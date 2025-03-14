@@ -69,7 +69,7 @@ void LightStateService::begin()
 
 void LightStateService::onConfigUpdated()
 {
-    digitalWrite(LED_BUILTIN, _state.ledOn ? 1 : 0);
+    // digitalWrite(LED_BUILTIN, _state.ledOn ? 1 : 0); //blocks FastLED.show()
 }
 
 void LightStateService::registerConfig()
