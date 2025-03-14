@@ -19,6 +19,8 @@
 	import Metrics from '~icons/tabler/report-analytics';
 	import { page } from '$app/state';
 	import { user } from '$lib/stores/user';
+	import StarIcon from '~icons/tabler/star';
+	import BulbIcon from '~icons/tabler/bulb';
 
 	let { closeMenu } = $props();
 
@@ -45,10 +47,17 @@
 
 	let menuItems = $state([
 		{
-			title: 'Demo App',
-			icon: Control,
-			href: '/demo',
-			feature: true
+			title: 'Custom',
+			icon: StarIcon,
+			feature: true,
+			submenu: [
+				{
+					title: 'Live Animation',
+					icon: BulbIcon,
+					href: '/custom/liveanimation',
+					feature: true,
+				},
+			]
 		},
 		{
 			title: 'Connections',
@@ -120,7 +129,13 @@
 							page.data.features.upload_firmware ||
 							page.data.features.download_firmware) &&
 						(!page.data.features.security || $user.admin)
-				}
+				},
+				{
+					title: 'Demo App',
+					icon: Control,
+					href: '/demo',
+					feature: true
+				},
 			]
 		}
 	] as menuItem[]);

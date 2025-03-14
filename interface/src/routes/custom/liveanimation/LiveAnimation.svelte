@@ -17,23 +17,18 @@
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import LightIcon from '~icons/tabler/bulb';
 	import { socket } from '$lib/stores/socket';
+	import type { LiveAnimationState } from '$lib/types/models_custom';
+	import Slider from '$lib/components/custom/Slider.svelte';
+	import Checkbox from '$lib/components/custom/Checkbox.svelte';
+	import Number from '$lib/components/custom/Number.svelte';
 	import Spinner from '$lib/components/custom/Spinner.svelte';
-	import Textarea from '$lib/components/custom/Textarea.svelte';
-
-	interface Props {
-		endPoint: string;
-		children?: import('svelte').Snippet;
-	}
-
-	let {
-		endPoint ,
-		children
-	}: Props = $props();
+	import Select from '$lib/components/custom/Select.svelte';
+	import FileEdit from '$lib/components/custom/FileEdit.svelte';
 
 	let state: any = $state({});
 
 	let dataLoaded = false;
-	let stateString = "";
+	const endPoint = "liveAnimation";
 
 	async function getState() {
 		try {
@@ -54,22 +49,22 @@
 	const handleState = (data: any) => {
 		console.log("handleState", data);
 		state = data;
-		stateString = JSON.stringify(state)
 		dataLoaded = true;
 	};
 
 	onMount(() => {
-		console.log("onMount ");
+		console.log("onMount", endPoint);
 		socket.on(endPoint, handleState);
+		// getState(); //done in settingscard
 	});
 
 	onDestroy(() => {
-		console.log("onDestroy");
+		console.log("onDestroy", endPoint);
 		socket.off(endPoint, handleState);
 	});
 
-	export function sendSocket() {
-		console.log("sendSocket", state);
+	function sendSocket() {
+		console.log("sendSocket", endPoint, state);
 		if (dataLoaded) 
 			socket.sendEvent(endPoint, state)
 	}
@@ -85,7 +80,7 @@
 				body: JSON.stringify(state)
 			});
 			if (response.status == 200) {
-				notifications.success('state updated.', 3000);
+				notifications.success(endPoint + ' updated.', 3000);
 				state = await response.json();
 			} else {
 				notifications.error('User not authorized.', 3000);
@@ -101,24 +96,41 @@
 		<LightIcon  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span >{endPoint}</span>
+		<span >Live Animation</span>
 	{/snippet}
 	{#await getState()}
 		<Spinner />
 	{:then nothing}
 	<div class="w-full">
-		{#if children == null}
-			<Textarea 
-				label="State" 
-				bind:value={stateString} 
-				onChange={(event) => {
-					console.log("onChange", event.target.value);
-				}}
-			></Textarea>
-		{/if}
-		<div class="w-full">
-			{@render children?.()}
-		</div>
+		<Checkbox 
+			label="On" 
+			bind:value={state.lightsOn}
+			onChange={sendSocket}
+		></Checkbox>
+		<Slider 
+			label="Brightness" 
+			bind:value={state.brightness}
+			min={0} 
+			max={255} 
+			step={1}
+			onChange={sendSocket}
+		></Slider>
+		<Select label="Animation" bind:value={state.animation} onChange={sendSocket}>
+			{#each state.animations as animation, i}
+				<option value={i}>
+					{animation}
+				</option>
+			{/each}
+		</Select>
+		<FileEdit
+			path = {state.animations[state.animation]}
+			showEditor = {false}
+		/>
+		<Checkbox 
+			label="Driver on" 
+			bind:value={state.driverOn}
+			onChange={sendSocket}
+		></Checkbox>
 	</div>
 	{/await}
 </SettingsCard>
