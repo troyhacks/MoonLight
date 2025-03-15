@@ -12,6 +12,8 @@
 #ifndef LiveAnimation_h
 #define LiveAnimation_h
 
+#if FT_LIVEANIMATION == 1
+
 #include <EventSocket.h>
 #include <HttpEndpoint.h>
 #include <EventEndpoint.h>
@@ -19,6 +21,10 @@
 #include <PsychicHttp.h>
 #include <FSPersistence.h>
 #include <ESP32SvelteKit.h>
+
+#if FT_ENABLED(FT_FILEMANAGER)
+    #include "FilesService.h"
+#endif
 
 #include "FastLED.h"
 #define MAXLEDS 8192
@@ -31,7 +37,7 @@ public:
 
     bool lightsOn = true;
     uint8_t brightness = 32;
-    uint16_t animation = UINT8_MAX;
+    String animation = "Random";
     bool driverOn = true;
 
     static void read(LiveAnimationState &state, JsonObject &root);
@@ -42,7 +48,11 @@ class LiveAnimation : public StatefulService<LiveAnimationState>
 {
 public:
     LiveAnimation(PsychicHttpServer *server,
-                      ESP32SvelteKit *sveltekit);
+                      ESP32SvelteKit *sveltekit
+                      #if FT_ENABLED(FT_FILEMANAGER)
+                          , FilesService *filesService
+                      #endif
+                    );
 
     void begin();
     void loop();
@@ -56,7 +66,12 @@ private:
     WebSocketServer<LiveAnimationState> _webSocketServer;
     FSPersistence<LiveAnimationState> _fsPersistence;
 
+    #if FT_ENABLED(FT_FILEMANAGER)
+        FilesService *_filesService;
+    #endif
+
     void onConfigUpdated();
 };
 
+#endif
 #endif

@@ -62,4 +62,14 @@
 #define EVENT_USE_JSON 0
 #endif
 
+//custom
+
+#ifndef FT_FILEMANAGER
+#define FT_FILEMANAGER 1
+#endif
+
+#ifndef FT_LIVEANIMATION
+#define FT_LIVEANIMATION 1
+#endif
+
 #endif

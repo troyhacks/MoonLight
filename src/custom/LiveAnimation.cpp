@@ -9,17 +9,31 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
-#include "LiveAnimation.h"
+#if FT_LIVEANIMATION == 1
 
+#include "LiveAnimation.h"
 void LiveAnimationState::read(LiveAnimationState &state, JsonObject &root)
 {
     ESP_LOGI("", "LiveAnimation::read");
     root["lightsOn"] = state.lightsOn;
     root["brightness"] = state.brightness;
     root["animation"] = state.animation;
+
     root["animations"].to<JsonArray>();
     root["animations"].add("Random");
     root["animations"].add("Rainbow");
+    //find all the .sc files on FS
+    #if FT_ENABLED(FT_FILEMANAGER)
+        File rootFolder = ESPFS.open("/");
+        walkThroughFiles(rootFolder, [&](File folder, File file) {
+            if (strstr(file.name(), ".sc")) {
+                ESP_LOGD("", "found file %s", file.path());
+                root["animations"].add((char *)file.path());
+            }
+        });
+        rootFolder.close();
+    #endif
+
     root["driverOn"] = state.driverOn;
 }
 
@@ -34,8 +48,9 @@ StateUpdateResult LiveAnimationState::update(JsonObject &root, LiveAnimationStat
         state.brightness = root["brightness"]; changed = true;
         FastLED.setBrightness(state.lightsOn?state.brightness:0);
     }
-    if (state.animation != root["animation"]) {
-        state.animation = root["animation"]; changed = true;
+    if (state.animation != root["animation"].as<String>()) {
+        state.animation = root["animation"].as<String>(); changed = true;
+        //set new animation (Yves)
     }
     if (state.driverOn != root["driverOn"] | state.driverOn) {
         state.driverOn = root["driverOn"]; changed = true;
@@ -49,7 +64,11 @@ StateUpdateResult LiveAnimationState::update(JsonObject &root, LiveAnimationStat
 }
 
 LiveAnimation::LiveAnimation(PsychicHttpServer *server,
-                                     ESP32SvelteKit *sveltekit) : _httpEndpoint(LiveAnimationState::read,
+                                     ESP32SvelteKit *sveltekit
+                                     #if FT_ENABLED(FT_FILEMANAGER)
+                                         , FilesService *filesService
+                                     #endif
+                                    ) : _httpEndpoint(LiveAnimationState::read,
                                                                                                          LiveAnimationState::update,
                                                                                                          this,
                                                                                                          server,
@@ -80,6 +99,10 @@ LiveAnimation::LiveAnimation(PsychicHttpServer *server,
     addUpdateHandler([&](const String &originId)
                      { onConfigUpdated(); },
                      false);
+
+    #if FT_ENABLED(FT_FILEMANAGER)
+        _filesService = filesService;
+    #endif
 }
 
 void LiveAnimation::begin()
@@ -87,6 +110,25 @@ void LiveAnimation::begin()
     _httpEndpoint.begin();
     _eventEndpoint.begin();
     _fsPersistence.readFromFS();
+
+    #if FT_ENABLED(FT_FILEMANAGER)
+        update_handler_id_t _updateHandlerId = _filesService->addUpdateHandler([&](const String &originId)
+        { 
+            ESP_LOGD("", "FilesService::updateHandler %s", originId.c_str());
+            _filesService->read([&](FilesState &state) {
+                for (auto changedFile : state.changedFiles) {
+                    //if file is the current animation, recompile it (to do: multiple animations)
+                    if (changedFile == _state.animation) {
+                        ESP_LOGD("", "LiveAnimation::updateHandler changedFile %s", changedFile.c_str());
+                        //send UI spinner
+                        //recompile ... (Yves)
+                        //stop UI spinner
+                        break;
+                    }
+                }
+            });
+        });
+    #endif
 
     onConfigUpdated();
 
@@ -103,14 +145,18 @@ void LiveAnimation::onConfigUpdated()
 void LiveAnimation::loop()
 {
     //select the right effect
-    if (_state.animation%2 == 0) {
+    if (_state.animation == "Random") {
         fadeToBlackBy(_state.leds, _state.nrOfLeds, 70);
         _state.leds[random16(_state.nrOfLeds)] = CRGB(255, 0, 0); //one random led red
-    } else {
+    } else if (_state.animation == "Rainbow") {
         static uint8_t hue = 0;
         fill_rainbow(_state.leds, _state.nrOfLeds, hue++, 7);
+    } else {
+        //Live script (Yves)
     }
 
     if (_state.driverOn)
         FastLED.show();
 }
+
+#endif

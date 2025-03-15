@@ -17,7 +17,13 @@
 #include <LightStateService.h>
 #include <PsychicHttpServer.h>
 
-#include "custom/LiveAnimation.h"
+#if FT_ENABLED(FT_FILEMANAGER)
+    #include "custom/FilesService.h"
+#endif
+
+#if FT_ENABLED(FT_LIVEANIMATION)
+    #include "custom/LiveAnimation.h"
+#endif
 
 #define SERIAL_BAUD_RATE 115200
 
@@ -32,7 +38,17 @@ LightStateService lightStateService = LightStateService(&server,
                                                         &esp32sveltekit,
                                                         &lightMqttSettingsService);
 
-LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit);
+#if FT_ENABLED(FT_FILEMANAGER)
+    FilesService filesService = FilesService(&server, &esp32sveltekit);
+#endif
+    
+#if FT_ENABLED(FT_LIVEANIMATION)
+    #if FT_ENABLED(FT_FILEMANAGER)
+        LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit, &filesService);
+    #else
+        LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit);
+    #endif
+#endif
 
 void setup()
 {
@@ -44,15 +60,23 @@ void setup()
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
 
+    #if FT_ENABLED(FT_FILEMANAGER)
+        filesService.begin();
+    #endif
+
     // load the initial light settings
     lightStateService.begin();
     // start the light service
     lightMqttSettingsService.begin();
 
-    liveAnimation.begin();
+    #if FT_ENABLED(FT_LIVEANIMATION)
+        liveAnimation.begin();
+    #endif
 }
 
 void loop()
 {
-    liveAnimation.loop();
+    #if FT_ENABLED(FT_LIVEANIMATION)
+        liveAnimation.loop();
+    #endif
 }

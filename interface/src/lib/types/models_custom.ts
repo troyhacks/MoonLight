@@ -14,7 +14,7 @@ export type LiveAnimationState = {
 	name: string;
 	lightsOn:boolean;
 	brightness: number;
-	animation: number;
+	animation: string;
 	animations: string[];
 	driverOn:boolean;
 };

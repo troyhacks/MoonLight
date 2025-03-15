@@ -21,10 +21,7 @@
 	import Collapsible from '$lib/components/Collapsible.svelte';
 	import { onMount } from 'svelte';
 
-	export let path = "";
-	export let showEditor = true;
-	export let newItem = false;
-	export let isFile = true;
+	let { path = "", showEditor = true, newItem = false, isFile = true } = $props();
 
 	let folder:string = "";
 
@@ -32,7 +29,7 @@
 		name: false
 	};
 
-    let editableFile: FilesState = {
+    let editableFile: FilesState = $state({
 		name: '',
 		path: path,
 		isFile: isFile,
@@ -42,7 +39,7 @@
 		files: [],
 		fs_total: 0,
 		fs_used: 0,
-	};
+	});
 
     async function postFilesState(data: any) { //export needed to call from other components
 		try {
@@ -110,14 +107,15 @@
     }
 
     //reactive response as soon as path changes, load new file contents
-    $: if (editableFile.path != path) {
-		getFileContents();
-    }
+	$effect(() => {
+		if (editableFile.path != path) {
+			getFileContents();
+	    }
+	});
 
 	onMount(() => {
        	getFileContents();
 	});
-
 
 	function onSave() {
 		console.log("onSave", editableFile.isFile)
@@ -159,16 +157,14 @@
 		}
 	}
 
-	function nothing() {
-		// console.log("nothing");
-	}
-
 </script>
 
 {#if path[0] === '/'}
-	<Collapsible open={false} class="shadow-lg" on:closed={nothing}>
-		<span slot="title">{newItem ? 'Add ' + (isFile?"file":"folder") : 'Edit ' + editableFile.name}</span>
-		<div class="divider my-0" />
+	<Collapsible open={showEditor} class="shadow-lg">
+		{#snippet title()}
+			<span>{newItem ? 'Add ' + (isFile?"file":"folder") : 'Edit ' + editableFile.name}</span>
+		{/snippet}
+		<div class="divider my-0"></div>
 
 		<div>
 			<Text
@@ -205,7 +201,7 @@
 		<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
 			<button
 				class="btn btn-primary"
-				on:click={() => {
+				onclick={() => {
 					console.log("Save");
 					onSave();
 				}}
@@ -213,6 +209,6 @@
 				Save</button
 			>
 		</div>
-		<div class="divider mb-2 mt-0" />
+		<div class="divider mb-2 mt-0"></div>
 	</Collapsible>
 {/if}

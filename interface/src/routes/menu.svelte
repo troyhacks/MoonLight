@@ -4,6 +4,7 @@
 	import Discord from '~icons/tabler/brand-discord';
 	import Users from '~icons/tabler/users';
 	import Settings from '~icons/tabler/settings';
+	import FilesIcon from '~icons/tabler/files';
 	import Health from '~icons/tabler/stethoscope';
 	import Update from '~icons/tabler/refresh-alert';
 	import WiFi from '~icons/tabler/wifi';
@@ -55,7 +56,13 @@
 					title: 'Live Animation',
 					icon: BulbIcon,
 					href: '/custom/liveanimation',
-					feature: true,
+					feature: page.data.features.liveanimation,
+				},
+				{
+					title: 'Files',
+					icon: FilesIcon,
+					href: '/custom/files',
+					feature: page.data.features.filemanager,
 				},
 			]
 		},

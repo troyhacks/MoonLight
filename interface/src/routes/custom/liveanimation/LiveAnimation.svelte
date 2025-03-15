@@ -117,13 +117,13 @@
 		></Slider>
 		<Select label="Animation" bind:value={state.animation} onChange={sendSocket}>
 			{#each state.animations as animation, i}
-				<option value={i}>
+				<option value={animation}>
 					{animation}
 				</option>
 			{/each}
 		</Select>
 		<FileEdit
-			path = {state.animations[state.animation]}
+			path = {state.animation}
 			showEditor = {false}
 		/>
 		<Checkbox 
