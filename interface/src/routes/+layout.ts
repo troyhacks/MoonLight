@@ -9,9 +9,9 @@ export const load = (async ({ fetch }) => {
 	const item = await result.json();
 	return {
 		features: item,
-		title: 'ESP32-SvelteKit',
-		github: 'theelims/ESP32-sveltekit',
-		copyright: '2024 theelims',
-		appName: 'ESP32 SvelteKit'
+		title: 'ESP32-Svelte-Live-MM',
+		github: 'ewowi/ESP32-svelte-live-mm',
+		copyright: '2025 theelims, ewowi, hpwit ⚖️ GPL-3.0',
+		appName: 'ESP32 Svelte Live MM'
 	};
 }) satisfies LayoutLoad;

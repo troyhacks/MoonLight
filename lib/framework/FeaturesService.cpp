@@ -113,4 +113,16 @@ void FeaturesService::createJSON(JsonObject &root)
     {
         root[element.feature.c_str()] = element.enabled;
     }
+    
+    //Custom
+    #if FT_ENABLED(FT_FILEMANAGER)
+        root["filemanager"] = true;
+    #else
+        root["filemanager"] = false;
+    #endif
+    #if FT_ENABLED(FT_LIVEANIMATION)
+        root["liveanimation"] = true;
+    #else
+        root["liveanimation"] = false;
+    #endif
 }

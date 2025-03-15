@@ -17,6 +17,14 @@
 #include <LightStateService.h>
 #include <PsychicHttpServer.h>
 
+#if FT_ENABLED(FT_FILEMANAGER)
+    #include "custom/FilesService.h"
+#endif
+
+#if FT_ENABLED(FT_LIVEANIMATION)
+    #include "custom/LiveAnimation.h"
+#endif
+
 #define SERIAL_BAUD_RATE 115200
 
 PsychicHttpServer server;
@@ -30,22 +38,45 @@ LightStateService lightStateService = LightStateService(&server,
                                                         &esp32sveltekit,
                                                         &lightMqttSettingsService);
 
+#if FT_ENABLED(FT_FILEMANAGER)
+    FilesService filesService = FilesService(&server, &esp32sveltekit);
+#endif
+    
+#if FT_ENABLED(FT_LIVEANIMATION)
+    #if FT_ENABLED(FT_FILEMANAGER)
+        LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit, &filesService);
+    #else
+        LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit);
+    #endif
+#endif
+
 void setup()
 {
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
+    delay(1000);
+
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
+
+    #if FT_ENABLED(FT_FILEMANAGER)
+        filesService.begin();
+    #endif
 
     // load the initial light settings
     lightStateService.begin();
     // start the light service
     lightMqttSettingsService.begin();
+
+    #if FT_ENABLED(FT_LIVEANIMATION)
+        liveAnimation.begin();
+    #endif
 }
 
 void loop()
 {
-    // Delete Arduino loop task, as it is not needed in this example
-    vTaskDelete(NULL);
+    #if FT_ENABLED(FT_LIVEANIMATION)
+        liveAnimation.loop();
+    #endif
 }

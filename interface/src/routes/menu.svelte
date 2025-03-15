@@ -4,6 +4,7 @@
 	import Discord from '~icons/tabler/brand-discord';
 	import Users from '~icons/tabler/users';
 	import Settings from '~icons/tabler/settings';
+	import FilesIcon from '~icons/tabler/files';
 	import Health from '~icons/tabler/stethoscope';
 	import Update from '~icons/tabler/refresh-alert';
 	import WiFi from '~icons/tabler/wifi';
@@ -19,6 +20,8 @@
 	import Metrics from '~icons/tabler/report-analytics';
 	import { page } from '$app/state';
 	import { user } from '$lib/stores/user';
+	import StarIcon from '~icons/tabler/star';
+	import BulbIcon from '~icons/tabler/bulb';
 
 	let { closeMenu } = $props();
 
@@ -45,10 +48,23 @@
 
 	let menuItems = $state([
 		{
-			title: 'Demo App',
-			icon: Control,
-			href: '/demo',
-			feature: true
+			title: 'Custom',
+			icon: StarIcon,
+			feature: true,
+			submenu: [
+				{
+					title: 'Live Animation',
+					icon: BulbIcon,
+					href: '/custom/liveanimation',
+					feature: page.data.features.liveanimation,
+				},
+				{
+					title: 'Files',
+					icon: FilesIcon,
+					href: '/custom/files',
+					feature: page.data.features.filemanager,
+				},
+			]
 		},
 		{
 			title: 'Connections',
@@ -120,7 +136,13 @@
 							page.data.features.upload_firmware ||
 							page.data.features.download_firmware) &&
 						(!page.data.features.security || $user.admin)
-				}
+				},
+				{
+					title: 'Demo App',
+					icon: Control,
+					href: '/demo',
+					feature: true
+				},
 			]
 		}
 	] as menuItem[]);
