@@ -91,7 +91,7 @@ void extractPath(const char *filepath, char *path) {
 
 StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
 {
-    state.changedFiles.clear();
+    state.updatedItems.clear();
 
     JsonArray deletes = root["deletes"].as<JsonArray>();
     if (!deletes.isNull()) {
@@ -103,7 +103,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
             else
                 ESPFS.rmdir(var["path"].as<const char*>());
             
-            state.changedFiles.push_back(var["path"].as<const char*>());
+            state.updatedItems.push_back(var["path"].as<const char*>());
         }
     }
 
@@ -124,7 +124,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
             } else {
                 ESPFS.mkdir(var["path"].as<const char*>());
             }
-            state.changedFiles.push_back(var["path"].as<const char*>());
+            state.updatedItems.push_back(var["path"].as<const char*>());
         }
     }
 
@@ -154,14 +154,15 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
                 if (strcmp(var["path"], newPath) != 0) {
                     ESPFS.rename(var["path"].as<const char*>(), newPath);
                 }
-                state.changedFiles.push_back(var["path"].as<const char*>());
+                state.updatedItems.push_back(var["path"].as<const char*>());
             }
         }
     }
 
-    ESP_LOGI("", "FilesState:update %d", state.changedFiles.size());
+    if (state.updatedItems.size())
+        ESP_LOGD("", "FilesState::update %s", state.updatedItems.front().c_str());
 
-    return state.changedFiles.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+    return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
 }
 
 FilesService::FilesService(PsychicHttpServer *server,

@@ -55,7 +55,7 @@ void setup()
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
-    delay(1000);
+    delay(1000); // to capture all the serial output
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
@@ -79,4 +79,11 @@ void loop()
     #if FT_ENABLED(FT_LIVEANIMATION)
         liveAnimation.loop();
     #endif
+
+    while (!runInLoopTask.empty())
+    {
+        ESP_LOGD("Main", "Running queued function");
+        runInLoopTask.back()(); //calls the last function
+        runInLoopTask.pop_back();
+    }
 }

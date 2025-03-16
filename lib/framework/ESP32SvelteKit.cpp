@@ -14,6 +14,8 @@
 
 #include <ESP32SvelteKit.h>
 
+std::vector<std::function<void()>> runInLoopTask; //see .h
+
 ESP32SvelteKit::ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEndpoints) : _server(server),
                                                                                           _numberEndpoints(numberEndpoints),
                                                                                           _featureService(server, &_socket),

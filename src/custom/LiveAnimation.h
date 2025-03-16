@@ -32,6 +32,8 @@
 class LiveAnimationState
 {
 public:
+    std::vector<String> updatedItems;
+
     CRGB leds[MAXLEDS];
     uint16_t nrOfLeds = 256;
 
@@ -57,6 +59,9 @@ public:
     void begin();
     void loop();
 
+    void compileAndRun();
+    void driverShow();
+
 protected:
     EventSocket *_socket;
 
@@ -70,7 +75,6 @@ private:
         FilesService *_filesService;
     #endif
 
-    void onConfigUpdated();
 };
 
 #endif

@@ -25,7 +25,7 @@ void walkThroughFiles(File folder, std::function<void(File, File)> fun);
 class FilesState
 {
 public:
-    std::vector<String> changedFiles;
+    std::vector<String> updatedItems;
 
     static void read(FilesState &settings, JsonObject &root);
 

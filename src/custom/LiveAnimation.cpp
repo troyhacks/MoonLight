@@ -12,6 +12,9 @@
 #if FT_LIVEANIMATION == 1
 
 #include "LiveAnimation.h"
+
+#include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
+
 void LiveAnimationState::read(LiveAnimationState &state, JsonObject &root)
 {
     ESP_LOGI("", "LiveAnimation::read");
@@ -27,7 +30,7 @@ void LiveAnimationState::read(LiveAnimationState &state, JsonObject &root)
         File rootFolder = ESPFS.open("/");
         walkThroughFiles(rootFolder, [&](File folder, File file) {
             if (strstr(file.name(), ".sc")) {
-                ESP_LOGD("", "found file %s", file.path());
+                // ESP_LOGD("", "found file %s", file.path());
                 root["animations"].add((char *)file.path());
             }
         });
@@ -39,28 +42,26 @@ void LiveAnimationState::read(LiveAnimationState &state, JsonObject &root)
 
 StateUpdateResult LiveAnimationState::update(JsonObject &root, LiveAnimationState &state)
 {
-    bool changed = false;
+    state.updatedItems.clear();
 
     if (state.lightsOn != root["lightsOn"] | state.lightsOn) {
-        state.lightsOn = root["lightsOn"]; changed = true;
+        state.lightsOn = root["lightsOn"]; state.updatedItems.push_back("lightsOn");
     }
     if (state.brightness != root["brightness"] | state.brightness) {
-        state.brightness = root["brightness"]; changed = true;
+        state.brightness = root["brightness"]; state.updatedItems.push_back("brightness");
         FastLED.setBrightness(state.lightsOn?state.brightness:0);
     }
     if (state.animation != root["animation"].as<String>()) {
-        state.animation = root["animation"].as<String>(); changed = true;
-        //set new animation (Yves)
+        state.animation = root["animation"].as<String>(); state.updatedItems.push_back("animation");
     }
     if (state.driverOn != root["driverOn"] | state.driverOn) {
-        state.driverOn = root["driverOn"]; changed = true;
+        state.driverOn = root["driverOn"]; state.updatedItems.push_back("driverOn");
     }
 
-    if (changed) {
-        ESP_LOGD("", "LiveAnimation::update");
-    }
+    if (state.updatedItems.size())
+        ESP_LOGD("", "LiveAnimation::update %s", state.updatedItems.front().c_str());
 
-    return changed?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+    return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
 }
 
 LiveAnimation::LiveAnimation(PsychicHttpServer *server,
@@ -96,10 +97,6 @@ LiveAnimation::LiveAnimation(PsychicHttpServer *server,
 {
 
     // configure settings service update handler to update state
-    addUpdateHandler([&](const String &originId)
-                     { onConfigUpdated(); },
-                     false);
-
     #if FT_ENABLED(FT_FILEMANAGER)
         _filesService = filesService;
     #endif
@@ -111,52 +108,133 @@ void LiveAnimation::begin()
     _eventEndpoint.begin();
     _fsPersistence.readFromFS();
 
+    FastLED.addLeds<WS2812B, 2, GRB>(_state.leds, 0, _state.nrOfLeds); //pin 2
+    FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA
+    ESP_LOGD("", "FastLED.addLeds n:%d o:%d b:%d", _state.nrOfLeds, _state.lightsOn, _state.brightness);
+
     #if FT_ENABLED(FT_FILEMANAGER)
+        //create a handler which recompiles the animation when the file of the current animation changes
         update_handler_id_t _updateHandlerId = _filesService->addUpdateHandler([&](const String &originId)
         { 
             ESP_LOGD("", "FilesService::updateHandler %s", originId.c_str());
+            //read the file state
             _filesService->read([&](FilesState &state) {
-                for (auto changedFile : state.changedFiles) {
+                // loop over all changed files (normally only one)
+                for (auto updatedItem : state.updatedItems) {
                     //if file is the current animation, recompile it (to do: multiple animations)
-                    if (changedFile == _state.animation) {
-                        ESP_LOGD("", "LiveAnimation::updateHandler changedFile %s", changedFile.c_str());
-                        //send UI spinner
-                        //recompile ... (Yves)
-                        //stop UI spinner
-                        break;
+                    if (updatedItem == _state.animation) {
+                        ESP_LOGD("", "LiveAnimation::updateHandler updatedItem %s", updatedItem.c_str());
+                        compileAndRun();
                     }
+                }
+            });
+        });
+
+        update_handler_id_t _updateHandlerId2 = addUpdateHandler([&](const String &originId)
+        {
+            read([&](LiveAnimationState &state) {
+                for (auto updatedItem : state.updatedItems) {
+                    if (updatedItem == "animation") {
+                        compileAndRun();
+                    } 
                 }
             });
         });
     #endif
 
-    onConfigUpdated();
-
-    FastLED.addLeds<WS2812B, 2, GRB>(_state.leds, 0, _state.nrOfLeds); //pin 16
-    FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA
-    ESP_LOGD("", "FastLED.addLeds n:%d o:%d b:%d", _state.nrOfLeds, _state.lightsOn, _state.brightness);
-}
-
-void LiveAnimation::onConfigUpdated()
-{
-    ESP_LOGI("", "LiveAnimation::onConfigUpdated o:%d b:%d", _state.lightsOn, _state.brightness);
+    //handler not active yet so manually trigger
+    compileAndRun(); //change from livescript causes crashes
 }
 
 void LiveAnimation::loop()
 {
+    bool showLeds = false;
     //select the right effect
     if (_state.animation == "Random") {
         fadeToBlackBy(_state.leds, _state.nrOfLeds, 70);
         _state.leds[random16(_state.nrOfLeds)] = CRGB(255, 0, 0); //one random led red
+        showLeds = true;
     } else if (_state.animation == "Rainbow") {
         static uint8_t hue = 0;
         fill_rainbow(_state.leds, _state.nrOfLeds, hue++, 7);
+        showLeds = true;
     } else {
-        //Live script (Yves)
+        //Done by live script (Yves)
     }
 
+    if (showLeds) driverShow();
+}
+
+void LiveAnimation::driverShow()
+{
     if (_state.driverOn)
         FastLED.show();
+    else 
+        delay(1); //to avoid watchdog crash
+}
+
+void LiveAnimation::compileAndRun() {
+
+    if (_state.animation[0] != '/') { //no sc script
+        scriptRuntime.killAndFreeRunningProgram();
+        return;
+    }
+
+    //send UI spinner
+
+    //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
+    runInLoopTask.push_back([&] {
+        File file = ESPFS.open(_state.animation);
+        if (file) {
+            std::string scScript = file.readString().c_str();
+            // scScript += "void main(){setup();sync();}";
+            file.close();
+
+            Parser parser = Parser();
+            Executable executable = parser.parseScript(&scScript);
+            ESP_LOGD("", "parsing %s done\n", _state.animation.c_str());
+            scriptRuntime.addExe(executable);
+            ESP_LOGD("", "addExe success %s\n", executable.exeExist?"true":"false");
+
+            if (executable.exeExist)
+                executable.executeAsTask("main"); //background task (async - vs sync)
+        }
+    });
+
+    //stop UI spinner
 }
 
 #endif
+
+
+/* homework assignment: 
+
+Step 1: create an .sc file with this and verify it is working (no coding required):
+=======================
+
+void setup() {
+  printf("Run Live Script good afternoon\n");
+}
+void main() {
+  setup();
+}
+
+Step 2: make below script work, including controls: brightness/on, slider (easy) and driverOn
+=======================
+
+void setup() {
+  printf("Run Live Script good morning\n");
+}
+void loop() {
+  fadeToBlackBy(40);
+  leds[random16(255)] = CRGB(0, 0, 255);
+}
+void main() {
+  setup();
+  while (true) {
+    loop();
+    sync(); //or show??
+  }
+}
+
+*/
