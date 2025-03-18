@@ -17,7 +17,8 @@
 
 void LiveAnimationState::read(LiveAnimationState &state, JsonObject &root)
 {
-    ESP_LOGI("", "LiveAnimation::read");
+    TaskHandle_t httpdTask = xTaskGetHandle("httpd");
+    ESP_LOGI("", "LiveAnimation::read task %s %d", pcTaskGetName(httpdTask), uxTaskGetStackHighWaterMark(httpdTask));
     root["lightsOn"] = state.lightsOn;
     root["brightness"] = state.brightness;
     root["animation"] = state.animation;
@@ -42,6 +43,8 @@ void LiveAnimationState::read(LiveAnimationState &state, JsonObject &root)
 
 StateUpdateResult LiveAnimationState::update(JsonObject &root, LiveAnimationState &state)
 {
+    TaskHandle_t httpdTask = xTaskGetHandle("httpd");
+    ESP_LOGI("", "LiveAnimation::update task %s %d", pcTaskGetName(httpdTask), uxTaskGetStackHighWaterMark(httpdTask));
     state.updatedItems.clear();
 
     if (state.lightsOn != root["lightsOn"] | state.lightsOn) {
@@ -95,6 +98,7 @@ LiveAnimation::LiveAnimation(PsychicHttpServer *server,
                                                                                                       sveltekit->getFS(),
                                                                                                       "/config/liveAnimation.json")
 {
+    ESP_LOGD("", "LiveAnimation::constructor");
 
     // configure settings service update handler to update state
     #if FT_ENABLED(FT_FILEMANAGER)
@@ -104,13 +108,14 @@ LiveAnimation::LiveAnimation(PsychicHttpServer *server,
 
 void LiveAnimation::begin()
 {
+    ESP_LOGD("", "LiveAnimation::begin");
+    FastLED.addLeds<WS2812B, 16, GRB>(_state.leds, 0, _state.nrOfLeds); //pin 2
+    FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
+    ESP_LOGD("", "FastLED.addLeds n:%d o:%d b:%d", _state.nrOfLeds, _state.lightsOn, _state.brightness);
+
     _httpEndpoint.begin();
     _eventEndpoint.begin();
     _fsPersistence.readFromFS();
-
-    FastLED.addLeds<WS2812B, 2, GRB>(_state.leds, 0, _state.nrOfLeds); //pin 2
-    FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA
-    ESP_LOGD("", "FastLED.addLeds n:%d o:%d b:%d", _state.nrOfLeds, _state.lightsOn, _state.brightness);
 
     #if FT_ENABLED(FT_FILEMANAGER)
         //create a handler which recompiles the animation when the file of the current animation changes
@@ -132,6 +137,7 @@ void LiveAnimation::begin()
 
         update_handler_id_t _updateHandlerId2 = addUpdateHandler([&](const String &originId)
         {
+            ESP_LOGD("", "LiveAnimation::updateHandler %s", originId.c_str());
             read([&](LiveAnimationState &state) {
                 for (auto updatedItem : state.updatedItems) {
                     if (updatedItem == "animation") {
@@ -176,7 +182,9 @@ void LiveAnimation::driverShow()
 void LiveAnimation::compileAndRun() {
 
     if (_state.animation[0] != '/') { //no sc script
-        scriptRuntime.killAndFreeRunningProgram();
+        runInLoopTask.push_back([&] { // run in loopTask to avoid stack overflow
+            scriptRuntime.killAndFreeRunningProgram();
+        });
         return;
     }
 

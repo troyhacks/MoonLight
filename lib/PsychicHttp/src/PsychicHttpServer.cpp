@@ -25,6 +25,9 @@ PsychicHttpServer::PsychicHttpServer() :
   config.global_user_ctx = this;
   config.global_user_ctx_free_fn = destroy;
   config.max_uri_handlers = 20;
+  #ifdef HTTPD_STACK_SIZE
+    config.stack_size = HTTPD_STACK_SIZE;
+  #endif
 
   #ifdef ENABLE_ASYNC
     // It is advisable that httpd_config_t->max_open_sockets > MAX_ASYNC_REQUESTS
