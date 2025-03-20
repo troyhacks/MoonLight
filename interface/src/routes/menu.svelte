@@ -59,6 +59,12 @@
 					feature: page.data.features.liveanimation,
 				},
 				{
+					title: 'Module',
+					icon: BulbIcon,
+					href: '/custom/module',
+					feature: page.data.features.liveanimation,
+				},
+				{
 					title: 'Files',
 					icon: FilesIcon,
 					href: '/custom/files',
