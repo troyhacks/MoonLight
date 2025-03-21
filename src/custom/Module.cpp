@@ -18,7 +18,7 @@ void ModuleState::read(ModuleState &state, JsonObject &root)
     TaskHandle_t httpdTask = xTaskGetHandle("httpd");
     ESP_LOGI("", "Module::read task %s %d", pcTaskGetName(httpdTask), uxTaskGetStackHighWaterMark(httpdTask));
 
-    root.set(state.doc.as<JsonObject>()); //copy
+    root.set(state.data.as<JsonObject>()); //copy
     char buffer[256];
     serializeJson(root, buffer, sizeof(buffer));
     ESP_LOGD("", "state.doc %s", buffer);
@@ -31,12 +31,12 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
     ESP_LOGI("", "Module::update task %s %d", pcTaskGetName(httpdTask), uxTaskGetStackHighWaterMark(httpdTask));
     state.updatedItems.clear();
 
-    //to do: check which objects have updated
+    //to do: check which propertys have updated
 
     if (root.size() != 0) { // in case of empty file
-        state.doc.set(root); //copy
+        state.data.set(root); //copy
         char buffer[256];
-        serializeJson(state.doc, buffer, sizeof(buffer));
+        serializeJson(state.data, buffer, sizeof(buffer));
         ESP_LOGD("", "state.doc %s", buffer);
     }
 
@@ -93,15 +93,15 @@ void Module::begin()
     _httpEndpoint.begin();
     _eventEndpoint.begin();
     _fsPersistence.readFromFS(); //overwrites the default settings in state
-    _server->on("/rest/moduleDD", HTTP_GET, [&](PsychicRequest *request) {
+    _server->on("/rest/moduleDef", HTTP_GET, [&](PsychicRequest *request) {
         PsychicJsonResponse response = PsychicJsonResponse(request, false);
         JsonArray root = response.getRoot().to<JsonArray>();
 
-        _state.setupDD(root);
+        _state.setupDefinition(root);
 
         char buffer[256];
         serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "moduleDD %s", buffer);
+        ESP_LOGD("", "moduleDef %s", buffer);
     
         return response.send();
     });

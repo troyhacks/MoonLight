@@ -31,50 +31,54 @@ class ModuleState
 public:
     std::vector<String> updatedItems;
 
-    JsonDocument doc;
+    JsonDocument data;
 
     ModuleState() {
         //set default
 
         //only if no file ...
-        JsonDocument docDD;
-        setupDD(docDD.to<JsonArray>());
+        JsonDocument definition;
+        setupDefinition(definition.to<JsonArray>());
         char buffer[256];
-        serializeJson(docDD, buffer, sizeof(buffer));
-        ESP_LOGD("", "initDD %s", buffer);
+        serializeJson(definition, buffer, sizeof(buffer));
+        ESP_LOGD("", "setupDefinition %s", buffer);
         
-        JsonObject root = doc.to<JsonObject>();
+        JsonObject root = data.to<JsonObject>();
 
-        //create doc based on docDD...
-        for (JsonObject object: docDD.as<JsonArray>()) {
-            if (object["type"] != "array") {
-                root[object["name"]] = object["default"];
+        //create doc based on definition...
+        for (JsonObject property: definition.as<JsonArray>()) {
+            if (property["type"] != "array") {
+                root[property["name"]] = property["default"];
             } else {
-                root[object["name"]].to<JsonArray>();
-                //loop over detail objects (recursive)
+                root[property["name"]].to<JsonArray>();
+                //loop over detail propertys (recursive)
             }
         }
         //to do: make recursive
 
-        root["nodes"].to<JsonArray>();
-        JsonObject object;
-        object = root["nodes"].add<JsonObject>(); object["animation"] = "Random"; object["size"] = 100; 
-        object = root["nodes"].add<JsonObject>(); object["animation"] = "Rainbow"; object["size"] = 200; 
+        // JsonArray array = root["nodes"].to<JsonArray>();
+        // JsonObject property;
+        // property = array.add<JsonObject>(); property["animation"] = "Random"; property["size"] = 100; 
+        // property = array.add<JsonObject>(); property["animation"] = "Rainbow"; property["size"] = 200; 
 
         // char buffer[256];
         serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "init %s", buffer);
+        ESP_LOGD("", "setupData %s", buffer);
 
     }
 
-    void setupDD(JsonArray root) {
-        JsonObject object;
-        object = root.add<JsonObject>(); object["name"] = "lightsOn"; object["type"] = "boolean"; object["default"] = true;
-        object = root.add<JsonObject>(); object["name"] = "brightness"; object["type"] = "number"; object["min"] = 0; object["max"] = 255; object["default"] = 73;
-        object = root.add<JsonObject>(); object["name"] = "driverOn"; object["type"] = "boolean"; object["default"] = false;
-        object = root.add<JsonObject>(); object["name"] = "nodes"; object["type"] = "array"; JsonArray details = object["n"].to<JsonArray>();
+    void setupDefinition(JsonArray root) {
+        JsonObject property;
+        JsonArray details;
+        JsonArray values;
 
-        object = details.add<JsonObject>(); object["name"] = "animation"; object["type"] = "select"; object["default"] = "Random"; JsonArray values = object["values"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "boolean"; property["default"] = true;
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "number"; property["min"] = 0; property["max"] = 255; property["default"] = 73;
+        property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "boolean"; property["default"] = false;
+
+        property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "select"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
+        property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 85;
 
         values.add("Random");
         values.add("Rainbow");
@@ -90,7 +94,9 @@ public:
             rootFolder.close();
         #endif
 
-        object = details.add<JsonObject>(); object["name"] = "size"; object["type"] = "number";
+        property = root.add<JsonObject>(); property["name"] = "projections"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "Pinwheel"; values = property["values"].to<JsonArray>();
+        property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "text"; property["default"] = "normal";
 
         char buffer[256];
         serializeJson(root, buffer, sizeof(buffer));
