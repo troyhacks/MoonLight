@@ -29,7 +29,6 @@
 	});
 
 	let message = $state('Preparing ...');
-	let timerId: number = $state();
 
 	$effect(() => {
 		if ($telemetry.download_ota.status == 'progress') {
@@ -40,7 +39,7 @@
 			message = 'Restarting ...';
 			progress = 0;
 			// Reload page after 5 sec
-			timerId = setTimeout(() => {
+			setTimeout(() => {
 				modals.closeAll();
 				location.reload();
 			}, 5000);
