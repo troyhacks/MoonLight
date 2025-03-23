@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { modals } from 'svelte-modals';
 	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { user } from '$lib/stores/user';
@@ -7,21 +6,22 @@
 	import { notifications } from '$lib/components/toasts/notifications';
 	import DragDropList, { VerticalDropZone, reorder, type DropEvent } from 'svelte-dnd-list';
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Router from '~icons/tabler/router';
 	import Add from '~icons/tabler/circle-plus';
 	import Edit from '~icons/tabler/pencil';
 	import Delete from '~icons/tabler/trash';
 	import Cancel from '~icons/tabler/x';
-
-	let itemEditable: any = $state({});
-
-	let newItem: boolean = $state(true);
-	let showEditor: boolean = $state(false);
+	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 
 	let definition: any = $state([]);
-	let itemState: any = $state({});
+	let data: any = $state({});
+
+	let dataEditable: any = $state({});
+
+	let propertyEditable: string = $state("");
+	let showEditor: boolean = $state(false);
+	let changed: boolean = $state(false);
 
 	async function getState() {
 
@@ -49,11 +49,11 @@
 					'Content-Type': 'application/json'
 				}
 			});
-			itemState = await response.json();
+			data = await response.json();
 		} catch (error) {
 			console.error('Error:', error);
 		}
-		return itemState;
+		return data;
 	}
 
 	async function postState(data: any) {
@@ -68,41 +68,33 @@
 			});
 			if (response.status == 200) {
 				notifications.success('Module settings updated.', 3000);
-				itemState = await response.json();
+				data = await response.json();
 			} else {
 				notifications.error('User not authorized.', 3000);
 			}
 		} catch (error) {
 			console.error('Error:', error);
 		}
+		showEditor = false;
 	}
 
-	function validateState() {
-		postState(itemState);
+	function cancelState() {
+		getState();
+		showEditor = false;
+		changed = false;
 	}
 
-	function validateForm() {
-		const propertyName = "nodes"; // to do: make parameter
+	function validateAndSaveState() {
+		//optional checks if the whole state is correct
 
-		let valid = true;
-
-		// Submit JSON to REST API
-		if (valid) {
-			if (newItem) {
-				itemState[propertyName].push(itemEditable);
-			} else {
-				itemState[propertyName].splice(itemState[propertyName].indexOf(itemEditable), 1, itemEditable);
-			}
-			addItem(propertyName);
-			itemState[propertyName] = [...itemState[propertyName]]; //Trigger reactivity
-			showEditor = false;
-		}
+		postState(data);
+		changed = false;
 	}
 
 	function addItem(propertyName: string) {
-		newItem = true;
+		propertyEditable = propertyName;
 		//set the default values from the definition...
-		itemEditable = {};
+		dataEditable = {};
 
 		//set properties with their defaults
 		for (let i = 0; i < definition.length; i++) {
@@ -112,49 +104,43 @@
 				for (let i=0; i < property.n.length; i++) {
 					let propertyN = property.n[i];
 					console.log("propertyN", propertyN)
-					itemEditable[propertyN.name] = propertyN.default;
+					dataEditable[propertyN.name] = propertyN.default;
 				}
 			}
 		}
 	}
 
+	function inputChanged() {
+		changed = true;
+	}
+
 	function handleEdit(propertyName: string, index: number) {
-		newItem = false;
+		console.log("handleEdit", propertyName, index)
+		propertyEditable = propertyName;
 		showEditor = true;
-		itemEditable = itemState[propertyName][index];
+		dataEditable = data[propertyName][index];
 	}
 
-	function confirmDelete(propertyName: string, index: number) {
-		modals.open(ConfirmDialog, {
-			title: 'Delete Item',
-			message: 'Are you sure you want to delete this item?',
-			labels: {
-				cancel: { label: 'Cancel', icon: Cancel },
-				confirm: { label: 'Delete', icon: Delete }
-			},
-			onConfirm: () => {
-				// Check if item is currently been edited and delete as well
-				if (itemState[propertyName][index].animation === itemEditable.animation) {
-					addItem(propertyName);
-				}
-				// Remove item from array
-				itemState[propertyName].splice(index, 1);
-				itemState[propertyName] = [...itemState[propertyName]]; //Trigger reactivity
-				showEditor = false;
-				modals.close();
-			}
-		});
+	function deleteItem(propertyName: string, index: number) {
+		// Check if item is currently been edited and delete as well
+		if (data[propertyName][index].animation === dataEditable.animation) {
+			addItem(propertyName);
+		}
+		// Remove item from array
+		data[propertyName].splice(index, 1);
+		data[propertyName] = [...data[propertyName]]; //Trigger reactivity
+		showEditor = false;
+		changed = true;
 	}
 
-	function onDrop({ detail: { from, to } }: CustomEvent<DropEvent>) {
-		const propertyName = "nodes"; // to do: make parameter
+	function onDrop(propertyName: string, { detail: { from, to } }: CustomEvent<DropEvent>) {
 		
 		if (!to || from === to) {
 			return;
 		}
 
-		itemState[propertyName] = reorder(itemState[propertyName], from.index, to.index);
-		console.log(onDrop, itemState[propertyName]);
+		data[propertyName] = reorder(data[propertyName], from.index, to.index);
+		console.log(onDrop, data[propertyName]);
 	}
 
     function preventDefault(fn: any) {
@@ -178,32 +164,47 @@
 			{#await getState()}
 				<Spinner />
 			{:then nothing}
+				<!-- <div class="grid w-full grid-cols-1 content-center gap-x-4 px-4 sm:grid-cols-2"> -->
 				<div class="relative w-full overflow-visible">
 					{#each definition as property}
-						{#if property.type == "array" && property.name == "nodes"}
+						{#if property.type != "array"}
+							<div>
+								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged}></MultiInput>
+							</div>
+						{:else if property.type == "array"}
+							<div class="divider mb-2 mt-0"></div>
 							<div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
 								{property.name}
 							</div>
-							<button
-								class="btn btn-primary text-primary-content "
-								onclick={() => {
-									addItem(property.name);
-									showEditor = true;
-								}}
-							>
-								<Add class="h-6 w-6" /></button
-							>
+							<div class="relative w-full overflow-visible">
+							<!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->
+								<button
+									class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
+									onclick={() => {
+										addItem(property.name);
+										changed = true;
+
+										//add the new item to the data
+										data[property.name].push(dataEditable);
+										showEditor = true;
+									}}
+								>
+									<Add class="h-6 w-6" /></button
+								>
+							</div>
 
 							<div
 								class="overflow-x-auto space-y-1"
 								transition:slide|local={{ duration: 300, easing: cubicOut }}
 							>
 								<DragDropList
-									id="items"
+									id={property.name}
 									type={VerticalDropZone}
 									itemSize={60}
-									itemCount={itemState[property.name].length}
-									on:drop={onDrop}
+									itemCount={data[property.name].length}
+									on:drop={(event) => {
+										onDrop(property.name, event);
+									}}
 									
 								>
 									{#snippet children({ index })}
@@ -213,9 +214,11 @@
 												<Router class="text-primary-content h-auto w-full scale-75" />
 											</div>
 											{#each property.n as propertyN}
-												<div>
-													<div class="font-bold">{itemState[property.name][index][propertyN.name]}</div>
-												</div>
+												{#if propertyN.type != "password"}
+													<div>
+														<div class="font-bold">{data[property.name][index][propertyN.name]}</div>
+													</div>
+												{/if}
 											{/each}
 											{#if !page.data.features.security || $user.admin}
 												<div class="flex-grow"></div>
@@ -231,7 +234,7 @@
 													<button
 														class="btn btn-ghost btn-sm"
 														onclick={() => {
-															confirmDelete(property.name, index);
+															deleteItem(property.name, index);
 														}}
 													>
 														<Delete class="text-error h-6 w-6" />
@@ -242,81 +245,26 @@
 									{/snippet}
 								</DragDropList>
 							</div>
+							{#if showEditor && property.name == propertyEditable}
+								<div class="divider my-0"></div>
+								{#each property.n as propertyN}
+									<div>
+										<MultiInput property={propertyN} bind:value={dataEditable[propertyN.name]} onChange={inputChanged}></MultiInput>
+									</div>
+								{/each}
+							{/if}
 						{/if}
 					{/each}
 				</div>
 
-				<div class="divider mb-0"></div>
-				<div
-					class="flex flex-col gap-2 p-0"
-					transition:slide|local={{ duration: 300, easing: cubicOut }}
-				>
-					<form
-						class=""
-						onsubmit={preventDefault(validateForm)}
-						novalidate
+				<div class="divider mb-2 mt-0"></div>
+				<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
+					<button class="btn btn-primary" type="button" onclick={cancelState} disabled={!changed}
+						>Cancel</button
 					>
-
-						<div class="grid w-full grid-cols-1 content-center gap-x-4 px-4 sm:grid-cols-2">
-							{#each definition as property}
-								{#if property.type != "array"}
-									<div>
-										<label class="label" for={property.name}>
-											<span class="label-text text-md">{property.name}</span>
-										</label>
-										<input
-											type="text"
-											class="input input-bordered invalid:border-error w-full invalid:border-2"
-											bind:value={itemState[property.name]}
-											id={property.name}
-										/>
-									</div>
-								{:else if property.name == "nodes"}
-									{#if showEditor}
-										<div class="divider my-0"></div>
-										{#each property.n as propertyN}
-											<div>
-												<label class="label" for={propertyN.name}>
-													<span class="label-text text-md">{propertyN.name}</span>
-												</label>
-												{#if propertyN.type != "select"}
-													<input
-														type="text"
-														class="input input-bordered invalid:border-error w-full invalid:border-2}"
-														bind:value={itemEditable[propertyN.name]}
-														id={propertyN.name}
-													/>
-												{:else}
-													<select
-														class="select select-bordered w-full"
-														id="animation"
-														bind:value={itemEditable[propertyN.name]}
-													>
-														{#each propertyN.values as value}
-															<option value={value}>
-																{value}
-															</option>
-														{/each}
-													</select>
-												{/if}
-											</div>
-										{/each}
-									{/if}
-								{/if}
-							{/each}
-						</div>
-
-
-						<div class="divider mb-2 mt-0"></div>
-						<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
-							<button class="btn btn-primary" type="submit" disabled={!showEditor}
-								>{newItem ? 'Add Node' : 'Update Node'}</button
-							>
-							<button class="btn btn-primary" type="button" onclick={validateState}
-								>Apply Settings</button
-							>
-						</div>
-					</form>
+					<button class="btn btn-primary" type="button" onclick={validateAndSaveState} disabled={!changed}
+						>Save</button
+					>
 				</div>
 			{/await}
 		</div>

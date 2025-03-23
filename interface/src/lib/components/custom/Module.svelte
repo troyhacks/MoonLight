@@ -17,8 +17,8 @@
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import LightIcon from '~icons/tabler/bulb';
 	import { socket } from '$lib/stores/socket';
-	import Spinner from '$lib/components/custom/Spinner.svelte';
-	import Textarea from '$lib/components/custom/Textarea.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
+	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 
 	interface Props {
 		endPoint: string;
@@ -33,7 +33,7 @@
 	let state: any = $state({});
 
 	let dataLoaded = false;
-	let stateString = "";
+	let stateString: string = $state("");
 
 	async function getState() {
 		try {
@@ -108,13 +108,11 @@
 	{:then nothing}
 	<div class="w-full">
 		{#if children == null}
-			<Textarea 
-				label="State" 
-				bind:value={stateString} 
+			<MultiInput property={{name:"State", type:"textarea"}} bind:value={stateString} 
 				onChange={(event) => {
 					console.log("onChange", event.target.value);
-				}}
-			></Textarea>
+			}}>
+			</MultiInput>
 		{/if}
 		<div class="w-full">
 			{@render children?.()}

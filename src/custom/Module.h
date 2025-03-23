@@ -72,31 +72,58 @@ public:
         JsonArray details;
         JsonArray values;
 
-        property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "boolean"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "number"; property["min"] = 0; property["max"] = 255; property["default"] = 73;
-        property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "boolean"; property["default"] = false;
-
+        property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 73;
+        property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = false;
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "select"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
-        property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 85;
+        {
+            property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
+            values.add("Random");
+            values.add("Rainbow");
+            //find all the .sc files on FS
+            #if FT_ENABLED(FT_FILEMANAGER)
+                File rootFolder = ESPFS.open("/");
+                walkThroughFiles(rootFolder, [&](File folder, File file) {
+                    if (strstr(file.name(), ".sc")) {
+                        // ESP_LOGD("", "found file %s", file.path());
+                        values.add((char *)file.path());
+                    }
+                });
+                rootFolder.close();
+            #endif
+            property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Effect"; values = property["values"].to<JsonArray>();
+            values.add("Fixture definition");
+            values.add("Fixture mapping");
+            values.add("Effect");
+            values.add("Modifier");
+            values.add("Driver show");
+            property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 85;
+        }
 
-        values.add("Random");
-        values.add("Rainbow");
-        //find all the .sc files on FS
-        #if FT_ENABLED(FT_FILEMANAGER)
-            File rootFolder = ESPFS.open("/");
-            walkThroughFiles(rootFolder, [&](File folder, File file) {
-                if (strstr(file.name(), ".sc")) {
-                    // ESP_LOGD("", "found file %s", file.path());
-                    values.add((char *)file.path());
-                }
-            });
-            rootFolder.close();
-        #endif
+        //remaining is for demo purposes (temp)
+        property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonLight";
+        property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
+        values.add("Offline");
+        values.add("Signal Strength");
+        values.add("Priority");
 
-        property = root.add<JsonObject>(); property["name"] = "projections"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "Pinwheel"; values = property["values"].to<JsonArray>();
-        property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "text"; property["default"] = "normal";
+        property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        {
+            property = details.add<JsonObject>(); property["name"] = "SSID"; property["type"] = "text"; property["default"] = "ewtr"; property["min"] = 3; property["max"] = 32; 
+            property = details.add<JsonObject>(); property["name"] = "Password"; property["type"] = "password"; property["default"] = "";
+        }
+
+        property = root.add<JsonObject>(); property["name"] = "invoices"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        {
+            property = details.add<JsonObject>(); property["name"] = "number"; property["type"] = "number"; property["default"] = 1000; property["min"] = 1000; property["max"] = 9999; 
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "ewowi";
+            property = details.add<JsonObject>(); property["name"] = "date"; property["type"] = "date"; property["default"] = "2025-03-21";
+            property = details.add<JsonObject>(); property["name"] = "lines"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+            {
+                property = details.add<JsonObject>(); property["name"] = "service"; property["type"] = "text"; property["default"] = "consulting";
+                property = details.add<JsonObject>(); property["name"] = "price"; property["type"] = "number"; property["default"] = 100;
+            }
+        }
 
         char buffer[256];
         serializeJson(root, buffer, sizeof(buffer));

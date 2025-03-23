@@ -34,7 +34,7 @@
 	import { tick } from 'svelte';
 	import FileEdit from '$lib/components/custom/FileEdit.svelte';
 
-	let filesState: FilesState;
+	let filesState: any = $state({});;
 	let folderList: FilesState[] = $state([]); //all files in a folder
 	let editableFile: FilesState = $state({
 		name: '',
@@ -277,7 +277,7 @@
 				<div class="relative w-full overflow-visible">
 					<button
 						class="btn btn-primary text-primary-content btn-md absolute -top-14 right-16"
-						on:click={() => {
+						onclick={() => {
 							addFile();
 							showEditor = true;
 						}}
@@ -286,7 +286,7 @@
 					>
 					<button
 						class="btn btn-primary text-primary-content btn-md absolute -top-14 right-1"
-						on:click={() => {
+						onclick={() => {
 							addFolder();
 							showEditor = true;
 						}}
@@ -342,11 +342,11 @@
 							</div>
 							
 							{#if !$page.data.features.security || $user.admin}
-								<div class="flex-grow" />
+								<div class="flex-grow"></div>
 								<div class="space-x-0 px-0 mx-0">
 									<button
 										class="btn btn-ghost btn-sm"
-										on:click={() => {
+										onclick={() => {
 											handleEdit(index);
 										}}
 									>
@@ -355,7 +355,7 @@
 									{#if !(breadCrumbs.length > 0 && item.name === breadCrumbs[breadCrumbs.length-1])}
 										<button
 											class="btn btn-ghost btn-sm"
-											on:click={() => {
+											onclick={() => {
 												confirmDelete(index);
 											}}
 											disabled={item.files && item.files.length>0}

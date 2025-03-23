@@ -18,12 +18,9 @@
 	import LightIcon from '~icons/tabler/bulb';
 	import { socket } from '$lib/stores/socket';
 	import type { LiveAnimationState } from '$lib/types/models_custom';
-	import Slider from '$lib/components/custom/Slider.svelte';
-	import Checkbox from '$lib/components/custom/Checkbox.svelte';
-	import Number from '$lib/components/custom/Number.svelte';
-	import Spinner from '$lib/components/custom/Spinner.svelte';
-	import Select from '$lib/components/custom/Select.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 	import FileEdit from '$lib/components/custom/FileEdit.svelte';
+	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 
 	let state: any = $state({});
 
@@ -102,35 +99,10 @@
 		<Spinner />
 	{:then nothing}
 	<div class="w-full">
-		<Checkbox 
-			label="On" 
-			bind:value={state.lightsOn}
-			onChange={sendSocket}
-		></Checkbox>
-		<Slider 
-			label="Brightness" 
-			bind:value={state.brightness}
-			min={0} 
-			max={255} 
-			step={1}
-			onChange={sendSocket}
-		></Slider>
-		<Select label="Animation" bind:value={state.animation} onChange={sendSocket}>
-			{#each state.animations as animation, i}
-				<option value={animation}>
-					{animation}
-				</option>
-			{/each}
-		</Select>
-		<FileEdit
-			path = {state.animation}
-			showEditor = {false}
-		/>
-		<Checkbox 
-			label="Driver on" 
-			bind:value={state.driverOn}
-			onChange={sendSocket}
-		></Checkbox>
+		<MultiInput property={{name:"lightsOn", type:"checkbox"}} bind:value={state.lightsOn} onChange={sendSocket}></MultiInput>
+		<MultiInput property={{name:"Brightness", type:"range", min:0, max:255}} bind:value={state.brightness} onChange={sendSocket}></MultiInput>
+		<MultiInput property={{name:"Animation", type:"selectFile", values:state.animations}} bind:value={state.animation} onChange={sendSocket}></MultiInput>
+		<MultiInput property={{name:"driverOn", type:"checkbox"}} bind:value={state.driverOn} onChange={sendSocket}></MultiInput>
 	</div>
 	{/await}
 </SettingsCard>

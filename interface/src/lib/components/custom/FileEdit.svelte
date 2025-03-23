@@ -7,12 +7,12 @@
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+
+   known issues
+   - showEditor does collapse in Files module, but not in LiveAnimation and Module
 -->
 
 <script lang="ts">
-	import Text from '$lib/components/custom/Text.svelte';
-	import Textarea from '$lib/components/custom/Textarea.svelte';
-	import File from '$lib/components/custom/File.svelte';
 	import type { FilesState } from '$lib/types/models_custom';
 	import { tick } from 'svelte';
     import { user } from '$lib/stores/user';
@@ -20,6 +20,7 @@
 	import { notifications } from '$lib/components/toasts/notifications';
 	import Collapsible from '$lib/components/Collapsible.svelte';
 	import { onMount } from 'svelte';
+	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 
 	let { path = "", showEditor = true, newItem = false, isFile = true } = $props();
 
@@ -40,6 +41,8 @@
 		fs_total: 0,
 		fs_used: 0,
 	});
+
+	let changed: boolean = $state(false);
 
     async function postFilesState(data: any) { //export needed to call from other components
 		try {
@@ -80,6 +83,7 @@
 				console.log("uploadFileWithText", editableFile.contents)
 			};
             reader.readAsText(file);
+			changed = true;
         }
 	}
 
@@ -116,6 +120,12 @@
 	onMount(() => {
        	getFileContents();
 	});
+
+	function onCancel() {
+		getFileContents();
+		showEditor = false;
+		changed = false;
+	}
 
 	function onSave() {
 		console.log("onSave", editableFile.isFile)
@@ -154,6 +164,7 @@
 			}
 			postFilesState(response);
 			showEditor = false;
+			changed = false;
 		}
 	}
 
@@ -167,10 +178,11 @@
 		<div class="divider my-0"></div>
 
 		<div>
-			<Text
-				label="Name" 
-				bind:value={editableFile.name} 
-			></Text>
+			<MultiInput property={{name:"Name", type:"text"}} bind:value={editableFile.name}
+				onChange={() => {
+					changed = true;
+				}}>
+			</MultiInput>
 			<label class="label" for="name">
 				<span class="label-text-alt text-error {formErrors.name ? '' : 'hidden'}"
 					>Name must be between 3 and 32 characters long</span
@@ -179,32 +191,40 @@
 		</div>
 		{#if isFile}
 			<div>
-				<Textarea 
-					label="Contents" 
-					bind:value={editableFile.contents} 
+				<MultiInput property={{name:"Contents", type:"textarea"}} bind:value={editableFile.contents} 
 					onChange={(event) => {
 						editableFile.contents = event.target.value;
-					}}
-				></Textarea>
+						changed = true;
+					}}>
+				</MultiInput>
 			</div>
-			{#if newItem}
-				<div>
-					<File 
-						label="Upload" 
-						onChange={(event) => {
-							uploadFile(event);
-						}}
-					></File>
-				</div>
-			{/if}
+			<div>
+				<MultiInput property={{name:"Upload", type:"file"}} bind:value={editableFile.contents} 
+					onChange={(event) => {
+						uploadFile(event);
+						changed = true;
+					}}>
+				</MultiInput>
+			</div>
 		{/if}
 		<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
 			<button
 				class="btn btn-primary"
 				onclick={() => {
 					console.log("Save");
+					onCancel();
+				}}
+				disabled={!changed}
+			>
+				Cancel</button
+			>
+			<button
+				class="btn btn-primary"
+				onclick={() => {
+					console.log("Save");
 					onSave();
 				}}
+				disabled={!changed}
 			>
 				Save</button
 			>
