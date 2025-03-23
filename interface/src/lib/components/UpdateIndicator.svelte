@@ -17,7 +17,7 @@
 
 	let { update = $bindable(false) }: Props = $props();
 
-	let firmwareVersion: string;
+	let firmwareVersion: string = $state("");
 	let firmwareDownloadLink: string;
 
 	async function getGithubAPI() {
