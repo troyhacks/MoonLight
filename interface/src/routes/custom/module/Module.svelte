@@ -50,6 +50,7 @@
 				}
 			});
 			data = await response.json();
+			console.log("data", data)
 		} catch (error) {
 			console.error('Error:', error);
 		}
@@ -140,6 +141,7 @@
 		}
 
 		data[propertyName] = reorder(data[propertyName], from.index, to.index);
+		changed = true;
 		console.log(onDrop, data[propertyName]);
 	}
 

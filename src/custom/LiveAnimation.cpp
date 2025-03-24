@@ -119,7 +119,7 @@ void LiveAnimation::begin()
 
     #if FT_ENABLED(FT_FILEMANAGER)
         //create a handler which recompiles the animation when the file of the current animation changes
-        update_handler_id_t _updateHandlerId = _filesService->addUpdateHandler([&](const String &originId)
+        _filesService->addUpdateHandler([&](const String &originId)
         { 
             ESP_LOGD("", "FilesService::updateHandler %s", originId.c_str());
             //read the file state
@@ -135,11 +135,11 @@ void LiveAnimation::begin()
             });
         });
 
-        update_handler_id_t _updateHandlerId2 = addUpdateHandler([&](const String &originId)
+        addUpdateHandler([&](const String &originId)
         {
             ESP_LOGD("", "LiveAnimation::updateHandler %s", originId.c_str());
             read([&](LiveAnimationState &state) {
-                for (auto updatedItem : state.updatedItems) {
+                for (String updatedItem : state.updatedItems) {
                     if (updatedItem == "animation") {
                         compileAndRun();
                     } 
@@ -158,7 +158,7 @@ void LiveAnimation::loop()
     //select the right effect
     if (_state.animation == "Random") {
         fadeToBlackBy(_state.leds, _state.nrOfLeds, 70);
-        _state.leds[random16(_state.nrOfLeds)] = CRGB(255, 0, 0); //one random led red
+        _state.leds[random16(_state.nrOfLeds)] = CRGB(255, random8(), 0);
         showLeds = true;
     } else if (_state.animation == "Rainbow") {
         static uint8_t hue = 0;

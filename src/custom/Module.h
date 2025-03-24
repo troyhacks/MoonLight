@@ -26,10 +26,17 @@
     #include "FilesService.h"
 #endif
 
+struct UpdatedItem {
+    JsonString parent;
+    JsonString name;
+    JsonVariant value;
+    uint8_t index;
+};
+
 class ModuleState
 {
 public:
-    std::vector<String> updatedItems;
+    std::vector<UpdatedItem> updatedItems;
 
     JsonDocument data;
 
@@ -146,6 +153,7 @@ public:
                     );
 
     void begin();
+    void onUpdate(UpdatedItem updatedItem);
     void loop();
 
 protected:
