@@ -9,9 +9,9 @@ export const load = (async ({ fetch }) => {
 	const item = await result.json();
 	return {
 		features: item,
-		title: 'ESP32-Svelte-Live-MM',
-		github: 'ewowi/ESP32-svelte-live-mm',
+		title: 'MoonBaseESK',
+		github: 'ewowi/MoonBaseESK',
 		copyright: '2025 theelims, ewowi, hpwit ⚖️ GPL-3.0',
-		appName: 'ESP32 Svelte Live MM'
+		appName: 'MoonBaseESK'
 	};
 }) satisfies LayoutLoad;
