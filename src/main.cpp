@@ -23,7 +23,8 @@
 
 #if FT_ENABLED(FT_LIVEANIMATION)
     #include "custom/LiveAnimation.h"
-    #include "custom/Module.h"
+    #include "custom/ModuleLive.h"
+    #include "custom/ModuleDemo.h"
 #endif
 
 #define SERIAL_BAUD_RATE 115200
@@ -46,10 +47,12 @@ LightStateService lightStateService = LightStateService(&server,
 #if FT_ENABLED(FT_LIVEANIMATION)
     #if FT_ENABLED(FT_FILEMANAGER)
         LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit, &filesService);
-        Module module = Module(&server, &esp32sveltekit, &filesService);
+        ModuleLive moduleLive = ModuleLive("live", &server, &esp32sveltekit, &filesService);
+        ModuleDemo moduleDemo = ModuleDemo("demo", &server, &esp32sveltekit, &filesService);
     #else
         LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit);
-        Module module = Module(&server, &esp32sveltekit);
+        ModuleLive moduleLive = ModuleLive("live", &server, &esp32sveltekit);
+        ModuleDemo moduleDemo = ModuleDemo("demo", &server, &esp32sveltekit);
     #endif
 #endif
 
@@ -74,7 +77,8 @@ void setup()
 
     #if FT_ENABLED(FT_LIVEANIMATION)
         liveAnimation.begin();
-        module.begin();
+        moduleLive.begin();
+        moduleDemo.begin();
     #endif
 }
 
@@ -82,7 +86,7 @@ void loop()
 {
     #if FT_ENABLED(FT_LIVEANIMATION)
         liveAnimation.loop();
-        module.loop();
+        // module.loop();
     #endif
 
     while (!runInLoopTask.empty())

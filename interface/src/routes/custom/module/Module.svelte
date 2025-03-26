@@ -25,9 +25,14 @@
 
 	async function getState() {
 
+		let params = new URLSearchParams(page.url.search);
+		let moduleName = params.get('module') || "module";
+
+		console.log("get definition", '/rest/' + moduleName + 'Def')
+
 		//load definition
 		try {
-			const response = await fetch('/rest/moduleDef', {
+			const response = await fetch('/rest/' + moduleName + 'Def', {
 				method: 'GET',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
@@ -40,9 +45,10 @@
 			console.error('Error:', error);
 		}
 
+		console.log("get data", '/rest/' + moduleName)
 		//load data
 		try {
-			const response = await fetch('/rest/module', {
+			const response = await fetch('/rest/' + moduleName, {
 				method: 'GET',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
@@ -58,8 +64,11 @@
 	}
 
 	async function postState(data: any) {
+		let params = new URLSearchParams(page.url.search);
+		let moduleName = params.get('module') || "module";
+
 		try {
-			const response = await fetch('/rest/module', {
+			const response = await fetch('/rest/' + moduleName, {
 				method: 'POST',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
@@ -158,7 +167,7 @@
 		<Router  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span >Module</span>
+		<span >Module {new URLSearchParams(page.url.search).get('module') || 'module'}</span>
 	{/snippet}
 
 	{#if !page.data.features.security || $user.admin}

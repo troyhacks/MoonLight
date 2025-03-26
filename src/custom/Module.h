@@ -40,130 +40,152 @@ public:
 
     JsonDocument data;
 
-    ModuleState() {
-        //set default
+    void setupData() {
+
+        ESP_LOGD("", "ModuleState::setupData size %d", data.size());
 
         //only if no file ...
-        JsonDocument definition;
-        setupDefinition(definition.to<JsonArray>());
-        char buffer[256];
-        serializeJson(definition, buffer, sizeof(buffer));
-        ESP_LOGD("", "setupDefinition %s", buffer);
-        
-        JsonObject root = data.to<JsonObject>();
+        if (data.size() == 0) {
+            JsonDocument definition;
+            setupDefinition(definition.to<JsonArray>());
 
-        //create doc based on definition...
-        for (JsonObject property: definition.as<JsonArray>()) {
-            if (property["type"] != "array") {
-                root[property["name"]] = property["default"];
-            } else {
-                root[property["name"]].to<JsonArray>();
-                //loop over detail propertys (recursive)
+            char buffer[256];
+            serializeJson(definition, buffer, sizeof(buffer));
+            ESP_LOGD("", "setupDefinition %s", buffer);
+            
+            JsonObject root = data.to<JsonObject>();
+
+            //create doc based on definition... only top level properties
+            for (JsonObject property: definition.as<JsonArray>()) {
+                if (property["type"] != "array") {
+                    root[property["name"]] = property["default"];
+                } else {
+                    root[property["name"]].to<JsonArray>();
+                    //loop over detail propertys (recursive)
+                }
             }
+
+            // char buffer[256];
+            serializeJson(root, buffer, sizeof(buffer));
+            ESP_LOGD("", "setupData %s", buffer);
         }
-        //to do: make recursive
-
-        // JsonArray array = root["nodes"].to<JsonArray>();
-        // JsonObject property;
-        // property = array.add<JsonObject>(); property["animation"] = "Random"; property["size"] = 100; 
-        // property = array.add<JsonObject>(); property["animation"] = "Rainbow"; property["size"] = 200; 
-
-        // char buffer[256];
-        serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "setupData %s", buffer);
-
     }
 
-    void setupDefinition(JsonArray root) {
+    virtual void setupDefinition(JsonArray root) { //virtual so it can be overriden in derived classes
         JsonObject property;
         JsonArray details;
         JsonArray values;
 
-        property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 73;
-        property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = false;
-        property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        {
-            property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
-            values.add("Random");
-            values.add("Rainbow");
-            //find all the .sc files on FS
-            #if FT_ENABLED(FT_FILEMANAGER)
-                File rootFolder = ESPFS.open("/");
-                walkThroughFiles(rootFolder, [&](File folder, File file) {
-                    if (strstr(file.name(), ".sc")) {
-                        // ESP_LOGD("", "found file %s", file.path());
-                        values.add((char *)file.path());
-                    }
-                });
-                rootFolder.close();
-            #endif
-            property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Effect"; values = property["values"].to<JsonArray>();
-            values.add("Fixture definition");
-            values.add("Fixture mapping");
-            values.add("Effect");
-            values.add("Modifier");
-            values.add("Driver show");
-            property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 85;
-        }
-
-        //remaining is for demo purposes (temp)
-        property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonLight";
-        property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
-        values.add("Offline");
-        values.add("Signal Strength");
-        values.add("Priority");
-
-        property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        {
-            property = details.add<JsonObject>(); property["name"] = "SSID"; property["type"] = "text"; property["default"] = "ewtr"; property["min"] = 3; property["max"] = 32; 
-            property = details.add<JsonObject>(); property["name"] = "Password"; property["type"] = "password"; property["default"] = "";
-        }
-
-        property = root.add<JsonObject>(); property["name"] = "invoices"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        {
-            property = details.add<JsonObject>(); property["name"] = "number"; property["type"] = "number"; property["default"] = 1000; property["min"] = 1000; property["max"] = 9999; 
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "ewowi";
-            property = details.add<JsonObject>(); property["name"] = "date"; property["type"] = "date"; property["default"] = "2025-03-21";
-            property = details.add<JsonObject>(); property["name"] = "lines"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-            {
-                property = details.add<JsonObject>(); property["name"] = "service"; property["type"] = "text"; property["default"] = "consulting";
-                property = details.add<JsonObject>(); property["name"] = "price"; property["type"] = "number"; property["default"] = 100;
-            }
-        }
-
-        char buffer[256];
-        serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "definition %s", buffer);
-
+        property = root.add<JsonObject>(); property["name"] = "text"; property["type"] = "text"; property["default"] = "MoonLight";
     }
 
     static void read(ModuleState &state, JsonObject &root);
     static StateUpdateResult update(JsonObject &root, ModuleState &state);
 };
 
-class Module : public StatefulService<ModuleState>
+template <class T>
+class Module : public StatefulService<T>
 {
 public:
-    Module(PsychicHttpServer *server,
+    String _moduleName = "";
+
+    Module(String moduleName, PsychicHttpServer *server,
                       ESP32SvelteKit *sveltekit
                       #if FT_ENABLED(FT_FILEMANAGER)
                           , FilesService *filesService
                       #endif
-                    );
+                    ): _httpEndpoint(T::read,
+                                        T::update,
+                                        this,
+                                        server,
+                                        String("/rest/" + moduleName).c_str(),
+                                        sveltekit->getSecurityManager(),
+                                        AuthenticationPredicates::IS_AUTHENTICATED),
+                        _eventEndpoint(T::read,
+                                        T::update,
+                                        this,
+                                        sveltekit->getSocket(),
+                                        moduleName.c_str()),
+                        _webSocketServer(T::read,
+                                        T::update,
+                                        this,
+                                        server,
+                                        String("/ws/" + moduleName).c_str(),
+                                        sveltekit->getSecurityManager(),
+                                        AuthenticationPredicates::IS_AUTHENTICATED),
+                        _socket(sveltekit->getSocket()),
+                            _fsPersistence(T::read,
+                                    T::update,
+                                    this,
+                                    sveltekit->getFS(),
+                                    String("/config/" + moduleName + ".json").c_str())
+    {
+        _moduleName = moduleName;
+        
+        ESP_LOGD("", "Module::constructor %s", moduleName.c_str());
+        _server = server;
 
-    void begin();
-    void onUpdate(UpdatedItem updatedItem);
-    void loop();
+        // configure settings service update handler to update state
+        #if FT_ENABLED(FT_FILEMANAGER)
+        _filesService = filesService;
+        #endif
+
+    }
+
+    void begin()
+    {
+        ESP_LOGD("", "Module::begin");
+        _httpEndpoint.begin();
+        _eventEndpoint.begin();
+        _fsPersistence.readFromFS(); //overwrites the default settings in state
+
+        this->read([&](T &state) {
+            state.setupData(); //if no data readFromFS, using overridden setupDefinition
+        });
+
+        _server->on(String("/rest/" + _moduleName + "Def").c_str(), HTTP_GET, [&](PsychicRequest *request) {
+            PsychicJsonResponse response = PsychicJsonResponse(request, false);
+            JsonArray root = response.getRoot().to<JsonArray>();
+    
+            this->read([&](T &state) {
+                state.setupDefinition(root);
+            });
+    
+            char buffer[256];
+            serializeJson(root, buffer, sizeof(buffer));
+            ESP_LOGD("", "moduleDef %s", buffer);
+        
+            return response.send();
+        });
+    
+        //if update, for all updated items, run onUpdate
+        this->addUpdateHandler([&](const String &originId)
+        {
+            ESP_LOGD("", "Module::updateHandler %s", originId.c_str());
+            this->read([&](T &state) {
+                for (UpdatedItem updatedItem : state.updatedItems) {
+                    onUpdate(updatedItem);
+                }
+            });
+        });
+    
+    }
+    
+    void onUpdate(UpdatedItem updatedItem)
+    {
+        ESP_LOGD("", "no handle for %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
+    }
+
+    void loop() {};
 
 protected:
     EventSocket *_socket;
 
 private:
-    HttpEndpoint<ModuleState> _httpEndpoint;
-    EventEndpoint<ModuleState> _eventEndpoint;
-    WebSocketServer<ModuleState> _webSocketServer;
-    FSPersistence<ModuleState> _fsPersistence;
+    HttpEndpoint<T> _httpEndpoint;
+    EventEndpoint<T> _eventEndpoint;
+    WebSocketServer<T> _webSocketServer;
+    FSPersistence<T> _fsPersistence;
     PsychicHttpServer *_server;
 
     #if FT_ENABLED(FT_FILEMANAGER)

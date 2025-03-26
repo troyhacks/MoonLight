@@ -59,9 +59,15 @@
 					feature: page.data.features.liveanimation,
 				},
 				{
-					title: 'Module',
+					title: 'Module Live',
 					icon: BulbIcon,
-					href: '/custom/module',
+					href: '/custom/module?module=live',
+					feature: page.data.features.liveanimation,
+				},
+				{
+					title: 'Module Demo',
+					icon: BulbIcon,
+					href: '/custom/module?module=demo',
 					feature: page.data.features.liveanimation,
 				},
 				{
