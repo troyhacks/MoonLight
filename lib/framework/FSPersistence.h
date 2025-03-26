@@ -109,18 +109,17 @@ private:
     JsonStateUpdater<T> _stateUpdater;
     StatefulService<T> *_statefulService;
     FS *_fs;
-    const char *_filePath;
+    String _filePath;
     update_handler_id_t _updateHandlerId;
 
     // We assume we have a _filePath with format "/directory1/directory2/filename"
     // We create a directory for each missing parent
     void mkdirs()
     {
-        String path(_filePath);
         int index = 0;
-        while ((index = path.indexOf('/', index + 1)) != -1)
+        while ((index = _filePath.indexOf('/', index + 1)) != -1)
         {
-            String segment = path.substring(0, index);
+            String segment = _filePath.substring(0, index);
             if (!_fs->exists(segment))
             {
                 _fs->mkdir(segment);

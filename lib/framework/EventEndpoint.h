@@ -51,7 +51,7 @@ private:
     JsonStateUpdater<T> _stateUpdater;
     StatefulService<T> *_statefulService;
     EventSocket *_socket;
-    const char *_event;
+    String _event;
 
     void updateState(JsonObject &root, int originId)
     {

@@ -23,7 +23,7 @@ protected:
     SecurityManager *_securityManager;
     AuthenticationPredicate _authenticationPredicate;
     PsychicHttpServer *_server;
-    const char *_servicePath;
+    String _servicePath;
 
 public:
     HttpEndpoint(JsonStateReader<T> stateReader,
@@ -48,7 +48,7 @@ public:
 
 // OPTIONS (for CORS preflight)
 #ifdef ENABLE_CORS
-        _server->on(_servicePath,
+        _server->on(_servicePath.c_str(),
                     HTTP_OPTIONS,
                     _securityManager->wrapRequest(
                         [this](PsychicRequest *request)
@@ -59,7 +59,7 @@ public:
 #endif
 
         // GET
-        _server->on(_servicePath,
+        _server->on(_servicePath.c_str(),
                     HTTP_GET,
                     _securityManager->wrapRequest(
                         [this](PsychicRequest *request)
@@ -70,10 +70,10 @@ public:
                             return response.send();
                         },
                         _authenticationPredicate));
-        ESP_LOGV("HttpEndpoint", "Registered GET endpoint: %s", _servicePath);
+        ESP_LOGV("HttpEndpoint", "Registered GET endpoint: %s", _servicePath.c_str());
 
         // POST
-        _server->on(_servicePath,
+        _server->on(_servicePath.c_str(),
                     HTTP_POST,
                     _securityManager->wrapCallback(
                         [this](PsychicRequest *request, JsonVariant &json)
@@ -105,7 +105,7 @@ public:
                         },
                         _authenticationPredicate));
 
-        ESP_LOGV("HttpEndpoint", "Registered POST endpoint: %s", _servicePath);
+        ESP_LOGV("HttpEndpoint", "Registered POST endpoint: %s", _servicePath.c_str());
     }
 };
 
