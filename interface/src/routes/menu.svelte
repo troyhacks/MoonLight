@@ -153,18 +153,18 @@
 		}
 	] as menuItem[]);
 
-	function setActiveMenuItem(targetTitle: string) {
+	function setActiveMenuItem(targetHref: string) {
 		menuItems.forEach((item) => {
-			item.active = item.title === targetTitle;
+			item.active = item.href === targetHref;
 			item.submenu?.forEach((subItem) => {
-				subItem.active = subItem.title === targetTitle;
+				subItem.active = subItem.href === targetHref;
 			});
 		});
 		closeMenu();
 	}
 
 	$effect(() => {
-		setActiveMenuItem(page.data.title);
+		setActiveMenuItem(page.url.pathname + page.url.search); //href instead of page title
 	});
 </script>
 
@@ -197,7 +197,7 @@
 												class:bg-base-100={subMenuItem.active}
 												class="text-ml font-bold"
 												onclick={() => {
-													setActiveMenuItem(subMenuItem.title);
+													setActiveMenuItem(subMenuItem.href);
 												}}><subMenuItem.icon class="h-5 w-5" />{subMenuItem.title}</a
 											>
 										</li>
@@ -211,7 +211,7 @@
 							class:bg-base-100={menuItem.active}
 							class="text-lg font-bold"
 							onclick={() => {
-								setActiveMenuItem(menuItem.title);
+								setActiveMenuItem(menuItem.href||'');
 							}}><menuItem.icon class="h-6 w-6" />{menuItem.title}</a
 						>
 					{/if}
