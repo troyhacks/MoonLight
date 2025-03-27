@@ -13,6 +13,8 @@
 	import Delete from '~icons/tabler/trash';
 	import Cancel from '~icons/tabler/x';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { socket } from '$lib/stores/socket';
 
 	let definition: any = $state([]);
 	let data: any = $state({});
@@ -23,10 +25,11 @@
 	let showEditor: boolean = $state(false);
 	let changed: boolean = $state(false);
 
+	const modeWS: boolean = true; //todo: make this an argument
+
 	async function getState() {
 
-		let params = new URLSearchParams(page.url.search);
-		let moduleName = params.get('module') || "module";
+		let moduleName = page.url.searchParams.get('module');
 
 		console.log("get definition", '/rest/' + moduleName + 'Def')
 
@@ -63,9 +66,11 @@
 		return data;
 	}
 
-	async function postState(data: any) {
-		let params = new URLSearchParams(page.url.search);
-		let moduleName = params.get('module') || "module";
+	async function postState() {
+		//validation (if needed) here?
+		//optional checks if the whole state is correct
+
+		let moduleName = page.url.searchParams.get('module')
 
 		try {
 			const response = await fetch('/rest/' + moduleName, {
@@ -79,6 +84,7 @@
 			if (response.status == 200) {
 				notifications.success('Module settings updated.', 3000);
 				data = await response.json();
+				changed = false;
 			} else {
 				notifications.error('User not authorized.', 3000);
 			}
@@ -91,13 +97,6 @@
 	function cancelState() {
 		getState();
 		showEditor = false;
-		changed = false;
-	}
-
-	function validateAndSaveState() {
-		//optional checks if the whole state is correct
-
-		postState(data);
 		changed = false;
 	}
 
@@ -121,8 +120,35 @@
 	}
 
 	function inputChanged() {
-		changed = true;
+		if (modeWS) {
+			let moduleName = page.url.searchParams.get('module')||'';
+			socket.sendEvent(moduleName, data)
+		} else {
+			changed = true;
+		}
 	}
+
+	const handleState = (state: any) => {
+		console.log("handleState", state);
+		data = state;
+		// dataLoaded = true;
+	};
+
+	onMount(() => {
+		if (modeWS) {
+			let moduleName = page.url.searchParams.get('module') || ''
+			console.log("onMount", moduleName, handleState);
+			socket.on(moduleName, data);
+		}
+	});
+
+	onDestroy(() => {
+		if (modeWS) {
+			let moduleName = page.url.searchParams.get('module') || ''
+			console.log("onDestroy", moduleName, handleState);
+			socket.off(moduleName, data);
+		}
+	});
 
 	function handleEdit(propertyName: string, index: number) {
 		console.log("handleEdit", propertyName, index)
@@ -140,7 +166,7 @@
 		data[propertyName].splice(index, 1);
 		data[propertyName] = [...data[propertyName]]; //Trigger reactivity
 		showEditor = false;
-		changed = true;
+		inputChanged();
 	}
 
 	function onDrop(propertyName: string, { detail: { from, to } }: CustomEvent<DropEvent>) {
@@ -150,8 +176,8 @@
 		}
 
 		data[propertyName] = reorder(data[propertyName], from.index, to.index);
-		changed = true;
-		console.log(onDrop, data[propertyName]);
+		inputChanged();
+		// console.log(onDrop, data[propertyName]);
 	}
 
     function preventDefault(fn: any) {
@@ -167,7 +193,7 @@
 		<Router  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span >Module {new URLSearchParams(page.url.search).get('module') || 'module'}</span>
+		<span >Module {page.url.searchParams.get('module')}</span>
 	{/snippet}
 
 	{#if !page.data.features.security || $user.admin}
@@ -180,7 +206,7 @@
 					{#each definition as property}
 						{#if property.type != "array"}
 							<div>
-								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged}></MultiInput>
+								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
 						{:else if property.type == "array"}
 							<div class="divider mb-2 mt-0"></div>
@@ -193,7 +219,7 @@
 									class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
 									onclick={() => {
 										addItem(property.name);
-										changed = true;
+										inputChanged();
 
 										//add the new item to the data
 										data[property.name].push(dataEditable);
@@ -260,7 +286,7 @@
 								<div class="divider my-0"></div>
 								{#each property.n as propertyN}
 									<div>
-										<MultiInput property={propertyN} bind:value={dataEditable[propertyN.name]} onChange={inputChanged}></MultiInput>
+										<MultiInput property={propertyN} bind:value={dataEditable[propertyN.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 									</div>
 								{/each}
 							{/if}
@@ -268,15 +294,17 @@
 					{/each}
 				</div>
 
-				<div class="divider mb-2 mt-0"></div>
-				<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
-					<button class="btn btn-primary" type="button" onclick={cancelState} disabled={!changed}
-						>Cancel</button
-					>
-					<button class="btn btn-primary" type="button" onclick={validateAndSaveState} disabled={!changed}
-						>Save</button
-					>
-				</div>
+				{#if !modeWS}
+					<div class="divider mb-2 mt-0"></div>
+					<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
+						<button class="btn btn-primary" type="button" onclick={cancelState} disabled={!changed}
+							>Cancel</button
+						>
+						<button class="btn btn-primary" type="button" onclick={postState} disabled={!changed}
+							>Save</button
+						>
+					</div>
+				{/if}
 			{/await}
 		</div>
 	{/if}

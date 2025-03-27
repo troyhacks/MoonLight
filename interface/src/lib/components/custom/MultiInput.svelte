@@ -20,6 +20,7 @@
     export let hasNumber = true;
     export let disabled = false;
     export let step = 1;
+    export let changeOnInput:boolean = true;
 
     function isLowerCase(s: string) {
         return s.toLowerCase() == s
@@ -106,7 +107,7 @@
     <textarea rows="10" cols="61"
         class="textarea textarea-bordered"
         on:change={onChange}
-        on:input={onChange}
+        on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     >{value}</textarea>
 {:else if property.type == "file"}
     <input 
@@ -121,7 +122,7 @@
         class="input input-bordered invalid:border-error invalid:border-2"
         bind:value={value}
         on:change={onChange}
-        on:input={onChange}
+        on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     />
 {:else if property.type == "text"}
     <input 
@@ -131,7 +132,7 @@
         maxlength={property.max}
         bind:value={value}
         on:change={onChange}
-        on:input={onChange}
+        on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     />
 {:else}
     <input 

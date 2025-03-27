@@ -35,6 +35,14 @@
 			}
 		});
 	}
+
+	function addModuleToURL() {
+		// console.log("page.url.search", page.url.search);
+		if (page.url.search) 
+			return '/' + page.url.searchParams.get('module');
+		else
+			return '';
+	}
 </script>
 
 <div class="navbar bg-base-300 sticky top-0 z-10 h-12 min-h-fit drop-shadow-lg lg:h-16">
@@ -44,7 +52,7 @@
 			><Hamburger class="h-6 w-auto" /></label
 		>
 		<span class="px-2 text-xl font-bold lg:text-2xl">{page.data.title}</span>
-		<a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}/{page.url.pathname}" target="_blank">?</a>
+		<a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname + addModuleToURL()}" target="_blank">?</a>
 	</div>
 	<div class="indicator flex-none">
 		<UpdateIndicator />
