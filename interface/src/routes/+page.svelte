@@ -14,9 +14,9 @@
 	<div class="card md:card-side bg-base-200 shadow-primary shadow-2xl">
 		<figure class="bg-base-200"><img src={logo} alt="Logo" class="h-auto w-64" /></figure>
 		<div class="card-body w-80">
-			<h2 class="card-title text-center text-2xl">Welcome to ESP32-SvelteKit</h2>
+			<h2 class="card-title text-center text-2xl">Welcome to MoonBase</h2>
 			<p class="py-6 text-center">
-				ESP32 Svelte Live MM is made by ewowi and hpwit. We can be found on 
+				MoonBase is an enhanced fork of ESP-SvelteKit and provides a basis for ESP32 based applications and uses ESPLiveScript for live scripting. We can be found on 
 				<a
 					href="https://discord.gg/TC8NSUSCdV"
 					class="link"

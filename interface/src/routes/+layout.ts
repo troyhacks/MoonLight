@@ -9,9 +9,9 @@ export const load = (async ({ fetch }) => {
 	const item = await result.json();
 	return {
 		features: item,
-		title: 'MoonBaseESK',
+		title: 'MoonBase',
 		github: 'ewowi/MoonBaseESK',
 		copyright: '2025 theelims, ewowi, hpwit ⚖️ GPL-3.0',
-		appName: 'MoonBaseESK'
+		appName: 'MoonBase'
 	};
 }) satisfies LayoutLoad;

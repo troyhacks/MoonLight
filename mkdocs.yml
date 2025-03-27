@@ -19,8 +19,8 @@ site_description: >-
   A simple, secure and extensible framework for IoT projects on ESP32 platforms with responsive Sveltekit front-end built with TailwindCSS and DaisyUI.
 
 # Repository
-repo_name: theelims/ESP32-sveltekit
-repo_url: https://github.com/theelims/ESP32-sveltekit
+repo_name: ewowi/MoonBaseESK
+repo_url: https://github.com/ewowi/MoonBaseESK
 
 theme:
   name: material
