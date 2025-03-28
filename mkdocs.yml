@@ -42,7 +42,7 @@ repo_url: https://github.com/ewowi/MoonBase
 
 theme:
   name: material
-  logo: media/svelte-logo.png
+  logo: media/moonlight-logo.png
   favicon: media/favicon.png
   icon:
     repo: fontawesome/brands/github
