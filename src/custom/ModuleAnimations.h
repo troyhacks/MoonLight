@@ -86,6 +86,7 @@ public:
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
             values.add("Random");
+            values.add("Sinelon");
             values.add("Rainbow");
             //find all the .sc files on FS
             #if FT_ENABLED(FT_FILEMANAGER)
@@ -142,6 +143,12 @@ public:
                 fadeToBlackBy(leds, nrOfLeds, 70);
                 leds[random16(nrOfLeds)] = CRGB(255, random8(), 0);
                 showLeds = true;
+            } else if (animation == "Sinelon") {
+                fadeToBlackBy(leds, nrOfLeds, 20);
+                uint8_t bpm = 60;
+                int pos = beatsin16( bpm, 0, 255 );
+                leds[pos] += CHSV( millis()/50, 255, 255); //= CRGB(255, random8(), 0);
+                showLeds = true;
             } else if (animation == "Rainbow") {
                 static uint8_t hue = 0;
                 fill_rainbow(leds, nrOfLeds, hue++, 7);
@@ -197,7 +204,7 @@ public:
     
                 if (executable.exeExist)
                     executable.execute("main"); //background task (async - vs sync)
-                    
+
                 for (Executable &exec: scriptRuntime._scExecutables) {
                     exe_info exeInfo = scriptRuntime.getExecutableInfo(exec.name);
                     ESP_LOGD("", "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
