@@ -31,7 +31,7 @@
 
 		let moduleName = page.url.searchParams.get('module');
 
-		console.log("get definition", '/rest/' + moduleName + 'Def')
+		// console.log("get definition", '/rest/' + moduleName + 'Def')
 
 		//load definition
 		try {
@@ -43,12 +43,12 @@
 				}
 			});
 			definition = await response.json();
-			console.log("definition", definition)
+			// console.log("definition", definition)
 		} catch (error) {
 			console.error('Error:', error);
 		}
 
-		console.log("get data", '/rest/' + moduleName)
+		// console.log("get data", '/rest/' + moduleName)
 		//load data
 		try {
 			const response = await fetch('/rest/' + moduleName, {
@@ -58,8 +58,8 @@
 					'Content-Type': 'application/json'
 				}
 			});
-			data = await response.json();
-			console.log("data", data)
+			handleState(await response.json())
+			// console.log("data", data)
 		} catch (error) {
 			console.error('Error:', error);
 		}
@@ -131,22 +131,22 @@
 	const handleState = (state: any) => {
 		console.log("handleState", state);
 		data = state;
-		// dataLoaded = true;
+		showEditor = false;
 	};
 
 	onMount(() => {
 		if (modeWS) {
 			let moduleName = page.url.searchParams.get('module') || ''
-			console.log("onMount", moduleName, handleState);
-			socket.on(moduleName, data);
+			// console.log("onMount", moduleName);
+			socket.on(moduleName, handleState);
 		}
 	});
 
 	onDestroy(() => {
 		if (modeWS) {
 			let moduleName = page.url.searchParams.get('module') || ''
-			console.log("onDestroy", moduleName, handleState);
-			socket.off(moduleName, data);
+			// console.log("onDestroy", moduleName);
+			socket.off(moduleName, handleState);
 		}
 	});
 

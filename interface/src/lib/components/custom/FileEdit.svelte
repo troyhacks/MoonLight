@@ -88,7 +88,7 @@
 	}
 
     async function getFileContents() {
-		console.log("getFileContents", path, path[0])
+		// console.log("getFileContents", path, path[0])
 		editableFile.isFile = isFile;
 		editableFile.path = path;
 		if (newItem) {

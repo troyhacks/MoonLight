@@ -16,11 +16,21 @@
 
 #include "Module.h"
 
-class ModuleLiveState: public ModuleState
+class ModuleLive : public Module
 {
+    // using Module::Module; //constructor inheritance
 public:
 
-    void setupDefinition(JsonArray root) override{
+    ModuleLive(PsychicHttpServer *server,
+        ESP32SvelteKit *sveltekit
+        #if FT_ENABLED(FT_FILEMANAGER)
+            , FilesService *filesService
+        #endif
+    ) : Module("live", server, sveltekit, filesService) {
+        ESP_LOGD("", "ModuleLive::constructor");
+    }
+
+    void setupDefinition(JsonArray root) override {
         JsonObject property;
         JsonArray details;
         JsonArray values;
@@ -58,29 +68,20 @@ public:
         ESP_LOGD("", "definition %s", buffer);
     }
 
-};
-
-class ModuleLive : public Module<ModuleLiveState>
-{
-    using Module::Module; //constructor inheritance
-public:
-
-    // ModuleLive(PsychicHttpServer *server,
-    //     ESP32SvelteKit *sveltekit
-    //     #if FT_ENABLED(FT_FILEMANAGER)
-    //         , FilesService *filesService
-    //     #endif
-    // ) : Module("live", server, sveltekit, filesService) {
-    //     // ESP_LOGD("", "ModuleLive::constructor");
-    // }
-
-    void onUpdate(UpdatedItem updatedItem)
+    void onUpdate(UpdatedItem updatedItem) override
     {
-        if (updatedItem.name == "brightness") {
-            ESP_LOGD("", "handle %s.%s[%d] %d", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<int>());
+        if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
+            ESP_LOGD("", "handle %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>());
+        } else if (updatedItem.parent == "nodes" && updatedItem.name == "animation" && updatedItem.index == 0) {    
+            ESP_LOGD("", "handle %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, _state.data["nodes"][0]["animation"].as<String>().c_str());
         } else
-            ESP_LOGD("", "no handle for %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
+            ESP_LOGD("", "no handle for %s.%s[%d] %s (%d %s)", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str(), _state.data["driverOn"].as<bool>(), _state.data["nodes"][0]["animation"].as<String>());
     }
+
+    void loop()
+    {
+    }
+
 };
 
 #endif

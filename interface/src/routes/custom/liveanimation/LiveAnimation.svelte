@@ -36,7 +36,7 @@
 					'Content-Type': 'application/json'
 				}
 			});
-			console.log("getState", endPoint);
+			// console.log("getState", endPoint);
 			handleState(await response.json());
 		} catch (error) {
 			console.error('Error:', error);
@@ -50,13 +50,13 @@
 	};
 
 	onMount(() => {
-		console.log("onMount", endPoint);
+		// console.log("onMount", endPoint);
 		socket.on(endPoint, handleState);
 		// getState(); //done in settingscard
 	});
 
 	onDestroy(() => {
-		console.log("onDestroy", endPoint);
+		// console.log("onDestroy", endPoint);
 		socket.off(endPoint, handleState);
 	});
 

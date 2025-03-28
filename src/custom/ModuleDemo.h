@@ -16,11 +16,20 @@
 
 #include "Module.h"
 
-class ModuleDemoState: public ModuleState
+class ModuleDemo : public Module
 {
 public:
 
-    void setupDefinition(JsonArray root) override {
+ModuleDemo(PsychicHttpServer *server,
+        ESP32SvelteKit *sveltekit
+        #if FT_ENABLED(FT_FILEMANAGER)
+            , FilesService *filesService
+        #endif
+    ) : Module("demo", server, sveltekit, filesService) {
+        ESP_LOGD("", "ModuleDemo::constructor");
+    }
+
+    void setupDefinition(JsonArray root) override{
         JsonObject property;
         JsonArray details;
         JsonArray values;
@@ -55,14 +64,7 @@ public:
         ESP_LOGD("", "definition %s", buffer);
     }
 
-};
-
-class ModuleDemo : public Module<ModuleDemoState>
-{
-    using Module::Module; //constructor inheritance
-public:
-
-    void onUpdate(UpdatedItem updatedItem)
+    void onUpdate(UpdatedItem updatedItem) override
     {
         ESP_LOGD("", "no handle for %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
     }

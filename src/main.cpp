@@ -47,12 +47,12 @@ LightStateService lightStateService = LightStateService(&server,
 #if FT_ENABLED(FT_LIVEANIMATION)
     #if FT_ENABLED(FT_FILEMANAGER)
         LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit, &filesService);
-        ModuleLive moduleLive = ModuleLive("live", &server, &esp32sveltekit, &filesService);
-        ModuleDemo moduleDemo = ModuleDemo("demo", &server, &esp32sveltekit, &filesService);
+        ModuleLive moduleLive = ModuleLive(&server, &esp32sveltekit, &filesService);
+        ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
     #else
         LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit);
-        ModuleLive moduleLive = ModuleLive("live", &server, &esp32sveltekit);
-        ModuleDemo moduleDemo = ModuleDemo("demo", &server, &esp32sveltekit);
+        ModuleLive moduleLive = ModuleLive(&server, &esp32sveltekit);
+        ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit);
     #endif
 #endif
 
@@ -86,7 +86,7 @@ void loop()
 {
     #if FT_ENABLED(FT_LIVEANIMATION)
         liveAnimation.loop();
-        // module.loop();
+        moduleLive.loop();
     #endif
 
     while (!runInLoopTask.empty())

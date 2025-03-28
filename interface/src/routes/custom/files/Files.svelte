@@ -9,14 +9,12 @@
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 -->
 
-<svelte:options immutable={true} />
-
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { modals } from 'svelte-modals';
 	import { user } from '$lib/stores/user';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { notifications } from '$lib/components/toasts/notifications';
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
@@ -55,7 +53,7 @@
 	let path: string = $state("");
 
 	const cookieValue = getCookie('breadCrumbs');
-	console.log("cookie", cookieValue);
+	// console.log("cookie", cookieValue);
 	if (cookieValue) {
 		breadCrumbs = JSON.parse(cookieValue);
 		breadCrumbsString = breadCrumbs.join("/");
@@ -66,7 +64,7 @@
 			const response = await fetch('/rest/filesState', {
 				method: 'GET',
 				headers: {
-					Authorization: $page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
+					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
 					'Content-Type': 'application/json'
 				}
 			});
@@ -84,7 +82,7 @@
 			const response = await fetch('/rest/filesState', {
 				method: 'POST',
 				headers: {
-					Authorization: $page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
+					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(data)
@@ -140,7 +138,7 @@
 			let found = false;
 			for (let indexI = 0; indexI < folderList.length; indexI++) {
 				if (folderList[indexI].name === breadCrumbs[indexF]) {
-					console.log("handleEdit parent", folderList[indexI], breadCrumbs[indexF])
+					// console.log("handleEdit parent", folderList[indexI], breadCrumbs[indexF])
 					folderList = [folderList[indexI], ...folderList[indexI].files];
 					found = true;
 				}
@@ -266,7 +264,7 @@
 	<div class="w-full overflow-x-auto">
 	</div>
 
-	{#if !$page.data.features.security || $user.admin}
+	{#if !page.data.features.security || $user.admin}
 		<div class="bg-base-200 shadow-lg relative grid w-full max-w-2xl self-center overflow-hidden">
 			<div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
 				Files /{breadCrumbsString}
@@ -341,7 +339,7 @@
 								{/if}
 							</div>
 							
-							{#if !$page.data.features.security || $user.admin}
+							{#if !page.data.features.security || $user.admin}
 								<div class="flex-grow"></div>
 								<div class="space-x-0 px-0 mx-0">
 									<button

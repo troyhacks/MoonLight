@@ -59,7 +59,7 @@ public:
     void begin();
     void loop();
 
-    void compileAndRun();
+    void compileAndRun(String &animation);
     void driverShow();
 
 protected:

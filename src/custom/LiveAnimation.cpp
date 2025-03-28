@@ -123,13 +123,13 @@ void LiveAnimation::begin()
         { 
             ESP_LOGD("", "FilesService::updateHandler %s", originId.c_str());
             //read the file state
-            _filesService->read([&](FilesState &state) {
+            _filesService->read([&](FilesState &filesState) {
                 // loop over all changed files (normally only one)
-                for (auto updatedItem : state.updatedItems) {
+                for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current animation, recompile it (to do: multiple animations)
                     if (updatedItem == _state.animation) {
                         ESP_LOGD("", "LiveAnimation::updateHandler updatedItem %s", updatedItem.c_str());
-                        compileAndRun();
+                        compileAndRun(_state.animation);
                     }
                 }
             });
@@ -138,18 +138,16 @@ void LiveAnimation::begin()
         addUpdateHandler([&](const String &originId)
         {
             ESP_LOGD("", "LiveAnimation::updateHandler %s", originId.c_str());
-            read([&](LiveAnimationState &state) {
-                for (String updatedItem : state.updatedItems) {
-                    if (updatedItem == "animation") {
-                        compileAndRun();
-                    } 
-                }
-            });
+            for (String updatedItem : _state.updatedItems) {
+                if (updatedItem == "animation") {
+                    compileAndRun(_state.animation);
+                } 
+            }
         });
     #endif
 
     //handler not active yet so manually trigger
-    compileAndRun(); //change from livescript causes crashes
+    compileAndRun(_state.animation); //change from livescript causes crashes
 }
 
 void LiveAnimation::loop()
@@ -179,9 +177,9 @@ void LiveAnimation::driverShow()
         delay(1); //to avoid watchdog crash
 }
 
-void LiveAnimation::compileAndRun() {
+void LiveAnimation::compileAndRun(String &animation) {
 
-    if (_state.animation[0] != '/') { //no sc script
+    if (animation[0] != '/') { //no sc script
         runInLoopTask.push_back([&] { // run in loopTask to avoid stack overflow
             scriptRuntime.killAndFreeRunningProgram();
         });
@@ -192,7 +190,7 @@ void LiveAnimation::compileAndRun() {
 
     //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
     runInLoopTask.push_back([&] {
-        File file = ESPFS.open(_state.animation);
+        File file = ESPFS.open(animation);
         if (file) {
             std::string scScript = file.readString().c_str();
             // scScript += "void main(){setup();sync();}";
@@ -200,7 +198,7 @@ void LiveAnimation::compileAndRun() {
 
             Parser parser = Parser();
             Executable executable = parser.parseScript(&scScript);
-            ESP_LOGD("", "parsing %s done\n", _state.animation.c_str());
+            ESP_LOGD("", "parsing %s done\n", animation.c_str());
             scriptRuntime.addExe(executable);
             ESP_LOGD("", "addExe success %s\n", executable.exeExist?"true":"false");
 
