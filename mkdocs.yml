@@ -37,8 +37,8 @@ site_description: >-
   A simple, secure and extensible framework for IoT projects on ESP32 platforms with responsive Sveltekit front-end built with TailwindCSS and DaisyUI.
 
 # Repository
-repo_name: ewowi/MoonBaseESK
-repo_url: https://github.com/ewowi/MoonBaseESK
+repo_name: ewowi/MoonBase
+repo_url: https://github.com/ewowi/MoonBase
 
 theme:
   name: material

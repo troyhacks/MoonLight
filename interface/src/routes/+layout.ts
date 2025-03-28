@@ -10,7 +10,7 @@ export const load = (async ({ fetch }) => {
 	return {
 		features: item,
 		title: 'MoonBase',
-		github: 'ewowi/MoonBaseESK',
+		github: 'ewowi/MoonBase',
 		copyright: '2025 theelims, ewowi, hpwit ⚖️ GPL-3.0',
 		appName: 'MoonBase'
 	};
