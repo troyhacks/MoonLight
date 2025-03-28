@@ -22,8 +22,7 @@
 #endif
 
 #if FT_ENABLED(FT_LIVEANIMATION)
-    #include "custom/LiveAnimation.h"
-    #include "custom/ModuleLive.h"
+    #include "custom/ModuleAnimations.h"
     #include "custom/ModuleDemo.h"
 #endif
 
@@ -46,12 +45,10 @@ LightStateService lightStateService = LightStateService(&server,
     
 #if FT_ENABLED(FT_LIVEANIMATION)
     #if FT_ENABLED(FT_FILEMANAGER)
-        LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit, &filesService);
-        ModuleLive moduleLive = ModuleLive(&server, &esp32sveltekit, &filesService);
+        ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit, &filesService);
         ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
     #else
-        LiveAnimation liveAnimation = LiveAnimation(&server, &esp32sveltekit);
-        ModuleLive moduleLive = ModuleLive(&server, &esp32sveltekit);
+        ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit);
         ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit);
     #endif
 #endif
@@ -76,17 +73,16 @@ void setup()
     lightMqttSettingsService.begin();
 
     #if FT_ENABLED(FT_LIVEANIMATION)
-        liveAnimation.begin();
-        moduleLive.begin();
+        moduleAnimations.begin();
         moduleDemo.begin();
     #endif
 }
 
 void loop()
 {
+    esp32sveltekit.lps++;
     #if FT_ENABLED(FT_LIVEANIMATION)
-        liveAnimation.loop();
-        moduleLive.loop();
+        moduleAnimations.loop();
     #endif
 
     while (!runInLoopTask.empty())

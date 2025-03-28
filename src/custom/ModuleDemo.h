@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      Module.h
+    @file      ModuleDemo.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/custom/animation/

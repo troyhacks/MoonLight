@@ -11,6 +11,9 @@
 
 	Chart.register(...registerables); 
 
+	let lpsChartElement: HTMLCanvasElement = $state();
+	let lpsChart: Chart;
+
 	let heapChartElement: HTMLCanvasElement = $state();
 	let heapChart: Chart;
 
@@ -24,6 +27,71 @@
 	let temperatureChart: Chart;
 
 	onMount(() => {
+		lpsChart = new Chart(lpsChartElement, {
+			type: 'line',
+			data: {
+				labels: $analytics.uptime,
+				datasets: [
+					{
+						label: 'LPS',
+						borderColor: daisyColor('--p'),
+						backgroundColor: daisyColor('--p', 50),
+						borderWidth: 2,
+						data: $analytics.lps,
+						yAxisID: 'y'
+					},
+				]
+			},
+			options: {
+				maintainAspectRatio: false,
+				responsive: true,
+				plugins: {
+					legend: {
+						display: true
+					},
+					tooltip: {
+						mode: 'index',
+						intersect: false
+					}
+				},
+				elements: {
+					point: {
+						radius: 1
+					}
+				},
+				scales: {
+					x: {
+						grid: {
+							color: daisyColor('--bc', 10)
+						},
+						ticks: {
+							color: daisyColor('--bc')
+						},
+						display: false
+					},
+					y: {
+						type: 'linear',
+						title: {
+							display: true,
+							text: 'LPS',
+							color: daisyColor('--bc'),
+							font: {
+								size: 16,
+								weight: 'bold'
+							}
+						},
+						position: 'left',
+						min: 0,
+						max: Math.round($analytics.lps[0]),
+						grid: { color: daisyColor('--bc', 10) },
+						ticks: {
+							color: daisyColor('--bc')
+						},
+						border: { color: daisyColor('--bc', 10) }
+					}
+				}
+			}
+		}); //lpsChart
 		heapChart = new Chart(heapChartElement, {
 			type: 'line',
 			data: {
@@ -308,6 +376,10 @@
 	});
 
 	function updateData() {
+		lpsChart.data.labels = $analytics.uptime;
+		lpsChart.data.datasets[0].data = $analytics.lps;
+		lpsChart.update('none');
+
 		heapChart.data.labels = $analytics.uptime;
 		heapChart.data.datasets[0].data = $analytics.used_heap;
 		heapChart.data.datasets[1].data = $analytics.max_alloc_heap;
@@ -365,6 +437,14 @@
 		<span >System Metrics</span>
 	{/snippet}
 
+	<div class="w-full overflow-x-auto">
+		<div
+			class="flex w-full flex-col space-y-1 h-60"
+			transition:slide|local={{ duration: 300, easing: cubicOut }}
+		>
+			<canvas bind:this={lpsChartElement}></canvas>
+		</div>
+	</div>
 	<div class="w-full overflow-x-auto">
 		<div
 			class="flex w-full flex-col space-y-1 h-60"

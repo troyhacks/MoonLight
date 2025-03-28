@@ -243,14 +243,16 @@ void ESP32SvelteKit::_loop()
             function();
         }
 
-#ifdef TELEPLOT_TASKS
         static int lastTime = 0;
         if (millis() - lastTime > 1000)
         {
             lastTime = millis();
+            _analyticsService.lps = lps;
+            lps = 0;
+#ifdef TELEPLOT_TASKS
             Serial.printf(">ESP32SveltekitTask:%i:%i\n", millis(), uxTaskGetStackHighWaterMark(NULL));
-        }
 #endif
+        }
         vTaskDelayUntil(&xLastWakeTime, ESP32SVELTEKIT_LOOP_INTERVAL / portTICK_PERIOD_MS);
     }
 }

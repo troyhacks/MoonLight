@@ -45,6 +45,8 @@ void ModuleState::setupData() {
         serializeJson(root, buffer, sizeof(buffer));
         ESP_LOGD("", "setupData %s", buffer);
     }
+
+    //to do: check if the file matches the definition
 }
 
 void ModuleState::read(ModuleState &state, JsonObject &root)
@@ -76,8 +78,8 @@ void compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newDat
             } else { // if property is key/value
                 ESP_LOGD("", "compareRecursive %s[%d]: %s -> %s", oldProperty.key().c_str(), index, oldProperty.value().as<String>().c_str(), newValue.as<String>().c_str());
                 UpdatedItem newItem;
-                newItem.parent = parent;
-                newItem.name = oldProperty.key();
+                newItem.parent = String(parent.c_str());
+                newItem.name = String(oldProperty.key().c_str());
                 newItem.value = newValue;
                 newItem.index = index;
                 updatedItems.push_back(newItem);

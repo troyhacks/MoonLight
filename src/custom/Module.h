@@ -27,8 +27,8 @@
 #endif
 
 struct UpdatedItem {
-    JsonString parent;
-    JsonString name;
+    String parent;
+    String name;
     JsonVariant value;
     uint8_t index;
 };
@@ -68,6 +68,9 @@ public:
 
 protected:
     EventSocket *_socket;
+    #if FT_ENABLED(FT_FILEMANAGER)
+        FilesService *_filesService;
+    #endif
 
 private:
     HttpEndpoint<ModuleState> _httpEndpoint;
@@ -75,10 +78,6 @@ private:
     WebSocketServer<ModuleState> _webSocketServer;
     FSPersistence<ModuleState> _fsPersistence;
     PsychicHttpServer *_server;
-
-    #if FT_ENABLED(FT_FILEMANAGER)
-        FilesService *_filesService;
-    #endif
 
 };
 

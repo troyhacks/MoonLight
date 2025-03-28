@@ -88,6 +88,8 @@ extern std::vector<std::function<void()>> runInLoopTask; //functions to be calle
 class ESP32SvelteKit
 {
 public:
+    uint16_t lps = 0;
+
     ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEndpoints = 115);
 
     void begin();

@@ -1,4 +1,4 @@
-site_name: ESP32 SvelteKit
+site_name: MoonBase
 
 nav:
   - Home: index.md
@@ -7,6 +7,7 @@ nav:
       - general/customizingsveltekit.md
   - "Custom":
       - custom/modules.md
+      - custom/module/animations.md
       - custom/module/live.md
       - custom/module/demo.md
   - "Connections":
@@ -95,7 +96,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/theelims/
+      link: https://github.com/ewowi/
   consent:
     title: Cookie consent
     description: >-
@@ -106,6 +107,9 @@ extra:
     actions:
       - accept
       - reject
+  analytics:
+    provider: google
+    property: G-R6QYDG0126
 
 plugins:
   - search:
@@ -113,4 +117,6 @@ plugins:
 
 copyright: |
   Copyright &copy; 2024 by <a href="https://github.com/theelims"  target="_blank" rel="noopener">elims</a> -
+  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/ewowi"  target="_blank" rel="noopener">ewowi</a> -
+  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/MoonModules"  target="_blank" rel="noopener">MoonModules</a> -
   <a href="#__consent">Change cookie settings</a>

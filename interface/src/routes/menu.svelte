@@ -53,15 +53,9 @@
 			feature: true,
 			submenu: [
 				{
-					title: 'Live Animation',
+					title: 'Module Animations',
 					icon: BulbIcon,
-					href: '/custom/liveanimation',
-					feature: page.data.features.liveanimation,
-				},
-				{
-					title: 'Module Live',
-					icon: BulbIcon,
-					href: '/custom/module?module=live',
+					href: '/custom/module?module=animations',
 					feature: page.data.features.liveanimation,
 				},
 				{

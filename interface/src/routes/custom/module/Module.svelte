@@ -31,7 +31,7 @@
 
 		let moduleName = page.url.searchParams.get('module');
 
-		// console.log("get definition", '/rest/' + moduleName + 'Def')
+		console.log("getState", '/rest/' + moduleName)
 
 		//load definition
 		try {
@@ -108,11 +108,11 @@
 		//set properties with their defaults
 		for (let i = 0; i < definition.length; i++) {
 			let property = definition[i];
-			console.log("addItem def", propertyName, property)
+			// console.log("addItem def", propertyName, property)
 			if (property.name == propertyName) {
 				for (let i=0; i < property.n.length; i++) {
 					let propertyN = property.n[i];
-					console.log("propertyN", propertyN)
+					// console.log("propertyN", propertyN)
 					dataEditable[propertyN.name] = propertyN.default;
 				}
 			}
