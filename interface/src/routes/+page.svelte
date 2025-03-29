@@ -32,8 +32,8 @@
 			</p>
 			<a
 				class="btn btn-primary"
-				href="/demo"
-				onclick={() => notifications.success('You did it!', 1000)}>Start Demo</a
+				href="/system/status"
+				onclick={() => notifications.success('You did it!', 1000)}>Start</a
 			>
 		</div>
 	</div>

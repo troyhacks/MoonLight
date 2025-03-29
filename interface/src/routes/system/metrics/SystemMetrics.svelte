@@ -33,7 +33,7 @@
 				labels: $analytics.uptime,
 				datasets: [
 					{
-						label: 'LPS',
+						label: 'Loops/s',
 						borderColor: daisyColor('--p'),
 						backgroundColor: daisyColor('--p', 50),
 						borderWidth: 2,
@@ -73,7 +73,7 @@
 						type: 'linear',
 						title: {
 							display: true,
-							text: 'LPS',
+							text: 'Performance',
 							color: daisyColor('--bc'),
 							font: {
 								size: 16,
@@ -82,7 +82,7 @@
 						},
 						position: 'left',
 						min: 0,
-						max: Math.round($analytics.lps[0]),
+						max: Math.round(Math.max(...$analytics.lps)),
 						grid: { color: daisyColor('--bc', 10) },
 						ticks: {
 							color: daisyColor('--bc')
@@ -369,6 +369,7 @@
 		lpsChart.data.labels = $analytics.uptime;
 		lpsChart.data.datasets[0].data = $analytics.lps;
 		lpsChart.update('none');
+		lpsChart.options.scales.y.max = Math.round(Math.max(...$analytics.lps));
 
 		heapChart.data.labels = $analytics.uptime;
 		heapChart.data.datasets[0].data = $analytics.used_heap;

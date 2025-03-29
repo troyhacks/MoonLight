@@ -185,9 +185,9 @@
 						<Power class="text-primary-content h-auto w-full scale-75" />
 					</div>
 					<div>
-						<div class="font-bold">Loops</div>
+						<div class="font-bold">Performance</div>
 						<div class="text-sm opacity-75">
-							{systemInformation.lps} /s
+							{systemInformation.lps} loops/s
 						</div>
 					</div>
 				</div>

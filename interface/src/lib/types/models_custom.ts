@@ -9,12 +9,3 @@ export type FilesState = {
 	fs_total: number;
 	fs_used: number;
 };
-
-export type LiveAnimationState = {
-	name: string;
-	lightsOn:boolean;
-	brightness: number;
-	animation: string;
-	animations: string[];
-	driverOn:boolean;
-};
