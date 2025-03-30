@@ -106,6 +106,17 @@ public:
             values.add("Modifier");
             values.add("Driver show");
             property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 85;
+            property = details.add<JsonObject>(); property["name"] = "controls"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+            {
+                property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "speed";
+                property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Number"; values = property["values"].to<JsonArray>();
+                values.add("Number");
+                values.add("Range");
+                values.add("Text");
+                values.add("Coordinate");
+                property = details.add<JsonObject>(); property["name"] = "value"; property["type"] = "text"; property["default"] = "128";
+            }
+            //, "controls":[{"name":"speed","type":"range", "value":"128"}]
         }
 
         property = root.add<JsonObject>(); property["name"] = "scripts"; property["type"] = "array"; details = property["n"].to<JsonArray>();
@@ -114,7 +125,7 @@ public:
             property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "text"; property["default"] = "ewowi";
         }
 
-        char buffer[256];
+        char buffer[1024];
         serializeJson(root, buffer, sizeof(buffer));
         ESP_LOGD("", "definition %s", buffer);
     }

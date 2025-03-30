@@ -46,7 +46,6 @@
 		fs_used: 0,
 	});
 	let breadCrumbs:string[] = $state([]);
-	let breadCrumbsString:string = $state(""); //as breadCrumbs.join("/") is not reactive for some reason
 
 	let newItem: boolean = $state(true);
 	let showEditor: boolean = $state(false);
@@ -56,7 +55,6 @@
 	// console.log("cookie", cookieValue);
 	if (cookieValue) {
 		breadCrumbs = JSON.parse(cookieValue);
-		breadCrumbsString = breadCrumbs.join("/");
 	}
 
 	async function getState() {
@@ -101,7 +99,7 @@
 	function addFile() {
 		console.log("addFile")
 		newItem = true;
-		path = "/" + breadCrumbsString
+		path = "/" + breadCrumbs.join("/");
 		editableFile = {
 			name: '',
 			path: '',
@@ -117,7 +115,7 @@
 	function addFolder() {
 		console.log("addFolder")
 		newItem = true;
-		path = "/" + breadCrumbsString
+		path = "/" + breadCrumbs.join("/");
 		editableFile = {
 			name: '',
 			path: '',
@@ -145,7 +143,6 @@
 			}
 			if (!found) { //e.g. old coookie, reset
 				breadCrumbs = [];
-				breadCrumbsString = "";
 				folderList = filesState.files;
 				return;
 			}
@@ -160,7 +157,6 @@
 
 		if (breadCrumbs.length > 0 && editableFile.name === breadCrumbs[breadCrumbs.length-1]) { //if parent folder
 			breadCrumbs.pop(); //remove last folder
-			breadCrumbsString = breadCrumbs.join("/");
 			folderListFromBreadCrumbs();
 
 			setCookie('breadCrumbs', JSON.stringify(breadCrumbs), 7);
@@ -171,7 +167,6 @@
 			showEditor = false; await tick(); showEditor = true; //Trigger reactivity
 		} else { //if folder, go to folder
 			breadCrumbs.push(editableFile.name);
-			breadCrumbsString = breadCrumbs.join("/");
 			setCookie('breadCrumbs', JSON.stringify(breadCrumbs), 7);
 			// folderList = [folderList[index], ...editableFile.files];
 			folderListFromBreadCrumbs();
@@ -267,7 +262,7 @@
 	{#if !page.data.features.security || $user.admin}
 		<div class="bg-base-200 shadow-lg relative grid w-full max-w-2xl self-center overflow-hidden">
 			<div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
-				Files /{breadCrumbsString}
+				Files /{breadCrumbs.join("/")}
 			</div>
 			{#await getState()}
 				<Spinner />
@@ -312,7 +307,6 @@
 				>
 					{#each folderList as item, index}
 
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 							<div class="mask mask-hexagon bg-primary h-auto w-10 shrink-0">
 								{#if item.isFile}

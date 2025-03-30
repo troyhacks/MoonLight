@@ -29,21 +29,20 @@ ModuleDemo(PsychicHttpServer *server,
         ESP_LOGD("", "ModuleDemo::constructor");
     }
 
-    void setupDefinition(JsonArray root) override{
-        JsonObject property;
-        JsonArray details;
-        JsonArray values;
+void setupDefinition(JsonArray root) override{
+    JsonObject property;
+    JsonArray details;
+    JsonArray values;
 
-        //remaining is for demo purposes (temp)
-        property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonLight";
-        property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
-        values.add("Offline");
-        values.add("Signal Strength");
-        values.add("Priority");
+    property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonLight";
+    property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
+    values.add("Offline");
+    values.add("Signal Strength");
+    values.add("Priority");
 
-        property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        {
-            property = details.add<JsonObject>(); property["name"] = "SSID"; property["type"] = "text"; property["default"] = "ewtr"; property["min"] = 3; property["max"] = 32; 
+    property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+    {
+        property = details.add<JsonObject>(); property["name"] = "SSID"; property["type"] = "text"; property["default"] = "ewtr"; property["min"] = 3; property["max"] = 32; 
             property = details.add<JsonObject>(); property["name"] = "Password"; property["type"] = "password"; property["default"] = "";
         }
 
@@ -59,15 +58,17 @@ ModuleDemo(PsychicHttpServer *server,
             }
         }
 
+        // {"hostName":"MoonLight","connectionMode":"Priority","savedNetworks":[],"invoices":[{"number":1000,"name":"ewowi","date":"2025-03-21", "lines":[{"service":"con", "price":124}]}]}
+
         char buffer[256];
         serializeJson(root, buffer, sizeof(buffer));
         ESP_LOGD("", "definition %s", buffer);
     }
 
     void onUpdate(UpdatedItem updatedItem) override
-    {
-        ESP_LOGD("", "no handle for %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
-    }
+{
+    ESP_LOGD("", "no handle for %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
+}
 };
 
 #endif

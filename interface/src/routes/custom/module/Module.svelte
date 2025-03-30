@@ -1,27 +1,19 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 	import { user } from '$lib/stores/user';
 	import { page } from '$app/state';
 	import { notifications } from '$lib/components/toasts/notifications';
-	import DragDropList, { VerticalDropZone, reorder, type DropEvent } from 'svelte-dnd-list';
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Router from '~icons/tabler/router';
-	import Add from '~icons/tabler/circle-plus';
-	import Edit from '~icons/tabler/pencil';
-	import Delete from '~icons/tabler/trash';
 	import Cancel from '~icons/tabler/x';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { socket } from '$lib/stores/socket';
+	import Array from '$lib/components/custom/Array.svelte';
 
 	let definition: any = $state([]);
 	let data: any = $state({});
 
-	let dataEditable: any = $state({});
-
-	let propertyEditable: string = $state("");
 	let showEditor: boolean = $state(false);
 	let changed: boolean = $state(false);
 
@@ -43,12 +35,12 @@
 				}
 			});
 			definition = await response.json();
-			// console.log("definition", definition)
+			console.log("definition", definition)
 		} catch (error) {
 			console.error('Error:', error);
 		}
 
-		// console.log("get data", '/rest/' + moduleName)
+		console.log("get data", '/rest/' + moduleName)
 		//load data
 		try {
 			const response = await fetch('/rest/' + moduleName, {
@@ -100,25 +92,6 @@
 		changed = false;
 	}
 
-	function addItem(propertyName: string) {
-		propertyEditable = propertyName;
-		//set the default values from the definition...
-		dataEditable = {};
-
-		//set properties with their defaults
-		for (let i = 0; i < definition.length; i++) {
-			let property = definition[i];
-			// console.log("addItem def", propertyName, property)
-			if (property.name == propertyName) {
-				for (let i=0; i < property.n.length; i++) {
-					let propertyN = property.n[i];
-					// console.log("propertyN", propertyN)
-					dataEditable[propertyN.name] = propertyN.default;
-				}
-			}
-		}
-	}
-
 	function inputChanged() {
 		if (modeWS) {
 			let moduleName = page.url.searchParams.get('module')||'';
@@ -137,7 +110,7 @@
 	onMount(() => {
 		if (modeWS) {
 			let moduleName = page.url.searchParams.get('module') || ''
-			// console.log("onMount", moduleName);
+			console.log("onMount", moduleName);
 			socket.on(moduleName, handleState);
 		}
 	});
@@ -145,47 +118,11 @@
 	onDestroy(() => {
 		if (modeWS) {
 			let moduleName = page.url.searchParams.get('module') || ''
-			// console.log("onDestroy", moduleName);
+			console.log("onDestroy", moduleName);
 			socket.off(moduleName, handleState);
 		}
 	});
 
-	function handleEdit(propertyName: string, index: number) {
-		console.log("handleEdit", propertyName, index)
-		propertyEditable = propertyName;
-		showEditor = true;
-		dataEditable = data[propertyName][index];
-	}
-
-	function deleteItem(propertyName: string, index: number) {
-		// Check if item is currently been edited and delete as well
-		if (data[propertyName][index].animation === dataEditable.animation) {
-			addItem(propertyName);
-		}
-		// Remove item from array
-		data[propertyName].splice(index, 1);
-		data[propertyName] = [...data[propertyName]]; //Trigger reactivity
-		showEditor = false;
-		inputChanged();
-	}
-
-	function onDrop(propertyName: string, { detail: { from, to } }: CustomEvent<DropEvent>) {
-		
-		if (!to || from === to) {
-			return;
-		}
-
-		data[propertyName] = reorder(data[propertyName], from.index, to.index);
-		inputChanged();
-		// console.log(onDrop, data[propertyName]);
-	}
-
-    function preventDefault(fn: any) {
-		return function (event: any) {
-			event.preventDefault();
-			fn.call(this, event);
-		};
-	}
 </script>
 
 <SettingsCard collapsible={false}>
@@ -209,87 +146,7 @@
 								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
 						{:else if property.type == "array"}
-							<div class="divider mb-2 mt-0"></div>
-							<div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
-								{property.name}
-							</div>
-							<div class="relative w-full overflow-visible">
-							<!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->
-								<button
-									class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
-									onclick={() => {
-										addItem(property.name);
-										inputChanged();
-
-										//add the new item to the data
-										data[property.name].push(dataEditable);
-										showEditor = true;
-									}}
-								>
-									<Add class="h-6 w-6" /></button
-								>
-							</div>
-
-							<div
-								class="overflow-x-auto space-y-1"
-								transition:slide|local={{ duration: 300, easing: cubicOut }}
-							>
-								<DragDropList
-									id={property.name}
-									type={VerticalDropZone}
-									itemSize={60}
-									itemCount={data[property.name].length}
-									on:drop={(event) => {
-										onDrop(property.name, event);
-									}}
-									
-								>
-									{#snippet children({ index })}
-																<!-- svelte-ignore a11y_click_events_have_key_events -->
-										<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
-											<div class="mask mask-hexagon bg-primary h-auto w-10 shrink-0">
-												<Router class="text-primary-content h-auto w-full scale-75" />
-											</div>
-											{#each property.n as propertyN}
-												{#if propertyN.type != "password"}
-													<div>
-														<div class="font-bold">{data[property.name][index][propertyN.name]}</div>
-													</div>
-												{/if}
-											{/each}
-											{#if !page.data.features.security || $user.admin}
-												<div class="flex-grow"></div>
-												<div class="space-x-0 px-0 mx-0">
-													<button
-														class="btn btn-ghost btn-sm"
-														onclick={() => {
-															handleEdit(property.name, index);
-														}}
-													>
-														<Edit class="h-6 w-6" /></button
-													>
-													<button
-														class="btn btn-ghost btn-sm"
-														onclick={() => {
-															deleteItem(property.name, index);
-														}}
-													>
-														<Delete class="text-error h-6 w-6" />
-													</button>
-												</div>
-											{/if}
-										</div>
-									{/snippet}
-								</DragDropList>
-							</div>
-							{#if showEditor && property.name == propertyEditable}
-								<div class="divider my-0"></div>
-								{#each property.n as propertyN}
-									<div>
-										<MultiInput property={propertyN} bind:value={dataEditable[propertyN.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
-									</div>
-								{/each}
-							{/if}
+							<Array property={property} bind:value1={data[property.name]} value2={data[property.name]} data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></Array>
 						{/if}
 					{/each}
 				</div>
