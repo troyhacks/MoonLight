@@ -167,6 +167,8 @@
 			class="fixed inset-0 z-40 max-h-full max-w-full bg-black/20 backdrop-blur"
 			transition:fade|global
 			onclick={() => close()}
+			role="button"
+			tabindex="0"
 		></div>
 	{/snippet}
 </Modals>
