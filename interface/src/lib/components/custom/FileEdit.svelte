@@ -9,7 +9,7 @@
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 
    known issues
-   - showEditor does collapse in Files module, but not in LiveAnimation and Module
+   - showEditor does collapse in Files module, but not in Animations and Module
 -->
 
 <script lang="ts">

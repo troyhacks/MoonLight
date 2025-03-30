@@ -12,8 +12,6 @@
 #ifndef ModuleDemo_h
 #define ModuleDemo_h
 
-#if FT_LIVEANIMATION == 1
-
 #include "Module.h"
 
 class ModuleDemo : public Module
@@ -71,5 +69,4 @@ void setupDefinition(JsonArray root) override{
 }
 };
 
-#endif
 #endif

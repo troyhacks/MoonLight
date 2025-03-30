@@ -120,9 +120,14 @@ void FeaturesService::createJSON(JsonObject &root)
     #else
         root["filemanager"] = false;
     #endif
-    #if FT_ENABLED(FT_LIVEANIMATION)
-        root["liveanimation"] = true;
+    #if FT_ENABLED(FT_MOONLIGHT)
+        root["moonlight"] = true;
     #else
-        root["liveanimation"] = false;
+        root["moonlight"] = false;
+    #endif
+    #if FT_ENABLED(FT_LIVESCRIPT)
+        root["livescript"] = true;
+    #else
+        root["livescript"] = false;
     #endif
 }

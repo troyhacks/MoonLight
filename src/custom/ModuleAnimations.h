@@ -12,14 +12,16 @@
 #ifndef ModuleAnimations_h
 #define ModuleAnimations_h
 
-#if FT_LIVEANIMATION == 1
+#if FT_MOONLIGHT == 1
 
 #include "Module.h"
 
 #include "FastLED.h"
 #define MAXLEDS 8192
 
-#include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
+#if FT_LIVESCRIPT
+    #include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
+#endif
 
 class ModuleAnimations : public Module
 {
@@ -27,7 +29,9 @@ public:
 
     CRGB leds[MAXLEDS];
     uint16_t nrOfLeds = 256;
-    Parser parser = Parser();
+    #if FT_LIVESCRIPT
+        Parser parser = Parser();
+    #endif
     String animation = "Random";
 
     ModuleAnimations(PsychicHttpServer *server,
@@ -62,7 +66,7 @@ public:
                         String animation = node["animation"];
 
                         if (updatedItem == animation) {
-                            ESP_LOGD("", "LiveAnimation::updateHandler updatedItem %s", updatedItem.c_str());
+                            ESP_LOGD("", "updateHandler updatedItem %s", updatedItem.c_str());
                             compileAndRun(animation);
                         }
                     }
@@ -183,45 +187,47 @@ public:
 
     void compileAndRun(String &animation) {
 
-        ESP_LOGD("", "animation %s", animation.c_str());
+        #if FT_LIVESCRIPT
+            ESP_LOGD("", "animation %s", animation.c_str());
 
-        if (animation[0] != '/') { //no sc script
-            return;
-        }
-
-        //if this animation is already running, kill it ...
-
-        // ESP_LOGD("", "killAndFreeRunningProgram %s", animation.c_str());
-        // runInLoopTask.push_back([&] { // run in loopTask to avoid stack overflow
-        //     scriptRuntime.killAndFreeRunningProgram();
-        // });
-
-        //send UI spinner
-    
-        //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-        runInLoopTask.push_back([&] {
-            ESP_LOGD("", "compileAndRun %s (%d)", animation.c_str());
-            File file = ESPFS.open(animation);
-            if (file) {
-                std::string scScript = file.readString().c_str();
-                // scScript += "void main(){setup();sync();}";
-                file.close();
-    
-                Executable executable = parser.parseScript(&scScript);
-                executable.name = animation.c_str();
-                ESP_LOGD("", "parsing %s done\n", animation.c_str());
-                scriptRuntime.addExe(executable);
-                ESP_LOGD("", "addExe success %s\n", executable.exeExist?"true":"false");
-    
-                if (executable.exeExist)
-                    executable.execute("main"); //background task (async - vs sync)
-
-                for (Executable &exec: scriptRuntime._scExecutables) {
-                    exe_info exeInfo = scriptRuntime.getExecutableInfo(exec.name);
-                    ESP_LOGD("", "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
-                }
+            if (animation[0] != '/') { //no sc script
+                return;
             }
-        });
+
+            //if this animation is already running, kill it ...
+
+            // ESP_LOGD("", "killAndFreeRunningProgram %s", animation.c_str());
+            // runInLoopTask.push_back([&] { // run in loopTask to avoid stack overflow
+            //     scriptRuntime.killAndFreeRunningProgram();
+            // });
+
+            //send UI spinner
+        
+            //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
+            runInLoopTask.push_back([&] {
+                ESP_LOGD("", "compileAndRun %s (%d)", animation.c_str());
+                File file = ESPFS.open(animation);
+                if (file) {
+                    std::string scScript = file.readString().c_str();
+                    // scScript += "void main(){setup();sync();}";
+                    file.close();
+        
+                    Executable executable = parser.parseScript(&scScript);
+                    executable.name = animation.c_str();
+                    ESP_LOGD("", "parsing %s done\n", animation.c_str());
+                    scriptRuntime.addExe(executable);
+                    ESP_LOGD("", "addExe success %s\n", executable.exeExist?"true":"false");
+        
+                    if (executable.exeExist)
+                        executable.execute("main"); //background task (async - vs sync)
+
+                    for (Executable &exec: scriptRuntime._scExecutables) {
+                        exe_info exeInfo = scriptRuntime.getExecutableInfo(exec.name);
+                        ESP_LOGD("", "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
+                    }
+                }
+            });
+        #endif
     
         //stop UI spinner
     }

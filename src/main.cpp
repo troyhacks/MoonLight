@@ -21,10 +21,11 @@
     #include "custom/FilesService.h"
 #endif
 
-#if FT_ENABLED(FT_LIVEANIMATION)
+#if FT_ENABLED(FT_MOONLIGHT)
     #include "custom/ModuleAnimations.h"
-    #include "custom/ModuleDemo.h"
-#endif
+    #endif
+
+#include "custom/ModuleDemo.h"
 
 #define SERIAL_BAUD_RATE 115200
 
@@ -41,15 +42,16 @@ LightStateService lightStateService = LightStateService(&server,
 
 #if FT_ENABLED(FT_FILEMANAGER)
     FilesService filesService = FilesService(&server, &esp32sveltekit);
+    ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
+#else
+    ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit);
 #endif
     
-#if FT_ENABLED(FT_LIVEANIMATION)
+#if FT_ENABLED(FT_MOONLIGHT)
     #if FT_ENABLED(FT_FILEMANAGER)
         ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit, &filesService);
-        ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
     #else
         ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit);
-        ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit);
     #endif
 #endif
 
@@ -72,16 +74,17 @@ void setup()
     // start the light service
     lightMqttSettingsService.begin();
 
-    #if FT_ENABLED(FT_LIVEANIMATION)
+    #if FT_ENABLED(FT_MOONLIGHT)
         moduleAnimations.begin();
-        moduleDemo.begin();
     #endif
+
+    moduleDemo.begin();
 }
 
 void loop()
 {
     esp32sveltekit.lps++;
-    #if FT_ENABLED(FT_LIVEANIMATION)
+    #if FT_ENABLED(FT_MOONLIGHT)
         moduleAnimations.loop();
     #endif
 

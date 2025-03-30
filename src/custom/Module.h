@@ -12,8 +12,6 @@
 #ifndef Module_h
 #define Module_h
 
-#if FT_LIVEANIMATION == 1
-
 #include <EventSocket.h>
 #include <HttpEndpoint.h>
 #include <EventEndpoint.h>
@@ -81,5 +79,4 @@ private:
 
 };
 
-#endif
 #endif

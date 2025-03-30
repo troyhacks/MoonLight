@@ -9,8 +9,6 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
-#if FT_LIVEANIMATION == 1
-
 #include "Module.h"
 
 void ModuleState::setupData() {
@@ -210,6 +208,3 @@ void Module::onUpdate(UpdatedItem updatedItem)
 {
     ESP_LOGW("", "onUpdate not implemented %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
 }
-
-#endif
-

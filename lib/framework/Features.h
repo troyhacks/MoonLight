@@ -68,8 +68,12 @@
 #define FT_FILEMANAGER 1
 #endif
 
-#ifndef FT_LIVEANIMATION
-#define FT_LIVEANIMATION 1
+#ifndef FT_MOONLIGHT
+#define FT_MOONLIGHT 1
+#endif
+
+#ifndef FT_LIVESCRIPT
+#define FT_LIVESCRIPT 1
 #endif
 
 #endif

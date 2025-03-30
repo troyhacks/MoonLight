@@ -254,7 +254,7 @@
 		<FilesIcon class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span>Files info</span>
+		<span>File Manager</span>
 	{/snippet}
 	<div class="w-full overflow-x-auto">
 	</div>
