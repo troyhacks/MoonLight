@@ -125,8 +125,8 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "scripts"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "ewowi";
-            property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "text"; property["default"] = "ewowi";
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "blink";
+            property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "text"; property["default"] = "map";
         }
 
         char buffer[1024];

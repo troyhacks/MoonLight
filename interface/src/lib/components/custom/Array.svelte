@@ -37,6 +37,8 @@
         data[property.name] = [];
     }
 
+    let lastIndex: number = -1;
+
     console.log("Array property", property, data, definition, showEditor, changeOnInput, data[property.name], value1, value2);
     for (let i = 0; i < definition.length; i++) {
         // console.log("addItem def", propertyName, property)
@@ -77,8 +79,12 @@
 
 	function handleEdit(propertyName: string, index: number) {
 		console.log("handleEdit", propertyName, index)
-		propertyEditable = propertyName;
-		showEditor = true;
+        if (lastIndex != index) {
+            showEditor = true;
+            lastIndex = index;
+        } else
+            showEditor = !showEditor;
+        propertyEditable = propertyName;
 		dataEditable = data[propertyName][index];
 	}
 
@@ -93,6 +99,12 @@
 		showEditor = false;
 		onChange();
 	}
+
+    function nrofDetails(index: number, propertyN: any) {
+        if (data[property.name][index][propertyN.name])
+            return data[property.name][index][propertyN.name].length
+        else return 0;
+    }
 
 </script>
 
@@ -140,7 +152,7 @@
                     {#each property.n as propertyN}
                         {#if propertyN.type == "array"}
                             <div>
-                                <div class="font-bold">{data[property.name][index][propertyN.name].length}</div>
+                                <div class="font-bold">↓{nrofDetails(index, propertyN)}</div>
                             </div>
                         {:else if propertyN.type != "password"}
                             <div>
