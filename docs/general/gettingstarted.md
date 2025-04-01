@@ -1,10 +1,10 @@
 # Getting started
 
-## Installation
+## Installation - Developer
 
 * Open GitKraken Press + / New tab and select Clone a Repo (Or another git management tool)
 * Select the folder on your local drive where to copy to (e.g. /github/MoonModules)
-* Copy [MoonLight.git](https://github.com/MoonModules/MoonLight.git) (or [MoonBase.git](https://github.com/ewowi/MoonBase.git)) and paste in the URL field of GitKraken
+* Copy [MoonBase.git](https://github.com/ewowi/MoonBase.git) or [MoonLight.git](https://github.com/MoonModules/MoonLight.git) and paste in the URL field of GitKraken
 * Press clone the repo
 * Open VSCode
 * Install the PlatformIO IDE extension
@@ -13,25 +13,39 @@
 * On the status bar select the env to flash and the board to flash to
     * Select esp32dev for a normal ESP32
     * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S2 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
-* Press PlaformIO:Upload on the statusbar
-* The formware is now flashed to your board, after flashing the board will reboot
+
+   <img width="617" alt="image" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
+
+* Press PlaformIO:Upload (->) on the statusbar
+* The firmware is now flashed to your board, after flashing the board will reboot
+* Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
+
+## Installation - End user
+
+[install](https://moonmodules.org/MoonLight/general/index.html)
+
+* release 0.5.4, for latest build follow installation developer
+* This is WIP, looks like issue with erasing the board and setting the partitions right ...
+* Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
 
 ## Configuration
 
-* Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
-* In case of a newly flashed board, a Wifi access point (AP) will be created. Go to your Wifi settings on your computer and find the new Wifi AP (starts with MoonLight or ESPSvelteKit)
+* In case of a newly flashed board, a Wifi access point (AP) will be created. Go to your Wifi settings on your computer and find the new Wifi AP (starts with MoonBase, MoonLight or ESPSvelteKit)
+    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board (vscode 👽, Erase flash)
 * Connect to the AP (no password needed), a captive portal will show with a welcome screen.
+    * There seems to be an issue in the captive portal showing Connection to device lost repeatedly. In that case, close the captive portal and open the app in a brower using 192.168.4.1
 * Go to the menu and select Wifi / Wifi Station
 * Press (+) and enter the SSID and the password of your Wifi Network
 * Press Add Network and Apply settings
 * The board will reconnect to your Wifi Network
 * Go back to your Wifi Network on your computer
 * Find out the new IP of the board, or in your Wifi Network settings or by looking at the log in the Serial Monitor (see above)
+* (sometimes it takes a while to load pages for the first time, might be related to caching of javascript, on the issuelist)
 
 ## Developing
 
 * Read the [ESP32 Sveltekit docs](https://moonmodules.org/MoonLight/eskIndex/) (Latest version (Svelte 5) here [ESP32 Sveltekit docs](https://theelims.github.io/ESP32-sveltekit/))
-* Read [Customizing Sveltekit](https://moonmodules.org/MoonLight/general/customizingsveltekit/), this things have normally been done (MoonBase WIP)
+* Read [Customizing Sveltekit](https://moonmodules.org/MoonLight/general/customizingsveltekit/)
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
 * Want to make changes: fork the repo and submit pull requests
 
@@ -41,12 +55,16 @@
 * Search for FastLED.addLeds in the code and update to the pin you use to drive LEDS, reflash the code to the board
 * Go to the UI in the browser
 * Go to Custom / Files and create or upload Live scripts 
-* Go to Custom / Live Animation and select the 'hardcoded animations' (Random, Rainbow), you should see it on your panel
+* Go to Custom / Module Animations and select the 'hardcoded animations' (Random, Sinelon, Rainbow), you should see it on your panel
 * Select any of the Live scripts you uploaded, check the Serial Output for results. (No led output in current version, see below)
 * Open the Edit area and change things in the code, see the Serial Output for results
+
+<img width="350" alt="image" src="https://github.com/user-attachments/assets/56bdd019-927b-40cc-9199-9bc6344f8d8b" />
+
+
 * To do
     * Find a way to present feedback to the UI (e.g. error messages as comments in the sc file)
-    * Extend the code to support led animations ('homework assignment')
+    * Extend the code in [ModuleAnimations.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleAnimations.h) to support led animations ('homework assignment')
     * see ModuleAnimation.h (Server)
 
 ### Current script supported

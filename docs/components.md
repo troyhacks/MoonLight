@@ -158,15 +158,20 @@ This modal is based on [svelte-modals](https://svelte-modals.mattjennings.io/) w
 
 ## MoonBase components
 
+<img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/>
+
 ### MultiInput
 
-### File and FileEdit
+### Array
 
-#### File
+* Show an array of objects
+    * Summary and editor
+* Recursive
+    * An array can have an array e.g. multiple nodes with multiple controls per node
+* Uses MultiInput
+* Used data and definition rest apis
 
-Input type="file"
-
-#### FileEdit
+### FileEdit
 
 Arguments
 
