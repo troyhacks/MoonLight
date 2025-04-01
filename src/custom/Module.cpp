@@ -35,8 +35,8 @@ void ModuleState::setupData() {
         else
             ESP_LOGW("", "ModuleState::setupData no definition");
 
-        char buffer[256];
-        serializeJson(definition, buffer, sizeof(buffer));
+        // char buffer[256];
+        // serializeJson(definition, buffer, sizeof(buffer));
         // ESP_LOGD("", "setupDefinition %s", buffer);
         
         JsonObject root = data.to<JsonObject>();

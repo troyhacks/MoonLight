@@ -126,8 +126,14 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "scripts"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "blink";
-            property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "text"; property["default"] = "map";
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text";
+            property = details.add<JsonObject>(); property["name"] = "isRunning"; property["type"] = "checkbox";
+            property = details.add<JsonObject>(); property["name"] = "isHalted"; property["type"] = "checkbox";
+            property = details.add<JsonObject>(); property["name"] = "exeExist"; property["type"] = "checkbox";
+            property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number";
+            property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number";
+            property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number";
+            property = details.add<JsonObject>(); property["name"] = "kill"; property["type"] = "button";
         }
 
         // char buffer[1024];

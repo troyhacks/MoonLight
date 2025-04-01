@@ -31,7 +31,7 @@
 ## Configuration
 
 * In case of a newly flashed board, a Wifi access point (AP) will be created. Go to your Wifi settings on your computer and find the new Wifi AP (starts with MoonBase, MoonLight or ESPSvelteKit)
-    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board (vscode 👽, Erase flash)
+    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
 * Connect to the AP (no password needed), a captive portal will show with a welcome screen.
     * There seems to be an issue in the captive portal showing Connection to device lost repeatedly. In that case, close the captive portal and open the app in a brower using 192.168.4.1
 * Go to the menu and select Wifi / Wifi Station
