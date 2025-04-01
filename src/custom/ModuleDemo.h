@@ -28,6 +28,7 @@ ModuleDemo(PsychicHttpServer *server,
     }
 
 void setupDefinition(JsonArray root) override{
+    ESP_LOGD("", "");
     JsonObject property;
     JsonArray details;
     JsonArray values;
@@ -58,9 +59,9 @@ void setupDefinition(JsonArray root) override{
 
         // {"hostName":"MoonLight","connectionMode":"Priority","savedNetworks":[],"invoices":[{"number":1000,"name":"ewowi","date":"2025-03-21", "lines":[{"service":"con", "price":124}]}]}
 
-        char buffer[256];
-        serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "definition %s", buffer);
+        // char buffer[256];
+        // serializeJson(root, buffer, sizeof(buffer));
+        // ESP_LOGD("", "definition %s", buffer);
     }
 
     void onUpdate(UpdatedItem updatedItem) override

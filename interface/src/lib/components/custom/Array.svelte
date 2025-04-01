@@ -26,11 +26,13 @@
 	import Array from '$lib/components/custom/Array.svelte';
 	import ArrayLight from '$lib/components/custom/ArrayLight.svelte';
 
-    let { property, data, definition, showEditor = false, onChange, changeOnInput, value1=$bindable(), value2 } = $props();
+    let { property, data, definition, onChange, changeOnInput, value1=$bindable(), value2 } = $props();
 
     let dataEditable: any = $state({});
 
     let propertyEditable: string = $state("");
+
+    let showEditor: boolean = $state(false);
 
     //if no records added yet, add an empty array
     if (data[property.name] == undefined) {
@@ -39,7 +41,7 @@
 
     let lastIndex: number = -1;
 
-    console.log("Array property", property, data, definition, showEditor, changeOnInput, data[property.name], value1, value2);
+    console.log("Array property", property, data, definition, changeOnInput, data[property.name], value1, value2);
     for (let i = 0; i < definition.length; i++) {
         // console.log("addItem def", propertyName, property)
         if (property.name == definition[i].name) {

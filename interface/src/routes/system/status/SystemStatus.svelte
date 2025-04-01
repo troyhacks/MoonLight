@@ -206,7 +206,7 @@
 						</div>
 					</div>
 				{/if}
-				
+
 				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
 						<Heap class="text-primary-content h-auto w-full scale-75" />

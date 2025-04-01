@@ -11,12 +11,24 @@
 
 #include "Module.h"
 
-void ModuleState::setupData() {
+void setDefaults(JsonObject root, JsonArray definition) {
+    for (JsonObject property: definition) {
+        if (property["type"] != "array") {
+            root[property["name"]] = property["default"];
+        } else {
+            JsonArray array = root[property["name"]].to<JsonArray>();
+            //loop over detail propertys (recursive)
+            JsonObject object = array.add<JsonObject>(); // add one row
+            setDefaults(object, property["n"].as<JsonArray>());
+        }
+    }
+}
 
-    ESP_LOGD("", "ModuleState::setupData size %d", data.size());
+void ModuleState::setupData() {
 
     //only if no file ...
     if (data.size() == 0) {
+        ESP_LOGD("", "ModuleState::setupData size %d", data.size());
         JsonDocument definition;
         if (setupDefinition) 
             setupDefinition(definition.to<JsonArray>());
@@ -25,23 +37,15 @@ void ModuleState::setupData() {
 
         char buffer[256];
         serializeJson(definition, buffer, sizeof(buffer));
-        ESP_LOGD("", "setupDefinition %s", buffer);
+        // ESP_LOGD("", "setupDefinition %s", buffer);
         
         JsonObject root = data.to<JsonObject>();
 
-        //create doc based on definition... only top level properties
-        for (JsonObject property: definition.as<JsonArray>()) {
-            if (property["type"] != "array") {
-                root[property["name"]] = property["default"];
-            } else {
-                root[property["name"]].to<JsonArray>();
-                //loop over detail propertys (recursive)
-            }
-        }
+        setDefaults(root, definition.as<JsonArray>());
 
         // char buffer[256];
-        serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "setupData %s", buffer);
+        // serializeJson(root, buffer, sizeof(buffer));
+        // ESP_LOGD("", "setupData %s", buffer);
     }
 
     //to do: check if the file matches the definition
@@ -49,8 +53,8 @@ void ModuleState::setupData() {
 
 void ModuleState::read(ModuleState &state, JsonObject &root)
 {
-    TaskHandle_t httpdTask = xTaskGetHandle("httpd");
-    ESP_LOGI("", "Module::read task %s %d", pcTaskGetName(httpdTask), uxTaskGetStackHighWaterMark(httpdTask));
+    TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+    ESP_LOGI("", "Module::read task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
 
     root.set(state.data.as<JsonObject>()); //copy
 
@@ -90,8 +94,8 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
 {
     
     if (root.size() != 0) { // in case of empty file
-        TaskHandle_t httpdTask = xTaskGetHandle("httpd");
-        ESP_LOGI("", "Module::update task %s %d", pcTaskGetName(httpdTask), uxTaskGetStackHighWaterMark(httpdTask));
+        TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+        ESP_LOGI("", "Module::update task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
         state.updatedItems.clear();
 
         //check which propertys have updated

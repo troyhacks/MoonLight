@@ -79,6 +79,7 @@ public:
     }
 
     void setupDefinition(JsonArray root) override {
+        ESP_LOGD("", "");
         JsonObject property;
         JsonArray details;
         JsonArray values;
@@ -129,9 +130,9 @@ public:
             property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "text"; property["default"] = "map";
         }
 
-        char buffer[1024];
-        serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "definition %s", buffer);
+        // char buffer[1024];
+        // serializeJson(root, buffer, sizeof(buffer));
+        // ESP_LOGD("", "definition %s", buffer);
     }
 
     void onUpdate(UpdatedItem updatedItem) override
