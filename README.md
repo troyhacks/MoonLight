@@ -1,3 +1,5 @@
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/ewowi/MoonBase?utm_source=oss&utm_medium=github&utm_campaign=ewowi%2FMoonBase&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 # MoonBase / MoonLight
 
 <img width="500" alt="MoonLight" src="https://github.com/user-attachments/assets/de0ab735-d547-462e-b7e3-c3f819bf9283" />
