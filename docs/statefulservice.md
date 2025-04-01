@@ -550,6 +550,15 @@ esp32sveltekit.getBatteryService()->updateSOC(float stateOfCharge); // update st
 esp32sveltekit.getBatteryService()->setCharging(boolean isCharging); // notify the client that the device is charging
 ```
 
+For devices where battery voltage is exposed on a pin you can measure the voltage and updateSOC by specifying this in platformio.ini:
+
+```
+    -D BATTERY_PIN=35 ; Used if FT_BATTERY=1
+    -D BATTERY_MV=4200 ; Used if FT_BATTERY=1
+```
+
+For other devices (like I2C fuel gauge IC's) you have to implement your own measure code.
+
 ### ESP32-SvelteKit Connection Status
 
 Especially for a cases like a colored status LED it can be useful to have a quick indication of the connection status. By calling:

@@ -249,6 +249,12 @@ void ESP32SvelteKit::_loop()
             lastTime = millis();
             _analyticsService.lps = lps;
             lps = 0;
+            #if FT_BATTERY && BATTERY_PIN && BATTERY_MV
+                float mV = analogReadMilliVolts(BATTERY_PIN) * 2.0;
+                float perc = (mV - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%
+                // ESP_LOGD("", "bat mV %f p:%f", mV, perc);
+                _batteryService.updateSOC(perc * 100);
+            #endif
 #ifdef TELEPLOT_TASKS
             Serial.printf(">ESP32SveltekitTask:%i:%i\n", millis(), uxTaskGetStackHighWaterMark(NULL));
 #endif
