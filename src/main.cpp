@@ -90,7 +90,7 @@ void loop()
 
     while (!runInLoopTask.empty())
     {
-        ESP_LOGD("Main", "Running queued function");
+        ESP_LOGD(TAG, "Running queued function");
         runInLoopTask.back()(); //calls the last function
         runInLoopTask.pop_back();
     }

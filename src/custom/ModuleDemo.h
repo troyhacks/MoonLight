@@ -14,6 +14,8 @@
 
 #include "Module.h"
 
+#define TAG "🌙"
+
 class ModuleDemo : public Module
 {
 public:
@@ -24,11 +26,11 @@ ModuleDemo(PsychicHttpServer *server,
             , FilesService *filesService
         #endif
     ) : Module("demo", server, sveltekit, filesService) {
-        ESP_LOGD("", "ModuleDemo::constructor");
+        ESP_LOGD(TAG, "constructor");
     }
 
 void setupDefinition(JsonArray root) override{
-    ESP_LOGD("", "");
+    ESP_LOGD(TAG, "");
     JsonObject property;
     JsonArray details;
     JsonArray values;
@@ -61,13 +63,13 @@ void setupDefinition(JsonArray root) override{
 
         // char buffer[256];
         // serializeJson(root, buffer, sizeof(buffer));
-        // ESP_LOGD("", "definition %s", buffer);
+        // ESP_LOGD(TAG, "definition %s", buffer);
     }
 
     void onUpdate(UpdatedItem updatedItem) override
-{
-    ESP_LOGD("", "no handle for %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
-}
+    {
+        ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+    }
 };
 
 #endif

@@ -20,6 +20,8 @@
 #include <PsychicHttp.h>
 #include <ESP32SvelteKit.h>
 
+#define TAG "🌙"
+
 void walkThroughFiles(File folder, std::function<void(File, File)> fun);
 
 class FilesState

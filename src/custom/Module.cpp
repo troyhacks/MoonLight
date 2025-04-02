@@ -11,6 +11,8 @@
 
 #include "Module.h"
 
+#define TAG "🌙"
+
 void setDefaults(JsonObject root, JsonArray definition) {
     for (JsonObject property: definition) {
         if (property["type"] != "array") {
@@ -28,24 +30,16 @@ void ModuleState::setupData() {
 
     //only if no file ...
     if (data.size() == 0) {
-        ESP_LOGD("", "ModuleState::setupData size %d", data.size());
+        ESP_LOGD(TAG, "size %d", data.size());
         JsonDocument definition;
         if (setupDefinition) 
             setupDefinition(definition.to<JsonArray>());
         else
-            ESP_LOGW("", "ModuleState::setupData no definition");
+            ESP_LOGW(TAG, "no definition");
 
-        // char buffer[256];
-        // serializeJson(definition, buffer, sizeof(buffer));
-        // ESP_LOGD("", "setupDefinition %s", buffer);
-        
         JsonObject root = data.to<JsonObject>();
 
         setDefaults(root, definition.as<JsonArray>());
-
-        // char buffer[256];
-        // serializeJson(root, buffer, sizeof(buffer));
-        // ESP_LOGD("", "setupData %s", buffer);
     }
 
     //to do: check if the file matches the definition
@@ -54,36 +48,39 @@ void ModuleState::setupData() {
 void ModuleState::read(ModuleState &state, JsonObject &root)
 {
     TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-    ESP_LOGI("", "Module::read task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+    ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
 
     root.set(state.data.as<JsonObject>()); //copy
-
-    // char buffer[256];
-    // serializeJson(root, buffer, sizeof(buffer));
-    // ESP_LOGD("", "state.doc %s", buffer);
-
 }
 
-//Utility function?
-void compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, std::vector<UpdatedItem> &updatedItems, int index = -1) {
-    for (JsonPair oldProperty: oldData.as<JsonObject>()) { //loop over old properties
-        JsonVariant newValue = newData[oldProperty.key().c_str()]; //find according new value
-        if (oldProperty.value() != newValue) { //if value changed
-            if (oldProperty.value().is<JsonArray>()) { // if the propery is an array
-                JsonArray oldArray = oldProperty.value().as<JsonArray>();
-                JsonArray newArray = newValue.as<JsonArray>();
+void ModuleState::compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData) {
+    //collect old and new keys
+    std::vector<JsonString> keys; // Container to store unique keys
+    auto addUniqueKey = [&keys](const JsonString key) {if (std::find(keys.begin(), keys.end(), key) == keys.end()) keys.push_back(key);}; // Helper lambda to add keys to the vector if they don't already exist
+    for (JsonPair oldProperty : oldData.as<JsonObject>()) addUniqueKey(oldProperty.key()); // Collect keys from oldData
+    for (JsonPair newProperty : newData.as<JsonObject>()) addUniqueKey(newProperty.key()); // Collect keys from newData
 
-                for (int i = 0; i < oldArray.size(); i++) { //compare each item in the array
-                    compareRecursive(oldProperty.key(), oldArray[i], newArray[i], updatedItems, i);
+    for (const JsonString key: keys) { //loop over keys
+        JsonVariant oldValue = oldData[key.c_str()];
+        JsonVariant newValue = newData[key.c_str()];
+        if (oldValue != newValue) { //if value changed
+
+            if (oldValue.is<JsonArray>()) { // if the property is an array
+                JsonArray oldArray = oldValue.as<JsonArray>();
+                JsonArray newArray = newValue.as<JsonArray>();
+                
+                for (int i = 0; i < max(oldArray.size(), newArray.size()); i++) { //compare each item in the array
+                    if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add a new row
+                    char prefix[128];
+                    snprintf(prefix, 128, "%s%s[%d]", parent.c_str(), key.c_str(), i);
+                    compareRecursive(prefix, oldArray[i], newArray[i]);
                 }
-                //to do: oldArray size is not new array size
             } else { // if property is key/value
-                ESP_LOGD("", "compareRecursive %s[%d]: %s -> %s", oldProperty.key().c_str(), index, oldProperty.value().as<String>().c_str(), newValue.as<String>().c_str());
+                ESP_LOGD(TAG, "compareRecursive %s: %s -> %s", key.c_str(), oldValue.as<String>().c_str(), newValue.as<String>().c_str());
                 UpdatedItem newItem;
                 newItem.parent = String(parent.c_str());
-                newItem.name = String(oldProperty.key().c_str());
+                newItem.name = String(key.c_str());
                 newItem.value = newValue;
-                newItem.index = index;
                 updatedItems.push_back(newItem);
             }
         }
@@ -95,22 +92,23 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
     
     if (root.size() != 0) { // in case of empty file
         TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-        ESP_LOGI("", "Module::update task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+        ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
         state.updatedItems.clear();
+
+        // char buffer[1024];
+        // serializeJson(state.data, buffer, sizeof(buffer));
+        // ESP_LOGD(TAG, "state.doc %s", buffer);
+        // serializeJson(root, buffer, sizeof(buffer));
+        // ESP_LOGD(TAG, "root %s", buffer);
 
         //check which propertys have updated
         if (root != state.data) {
-            compareRecursive("/", state.data, root, state.updatedItems);
-
+            state.compareRecursive("", state.data, root);
 
             state.data.set(root); //copy
 
-            // char buffer[256];
-            // serializeJson(state.data, buffer, sizeof(buffer));
-            // ESP_LOGD("", "state.doc %s", buffer);
-
             if (state.updatedItems.size())
-                ESP_LOGD("", "Module::update %s", state.updatedItems.front().name.c_str());
+                ESP_LOGD(TAG, "property %s", state.updatedItems.front().name.c_str());
 
             return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
         } else
@@ -152,7 +150,7 @@ Module::Module(String moduleName, PsychicHttpServer *server,
 {
     _moduleName = moduleName;
 
-    ESP_LOGD("", "Module::constructor %s", moduleName.c_str());
+    ESP_LOGD(TAG, "constructor %s", moduleName.c_str());
     _server = server;
 
     // configure settings service update handler to update state
@@ -164,7 +162,7 @@ Module::Module(String moduleName, PsychicHttpServer *server,
 
 void Module::begin()
 {
-    ESP_LOGD("", "Module::begin");
+    ESP_LOGD(TAG, "");
     _httpEndpoint.begin();
     _eventEndpoint.begin();
     _fsPersistence.readFromFS(); //overwrites the default settings in state
@@ -172,7 +170,7 @@ void Module::begin()
     _state.setupDefinition = [&](JsonArray root) {
         this->setupDefinition(root); //using here means setupDefinition must be virtual ...
     };
-    // state.setupDefinition = this->setupDefinition;
+    // _state.setupDefinition = this->setupDefinition;
     _state.setupData(); //if no data readFromFS, using overridden setupDefinition
 
     _server->on(String("/rest/" + _moduleName + "Def").c_str(), HTTP_GET, [&](PsychicRequest *request) {
@@ -181,9 +179,9 @@ void Module::begin()
 
         setupDefinition(root);
 
-        char buffer[256];
-        serializeJson(root, buffer, sizeof(buffer));
-        ESP_LOGD("", "moduleDef %s", buffer);
+        // char buffer[2048];
+        // serializeJson(root, buffer, sizeof(buffer));
+        // ESP_LOGD(TAG, "server->on %s moduleDef %s", request->url().c_str(), buffer);
     
         return response.send();
     });
@@ -191,7 +189,7 @@ void Module::begin()
     //if update, for all updated items, run onUpdate
     this->addUpdateHandler([&](const String &originId)
     {
-        ESP_LOGD("", "Module::updateHandler %s", originId.c_str());
+        ESP_LOGD(TAG, "updateHandler %s", originId.c_str());
         for (UpdatedItem updatedItem : _state.updatedItems) {
             onUpdate(updatedItem);
         }
@@ -200,7 +198,7 @@ void Module::begin()
 }
 
 void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden in derived classes
-    ESP_LOGW("", "setupDefinition not implemented");
+    ESP_LOGW(TAG, "not implemented");
     JsonObject property;
     JsonArray details;
     JsonArray values;
@@ -210,5 +208,17 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
 
 void Module::onUpdate(UpdatedItem updatedItem)
 {
-    ESP_LOGW("", "onUpdate not implemented %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str());
+    ESP_LOGW(TAG, "not implemented %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+}
+
+int UpdatedItem::getParentIndex(int depth) {
+    int indexFrom = parent.indexOf("[");
+    int indexTo = parent.indexOf("]");
+    return parent.substring(indexFrom+1, indexTo).toInt();
+}
+
+String UpdatedItem::getParentName(int depth) {
+    int indexFrom = parent.indexOf("[");
+    int indexTo = parent.indexOf("]");
+    return parent.substring(0, indexFrom);
 }

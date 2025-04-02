@@ -41,11 +41,14 @@
 
     let lastIndex: number = -1;
 
-    console.log("Array property", property, data, definition, changeOnInput, data[property.name], value1, value2);
+    let localDefinition: any = $state([]);
+
+    // console.log("Array property", property, data, definition, changeOnInput, data[property.name], value1, value2);
     for (let i = 0; i < definition.length; i++) {
         // console.log("addItem def", propertyName, property)
         if (property.name == definition[i].name) {
-            console.log("def[i]", property.name, definition[i].n)
+            localDefinition = definition[i].n;
+            console.log("localDefinition", property.name, definition[i].n)
         }
     }
 
@@ -66,10 +69,10 @@
 		dataEditable = {};
 
 		//set properties with their defaults
-		for (let i = 0; i < definition.length; i++) {
-			let property = definition[i];
-			// console.log("addItem def", propertyName, property)
+		for (let i = 0; i < localDefinition.length; i++) {
+			let property = localDefinition[i];
 			if (property.name == propertyName) {
+                console.log("addItem def", propertyName, property)
 				for (let i=0; i < property.n.length; i++) {
 					let propertyN = property.n[i];
 					// console.log("propertyN", propertyN)
@@ -80,7 +83,7 @@
 	}
 
 	function handleEdit(propertyName: string, index: number) {
-		console.log("handleEdit", propertyName, index)
+		console.log("handleEdit", propertyName, index, data[propertyName][index])
         if (lastIndex != index) {
             showEditor = true;
             lastIndex = index;
@@ -196,7 +199,7 @@
                 </div>
             {:else if propertyN.type == "array"}
                 <label for="{propertyN.name}">{propertyN.name}</label>
-                <Array property={propertyN} bind:value1={data[propertyN.name]} value2={data} data={dataEditable} definition={definition} onChange={onChange} changeOnInput={changeOnInput}></Array>
+                <Array property={propertyN} bind:value1={data[propertyN.name]} value2={data} data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></Array>
             {/if}
         {/each}
     {/if}

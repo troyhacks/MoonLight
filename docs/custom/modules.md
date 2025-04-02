@@ -17,7 +17,7 @@ See [Demo](https://moonmodules.org/MoonLight/custom/module/demo/) and [Animation
     * This name will be used to set up http rest api and webserver sockets
     * See [ModuleDemo.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleDemo.h)
 
-```
+```cpp
 class ModuleDemo : public Module
 {
 public:
@@ -26,7 +26,7 @@ ModuleDemo(PsychicHttpServer *server
       , ESP32SvelteKit *sveltekit
       , FilesService *filesService
     ) : Module("demo", server, sveltekit, filesService) {
-        ESP_LOGD("", "ModuleDemo::constructor");
+        ESP_LOGD(TAG, "ModuleDemo::constructor");
     }
 }
 ```
@@ -36,7 +36,7 @@ ModuleDemo(PsychicHttpServer *server
     * Generate the UI
     * Initialy create the module data
 
-```
+```cpp
 void setupDefinition(JsonArray root) override{
     JsonObject property;
     JsonArray details;
@@ -62,24 +62,27 @@ void setupDefinition(JsonArray root) override{
     * struct UpdatedItem defines the update (parent property, name of property, value and index (in case of multiple records)
     * This is run in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleAnimations](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleAnimations.h))
 
-```
+```cpp
 void onUpdate(UpdatedItem updatedItem) override
 {
-  if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-      ESP_LOGD("", "handle %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>());
-      FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-  } else if (updatedItem.parent == "nodes" && updatedItem.name == "animation") {    
-      ESP_LOGD("", "handle %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, _state.data["nodes"][updatedItem.index]["animation"].as<String>().c_str());
-      animation = _state.data["nodes"][updatedItem.index]["animation"].as<String>();
-      compileAndRun(animation);
-  } else
-      ESP_LOGD("", "no handle for %s.%s[%d] %s (%d %s)", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str(), _state.data["driverOn"].as<bool>(), _state.data["nodes"][0]["animation"].as<String>());
-}
+    void onUpdate(UpdatedItem updatedItem) override
+    {
+        if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>());
+            FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
+        } else if (updatedItem.getParentName() == "nodes" && updatedItem.name == "animation") {    
+            int index = updatedItem.getParentIndex();
+            animation = _state.data["nodes"][index]["animation"].as<String>();
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), animation.c_str());
+            compileAndRun(animation);
+        } else
+            ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+    }
 ```
 
 * Add the module in [main.cpp](https://github.com/ewowi/MoonBase/blob/main/src/main.cpp)
 
-```
+```cpp
 ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
 ...
 moduleDemo.begin();
@@ -89,7 +92,7 @@ moduleDemo.loop();
 
 * Add the module in [menu.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/menu.svelte) (this will be automated in the future)
 
-```
+```ts
 submenu: [
    {
       title: 'Module Demo',

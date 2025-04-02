@@ -17,12 +17,12 @@
 
 ## Technical
 
-* See [Modules](https://moonmodules.org/MoonLight/custom/modules/)
+* See [Modules](../modules/)
 
 ### Server
 
-[Instances.h](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/Instances.h) and [Instances.cpp](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/Instances.cpp)
+[ModuleAnimations.h](/src/custom/ModuleAnimations.h)
 
 ### UI
 
-[Instances.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/system/status/Instances.svelte)
+Generated

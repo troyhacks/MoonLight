@@ -35,7 +35,7 @@
 				}
 			});
 			definition = await response.json();
-			console.log("definition", definition)
+			// console.log("definition", definition)
 		} catch (error) {
 			console.error('Error:', error);
 		}
@@ -95,6 +95,7 @@
 	function inputChanged() {
 		if (modeWS) {
 			let moduleName = page.url.searchParams.get('module')||'';
+			console.log(moduleName, data);
 			socket.sendEvent(moduleName, data)
 		} else {
 			changed = true;
@@ -146,7 +147,7 @@
 								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
 						{:else if property.type == "array"}
-							<Array property={property} bind:value1={data[property.name]} value2={data[property.name]} data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></Array>
+							<Array property={property} value2={data[property.name]} data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></Array>
 						{/if}
 					{/each}
 				</div>
