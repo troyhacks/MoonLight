@@ -47,6 +47,7 @@
 * Read the [ESP32 Sveltekit docs](https://moonmodules.org/MoonLight/eskIndex/) (Latest version (Svelte 5) here [ESP32 Sveltekit docs](https://theelims.github.io/ESP32-sveltekit/))
 * Read [Customizing Sveltekit](https://moonmodules.org/MoonLight/general/customizingsveltekit/)
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
+* Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.
 * Want to make changes: fork the repo and submit pull requests
 
 ## MoonBase specific

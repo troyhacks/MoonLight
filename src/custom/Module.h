@@ -12,6 +12,8 @@
 #ifndef Module_h
 #define Module_h
 
+#define TAG "🌙"
+
 #include <EventSocket.h>
 #include <HttpEndpoint.h>
 #include <EventEndpoint.h>
@@ -28,7 +30,9 @@ struct UpdatedItem {
     String parent;
     String name;
     JsonVariant value;
-    uint8_t index;
+
+    int getParentIndex(int depth = 0);
+    String getParentName(int depth = 0);
 };
 
 class ModuleState
@@ -41,6 +45,7 @@ public:
     std::function<void(JsonArray root)> setupDefinition = nullptr;
 
     void setupData();
+    void compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData);
 
     static void read(ModuleState &state, JsonObject &root);
     static StateUpdateResult update(JsonObject &root, ModuleState &state);

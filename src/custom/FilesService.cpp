@@ -47,7 +47,7 @@ void addFolder(File folder, JsonArray fileArray)
             fileObject["name"] = (char *)file.name(); //enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
             fileObject["path"] = (char *)file.path(); //enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
             fileObject["isFile"] = !file.isDirectory();
-            // ESP_LOGI("", "file %s (%d)", file.path(), file.size());
+            // ESP_LOGI(TAG, "file %s (%d)", file.path(), file.size());
 			if (file.isDirectory())
 			{
 				addFolder(file, fileObject["files"].to<JsonArray>());
@@ -73,7 +73,7 @@ void FilesState::read(FilesState &state, JsonObject &root)
     addFolder(folder, root["files"].to<JsonArray>());
     folder.close();
     // print->printJson("FilesState::read", root);
-    ESP_LOGI("", "FilesState::read");
+    ESP_LOGI(TAG, "");
 }
 
 //utility function
@@ -96,7 +96,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
     JsonArray deletes = root["deletes"].as<JsonArray>();
     if (!deletes.isNull()) {
         for (JsonObject var : deletes) {
-            ESP_LOGI("", "delete %s %s", var["path"].as<const char*>(), var["isFile"]?"File":"Folder");
+            ESP_LOGI(TAG, "delete %s %s", var["path"].as<const char*>(), var["isFile"]?"File":"Folder");
             // print->printJson("new file", var);
             if (var["isFile"])
                 ESPFS.remove(var["path"].as<const char*>());
@@ -110,14 +110,14 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
     JsonArray news = root["news"].as<JsonArray>();
     if (!news.isNull()) {
         for (JsonObject var : news) {
-            ESP_LOGI("", "new %s %s", var["path"].as<const char*>(), var["isFile"]?"File":"Folder");
+            ESP_LOGI(TAG, "new %s %s", var["path"].as<const char*>(), var["isFile"]?"File":"Folder");
             // print->printJson("new file", var);
             if (var["isFile"]) {
                 File file = ESPFS.open(var["path"].as<const char*>(), FILE_WRITE);
                 const char *contents = var["contents"];
                 if (strlen(contents)) {
                     if (!file.write((byte *)contents, strlen(contents))) { //changed not true as contents is not part of the state
-                        ESP_LOGE("", "Write failed");
+                        ESP_LOGE(TAG, "Write failed");
                     }
                 }
                 file.close();
@@ -131,16 +131,16 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
     JsonArray updates = root["updates"].as<JsonArray>();
     if (!updates.isNull()) {
         for (JsonObject var : updates) {
-            ESP_LOGI("", "update %s %s", var["path"].as<const char*>(), var["isFile"]?"File":"Folder");
+            ESP_LOGI(TAG, "update %s %s", var["path"].as<const char*>(), var["isFile"]?"File":"Folder");
             // print->printJson("update file", var);
             File file = ESPFS.open(var["path"].as<const char*>(), FILE_WRITE);
             if (!file) {
-                ESP_LOGE("", "Failed to open file");
+                ESP_LOGE(TAG, "Failed to open file");
             }
             else {
                 const char *contents = var["contents"];
                 if (!file.write((byte *)contents, strlen(contents))) { //changed not true as contents is not part of the state
-                    ESP_LOGE("", "Write failed");
+                    ESP_LOGE(TAG, "Write failed");
                 }
                 file.close();
 
@@ -149,7 +149,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
                 strcat(newPath, "/");
                 strcat(newPath, var["name"]);
 
-                ESP_LOGI("", "rename %s to %s", var["path"].as<const char*>(), newPath);
+                ESP_LOGI(TAG, "rename %s to %s", var["path"].as<const char*>(), newPath);
 
                 if (strcmp(var["path"], newPath) != 0) {
                     ESPFS.rename(var["path"].as<const char*>(), newPath);
@@ -160,7 +160,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
     }
 
     if (state.updatedItems.size())
-        ESP_LOGD("", "FilesState::update %s", state.updatedItems.front().c_str());
+        ESP_LOGD(TAG, "first item %s", state.updatedItems.front().c_str());
 
     return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
 }
@@ -207,7 +207,7 @@ void FilesService::begin()
 
 void FilesService::onConfigUpdated()
 {
-    ESP_LOGI("", "FilesService::onConfigUpdated");
+    ESP_LOGI(TAG, "");
 }
 
 #endif

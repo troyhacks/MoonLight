@@ -14,7 +14,10 @@
 
 #if FT_MOONLIGHT == 1
 
+
 #include "Module.h"
+
+#define TAG "🌟"
 
 #include "FastLED.h"
 #define MAXLEDS 8192
@@ -40,23 +43,24 @@ public:
             , FilesService *filesService
         #endif
     ) : Module("animations", server, sveltekit, filesService) {
-        ESP_LOGD("", "constructor");
+        ESP_LOGD(TAG, "constructor");
     }
 
     void begin() {
         Module::begin();
 
-        ESP_LOGD("", "begin");
+        ESP_LOGD(TAG, "");
         FastLED.addLeds<WS2812B, 16, GRB>(leds, 0, nrOfLeds); //pin 2
         FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
-        ESP_LOGD("", "FastLED.addLeds n:%d", nrOfLeds);
+        FastLED.setBrightness(10);
+        ESP_LOGD(TAG, "FastLED.addLeds n:%d", nrOfLeds);
 
         #if FT_ENABLED(FT_FILEMANAGER)
         //create a handler which recompiles the animation when the file of the current animation changes
 
         _filesService->addUpdateHandler([&](const String &originId)
         { 
-            ESP_LOGD("", "FilesService::updateHandler %s", originId.c_str());
+            ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
             //read the file state
             _filesService->read([&](FilesState &filesState) {
                 // loop over all changed files (normally only one)
@@ -66,7 +70,7 @@ public:
                         String animation = node["animation"];
 
                         if (updatedItem == animation) {
-                            ESP_LOGD("", "updateHandler updatedItem %s", updatedItem.c_str());
+                            ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
                             compileAndRun(animation);
                         }
                     }
@@ -76,16 +80,17 @@ public:
 
         #endif
 
+        _socket->registerEvent("livescripts");
     }
 
     void setupDefinition(JsonArray root) override {
-        ESP_LOGD("", "");
+        ESP_LOGD(TAG, "");
         JsonObject property;
         JsonArray details;
         JsonArray values;
 
         property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 73;
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -98,7 +103,7 @@ public:
                 File rootFolder = ESPFS.open("/");
                 walkThroughFiles(rootFolder, [&](File folder, File file) {
                     if (strstr(file.name(), ".sc")) {
-                        // ESP_LOGD("", "found file %s", file.path());
+                        // ESP_LOGD(TAG, "found file %s", file.path());
                         values.add((char *)file.path());
                     }
                 });
@@ -135,23 +140,20 @@ public:
             property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number";
             property = details.add<JsonObject>(); property["name"] = "kill"; property["type"] = "button";
         }
-
-        // char buffer[1024];
-        // serializeJson(root, buffer, sizeof(buffer));
-        // ESP_LOGD("", "definition %s", buffer);
     }
 
     void onUpdate(UpdatedItem updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            ESP_LOGD("", "handle %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>());
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-        } else if (updatedItem.parent == "nodes" && updatedItem.name == "animation") {    
-            ESP_LOGD("", "handle %s.%s[%d] %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, _state.data["nodes"][updatedItem.index]["animation"].as<String>().c_str());
-            animation = _state.data["nodes"][updatedItem.index]["animation"].as<String>();
+        } else if (updatedItem.getParentName() == "nodes" && updatedItem.name == "animation") {    
+            int index = updatedItem.getParentIndex();
+            animation = _state.data["nodes"][index]["animation"].as<String>();
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), animation.c_str());
             compileAndRun(animation);
         } else
-            ESP_LOGD("", "no handle for %s.%s[%d] %s (%d %s)", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.index, updatedItem.value.as<String>().c_str(), _state.data["driverOn"].as<bool>(), _state.data["nodes"][0]["animation"].as<String>());
+            ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop()
@@ -195,7 +197,7 @@ public:
     void compileAndRun(String &animation) {
 
         #if FT_LIVESCRIPT
-            ESP_LOGD("", "animation %s", animation.c_str());
+            ESP_LOGD(TAG, "animation %s", animation.c_str());
 
             if (animation[0] != '/') { //no sc script
                 return;
@@ -203,7 +205,7 @@ public:
 
             //if this animation is already running, kill it ...
 
-            // ESP_LOGD("", "killAndFreeRunningProgram %s", animation.c_str());
+            // ESP_LOGD(TAG, "killAndFreeRunningProgram %s", animation.c_str());
             // runInLoopTask.push_back([&] { // run in loopTask to avoid stack overflow
             //     scriptRuntime.killAndFreeRunningProgram();
             // });
@@ -212,7 +214,7 @@ public:
         
             //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
             runInLoopTask.push_back([&] {
-                ESP_LOGD("", "compileAndRun %s (%d)", animation.c_str());
+                ESP_LOGD(TAG, "compileAndRun %s (%d)", animation.c_str());
                 File file = ESPFS.open(animation);
                 if (file) {
                     std::string scScript = file.readString().c_str();
@@ -221,17 +223,13 @@ public:
         
                     Executable executable = parser.parseScript(&scScript);
                     executable.name = animation.c_str();
-                    ESP_LOGD("", "parsing %s done\n", animation.c_str());
+                    ESP_LOGD(TAG, "parsing %s done\n", animation.c_str());
                     scriptRuntime.addExe(executable);
-                    ESP_LOGD("", "addExe success %s\n", executable.exeExist?"true":"false");
+                    ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
         
                     if (executable.exeExist)
                         executable.execute("main"); //background task (async - vs sync)
 
-                    for (Executable &exec: scriptRuntime._scExecutables) {
-                        exe_info exeInfo = scriptRuntime.getExecutableInfo(exec.name);
-                        ESP_LOGD("", "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
-                    }
                 }
             });
         #endif

@@ -135,7 +135,7 @@
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     />
 {:else if property.type == "button"}
-    <button class="btn btn-primary" type="button" on:click={onChange}
+    <button class="btn btn-primary" type="button" on:click={(event:any) => {if (value==null) value = 1; else value++; onChange(event)}}
     >{property.name}</button
     >
 {:else}
