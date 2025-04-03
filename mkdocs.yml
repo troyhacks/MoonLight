@@ -7,8 +7,8 @@ nav:
       - general/customizingsveltekit.md
   - "Modules":
       - modules/modules.md
-      - modules/animations.md
-      - modules/demo.md
+      - modules/module/animations.md
+      - modules/module/demo.md
   - "Connections":
       - connections/mqtt.md
       - connections/ntp.md

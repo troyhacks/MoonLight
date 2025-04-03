@@ -6,7 +6,7 @@
 
 ## Technical
 
-* See [Modules](docs/modules/modules.md)
+* See [Modules](../modules.md)
 
 ### Server
 
