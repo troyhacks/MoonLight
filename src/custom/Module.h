@@ -30,7 +30,7 @@
 struct UpdatedItem {
     String parent;
     String name;
-    JsonVariant value;
+    String value;
 
     int getParentIndex(int depth = 0);
     String getParentName(int depth = 0);
@@ -82,6 +82,8 @@ private:
     WebSocketServer<ModuleState> _webSocketServer;
     FSPersistence<ModuleState> _fsPersistence;
     PsychicHttpServer *_server;
+
+    void onConfigUpdated();
 
 };
 

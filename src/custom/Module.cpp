@@ -63,22 +63,23 @@ void ModuleState::compareRecursive(JsonString parent, JsonVariant oldData, JsonV
         JsonVariant newValue = newData[key.c_str()];
         if (oldValue != newValue) { //if value changed
 
-            if (oldValue.is<JsonArray>()) { // if the property is an array
+            if (oldValue.is<JsonArray>() || newValue.is<JsonArray>()) { // if the property is an array
+                if (oldValue.isNull()) oldValue.to<JsonArray>();
                 JsonArray oldArray = oldValue.as<JsonArray>();
                 JsonArray newArray = newValue.as<JsonArray>();
                 
                 for (int i = 0; i < max(oldArray.size(), newArray.size()); i++) { //compare each item in the array
-                    if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add a new row
+                    if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add enough new rows
                     char prefix[128];
                     snprintf(prefix, 128, "%s%s[%d]", parent.c_str(), key.c_str(), i);
                     compareRecursive(prefix, oldArray[i], newArray[i]);
                 }
             } else { // if property is key/value
-                ESP_LOGD(TAG, "compareRecursive %s: %s -> %s", key.c_str(), oldValue.as<String>().c_str(), newValue.as<String>().c_str());
+                ESP_LOGD(TAG, "%s: %s -> %s", key.c_str(), oldValue.as<String>().c_str(), newValue.as<String>().c_str());
                 UpdatedItem newItem;
                 newItem.parent = String(parent.c_str());
                 newItem.name = String(key.c_str());
-                newItem.value = newValue;
+                newItem.value = newValue.as<String>();
                 updatedItems.push_back(newItem);
             }
         }
@@ -156,6 +157,9 @@ Module::Module(String moduleName, PsychicHttpServer *server,
         _filesService = filesService;
     #endif
 
+    addUpdateHandler([&](const String &originId)
+                     { onConfigUpdated(); },
+                     false);
 }
 
 void Module::begin()
@@ -165,17 +169,18 @@ void Module::begin()
     _eventEndpoint.begin();
     _fsPersistence.readFromFS(); //overwrites the default settings in state
 
+    //no virtual functions in constructor so this is in begin()
     _state.setupDefinition = [&](JsonArray root) {
         this->setupDefinition(root); //using here means setupDefinition must be virtual ...
     };
     // _state.setupDefinition = this->setupDefinition;
-    _state.setupData(); //if no data readFromFS, using overridden setupDefinition
+    _state.setupData(); //if no data readFromFS, using overridden virtual function setupDefinition
 
     _server->on(String("/rest/" + _moduleName + "Def").c_str(), HTTP_GET, [&](PsychicRequest *request) {
         PsychicJsonResponse response = PsychicJsonResponse(request, false);
         JsonArray root = response.getRoot().to<JsonArray>();
 
-        setupDefinition(root);
+        setupDefinition(root); //virtual function
 
         // char buffer[2048];
         // serializeJson(root, buffer, sizeof(buffer));
@@ -184,15 +189,16 @@ void Module::begin()
         return response.send();
     });
 
-    //if update, for all updated items, run onUpdate
-    this->addUpdateHandler([&](const String &originId)
-    {
-        ESP_LOGD(TAG, "updateHandler %s", originId.c_str());
-        for (UpdatedItem updatedItem : _state.updatedItems) {
-            onUpdate(updatedItem);
-        }
-    });
+    onConfigUpdated(); //triggers all onUpdates
+}
 
+void Module::onConfigUpdated()
+{
+    ESP_LOGD(TAG, "onConfigUpdated");
+    //if update, for all updated items, run onUpdate
+    for (UpdatedItem updatedItem : _state.updatedItems) {
+        onUpdate(updatedItem);
+    }
 }
 
 void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden in derived classes
@@ -206,7 +212,7 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
 
 void Module::onUpdate(UpdatedItem updatedItem)
 {
-    ESP_LOGW(TAG, "not implemented %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+    ESP_LOGW(TAG, "not implemented %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
 }
 
 int UpdatedItem::getParentIndex(int depth) {

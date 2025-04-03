@@ -66,7 +66,7 @@ void setupDefinition(JsonArray root) override{
 
     void onUpdate(UpdatedItem updatedItem) override
     {
-        ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+        ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
     }
 };
 

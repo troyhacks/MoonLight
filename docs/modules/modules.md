@@ -59,24 +59,22 @@ void setupDefinition(JsonArray root) override{
 ```
 
 * Implement function onUpdate to define what happens if data changes
-    * struct UpdatedItem defines the update (parent property, name of property, value and index (in case of multiple records)
-    * This is run in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleAnimations](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleAnimations.h))
+    * struct UpdatedItem defines the update (parent property (including index in case of multiple records), name of property and value)
+    * This runs in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleAnimations](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleAnimations.h)) - as httpd stack has been increased runInLoopTask is less needed
 
 ```cpp
-void onUpdate(UpdatedItem updatedItem) override
-{
     void onUpdate(UpdatedItem updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>());
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (updatedItem.getParentName() == "nodes" && updatedItem.name == "animation") {    
             int index = updatedItem.getParentIndex();
-            animation = _state.data["nodes"][index]["animation"].as<String>();
-            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), animation.c_str());
+            const char *animation = _state.data["nodes"][index]["animation"].as<const char *>();
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), animation);
             compileAndRun(animation);
         } else
-            ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
     }
 ```
 

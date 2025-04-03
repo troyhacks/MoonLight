@@ -5,11 +5,10 @@ nav:
   - General:
       - general/gettingstarted.md
       - general/customizingsveltekit.md
-  - "Custom":
-      - custom/modules.md
-      - custom/module/animations.md
-      - custom/module/demo.md
-      - custom/files.md
+  - "Modules":
+      - modules/modules.md
+      - modules/animations.md
+      - modules/demo.md
   - "Connections":
       - connections/mqtt.md
       - connections/ntp.md
@@ -19,6 +18,7 @@ nav:
   - "System":
       - system/status.md
       - system/metrics.md
+      - system/filemanager.md
   - "ESP32 SveleteKit": 
       - esp32sveltekit.md
   - "Build Tools":

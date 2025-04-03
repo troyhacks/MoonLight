@@ -17,7 +17,7 @@
 
 ## Technical
 
-* See [Modules](/docs/custom/modules.md)
+* See [Modules](modules.md)
 
 ### Server
 

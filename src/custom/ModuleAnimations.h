@@ -35,7 +35,6 @@ public:
     #if FT_LIVESCRIPT
         Parser parser = Parser();
     #endif
-    String animation = "Random";
 
     ModuleAnimations(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit
@@ -44,16 +43,18 @@ public:
         #endif
     ) : Module("animations", server, sveltekit, filesService) {
         ESP_LOGD(TAG, "constructor");
+
+        //In constructor so before onUpdate
+        FastLED.addLeds<WS2812B, 16, GRB>(leds, 0, nrOfLeds); //pin 2
+        FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
+        FastLED.setBrightness(0);
+        ESP_LOGD(TAG, "FastLED.addLeds n:%d", nrOfLeds);
     }
 
     void begin() {
         Module::begin();
 
         ESP_LOGD(TAG, "");
-        FastLED.addLeds<WS2812B, 16, GRB>(leds, 0, nrOfLeds); //pin 2
-        FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
-        FastLED.setBrightness(10);
-        ESP_LOGD(TAG, "FastLED.addLeds n:%d", nrOfLeds);
 
         #if FT_ENABLED(FT_FILEMANAGER)
         //create a handler which recompiles the animation when the file of the current animation changes
@@ -71,7 +72,7 @@ public:
 
                         if (updatedItem == animation) {
                             ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                            compileAndRun(animation);
+                            compileAndRun(animation.c_str());
                         }
                     }
                 }
@@ -145,15 +146,15 @@ public:
     void onUpdate(UpdatedItem updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>());
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (updatedItem.getParentName() == "nodes" && updatedItem.name == "animation") {    
             int index = updatedItem.getParentIndex();
-            animation = _state.data["nodes"][index]["animation"].as<String>();
-            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), animation.c_str());
+            const char *animation = _state.data["nodes"][index]["animation"].as<const char *>();
+            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), animation);
             compileAndRun(animation);
         } else
-            ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
     }
 
     void loop()
@@ -194,10 +195,11 @@ public:
         //     delay(1); //to avoid watchdog crash
     }
 
-    void compileAndRun(String &animation) {
+    void compileAndRun(const char * animation) {
 
         #if FT_LIVESCRIPT
-            ESP_LOGD(TAG, "animation %s", animation.c_str());
+        
+            ESP_LOGD(TAG, "animation %s", animation);
 
             if (animation[0] != '/') { //no sc script
                 return;
@@ -213,8 +215,8 @@ public:
             //send UI spinner
         
             //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-            runInLoopTask.push_back([&] {
-                ESP_LOGD(TAG, "compileAndRun %s (%d)", animation.c_str());
+            // runInLoopTask.push_back([&] {
+                ESP_LOGD(TAG, "compileAndRun %s (%d)", animation);
                 File file = ESPFS.open(animation);
                 if (file) {
                     std::string scScript = file.readString().c_str();
@@ -222,8 +224,8 @@ public:
                     file.close();
         
                     Executable executable = parser.parseScript(&scScript);
-                    executable.name = animation.c_str();
-                    ESP_LOGD(TAG, "parsing %s done\n", animation.c_str());
+                    executable.name = string(animation);
+                    ESP_LOGD(TAG, "parsing %s done\n", animation);
                     scriptRuntime.addExe(executable);
                     ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
         
@@ -231,7 +233,7 @@ public:
                         executable.execute("main"); //background task (async - vs sync)
 
                 }
-            });
+            // });
         #endif
     
         //stop UI spinner
