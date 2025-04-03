@@ -55,13 +55,13 @@
 				{
 					title: 'Animations',
 					icon: BulbIcon,
-					href: '/custom/module?module=animations',
+					href: '/modules/module?module=animations',
 					feature: page.data.features.moonlight,
 				},
 				{
 					title: 'Demo',
 					icon: BulbIcon,
-					href: '/custom/module?module=demo',
+					href: '/modules/module?module=demo',
 					feature: true,
 				},
 			]
@@ -130,7 +130,7 @@
 				{
 					title: 'File Manager',
 					icon: FilesIcon,
-					href: '/custom/files',
+					href: '/system/files',
 					feature: page.data.features.filemanager,
 				},
 				{

@@ -8,7 +8,7 @@ With Moonbase Modules it is possible to create new module entirely from one c++ 
 
 This is inspired by WLED usermods, further developed in StarBase and now MoonBase (using the ESP32-Sveltekit infrastructure)
 
-See [Demo](https://moonmodules.org/MoonLight/custom/module/demo/) and [Animations](https://moonmodules.org/MoonLight/custom/module/animations/) as examples
+See [Demo](module/demo.md) and [Animations](module/animations.md) for examples
 
 ## Technical
 
