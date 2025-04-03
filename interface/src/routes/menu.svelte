@@ -48,27 +48,21 @@
 
 	let menuItems = $state([
 		{
-			title: 'Custom',
+			title: 'Modules',
 			icon: StarIcon,
 			feature: true,
 			submenu: [
 				{
-					title: 'Module Animations',
+					title: 'Animations',
 					icon: BulbIcon,
 					href: '/custom/module?module=animations',
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Module Demo',
+					title: 'Demo',
 					icon: BulbIcon,
 					href: '/custom/module?module=demo',
 					feature: true,
-				},
-				{
-					title: 'File Manager',
-					icon: FilesIcon,
-					href: '/custom/files',
-					feature: page.data.features.filemanager,
 				},
 			]
 		},
@@ -132,6 +126,12 @@
 					icon: Metrics,
 					href: '/system/metrics',
 					feature: page.data.features.analytics
+				},
+				{
+					title: 'File Manager',
+					icon: FilesIcon,
+					href: '/custom/files',
+					feature: page.data.features.filemanager,
 				},
 				{
 					title: 'Firmware Update',

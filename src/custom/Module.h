@@ -12,6 +12,7 @@
 #ifndef Module_h
 #define Module_h
 
+#undef TAG
 #define TAG "🌙"
 
 #include <EventSocket.h>

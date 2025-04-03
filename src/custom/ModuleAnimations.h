@@ -14,10 +14,10 @@
 
 #if FT_MOONLIGHT == 1
 
-
 #include "Module.h"
 
-#define TAG "🌟"
+#undef TAG
+#define TAG "💫"
 
 #include "FastLED.h"
 #define MAXLEDS 8192

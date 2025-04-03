@@ -29,6 +29,9 @@
 
 #define SERIAL_BAUD_RATE 115200
 
+#undef TAG
+#define TAG "🌙"
+
 PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, 120);

@@ -11,8 +11,6 @@
 
 #include "Module.h"
 
-#define TAG "🌙"
-
 void setDefaults(JsonObject root, JsonArray definition) {
     for (JsonObject property: definition) {
         if (property["type"] != "array") {

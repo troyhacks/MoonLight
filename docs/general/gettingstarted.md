@@ -70,7 +70,7 @@
 
 ### Current script supported
 
-```
+```cpp
 void setup() {
   printf("Run Live Script good afternoon\n");
 }
@@ -81,7 +81,7 @@ void main() {
 
 ### Homework assignment
 
-```
+```cpp
 void setup() {
   printf("Run Live Script good morning\n");
 }

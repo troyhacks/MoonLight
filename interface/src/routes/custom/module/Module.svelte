@@ -131,7 +131,7 @@
 		<Router  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span >Module {page.url.searchParams.get('module')}</span>
+		<span>{page.url.searchParams.get('module')}</span>
 	{/snippet}
 
 	{#if !page.data.features.security || $user.admin}

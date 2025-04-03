@@ -14,8 +14,6 @@
 
 #include "Module.h"
 
-#define TAG "🌙"
-
 class ModuleDemo : public Module
 {
 public:

@@ -6,11 +6,11 @@
 
 ## Technical
 
-* See [Modules](../modules/)
+* See [Modules](/docs/custom/modules.md)
 
 ### Server
 
-[ModuleDemo.h](/src/custom/ModuleDemo.h)
+[ModuleDemo.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleDemo.h)
 
 ### UI
 

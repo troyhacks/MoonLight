@@ -17,11 +17,11 @@
 
 ## Technical
 
-* See [Modules](../modules/)
+* See [Modules](/docs/custom/modules.md)
 
 ### Server
 
-[ModuleAnimations.h](/src/custom/ModuleAnimations.h)
+[ModuleAnimations.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleAnimations.h)
 
 ### UI
 

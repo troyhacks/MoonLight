@@ -52,7 +52,15 @@ The menu consists of an array of menu items. These are defined as follows:
 },
 ```
 
-- Where `title` refers to the page title. It must be identical to `page.data.title` as defined in the `+page.ts` in any of your routes. If they do not match the corresponding menu item is not highlighted on first page load or a page refresh. A minimum `+page.ts` looks like this:
+- Where `title` refers to the page title. It must be identical to `page.data.title` as defined in the `+page.ts` in any of your routes. If they do not match the corresponding menu item is not highlighted on first page load or a page refresh. 
+
+<img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/>
+
+!!! info 
+
+    Note: In MoonBase matching is not done on title but on href, which is not compared with page.ts title but with page.url.pathname + page.url.search (see Menu.svelte)
+
+A minimum `+page.ts` looks like this:
 
 ```ts
 import type { PageLoad } from "./$types";
