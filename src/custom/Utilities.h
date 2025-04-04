@@ -3,7 +3,7 @@
     @file      Utilities.h
     @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
     @Authors   https://github.com/ewowi/MoonBase/commits/main
-    @Doc       https://ewowi.github.io/MoonBase/general/utilties/
+    @Doc       https://ewowi.github.io/MoonBase/general/utilities/
     @Copyright © 2025 Github MoonBase Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
@@ -14,6 +14,7 @@
 #include <Arduino.h>
 #include "ArduinoJson.h"
 
+//See https://discord.com/channels/473448917040758787/718943978636050542/1357670679196991629
 template <size_t N>
 struct Char {
     char s[N] = "";
@@ -47,6 +48,9 @@ struct Char {
     //compare
     bool operator==(const char *rhs) {
       return strcmp(s, rhs) == 0;
+    }
+    bool operator==(Char & rhs) {
+        return strcmp(s, rhs.s) == 0;
     }
     bool operator!=(const char *rhs) {
         return strcmp(s, rhs) != 0;

@@ -69,8 +69,8 @@
 		dataEditable = {};
 
 		//set properties with their defaults
-		for (let i = 0; i < localDefinition.length; i++) {
-			let property = localDefinition[i];
+		for (let i = 0; i < definition.length; i++) {
+			let property = definition[i];
 			if (property.name == propertyName) {
                 console.log("addItem def", propertyName, property)
 				for (let i=0; i < property.n.length; i++) {

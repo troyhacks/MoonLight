@@ -57,8 +57,8 @@ public:
         ESP_LOGD(TAG, "");
 
         #if FT_ENABLED(FT_FILEMANAGER)
-        //create a handler which recompiles the animation when the file of the current animation changes
 
+        //create a handler which recompiles the animation when the file of the current animation changes
         _filesService->addUpdateHandler([&](const String &originId)
         { 
             ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
@@ -192,8 +192,6 @@ public:
     {
         if (_state.data["driverOn"])
             FastLED.show();
-        // else 
-        //     delay(1); //to avoid watchdog crash
     }
 
     void compileAndRun(const char * animation) {
