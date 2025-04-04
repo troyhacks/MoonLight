@@ -2,7 +2,7 @@
 
 ### Customize UI and app specific
 
-* {custom} = MoonLight
+* {custom} = MoonBase / MoonLight
 
 * docs/media/
     * add {custom}-logo.png
@@ -70,7 +70,7 @@
 * Add Monitor
     * socket.ts: add else listeners.get("monitor")?.forEach((listener) => listener(new Uint8Array(message.data)));
     * EventSocket.cpp: add void EventSocket::emitEvent with char * argument
-* Add MoonLight specific functionality (Currently fixtures and effects)
+* Add MoonBase / MoonLight specific functionality (Currently fixtures and effects)
 * ESP32SvelteKit.cpp: 
     * CPU load, loops per second (and main.cpp)
     * comment response.addHeader("Cache-Control", "public, immutable, max-age=31536000");
@@ -79,7 +79,7 @@
 * interface/source/routes/statusbar.svelte
     * show help: 
 ```html
-<a href="https://moonmodules.org{window.location.pathname} target="_blank">?</a>
+<a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname + addModuleToURL()}" target="_blank">?</a>
 ```
 * main.cpp: esp_log_set_vprintf(my_vprintf); WIP
 * ci pio

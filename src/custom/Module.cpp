@@ -1,10 +1,10 @@
 /**
-    @title     MoonLight
+    @title     MoonBase
     @file      Module.cpp
-    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
-    @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/moonlight/animation/
-    @Copyright © 2025 Github MoonLight Commit Authors
+    @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
+    @Authors   https://github.com/ewowi/MoonBase/commits/main
+    @Doc       https://ewowi.github.io/MoonBase/modules/modules/
+    @Copyright © 2025 Github MoonBase Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
@@ -208,7 +208,7 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
     JsonArray details;
     JsonArray values;
 
-    property = root.add<JsonObject>(); property["name"] = "text"; property["type"] = "text"; property["default"] = "MoonLight";
+    property = root.add<JsonObject>(); property["name"] = "text"; property["type"] = "text"; property["default"] = "MoonBase";
 }
 
 void Module::onUpdate(UpdatedItem updatedItem)
@@ -219,7 +219,7 @@ void Module::onUpdate(UpdatedItem updatedItem)
 int UpdatedItem::getParentIndex(int depth) {
     int indexFrom = parent.indexOf("[");
     int indexTo = parent.indexOf("]");
-    if (indexFrom >=0 && indexTo < parent.size()) {
+    if (indexFrom >=0 && indexTo < parent.length()) {
         // ESP_LOGD(TAG, "getParentIndex %s %s %d %d", parent.c_str(), parent.substring(indexFrom+1, indexTo), indexFrom, indexTo);
         return parent.substring(indexFrom+1, indexTo).toInt();
     }
@@ -231,7 +231,7 @@ Char<32> UpdatedItem::getParentName(int depth) {
     Char<32> returnValue;
     int indexFrom = parent.indexOf("[");
     int indexTo = parent.indexOf("]");
-    if (indexFrom >=0 && indexTo < parent.size()) {
+    if (indexFrom >=0 && indexTo < parent.length()) {
         // ESP_LOGD(TAG, "getParentName %s %s f:%d t:%d", parent.c_str(), parent.substring(0, indexFrom).c_str(), indexFrom, indexTo);
         returnValue = parent.substring(0, indexFrom);
     }

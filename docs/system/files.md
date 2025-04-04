@@ -21,7 +21,7 @@
 * confirmDelete: when delete button pressed
 * socket files / handleFileState (->folderListFromBreadCrumbs)
 
-Using component FileEdit, see [Components](https://moonmodules.org/MoonLight/components/#fileedit)
+Using component FileEdit, see [Components](https://ewowi.github.io/MoonBase/components/#fileedit)
 
 ### Server
 

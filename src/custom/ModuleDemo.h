@@ -1,10 +1,10 @@
 /**
-    @title     MoonLight
+    @title     MoonBase
     @file      ModuleDemo.h
-    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
-    @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/custom/animation/
-    @Copyright © 2025 Github MoonLight Commit Authors
+    @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
+    @Authors   https://github.com/ewowi/MoonBase/commits/main
+    @Doc       https://ewowi.github.io/MoonBase/modules/module/demo/
+    @Copyright © 2025 Github MoonBase Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
@@ -33,7 +33,7 @@ void setupDefinition(JsonArray root) override{
     JsonArray details;
     JsonArray values;
 
-    property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonLight";
+    property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonBase";
     property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
     values.add("Offline");
     values.add("Signal Strength");
@@ -57,7 +57,7 @@ void setupDefinition(JsonArray root) override{
             }
         }
 
-        // {"hostName":"MoonLight","connectionMode":"Priority","savedNetworks":[],"invoices":[{"number":1000,"name":"ewowi","date":"2025-03-21", "lines":[{"service":"con", "price":124}]}]}
+        // {"hostName":"MoonBase","connectionMode":"Priority","savedNetworks":[],"invoices":[{"number":1000,"name":"ewowi","date":"2025-03-21", "lines":[{"service":"con", "price":124}]}]}
 
         // char buffer[256];
         // serializeJson(root, buffer, sizeof(buffer));

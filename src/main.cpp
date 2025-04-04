@@ -82,6 +82,25 @@ void setup()
     #endif
 
     moduleDemo.begin();
+
+    // String shortString = "Hello world";
+    // String longString = "Hello world, this is a long string that is longer than 32 characters";
+    // Char<32> averageChar; averageChar = "Hello world";
+
+    // String microString = "Hi";
+    // ESP_LOGD(TAG, "microString: %s", microString.c_str());
+    // ESP_LOGD(TAG, "microString length: %d", microString.length());
+    // ESP_LOGD(TAG, "microString size: %d", sizeof(microString));
+
+    // ESP_LOGD(TAG, "shortString: %s", shortString.c_str());
+    // ESP_LOGD(TAG, "longString: %s", longString.c_str());
+    // ESP_LOGD(TAG, "averageChar: %s", averageChar.c_str());
+    // ESP_LOGD(TAG, "shortString length: %d", shortString.length());
+    // ESP_LOGD(TAG, "longString length: %d", longString.length());
+    // ESP_LOGD(TAG, "averageChar length: %d", averageChar.length());
+    // ESP_LOGD(TAG, "shortString size: %d", sizeof(shortString));
+    // ESP_LOGD(TAG, "longString size: %d", sizeof(longString));
+    // ESP_LOGD(TAG, "averageChar size: %d", sizeof(averageChar));
 }
 
 void loop()

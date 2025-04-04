@@ -1,10 +1,10 @@
 /**
-    @title     MoonLight
+    @title     MoonBase
     @file      ModuleAnimations.h
-    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
-    @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/custom/animation/
-    @Copyright © 2025 Github MoonLight Commit Authors
+    @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
+    @Authors   https://github.com/ewowi/MoonBase/commits/main
+    @Doc       https://ewowi.github.io/MoonBase/modules/module/animations/
+    @Copyright © 2025 Github MoonBase Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
@@ -150,9 +150,9 @@ public:
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (updatedItem.getParentName() == "nodes" && updatedItem.getParentIndex() >= 0 && updatedItem.name == "animation") {    
             ESP_LOGD(TAG, "handle %s.%s = (%s -> %s)", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.c_str());
-            if (updatedItem.oldValue.size())
+            if (updatedItem.oldValue.length())
                 ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
-            if (updatedItem.value.size())
+            if (updatedItem.value.length())
                 compileAndRun(updatedItem.value.c_str());
         } else
             ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
