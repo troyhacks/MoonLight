@@ -4,13 +4,21 @@
 
 ## Functional
 
-With Moonbase Modules it is possible to create new module entirely from one c++ class by only defining a json document describing the data structure and a function catching all the changes in the data. Http endpont and websockets are created automatically. There is no need to create any UI code, it is entirely driven by the json document.
+A module is a generic building block to create server and UI functionality which can be activated through the menu.
 
-This is inspired by WLED usermods, further developed in StarBase and now MoonBase (using the ESP32-Sveltekit infrastructure)
+MoonBase-Modules are inspired by WLED usermods, further developed in StarBase and now in MoonBase (using the ESP32-Sveltekit infrastructure)
 
 See [Demo](module/demo.md) and [Animations](module/animations.md) for examples
 
+Press the ? on any module to go to the documentation.
+
 ## Technical
+
+With Moonbase Modules it is possible to create new module entirely from one c++ class by only defining a json document describing the data structure and a function catching all the changes in the data. Http endpont and websockets are created automatically. There is no need to create any UI code, it is entirely driven by the json document.
+
+Each module has each own documentation which can be accessed by pressing the ? and is defined in the [docs](https://github.com/ewowi/MoonBase/tree/main/docs) folder.
+
+To create a new module:
 
 * Create a class which inherits from Module
 * Call the Module constructor with the name of the module.
@@ -26,7 +34,7 @@ ModuleDemo(PsychicHttpServer *server
       , ESP32SvelteKit *sveltekit
       , FilesService *filesService
     ) : Module("demo", server, sveltekit, filesService) {
-        ESP_LOGD(TAG, "ModuleDemo::constructor");
+        ESP_LOGD(TAG, "constructor");
     }
 }
 ```
@@ -68,11 +76,12 @@ void setupDefinition(JsonArray root) override{
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
             ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-        } else if (updatedItem.getParentName() == "nodes" && updatedItem.name == "animation") {    
-            int index = updatedItem.getParentIndex();
-            const char *animation = _state.data["nodes"][index]["animation"].as<const char *>();
-            ESP_LOGD(TAG, "handle %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), animation);
-            compileAndRun(animation);
+        } else if (updatedItem.getParentName() == "nodes" && updatedItem.getParentIndex() >= 0 && updatedItem.name == "animation") {    
+            ESP_LOGD(TAG, "handle %s.%s = (%s -> %s)", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+            if (updatedItem.oldValue.size())
+                ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
+            if (updatedItem.value.size())
+                compileAndRun(updatedItem.value.c_str());
         } else
             ESP_LOGD(TAG, "no handle for %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
     }

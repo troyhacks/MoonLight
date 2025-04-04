@@ -27,13 +27,16 @@
     #include "FilesService.h"
 #endif
 
+#include "Utilities.h"
+
 struct UpdatedItem {
-    String parent;
-    String name;
-    String value;
+    Char<64> parent; //like nodes[0]controls[1]
+    Char<32> name;
+    Char<32> oldValue;
+    Char<32> value;
 
     int getParentIndex(int depth = 0);
-    String getParentName(int depth = 0);
+    Char<32> getParentName(int depth = 0);
 };
 
 class ModuleState

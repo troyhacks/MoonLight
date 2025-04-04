@@ -77,9 +77,10 @@ void ModuleState::compareRecursive(JsonString parent, JsonVariant oldData, JsonV
             } else { // if property is key/value
                 ESP_LOGD(TAG, "%s: %s -> %s", key.c_str(), oldValue.as<String>().c_str(), newValue.as<String>().c_str());
                 UpdatedItem newItem;
-                newItem.parent = String(parent.c_str());
-                newItem.name = String(key.c_str());
-                newItem.value = newValue.as<String>();
+                newItem.parent = parent;
+                newItem.name = key;
+                newItem.oldValue = oldValue;
+                newItem.value = newValue;
                 updatedItems.push_back(newItem);
             }
         }
@@ -218,11 +219,21 @@ void Module::onUpdate(UpdatedItem updatedItem)
 int UpdatedItem::getParentIndex(int depth) {
     int indexFrom = parent.indexOf("[");
     int indexTo = parent.indexOf("]");
-    return parent.substring(indexFrom+1, indexTo).toInt();
+    if (indexFrom >=0 && indexTo < parent.size()) {
+        // ESP_LOGD(TAG, "getParentIndex %s %s %d %d", parent.c_str(), parent.substring(indexFrom+1, indexTo), indexFrom, indexTo);
+        return parent.substring(indexFrom+1, indexTo).toInt();
+    }
+    else
+        return -1;
 }
 
-String UpdatedItem::getParentName(int depth) {
+Char<32> UpdatedItem::getParentName(int depth) {
+    Char<32> returnValue;
     int indexFrom = parent.indexOf("[");
     int indexTo = parent.indexOf("]");
-    return parent.substring(0, indexFrom);
+    if (indexFrom >=0 && indexTo < parent.size()) {
+        // ESP_LOGD(TAG, "getParentName %s %s f:%d t:%d", parent.c_str(), parent.substring(0, indexFrom).c_str(), indexFrom, indexTo);
+        returnValue = parent.substring(0, indexFrom);
+    }
+    return returnValue;
 }
