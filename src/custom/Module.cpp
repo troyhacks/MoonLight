@@ -118,10 +118,8 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
 }
 
 Module::Module(String moduleName, PsychicHttpServer *server,
-    ESP32SvelteKit *sveltekit
-    #if FT_ENABLED(FT_FILEMANAGER)
-        , FilesService *filesService
-    #endif
+    ESP32SvelteKit *sveltekit,
+    FilesService *filesService
   ): _httpEndpoint(ModuleState::read,
                       ModuleState::update,
                       this,
@@ -154,9 +152,7 @@ Module::Module(String moduleName, PsychicHttpServer *server,
     _server = server;
 
     // configure settings service update handler to update state
-    #if FT_ENABLED(FT_FILEMANAGER)
-        _filesService = filesService;
-    #endif
+    _filesService = filesService;
 
     addUpdateHandler([&](const String &originId)
                      { onConfigUpdated(); },

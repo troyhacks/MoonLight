@@ -64,8 +64,8 @@
 
 //custom
 
-#ifndef FT_FILEMANAGER
-#define FT_FILEMANAGER 1
+#ifndef FT_MOONBASE
+#define FT_MOONBASE 1
 #endif
 
 #ifndef FT_MOONLIGHT

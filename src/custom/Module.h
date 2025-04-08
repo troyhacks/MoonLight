@@ -23,9 +23,7 @@
 #include <FSPersistence.h>
 #include <ESP32SvelteKit.h>
 
-#if FT_ENABLED(FT_FILEMANAGER)
-    #include "FilesService.h"
-#endif
+#include "FilesService.h"
 
 #include "Utilities.h"
 
@@ -67,10 +65,8 @@ public:
     String _moduleName = "";
 
     Module(String moduleName, PsychicHttpServer *server,
-                      ESP32SvelteKit *sveltekit
-                      #if FT_ENABLED(FT_FILEMANAGER)
-                          , FilesService *filesService
-                      #endif
+                      ESP32SvelteKit *sveltekit,
+                      FilesService *filesService
                     );
 
     void begin();
@@ -81,9 +77,7 @@ public:
 
 protected:
     EventSocket *_socket;
-    #if FT_ENABLED(FT_FILEMANAGER)
-        FilesService *_filesService;
-    #endif
+    FilesService *_filesService;
 
 private:
     HttpEndpoint<ModuleState> _httpEndpoint;

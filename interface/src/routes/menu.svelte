@@ -48,21 +48,40 @@
 
 	let menuItems = $state([
 		{
-			title: 'Modules',
+			title: 'MoonLight',
 			icon: StarIcon,
 			feature: true,
 			submenu: [
 				{
 					title: 'Animations',
 					icon: BulbIcon,
-					href: '/modules/module?module=animations',
+					href: '/moonbase/module?module=animations',
 					feature: page.data.features.moonlight,
+				},
+			]
+		},
+		{
+			title: 'MoonBase',
+			icon: StarIcon,
+			feature: true,
+			submenu: [
+				{
+					title: 'File Manager',
+					icon: FilesIcon,
+					href: '/moonbase/files',
+					feature: page.data.features.moonbase,
+				},
+				{
+					title: 'Instances',
+					icon: BulbIcon,
+					href: '/moonbase/module?module=instances',
+					feature: page.data.features.moonbase,
 				},
 				{
 					title: 'Demo',
 					icon: BulbIcon,
-					href: '/modules/module?module=demo',
-					feature: true,
+					href: '/moonbase/module?module=demo',
+					feature: page.data.features.moonbase,
 				},
 			]
 		},
@@ -126,12 +145,6 @@
 					icon: Metrics,
 					href: '/system/metrics',
 					feature: page.data.features.analytics
-				},
-				{
-					title: 'File Manager',
-					icon: FilesIcon,
-					href: '/system/files',
-					feature: page.data.features.filemanager,
 				},
 				{
 					title: 'Firmware Update',

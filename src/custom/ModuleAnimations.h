@@ -37,10 +37,8 @@ public:
     #endif
 
     ModuleAnimations(PsychicHttpServer *server,
-        ESP32SvelteKit *sveltekit
-        #if FT_ENABLED(FT_FILEMANAGER)
-            , FilesService *filesService
-        #endif
+        ESP32SvelteKit *sveltekit,
+        FilesService *filesService
     ) : Module("animations", server, sveltekit, filesService) {
         ESP_LOGD(TAG, "constructor");
 
@@ -55,8 +53,6 @@ public:
         Module::begin();
 
         ESP_LOGD(TAG, "");
-
-        #if FT_ENABLED(FT_FILEMANAGER)
 
         //create a handler which recompiles the animation when the file of the current animation changes
         _filesService->addUpdateHandler([&](const String &originId)
@@ -79,8 +75,6 @@ public:
             });
         });
 
-        #endif
-
         _socket->registerEvent("livescripts");
     }
 
@@ -100,16 +94,14 @@ public:
             values.add("Sinelon");
             values.add("Rainbow");
             //find all the .sc files on FS
-            #if FT_ENABLED(FT_FILEMANAGER)
-                File rootFolder = ESPFS.open("/");
-                walkThroughFiles(rootFolder, [&](File folder, File file) {
-                    if (strstr(file.name(), ".sc")) {
-                        // ESP_LOGD(TAG, "found file %s", file.path());
-                        values.add((char *)file.path());
-                    }
-                });
-                rootFolder.close();
-            #endif
+            File rootFolder = ESPFS.open("/");
+            walkThroughFiles(rootFolder, [&](File folder, File file) {
+                if (strstr(file.name(), ".sc")) {
+                    // ESP_LOGD(TAG, "found file %s", file.path());
+                    values.add((char *)file.path());
+                }
+            });
+            rootFolder.close();
             property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Effect"; values = property["values"].to<JsonArray>();
             values.add("Fixture definition");
             values.add("Fixture mapping");

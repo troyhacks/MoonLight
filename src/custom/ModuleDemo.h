@@ -18,30 +18,28 @@ class ModuleDemo : public Module
 {
 public:
 
-ModuleDemo(PsychicHttpServer *server,
-        ESP32SvelteKit *sveltekit
-        #if FT_ENABLED(FT_FILEMANAGER)
-            , FilesService *filesService
-        #endif
-    ) : Module("demo", server, sveltekit, filesService) {
-        ESP_LOGD(TAG, "constructor");
-    }
+    ModuleDemo(PsychicHttpServer *server,
+            ESP32SvelteKit *sveltekit,
+            FilesService *filesService
+        ) : Module("demo", server, sveltekit, filesService) {
+            ESP_LOGD(TAG, "constructor");
+        }
 
-void setupDefinition(JsonArray root) override{
-    ESP_LOGD(TAG, "");
-    JsonObject property;
-    JsonArray details;
-    JsonArray values;
+    void setupDefinition(JsonArray root) override{
+        ESP_LOGD(TAG, "");
+        JsonObject property;
+        JsonArray details;
+        JsonArray values;
 
-    property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonBase";
-    property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
-    values.add("Offline");
-    values.add("Signal Strength");
-    values.add("Priority");
+        property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonBase";
+        property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
+        values.add("Offline");
+        values.add("Signal Strength");
+        values.add("Priority");
 
-    property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-    {
-        property = details.add<JsonObject>(); property["name"] = "SSID"; property["type"] = "text"; property["default"] = "ewtr"; property["min"] = 3; property["max"] = 32; 
+        property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        {
+            property = details.add<JsonObject>(); property["name"] = "SSID"; property["type"] = "text"; property["default"] = "ewtr"; property["min"] = 3; property["max"] = 32; 
             property = details.add<JsonObject>(); property["name"] = "Password"; property["type"] = "password"; property["default"] = "";
         }
 
@@ -66,8 +64,9 @@ void setupDefinition(JsonArray root) override{
 
     void onUpdate(UpdatedItem updatedItem) override
     {
-        ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue, updatedItem.value.as<String>().c_str());
+        ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
+
 };
 
 #endif

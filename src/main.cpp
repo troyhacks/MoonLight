@@ -17,15 +17,15 @@
 #include <LightStateService.h>
 #include <PsychicHttpServer.h>
 
-#if FT_ENABLED(FT_FILEMANAGER)
+#if FT_ENABLED(FT_MOONBASE)
     #include "custom/FilesService.h"
-#endif
+    #include "custom/ModuleInstances.h"
+    #include "custom/ModuleDemo.h"
 
-#if FT_ENABLED(FT_MOONLIGHT)
-    #include "custom/ModuleAnimations.h"
+    #if FT_ENABLED(FT_MOONLIGHT)
+        #include "custom/ModuleAnimations.h"
     #endif
-
-#include "custom/ModuleDemo.h"
+#endif
 
 #define SERIAL_BAUD_RATE 115200
 
@@ -43,21 +43,16 @@ LightStateService lightStateService = LightStateService(&server,
                                                         &esp32sveltekit,
                                                         &lightMqttSettingsService);
 
-#if FT_ENABLED(FT_FILEMANAGER)
+#if FT_ENABLED(FT_MOONBASE)
     FilesService filesService = FilesService(&server, &esp32sveltekit);
+    ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit, &filesService);
     ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
-#else
-    ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit);
-#endif
-    
-#if FT_ENABLED(FT_MOONLIGHT)
-    #if FT_ENABLED(FT_FILEMANAGER)
+
+    #if FT_ENABLED(FT_MOONLIGHT)
         ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit, &filesService);
-    #else
-        ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit);
     #endif
 #endif
-
+    
 void setup()
 {
     // start serial and filesystem
@@ -68,20 +63,20 @@ void setup()
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
 
-    #if FT_ENABLED(FT_FILEMANAGER)
+    #if FT_ENABLED(FT_MOONBASE)
         filesService.begin();
+        moduleInstances.begin();
+        moduleDemo.begin();
+
+        #if FT_ENABLED(FT_MOONLIGHT)
+            moduleAnimations.begin();
+        #endif
     #endif
 
     // load the initial light settings
     lightStateService.begin();
     // start the light service
     lightMqttSettingsService.begin();
-
-    #if FT_ENABLED(FT_MOONLIGHT)
-        moduleAnimations.begin();
-    #endif
-
-    moduleDemo.begin();
 
     // String shortString = "Hello world";
     // String longString = "Hello world, this is a long string that is longer than 32 characters";
@@ -107,8 +102,28 @@ void setup()
 void loop()
 {
     esp32sveltekit.lps++;
+
     #if FT_ENABLED(FT_MOONLIGHT)
-        moduleAnimations.loop();
+
+        //20ms loop
+        static int lastTime1s = 0;
+        if (millis() - lastTime1s > 1000)
+        {
+            lastTime1s = millis();
+            moduleInstances.loop1s();
+        }
+
+        //10s loop
+        static int lastTime10s = 0;
+        if (millis() - lastTime10s > 10000)
+        {
+            lastTime10s = millis();
+            moduleInstances.loop10s();
+        }
+
+        #if FT_ENABLED(FT_MOONLIGHT)
+            moduleAnimations.loop();
+        #endif
     #endif
 
     while (!runInLoopTask.empty())

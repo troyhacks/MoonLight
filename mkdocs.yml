@@ -5,10 +5,13 @@ nav:
   - General:
       - general/gettingstarted.md
       - general/customizingsveltekit.md
-  - "Modules":
-      - modules/modules.md
-      - modules/module/animations.md
-      - modules/module/demo.md
+  - "MoonLight":
+      - moonbase/module/animations.md
+  - "MoonBase":
+      - moonbase/modules.md
+      - moonbase/files.md
+      - moonbase/module/instances.md
+      - moonbase/module/demo.md
   - "Connections":
       - connections/mqtt.md
       - connections/ntp.md
@@ -18,7 +21,6 @@ nav:
   - "System":
       - system/status.md
       - system/metrics.md
-      - system/files.md
   - "ESP32 SveleteKit": 
       - esp32sveltekit.md
   - "Build Tools":

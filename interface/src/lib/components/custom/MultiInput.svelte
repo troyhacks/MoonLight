@@ -134,6 +134,20 @@
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     />
+{:else if property.type == "ip"}
+    <input 
+        type={property.type}
+        class="input input-bordered invalid:border-error invalid:border-2"
+        minlength={property.min}
+        maxlength={property.max}
+        bind:value={value}
+        on:change={onChange}
+        on:input={(event:any) => {if (changeOnInput) onChange(event)}}
+    />
+    <a 
+        href="http://{value}"
+        target ="_blank"
+    >{value}</a>
 {:else if property.type == "button"}
     <button class="btn btn-primary" type="button" on:click={(event:any) => {if (value==null) value = 1; else value++; onChange(event)}}
     >{property.name}</button

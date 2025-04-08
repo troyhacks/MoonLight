@@ -115,10 +115,10 @@ void FeaturesService::createJSON(JsonObject &root)
     }
     
     //Custom
-    #if FT_ENABLED(FT_FILEMANAGER)
-        root["filemanager"] = true;
+    #if FT_ENABLED(FT_MOONBASE)
+        root["moonbase"] = true;
     #else
-        root["filemanager"] = false;
+        root["moonbase"] = false;
     #endif
     #if FT_ENABLED(FT_MOONLIGHT)
         root["moonlight"] = true;

@@ -12,7 +12,7 @@
 #ifndef FilesService_h
 #define FilesService_h
 
-#if FT_FILEMANAGER == 1
+#if FT_MOONBASE == 1
 
 #include <EventSocket.h>
 #include <HttpEndpoint.h>
