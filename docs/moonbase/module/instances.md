@@ -1,6 +1,6 @@
 # Instances module
 
-<img width="517" alt="image" src="https://github.com/user-attachments/assets/022fde4d-9a3b-456c-ade5-e18219e5a5d5" />
+<img width="522" alt="image" src="https://github.com/user-attachments/assets/68cbbef1-bcd7-4333-a4d9-904d3e08b243" />
 
 ## Functional
 
