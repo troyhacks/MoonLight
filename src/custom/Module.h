@@ -29,14 +29,20 @@
 
 #include "Utilities.h"
 
+//sizeof was 160 chars -> 80 -> 40
 struct UpdatedItem {
-    Char<64> parent; //like nodes[0]controls[1]
-    Char<32> name;
-    Char<32> oldValue;
-    Char<32> value;
+    const char *parent[2]; //24 -> 8
+    uint8_t index[2]; //2x1 = 2
+    const char *name; //16 -> 4
+    String oldValue; //32 -> 16, smaller then 11 bytes mostly
+    JsonVariant value; //8
 
-    int getParentIndex(int depth = 0);
-    Char<32> getParentName(int depth = 0);
+    UpdatedItem() {
+        parent[0] = nullptr; //will be checked in onUpdate
+        parent[1] = nullptr;
+        index[0] = UINT8_MAX;
+        index[1] = UINT8_MAX;
+    }
 };
 
 class ModuleState
@@ -49,7 +55,7 @@ public:
     std::function<void(JsonArray root)> setupDefinition = nullptr;
 
     void setupData();
-    void compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData);
+    void compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth = UINT8_MAX, uint8_t index =UINT8_MAX);
 
     static void read(ModuleState &state, JsonObject &root);
     static StateUpdateResult update(JsonObject &root, ModuleState &state);

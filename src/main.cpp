@@ -101,6 +101,7 @@ void setup()
     // ESP_LOGD(TAG, "shortString size: %d", sizeof(shortString));
     // ESP_LOGD(TAG, "longString size: %d", sizeof(longString));
     // ESP_LOGD(TAG, "averageChar size: %d", sizeof(averageChar));
+    // ESP_LOGD(TAG, "UpdatedItem size: %d = %d + %d + %d ...", sizeof(UpdatedItem), sizeof(JsonString), sizeof(JsonVariant), sizeof(String));
 }
 
 void loop()

@@ -51,37 +51,41 @@ void ModuleState::read(ModuleState &state, JsonObject &root)
     root.set(state.data.as<JsonObject>()); //copy
 }
 
-void ModuleState::compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData) {
+void ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth, uint8_t index) {
     //collect old and new keys
     std::vector<JsonString> keys; // Container to store unique keys
     auto addUniqueKey = [&keys](const JsonString key) {if (std::find(keys.begin(), keys.end(), key) == keys.end()) keys.push_back(key);}; // Helper lambda to add keys to the vector if they don't already exist
-    for (JsonPair oldProperty : oldData.as<JsonObject>()) addUniqueKey(oldProperty.key()); // Collect keys from oldData
+    for (JsonPair stateProperty : stateData.as<JsonObject>()) addUniqueKey(stateProperty.key()); // Collect keys from stateData
     for (JsonPair newProperty : newData.as<JsonObject>()) addUniqueKey(newProperty.key()); // Collect keys from newData
 
     for (const JsonString key: keys) { //loop over keys
-        JsonVariant oldValue = oldData[key.c_str()];
+        JsonVariant stateValue = stateData[key.c_str()];
         JsonVariant newValue = newData[key.c_str()];
-        if (oldValue != newValue) { //if value changed
+        if (stateValue != newValue) { //if value changed
 
-            if (oldValue.is<JsonArray>() || newValue.is<JsonArray>()) { // if the property is an array
-                if (oldValue.isNull()) oldValue.to<JsonArray>();
-                JsonArray oldArray = oldValue.as<JsonArray>();
+            if (depth != UINT8_MAX) {
+                updatedItem.parent[depth] = parent.c_str();
+                updatedItem.index[depth] = index;
+            }
+
+            if (stateValue.is<JsonArray>() || newValue.is<JsonArray>()) { // if the property is an array
+                if (stateValue.isNull()) {stateData[key.c_str()].to<JsonArray>(); stateValue = stateData[key.c_str()];} // if old value is null, set to empty array
+                JsonArray oldArray = stateValue.as<JsonArray>();
                 JsonArray newArray = newValue.as<JsonArray>();
                 
                 for (int i = 0; i < max(oldArray.size(), newArray.size()); i++) { //compare each item in the array
-                    if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add enough new rows
-                    char prefix[128];
-                    snprintf(prefix, 128, "%s%s[%d]", parent.c_str(), key.c_str(), i);
-                    compareRecursive(prefix, oldArray[i], newArray[i]);
+                    if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add new row
+                    compareRecursive(key, oldArray[i], newArray[i], updatedItem, depth+1, i);
+                    if (oldArray.size() > newArray.size()) oldArray.remove(i); //remove old row
                 }
             } else { // if property is key/value
-                ESP_LOGD(TAG, "%s: %s -> %s", key.c_str(), oldValue.as<String>().c_str(), newValue.as<String>().c_str());
-                UpdatedItem newItem;
-                newItem.parent = parent;
-                newItem.name = key;
-                newItem.oldValue = oldValue;
-                newItem.value = newValue;
-                updatedItems.push_back(newItem);
+                updatedItem.name = key.c_str();
+                updatedItem.oldValue = stateValue.as<String>();
+                updatedItem.value = newValue;
+                updatedItems.push_back(updatedItem);
+
+                stateData[key.c_str()] = newValue; //update state
+                ESP_LOGD(TAG, "changed %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             }
         }
     }
@@ -103,12 +107,8 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
 
         //check which propertys have updated
         if (root != state.data) {
-            state.compareRecursive("", state.data, root);
-
-            state.data.set(root); //copy
-
-            if (state.updatedItems.size())
-                ESP_LOGD(TAG, "property %s", state.updatedItems.front().name.c_str());
+            UpdatedItem updatedItem;
+            state.compareRecursive("", state.data, root, updatedItem);
 
             return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
         } else
@@ -213,27 +213,5 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
 
 void Module::onUpdate(UpdatedItem updatedItem)
 {
-    ESP_LOGW(TAG, "not implemented %s.%s = %s", updatedItem.parent.c_str(), updatedItem.name.c_str(), updatedItem.value.c_str());
-}
-
-int UpdatedItem::getParentIndex(int depth) {
-    int indexFrom = parent.indexOf("[");
-    int indexTo = parent.indexOf("]");
-    if (indexFrom >=0 && indexTo < parent.length()) {
-        // ESP_LOGD(TAG, "getParentIndex %s %s %d %d", parent.c_str(), parent.substring(indexFrom+1, indexTo), indexFrom, indexTo);
-        return parent.substring(indexFrom+1, indexTo).toInt();
-    }
-    else
-        return -1;
-}
-
-Char<32> UpdatedItem::getParentName(int depth) {
-    Char<32> returnValue;
-    int indexFrom = parent.indexOf("[");
-    int indexTo = parent.indexOf("]");
-    if (indexFrom >=0 && indexTo < parent.length()) {
-        // ESP_LOGD(TAG, "getParentName %s %s f:%d t:%d", parent.c_str(), parent.substring(0, indexFrom).c_str(), indexFrom, indexTo);
-        returnValue = parent.substring(0, indexFrom);
-    }
-    return returnValue;
+    ESP_LOGW(TAG, "not implemented %s = %s", updatedItem.name, updatedItem.value.as<String>().c_str());
 }
