@@ -5,6 +5,7 @@ nav:
   - General:
       - general/gettingstarted.md
       - general/customizingsveltekit.md
+      - general/pull-requests.md
   - "MoonLight":
       - moonbase/module/animations.md
   - "MoonBase":
