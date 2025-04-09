@@ -12,6 +12,7 @@
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import ScanNetworks from './Scan.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
+	import Help from '~icons/tabler/help';
 	import AP from '~icons/tabler/access-point';
 	import Router from '~icons/tabler/router';
 	import MAC from '~icons/tabler/dna-2';
@@ -321,6 +322,7 @@
 	{/snippet}
 	{#snippet title()}
 		<span >WiFi Connection</span>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 	{/snippet}
 	<div class="w-full overflow-x-auto">
 		{#await getWifiStatus()}

@@ -9,6 +9,7 @@
 	import { notifications } from '$lib/components/toasts/notifications';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Collapsible from '$lib/components/Collapsible.svelte';
+	import Help from '~icons/tabler/help';
 	import MQTT from '~icons/tabler/topology-star-3';
 	import Client from '~icons/tabler/robot';
 	import type { MQTTSettings, MQTTStatus } from '$lib/types/models';
@@ -135,6 +136,7 @@
 	{/snippet}
 	{#snippet title()}
 		<span >MQTT</span>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 	{/snippet}
 	<div class="w-full overflow-x-auto">
 		{#await getMQTTStatus()}

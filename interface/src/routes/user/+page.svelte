@@ -14,6 +14,7 @@
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import EditUser from './EditUser.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
+	import Help from '~icons/tabler/help';
 	import Delete from '~icons/tabler/trash';
 	import AddUser from '~icons/tabler/user-plus';
 	import Edit from '~icons/tabler/pencil';
@@ -158,6 +159,7 @@
 					{/snippet}
 			{#snippet title()}
 						<span >Manage Users</span>
+						<div class="absolute right-20"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 					{/snippet}
 			{#await getSecuritySettings()}
 				<Spinner />

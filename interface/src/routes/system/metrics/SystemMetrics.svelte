@@ -5,6 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { Chart, registerables } from 'chart.js';
+	import Help from '~icons/tabler/help';
 	import Metrics from '~icons/tabler/report-analytics';
 	import { daisyColor } from '$lib/DaisyUiHelper';
 	import { analytics } from '$lib/stores/analytics';
@@ -428,6 +429,7 @@
 	{/snippet}
 	{#snippet title()}
 		<span >System Metrics</span>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 	{/snippet}
 
 	<div class="w-full overflow-x-auto">
