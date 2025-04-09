@@ -9,6 +9,7 @@
 	import { page } from '$app/state';
 	import { notifications } from '$lib/components/toasts/notifications';
 	import { TIME_ZONES } from './timezones';
+	import Help from '~icons/tabler/help';
 	import NTP from '~icons/tabler/clock-check';
 	import Server from '~icons/tabler/server';
 	import Clock from '~icons/tabler/clock';
@@ -158,6 +159,7 @@
 	{/snippet}
 	{#snippet title()}
 		<span >Network Time</span>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 	{/snippet}
 	<div class="w-full overflow-x-auto">
 		{#await getNTPStatus()}

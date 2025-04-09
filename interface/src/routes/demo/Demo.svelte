@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { notifications } from '$lib/components/toasts/notifications';
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
+	import Help from '~icons/tabler/help';
 	import Light from '~icons/tabler/bulb';
 	import Info from '~icons/tabler/info-circle';
 	import Save from '~icons/tabler/device-floppy';
@@ -70,6 +71,7 @@
 	{/snippet}
 	{#snippet title()}
 		<span >Light State</span>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 	{/snippet}
 	<div class="w-full">
 		<h1 class="text-xl font-semibold">REST Example</h1>

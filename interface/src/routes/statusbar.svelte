@@ -44,7 +44,6 @@
 			><Hamburger class="h-6 w-auto" /></label
 		>
 		<span class="px-2 text-xl font-bold lg:text-2xl">{page.data.title}</span>
-		<a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}/{page.url.pathname}" target="_blank">?</a>
 	</div>
 	<div class="indicator flex-none">
 		<UpdateIndicator />
