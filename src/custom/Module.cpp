@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#if FT_MOONBASE == 1
+
 #include "Module.h"
 
 void setDefaults(JsonObject root, JsonArray definition) {
@@ -56,7 +58,10 @@ void ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
     std::vector<JsonString> keys; // Container to store unique keys
     auto addUniqueKey = [&keys](const JsonString key) {if (std::find(keys.begin(), keys.end(), key) == keys.end()) keys.push_back(key);}; // Helper lambda to add keys to the vector if they don't already exist
     for (JsonPair stateProperty : stateData.as<JsonObject>()) addUniqueKey(stateProperty.key()); // Collect keys from stateData
-    for (JsonPair newProperty : newData.as<JsonObject>()) addUniqueKey(newProperty.key()); // Collect keys from newData
+    for (JsonPair newProperty : newData.as<JsonObject>()) {
+        ESP_LOGW(TAG, "newProperty not in state! %s", newProperty.key().c_str());
+        addUniqueKey(newProperty.key()); // Collect keys from newData
+    }
 
     for (const JsonString key: keys) { //loop over keys
         JsonVariant stateValue = stateData[key.c_str()];
@@ -200,9 +205,9 @@ void Module::onConfigUpdated()
 
 void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden in derived classes
     ESP_LOGW(TAG, "not implemented");
-    JsonObject property;
-    JsonArray details;
-    JsonArray values;
+    JsonObject property; // state.data has one or more properties
+    JsonArray details; // if a property is an array, this is the details of the array
+    JsonArray values; // if a property is a select, this is the values of the select
 
     property = root.add<JsonObject>(); property["name"] = "text"; property["type"] = "text"; property["default"] = "MoonBase";
 }
@@ -211,3 +216,5 @@ void Module::onUpdate(UpdatedItem updatedItem)
 {
     ESP_LOGW(TAG, "not implemented %s = %s", updatedItem.name, updatedItem.value.as<String>().c_str());
 }
+
+#endif

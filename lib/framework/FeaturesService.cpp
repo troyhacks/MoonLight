@@ -117,14 +117,15 @@ void FeaturesService::createJSON(JsonObject &root)
     //Custom
     #if FT_ENABLED(FT_MOONBASE)
         root["moonbase"] = true;
+        #if FT_ENABLED(FT_MOONLIGHT)
+            root["moonlight"] = true;
+        #else
+            root["moonlight"] = false;
+        #endif
     #else
         root["moonbase"] = false;
     #endif
-    #if FT_ENABLED(FT_MOONLIGHT)
-        root["moonlight"] = true;
-    #else
-        root["moonlight"] = false;
-    #endif
+
     #if FT_ENABLED(FT_LIVESCRIPT)
         root["livescript"] = true;
     #else

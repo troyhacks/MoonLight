@@ -31,6 +31,7 @@
 	import { socket } from '$lib/stores/socket';
 	import { tick } from 'svelte';
 	import FileEdit from '$lib/components/custom/FileEdit.svelte';
+	import Help from '~icons/tabler/help';
 
 	let filesState: any = $state({});;
 	let folderList: FilesState[] = $state([]); //all files in a folder
@@ -255,9 +256,8 @@
 	{/snippet}
 	{#snippet title()}
 		<span>File Manager</span>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 	{/snippet}
-	<div class="w-full overflow-x-auto">
-	</div>
 
 	{#if !page.data.features.security || $user.admin}
 		<div class="bg-base-200 shadow-lg relative grid w-full max-w-2xl self-center overflow-hidden">

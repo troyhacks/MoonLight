@@ -5,11 +5,13 @@
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Router from '~icons/tabler/router';
+	import Help from '~icons/tabler/help';
 	import Cancel from '~icons/tabler/x';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { socket } from '$lib/stores/socket';
 	import Array from '$lib/components/custom/Array.svelte';
+    import {initCap} from '$lib/stores/custom_utilities';
 
 	let definition: any = $state([]);
 	let data: any = $state({});
@@ -131,7 +133,8 @@
 		<Router  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span>{page.url.searchParams.get('module')}</span>
+		<span>{initCap(page.url.searchParams.get('module') || '')}</span>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname + '/' + page.url.searchParams.get('module')}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
 	{/snippet}
 
 	{#if !page.data.features.security || $user.admin}

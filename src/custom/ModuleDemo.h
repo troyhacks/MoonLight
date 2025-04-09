@@ -12,6 +12,8 @@
 #ifndef ModuleDemo_h
 #define ModuleDemo_h
 
+#if FT_MOONBASE == 1
+
 #include "Module.h"
 
 class ModuleDemo : public Module
@@ -27,9 +29,9 @@ public:
 
     void setupDefinition(JsonArray root) override{
         ESP_LOGD(TAG, "");
-        JsonObject property;
-        JsonArray details;
-        JsonArray values;
+        JsonObject property; // state.data has one or more properties
+        JsonArray details; // if a property is an array, this is the details of the array
+        JsonArray values; // if a property is a select, this is the values of the select
 
         property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonBase";
         property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
@@ -69,4 +71,5 @@ public:
 
 };
 
+#endif
 #endif

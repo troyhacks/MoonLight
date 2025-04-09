@@ -5,7 +5,8 @@
 * {custom} = MoonBase / MoonLight
 
 * docs/media/
-    * add {custom}-logo.png
+    * add {custom}-logo.png (used in mkdocs.yml)
+    * replace favicon.png
 * factory_settings.ini
     * FACTORY_AP_SSID=\"{custom}-#{unique_id}\"
     * FACTORY_AP_PASSWORD=\"\" (recommendation)

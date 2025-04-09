@@ -48,11 +48,19 @@ struct Char {
       strlcat(s, rhs, sizeof(s));
       return *this;
     }
+    Char& operator+(String rhs) {
+        strlcat(s, rhs.c_str(), sizeof(s));
+        return *this;
+    }
     Char& operator+=(const char *rhs) {
       strlcat(s, rhs, sizeof(s));
       return *this;
     }
-
+    Char& operator+=(String rhs) {
+        strlcat(s, rhs.c_str(), sizeof(s));
+        return *this;
+      }
+  
     //compare
     bool operator==(const char *rhs) {
       return strcmp(s, rhs) == 0;

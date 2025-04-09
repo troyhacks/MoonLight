@@ -6,6 +6,7 @@
 
 * Instance name: name of this instance
 * Instances: Instances found on the network
+    * Click on IP to jump to the instance
 
 ## Technical
 

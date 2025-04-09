@@ -22,12 +22,18 @@
 					class="link"
 					target="_blank"
 					rel="noopener noreferrer">Discord WLED MM 2D & Audio</a
-				> and 
+				>, 
 				<a
 					href="https://moonmodules.org"
 					class="link"
 					target="_blank"
 					rel="noopener noreferrer">MoonModules.org</a
+				> and
+				<a
+					href="https://reddit.com/r/MoonModules"
+					class="link"
+					target="_blank"
+					rel="noopener noreferrer">Reddit</a
 				>.
 			</p>
 			<a

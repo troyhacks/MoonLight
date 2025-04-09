@@ -36,13 +36,6 @@
 		});
 	}
 
-	function addModuleToURL() {
-		// console.log("page.url.search", page.url.search);
-		if (page.url.search) 
-			return '/' + page.url.searchParams.get('module');
-		else
-			return '';
-	}
 </script>
 
 <div class="navbar bg-base-300 sticky top-0 z-10 h-12 min-h-fit drop-shadow-lg lg:h-16">
@@ -51,9 +44,7 @@
 		<label for="main-menu" class="btn btn-ghost btn-circle btn-sm drawer-button lg:hidden"
 			><Hamburger class="h-6 w-auto" /></label
 		>
-		<span class="px-2 text-xl font-bold lg:text-2xl">{page.data.title}</span>
-		<a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname + addModuleToURL()}" target="_blank">?</a>
-		<!-- <a href="https://MoonModules.org/MoonLight{page.url.pathname + addModuleToURL()}" target="_blank">?</a> -->
+		<span class="px-2 text-xl font-bold lg:text-2xl">{page.data.instances.instanceName}</span>
 	</div>
 	<div class="indicator flex-none">
 		<UpdateIndicator />

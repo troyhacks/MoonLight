@@ -12,6 +12,8 @@
 #ifndef ModuleInstances_h
 #define ModuleInstances_h
 
+#if FT_MOONBASE == 1
+
 #include "Module.h"
 
 #include "Utilities.h"
@@ -38,17 +40,25 @@ public:
 
     void setupDefinition(JsonArray root) override{
         ESP_LOGD(TAG, "");
-        JsonObject property;
-        JsonArray details;
-        JsonArray values;
+        JsonObject property; // state.data has one or more properties
+        JsonArray details; // if a property is an array, this is the details of the array
+        JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonBase";
+        Char<32> instanceName;
+        instanceName = "MoonBase-";
+        uint8_t mac[6];
+        esp_read_mac(mac, ESP_MAC_WIFI_STA);
+        char macStr[5] = {0};
+        sprintf(macStr, "%02x%02x", mac[4], mac[5]);
+        // instanceName += WiFi.macAddress().substring(12);//localIP().toString().c_str();
+        instanceName += macStr;
+        property = root.add<JsonObject>(); property["name"] = "instanceName"; property["type"] = "text"; property["default"] = instanceName.c_str();
 
         property = root.add<JsonObject>(); property["name"] = "instances"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; 
-            property = details.add<JsonObject>(); property["name"] = "ip"; property["type"] = "ip";;
-            property = details.add<JsonObject>(); property["name"] = "time"; property["type"] = "text";;
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "ip"; property["type"] = "ip"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "time"; property["type"] = "text"; property["ro"] = true;
         }
     }
 
@@ -95,7 +105,7 @@ public:
                 instance["ip"] = instanceUDP.remoteIP().toString();
                 instance["name"] = buffer+6;
                 instance["time"] = millis();
-                ESP_LOGD(TAG, "added %s", instance["ip"].as<String>().c_str());
+                ESP_LOGD(TAG, "added %s %s", instance["ip"].as<String>().c_str(), buffer+6);
             }
 
             // char buffer[2048];
@@ -107,10 +117,10 @@ public:
     }
 
     void writeUDP() {
-        if (instanceUDP.beginPacket(IPAddress(255, 255, 255, 255), instanceUDPPort)) {  // WLEDMM beginPacket == 0 --> error
+        if (instanceUDP.beginPacket(IPAddress(255, 255, 255, 255), instanceUDPPort)) {
             
             UDPMessage message;
-            message.name = _state.data["hostName"].as<String>().c_str();
+            message.name = _state.data["instanceName"].as<String>().c_str();
             instanceUDP.write((byte *)&message, sizeof(message));
             instanceUDP.endPacket();
             // ESP_LOGD(TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
@@ -119,4 +129,5 @@ public:
     }
 };
 
+#endif
 #endif

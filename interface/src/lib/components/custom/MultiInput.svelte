@@ -13,6 +13,7 @@
 
 <script lang="ts">
 	import FileEdit from '$lib/components/custom/FileEdit.svelte';
+    import {initCap} from '$lib/stores/custom_utilities';
 
     export let property: any;
     export let value: any;
@@ -22,35 +23,23 @@
     export let step = 1;
     export let changeOnInput:boolean = true;
 
-    function isLowerCase(s: string) {
-        return s.toLowerCase() == s
-    }
-
-    function initCap(s: string) {
-        if (typeof s !== 'string') return '';
-        let result = "";
-        for (let i = 0; i < s.length; i++) {
-            if (i==0) //first uppercase
-            result += s.charAt(i).toUpperCase();
-            else if (!isLowerCase(s.charAt(i)) && isLowerCase(s.charAt(i-1))) //uppercase (previous not uppercase) => add space
-            // else if (!isLowerCase(s.charAt(i)) && isLowerCase(s.charAt(i-1)) && (i+1 >= s.length || isLowerCase(s.charAt(i+1))))
-            result += " " + s.charAt(i);
-            // else if (!isLowerCase(s.charAt(i)) && !isLowerCase(s.charAt(i-1)) && (i+1 >= s.length || isLowerCase(s.charAt(i+1))))
-            //   result += " " + s.charAt(i);
-            else if (s.charAt(i) == '-' || s.charAt(i) == '_') //- and _ is space
-            result += " ";
-            else
-            result+=s.charAt(i);
-        }
-        return result;
-    }
-
 </script>
 
 <label class="label cursor-pointer" for={property.name}>
     <!-- <span class="label-text text-md">{initCap(property.name)}</span> -->
     <span class="mr-4">{initCap(property.name)}</span>
 </label>
+
+{#if property.ro}
+    {#if property.type == "ip"}
+        <a 
+            href="http://{value}"
+            target ="_blank"
+        >{value}</a>
+    {:else}
+        <span>{value}</span> 
+    {/if}
+{:else}
 
 {#if property.type == "select" || property.type == "selectFile"}
     <select 
@@ -147,7 +136,7 @@
     <a 
         href="http://{value}"
         target ="_blank"
-    >{value}</a>
+    >Link</a>
 {:else if property.type == "button"}
     <button class="btn btn-primary" type="button" on:click={(event:any) => {if (value==null) value = 1; else value++; onChange(event)}}
     >{property.name}</button
@@ -159,4 +148,5 @@
         bind:value={value}
         on:change={onChange}
     />
+{/if}
 {/if}

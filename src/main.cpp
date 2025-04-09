@@ -103,33 +103,34 @@ void loop()
 {
     esp32sveltekit.lps++;
 
-    #if FT_ENABLED(FT_MOONLIGHT)
+    #if FT_ENABLED(FT_MOONBASE)
 
-        //20ms loop
+        #if FT_ENABLED(FT_MOONLIGHT)
+            moduleAnimations.loop();
+        #endif
+
+        //1s loop
         static int lastTime1s = 0;
         if (millis() - lastTime1s > 1000)
         {
             lastTime1s = millis();
             moduleInstances.loop1s();
+
+            //10s loop
+            static int lastTime10s = 0;
+            if (millis() - lastTime10s > 10000)
+            {
+                lastTime10s = millis();
+                moduleInstances.loop10s();
+            }
         }
 
-        //10s loop
-        static int lastTime10s = 0;
-        if (millis() - lastTime10s > 10000)
-        {
-            lastTime10s = millis();
-            moduleInstances.loop10s();
-        }
+        // while (!runInLoopTask.empty())
+        // {
+        //     ESP_LOGD(TAG, "Running queued function");
+        //     runInLoopTask.back()(); //calls the last function
+        //     runInLoopTask.pop_back();
+        // }
 
-        #if FT_ENABLED(FT_MOONLIGHT)
-            moduleAnimations.loop();
-        #endif
     #endif
-
-    while (!runInLoopTask.empty())
-    {
-        ESP_LOGD(TAG, "Running queued function");
-        runInLoopTask.back()(); //calls the last function
-        runInLoopTask.pop_back();
-    }
 }

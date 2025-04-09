@@ -26,6 +26,26 @@
     #include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
 #endif
 
+struct Coord3D {
+    int x;
+    int y;
+    int z;
+};
+
+class Node {
+
+};
+
+class EffectNode : public Node {
+
+    public:
+    
+    Coord3D size = {8,8,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
+
+    void fadeToBlackBy(const uint8_t fadeBy) {}
+    void setPixelColor(const Coord3D &pixel, const CRGB& color) {}
+};
+
 class ModuleAnimations : public Module
 {
 public:
@@ -41,12 +61,6 @@ public:
         FilesService *filesService
     ) : Module("animations", server, sveltekit, filesService) {
         ESP_LOGD(TAG, "constructor");
-
-        //In constructor so before onUpdate
-        FastLED.addLeds<WS2812B, 16, GRB>(leds, 0, nrOfLeds); //pin 2
-        FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
-        FastLED.setBrightness(0);
-        ESP_LOGD(TAG, "FastLED.addLeds n:%d", nrOfLeds);
     }
 
     void begin() {
@@ -80,19 +94,24 @@ public:
 
     void setupDefinition(JsonArray root) override {
         ESP_LOGD(TAG, "");
-        JsonObject property;
-        JsonArray details;
-        JsonArray values;
+        JsonObject property; // state.data has one or more properties
+        JsonArray details; // if a property is an array, this is the details of the array
+        JsonArray values; // if a property is a select, this is the values of the select
 
         property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
         property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
+        property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = 2; values = property["values"].to<JsonArray>();
+        values.add("2");
+        values.add("16");
+
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
             values.add("Random");
             values.add("Sinelon");
             values.add("Rainbow");
+            values.add("Lissajous");
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
@@ -124,20 +143,36 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "scripts"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text";
-            property = details.add<JsonObject>(); property["name"] = "isRunning"; property["type"] = "checkbox";
-            property = details.add<JsonObject>(); property["name"] = "isHalted"; property["type"] = "checkbox";
-            property = details.add<JsonObject>(); property["name"] = "exeExist"; property["type"] = "checkbox";
-            property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number";
-            property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number";
-            property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number";
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "isRunning"; property["type"] = "checkbox"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "isHalted"; property["type"] = "checkbox"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "exeExist"; property["type"] = "checkbox"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "kill"; property["type"] = "button";
         }
     }
 
     void onUpdate(UpdatedItem updatedItem) override
     {
-        if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
+        if (equal(updatedItem.name, "pin")) {
+            ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            //In constructor so before onUpdate
+            switch (updatedItem.value.as<int>()) {
+                case 2:
+                    FastLED.addLeds<WS2812B, 2, GRB>(leds, 0, nrOfLeds);
+                    break;
+                case 16:
+                    FastLED.addLeds<WS2812B, 16, GRB>(leds, 0, nrOfLeds);
+                    break;
+                default:
+                    ESP_LOGD(TAG, "unknown pin %d", updatedItem.value.as<int>());
+            }
+            FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
+            FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
+            ESP_LOGD(TAG, "FastLED.addLeds n:%d", nrOfLeds);
+        } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (equal(updatedItem.parent[0], "nodes") && equal(updatedItem.name, "animation")) {    
@@ -171,12 +206,33 @@ public:
                 static uint8_t hue = 0;
                 fill_rainbow(leds, nrOfLeds, hue++, 7);
                 showLeds = true;
+            } else if (animation == "Lissajous") {
+                uint8_t xFrequency = 64;// = leds.effectControls.read<uint8_t>();
+                uint8_t fadeRate = 128;// = leds.effectControls.read<uint8_t>();
+                uint8_t speed = 128;// = leds.effectControls.read<uint8_t>();
+                CRGBPalette16 palette = PartyColors_p;
+
+                EffectNode leds;
+
+                leds.fadeToBlackBy(fadeRate);
+                uint_fast16_t phase = millis() * speed / 256;  // allow user to control rotation speed, speed between 0 and 255!
+                Coord3D locn = {0,0,0};
+                for (int i=0; i < 256; i ++) {
+                    //WLEDMM: stick to the original calculations of xlocn and ylocn
+                    locn.x = sin8(phase/2 + (i*xFrequency)/64);
+                    locn.y = cos8(phase/2 + i*2);
+                    locn.x = (leds.size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(leds.size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
+                    // leds.setPixelColor((uint8_t)xlocn, (uint8_t)ylocn, leds.color_from_palette(sys->now/100+i, false, PALETTE_SOLID_WRAP, 0));
+                    // leds[locn] = ColorFromPalette(leds.palette, sys->now/100+i);
+                    // leds.setPixelColorPal(locn, millis()/100+i);
+                    leds.setPixelColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
+                }
+                showLeds = true;
             } else {
                 //Done by live script (Yves)
             }
         }
         // Serial.printf(" %s", animation.c_str());
-
         if (showLeds) driverShow();
     }
 

@@ -7,11 +7,14 @@ export const ssr = false;
 export const load = (async ({ fetch }) => {
 	const result = await fetch('/rest/features');
 	const item = await result.json();
+	const instances = await fetch('/rest/instances');
+	const instancesJson = await instances.json();
 	return {
 		features: item,
 		title: 'MoonBase',
 		github: 'ewowi/MoonBase',
-		copyright: '2025 theelims, ewowi, hpwit ⚖️ GPL-3.0',
-		appName: 'MoonBase'
+		copyright: '2025 MoonModules ⚖️GPLv3',
+		appName: 'MoonBase',
+		instances: instancesJson
 	};
 }) satisfies LayoutLoad;

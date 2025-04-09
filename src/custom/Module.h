@@ -12,6 +12,8 @@
 #ifndef Module_h
 #define Module_h
 
+#if FT_MOONBASE == 1
+
 #undef TAG
 #define TAG "🌙"
 
@@ -90,4 +92,5 @@ private:
 
 };
 
+#endif
 #endif

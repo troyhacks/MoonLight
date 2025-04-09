@@ -25,6 +25,7 @@
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 	import Array from '$lib/components/custom/Array.svelte';
 	import ArrayLight from '$lib/components/custom/ArrayLight.svelte';
+    import {initCap} from '$lib/stores/custom_utilities';
 
     let { property, data, definition, onChange, changeOnInput, value1=$bindable(), value2 } = $props();
 
@@ -115,7 +116,7 @@
 
     <div class="divider mb-2 mt-0"></div>
     <div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
-        {property.name}
+        {initCap(property.name)}
     </div>
     <div class="relative w-full overflow-visible">
     <!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->

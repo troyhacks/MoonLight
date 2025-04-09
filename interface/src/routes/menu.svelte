@@ -21,7 +21,9 @@
 	import { page } from '$app/state';
 	import { user } from '$lib/stores/user';
 	import StarIcon from '~icons/tabler/star';
+	import MoonIcon from '~icons/tabler/moon';
 	import BulbIcon from '~icons/tabler/bulb';
+	import CPU from '~icons/tabler/cpu';
 
 	let { closeMenu } = $props();
 
@@ -50,7 +52,7 @@
 		{
 			title: 'MoonLight',
 			icon: StarIcon,
-			feature: true,
+			feature: page.data.features.moonlight,
 			submenu: [
 				{
 					title: 'Animations',
@@ -62,8 +64,8 @@
 		},
 		{
 			title: 'MoonBase',
-			icon: StarIcon,
-			feature: true,
+			icon: MoonIcon,
+			feature: page.data.features.moonbase,
 			submenu: [
 				{
 					title: 'File Manager',
@@ -73,7 +75,7 @@
 				},
 				{
 					title: 'Instances',
-					icon: BulbIcon,
+					icon: CPU,
 					href: '/moonbase/module?module=instances',
 					feature: page.data.features.moonbase,
 				},
