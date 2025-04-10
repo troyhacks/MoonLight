@@ -1,6 +1,6 @@
 # Animations module
 
-<img width="517" alt="image" src="https://github.com/user-attachments/assets/022fde4d-9a3b-456c-ade5-e18219e5a5d5" />
+<img width="517" src="https://github.com/user-attachments/assets/88e00192-a029-43c7-974c-15d786b48c0e" />
 
 ## Functional
 
@@ -14,7 +14,6 @@
 * Scrips: Running Live scripts (WIP)
 
 <img width="498" alt="Screenshot 2025-03-29 at 14 12 01" src="https://github.com/user-attachments/assets/3a5a3743-c0a4-4456-96cb-f4abd0d01450" />
-
 
 ## Technical
 
