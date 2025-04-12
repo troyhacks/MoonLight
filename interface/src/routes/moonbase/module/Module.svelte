@@ -10,20 +10,19 @@
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { socket } from '$lib/stores/socket';
-	import Array from '$lib/components/custom/Array.svelte';
+	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
     import {initCap} from '$lib/stores/custom_utilities';
 
 	let definition: any = $state([]);
 	let data: any = $state({});
 
-	let showEditor: boolean = $state(false);
 	let changed: boolean = $state(false);
 
 	const modeWS: boolean = true; //todo: make this an argument
 
 	async function getState() {
 
-		let moduleName = page.url.searchParams.get('module');
+		let moduleName = page.url.searchParams.get('module') || '';
 
 		console.log("getState", '/rest/' + moduleName)
 
@@ -64,7 +63,7 @@
 		//validation (if needed) here?
 		//optional checks if the whole state is correct
 
-		let moduleName = page.url.searchParams.get('module')
+		let moduleName = page.url.searchParams.get('module') || ''
 
 		try {
 			const response = await fetch('/rest/' + moduleName, {
@@ -85,29 +84,58 @@
 		} catch (error) {
 			console.error('Error:', error);
 		}
-		showEditor = false;
 	}
 
 	function cancelState() {
 		getState();
-		showEditor = false;
 		changed = false;
 	}
 
 	function inputChanged() {
 		if (modeWS) {
 			let moduleName = page.url.searchParams.get('module')||'';
-			console.log(moduleName, data);
+			// console.log("inputChanged", moduleName, data);
 			socket.sendEvent(moduleName, data)
 		} else {
 			changed = true;
 		}
 	}
 
+	function updateRecursive(oldData:any, newData: any) {
+		//loop over properties
+		for (let key in newData) {
+			if (typeof newData[key] != 'object') {
+				// console.log("updateRecursive", key, newData[key], oldData);
+				if (newData[key] != oldData[key]) {
+					oldData[key] = newData[key]; //trigger reactiveness
+				}
+			} else {
+				if (Array.isArray(newData[key])) {
+					//loop over array
+					for (let i = 0; i < Math.max(oldData[key].length, newData[key].length); i++) {
+						if (oldData[key][i] == undefined) {
+							oldData[key][i] = newData[key][i]; //create new row if not existed, trigger reactiveness
+						} else if (newData[key][i] == undefined) {
+							console.log("remove row", key, i);
+							//remove row if not existing anymore
+							oldData[key].splice(i, 1);
+							// oldData[key] = [...oldData[key]]; //Trigger reactivity ???
+						} else
+							updateRecursive(oldData[key][i], newData[key][i]);
+					}
+				}
+			}
+		}
+	}
+
 	const handleState = (state: any) => {
-		console.log("handleState", state);
+		// console.log("handleState", state);
 		data = state;
-		showEditor = false;
+	};
+
+	const handleRO = (state: any) => {
+		console.log("handleRO", state);
+		updateRecursive(data, state);
 	};
 
 	onMount(() => {
@@ -115,6 +143,7 @@
 			let moduleName = page.url.searchParams.get('module') || ''
 			console.log("onMount", moduleName);
 			socket.on(moduleName, handleState);
+			socket.on(moduleName + "RO", handleRO);
 		}
 	});
 
@@ -123,6 +152,7 @@
 			let moduleName = page.url.searchParams.get('module') || ''
 			console.log("onDestroy", moduleName);
 			socket.off(moduleName, handleState);
+			socket.off(moduleName + "RO", handleRO);
 		}
 	});
 
@@ -150,7 +180,7 @@
 								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
 						{:else if property.type == "array"}
-							<Array property={property} value2={data[property.name]} data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></Array>
+							<ObjectArray property={property} value2={data[property.name]} data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></ObjectArray>
 						{/if}
 					{/each}
 				</div>

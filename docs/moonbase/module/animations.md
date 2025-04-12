@@ -38,7 +38,7 @@
             * e.g. if the fixture is a globe, you can map that to 2D using mercator projection mapping
             * if the fixture is 200x200 you can map it to 50x50
         * Effect: run an effect in (part of) the virtual coordinate space
-            * or in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings
+            * or in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings ✅
         * Modifier: Mirror, rotate, etc, multiple projections allowed (projection in StarLight)
         * Driver show: show the result on Leds (using FastLED, hpwit drivers), ArtNet, DDP, ...
 * Future situation: Nodes and noodles (2)
@@ -51,6 +51,8 @@
         * 1:0, 1:1, 1:many : each logical pixel can be mapped to no, 1 or many physical pixels)
     * Nodes manipulate the mapping model and/or interfere in the effects loop
 * Presets/playlist: change (part of) the nodes model
+
+✅: Done
 
 ### Server
 

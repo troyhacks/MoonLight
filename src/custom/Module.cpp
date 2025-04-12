@@ -59,7 +59,7 @@ void ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
     auto addUniqueKey = [&keys](const JsonString key) {if (std::find(keys.begin(), keys.end(), key) == keys.end()) keys.push_back(key);}; // Helper lambda to add keys to the vector if they don't already exist
     for (JsonPair stateProperty : stateData.as<JsonObject>()) addUniqueKey(stateProperty.key()); // Collect keys from stateData
     for (JsonPair newProperty : newData.as<JsonObject>()) {
-        ESP_LOGW(TAG, "newProperty not in state! %s", newProperty.key().c_str());
+        // ESP_LOGW(TAG, "newProperty not in state! %s", newProperty.key().c_str());
         addUniqueKey(newProperty.key()); // Collect keys from newData
     }
 

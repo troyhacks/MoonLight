@@ -89,7 +89,7 @@ public:
             });
         });
 
-        _socket->registerEvent("livescripts");
+        _socket->registerEvent("animationsRO");
     }
 
     void setupDefinition(JsonArray root) override {
@@ -104,6 +104,7 @@ public:
         property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = 2; values = property["values"].to<JsonArray>();
         values.add("2");
         values.add("16");
+        property = root.add<JsonObject>(); property["name"] = "millis"; property["type"] = "number";
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -111,6 +112,7 @@ public:
             values.add("Random");
             values.add("Sinelon");
             values.add("Rainbow");
+            values.add("Sinus");
             values.add("Lissajous");
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
@@ -181,8 +183,31 @@ public:
                 ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
             if (updatedItem.value.as<String>().length())
                 compileAndRun(updatedItem.value.as<String>().c_str());
+        } else if (equal(updatedItem.parent[0], "scripts") && equal(updatedItem.name, "kill")) {    
+            ESP_LOGD(TAG, "handle %s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            kill(updatedItem.index[0]);
         } else
             ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    }
+
+    //AI generated
+    void sinusEffect(CRGB* leds, uint16_t numLeds, uint8_t hueOffset = 0, uint8_t brightness = 255, uint16_t speed = 10) {
+        static uint16_t phase = 0; // Tracks the phase of the sine wave
+        // ESP_LOGD(TAG, "sinusEffect %d %d %d %d", numLeds, hueOffset, brightness, speed);
+    
+        for (uint16_t i = 0; i < numLeds; i++) {
+            // Calculate the sine wave value for the current LED
+            uint8_t wave = sin8((i * 255 / numLeds) + phase);
+    
+            // Map the sine wave value to a color hue
+            uint8_t hue = wave + hueOffset;
+    
+            // Set the LED color using the calculated hue
+            leds[i] = CHSV(hue, 255, brightness);
+        }
+    
+        // Increment the phase to animate the wave
+        phase += speed;
     }
 
     void loop()
@@ -206,7 +231,12 @@ public:
                 static uint8_t hue = 0;
                 fill_rainbow(leds, nrOfLeds, hue++, 7);
                 showLeds = true;
+            } else if (animation == "Sinus") {
+                fadeToBlackBy(leds, nrOfLeds, 70);
+                sinusEffect(leds, nrOfLeds, millis() / 10, 255, 5);
+                showLeds = true;
             } else if (animation == "Lissajous") {
+
                 uint8_t xFrequency = 64;// = leds.effectControls.read<uint8_t>();
                 uint8_t fadeRate = 128;// = leds.effectControls.read<uint8_t>();
                 uint8_t speed = 128;// = leds.effectControls.read<uint8_t>();
@@ -236,12 +266,44 @@ public:
         if (showLeds) driverShow();
     }
 
+    void loop1s() {
+        JsonDocument newData; //to only send updatedData
+
+        //push read only variables
+        //use state.data or newData?
+
+        newData["millis"] = millis()/1000;
+        JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
+
+        for (Executable &exec: scriptRuntime._scExecutables) {
+            exe_info exeInfo = scriptRuntime.getExecutableInfo(exec.name);
+            JsonObject object = scripts.add<JsonObject>();
+            object["name"] = exec.name;
+            object["isRunning"] = exec.isRunning();
+            object["isHalted"] = exec.isHalted;
+            object["exeExist"] = exec.exeExist;
+            object["handle"] = exec.__run_handle_index;
+            object["binary_size"] = exeInfo.binary_size;
+            object["data_size"] = exeInfo.data_size;
+            object["kill"] = 0;
+            // ESP_LOGD(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
+        }
+
+        JsonObject jsonObject = newData.as<JsonObject>();
+        _socket->emitEvent("animationsRO", jsonObject);
+            
+        // char buffer[256];
+        // serializeJson(doc, buffer, sizeof(buffer));
+        // ESP_LOGD(TAG, "livescripts %s", buffer);
+    }
+
     void driverShow()
     {
         if (_state.data["driverOn"])
             FastLED.show();
     }
 
+    //ESPLiveScript
     void compileAndRun(const char * animation) {
 
         #if FT_LIVESCRIPT
@@ -284,6 +346,16 @@ public:
         #endif
     
         //stop UI spinner
+    }
+
+    // ESPLiveScript
+    void kill(int index) {
+        ESP_LOGD(TAG, "kill %d", index);
+        if (index < scriptRuntime._scExecutables.size()) {
+            scriptRuntime.kill(scriptRuntime._scExecutables[index].name);
+            scriptRuntime.free(scriptRuntime._scExecutables[index].name);
+            scriptRuntime.deleteExe(scriptRuntime._scExecutables[index].name);
+        }
     }
 };
 

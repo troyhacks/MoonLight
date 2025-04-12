@@ -115,6 +115,7 @@ void loop()
         {
             lastTime1s = millis();
             moduleInstances.loop1s();
+            moduleAnimations.loop1s();
 
             //10s loop
             static int lastTime10s = 0;

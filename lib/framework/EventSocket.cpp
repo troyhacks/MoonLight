@@ -110,6 +110,7 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
     if (!isEventValid(event))
     {
         ESP_LOGW("EventSocket", "Method tried to emit unregistered event: %s", event.c_str());
+        ESP_LOGW(TAG, "Method tried to emit unregistered event: %s", event.c_str());
         return;
     }
 
@@ -149,7 +150,7 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
         auto *client = _socket.getClient(originSubscriptionId);
         if (client)
         {
-            ESP_LOGV("EventSocket", "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
+            ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
 #if FT_ENABLED(EVENT_USE_JSON)
             client->sendMessage(HTTPD_WS_TYPE_TEXT, output, len);
 #else
@@ -170,7 +171,7 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
                 subscriptions.remove(subscription);
                 continue;
             }
-            ESP_LOGV("EventSocket", "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
+            ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
 #if FT_ENABLED(EVENT_USE_JSON)
             client->sendMessage(HTTPD_WS_TYPE_TEXT, output, len);
 #else

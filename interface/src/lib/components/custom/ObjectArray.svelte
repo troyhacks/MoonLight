@@ -23,7 +23,7 @@
 	import Edit from '~icons/tabler/pencil';
 	import Delete from '~icons/tabler/trash';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
-	import Array from '$lib/components/custom/Array.svelte';
+	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
 	import ArrayLight from '$lib/components/custom/ArrayLight.svelte';
     import {initCap} from '$lib/stores/custom_utilities';
 
@@ -49,7 +49,7 @@
         // console.log("addItem def", propertyName, property)
         if (property.name == definition[i].name) {
             localDefinition = definition[i].n;
-            console.log("localDefinition", property.name, definition[i].n)
+            // console.log("localDefinition", property.name, definition[i].n)
         }
     }
 
@@ -84,7 +84,7 @@
 	}
 
 	function handleEdit(propertyName: string, index: number) {
-		console.log("handleEdit", propertyName, index, data[propertyName][index])
+		// console.log("handleEdit", propertyName, index, data[propertyName][index])
         if (lastIndex != index) {
             showEditor = true;
             lastIndex = index;
@@ -191,7 +191,7 @@
             {/snippet}
         </DragDropList>
     </div>
-    {#if showEditor && property.name == propertyEditable}
+    {#if showEditor && property.name == propertyEditable && data[property.name] && data[property.name].length}
         <div class="divider my-0"></div>
         {#each property.n as propertyN}
             {#if propertyN.type != "array"}
@@ -200,7 +200,7 @@
                 </div>
             {:else if propertyN.type == "array"}
                 <label for="{propertyN.name}">{propertyN.name}</label>
-                <Array property={propertyN} bind:value1={data[propertyN.name]} value2={data} data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></Array>
+                <ObjectArray property={propertyN} bind:value1={data[propertyN.name]} value2={data} data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
             {/if}
         {/each}
     {/if}

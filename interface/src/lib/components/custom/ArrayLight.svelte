@@ -23,7 +23,7 @@
 	import Edit from '~icons/tabler/pencil';
 	import Delete from '~icons/tabler/trash';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
-	import Array from '$lib/components/custom/Array.svelte';
+	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
 
     let { property, data, definition, showEditor = false, onChange, changeOnInput, value1=$bindable(), value2 } = $props();
 
