@@ -5,6 +5,7 @@
 	interface Props {
 		open?: boolean;
 		collapsible?: boolean;
+		data?: any; //added by MM to pass through data to other components
 		icon?: import('svelte').Snippet;
 		title?: import('svelte').Snippet;
 		children?: import('svelte').Snippet;
@@ -13,6 +14,7 @@
 	let {
 		open = $bindable(true),
 		collapsible = true,
+		data = $bindable({}),
 		icon,
 		title,
 		children

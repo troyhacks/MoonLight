@@ -12,7 +12,6 @@
 
 
 <script lang="ts">
-	import FileEdit from '$lib/components/custom/FileEdit.svelte';
 	import DragDropList, { VerticalDropZone, reorder, type DropEvent } from 'svelte-dnd-list';
 	import Add from '~icons/tabler/circle-plus';
 	import { user } from '$lib/stores/user';
@@ -24,10 +23,9 @@
 	import Delete from '~icons/tabler/trash';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
-	import ArrayLight from '$lib/components/custom/ArrayLight.svelte';
     import {initCap} from '$lib/stores/custom_utilities';
 
-    let { property, data, definition, onChange, changeOnInput, value1=$bindable(), value2 } = $props();
+    let { property, data = $bindable(), definition, onChange, changeOnInput} = $props();
 
     let dataEditable: any = $state({});
 
@@ -200,7 +198,7 @@
                 </div>
             {:else if propertyN.type == "array"}
                 <label for="{propertyN.name}">{propertyN.name}</label>
-                <ObjectArray property={propertyN} bind:value1={data[propertyN.name]} value2={data} data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
+                <ObjectArray property={propertyN} bind:data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
             {/if}
         {/each}
     {/if}

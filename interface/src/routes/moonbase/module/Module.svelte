@@ -8,7 +8,6 @@
 	import Help from '~icons/tabler/help';
 	import Cancel from '~icons/tabler/x';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
-	import { onMount, onDestroy } from 'svelte';
 	import { socket } from '$lib/stores/socket';
 	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
     import {initCap} from '$lib/stores/custom_utilities';
@@ -20,9 +19,26 @@
 
 	const modeWS: boolean = true; //todo: make this an argument
 
+	// https://github.com/sveltejs/svelte/issues/14091
+	// https://www.reddit.com/r/sveltejs/comments/1atm5xw/detect_url_params_changes_in_sveltekit_2/
+	// let params = $state(page.url.searchParams)
+	// let mName = $derived(params.get('module'));
+	// didn't work
+	let oldName: string = "";//workaround for let params = $state(page.url.searchParams)
+
 	async function getState() {
 
 		let moduleName = page.url.searchParams.get('module') || '';
+
+		//workaround for let params = $state(page.url.searchParams)
+		if (moduleName != oldName) {
+			console.log("getState changed", moduleName);
+			if (oldName != "") {
+				socketOff(oldName);
+			}
+			oldName = moduleName;
+			socketOn(moduleName);
+		}
 
 		console.log("getState", '/rest/' + moduleName)
 
@@ -112,6 +128,7 @@
 			} else {
 				if (Array.isArray(newData[key])) {
 					//loop over array
+					if (!oldData[key]) oldData[key] = []; //create an empty array
 					for (let i = 0; i < Math.max(oldData[key].length, newData[key].length); i++) {
 						if (oldData[key][i] == undefined) {
 							oldData[key][i] = newData[key][i]; //create new row if not existed, trigger reactiveness
@@ -138,27 +155,25 @@
 		updateRecursive(data, state);
 	};
 
-	onMount(() => {
+	//workaround for let params = $state(page.url.searchParams)
+	const socketOn = ((name: string) => {
 		if (modeWS) {
-			let moduleName = page.url.searchParams.get('module') || ''
-			console.log("onMount", moduleName);
-			socket.on(moduleName, handleState);
-			socket.on(moduleName + "RO", handleRO);
+			console.log("socketOn", name);
+			socket.on(name, handleState);
+			socket.on(name + "RO", handleRO);
 		}
 	});
-
-	onDestroy(() => {
+	const socketOff = ((name: string) => {
 		if (modeWS) {
-			let moduleName = page.url.searchParams.get('module') || ''
-			console.log("onDestroy", moduleName);
-			socket.off(moduleName, handleState);
-			socket.off(moduleName + "RO", handleRO);
+			console.log("socketOff", name);
+			socket.off(name, handleState);
+			socket.off(name + "RO", handleRO);
 		}
 	});
 
 </script>
 
-<SettingsCard collapsible={false}>
+<SettingsCard collapsible={false} bind:data={data}>
 	{#snippet icon()}
 		<Router  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
@@ -180,7 +195,7 @@
 								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
 						{:else if property.type == "array"}
-							<ObjectArray property={property} value2={data[property.name]} data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></ObjectArray>
+							<ObjectArray property={property} bind:data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></ObjectArray>
 						{/if}
 					{/each}
 				</div>

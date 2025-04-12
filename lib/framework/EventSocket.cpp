@@ -109,7 +109,6 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
     // Only process valid events
     if (!isEventValid(event))
     {
-        ESP_LOGW("EventSocket", "Method tried to emit unregistered event: %s", event.c_str());
         ESP_LOGW(TAG, "Method tried to emit unregistered event: %s", event.c_str());
         return;
     }

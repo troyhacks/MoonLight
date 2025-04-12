@@ -272,7 +272,6 @@ public:
         //push read only variables
         //use state.data or newData?
 
-        newData["millis"] = millis()/1000;
         JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
 
         for (Executable &exec: scriptRuntime._scExecutables) {
@@ -289,8 +288,18 @@ public:
             // ESP_LOGD(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
         }
 
-        JsonObject jsonObject = newData.as<JsonObject>();
-        _socket->emitEvent("animationsRO", jsonObject);
+        //only if changed
+        if (_state.data["scripts"] != newData["scripts"]) {
+            newData["millis"] = millis()/1000;
+            _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
+            JsonObject newDataObject = newData.as<JsonObject>();
+            _socket->emitEvent("animationsRO", newDataObject);
+        } else {
+            newData["millis"] = millis()/1000;
+            newData.remove("scripts");
+            JsonObject newDataObject = newData.as<JsonObject>();
+            _socket->emitEvent("animationsRO", newDataObject);
+        }
             
         // char buffer[256];
         // serializeJson(doc, buffer, sizeof(buffer));
@@ -335,7 +344,7 @@ public:
                     Executable executable = parser.parseScript(&scScript);
                     executable.name = string(animation);
                     ESP_LOGD(TAG, "parsing %s done\n", animation);
-                    scriptRuntime.addExe(executable);
+                    scriptRuntime.addExe(executable); //if already exists, delete it first
                     ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
         
                     if (executable.exeExist)
