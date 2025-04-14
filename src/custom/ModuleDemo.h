@@ -25,6 +25,7 @@ public:
             FilesService *filesService
         ) : Module("demo", server, sveltekit, filesService) {
             ESP_LOGD(TAG, "constructor");
+            _socket->registerEvent("demoRO");
         }
 
     void setupDefinition(JsonArray root) override{
@@ -38,6 +39,7 @@ public:
         values.add("Offline");
         values.add("Signal Strength");
         values.add("Priority");
+        property = root.add<JsonObject>(); property["name"] = "millis"; property["type"] = "number";
 
         property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -64,11 +66,21 @@ public:
         // ESP_LOGD(TAG, "definition %s", buffer);
     }
 
-    void onUpdate(UpdatedItem updatedItem) override
+    void onUpdate(UpdatedItem &updatedItem) override
     {
         ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
+    void loop1s() {
+        if (!_socket->getConnectedClients()) return; 
+
+        JsonDocument newData; //to only send updatedData
+
+        newData["millis"] = millis()/1000;
+
+        JsonObject newDataObject = newData.as<JsonObject>();
+        _socket->emitEvent("demoRO", newDataObject);
+}
 };
 
 #endif

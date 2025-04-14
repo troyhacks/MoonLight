@@ -46,6 +46,9 @@ class EffectNode : public Node {
     void setPixelColor(const Coord3D &pixel, const CRGB& color) {}
 };
 
+class ModuleAnimations;
+static ModuleAnimations *gLiveAnimation = nullptr;
+
 class ModuleAnimations : public Module
 {
 public:
@@ -82,7 +85,7 @@ public:
 
                         if (updatedItem == animation) {
                             ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                            compileAndRun(animation.c_str());
+                            compileAndRun(node["animation"]);
                         }
                     }
                 }
@@ -104,7 +107,6 @@ public:
         property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = 2; values = property["values"].to<JsonArray>();
         values.add("2");
         values.add("16");
-        property = root.add<JsonObject>(); property["name"] = "millis"; property["type"] = "number";
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -156,11 +158,26 @@ public:
         }
     }
 
-    void onUpdate(UpdatedItem updatedItem) override
+    void removeLeds() {
+        // Turn off all LEDs
+        for (int i = 0; i < nrOfLeds; i++) {
+            leds[i] = CRGB::Black;
+        }
+        FastLED.show();
+    
+        // Clear the FastLED configuration
+        FastLED.clear(true); // Pass 'true' to reset internal FastLED data
+        ESP_LOGD(TAG, "LEDs removed and FastLED configuration reset.");
+    }
+
+    void onUpdate(UpdatedItem &updatedItem) override
     {
         if (equal(updatedItem.name, "pin")) {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            //In constructor so before onUpdate
+
+            removeLeds();
+
+            //In constructor so before onUpdate ...
             switch (updatedItem.value.as<int>()) {
                 case 2:
                     FastLED.addLeds<WS2812B, 2, GRB>(leds, 0, nrOfLeds);
@@ -182,7 +199,7 @@ public:
             if (updatedItem.oldValue.length())
                 ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
             if (updatedItem.value.as<String>().length())
-                compileAndRun(updatedItem.value.as<String>().c_str());
+                compileAndRun(updatedItem.value);
         } else if (equal(updatedItem.parent[0], "scripts") && equal(updatedItem.name, "kill")) {    
             ESP_LOGD(TAG, "handle %s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             kill(updatedItem.index[0]);
@@ -262,11 +279,22 @@ public:
                 //Done by live script (Yves)
             }
         }
+
+        //show connected clients on the led display
+        // static uint8_t lastConnectedClients = 0;
+        // if (_socket->getConnectedClients() == 0) lastConnectedClients++;
+        for (int i = 0; i < _socket->getConnectedClients(); i++) {
+            // ESP_LOGD(TAG, "socket %d", i);
+            leds[i] = CRGB(0, 0, 128);
+        }
+
         // Serial.printf(" %s", animation.c_str());
         if (showLeds) driverShow();
     }
 
     void loop1s() {
+        if (!_socket->getConnectedClients()) return; 
+
         JsonDocument newData; //to only send updatedData
 
         //push read only variables
@@ -290,13 +318,7 @@ public:
 
         //only if changed
         if (_state.data["scripts"] != newData["scripts"]) {
-            newData["millis"] = millis()/1000;
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-            JsonObject newDataObject = newData.as<JsonObject>();
-            _socket->emitEvent("animationsRO", newDataObject);
-        } else {
-            newData["millis"] = millis()/1000;
-            newData.remove("scripts");
             JsonObject newDataObject = newData.as<JsonObject>();
             _socket->emitEvent("animationsRO", newDataObject);
         }
@@ -306,6 +328,13 @@ public:
         // ESP_LOGD(TAG, "livescripts %s", buffer);
     }
 
+    static void show()
+    {
+        delay(1); //to feed the watchdog (also if loopState == 0)
+
+        // gLiveAnimation->driverShow();
+    }
+
     void driverShow()
     {
         if (_state.data["driverOn"])
@@ -313,13 +342,13 @@ public:
     }
 
     //ESPLiveScript
-    void compileAndRun(const char * animation) {
+    void compileAndRun(JsonVariant animation) {
 
         #if FT_LIVESCRIPT
         
-            ESP_LOGD(TAG, "animation %s", animation);
+            ESP_LOGD(TAG, "animation %s", animation.as<String>().c_str());
 
-            if (animation[0] != '/') { //no sc script
+            if (animation.as<String>().c_str()[0] != '/') { //no sc script
                 return;
             }
 
@@ -331,19 +360,28 @@ public:
             // });
 
             //send UI spinner
+
+            runningPrograms.setFunctionToSync(show);
         
             //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-            // runInLoopTask.push_back([&] {
-                ESP_LOGD(TAG, "compileAndRun %s", animation);
-                File file = ESPFS.open(animation);
+            // runInLoopTask.push_back([&, animation] {
+                ESP_LOGD(TAG, "compileAndRun %s", animation.as<String>().c_str());
+                File file = ESPFS.open(animation.as<String>().c_str());
                 if (file) {
                     std::string scScript = file.readString().c_str();
                     // scScript += "void main(){setup();sync();}";
                     file.close();
-        
+
+                    gLiveAnimation = this;
+                    addExternalVariable("leds", "CRGB *", "", (void *)leds);
+                    // addExternalFunction("fadeToBlackBy", "void", "uint8_t", (void *)fadeToBlackBy_static);
+                    uint16_t (*_random16)(uint16_t)=random16; //enforce specific random16 function
+                    addExternalFunction("random16", "uint16_t", "uint16_t", (void *)_random16);
+                    addExternalFunction("sin8", "uint8_t", "uint8_t", (void *)sin8);
+                
                     Executable executable = parser.parseScript(&scScript);
-                    executable.name = string(animation);
-                    ESP_LOGD(TAG, "parsing %s done\n", animation);
+                    executable.name = animation.as<string>();
+                    ESP_LOGD(TAG, "parsing %s done\n", animation.as<String>().c_str());
                     scriptRuntime.addExe(executable); //if already exists, delete it first
                     ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
         

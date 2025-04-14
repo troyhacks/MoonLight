@@ -62,12 +62,14 @@ public:
         }
     }
 
-    void onUpdate(UpdatedItem updatedItem) override
+    void onUpdate(UpdatedItem &updatedItem) override
     {
         ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop1s() {
+        if (!_socket->getConnectedClients()) return; 
+
         if (!instanceUDPConnected) return;
 
         readUDP();

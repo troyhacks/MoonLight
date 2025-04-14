@@ -147,7 +147,8 @@
 
 	const handleState = (state: any) => {
 		// console.log("handleState", state);
-		data = state;
+		updateRecursive(data, state);
+		// data = state;
 	};
 
 	const handleRO = (state: any) => {

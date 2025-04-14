@@ -53,17 +53,16 @@ void ModuleState::read(ModuleState &state, JsonObject &root)
     root.set(state.data.as<JsonObject>()); //copy
 }
 
-void ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth, uint8_t index) {
-    //collect old and new keys
-    std::vector<JsonString> keys; // Container to store unique keys
-    auto addUniqueKey = [&keys](const JsonString key) {if (std::find(keys.begin(), keys.end(), key) == keys.end()) keys.push_back(key);}; // Helper lambda to add keys to the vector if they don't already exist
-    for (JsonPair stateProperty : stateData.as<JsonObject>()) addUniqueKey(stateProperty.key()); // Collect keys from stateData
+bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth, uint8_t index) {
+    bool changed = false;
     for (JsonPair newProperty : newData.as<JsonObject>()) {
-        // ESP_LOGW(TAG, "newProperty not in state! %s", newProperty.key().c_str());
-        addUniqueKey(newProperty.key()); // Collect keys from newData
+        if (stateData[newProperty.key()].isNull()) { 
+            stateData[newProperty.key()] = nullptr; // Initialize the key in stateData if it doesn't exist
+        }
     }
 
-    for (const JsonString key: keys) { //loop over keys
+    for (JsonPair stateProperty : stateData.as<JsonObject>()) {
+        JsonString key = stateProperty.key();
         JsonVariant stateValue = stateData[key.c_str()];
         JsonVariant newValue = newData[key.c_str()];
         if (stateValue != newValue) { //if value changed
@@ -80,20 +79,23 @@ void ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 
                 for (int i = 0; i < max(oldArray.size(), newArray.size()); i++) { //compare each item in the array
                     if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add new row
-                    compareRecursive(key, oldArray[i], newArray[i], updatedItem, depth+1, i);
+                    changed = changed || compareRecursive(key, oldArray[i], newArray[i], updatedItem, depth+1, i);
                     if (oldArray.size() > newArray.size()) oldArray.remove(i); //remove old row
                 }
             } else { // if property is key/value
                 updatedItem.name = key.c_str();
                 updatedItem.oldValue = stateValue.as<String>();
                 updatedItem.value = newValue;
-                updatedItems.push_back(updatedItem);
-
                 stateData[key.c_str()] = newValue; //update state
-                ESP_LOGD(TAG, "changed %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                
+                TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+                ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+
+                if (onUpdate) onUpdate(updatedItem);
             }
         }
     }
+    return changed;
 }
 
 StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
@@ -102,7 +104,6 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
     if (root.size() != 0) { // in case of empty file
         TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
         ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
-        state.updatedItems.clear();
 
         // char buffer[1024];
         // serializeJson(state.data, buffer, sizeof(buffer));
@@ -113,9 +114,8 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
         //check which propertys have updated
         if (root != state.data) {
             UpdatedItem updatedItem;
-            state.compareRecursive("", state.data, root, updatedItem);
-
-            return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+            
+            return state.compareRecursive("", state.data, root, updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
         } else
             return StateUpdateResult::UNCHANGED;
     } else
@@ -159,6 +159,10 @@ Module::Module(String moduleName, PsychicHttpServer *server,
     // configure settings service update handler to update state
     _filesService = filesService;
 
+    _state.onUpdate = [&](UpdatedItem &updatedItem) {
+        onUpdate(updatedItem); // Ensure updatedItem is of type UpdatedItem&
+    };
+
     addUpdateHandler([&](const String &originId)
                      { onConfigUpdated(); },
                      false);
@@ -198,9 +202,9 @@ void Module::onConfigUpdated()
 {
     ESP_LOGD(TAG, "onConfigUpdated");
     //if update, for all updated items, run onUpdate
-    for (UpdatedItem updatedItem : _state.updatedItems) {
-        onUpdate(updatedItem);
-    }
+    // for (UpdatedItem updatedItem : _state.updatedItems) {
+    //     onUpdate(updatedItem);
+    // }
 }
 
 void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden in derived classes
@@ -212,9 +216,9 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
     property = root.add<JsonObject>(); property["name"] = "text"; property["type"] = "text"; property["default"] = "MoonBase";
 }
 
-void Module::onUpdate(UpdatedItem updatedItem)
-{
+void Module::onUpdate(UpdatedItem &updatedItem) {
     ESP_LOGW(TAG, "not implemented %s = %s", updatedItem.name, updatedItem.value.as<String>().c_str());
 }
+
 
 #endif

@@ -48,17 +48,17 @@ struct UpdatedItem {
 class ModuleState
 {
 public:
-    std::vector<UpdatedItem> updatedItems;
-
     JsonDocument data;
 
     std::function<void(JsonArray root)> setupDefinition = nullptr;
 
     void setupData();
-    void compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth = UINT8_MAX, uint8_t index =UINT8_MAX);
+    bool compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth = UINT8_MAX, uint8_t index =UINT8_MAX);
+    std::function<void(UpdatedItem &)> onUpdate = nullptr;
 
     static void read(ModuleState &state, JsonObject &root);
     static StateUpdateResult update(JsonObject &root, ModuleState &state);
+
 };
 
 class Module : public StatefulService<ModuleState>
@@ -75,7 +75,7 @@ public:
 
     virtual void setupDefinition(JsonArray root);
 
-    virtual void onUpdate(UpdatedItem updatedItem);
+    virtual void onUpdate(UpdatedItem &updatedItem);
 
 protected:
     EventSocket *_socket;

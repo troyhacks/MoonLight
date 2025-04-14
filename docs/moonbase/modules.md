@@ -20,8 +20,8 @@ Each module has each own documentation which can be accessed by pressing the ? a
 
 To create a new module:
 
-* Create a class which inherits from Module
-* Call the Module constructor with the name of the module.
+* Create a **class** which inherits from Module
+* Call the Module **constructor** with the name of the module.
     * This name will be used to set up http rest api and webserver sockets
     * See [ModuleDemo.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleDemo.h)
 
@@ -39,7 +39,7 @@ ModuleDemo(PsychicHttpServer *server
 }
 ```
 
-* Implement function setupDefinition to create a json document with the datastructure
+* Implement function **setupDefinition** to create a json document with the datastructure
     * Store data on the file system
     * Generate the UI
     * Initialy create the module data
@@ -66,12 +66,12 @@ void setupDefinition(JsonArray root) override{
 
 ```
 
-* Implement function onUpdate to define what happens if data changes
+* Implement function **onUpdate** to define what happens if data changes
     * struct UpdatedItem defines the update (parent property (including index in case of multiple records), name of property and value)
     * This runs in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleAnimations](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleAnimations.h)) - as httpd stack has been increased runInLoopTask is less needed
 
 ```cpp
-    void onUpdate(UpdatedItem updatedItem) override
+    void onUpdate(UpdatedItem &updatedItem) override
     {
         if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
@@ -81,9 +81,35 @@ void setupDefinition(JsonArray root) override{
             if (updatedItem.oldValue.length())
                 ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
             if (updatedItem.value.as<String>().length())
-                compileAndRun(updatedItem.value.as<String>().c_str());
+                compileAndRun(updatedItem.value);
         } else
             ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    }
+```
+
+* Implement function **loop1s** to send [readonly data](#Readonly_data) from the server to the UI
+    * Optionally, only when a module has readonly data
+
+```cpp
+    void loop1s() {
+        JsonDocument newData; //to only send updatedData
+
+        JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
+
+        for (Executable &exec: scriptRuntime._scExecutables) {
+            JsonObject object = scripts.add<JsonObject>();
+            object["name"] = exec.name;
+            object["isRunning"] = exec.isRunning();
+            object["isHalted"] = exec.isHalted;
+            object["exeExist"] = exec.exeExist;
+            object["kill"] = 0;
+        }
+
+        if (_state.data["scripts"] != newData["scripts"]) {
+            _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles - WIP
+            JsonObject newDataObject = newData.as<JsonObject>();
+            _socket->emitEvent("animationsRO", newDataObject); //RO is WIP, maybe use "animations" also for readonly
+        }
     }
 ```
 
@@ -95,6 +121,8 @@ ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
 moduleDemo.begin();
 ...
 moduleDemo.loop();
+...
+moduleDemo.loop1s();
 ```
 
 * Add the module in [menu.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/menu.svelte) (this will be automated in the future)
@@ -112,9 +140,17 @@ submenu: [
 
 * This is all to create a fully functioning new module
 
-Moonbase-Modules is implemented in:
+### Readonly data
+
+A module can consist of data which is edited by the user (e.g. selecting an animation to run) and data which is send from the server to the UI (e.g. a list of running processes). Currently both type of valuas are stored in state data and definition. Distinguished by property["ro"] = true in setupDefinition. So the client uses state data and definition to build a screen with both types visually mixed together (what is desirable). Currently there are 2 websocket events: one for the entire state (including readonly) and one only for readonly which only contains the changed values. Module.svelte handles readonly differently by the function handleRO which calls updateRecursive which only update the parts of the data which has changed.
+
+It might be arguable that readonly variables are not stored in state data.
+
+### Server
 
 * [Module.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/Module.h) and [Module.cpp](https://github.com/ewowi/MoonBase/blob/main/src/custom/Module.cpp) will generate all the required server code
+
+### UI
 * [Module.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/custom/module/Module.svelte) will deal with the UI
 * [MultiInput.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/lib/components/custom/MultiInput.svelte) is used by Module.svelte to display the right UI widget based on what is defined in the definition json
 * Modifications done in [menu.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/menu.svelte) do identify a module by href and not by title alone

@@ -116,6 +116,7 @@ void loop()
             lastTime1s = millis();
             moduleInstances.loop1s();
             moduleAnimations.loop1s();
+            moduleDemo.loop1s();
 
             //10s loop
             static int lastTime10s = 0;
@@ -126,12 +127,11 @@ void loop()
             }
         }
 
-        // while (!runInLoopTask.empty())
-        // {
-        //     ESP_LOGD(TAG, "Running queued function");
-        //     runInLoopTask.back()(); //calls the last function
-        //     runInLoopTask.pop_back();
-        // }
+        while (!runInLoopTask.empty()) {
+            ESP_LOGD(TAG, "Running queued function");
+            runInLoopTask.back()(); //calls the last function
+            runInLoopTask.pop_back();
+        }
 
     #endif
 }
