@@ -240,6 +240,8 @@ void WiFiSettingsService::configureNetwork(wifi_settings_t &network)
 
 void WiFiSettingsService::updateRSSI()
 {
+    if (!_socket->getConnectedClients()) return; 
+
     JsonDocument doc;
     doc["rssi"] = WiFi.RSSI();
     doc["ssid"] = WiFi.isConnected() ? WiFi.SSID() : "disconnected";
