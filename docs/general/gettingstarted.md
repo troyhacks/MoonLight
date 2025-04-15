@@ -52,11 +52,20 @@
     * Login to your own github account
     * Fork: go to [ewowi/MoonBase](https://github.com/ewowi/MoonBase/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonBase
     * Press xx Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
+      
+      <img width="90" alt="image" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
+
     * Go to the file you want to change e.g. [ModuleAnimations.h](https://github.com/ewoudwijma/MoonBase/blob/background-script/src/custom/ModuleAnimations.h), press edit and make the changes. E.g. change executable.execute("main") to executable.executeAsTask("main")
     * Press Commit Changes..., enter a commit message and an extended description, Press Commit Changes
     * Go back to the homepage of your fork [myfork/MoonBase](https://github.com/ewoudwijma/MoonBase). There is a message inviting to create a Pull Request. Press Compare & pull request.
+      
+      <img width="350" alt="Screenshot 2025-04-15 at 14 59 15" src="https://github.com/user-attachments/assets/410aa517-99eb-4907-b1a3-db7f38abb194" />
+  
     * Add a title and Description to the Pull Request and press Create Pull Request
     * Note: coderabbit has been installed on this repo, adding intelligent comments in the PR
+      
+      <img width="350" alt="Screenshot 2025-04-15 at 15 02 33" src="https://github.com/user-attachments/assets/53bc8b2e-a078-46a5-b926-25d581ec8202" />
+  
     * The upstream repo can now process this PR
 
 ## MoonBase specific
