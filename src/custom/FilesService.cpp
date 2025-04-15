@@ -68,8 +68,8 @@ void FilesState::read(FilesState &state, JsonObject &root)
 {
     root["name"] = "/";
     //crashes for some reason: ???
-    root["fs_total"] = ESPFS.totalBytes() / 1000;
-    root["fs_used"] = ESPFS.usedBytes() / 1000;
+    root["fs_total"] = ESPFS.totalBytes();
+    root["fs_used"] = ESPFS.usedBytes();
     File folder = ESPFS.open("/");
     addFolder(folder, root["files"].to<JsonArray>());
     folder.close();

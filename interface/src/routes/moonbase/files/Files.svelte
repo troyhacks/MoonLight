@@ -321,7 +321,7 @@
 								{:else}
 									<div class="font-bold">{item.name}</div>
 									{#if item.isFile}
-										<div>{item.size/1000} kb {new Intl.DateTimeFormat('en-GB', {
+										<div>{item.size/1000} KB {new Intl.DateTimeFormat('en-GB', {
 											dateStyle: 'short',
 											timeStyle: 'short',
 											timeZone: 'UTC'
@@ -370,14 +370,17 @@
 					<div>
 						<div class="font-bold">File System Size</div>
 						<div class="flex flex-wrap justify-start gap-1 text-sm opacity-75">
-							<span>
-								{((filesState.fs_used / filesState.fs_total) * 100).toFixed(1)} % of {(filesState.fs_total / 1000).toFixed(0)} KB used
-							</span>
+							<span
+								>{((filesState.fs_used / filesState.fs_total) * 100).toFixed(1)} % of {Math.round(
+									filesState.fs_total / 1000
+								).toLocaleString('en-US')} KB</span
+							>
 
-							<span>({(
+							<span
+								>({Math.round(
 									(filesState.fs_total - filesState.fs_used) /
 									1000
-								).toFixed(0)}
+								).toLocaleString('en-US')}
 								KB free)</span
 							>
 						</div>
