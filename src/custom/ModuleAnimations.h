@@ -360,7 +360,7 @@ public:
             runningPrograms.setFunctionToSync(show);
         
             //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-            // runInLoopTask.push_back([&, animation] {
+            // runInLoopTask.push_back([&, animation, type, error] {
                 ESP_LOGD(TAG, "compileAndRun %s %s", animation, type);
                 File file = ESPFS.open(animation);
                 if (file) {
@@ -396,8 +396,8 @@ public:
                     }
                     // ... send to client
                     //send also error to client
-                    // error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
-                    _state.data["nodes"][2]["error"] = executable.error.error_message;
+                    error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
+                    // _state.data["nodes"][2]["error"] = executable.error.error_message;
 
                 }
             // });
