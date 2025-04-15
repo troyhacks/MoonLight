@@ -36,6 +36,8 @@ public:
 
     void loop()
     {
+        if (!_socket->getConnectedClients()) return; 
+
         if (millis() - lastMillis > ANALYTICS_INTERVAL)
         {
             lastMillis = millis();

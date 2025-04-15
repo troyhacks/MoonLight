@@ -60,6 +60,8 @@ private:
 
     void syncState(const String &originId, bool sync = false)
     {
+        if (!_socket->getConnectedClients()) return; 
+
         JsonDocument jsonDocument;
         JsonObject root = jsonDocument.to<JsonObject>();
         _statefulService->read(root, _stateReader);

@@ -46,6 +46,8 @@ void BatteryService::begin()
 
 void BatteryService::batteryEvent()
 {
+    if (!_socket->getConnectedClients()) return; 
+
     JsonDocument doc;
     doc["soc"] = _lastSOC;
     doc["charging"] = _isCharging;

@@ -14,6 +14,8 @@ void NotificationService::begin()
 
 void NotificationService::pushNotification(String message, pushType event)
 {
+    if (!_eventSocket->getConnectedClients()) return; 
+    
     JsonDocument doc;
     doc["type"] = pushTypeStrings[event];
     doc["message"] = message;
