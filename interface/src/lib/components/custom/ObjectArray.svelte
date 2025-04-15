@@ -153,14 +153,17 @@
                     <div class="mask mask-hexagon bg-primary h-auto w-10 shrink-0">
                         <Router class="text-primary-content h-auto w-full scale-75" />
                     </div>
+                    {#each property.n.slice(0, 3) as propertyN}
+                        {#if propertyN.type != "array" && propertyN.type != "password"}
+                            <div>
+                                <div class="font-bold">{data[property.name][index][propertyN.name]}</div>
+                            </div>
+                        {/if}
+                    {/each}
                     {#each property.n as propertyN}
                         {#if propertyN.type == "array"}
                             <div>
                                 <div class="font-bold">↓{nrofDetails(index, propertyN)}</div>
-                            </div>
-                        {:else if propertyN.type != "password"}
-                            <div>
-                                <div class="font-bold">{data[property.name][index][propertyN.name]}</div>
                             </div>
                         {/if}
                     {/each}

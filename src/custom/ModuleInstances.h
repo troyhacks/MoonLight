@@ -114,6 +114,8 @@ public:
             // char buffer[2048];
             // serializeJson(_state.data, buffer, sizeof(buffer));
             // ESP_LOGD(TAG, "data %s", buffer);
+            if (!_socket->getConnectedClients()) return; 
+
             JsonObject instancesData = _state.data.as<JsonObject>();
             _socket->emitEvent("instances", instancesData);
         }

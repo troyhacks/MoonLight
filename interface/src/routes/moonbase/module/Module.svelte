@@ -32,7 +32,7 @@
 
 		//workaround for let params = $state(page.url.searchParams)
 		if (moduleName != oldName) {
-			console.log("getState changed", moduleName);
+			console.log("getState new module loaded", moduleName);
 			if (oldName != "") {
 				socketOff(oldName);
 			}
@@ -67,6 +67,7 @@
 					'Content-Type': 'application/json'
 				}
 			});
+			data = {}; //clear the data of the old module
 			handleState(await response.json())
 			// console.log("data", data)
 		} catch (error) {

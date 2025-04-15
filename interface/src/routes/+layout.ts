@@ -13,7 +13,7 @@ export const load = (async ({ fetch }) => {
 		features: item,
 		title: 'MoonBase',
 		github: 'ewowi/MoonBase',
-		copyright: '2025 MoonModules ⚖️GPLv3',
+		copyright: '2025 MoonModules⚖️GPLv3',
 		appName: 'MoonBase',
 		instances: instancesJson
 	};

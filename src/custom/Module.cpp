@@ -79,10 +79,11 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 
                 for (int i = 0; i < max(oldArray.size(), newArray.size()); i++) { //compare each item in the array
                     if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add new row
-                    changed = changed || compareRecursive(key, oldArray[i], newArray[i], updatedItem, depth+1, i);
+                    changed = compareRecursive(key, oldArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                     if (oldArray.size() > newArray.size()) oldArray.remove(i); //remove old row
                 }
             } else { // if property is key/value
+                changed = true;
                 updatedItem.name = key.c_str();
                 updatedItem.oldValue = stateValue.as<String>();
                 updatedItem.value = newValue;

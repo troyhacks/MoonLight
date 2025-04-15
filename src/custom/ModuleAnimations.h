@@ -15,6 +15,7 @@
 #if FT_MOONLIGHT == 1
 
 #include "Module.h"
+#include "Leds.h"
 
 #undef TAG
 #define TAG "💫"
@@ -26,28 +27,12 @@
     #include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
 #endif
 
-struct Coord3D {
-    int x;
-    int y;
-    int z;
-};
-
-class Node {
-
-};
-
-class EffectNode : public Node {
-
-    public:
-    
-    Coord3D size = {8,8,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
-
-    void fadeToBlackBy(const uint8_t fadeBy) {}
-    void setPixelColor(const Coord3D &pixel, const CRGB& color) {}
-};
-
 class ModuleAnimations;
-static ModuleAnimations *gLiveAnimation = nullptr;
+static ModuleAnimations *gAnimations = nullptr;
+
+LedsModel ledsModel;
+static void _addPixel(uint16_t x, uint16_t y, uint16_t z) {ledsModel.addPixel(x, y, z);}
+
 
 class ModuleAnimations : public Module
 {
@@ -71,7 +56,7 @@ public:
 
         ESP_LOGD(TAG, "");
 
-        //create a handler which recompiles the animation when the file of the current animation changes
+        //create a handler which recompiles the animation when the file of the current animation changes in the File Manager
         _filesService->addUpdateHandler([&](const String &originId)
         { 
             ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
@@ -85,7 +70,7 @@ public:
 
                         if (updatedItem == animation) {
                             ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                            compileAndRun(node["animation"]);
+                            compileAndRun(node["animation"], node["type"], node["error"]);
                         }
                     }
                 }
@@ -95,10 +80,11 @@ public:
         _socket->registerEvent("animationsRO");
     }
 
+    //define the data model
     void setupDefinition(JsonArray root) override {
         ESP_LOGD(TAG, "");
         JsonObject property; // state.data has one or more properties
-        JsonArray details; // if a property is an array, this is the details of the array
+        JsonArray details = root; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
 
         property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
@@ -132,6 +118,7 @@ public:
             values.add("Modifier");
             values.add("Driver show");
             property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 85;
+            property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "controls"; property["type"] = "array"; details = property["n"].to<JsonArray>();
             {
                 property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "speed";
@@ -154,6 +141,7 @@ public:
             property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "kill"; property["type"] = "button";
         }
     }
@@ -170,6 +158,7 @@ public:
         ESP_LOGD(TAG, "LEDs removed and FastLED configuration reset.");
     }
 
+    //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (equal(updatedItem.name, "pin")) {
@@ -194,15 +183,17 @@ public:
         } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-        } else if (equal(updatedItem.parent[0], "nodes") && equal(updatedItem.name, "animation")) {    
+        } else if (equal(updatedItem.parent[0], "nodes") && (equal(updatedItem.name, "animation") || equal(updatedItem.name, "type"))) {    
+            JsonVariant node = _state.data["nodes"][updatedItem.index[0]];
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue.length())
-                ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
-            if (updatedItem.value.as<String>().length())
-                compileAndRun(updatedItem.value);
+                ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
+            if (!node["animation"].isNull() && !node["type"].isNull())
+                compileAndRun(node["animation"], node["type"], node["error"]);
         } else if (equal(updatedItem.parent[0], "scripts") && equal(updatedItem.name, "kill")) {    
-            ESP_LOGD(TAG, "handle %s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            kill(updatedItem.index[0]);
+            ESP_LOGD(TAG, "handle %s[%d].%s = %s -> %s (%d)", updatedItem.parent[0], updatedItem.index[0], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updatedItem.oldValue.length());
+            if (updatedItem.oldValue != "null") //do not run at boot!
+                kill(updatedItem.index[0]);
         } else
             ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
@@ -227,6 +218,7 @@ public:
         phase += speed;
     }
 
+    //run effects
     void loop()
     {
         bool showLeds = false;
@@ -292,6 +284,7 @@ public:
         if (showLeds) driverShow();
     }
 
+    //update scripts / read only values in the UI
     void loop1s() {
         if (!_socket->getConnectedClients()) return; 
 
@@ -312,6 +305,7 @@ public:
             object["handle"] = exec.__run_handle_index;
             object["binary_size"] = exeInfo.binary_size;
             object["data_size"] = exeInfo.data_size;
+            object["error"] = exec.error.error_message;
             object["kill"] = 0;
             // ESP_LOGD(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
         }
@@ -328,27 +322,29 @@ public:
         // ESP_LOGD(TAG, "livescripts %s", buffer);
     }
 
-    static void show()
-    {
-        delay(1); //to feed the watchdog (also if loopState == 0)
-
-        // gLiveAnimation->driverShow();
-    }
-
     void driverShow()
     {
         if (_state.data["driverOn"])
             FastLED.show();
     }
 
-    //ESPLiveScript
-    void compileAndRun(JsonVariant animation) {
+    //ESPLiveScript functions
+    //=======================
+
+    static void show()
+    {
+        delay(1); //to feed the watchdog (also if loopState == 0)
+
+        // gAnimations->driverShow();
+    }
+
+    void compileAndRun(const char * animation, const char * type, JsonVariant error) {
 
         #if FT_LIVESCRIPT
         
-            ESP_LOGD(TAG, "animation %s", animation.as<String>().c_str());
+            ESP_LOGD(TAG, "animation %s %s", animation, type);
 
-            if (animation.as<String>().c_str()[0] != '/') { //no sc script
+            if (animation[0] != '/') { //no sc script
                 return;
             }
 
@@ -365,28 +361,43 @@ public:
         
             //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
             // runInLoopTask.push_back([&, animation] {
-                ESP_LOGD(TAG, "compileAndRun %s", animation.as<String>().c_str());
-                File file = ESPFS.open(animation.as<String>().c_str());
+                ESP_LOGD(TAG, "compileAndRun %s %s", animation, type);
+                File file = ESPFS.open(animation);
                 if (file) {
                     std::string scScript = file.readString().c_str();
                     // scScript += "void main(){setup();sync();}";
                     file.close();
 
-                    gLiveAnimation = this;
-                    addExternalVariable("leds", "CRGB *", "", (void *)leds);
-                    // addExternalFunction("fadeToBlackBy", "void", "uint8_t", (void *)fadeToBlackBy_static);
-                    uint16_t (*_random16)(uint16_t)=random16; //enforce specific random16 function
-                    addExternalFunction("random16", "uint16_t", "uint16_t", (void *)_random16);
-                    addExternalFunction("sin8", "uint8_t", "uint8_t", (void *)sin8);
+                    gAnimations = this;
+                    if (equal(type, "Effect")) {
+                        addExternalVariable("leds", "CRGB *", "", (void *)leds);
+                        // addExternalFunction("fadeToBlackBy", "void", "uint8_t", (void *)fadeToBlackBy_static);
+                        uint16_t (*_random16)(uint16_t)=random16; //enforce specific random16 function
+                        addExternalFunction("random16", "uint16_t", "uint16_t", (void *)_random16);
+                        addExternalFunction("sin8", "uint8_t", "uint8_t", (void *)sin8);
+                    } else if (equal(type, "Fixture definition")) {
+                        if (findLink("addPixel", externalType::function) == -1)
+                            addExternalFunction("addPixel", "void", "uint16_t,uint16_t,uint16_t", (void *)_addPixel);
+                    }
                 
                     Executable executable = parser.parseScript(&scScript);
-                    executable.name = animation.as<string>();
-                    ESP_LOGD(TAG, "parsing %s done\n", animation.as<String>().c_str());
+                    executable.name = animation;
+                    ESP_LOGD(TAG, "parsing %s done\n", animation);
                     scriptRuntime.addExe(executable); //if already exists, delete it first
                     ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
         
                     if (executable.exeExist)
                         executable.execute("main"); //background task (async - vs sync)
+                    else
+                        ESP_LOGD(TAG, "error %s", executable.error.error_message.c_str());
+
+                    for (asm_external el: external_links) {
+                        ESP_LOGD("", "el %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
+                    }
+                    // ... send to client
+                    //send also error to client
+                    // error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
+                    _state.data["nodes"][2]["error"] = executable.error.error_message;
 
                 }
             // });
@@ -395,7 +406,6 @@ public:
         //stop UI spinner
     }
 
-    // ESPLiveScript
     void kill(int index) {
         ESP_LOGD(TAG, "kill %d", index);
         if (index < scriptRuntime._scExecutables.size()) {
@@ -404,7 +414,7 @@ public:
             scriptRuntime.deleteExe(scriptRuntime._scExecutables[index].name);
         }
     }
-};
+}; // class ModuleAnimations
 
 #endif
 #endif
