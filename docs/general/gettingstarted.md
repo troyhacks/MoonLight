@@ -48,10 +48,14 @@
 * Read [Customizing Sveltekit](https://ewowi.github.io/MoonBase/general/customizingsveltekit/)
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
 * Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.
+
+### Pull Requests
+
 * Want to make changes: fork the repo and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
+
     * Login to your own github account
     * Fork: go to [ewowi/MoonBase](https://github.com/ewowi/MoonBase/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonBase
-    * Press xx Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
+    * Press Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
       
       <img width="90" alt="image" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
 
