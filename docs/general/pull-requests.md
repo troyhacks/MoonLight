@@ -32,6 +32,8 @@ Below lists are ordered in terms of likelyhood to be accepted:
 ## Submitted
 
 * [Refactor System Status and Metrics](https://github.com/theelims/ESP32-sveltekit/pull/78)
+    * Add free_psram, used_psram and psram_size in Analytics (models.ts) and analytics_data (analytics.ts) and show in UI (SystemMetrics.svelte)
+    * Send psram data only if psramFound (SystemStatus.svelte, AnalyticsService.h, SystemStatus.cpp)
 * [Wifi: Multiple edits bug resolved](https://github.com/theelims/ESP32-sveltekit/pull/81)
 * [ESPD_LOGx: replace first argument with TAG and define TAG as 🐼](https://github.com/theelims/ESP32-sveltekit/pull/85)
 
@@ -40,3 +42,19 @@ Below lists are ordered in terms of likelyhood to be accepted:
 * [Expands menu on selected subitem](https://github.com/theelims/ESP32-sveltekit/pull/77)
 * [Add file.close in fileHandler handleRequest](https://github.com/theelims/ESP32-sveltekit/pull/73)
 
+### Other improvements
+
+* Add esp32-s3-devkitc-1-n16r8v and LOLIN_WIFI_FIX in pio.ini (including boards folder)
+* Add Monitor
+    * socket.ts: add else listeners.get("monitor")?.forEach((listener) => listener(new Uint8Array(message.data)));
+    * EventSocket.cpp: add void EventSocket::emitEvent with char * argument
+* Add MoonBase / MoonLight specific functionality (Currently fixtures and effects)
+* ESP32SvelteKit.cpp: 
+    * CPU load (and main.cpp)
+    * comment response.addHeader("Cache-Control", "public, immutable, max-age=31536000");
+* interface/source/routes/+layout.svelte
+    * Don't show if captive portal: {#if (!window.location.href.includes("192.168.4.1") && $page.data.features.monitor)}
+* main.cpp: esp_log_set_vprintf(my_vprintf); WIP
+* ci pio
+* run in loopTask to avoid stack size crashes in httpd
+* updatedItems (to see what specifically has been updated)

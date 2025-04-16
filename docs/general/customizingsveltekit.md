@@ -2,6 +2,8 @@
 
 ### Customize UI and app specific
 
+This is a checklist, More info on most of the items can be found in the ESP32-Sveltekit specific documentation [ESP32 SvelteKit](https://ewowi.github.io/MoonBase/esp32sveltekit/), [Build Tools](https://ewowi.github.io/MoonBase/gettingstarted/), [Front end](https://ewowi.github.io/MoonBase/sveltekit/) and [Back End](https://ewowi.github.io/MoonBase/statefulservice/)
+
 * {custom} = MoonBase / MoonLight
 
 * docs/media/
@@ -61,28 +63,3 @@
     * change license
     * change description
     * change webhook
-
-### Other improvements
-
-* Add esp32-s3-devkitc-1-n16r8v and LOLIN_WIFI_FIX in pio.ini (including boards folder)
-* Add free_psram, used_psram and psram_size in Analytics (models.ts) and analytics_data (analytics.ts) and show in UI (SystemMetrics.svelte)
-* Send psram data only if psramFound (SystemStatus.svelte, AnalyticsService.h, SystemStatus.cpp)
-* Add File manager
-* Add Monitor
-    * socket.ts: add else listeners.get("monitor")?.forEach((listener) => listener(new Uint8Array(message.data)));
-    * EventSocket.cpp: add void EventSocket::emitEvent with char * argument
-* Add MoonBase / MoonLight specific functionality (Currently fixtures and effects)
-* ESP32SvelteKit.cpp: 
-    * CPU load, loops per second (and main.cpp)
-    * comment response.addHeader("Cache-Control", "public, immutable, max-age=31536000");
-* interface/source/routes/+layout.svelte
-    * Don't show if captive portal: {#if (!window.location.href.includes("192.168.4.1") && $page.data.features.monitor)}
-* interface/source/routes/statusbar.svelte
-    * show help: 
-```html
-<a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname + addModuleToURL()}" target="_blank">?</a>
-```
-* main.cpp: esp_log_set_vprintf(my_vprintf); WIP
-* ci pio
-* run in loopTask to avoid stack size crashes in httpd
-* updatedItems (to see what speicifcally has been updated)
