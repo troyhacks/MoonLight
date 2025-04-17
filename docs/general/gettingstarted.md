@@ -14,7 +14,7 @@
     * Select esp32dev for a normal ESP32
     * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
 
-   <img width="617" alt="image" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
+   <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
 
 * Press PlaformIO:Upload (->) on the statusbar
 * The firmware is now flashed to your board, after flashing the board will reboot
@@ -48,15 +48,23 @@ WIP...
 
 ## MoonBase specific
 
-* Connect a 256 leds panel to the board
-* Search for FastLED.addLeds in the code and update to the pin you use to drive LEDS, reflash the code to the board
-* Go to the UI in the browser
-* Go to Custom / Files and create or upload Live scripts 
-* Go to Custom / Module Animations and select the 'hardcoded animations' (Random, Sinelon, Rainbow), you should see it on your panel
-* Select any of the Live scripts you uploaded, check the Serial Output for results. (No led output in current version, see below)
-* Open the Edit area and change things in the code, see the Serial Output for results
+At the moment MoonBase is the work in progress repo and temporary also contains LED functionality (MoonLight / Animations), will move later to the MoonLight repo.
 
-<img width="350" alt="image" src="https://github.com/user-attachments/assets/56bdd019-927b-40cc-9199-9bc6344f8d8b" />
+* Connect a 256 leds panel to the board on Pin 2 or 16
+  
+   <img width="350" src="https://github.com/user-attachments/assets/1623a751-5f4b-463b-a6f3-a642c2bc52bf"/>
+   
+* Go to the UI in the browser
+* Go to MoonLight / Animations
+    * Select Pin 2 or 16
+    * Create a node, select the 'hardcoded animations' (Random, Sinelon, Rainbow, Sinus), you should see it on your panel
+    * Create more nodes with other animations, they will all run at the same time 
+* Live Scripts: Go to MoonBase / Files and create or upload Live scripts.
+    * Examples: [Live scripts](https://github.com/ewowi/MoonBase/tree/main/misc/livescripts)
+    * Back to Animations, select any of the Live scripts you uploaded, check the Led Panel and / or Serial Output for results
+    * Open the Edit area and change things in the code, see the Serial Output for results
+
+<img width="350" src="https://github.com/user-attachments/assets/56bdd019-927b-40cc-9199-9bc6344f8d8b" />
 
 ## Developing
 
@@ -74,7 +82,7 @@ WIP...
     * Fork: go to [ewowi/MoonBase](https://github.com/ewowi/MoonBase/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonBase
     * Press Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
       
-      <img width="90" alt="image" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
+      <img width="90" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
 
     * Go to the file you want to change e.g. [ModuleAnimations.h](https://github.com/ewoudwijma/MoonBase/blob/background-script/src/custom/ModuleAnimations.h), press edit and make the changes. E.g. change executable.execute("main") to executable.executeAsTask("main")
     * Press Commit Changes..., enter a commit message and an extended description, Press Commit Changes
