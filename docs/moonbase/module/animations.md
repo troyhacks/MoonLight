@@ -17,6 +17,12 @@
 
 <img width="498" alt="Screenshot 2025-03-29 at 14 12 01" src="https://github.com/user-attachments/assets/3a5a3743-c0a4-4456-96cb-f4abd0d01450" />
 
+### Scripts
+
+Example scripts can be found in [Live scripts](https://github.com/ewowi/MoonBase/tree/main/misc/livescripts) - WIP
+
+They represent current state of Live Script processing and will be extended as more functionality will be added.
+
 ## Technical
 
 * See [Modules](../modules.md)

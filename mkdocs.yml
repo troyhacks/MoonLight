@@ -36,9 +36,9 @@ nav:
       - statefulservice.md
       - restfulapi.md
 
-site_author: elims
+site_author: ewowi
 site_description: >-
-  A simple, secure and extensible framework for IoT projects on ESP32 platforms with responsive Sveltekit front-end built with TailwindCSS and DaisyUI.
+  MoonBase is a fork of ESP32-SvelteKit and add Files, Modules and much more, ready to flash on ESP32 devices. This is a MoonModules.org project.
 
 # Repository
 repo_name: ewowi/MoonBase
