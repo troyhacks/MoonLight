@@ -95,4 +95,4 @@ At the moment MoonBase is the work in progress repo and temporary also contains 
       
       <img width="350" alt="Screenshot 2025-04-15 at 15 02 33" src="https://github.com/user-attachments/assets/53bc8b2e-a078-46a5-b926-25d581ec8202" />
   
-    * The upstream repo can now process this PR
+    * The upstream repo (MoonBase or MoonLight) can now process this PR

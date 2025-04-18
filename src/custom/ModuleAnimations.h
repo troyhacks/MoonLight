@@ -14,14 +14,13 @@
 
 #if FT_MOONLIGHT == 1
 
-#include "Module.h"
-#include "Leds.h"
-
 #undef TAG
 #define TAG "💫"
 
 #include "FastLED.h"
-#define MAXLEDS 8192
+
+#include "Module.h"
+#include "PhysicalLayer.h"
 
 #if FT_LIVESCRIPT
     #include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
@@ -30,16 +29,17 @@
 class ModuleAnimations;
 static ModuleAnimations *gAnimations = nullptr;
 
-LedsModel ledsModel;
-static void _addPixel(uint16_t x, uint16_t y, uint16_t z) {ledsModel.addPixel(x, y, z);}
+PhysicalLayer layerP;
 
+static void _addPin(uint8_t pinNr) {layerP.addPin(pinNr);}
+static void _addPixelsPre() {layerP.addPixelsPre();}
+static void _addPixel(uint16_t x, uint16_t y, uint16_t z) {layerP.addPixel({x, y, z});}
+static void _addPixelsPost() {layerP.addPixelsPost();}
 
 class ModuleAnimations : public Module
 {
 public:
 
-    CRGB leds[MAXLEDS];
-    uint16_t nrOfLeds = 256;
     #if FT_LIVESCRIPT
         Parser parser = Parser();
     #endif
@@ -89,6 +89,12 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
         property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "select"; property["default"] = "solid"; values = property["values"].to<JsonArray>();
+        values.add("Preset1");
+        values.add("Preset2");
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
         property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = 2; values = property["values"].to<JsonArray>();
         values.add("2");
@@ -97,11 +103,13 @@ public:
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
+            values.add("Solid");
             values.add("Random");
             values.add("Sinelon");
             values.add("Rainbow");
             values.add("Sinus");
             values.add("Lissajous");
+            values.add("Lines");
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
@@ -117,7 +125,6 @@ public:
             values.add("Effect");
             values.add("Modifier");
             values.add("Driver show");
-            property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 85;
             property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "controls"; property["type"] = "array"; details = property["n"].to<JsonArray>();
             {
@@ -146,40 +153,28 @@ public:
         }
     }
 
-    void removeLeds() {
-        // Turn off all LEDs
-        for (int i = 0; i < nrOfLeds; i++) {
-            leds[i] = CRGB::Black;
-        }
-        FastLED.show();
-    
-        // Clear the FastLED configuration
-        FastLED.clear(true); // Pass 'true' to reset internal FastLED data
-        ESP_LOGD(TAG, "LEDs removed and FastLED configuration reset.");
-    }
-
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (equal(updatedItem.name, "pin")) {
+        if (equal(updatedItem.name, "pin") || equal(updatedItem.name, "red") || equal(updatedItem.name, "green") || equal(updatedItem.name, "blue")) {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
-            removeLeds();
-
-            //In constructor so before onUpdate ...
-            switch (updatedItem.value.as<int>()) {
+            //addLeds twice is temp hack to make rgb sliders work
+            switch (_state.data["pin"].as<int>()) {
                 case 2:
-                    FastLED.addLeds<WS2812B, 2, GRB>(leds, 0, nrOfLeds);
+                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
+                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
                     break;
                 case 16:
-                    FastLED.addLeds<WS2812B, 16, GRB>(leds, 0, nrOfLeds);
+                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
+                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
                     break;
                 default:
-                    ESP_LOGD(TAG, "unknown pin %d", updatedItem.value.as<int>());
+                    ESP_LOGD(TAG, "unknown pin %d", _state.data["pin"].as<int>());
             }
             FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-            ESP_LOGD(TAG, "FastLED.addLeds n:%d", nrOfLeds);
+            ESP_LOGD(TAG, "FastLED.addLeds n:%d", layerP.nrOfLeds);
         } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
@@ -198,78 +193,14 @@ public:
             ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
-    //AI generated
-    void sinusEffect(CRGB* leds, uint16_t numLeds, uint8_t hueOffset = 0, uint8_t brightness = 255, uint16_t speed = 10) {
-        static uint16_t phase = 0; // Tracks the phase of the sine wave
-        // ESP_LOGD(TAG, "sinusEffect %d %d %d %d", numLeds, hueOffset, brightness, speed);
-    
-        for (uint16_t i = 0; i < numLeds; i++) {
-            // Calculate the sine wave value for the current LED
-            uint8_t wave = sin8((i * 255 / numLeds) + phase);
-    
-            // Map the sine wave value to a color hue
-            uint8_t hue = wave + hueOffset;
-    
-            // Set the LED color using the calculated hue
-            leds[i] = CHSV(hue, 255, brightness);
-        }
-    
-        // Increment the phase to animate the wave
-        phase += speed;
-    }
-
     //run effects
     void loop()
     {
         bool showLeds = false;
         
         for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
-            String animation = node["animation"];
             //select the right effect
-            if (animation == "Random") {
-                fadeToBlackBy(leds, nrOfLeds, 70);
-                leds[random16(nrOfLeds)] = CRGB(255, random8(), 0);
-                showLeds = true;
-            } else if (animation == "Sinelon") {
-                fadeToBlackBy(leds, nrOfLeds, 20);
-                uint8_t bpm = 60;
-                int pos = beatsin16( bpm, 0, 255 );
-                leds[pos] += CHSV( millis()/50, 255, 255); //= CRGB(255, random8(), 0);
-                showLeds = true;
-            } else if (animation == "Rainbow") {
-                static uint8_t hue = 0;
-                fill_rainbow(leds, nrOfLeds, hue++, 7);
-                showLeds = true;
-            } else if (animation == "Sinus") {
-                fadeToBlackBy(leds, nrOfLeds, 70);
-                sinusEffect(leds, nrOfLeds, millis() / 10, 255, 5);
-                showLeds = true;
-            } else if (animation == "Lissajous") {
-
-                uint8_t xFrequency = 64;// = leds.effectControls.read<uint8_t>();
-                uint8_t fadeRate = 128;// = leds.effectControls.read<uint8_t>();
-                uint8_t speed = 128;// = leds.effectControls.read<uint8_t>();
-                CRGBPalette16 palette = PartyColors_p;
-
-                EffectNode leds;
-
-                leds.fadeToBlackBy(fadeRate);
-                uint_fast16_t phase = millis() * speed / 256;  // allow user to control rotation speed, speed between 0 and 255!
-                Coord3D locn = {0,0,0};
-                for (int i=0; i < 256; i ++) {
-                    //WLEDMM: stick to the original calculations of xlocn and ylocn
-                    locn.x = sin8(phase/2 + (i*xFrequency)/64);
-                    locn.y = cos8(phase/2 + i*2);
-                    locn.x = (leds.size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(leds.size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
-                    // leds.setPixelColor((uint8_t)xlocn, (uint8_t)ylocn, leds.color_from_palette(sys->now/100+i, false, PALETTE_SOLID_WRAP, 0));
-                    // leds[locn] = ColorFromPalette(leds.palette, sys->now/100+i);
-                    // leds.setPixelColorPal(locn, millis()/100+i);
-                    leds.setPixelColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
-                }
-                showLeds = true;
-            } else {
-                //Done by live script (Yves)
-            }
+            showLeds |= layerP.effectFrame(node["animation"]);
         }
 
         //show connected clients on the led display
@@ -277,7 +208,7 @@ public:
         // if (_socket->getConnectedClients() == 0) lastConnectedClients++;
         for (int i = 0; i < _socket->getConnectedClients(); i++) {
             // ESP_LOGD(TAG, "socket %d", i);
-            leds[i] = CRGB(0, 0, 128);
+            layerP.leds[i] = CRGB(0, 0, 128);
         }
 
         // Serial.printf(" %s", animation.c_str());
@@ -370,25 +301,38 @@ public:
 
                     gAnimations = this;
                     if (equal(type, "Effect")) {
-                        addExternalVariable("leds", "CRGB *", "", (void *)leds);
+                        addExternalVariable("leds", "CRGB *", "", (void *)layerP.leds);
                         // addExternalFunction("fadeToBlackBy", "void", "uint8_t", (void *)fadeToBlackBy_static);
                         uint16_t (*_random16)(uint16_t)=random16; //enforce specific random16 function
                         addExternalFunction("random16", "uint16_t", "uint16_t", (void *)_random16);
                         addExternalFunction("sin8", "uint8_t", "uint8_t", (void *)sin8);
+                        scScript += "#define NUM_LEDS " + std::to_string(layerP.nrOfLeds) + "\n"; //NUM_LEDS is used in arrays -> must be define e.g. uint8_t rMapRadius[NUM_LEDS];
+                        // scScript += "void main(){setup();while(2>1){loop();sync();}}";
                     } else if (equal(type, "Fixture definition")) {
-                        if (findLink("addPixel", externalType::function) == -1)
-                            addExternalFunction("addPixel", "void", "uint16_t,uint16_t,uint16_t", (void *)_addPixel);
+                        addExternalFunction("addPin", "void", "uint8_t", (void *)_addPin);
+                        addExternalFunction("addPixelsPre", "void", "", (void *)_addPixelsPre);
+                        addExternalFunction("addPixel", "void", "uint16_t,uint16_t,uint16_t", (void *)_addPixel);
+                        addExternalFunction("addPixelsPost", "void", "", (void *)_addPixelsPost);
+                        // scScript += "void main(){addPixelsPre();setup();addPixelsPost();}";
                     }
-                
+
                     Executable executable = parser.parseScript(&scScript);
                     executable.name = animation;
                     ESP_LOGD(TAG, "parsing %s done\n", animation);
                     scriptRuntime.addExe(executable); //if already exists, delete it first
                     ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
         
-                    if (executable.exeExist)
-                        executable.execute("main"); //background task (async - vs sync)
-                    else
+                    if (executable.exeExist) {
+                        if (equal(type, "Fixture definition")) {
+                            executable.execute("main"); //background task (async - vs sync)
+                            // pass = 1;
+                            // liveM->executeTask(liveFixtureID, "c");
+                            // pass = 2;
+                            // liveM->executeTask(liveFixtureID, "c");
+                        }
+                        // if (equal(type, "Effect")) // not working yet!!!
+                        //     executable.executeAsTask("main"); //background task (async - vs sync)
+                    } else
                         ESP_LOGD(TAG, "error %s", executable.error.error_message.c_str());
 
                     for (asm_external el: external_links) {
