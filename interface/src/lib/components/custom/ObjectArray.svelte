@@ -12,6 +12,7 @@
 
 
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import DragDropList, { VerticalDropZone, reorder, type DropEvent } from 'svelte-dnd-list';
 	import Add from '~icons/tabler/circle-plus';
 	import { user } from '$lib/stores/user';
@@ -23,7 +24,7 @@
 	import Delete from '~icons/tabler/trash';
 	import MultiInput from '$lib/components/custom/MultiInput.svelte';
 	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
-    import {initCap} from '$lib/stores/custom_utilities';
+    import {initCap, getTimeAgo} from '$lib/stores/custom_utilities';
 
     let { property, data = $bindable(), definition, onChange, changeOnInput} = $props();
 
@@ -50,6 +51,17 @@
             // console.log("localDefinition", property.name, definition[i].n)
         }
     }
+
+    //make getTimeAgo reactive
+    let currentTime = $state(Date.now());
+    // Update the dummy variable every second
+    const interval = setInterval(() => {
+        currentTime = Date.now();
+    }, 1000);
+
+    onDestroy(() => {
+        clearInterval(interval);
+    });
 
 	function onDrop(propertyName: string, { detail: { from, to } }: CustomEvent<DropEvent>) {
 		
@@ -154,7 +166,11 @@
                         <Router class="text-primary-content h-auto w-full scale-75" />
                     </div>
                     {#each property.n.slice(0, 3) as propertyN}
-                        {#if propertyN.type != "array" && propertyN.type != "password"}
+                        {#if propertyN.type == "time"}
+                            <div>
+                                <div class="font-bold">{getTimeAgo(data[property.name][index][propertyN.name], currentTime)}</div>
+                            </div>
+                        {:else if propertyN.type != "array" && propertyN.type != "password"}
                             <div>
                                 <div class="font-bold">{data[property.name][index][propertyN.name]}</div>
                             </div>

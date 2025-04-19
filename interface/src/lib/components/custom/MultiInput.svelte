@@ -12,8 +12,9 @@
 
 
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import FileEdit from '$lib/components/custom/FileEdit.svelte';
-    import {initCap} from '$lib/stores/custom_utilities';
+    import {initCap, getTimeAgo} from '$lib/stores/custom_utilities';
 
     export let property: any;
     export let value: any;
@@ -23,6 +24,16 @@
     export let step = 1;
     export let changeOnInput:boolean = true;
 
+    //make getTimeAgo reactive
+    export let currentTime = Date.now();
+    // Update the dummy variable every second
+    const interval = setInterval(() => {
+        currentTime = Date.now();
+    }, 1000);
+    onDestroy(() => {
+        clearInterval(interval);
+    });
+
 </script>
 
 <label class="label cursor-pointer" for={property.name}>
@@ -30,7 +41,7 @@
     <span class="mr-4">{initCap(property.name)}</span>
 </label>
 
-{#if property.ro}
+{#if property.ro && false}
     {#if property.type == "ip"}
         <a 
             href="http://{value}"
@@ -123,6 +134,8 @@
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     />
+{:else if property.type == "time"}
+    <span>{value} {getTimeAgo(value, currentTime)}</span> 
 {:else if property.type == "ip"}
     <input 
         type={property.type}

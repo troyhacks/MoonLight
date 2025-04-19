@@ -58,7 +58,7 @@ public:
         {
             property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "ip"; property["type"] = "ip"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "time"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "time"; property["type"] = "time"; property["ro"] = true;
         }
     }
 
@@ -93,21 +93,20 @@ public:
             instanceUDP.read(buffer, packetSize);
             // ESP_LOGD(TAG, "UDP packet read from %d: %s (%d)", instanceUDP.remoteIP()[3], buffer+6, packetSize);
 
-            bool found = false;
             //use state.data or newData?
             for (JsonObject instance: _state.data["instances"].as<JsonArray>()) {
                 if (instance["ip"] == instanceUDP.remoteIP().toString()) {
                     found = true;
                     instance["name"] = buffer+6;
-                    instance["time"] = millis();
-                    // ESP_LOGD(TAG, "updated %s", instance["ip"].as<String>().c_str());
+                    instance["time"] = time(nullptr);
+                    // ESP_LOGD(TAG, "updated %s %s %lu", instance["ip"].as<String>().c_str(), instance["time"].as<String>().c_str(), time(nullptr));
                 }
             }
             if (!found) {
                 JsonObject instance = _state.data["instances"].as<JsonArray>().add<JsonObject>();
                 instance["ip"] = instanceUDP.remoteIP().toString();
                 instance["name"] = buffer+6;
-                instance["time"] = millis();
+                instance["time"] = time(nullptr);
                 ESP_LOGD(TAG, "added %s %s", instance["ip"].as<String>().c_str(), buffer+6);
             }
 

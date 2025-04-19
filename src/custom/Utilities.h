@@ -125,6 +125,11 @@ struct Char {
         }
     }
 
+    void formatTime(time_t time, const char *format)
+    {
+        strftime(s, N, format, localtime(&time)); // or gmtime
+    }
+    
     //for parsing strings
     const char* eat() {
         //todo

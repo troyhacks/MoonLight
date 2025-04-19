@@ -336,7 +336,7 @@ public:
                         ESP_LOGD(TAG, "error %s", executable.error.error_message.c_str());
 
                     for (asm_external el: external_links) {
-                        ESP_LOGD("", "el %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
+                        ESP_LOGD("", "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
                     }
                     // ... send to client
                     //send also error to client
