@@ -79,12 +79,13 @@
     />
 {:else if property.type == "range"}
     <div class="flex-row flex items-center space-x-2">
+        <!-- range colors: https://daisyui.com/components/range/ -->
         <input 
             type="range"
             min={property.min} 
             max={property.max}
             step={step}
-            class={"range " + (disabled == false ? "range-primary" : "range-secondary")}
+            class={"range " + (disabled == false ? (property.color=="Red"?"range-error":(property.color=="Green"?"range-success":"range-primary")) : "range-secondary")}
             {disabled}
             bind:value={value}
             on:change={onChange}

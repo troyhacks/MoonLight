@@ -1,5 +1,5 @@
 /**
-    @title     MoonBase
+    @title     MoonLight
     @file      ModuleAnimations.h
     @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
     @Authors   https://github.com/ewowi/MoonBase/commits/main
@@ -18,9 +18,9 @@
 #define TAG "💫"
 
 #include "FastLED.h"
-
 #include "Module.h"
-#include "PhysicalLayer.h"
+
+#include "Effect.h"
 
 #if FT_LIVESCRIPT
     #include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
@@ -43,6 +43,8 @@ public:
     #if FT_LIVESCRIPT
         Parser parser = Parser();
     #endif
+
+    bool animationsChanged = false;
 
     ModuleAnimations(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
@@ -89,9 +91,9 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
         property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
-        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
-        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
-        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 128; property["color"] = "Red";
+        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 128; property["color"] = "Green";
+        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 1280; property["color"] = "Blue";
         property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "select"; property["default"] = "solid"; values = property["values"].to<JsonArray>();
         values.add("Preset1");
         values.add("Preset2");
@@ -179,6 +181,7 @@ public:
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (equal(updatedItem.parent[0], "nodes") && (equal(updatedItem.name, "animation") || equal(updatedItem.name, "type"))) {    
+            animationsChanged = true;
             JsonVariant node = _state.data["nodes"][updatedItem.index[0]];
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue.length())
@@ -196,12 +199,23 @@ public:
     //run effects
     void loop()
     {
-        bool showLeds = false;
-        
-        for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
-            //select the right effect
-            showLeds |= layerP.effectFrame(node["animation"]);
+        bool showLeds = true;
+
+        if (animationsChanged) {
+            animationsChanged = false;
+            ESP_LOGD(TAG, "animationsChanged");
+            
+            //rebuild layerP->layerV->effects
+            for (Effect* obj : layerP.layerV[0]->effects) {
+                delete obj;
+            }
+            layerP.layerV[0]->effects.clear(); //remove all effects
+            for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
+                layerP.addEffect(node["animation"]); // fill the layers and effects ...
+            }
         }
+
+        layerP.loop(); //run all the effects of all virtual layers (currently only one)
 
         //show connected clients on the led display
         // static uint8_t lastConnectedClients = 0;

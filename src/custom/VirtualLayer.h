@@ -1,5 +1,5 @@
 /**
-    @title     MoonBase
+    @title     MoonLight
     @file      VirtualLayer.h
     @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
     @Authors   https://github.com/ewowi/MoonBase/commits/main
@@ -14,19 +14,12 @@
 #include <Arduino.h>
 #include <vector>
 #include <FastLED.h>
-// #include "PhysicalLayer.h"
 
-class PhysicalLayer; //Forward as VirtualLayer refers back to PhysicalLayer
+#include "PhysicalLayer.h"
 
-#define _1D 1
-#define _2D 2
-#define _3D 3
+// #include "Effect.h"
 
-struct Coord3D {
-  int x;
-  int y;
-  int z;
-};
+// class PhysicalLayer; //Forward as VirtualLayer refers back to PhysicalLayer
 
 enum mapType {
     m_color,
@@ -50,6 +43,8 @@ class VirtualLayer {
 
   public:
 
+    uint16_t nrOfLeds = 256;
+
     std::vector<PhysMap> mappingTable;
     std::vector<std::vector<uint16_t>> mappingTableIndexes;
 
@@ -58,7 +53,10 @@ class VirtualLayer {
     uint16_t mappingTableIndexesSizeUsed = 0; 
 
     PhysicalLayer *layerP; //physical leds the virtual leds are mapped to
-
+    std::vector<Effect *> effects;
+    // Effect *liveEffect = nullptr;
+    std::vector<Projection *> projections;
+  
     Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
 
     VirtualLayer() {
@@ -67,6 +65,8 @@ class VirtualLayer {
         // mappingTableIndexesSizeUsed = 0;
         // mappingTableSizeUsed = 0;
     }
+
+    bool loop();
 
     void addIndexP(PhysMap &physMap, uint16_t indexP) {
         // ppf("addIndexP i:%d t:%d", indexP, mapType);
@@ -127,15 +127,6 @@ class VirtualLayer {
     //to be called in loop, if more then one effect
     void setPixelsToBlend(); //uses leds
 
+    void fill_solid(const CRGB& color);
+    void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
 };
-
-// struct MappingTable2 {
-//     uint16_t data[NUM_LEDS];       // Contiguous memory block for data - all ledsP indices
-//     uint8_t* lengths;    // Length of each row - nr of ledsP indices for each ledsV
-//     uint16_t* offsets;    // Starting index of each row - ledsV index
-//     int rows;        // Number of rows - nr of ledsV
-
-// };
-
-// MappingTable2 createMappingTable(int rows, int* lengths) {
-// }

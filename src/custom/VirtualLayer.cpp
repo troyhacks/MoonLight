@@ -1,5 +1,5 @@
 /**
-    @title     MoonBase
+    @title     MoonLight
     @file      VirtualLayer.h
     @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
     @Authors   https://github.com/ewowi/MoonBase/commits/main
@@ -12,6 +12,7 @@
 
 #include "VirtualLayer.h"
 #include "PhysicalLayer.h"
+#include "Effect.h"
 
 //convenience functions to call fastled functions out of the Leds namespace (there naming conflict)
 void fastled_fadeToBlackBy(CRGB* leds, uint16_t num_leds, uint8_t fadeBy) {
@@ -23,6 +24,14 @@ void fastled_fill_solid( struct CRGB * targetArray, int numToFill, const CRGB& c
 void fastled_fill_rainbow(struct CRGB * targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue) {
   fill_rainbow(targetArray, numToFill, initialhue, deltahue);
 }
+
+bool VirtualLayer::loop() {
+  for (Effect *effect: effects) {
+    effect->loop();
+  }
+
+  return true;
+};
 
 void VirtualLayer::setPixelColor(const int indexV, const CRGB& color) {
   if (indexV < 0)
@@ -62,8 +71,9 @@ void VirtualLayer::setPixelColor(const int indexV, const CRGB& color) {
       default: ;
     }
   }
-  else if (indexV < NUM_LEDS) //no projection
+  else if (indexV < NUM_LEDS) {//no projection
     layerP->leds[indexV] = layerP->pixelsToBlend[indexV]?blend(color, layerP->leds[indexV], layerP->globalBlend): color;
+  }
   // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
   // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
   //   ESP_LOGW(TAG, " dev sPC %d >= %d", indexV, STARLIGHT_NUM_LEDS);
@@ -117,12 +127,43 @@ void VirtualLayer::fadeToBlackBy(const uint8_t fadeBy) {
   //     }
   //   }
   // } else if (!projection || (layerP->layerV.size() == 1)) { //faster, else manual 
-  //   fastled_fadeToBlackBy(layerP->leds, layerP->nrOfLeds, fadeBy);
+    fastled_fadeToBlackBy(layerP->leds, layerP->nrOfLeds, fadeBy);
   // } else {
-    for (uint16_t index = 0; index < mappingTableSizeUsed; index++) {
-      CRGB color = getPixelColor(index);
-      color.nscale8(255-fadeBy);
-      setPixelColor(index, color);
-    }
+    // for (uint16_t index = 0; index < mappingTableSizeUsed; index++) {
+    //   CRGB color = getPixelColor(index);
+    //   color.nscale8(255-fadeBy);
+    //   setPixelColor(index, color);
+    // }
+  // }
+}
+
+void VirtualLayer::fill_solid(const CRGB& color) {
+  fastled_fill_solid(layerP->leds, layerP->nrOfLeds, color);
+}
+
+void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue) {
+  // if (effectDimension < projectionDimension) { //only process the effect pixels (so projections can do things with the other dimension)
+  //   CHSV hsv;
+  //   hsv.hue = initialhue;
+  //   hsv.val = 255;
+  //   hsv.sat = 240;
+  //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
+  //     for (int x=0; x<size.x; x++) {
+  //       setPixelColor({x,y,0}, hsv);
+  //       hsv.hue += deltahue;
+  //     }
+  //   }
+  // } else if (!projection || (fix->layers.size() == 1)) { //faster, else manual 
+    fastled_fill_rainbow(layerP->leds, layerP->nrOfLeds, initialhue, deltahue);
+  // } else {
+  //   CHSV hsv;
+  //   hsv.hue = initialhue;
+  //   hsv.val = 255;
+  //   hsv.sat = 240;
+
+  //   for (uint16_t index = 0; index < mappingTableSizeUsed; index++) {
+  //     setPixelColor(index, hsv);
+  //     hsv.hue += deltahue;
+  //   }
   // }
 }

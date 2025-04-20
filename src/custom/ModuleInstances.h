@@ -93,6 +93,8 @@ public:
             instanceUDP.read(buffer, packetSize);
             // ESP_LOGD(TAG, "UDP packet read from %d: %s (%d)", instanceUDP.remoteIP()[3], buffer+6, packetSize);
 
+            bool found = false;
+
             //use state.data or newData?
             for (JsonObject instance: _state.data["instances"].as<JsonArray>()) {
                 if (instance["ip"] == instanceUDP.remoteIP().toString()) {
