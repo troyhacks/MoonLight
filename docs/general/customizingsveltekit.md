@@ -56,9 +56,10 @@ This is a checklist, More info on most of the items can be found in the ESP32-Sv
     * Set target: 'http://192.168.1.xxx'
 * setup custom code
     * src/custom
-    * interface/src/routes/custom
-    * interface/src/lib/components/custom
-    * interface/src/lib/types/model_custom.ts
+    * interface/src/routes/moonbase
+    * interface/src/lib/components/moonbase
+    * interface/src/lib/types/moonbase_model.ts
+    * interface/src/lib/stores/moonbase_utilities.ts
 * Github repo
     * change license
     * change description

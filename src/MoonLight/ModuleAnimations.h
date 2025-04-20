@@ -18,7 +18,7 @@
 #define TAG "💫"
 
 #include "FastLED.h"
-#include "Module.h"
+#include "../MoonBase/Module.h"
 
 #include "Effect.h"
 
@@ -203,14 +203,15 @@ public:
 
         if (animationsChanged) {
             animationsChanged = false;
-            ESP_LOGD(TAG, "animationsChanged");
             
             //rebuild layerP->layerV->effects
-            for (Effect* obj : layerP.layerV[0]->effects) {
-                delete obj;
+            for (Effect* effect : layerP.layerV[0]->effects) {
+                ESP_LOGD(TAG, "delete effect %s", effect->name());
+                delete effect;
             }
             layerP.layerV[0]->effects.clear(); //remove all effects
             for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
+                ESP_LOGD(TAG, "create effect %s", node["animation"].as<String>().c_str());
                 layerP.addEffect(node["animation"]); // fill the layers and effects ...
             }
         }

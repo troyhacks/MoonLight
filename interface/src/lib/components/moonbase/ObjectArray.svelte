@@ -22,9 +22,9 @@
 	import { cubicOut } from 'svelte/easing';
 	import Edit from '~icons/tabler/pencil';
 	import Delete from '~icons/tabler/trash';
-	import MultiInput from '$lib/components/custom/MultiInput.svelte';
-	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
-    import {initCap, getTimeAgo} from '$lib/stores/custom_utilities';
+	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
+	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
+    import {initCap, getTimeAgo} from '$lib/stores/moonbase_utilities';
 
     let { property, data = $bindable(), definition, onChange, changeOnInput} = $props();
 

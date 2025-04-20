@@ -18,12 +18,12 @@
 #include <PsychicHttpServer.h>
 
 #if FT_ENABLED(FT_MOONBASE)
-    #include "custom/FilesService.h"
-    #include "custom/ModuleInstances.h"
-    #include "custom/ModuleDemo.h"
+    #include "MoonBase/FilesService.h"
+    #include "MoonBase/ModuleInstances.h"
+    #include "MoonBase/ModuleDemo.h"
 
     #if FT_ENABLED(FT_MOONLIGHT)
-        #include "custom/ModuleAnimations.h"
+        #include "MoonLight/ModuleAnimations.h"
     #endif
 #endif
 

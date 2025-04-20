@@ -26,11 +26,11 @@
 	import Edit from '~icons/tabler/pencil';
 	import Delete from '~icons/tabler/trash';
 	import Cancel from '~icons/tabler/x';
-	import type { FilesState } from '$lib/types/models_custom';
+	import type { FilesState } from '$lib/types/moonbase_models';
 	import { onMount, onDestroy } from 'svelte';
 	import { socket } from '$lib/stores/socket';
 	import { tick } from 'svelte';
-	import FileEdit from '$lib/components/custom/FileEdit.svelte';
+	import FileEdit from '$lib/components/moonbase/FileEdit.svelte';
 	import Help from '~icons/tabler/help';
 
 	let filesState: any = $state({});;

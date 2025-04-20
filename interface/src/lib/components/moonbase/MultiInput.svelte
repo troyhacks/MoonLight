@@ -13,8 +13,8 @@
 
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import FileEdit from '$lib/components/custom/FileEdit.svelte';
-    import {initCap, getTimeAgo} from '$lib/stores/custom_utilities';
+	import FileEdit from '$lib/components/moonbase/FileEdit.svelte';
+    import {initCap, getTimeAgo} from '$lib/stores/moonbase_utilities';
 
     export let property: any;
     export let value: any;

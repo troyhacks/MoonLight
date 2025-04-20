@@ -18,7 +18,7 @@
 	import LightIcon from '~icons/tabler/bulb';
 	import { socket } from '$lib/stores/socket';
 	import Spinner from '$lib/components/Spinner.svelte';
-	import MultiInput from '$lib/components/custom/MultiInput.svelte';
+	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 
 	interface Props {
 		endPoint: string;

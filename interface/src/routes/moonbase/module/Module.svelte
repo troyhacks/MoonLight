@@ -7,10 +7,10 @@
 	import Router from '~icons/tabler/router';
 	import Help from '~icons/tabler/help';
 	import Cancel from '~icons/tabler/x';
-	import MultiInput from '$lib/components/custom/MultiInput.svelte';
+	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 	import { socket } from '$lib/stores/socket';
-	import ObjectArray from '$lib/components/custom/ObjectArray.svelte';
-    import {initCap} from '$lib/stores/custom_utilities';
+	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
+    import {initCap} from '$lib/stores/moonbase_utilities';
 
 	let definition: any = $state([]);
 	let data: any = $state({});

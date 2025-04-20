@@ -13,14 +13,14 @@
 -->
 
 <script lang="ts">
-	import type { FilesState } from '$lib/types/models_custom';
+	import type { FilesState } from '$lib/types/moonbase_models';
 	import { tick } from 'svelte';
     import { user } from '$lib/stores/user';
 	import { page } from '$app/state';
 	import { notifications } from '$lib/components/toasts/notifications';
 	import Collapsible from '$lib/components/Collapsible.svelte';
 	import { onMount } from 'svelte';
-	import MultiInput from '$lib/components/custom/MultiInput.svelte';
+	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 
 	let { path = "", showEditor = true, newItem = false, isFile = true } = $props();
 
