@@ -15,7 +15,7 @@
 #define _2D 2
 #define _3D 3
 
-#include "VirtualLayer.h"
+#include "VirtualLayer.h" //VirtualLayer.h will include PhysicalLayer.h
 
 class Effect {
   public:
@@ -169,7 +169,7 @@ class Effect {
       layerV->fadeToBlackBy(255);
 
       Coord3D pos = {0,0,0};
-      pos.x = map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.x ); //instead of call%width
+      pos.x = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.x ); //instead of call%width
 
       for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
         int colorNr = (frameNr / layerV->size.y) % 3;
@@ -177,7 +177,7 @@ class Effect {
       }
 
       pos = {0,0,0};
-      pos.y = map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.y ); //instead of call%height
+      pos.y = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.y ); //instead of call%height
       for (pos.x = 0; pos.x <  layerV->size.x; pos.x++) {
         int colorNr = (frameNr / layerV->size.x) % 3;
         layerV->setPixelColor(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
@@ -209,8 +209,8 @@ class Effect {
           //WLEDMM: stick to the original calculations of xlocn and ylocn
           locn.x = sin8(phase/2 + (i*xFrequency)/64);
           locn.y = cos8(phase/2 + i*2);
-          locn.x = (layerV->size.x < 2) ? 1 : (map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
-          locn.y = (layerV->size.y < 2) ? 1 : (map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "leds.size.y > 2" is needed to avoid div/0 in map()
+          locn.x = (layerV->size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
+          locn.y = (layerV->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "leds.size.y > 2" is needed to avoid div/0 in map()
           layerV->setPixelColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
       }
     }

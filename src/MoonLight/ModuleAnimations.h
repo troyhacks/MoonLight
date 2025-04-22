@@ -20,16 +20,19 @@
 #include "FastLED.h"
 #include "../MoonBase/Module.h"
 
-#include "Effect.h"
-
 #if FT_LIVESCRIPT
     #include "ESPLiveScript.h" //note: contains declarations AND definitions, therefore can only be included once!
 #endif
 
-class ModuleAnimations;
-static ModuleAnimations *gAnimations = nullptr;
+#include "Effect.h" //effect.h will include VirtualLayer.h which will include PhysicalLayer.h
 
-PhysicalLayer layerP;
+PhysicalLayer layerP; //global declaration of the physical layer
+
+//to do: move to virtual layer ...
+void fadeToBlackBy_static(uint8_t fadeValue)
+{
+    layerP.layerV[0]->fadeToBlackBy(fadeValue);
+}
 
 static void _addPin(uint8_t pinNr) {layerP.addPin(pinNr);}
 static void _addPixelsPre() {layerP.addPixelsPre();}
@@ -51,6 +54,23 @@ public:
         FilesService *filesService
     ) : Module("animations", server, sveltekit, filesService) {
         ESP_LOGD(TAG, "constructor");
+
+        addExternalVariable("leds", "CRGB *", "", (void *)layerP.leds);
+        addExternalFunction("fadeToBlackBy", "void", "uint8_t", (void *)fadeToBlackBy_static);
+        uint16_t (*_random16)(uint16_t)=random16; //enforce specific random16 function
+        addExternalFunction("random16", "uint16_t", "uint16_t", (void *)_random16);
+        addExternalFunction("sin8", "uint8_t", "uint8_t", (void *)sin8);
+        addExternalFunction("cos8", "uint8_t", "uint8_t", (void *)cos8);
+        addExternalFunction("delay", "void", "uint8_t", (void *)delay);
+        addExternalFunction("addPin", "void", "uint8_t", (void *)_addPin);
+        addExternalFunction("addPixelsPre", "void", "", (void *)_addPixelsPre);
+        addExternalFunction("addPixel", "void", "uint16_t,uint16_t,uint16_t", (void *)_addPixel);
+        addExternalFunction("addPixelsPost", "void", "", (void *)_addPixelsPost);
+        
+        for (asm_external el: external_links) {
+            ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
+        }
+        // ... send to client
     }
 
     void begin() {
@@ -79,7 +99,7 @@ public:
             });
         });
 
-        _socket->registerEvent("animationsRO");
+        // _socket->registerEvent("animationsRO");
     }
 
     //define the data model
@@ -192,8 +212,9 @@ public:
             ESP_LOGD(TAG, "handle %s[%d].%s = %s -> %s (%d)", updatedItem.parent[0], updatedItem.index[0], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updatedItem.oldValue.length());
             if (updatedItem.oldValue != "null") //do not run at boot!
                 kill(updatedItem.index[0]);
-        } else
-            ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        } 
+        // else
+        //     ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //run effects
@@ -260,7 +281,7 @@ public:
         if (_state.data["scripts"] != newData["scripts"]) {
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
             JsonObject newDataObject = newData.as<JsonObject>();
-            _socket->emitEvent("animationsRO", newDataObject);
+            _socket->emitEvent("animations", newDataObject);
         }
             
         // char buffer[256];
@@ -314,22 +335,18 @@ public:
                     // scScript += "void main(){setup();sync();}";
                     file.close();
 
-                    gAnimations = this;
+                    // gAnimations = this;
                     if (equal(type, "Effect")) {
-                        addExternalVariable("leds", "CRGB *", "", (void *)layerP.leds);
-                        // addExternalFunction("fadeToBlackBy", "void", "uint8_t", (void *)fadeToBlackBy_static);
-                        uint16_t (*_random16)(uint16_t)=random16; //enforce specific random16 function
-                        addExternalFunction("random16", "uint16_t", "uint16_t", (void *)_random16);
-                        addExternalFunction("sin8", "uint8_t", "uint8_t", (void *)sin8);
                         scScript += "#define NUM_LEDS " + std::to_string(layerP.nrOfLeds) + "\n"; //NUM_LEDS is used in arrays -> must be define e.g. uint8_t rMapRadius[NUM_LEDS];
-                        // scScript += "void main(){setup();while(2>1){loop();sync();}}";
+                        scScript += "void main(){setup();while(2>1){loop();delay(1);}}"; //sync();
                     } else if (equal(type, "Fixture definition")) {
-                        addExternalFunction("addPin", "void", "uint8_t", (void *)_addPin);
-                        addExternalFunction("addPixelsPre", "void", "", (void *)_addPixelsPre);
-                        addExternalFunction("addPixel", "void", "uint16_t,uint16_t,uint16_t", (void *)_addPixel);
-                        addExternalFunction("addPixelsPost", "void", "", (void *)_addPixelsPost);
-                        // scScript += "void main(){addPixelsPre();setup();addPixelsPost();}";
+                        scScript += "void main(){addPixelsPre();setup();addPixelsPost();}";
                     }
+
+                    // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+                    // ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+            
+                    // ESP_LOGD(TAG, "parsing %s", scScript.c_str());
 
                     Executable executable = parser.parseScript(&scScript);
                     executable.name = animation;
@@ -345,16 +362,17 @@ public:
                             // pass = 2;
                             // liveM->executeTask(liveFixtureID, "c");
                         }
-                        // if (equal(type, "Effect")) // not working yet!!!
-                        //     executable.executeAsTask("main"); //background task (async - vs sync)
+                        if (equal(type, "Effect")) {
+                            // setup : create controls
+                            // executable.execute("setup"); 
+                            // send controls to UI
+                            executable.executeAsTask("main"); //background task (async - vs sync)
+                            //assert failed: xEventGroupSync event_groups.c:228 (uxBitsToWaitFor != 0)
+                        }
                     } else
                         ESP_LOGD(TAG, "error %s", executable.error.error_message.c_str());
 
-                    for (asm_external el: external_links) {
-                        ESP_LOGD("", "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
-                    }
-                    // ... send to client
-                    //send also error to client
+                    //send error to client ... not working yet
                     error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
                     // _state.data["nodes"][2]["error"] = executable.error.error_message;
 

@@ -32,6 +32,9 @@
 #undef TAG
 #define TAG "🌙"
 
+SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB, otherwise 8K, to allow multiple scripts loaded at boot
+//to do: needed as during boot scripts are run in looptask, later in httpd. Move scripts to same task...
+
 PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, 120);
@@ -58,7 +61,7 @@ void setup()
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
-    delay(1000); // to capture all the serial output
+    // delay(5000); // to capture all the serial output
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();

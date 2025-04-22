@@ -152,24 +152,17 @@
 		// data = state;
 	};
 
-	const handleRO = (state: any) => {
-		console.log("handleRO", state);
-		updateRecursive(data, state);
-	};
-
 	//workaround for let params = $state(page.url.searchParams)
 	const socketOn = ((name: string) => {
 		if (modeWS) {
 			console.log("socketOn", name);
 			socket.on(name, handleState);
-			socket.on(name + "RO", handleRO);
 		}
 	});
 	const socketOff = ((name: string) => {
 		if (modeWS) {
 			console.log("socketOff", name);
 			socket.off(name, handleState);
-			socket.off(name + "RO", handleRO);
 		}
 	});
 

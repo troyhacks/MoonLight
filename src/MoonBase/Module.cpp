@@ -89,8 +89,8 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 updatedItem.value = newValue;
                 stateData[key.c_str()] = newValue; //update state
                 
-                TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-                ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+                // ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
 
                 if (onUpdate) onUpdate(updatedItem);
             }

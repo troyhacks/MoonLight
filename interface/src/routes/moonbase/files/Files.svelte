@@ -325,7 +325,7 @@
 											dateStyle: 'short',
 											timeStyle: 'short',
 											timeZone: 'UTC'
-										}).format(item.time)}
+										}).format(item.time*1000)}
 										</div>
 									{:else}
 										<div>{item.files.length} files/folders</div>

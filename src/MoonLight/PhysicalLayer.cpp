@@ -41,6 +41,11 @@ PhysicalLayer::PhysicalLayer() {
         // ledsPExtended.type = 1; //definition, stop effects loop
         // ledsPExtended.ledFactor *= maxFactor;
     
+        for (VirtualLayer * layer: layerV) {
+            //add the pixel in the virtual layer
+            layer->addPixelsPre();
+        }
+
         //for each effect node
         //  set virtual size based on physical start and end, ... scaling ...
         //  modifiers can change the size...
@@ -54,6 +59,10 @@ PhysicalLayer::PhysicalLayer() {
         // ledsP[indexP].g = pixel.y / maxFactor;
         // ledsP[indexP].b = pixel.z / maxFactor;
 
+        for (VirtualLayer * layer: layerV) {
+            //add the pixel in the virtual layer
+            layer->addPixel(pixel);
+        }
         //for each effect node
         //  modifiers can change the pixel...
         //  indexV = XYZUnprojected(pixel); //using virtual size first...
@@ -63,8 +72,13 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::addPixelsPost() {
-        ESP_LOGD(TAG, "addPixelsPost");
+        ESP_LOGD(TAG, "addPixelsPost %d", indexP);
         //calculate physical size (pass1, pass2)
+
+        for (VirtualLayer * layer: layerV) {
+            //add the pixel in the virtual layer
+            layer->addPixelsPost();
+        }
 
         initPixelsToBlend();
         //driver init // alloc pins

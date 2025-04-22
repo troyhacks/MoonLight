@@ -41,6 +41,7 @@ class PhysicalLayer {
 
     CRGB leds[NUM_LEDS];
     uint16_t nrOfLeds = 256;
+    Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
 
     std::vector<bool> pixelsToBlend; //this is a 1-bit vector !!! overlapping effects will blend
     uint8_t globalBlend = 128; // to do add as UI control...

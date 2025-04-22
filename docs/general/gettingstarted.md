@@ -84,7 +84,7 @@ At the moment MoonBase is the work in progress repo and temporary also contains 
       
       <img width="90" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
 
-    * Go to the file you want to change e.g. [ModuleAnimations.h](https://github.com/ewoudwijma/MoonBase/blob/background-script/src/custom/ModuleAnimations.h), press edit and make the changes. E.g. change executable.execute("main") to executable.executeAsTask("main")
+    * Go to the file you want to change press edit and make the changes. E.g. change executable.execute("main") to executable.executeAsTask("main")
     * Press Commit Changes..., enter a commit message and an extended description, Press Commit Changes
     * Go back to the homepage of your fork [myfork/MoonBase](https://github.com/ewoudwijma/MoonBase). There is a message inviting to create a Pull Request. Press Compare & pull request.
       

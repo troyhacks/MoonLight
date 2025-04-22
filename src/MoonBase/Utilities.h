@@ -56,6 +56,12 @@ struct Char {
       strlcat(s, rhs, sizeof(s));
       return *this;
     }
+    Char& operator+=(int rhs) { //add integer to string
+        char buffer[12]; // enough for 32-bit int
+        snprintf(buffer, sizeof(buffer), " %d", rhs);
+        strlcat(s, buffer, sizeof(s));
+        return *this;
+    }
     Char& operator+=(String rhs) {
         strlcat(s, rhs.c_str(), sizeof(s));
         return *this;

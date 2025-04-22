@@ -23,7 +23,7 @@ To create a new module:
 * Create a **class** which inherits from Module
 * Call the Module **constructor** with the name of the module.
     * This name will be used to set up http rest api and webserver sockets
-    * See [ModuleDemo.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleDemo.h)
+    * See [ModuleDemo.h](https://github.com/ewowi/MoonBase/blob/main/src/MoonBase/ModuleDemo.h)
 
 ```cpp
 class ModuleDemo : public Module
@@ -68,7 +68,7 @@ void setupDefinition(JsonArray root) override{
 
 * Implement function **onUpdate** to define what happens if data changes
     * struct UpdatedItem defines the update (parent property (including index in case of multiple records), name of property and value)
-    * This runs in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleAnimations](https://github.com/ewowi/MoonBase/blob/main/src/custom/ModuleAnimations.h)) - as httpd stack has been increased runInLoopTask is less needed
+    * This runs in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleAnimations](https://github.com/ewowi/MoonBase/blob/main/src/MoonLight/ModuleAnimations.h)) - as httpd stack has been increased runInLoopTask is less needed
 
 ```cpp
     void onUpdate(UpdatedItem &updatedItem) override
@@ -134,7 +134,7 @@ submenu: [
    {
       title: 'Module Demo',
       icon: BulbIcon,
-      href: '/custom/module?module=demo',
+      href: '/moonbase/module?module=demo',
       feature: page.data.features.liveanimation,
    },
 ]
@@ -150,9 +150,9 @@ It might be arguable that readonly variables are not stored in state data.
 
 ### Server
 
-* [Module.h](https://github.com/ewowi/MoonBase/blob/main/src/custom/Module.h) and [Module.cpp](https://github.com/ewowi/MoonBase/blob/main/src/custom/Module.cpp) will generate all the required server code
+* [Module.h](https://github.com/ewowi/MoonBase/blob/main/src/MoonBase/Module.h) and [Module.cpp](https://github.com/ewowi/MoonBase/blob/main/src/MoonBase/Module.cpp) will generate all the required server code
 
 ### UI
-* [Module.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/custom/module/Module.svelte) will deal with the UI
+* [Module.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/moonbase/module/Module.svelte) will deal with the UI
 * [MultiInput.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/lib/components/moonbase/MultiInput.svelte) is used by Module.svelte to display the right UI widget based on what is defined in the definition json
 * Modifications done in [menu.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/menu.svelte) do identify a module by href and not by title alone

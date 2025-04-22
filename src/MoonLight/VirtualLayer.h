@@ -37,19 +37,25 @@ struct PhysMap {
       uint16_t indexP: 14;   //16384 one physical pixel (type==1) index to ledsP array
       uint16_t indexes:14;  //16384 multiple physical pixels (type==2) index in std::vector<std::vector<uint16_t>> mappingTableIndexes;
     }; // 2 bytes  
-};
+    
+    PhysMap() {
+      // ESP_LOGD(TAG, "Constructor");
+      mapType = m_color; // the default until indexP is added
+      rgb14 = 0;
+    }
+  };
 
 class VirtualLayer {
 
   public:
 
-    uint16_t nrOfLeds = 256;
+    Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
 
     std::vector<PhysMap> mappingTable;
     std::vector<std::vector<uint16_t>> mappingTableIndexes;
 
     //they will be reused to avoid fragmentation
-    uint16_t mappingTableSizeUsed = 0;
+    uint16_t nrOfLeds = 0;
     uint16_t mappingTableIndexesSizeUsed = 0; 
 
     PhysicalLayer *layerP; //physical leds the virtual leds are mapped to
@@ -57,65 +63,40 @@ class VirtualLayer {
     // Effect *liveEffect = nullptr;
     std::vector<Projection *> projections;
   
-    Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
 
     VirtualLayer() {
-        // mappingTable.reserve(nrOfLeds);
-        // mappingTableIndexes.reserve(nrOfLeds);
-        // mappingTableIndexesSizeUsed = 0;
-        // mappingTableSizeUsed = 0;
+      ESP_LOGD(TAG, "constructor");
     }
+    ~VirtualLayer() {
+      ESP_LOGD(TAG, "destructor");
+      fadeToBlackBy(255); //clear the leds
 
+      effects.clear(); //call effect destructors
+      projections.clear(); //call projection destructors
+
+      //clear array of array of indexes
+      for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
+        mappingTableIndex.clear();
+      }
+      mappingTableIndexes.clear();
+      //clear mapping table
+      mappingTable.clear();
+    }
+  
     bool loop();
 
-    void addIndexP(PhysMap &physMap, uint16_t indexP) {
-        // ppf("addIndexP i:%d t:%d", indexP, mapType);
-        switch (physMap.mapType) {
-          case m_color:
-          // case m_rgbColor:
-            physMap.indexP = indexP;
-            physMap.mapType = m_onePixel;
-            break;
-          case m_onePixel: {
-            uint16_t oldIndexP = physMap.indexP;
-            // std::vector<uint16_t> newVector;
-            // newVector.push_back(oldIndexP);
-            // newVector.push_back(indexP);
-            mappingTableIndexesSizeUsed++;
-            if (mappingTableIndexes.size() < mappingTableIndexesSizeUsed)
-              mappingTableIndexes.push_back({oldIndexP, indexP});
-            else
-              mappingTableIndexes[mappingTableIndexesSizeUsed-1] = {oldIndexP, indexP};
-      
-              physMap.indexes = mappingTableIndexesSizeUsed - 1; //array position
-              physMap.mapType = m_morePixels;
-            break; }
-          case m_morePixels:
-            mappingTableIndexes[physMap.indexes].push_back(indexP);
-            // ppf(" more %d", mappingTableIndexes.size());
-            break;
-        }
-        // ppf("\n");
-    }
-      
-    void add(uint16_t indexV, uint16_t indexP) {
-        mappingTable.reserve(indexV + 1); //make sure the index fits
-        addIndexP(mappingTable[indexV], indexP);
-        if (indexV >= mappingTableSizeUsed) mappingTableSizeUsed = indexV + 1;
-    }
+    void addIndexP(PhysMap &physMap, uint16_t indexP);
 
-    void get(uint16_t indexV) {
-        // return mappingTable[indexV];
-    }
-
+    int XYZ(Coord3D pixel);
+    
     int XYZUnprojected(const Coord3D &pixel) const {
       // if (pixel.x%2)
       //   return pixel.x + pixel.y * size.x + pixel.z * size.x * size.y;
       // else
       //   return pixel.x + (size.y-pixel.y-1)*size.x + pixel.z * size.x * size.y;
-      if (pixel.y%2)
-        return (size.x - pixel.x - 1) + pixel.y * size.x + pixel.z * size.x * size.y;
-      else
+      // if (pixel.y%2)
+      //   return (size.x - pixel.x - 1) + pixel.y * size.x + pixel.z * size.x * size.y;
+      // else
         return pixel.x + pixel.y*size.x + pixel.z * size.x * size.y;
     }
 
@@ -129,4 +110,11 @@ class VirtualLayer {
 
     void fill_solid(const CRGB& color);
     void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
+
+    void addPixelsPre();
+
+    void addPixel(Coord3D pixel);
+
+    void addPixelsPost();
+
 };
