@@ -13,7 +13,7 @@
 
 #include "VirtualLayer.h"
 
-#include "Effect.h"
+#include "Nodes.h"
 
 PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "constructor");
@@ -24,6 +24,24 @@ PhysicalLayer::PhysicalLayer() {
         layerV[0]->layerP = this;
     }
 
+    //run one loop of an effect
+    bool PhysicalLayer::setup() {
+        //runs the loop of all effects / nodes in the layer, we need to fill the effects in the layer...
+        for (VirtualLayer * layer: layerV) {
+            layer->setup();
+        }
+        return true;
+    }
+
+    //run one loop of an effect
+    bool PhysicalLayer::loop() {
+        //runs the loop of all effects / nodes in the layer, we need to fill the effects in the layer...
+        for (VirtualLayer * layer: layerV) {
+            layer->loop();
+        }
+        return true;
+    }
+    
     void PhysicalLayer::addPin(uint8_t pinNr) {
         ESP_LOGD(TAG, "addPin %d", pinNr);
     }
@@ -88,42 +106,38 @@ PhysicalLayer::PhysicalLayer() {
 
 
     //run one loop of an effect
-    bool PhysicalLayer::loop() {
-        //runs the loop of all effects / nodes in the layer, we need to fill the effects in the layer...
-        for (VirtualLayer * layer: layerV) {
-            layer->loop();
-        }
-        return true;
-    }
-    
-    //run one loop of an effect
-    bool PhysicalLayer::addEffect(const char * animation) {
+    bool PhysicalLayer::addNode(const char * animation) {
 
-        Effect *effect = nullptr;
+        Node *node = nullptr;
         if (equal(animation, "Solid")) {
-            effect = new SolidEffect();
+            node = new SolidEffect();
         } else if (equal(animation, "Random")) {
-            effect = new RandomEffect();
+            node = new RandomEffect();
         } else if (equal(animation, "Sinelon")) {
-            effect = new SinelonEffect();
+            node = new SinelonEffect();
         } else if (equal(animation, "Rainbow")) {
-            effect = new RainbowEffect();
+            node = new RainbowEffect();
         } else if (equal(animation, "Sinus")) {
-            effect = new SinusEffect();
+            node = new SinusEffect();
         } else if (equal(animation, "Lissajous")) {
-            effect = new LissajousEffect();
+            node = new LissajousEffect();
         } else if (equal(animation, "Lines")) {
-            effect = new LinesEffect();
+            node = new LinesEffect();
+        } else if (equal(animation, "Panel16")) {
+            node = new Panel16fixture();
+        } else if (equal(animation, "Multiply")) {
+            node = new MultiplyProjection();
         } else {
             //Done by live script (Yves)
         }
 
-        if (effect) {
-            effect->layerV = layerV[0];
-            layerV[0]->effects.push_back(effect); //add a new effect
+        if (node) {
+            node->layerV = layerV[0];
+            node->setup(); //run the setup of the effect
+            layerV[0]->nodes.push_back(node); //add a new effect
         }
 
-        return effect != nullptr;
+        return node != nullptr;
     }
 
     // to be called in setup, if more then one effect

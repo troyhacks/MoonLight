@@ -27,11 +27,27 @@ struct Coord3D {
     int x;
     int y;
     int z;
-  };
+    //Minus / delta (abs)
+    Coord3D operator-(const Coord3D rhs) const {
+        return Coord3D{x - rhs.x, y - rhs.y, z - rhs.z};;
+      }
+      Coord3D operator+(const Coord3D rhs) const {
+        return Coord3D{x + rhs.x, y + rhs.y, z + rhs.z};
+      }
+      Coord3D operator*(const Coord3D rhs) const {
+        return Coord3D{x * rhs.x, y * rhs.y, z * rhs.z};
+      }
+      Coord3D operator/(const Coord3D rhs) const {
+        return Coord3D{x / rhs.x, y / rhs.y, z / rhs.z};
+      }
+      Coord3D operator%(const Coord3D rhs) const {
+        return Coord3D{x % rhs.x, y % rhs.y, z % rhs.z};
+      }
+    };
   
   
 class VirtualLayer; //Forward as PhysicalLayer refers back to VirtualLayer
-class Effect; //Forward as PhysicalLayer refers back to Effect
+class Node; //Forward as PhysicalLayer refers back to Node
 class Projection; //Forward as PhysicalLayer refers back to Projection
 
 //contains leds array and implements fixture definition functions (add*)
@@ -52,6 +68,9 @@ class PhysicalLayer {
 
     PhysicalLayer();
 
+    bool setup();
+    bool loop();
+
     static void addPin(uint8_t pinNr);
 
     void addPixelsPre();
@@ -64,8 +83,7 @@ class PhysicalLayer {
 
 
     //run one loop of an effect
-    bool addEffect(const char * animation);
-    bool loop();
+    bool addNode(const char * animation);
 
     // to be called in setup, if more then one effect
     void initPixelsToBlend();

@@ -37,37 +37,38 @@ They represent current state of Live Script processing and will be extended as m
 
 * Multiple Nodes can be created (1)
     * Each node can have properties (compare controls in WLED / StarLight)
-    * Each node can run precompile code or Live scripts (with or without loop)
+    * Each node can run precompile code or Live scripts (with or without loop) 🚧
     * Each node has a type:
-        * Fixture definition: tell where each pixture is in a 1D/2D/3D physical coordinate space (based on StarLight)
+        * Fixture definition: tell where each pixture is in a 1D/2D/3D physical coordinate space (based on StarLight) ✅
         * Fixture mapping: change the fixture to a 1D/2D/3D virtual coordinate space
             * A fixture mapping is for a specific fixture dimension and effect dimension
             * e.g. if the fixture is a globe, you can map that to 2D using mercator projection mapping
             * if the fixture is 200x200 you can map it to 50x50
             * if the fixture is 2D, a 1D effect can be shown as a circle or a bar (as WLED expand1D)
-        * Effect: run an effect in a virtual coordinate space
-            * or in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings ✅
-        * Modifier: Mirror, rotate, etc, multiple projections allowed (projection in StarLight)
+        * Effect: 
+            * run an effect in a virtual coordinate space ✅
+            * in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings ✅
+        * Modifier: Mirror, rotate, etc, multiple projections allowed (projection in StarLight) 🚧
         * Driver show: show the result on Leds (using FastLED, hpwit drivers), ArtNet, DDP, ...
 * Future situation: Nodes and noodles (2)
     * Replace the nodes table (1) by a graphical view (2)
 * Virtual Layer (MappingTable) (3)
-    * Array of arrays. Outer array is virtual pixels, inner array is physical pixels. 
-    * Implemented efficiently using the StarLight PhysMap struct
-    * e.g. [[],[0],[1,2],[3,4,5],[6,7,8,9]]
+    * Array of arrays. Outer array is virtual pixels, inner array is physical pixels. ✅
+    * Implemented efficiently using the StarLight PhysMap struct ✅
+    * e.g. [[],[0],[1,2],[3,4,5],[6,7,8,9]] ✅
         * first virtual pixel is not mapped to a physical pixel
         * second virtual pixel is mapped to physical pixel 0
         * third virtual pixel is mapped to physical pixels 1 and 2
         * and so on
     * Virtual pixels can be 1D, 2D or 3D. Physical pixels also, in any combination
-        * Using x + y * sizeX + z * sizeX * sizeY
-    * set/getPixelColor functions used in effects using the MappingTable
+        * Using x + y * sizeX + z * sizeX * sizeY 🚧
+    * set/getPixelColor functions used in effects using the MappingTable ✅
     * Nodes manipulate the MappingTable and/or interfere in the effects loop
-    * A Virtual Layer gets updated if fixture, mapping or dimensions change
-    * An effect uses a virtual layer. One Virtual layer can have multiple effects. 
+    * A Virtual Layer gets updated if fixture, mapping or dimensions change 🚧
+    * An effect uses a virtual layer. One Virtual layer can have multiple effects. ✅
 * Physical layer
-    * CRGB leds[NUM_LEDS] are physical pixels (as in FASTLED)
-    * A Physical layer has one or more virtual layers and a virtual layer has one or more effects using it.
+    * CRGB leds[NUM_LEDS] are physical pixels (as in FASTLED) ✅
+    * A Physical layer has one or more virtual layers and a virtual layer has one or more effects using it. ✅
 * Presets/playlist: change (part of) the nodes model
 
 ✅: Done

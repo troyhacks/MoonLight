@@ -17,10 +17,6 @@
 
 #include "PhysicalLayer.h"
 
-// #include "Effect.h"
-
-// class PhysicalLayer; //Forward as VirtualLayer refers back to PhysicalLayer
-
 enum mapType {
     m_color,
     m_onePixel,
@@ -55,13 +51,12 @@ class VirtualLayer {
     std::vector<std::vector<uint16_t>> mappingTableIndexes;
 
     //they will be reused to avoid fragmentation
-    uint16_t nrOfLeds = 0;
+    uint16_t nrOfLeds = 256;
     uint16_t mappingTableIndexesSizeUsed = 0; 
 
     PhysicalLayer *layerP; //physical leds the virtual leds are mapped to
-    std::vector<Effect *> effects;
-    // Effect *liveEffect = nullptr;
-    std::vector<Projection *> projections;
+    std::vector<Node *> nodes;
+    // Node *liveNode = nullptr;
   
 
     VirtualLayer() {
@@ -71,8 +66,7 @@ class VirtualLayer {
       ESP_LOGD(TAG, "destructor");
       fadeToBlackBy(255); //clear the leds
 
-      effects.clear(); //call effect destructors
-      projections.clear(); //call projection destructors
+      nodes.clear(); //call effect destructors
 
       //clear array of array of indexes
       for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
@@ -83,7 +77,8 @@ class VirtualLayer {
       mappingTable.clear();
     }
   
-    bool loop();
+    void setup();
+    void loop();
 
     void addIndexP(PhysMap &physMap, uint16_t indexP);
 

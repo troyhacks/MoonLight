@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      Effect.h
+    @file      Nodes.h
     @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
     @Authors   https://github.com/ewowi/MoonBase/commits/main
     @Doc       https://ewowi.github.io/MoonBase/general/utilities/
@@ -17,7 +17,7 @@
 
 #include "VirtualLayer.h" //VirtualLayer.h will include PhysicalLayer.h
 
-class Effect {
+class Node {
   public:
     VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
 
@@ -25,59 +25,40 @@ class Effect {
     virtual const char * tags() {return "";}
     virtual uint8_t dim() {return _1D;};
   
-    virtual void setup(JsonVariant parentVar) {};
-  
-    virtual void loop() {}
-  };
-  
-  class Projection {
-  public:
-    VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
+    //effect and fixdef
+    virtual void setup() {};
 
-    virtual ~Projection() = default;
-  
-    virtual const char * name() {return "noname";}
-    virtual const char * tags() {return "";}
-  
-    virtual void setup(JsonVariant parentVar) {}
-  
-    //per frame
+    //effect and projection
     virtual void loop() {}
-    
-    //setupPixels
+
+    //projection
     virtual void addPixelsPre() {}
-  
-    //setupPixel
     virtual void addPixel(Coord3D &pixel) {} //not const as pixel is changed
-  
-    //loopPixel
     virtual void XYZ(Coord3D &pixel) {}
   };
-
-  class SolidEffect: public Effect {
+  
+  class SolidEffect: public Node {
       public:
 
       const char * name() override {return "Solid";}
       uint8_t dim() override {return _1D;}
       const char * tags() override {return "💡";}
     
-      void setup(JsonVariant parentVar) override {
-      }
+      void setup() override {}
     
       void loop() override {
           layerV->fill_solid(CRGB::White);
       }
   };
     
-  class RandomEffect: public Effect {
+  class RandomEffect: public Node {
       public:
 
       const char * name() override {return "Random";}
       uint8_t dim() override {return _1D;}
       const char * tags() override {return "💡";}
     
-      void setup(JsonVariant parentVar) override {
-      }
+      void setup() override {}
     
       void loop() override {
           layerV->fadeToBlackBy(70);
@@ -85,33 +66,31 @@ class Effect {
       }
   };
 
-  class SinelonEffect: public Effect {
+  class SinelonEffect: public Node {
     public:
 
     const char * name() override {return "Sinelon";}
     uint8_t dim() override {return _1D;}
     const char * tags() override {return "💡";}
   
-    void setup(JsonVariant parentVar) override {
-    }
+    void setup() override {}
   
     void loop() override {
       layerV->fadeToBlackBy(20);
       uint8_t bpm = 60;
-      int pos = beatsin16( bpm, 0, 255 );
+      int pos = beatsin16( bpm, 0, layerV->nrOfLeds );
       layerV->setPixelColor(pos, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
     }
   };
 
-  class RainbowEffect: public Effect {
+  class RainbowEffect: public Node {
     public:
 
     const char * name() override {return "Rainbow";}
     uint8_t dim() override {return _1D;}
     const char * tags() override {return "💡";}
   
-    void setup(JsonVariant parentVar) override {
-    }
+    void setup() override {}
   
     void loop() override {
       static uint8_t hue = 0;
@@ -120,15 +99,14 @@ class Effect {
   };
 
     //AI generated
-    class SinusEffect: public Effect {
+    class SinusEffect: public Node {
     public:
 
     const char * name() override {return "Sinus";}
     uint8_t dim() override {return _1D;}
     const char * tags() override {return "💡";}
   
-    void setup(JsonVariant parentVar) override {
-    }
+    void setup() override {}
   
     void loop() override {
       layerV->fadeToBlackBy(70);
@@ -152,14 +130,14 @@ class Effect {
     }
   };
 
-  class LinesEffect: public Effect {
+  class LinesEffect: public Node {
     public:
 
     const char * name() override {return "Lines";}
     uint8_t dim() override {return _1D;}
     const char * tags() override {return "💡";}
   
-    void setup(JsonVariant parentVar) override {
+    void setup() override {
     }
   
     void loop() override {
@@ -186,15 +164,14 @@ class Effect {
     }
   };
 
-  class LissajousEffect: public Effect {
+  class LissajousEffect: public Node {
     public:
 
     const char * name() override {return "Lissajous";}
     uint8_t dim() override {return _1D;}
     const char * tags() override {return "💡";}
   
-    void setup(JsonVariant parentVar) override {
-    }
+    void setup() override {}
   
     void loop() override {
       uint8_t xFrequency = 64;// = leds.effectControls.read<uint8_t>();
@@ -214,6 +191,49 @@ class Effect {
           layerV->setPixelColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
       }
     }
+  };
+
+  class Panel16fixture: public Node {
+    const char * name() override {return "Panel16";}
+
+    void setup() override {
+
+      //add controls for size ...
+      uint8_t width = 16;
+      uint8_t height = 16;
+
+      //create panel 16
+      layerV->layerP->addPixelsPre();
+      for (int x = 0; x<width; x++) {
+        for (int y = 0; y<height; y++) {
+          layerV->layerP->addPixel({x, (x%2)?y:height-1-y, 0});
+        }
+      }
+      layerV->layerP->addPixelsPost();
+    }
+  };
+
+  class MultiplyProjection: public Node {
+    const char * name() override {return "Multiply";}
+    Coord3D proMulti = {2,2,2};
+    bool    mirror = false;
+    Coord3D originalSize;
+
+    void addPixelsPre() override {
+      layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
+      originalSize = layerV->size;
+    }
+
+    void addPixel(Coord3D &pixel) override {
+      if (mirror) {
+        Coord3D mirrors = pixel / originalSize; // Place the pixel in the right quadrant
+        pixel = pixel % originalSize;
+        if (mirrors.x %2 != 0) pixel.x = originalSize.x - 1 - pixel.x;
+        if (mirrors.y %2 != 0) pixel.y = originalSize.y - 1 - pixel.y;
+        if (mirrors.z %2 != 0) pixel.z = originalSize.z - 1 - pixel.z;
+      }
+      else pixel = pixel % originalSize;
+      }
   };
 
   

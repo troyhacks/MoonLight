@@ -12,7 +12,7 @@
 
 #include "VirtualLayer.h"
 #include "PhysicalLayer.h"
-#include "Effect.h"
+#include "Nodes.h"
 
 //convenience functions to call fastled functions out of the Leds namespace (there naming conflict)
 void fastled_fadeToBlackBy(CRGB* leds, uint16_t num_leds, uint8_t fadeBy) {
@@ -25,19 +25,19 @@ void fastled_fill_rainbow(struct CRGB * targetArray, int numToFill, uint8_t init
   fill_rainbow(targetArray, numToFill, initialhue, deltahue);
 }
 
-bool VirtualLayer::loop() {
-  for (Effect *effect: effects) {
-    effect->loop();
-    for (Projection *projection: projections) { //e.g. RippleYZ
-      projection->loop();
-      // call projection.sc 
-      // executable.execute("loop");
-    }
+void VirtualLayer::setup() {
+  for (Node *node: nodes) {
+    node->setup();
+  }
+}
+
+void VirtualLayer::loop() {
+  for (Node *node: nodes) {
+    node->loop();
   }
 
   //fadeToBlackBy(lowest value);
 
-  return true;
 };
 
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
@@ -70,16 +70,16 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
 }
 int VirtualLayer::XYZ(Coord3D pixel) {
 
-  for (Projection *projection: projections) { //e.g. random or scrolling or rotate projection
-    projection->XYZ(pixel);
-    // call projection.sc 
-    // executable.execute("XYZ");
+  //projections
+  for (Node *node: nodes) { //e.g. random or scrolling or rotate projection
+    node->XYZ(pixel);
   }
 
   return XYZUnprojected(pixel);
 }
 
 void VirtualLayer::setPixelColor(const int indexV, const CRGB& color) {
+  // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
   if (indexV < 0)
     return;
   else if (indexV < nrOfLeds) {
@@ -173,7 +173,7 @@ void VirtualLayer::fadeToBlackBy(const uint8_t fadeBy) {
   //     }
   //   }
   // } else 
-  if (!projections.size() || (layerP->layerV.size() == 1)) { //faster, else manual 
+  if (layerP->layerV.size() == 1) { //faster, else manual 
     fastled_fadeToBlackBy(layerP->leds, layerP->nrOfLeds, fadeBy);
   } else {
     for (uint16_t index = 0; index < nrOfLeds; index++) {
@@ -192,7 +192,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
   //     }
   //   }
   // } else 
-  if (!projections.size() || (layerP->layerV.size() == 1)) { //faster, else manual 
+  if (layerP->layerV.size() == 1) { //faster, else manual 
     fastled_fill_solid(layerP->leds, layerP->nrOfLeds, color);
   } else {
     for (uint16_t index = 0; index < nrOfLeds; index++)
@@ -213,7 +213,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   //     }
   //   }
   // } else 
-  if (!projections.size() || (layerP->layerV.size() == 1)) { //faster, else manual 
+  if (layerP->layerV.size() == 1) { //faster, else manual 
     fastled_fill_rainbow(layerP->leds, layerP->nrOfLeds, initialhue, deltahue);
   } else {
     CHSV hsv;
@@ -241,19 +241,17 @@ void VirtualLayer::addPixelsPre() {
 
   size = layerP->size; //physical size
 
-  for (Projection *projection: projections) {
-    projection->addPixelsPre();
-    // call projection.sc 
-    // executable.execute("addPixelsPre");
+  //projections
+  for (Node *node: nodes) {
+    node->addPixelsPre();
   }
 }
 
 void VirtualLayer::addPixel(Coord3D pixel) {
 
-  for (Projection *projection: projections) {
-    projection->addPixel(pixel);
-    // call projection.sc 
-    // executable.execute("addPixel");
+  //projections
+  for (Node *node: nodes) {
+    node->addPixel(pixel);
   }
 
   uint16_t indexV = XYZUnprojected(pixel);
@@ -292,6 +290,6 @@ void VirtualLayer::addPixelsPost() {
     //   ESP_LOGD(TAG, "%d no mapping\n", x);
   }
 
-  ESP_LOGD(TAG, "V:%d x %d x %d (v:%d - p:%d pm:%d of %d c:%d)\n", size.x, size.y, size.z, nrOfLeds, nrOfPhysical, nrOfPhysicalM, mappingTableIndexesSizeUsed, nrOfColor);
+  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d +  1:%d + m:%d (p:%d)\n", size.x, size.y, size.z, nrOfLeds, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
 
 }

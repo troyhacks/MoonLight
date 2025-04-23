@@ -6,7 +6,7 @@ void add(int leds, int radius) {
     int x = width / 2.0 + ((sin8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
     int y = height / 2.0 + ((cos8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
     addPixel(x, y, 0);
-printf("%d %d %d\n", leds,x,y);
+    printf("%d %d %d\n", leds,x,y);
   }
 }
 
