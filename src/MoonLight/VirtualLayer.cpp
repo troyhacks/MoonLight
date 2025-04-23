@@ -82,7 +82,8 @@ void VirtualLayer::setPixelColor(const int indexV, const CRGB& color) {
   // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
   if (indexV < 0)
     return;
-  else if (indexV < nrOfLeds) {
+  else if (indexV < mappingTable.size()) {
+    // ESP_LOGD(TAG, "setPixelColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTable.size());
     switch (mappingTable[indexV].mapType) {
       case m_color:{
         mappingTable[indexV].rgb14 = ((min(color.r + 3, 255) >> 3) << 9) + 
@@ -139,7 +140,7 @@ void VirtualLayer::setPixelsToBlend() {
 CRGB VirtualLayer::getPixelColor(const int indexV) const {
   if (indexV < 0)
     return CRGB::Black;
-  else if (indexV < nrOfLeds) {
+  else if (indexV < mappingTable.size()) {
     switch (mappingTable[indexV].mapType) {
       case m_onePixel:
         return layerP->leds[mappingTable[indexV].indexP]; 

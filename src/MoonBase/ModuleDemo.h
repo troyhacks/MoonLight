@@ -25,7 +25,6 @@ public:
             FilesService *filesService
         ) : Module("demo", server, sveltekit, filesService) {
             ESP_LOGD(TAG, "constructor");
-            _socket->registerEvent("demoRO");
         }
 
     void setupDefinition(JsonArray root) override{
@@ -79,7 +78,6 @@ public:
         newData["millis"] = millis()/1000;
 
         JsonObject newDataObject = newData.as<JsonObject>();
-        _socket->emitEvent("demoRO", newDataObject);
 }
 };
 

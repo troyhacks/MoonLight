@@ -83,7 +83,7 @@ class PhysicalLayer {
 
 
     //run one loop of an effect
-    bool addNode(const char * animation);
+    bool addNode(const char * animation, const char * type);
 
     // to be called in setup, if more then one effect
     void initPixelsToBlend();

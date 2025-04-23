@@ -17,6 +17,8 @@
 
 #include "VirtualLayer.h" //VirtualLayer.h will include PhysicalLayer.h
 
+#include <ESPFS.h>
+
 class Node {
   public:
     VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
@@ -215,6 +217,7 @@ class Node {
 
   class MultiplyProjection: public Node {
     const char * name() override {return "Multiply";}
+
     Coord3D proMulti = {2,2,2};
     bool    mirror = false;
     Coord3D originalSize;
@@ -233,7 +236,22 @@ class Node {
         if (mirrors.z %2 != 0) pixel.z = originalSize.z - 1 - pixel.z;
       }
       else pixel = pixel % originalSize;
-      }
+    }
   };
 
+
+  #if FT_LIVESCRIPT
+  class LiveScriptNode: public Node {
+    public:
+    const char * name() override {return "LiveScriptNode";}
+
+    const char *animation;
+    const char *type;
+
+    void setup() override;
+
+    void loop() override;
+    
+  };
   
+  #endif

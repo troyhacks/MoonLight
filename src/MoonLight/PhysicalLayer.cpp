@@ -106,7 +106,7 @@ PhysicalLayer::PhysicalLayer() {
 
 
     //run one loop of an effect
-    bool PhysicalLayer::addNode(const char * animation) {
+    bool PhysicalLayer::addNode(const char * animation, const char * type) {
 
         Node *node = nullptr;
         if (equal(animation, "Solid")) {
@@ -128,13 +128,16 @@ PhysicalLayer::PhysicalLayer() {
         } else if (equal(animation, "Multiply")) {
             node = new MultiplyProjection();
         } else {
-            //Done by live script (Yves)
+            node = new LiveScriptNode();
+            //set animation and type
+            ((LiveScriptNode *)node)->animation = animation;
+            ((LiveScriptNode *)node)->type = type;
         }
 
         if (node) {
             node->layerV = layerV[0];
             node->setup(); //run the setup of the effect
-            layerV[0]->nodes.push_back(node); //add a new effect
+            layerV[0]->nodes.push_back(node); //add the node to the layer
         }
 
         return node != nullptr;
