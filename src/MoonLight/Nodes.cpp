@@ -16,11 +16,6 @@
 #define USE_FASTLED //as ESPLiveScript.h calls hsv ! one of the reserved functions!!
 #include "ESPLiveScript.h"
 
-// extern void _addPin(uint8_t pinNr);
-// extern void _addPixelsPre();
-// extern void _addPixel(uint16_t x, uint16_t y, uint16_t z);
-// extern void _addPixelsPost();
-
 PhysicalLayer *glayerP = nullptr;
 VirtualLayer *glayerV = nullptr;
 
@@ -30,8 +25,8 @@ static void _addPixel(uint16_t x, uint16_t y, uint16_t z) {glayerP->addPixel({x,
 static void _addPixelsPost() {glayerP->addPixelsPost();}
 
 void _fadeToBlackBy(uint8_t fadeValue) { glayerV->fadeToBlackBy(fadeValue);}
-static void _sPCLive(uint16_t pixel, CRGB color) {glayerV->setPixelColor(pixel, color);} //setPixelColor with color
-static void _sCFPLive(uint16_t pixel, uint8_t index, uint8_t brightness) { glayerV->setPixelColor(pixel, ColorFromPalette(PartyColors_p, index, brightness));} //setPixelColor within palette
+static void _sPC(uint16_t pixel, CRGB color) {glayerV->setPixelColor(pixel, color);} //setPixelColor with color
+static void _sCFP(uint16_t pixel, uint8_t index, uint8_t brightness) { glayerV->setPixelColor(pixel, ColorFromPalette(PartyColors_p, index, brightness));} //setPixelColor within palette
 
 static float _triangle(float j) {return 1.0 - fabs(fmod(2 * j, 2.0) - 1.0);}
 static float _time(float j) {
@@ -45,16 +40,38 @@ void sync() {
     delay(1); //feed the watchdog
 }
 
-void addExternalVal(string result, string name, void * ptr) {
-  if (findLink(name, externalType::value) == -1) //not allready added earlier
-      addExternalVariable(name, result, "", ptr);
-}
+void addExternal(string definition, void * ptr) {
+    bool success = false;
+    size_t firstSpace = definition.find(' ');
+    if (firstSpace != std::string::npos) {
+        string returnType = definition.substr(0, firstSpace);
 
-void addExternalFun(string result, string name, string parameters, void * ptr) {
-  if (findLink(name, externalType::function) == -1) //not allready added earlier
-      addExternalFunction(name, result, parameters, ptr);
-}
+        string parameters = "";
+        string functionName = "";
 
+        size_t openParen = definition.find('(', firstSpace + 1);
+        if (openParen != std::string::npos) { // function
+            functionName = definition.substr(firstSpace + 1, openParen - firstSpace - 1);
+
+            size_t closeParen = definition.find(')', openParen + 1);
+            if (closeParen != std::string::npos) { // function with parameters
+                parameters = definition.substr(openParen + 1, closeParen - openParen - 1);
+                success = true;
+                if (findLink(functionName, externalType::function) == -1) //not allready added earlier
+                    addExternalFunction(functionName, returnType, parameters, ptr);
+            }
+        } else { // variable
+            functionName = definition.substr(firstSpace + 1);
+            success = true;
+            if (findLink(functionName, externalType::value) == -1) //not allready added earlier
+                addExternalVariable(functionName, returnType, "", ptr);
+        }
+    }
+    if (!success) {
+        ESP_LOGE(TAG, "Failed to parse function definition: %s", definition.c_str());
+    }
+}
+  
 Parser parser = Parser();
 
 void LiveScriptNode::setup() {
@@ -65,53 +82,47 @@ void LiveScriptNode::setup() {
       return;
   }
 
-  //send UI spinner
+  //generic functions
+  addExternal("uint32_t millis()", (void *)millis);
+  addExternal("uint32_t now()", (void *)millis); //todo: synchronized time (sys->now)
+  addExternal("uint16_t random16(uint16_t)", (void *)(uint16_t (*)(uint16_t))random16);
+  addExternal(    "void delay(uint8_t)", (void *)delay);
+  addExternal(    "void pinMode(int,int)", (void *)pinMode);
+  addExternal(    "void digitalWrite(int,int)", (void *)digitalWrite);
 
-  addExternalFun("void", "addPin", "uint8_t", (void *)_addPin);
-  addExternalFun("void", "addPixelsPre", "", (void *)_addPixelsPre);
-  addExternalFun("void", "addPixel", "uint16_t,uint16_t,uint16_t", (void *)_addPixel);
-  addExternalFun("void", "addPixelsPost", "", (void *)_addPixelsPost);
-  addExternalFun("uint32_t", "millis", "", (void *)millis);
-  float (*_sin)(float) = sin;
-  addExternalFun("float", "sin", "float", (void *)_sin);
-  float (*_cos)(float) = cos;
-  addExternalFun("float", "cos", "float", (void *)_cos);
-  float (*_atan2)(float, float) = atan2;
-  addExternalFun("float", "atan2", "float,float",(void*)_atan2);
-  float (*_hypot)(float, float) = hypot;
-  addExternalFun("float", "hypot", "float,float",(void*)_hypot);
-  addExternalFun("float", "time", "float", (void *)_time);
-  addExternalFun("float", "triangle", "float", (void *)_triangle);
+  //trigonometric functions
+  addExternal(   "float sin(float)", (void *)(float (*)(float))sin);
+  addExternal(   "float cos(float)", (void *)(float (*)(float))cos);
+  addExternal( "uint8_t sin8(uint8_t)", (void *)sin8);
+  addExternal( "uint8_t cos8(uint8_t)", (void *)cos8);
+  addExternal(   "float atan2(float,float)", (void*)(float (*)(float,float))atan2);
+  addExternal( "uint8_t inoise8(uint16_t,uint16_t,uint16_t)", (void *)(uint8_t (*)(uint16_t,uint16_t,uint16_t))inoise8);
+  addExternal(   "float hypot(float,float)", (void*)(float (*)(float,float))hypot);
+  addExternal(   "float time(float)", (void *)_time);
+  addExternal(   "float triangle(float)", (void *)_triangle);
 
-  addExternalFun("void", "pinMode", "(int a1, int a2)", (void *)&pinMode);
-  addExternalFun("void", "digitalWrite", "(int a1, int a2)", (void *)&digitalWrite);
-  addExternalFun("void", "delay", "(int a1)", (void *)&delay);
+  //MoonLight functions
+  addExternal(    "void addPin(uint8_t)", (void *)_addPin);
+  addExternal(    "void addPixelsPre()", (void *)_addPixelsPre);
+  addExternal(    "void addPixel(uint16_t,uint16_t,uint16_t)", (void *)_addPixel);
+  addExternal(    "void addPixelsPost()", (void *)_addPixelsPost);
 
-  addExternalFun("uint8_t", "cos8", "uint8_t", (void *)cos8);
-  addExternalFun("void", "delay", "uint8_t", (void *)delay);
-  uint8_t (*_inoise8)(uint16_t, uint16_t, uint16_t)=inoise8;
-  addExternalFun("uint8_t", "inoise8", "uint16_t,uint16_t,uint16_t", (void *)_inoise8);
-  addExternalFun("uint32_t", "now", "", (void *)millis);
-  uint16_t (*_random16)(uint16_t)=random16; //enforce specific random16 function
-  addExternalFun("uint16_t", "random16", "uint16_t", (void *)_random16);
-  addExternalFun("uint8_t", "sin8", "uint8_t", (void *)sin8);
+  addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
+  addExternal(   "CRGB* leds", (void *)layerV->layerP->leds);
+  addExternal(    "void sPC(uint16_t,CRGB)", (void *)_sPC);
+  addExternal(    "void sCFP(uint16_t,uint8_t,uint8_t)", (void *)_sCFP);
+  addExternal("uint16_t width", &layerV->size.x);
+  addExternal("uint16_t height", &layerV->size.y);
+  addExternal("uint16_t depth", &layerV->size.z);
 
-  addExternalFun("void", "fadeToBlackBy", "uint8_t", (void *)_fadeToBlackBy);
-  addExternalVal("CRGB *", "leds", (void *)layerV->layerP->leds);
-  addExternalFun("void", "sPC", "uint16_t,CRGB", (void *)_sPCLive);
-  addExternalFun("void", "sCFP", "uint16_t,uint8_t,uint8_t", (void *)_sCFPLive);
-  addExternalVal("uint16_t", "width", &layerV->size.x);
-  addExternalVal("uint16_t", "height", &layerV->size.y);
-  addExternalVal("uint16_t", "depth", &layerV->size.z);
-
-  //void sPC(uint16_t,CRGB)
-  //CRGB * leds 
 
   for (asm_external el: external_links) {
       ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
   }
 
   runningPrograms.setFunctionToSync(sync);
+
+  //send UI spinner
 
   //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
   // runInLoopTask.push_back([&, animation, type, error] {

@@ -143,7 +143,7 @@ class Node {
     }
   
     void loop() override {
-      uint8_t bpm = 60;
+      uint8_t bpm = 120;
       int   frameNr;
 
       layerV->fadeToBlackBy(255);
