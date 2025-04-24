@@ -25,7 +25,7 @@ public:
             FilesService *filesService
         ) : Module("demo", server, sveltekit, filesService) {
             ESP_LOGD(TAG, "constructor");
-        }
+    }
 
     void setupDefinition(JsonArray root) override{
         ESP_LOGD(TAG, "");
@@ -51,6 +51,8 @@ public:
             property = details.add<JsonObject>(); property["name"] = "number"; property["type"] = "number"; property["default"] = 1000; property["min"] = 1000; property["max"] = 9999; 
             property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "ewowi";
             property = details.add<JsonObject>(); property["name"] = "date"; property["type"] = "date"; property["default"] = "2025-03-21";
+            property = details.add<JsonObject>(); property["name"] = "print"; property["type"] = "button";
+            property = details.add<JsonObject>(); property["name"] = "credit"; property["type"] = "button";
             property = details.add<JsonObject>(); property["name"] = "lines"; property["type"] = "array"; details = property["n"].to<JsonArray>();
             {
                 property = details.add<JsonObject>(); property["name"] = "service"; property["type"] = "text"; property["default"] = "consulting";
@@ -67,7 +69,7 @@ public:
 
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        ESP_LOGD(TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"", updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop1s() {
@@ -78,7 +80,7 @@ public:
         newData["millis"] = millis()/1000;
 
         JsonObject newDataObject = newData.as<JsonObject>();
-}
+        _socket->emitEvent("demo", newDataObject);}
 };
 
 #endif

@@ -23,6 +23,14 @@ class Node {
   public:
     VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
 
+    //C++ constructor and destructor are not inherited, so declare it as normal functions
+    virtual void constructor(VirtualLayer *layerV) {
+      this->layerV = layerV;
+    }
+    virtual void destructor() {
+      //delete any allocated memory
+    }
+
     virtual const char * name() {return "noname";}
     virtual const char * tags() {return "";}
     virtual uint8_t dim() {return _1D;};
@@ -36,7 +44,7 @@ class Node {
     //projection
     virtual void addPixelsPre() {}
     virtual void addPixel(Coord3D &pixel) {} //not const as pixel is changed
-    virtual void XYZ(Coord3D &pixel) {}
+    virtual void XYZ(Coord3D &pixel) {} //modifies the pixel
   };
   
   class SolidEffect: public Node {
@@ -246,11 +254,18 @@ class Node {
     const char * name() override {return "LiveScriptNode";}
 
     const char *animation;
-    const char *type;
+    const char *scriptType; //fixdef, effect, projection, ...
 
     void setup() override;
-
     void loop() override;
+
+    void getScriptsJson(JsonArray scripts);
+
+    void compileAndRun();
+    void kill();
+    void free();
+    void killAndDelete();
+    void execute();
     
   };
   

@@ -82,22 +82,15 @@ class VirtualLayer {
 
     void addIndexP(PhysMap &physMap, uint16_t indexP);
 
-    int XYZ(Coord3D pixel);
+    uint16_t XYZ(Coord3D &pixel);
     
-    int XYZUnprojected(const Coord3D &pixel) const {
-      // if (pixel.x%2)
-      //   return pixel.x + pixel.y * size.x + pixel.z * size.x * size.y;
-      // else
-      //   return pixel.x + (size.y-pixel.y-1)*size.x + pixel.z * size.x * size.y;
-      // if (pixel.y%2)
-      //   return (size.x - pixel.x - 1) + pixel.y * size.x + pixel.z * size.x * size.y;
-      // else
-        return pixel.x + pixel.y*size.x + pixel.z * size.x * size.y;
+    uint16_t XYZUnprojected(const Coord3D &pixel) const {
+      return pixel.x + pixel.y*size.x + pixel.z * size.x * size.y;
     }
 
     void setPixelColor(const Coord3D &pixel, const CRGB& color) {setPixelColor(XYZUnprojected(pixel), color);}
-    void setPixelColor(const int indexV, const CRGB& color); //uses leds
-    CRGB getPixelColor(const int indexV) const;
+    void setPixelColor(const uint16_t indexV, const CRGB& color); //uses leds
+    CRGB getPixelColor(const uint16_t indexV) const;
     void fadeToBlackBy(const uint8_t fadeBy);
 
     //to be called in loop, if more then one effect

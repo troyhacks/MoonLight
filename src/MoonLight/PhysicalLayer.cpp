@@ -131,11 +131,11 @@ PhysicalLayer::PhysicalLayer() {
             node = new LiveScriptNode();
             //set animation and type
             ((LiveScriptNode *)node)->animation = animation;
-            ((LiveScriptNode *)node)->type = type;
+            ((LiveScriptNode *)node)->scriptType = type;
         }
 
         if (node) {
-            node->layerV = layerV[0];
+            node->constructor(layerV[0]); //pass the layer to the node
             node->setup(); //run the setup of the effect
             layerV[0]->nodes.push_back(node); //add the node to the layer
         }

@@ -68,21 +68,19 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
   }
   // ESP_LOGD(TAG, "\n");
 }
-int VirtualLayer::XYZ(Coord3D pixel) {
+uint16_t VirtualLayer::XYZ(Coord3D &pixel) {
 
   //projections
   for (Node *node: nodes) { //e.g. random or scrolling or rotate projection
-    node->XYZ(pixel);
+    node->XYZ(pixel); //modifies the pixel
   }
 
   return XYZUnprojected(pixel);
 }
 
-void VirtualLayer::setPixelColor(const int indexV, const CRGB& color) {
+void VirtualLayer::setPixelColor(const uint16_t indexV, const CRGB& color) {
   // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
-  if (indexV < 0)
-    return;
-  else if (indexV < mappingTable.size()) {
+  if (indexV < mappingTable.size()) {
     // ESP_LOGD(TAG, "setPixelColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTable.size());
     switch (mappingTable[indexV].mapType) {
       case m_color:{
@@ -118,7 +116,7 @@ void VirtualLayer::setPixelColor(const int indexV, const CRGB& color) {
       default: ;
     }
   }
-  else if (indexV < NUM_LEDS) {//no projection
+  else if (indexV < NUM_LEDS) {//no mapping
     layerP->leds[indexV] = layerP->pixelsToBlend[indexV]?blend(color, layerP->leds[indexV], layerP->globalBlend): color;
   }
   // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
@@ -126,21 +124,8 @@ void VirtualLayer::setPixelColor(const int indexV, const CRGB& color) {
   //   ESP_LOGW(TAG, " dev sPC %d >= %d", indexV, STARLIGHT_NUM_LEDS);
 }
 
-void VirtualLayer::setPixelsToBlend() {
-  for (const std::vector<uint16_t>& mappingTableIndex: mappingTableIndexes) {
-      for (const uint16_t indexP: mappingTableIndex)
-      layerP->pixelsToBlend[indexP] = true;
-    }
-    for (const PhysMap &physMap: mappingTable) {
-      if (physMap.mapType == m_onePixel)
-      layerP->pixelsToBlend[physMap.indexP] = true;
-    }
-}
-
-CRGB VirtualLayer::getPixelColor(const int indexV) const {
-  if (indexV < 0)
-    return CRGB::Black;
-  else if (indexV < mappingTable.size()) {
+CRGB VirtualLayer::getPixelColor(const uint16_t indexV) const {
+  if (indexV < mappingTable.size()) {
     switch (mappingTable[indexV].mapType) {
       case m_onePixel:
         return layerP->leds[mappingTable[indexV].indexP]; 
@@ -162,6 +147,17 @@ CRGB VirtualLayer::getPixelColor(const int indexV) const {
     // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, STARLIGHT_MAXLEDS);
     return CRGB::Black;
   }
+}
+
+void VirtualLayer::setPixelsToBlend() {
+  for (const std::vector<uint16_t>& mappingTableIndex: mappingTableIndexes) {
+      for (const uint16_t indexP: mappingTableIndex)
+      layerP->pixelsToBlend[indexP] = true;
+    }
+    for (const PhysMap &physMap: mappingTable) {
+      if (physMap.mapType == m_onePixel)
+      layerP->pixelsToBlend[physMap.indexP] = true;
+    }
 }
 
 void VirtualLayer::fadeToBlackBy(const uint8_t fadeBy) {

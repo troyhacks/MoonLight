@@ -56,7 +56,8 @@ public:
 
                         if (updatedItem == animation) {
                             ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                            compileAndRun(node["animation"], node["type"], node["error"]);
+                            LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
+                            if (liveScriptNode) liveScriptNode->compileAndRun();
                         }
                     }
                 }
@@ -138,6 +139,9 @@ public:
             property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "kill"; property["type"] = "button";
+            property = details.add<JsonObject>(); property["name"] = "free"; property["type"] = "button";
+            property = details.add<JsonObject>(); property["name"] = "delete"; property["type"] = "button";
+            property = details.add<JsonObject>(); property["name"] = "execute"; property["type"] = "button";
         }
     }
 
@@ -167,20 +171,40 @@ public:
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (equal(updatedItem.parent[0], "nodes") && (equal(updatedItem.name, "animation") || equal(updatedItem.name, "type"))) {    
-            animationsChanged = true;
             JsonVariant node = _state.data["nodes"][updatedItem.index[0]];
+            animationsChanged = true;
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            if (updatedItem.oldValue.length())
+            if (updatedItem.oldValue.length()) {
                 ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
-            if (!node["animation"].isNull() && !node["type"].isNull())
-                compileAndRun(node["animation"], node["type"], node["error"]);
-        } else if (equal(updatedItem.parent[0], "scripts") && equal(updatedItem.name, "kill")) {    
-            ESP_LOGD(TAG, "handle %s[%d].%s = %s -> %s (%d)", updatedItem.parent[0], updatedItem.index[0], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updatedItem.oldValue.length());
-            if (updatedItem.oldValue != "null") //do not run at boot!
-                kill(updatedItem.index[0]);
+                LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
+                if (liveScriptNode) liveScriptNode->kill(); 
+                else ESP_LOGW(TAG, "liveScriptNode not found %s", node["animation"].as<String>().c_str());
+            }
+            if (!node["animation"].isNull() && !node["type"].isNull()) {
+                LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]); //todo: can be 2 nodes with the same name ...
+                if (liveScriptNode) liveScriptNode->compileAndRun();
+                // not needed as creating the node is already running it ...
+            }
+        } else if (equal(updatedItem.parent[0], "scripts")) {    
+            JsonVariant script = _state.data["scripts"][updatedItem.index[0]];
+            ESP_LOGD(TAG, "handle %s[%d]%s.%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], script["name"].as<String>().c_str(), updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            if (updatedItem.oldValue != "null") {//do not run at boot!
+                LiveScriptNode *liveScriptNode = findLiveScriptNode(script["name"]);
+                if (liveScriptNode) {
+                    if (equal(updatedItem.name, "kill"))
+                        liveScriptNode->kill();
+                    if (equal(updatedItem.name, "free"))
+                        liveScriptNode->free();
+                    if (equal(updatedItem.name, "delete"))
+                        liveScriptNode->killAndDelete();
+                    if (equal(updatedItem.name, "execute"))
+                        liveScriptNode->execute();
+                    // updatedItem.value = 0;
+                } else ESP_LOGW(TAG, "liveScriptNode not found %s", script["name"].as<String>().c_str());
+            }
         } 
         // else
-        //     ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                // ESP_LOGD(TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"", updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //run effects
@@ -194,6 +218,7 @@ public:
             //rebuild layerP->layerV->effects
             for (Node* node : layerP.layerV[0]->nodes) {
                 ESP_LOGD(TAG, "delete effect %s", node->name());
+                node->destructor();
                 delete node;
             }
             layerP.layerV[0]->nodes.clear(); //remove all effects
@@ -229,10 +254,13 @@ public:
 
         JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
 
-        // liveScript.updateScripts(scripts); //update the scripts in the UI ...
+        LiveScriptNode node;
+        node.getScriptsJson(scripts);
 
         //only if changed
         if (_state.data["scripts"] != newData["scripts"]) {
+            // UpdatedItem updatedItem;
+            // _state.compareRecursive("scripts", _state.data["scripts"], newData["scripts"], updatedItem); //compare and update
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
             JsonObject newDataObject = newData.as<JsonObject>();
             _socket->emitEvent("animations", newDataObject);
@@ -250,18 +278,21 @@ public:
         }
     }
 
-    //ESPLiveScript functions
-    //=======================
+    LiveScriptNode *findLiveScriptNode(const char *animation) {
+        for (Node *node : layerP.layerV[0]->nodes) {
+            // Check if the node is of type LiveScriptNode
 
-    void compileAndRun(const char * animation, const char * type, JsonVariant error) {
-
-    
-        //stop UI spinner
+            if (equal(node->name(), "LiveScriptNode")) {
+                LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
+                if (equal(liveScriptNode->animation, animation)) {
+                    ESP_LOGD(TAG, "found %s", animation);
+                    return liveScriptNode;
+                }
+            }
+        }
+        return nullptr;
     }
-
-    void kill(int index) {
-        ESP_LOGD(TAG, "kill %d", index);
-    }
+  
 }; // class ModuleAnimations
 
 #endif

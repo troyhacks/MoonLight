@@ -83,7 +83,7 @@ void setupDefinition(JsonArray root) override{
             if (updatedItem.value.as<String>().length())
                 compileAndRun(updatedItem.value);
         } else
-            ESP_LOGD(TAG, "no handle for %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"", updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 ```
 

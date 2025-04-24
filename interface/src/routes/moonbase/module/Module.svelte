@@ -122,8 +122,8 @@
 		//loop over properties
 		for (let key in newData) {
 			if (typeof newData[key] != 'object') {
-				// console.log("updateRecursive", key, newData[key], oldData);
 				if (newData[key] != oldData[key]) {
+					// console.log("updateRecursive", key, newData[key], oldData[key]);
 					oldData[key] = newData[key]; //trigger reactiveness
 				}
 			} else {
