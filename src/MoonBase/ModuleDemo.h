@@ -38,7 +38,8 @@ public:
         values.add("Offline");
         values.add("Signal Strength");
         values.add("Priority");
-        property = root.add<JsonObject>(); property["name"] = "millis"; property["type"] = "number";
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "millis"; property["type"] = "number"; property["ro"] = true;
 
         property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -76,11 +77,13 @@ public:
         if (!_socket->getConnectedClients()) return; 
 
         JsonDocument newData; //to only send updatedData
-
         newData["millis"] = millis()/1000;
 
         JsonObject newDataObject = newData.as<JsonObject>();
-        _socket->emitEvent("demo", newDataObject);}
+        _socket->emitEvent("demo", newDataObject);
+
+        //read only variables should not use update([&](ModuleState &state) {} as that will write to file each second
+    }
 };
 
 #endif

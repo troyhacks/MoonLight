@@ -106,7 +106,8 @@ PhysicalLayer::PhysicalLayer() {
 
 
     //run one loop of an effect
-    bool PhysicalLayer::addNode(const char * animation, const char * type) {
+    Node* PhysicalLayer::addNode(const char * animation, const char * type) {
+        ESP_LOGD(TAG, "%s", animation);
 
         Node *node = nullptr;
         if (equal(animation, "Solid")) {
@@ -126,21 +127,44 @@ PhysicalLayer::PhysicalLayer() {
         } else if (equal(animation, "Panel16")) {
             node = new Panel16fixture();
         } else if (equal(animation, "Multiply")) {
-            node = new MultiplyProjection();
-        } else {
-            node = new LiveScriptNode();
-            //set animation and type
-            ((LiveScriptNode *)node)->animation = animation;
-            ((LiveScriptNode *)node)->scriptType = type;
+            node = new MultiplyModifier();
+        } else if (equal(animation, "Mirror")) {
+            node = new MirrorModifier();
+        } else if (equal(animation, "Pinwheel")) {
+            node = new PinwheelModifier();
+        #if FT_LIVESCRIPT
+            } else {
+                node = new LiveScriptNode();
+        #endif
         }
 
         if (node) {
-            node->constructor(layerV[0]); //pass the layer to the node
+            node->constructor(layerV[0], animation, type); //pass the layer to the node
             node->setup(); //run the setup of the effect
             layerV[0]->nodes.push_back(node); //add the node to the layer
         }
 
-        return node != nullptr;
+        return node;
+    }
+
+    bool PhysicalLayer::removeNode(const char * animation) {
+        //find node in layerV[0]
+        size_t size = layerV[0]->nodes.size();
+        for (size_t i = 0; i < size; i++) {
+            ESP_LOGD(TAG, "%d %d", i, layerV[0]->nodes.size());
+            if (i< size) {
+                Node *node = layerV[0]->nodes[i];
+                ESP_LOGD(TAG, "%s %s", node->animation, animation);
+                if (equal(node->animation, animation)) {
+                    ESP_LOGD(TAG, "remove node %s", node->animation);
+                    node->destructor();
+                    delete node;
+                    layerV[0]->nodes.erase(layerV[0]->nodes.begin() + i);
+                    return true;
+                }
+            } else break;
+        }
+        return false;
     }
 
     // to be called in setup, if more then one effect

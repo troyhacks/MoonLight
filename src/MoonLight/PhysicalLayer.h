@@ -48,7 +48,7 @@ struct Coord3D {
   
 class VirtualLayer; //Forward as PhysicalLayer refers back to VirtualLayer
 class Node; //Forward as PhysicalLayer refers back to Node
-class Projection; //Forward as PhysicalLayer refers back to Projection
+class Modifier; //Forward as PhysicalLayer refers back to Modifier
 
 //contains leds array and implements fixture definition functions (add*)
 class PhysicalLayer {
@@ -83,7 +83,8 @@ class PhysicalLayer {
 
 
     //run one loop of an effect
-    bool addNode(const char * animation, const char * type);
+    Node *addNode(const char * animation, const char * type);
+    bool removeNode(const char * animation);
 
     // to be called in setup, if more then one effect
     void initPixelsToBlend();

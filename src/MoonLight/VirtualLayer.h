@@ -46,6 +46,7 @@ class VirtualLayer {
   public:
 
     Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
+    Coord3D middle = {8,8,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
 
     std::vector<PhysMap> mappingTable;
     std::vector<std::vector<uint16_t>> mappingTableIndexes;

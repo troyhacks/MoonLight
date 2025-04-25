@@ -70,9 +70,9 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
 }
 uint16_t VirtualLayer::XYZ(Coord3D &pixel) {
 
-  //projections
-  for (Node *node: nodes) { //e.g. random or scrolling or rotate projection
-    node->XYZ(pixel); //modifies the pixel
+  //modifiers
+  for (Node *node: nodes) { //e.g. random or scrolling or rotate modifier
+    node->modifyXYZ(pixel); //modifies the pixel
   }
 
   return XYZUnprojected(pixel);
@@ -161,7 +161,7 @@ void VirtualLayer::setPixelsToBlend() {
 }
 
 void VirtualLayer::fadeToBlackBy(const uint8_t fadeBy) {
-  // if (effectDimension < projectionDimension) { //only process the effect pixels (so projections can do things with the other dimension)
+  // if (effectDimension < projectionDimension) { //only process the effect pixels (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
   //       CRGB color = getPixelColor({x,y,0});
@@ -182,7 +182,7 @@ void VirtualLayer::fadeToBlackBy(const uint8_t fadeBy) {
 }
 
 void VirtualLayer::fill_solid(const CRGB& color) {
-  // if (effectDimension < projectionDimension) { //only process the effect pixels (so projections can do things with the other dimension)
+  // if (effectDimension < projectionDimension) { //only process the effect pixels (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
   //       setPixelColor({x,y,0}, color);
@@ -198,7 +198,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
 }
 
 void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue) {
-  // if (effectDimension < projectionDimension) { //only process the effect pixels (so projections can do things with the other dimension)
+  // if (effectDimension < projectionDimension) { //only process the effect pixels (so modifiers can do things with the other dimension)
   //   CHSV hsv;
   //   hsv.hue = initialhue;
   //   hsv.val = 255;
@@ -238,17 +238,17 @@ void VirtualLayer::addPixelsPre() {
 
   size = layerP->size; //physical size
 
-  //projections
+  //modifiers
   for (Node *node: nodes) {
-    node->addPixelsPre();
+    node->modifyPixelsPre();
   }
 }
 
 void VirtualLayer::addPixel(Coord3D pixel) {
 
-  //projections
+  //modifiers
   for (Node *node: nodes) {
-    node->addPixel(pixel);
+    node->modifyPixel(pixel);
   }
 
   uint16_t indexV = XYZUnprojected(pixel);

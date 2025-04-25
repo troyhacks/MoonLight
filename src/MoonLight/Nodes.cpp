@@ -16,16 +16,20 @@
 #define USE_FASTLED //as ESPLiveScript.h calls hsv ! one of the reserved functions!!
 #include "ESPLiveScript.h"
 
-VirtualLayer *glayerV = nullptr;
+Node *gNode = nullptr;
 
-static void _addPin(uint8_t pinNr) {glayerV->layerP->addPin(pinNr);}
-static void _addPixelsPre() {glayerV->layerP->addPixelsPre();}
-static void _addPixel(uint16_t x, uint16_t y, uint16_t z) {glayerV->layerP->addPixel({x, y, z});}
-static void _addPixelsPost() {glayerV->layerP->addPixelsPost();}
+static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
+static void _addPixelsPre() {gNode->layerV->layerP->addPixelsPre();}
+static void _addPixel(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addPixel({x, y, z});}
+static void _addPixelsPost() {gNode->layerV->layerP->addPixelsPost();}
 
-void _fadeToBlackBy(uint8_t fadeValue) { glayerV->fadeToBlackBy(fadeValue);}
-static void _sPC(uint16_t pixel, CRGB color) {glayerV->setPixelColor(pixel, color);}
-static void _sCFP(uint16_t pixel, uint8_t index, uint8_t brightness) { glayerV->setPixelColor(pixel, ColorFromPalette(PartyColors_p, index, brightness));}
+static void _modifyPixelsPre() {gNode->modifyPixelsPre();}
+// static void _modifyPixel() {gNode->modifyPixel();}
+// static void _modifyXYZ() {gNode->modifyXYZ();}
+
+void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
+static void _sPC(uint16_t pixel, CRGB color) {gNode->layerV->setPixelColor(pixel, color);}
+static void _sCFP(uint16_t pixel, uint8_t index, uint8_t brightness) { gNode->layerV->setPixelColor(pixel, ColorFromPalette(PartyColors_p, index, brightness));}
 
 static float _triangle(float j) {return 1.0 - fabs(fmod(2 * j, 2.0) - 1.0);}
 static float _time(float j) {
@@ -105,6 +109,9 @@ void LiveScriptNode::setup() {
   addExternal(    "void addPixelsPre()", (void *)_addPixelsPre);
   addExternal(    "void addPixel(uint16_t,uint16_t,uint16_t)", (void *)_addPixel);
   addExternal(    "void addPixelsPost()", (void *)_addPixelsPost);
+  addExternal(    "void modifyPixelsPre()", (void *)_modifyPixelsPre);
+//   addExternal(    "void modifyPixel(uint16_t,uint16_t,uint16_t)", (void *)_modifyPixel);
+//   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
   addExternal(   "CRGB* leds", (void *)layerV->layerP->leds);
@@ -140,11 +147,12 @@ void LiveScriptNode::compileAndRun() {
           file.close();
 
           const char * post = "";
-          if (equal(scriptType, "Effect")) {
-              post= "void main(){setup();while(2>1){loop();sync();}}"; //;
-          } else if (equal(scriptType, "Fixture definition")) {
-              post = "void main(){addPixelsPre();setup();addPixelsPost();}";
-          }
+          if (scScript.find("loop") != std::string::npos) { //effect
+              post = "void main(){setup();while(2>1){loop();sync();}}"; //;
+          } else if (scScript.find("modifyPixel") != std::string::npos) { //modifier
+              post = "void main(){setup();}";
+          } else
+              post = "void main(){addPixelsPre();setup();addPixelsPost();}"; //fixdef
 
           scScript += post;
 
@@ -161,7 +169,7 @@ void LiveScriptNode::compileAndRun() {
           scriptRuntime.addExe(executable); //if already exists, delete it first
           ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
 
-          glayerV = layerV; //todo: this is not working well with multiple scripts running!!!
+          gNode = this; //todo: this is not working well with multiple scripts running!!!
 
           if (executable.exeExist) {
             execute();
@@ -177,11 +185,15 @@ void LiveScriptNode::compileAndRun() {
   
   //stop UI spinner      
 }
+
+void LiveScriptNode::destructor() {
+    ESP_LOGD(TAG, "%s", animation);
+    scriptRuntime.kill(animation);
+}
+
 void LiveScriptNode::kill() {
     ESP_LOGD(TAG, "%s", animation);
     scriptRuntime.kill(animation);
-    // scriptRuntime.execute(animation, "main"); //todo: not working yet
-    // scriptRuntime.free(animation);
 }
 
 void LiveScriptNode::execute() {
@@ -204,7 +216,6 @@ void LiveScriptNode::execute() {
     }
 }
 
-
 void LiveScriptNode::free() {
     ESP_LOGD(TAG, "%s", animation);
     scriptRuntime.free(animation);
@@ -212,6 +223,8 @@ void LiveScriptNode::free() {
 
 void LiveScriptNode::killAndDelete() {
     ESP_LOGD(TAG, "%s", animation);
+    scriptRuntime.kill(animation);
+    // scriptRuntime.free(animation);
     scriptRuntime.deleteExe(animation);
 };
 

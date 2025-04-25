@@ -28,8 +28,6 @@ class ModuleAnimations : public Module
 {
 public:
 
-    bool animationsChanged = false;
-
     ModuleAnimations(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
         FilesService *filesService
@@ -42,27 +40,29 @@ public:
 
         ESP_LOGD(TAG, "");
 
-        //create a handler which recompiles the animation when the file of the current animation changes in the File Manager
-        _filesService->addUpdateHandler([&](const String &originId)
-        { 
-            ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
-            //read the file state
-            _filesService->read([&](FilesState &filesState) {
-                // loop over all changed files (normally only one)
-                for (auto updatedItem : filesState.updatedItems) {
-                    //if file is the current animation, recompile it (to do: multiple animations)
-                    for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
-                        String animation = node["animation"];
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            //create a handler which recompiles the animation when the file of the current animation changes in the File Manager
+            _filesService->addUpdateHandler([&](const String &originId)
+            { 
+                ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
+                //read the file state
+                _filesService->read([&](FilesState &filesState) {
+                    // loop over all changed files (normally only one)
+                    for (auto updatedItem : filesState.updatedItems) {
+                        //if file is the current animation, recompile it (to do: multiple animations)
+                        for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
+                            String animation = node["animation"];
 
-                        if (updatedItem == animation) {
-                            ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                            LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
-                            if (liveScriptNode) liveScriptNode->compileAndRun();
+                            if (updatedItem == animation) {
+                                ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)findNode(node["animation"]);
+                                if (liveScriptNode) liveScriptNode->compileAndRun();
+                            }
                         }
                     }
-                }
+                });
             });
-        });
+        #endif
 
         // _socket->registerEvent("animationsRO");
     }
@@ -79,7 +79,7 @@ public:
         property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 128; property["color"] = "Red";
         property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 128; property["color"] = "Green";
         property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 1280; property["color"] = "Blue";
-        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "select"; property["default"] = "solid"; values = property["values"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "select"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
         values.add("Preset1");
         values.add("Preset2");
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
@@ -99,6 +99,8 @@ public:
             values.add("Lines");
             values.add("Panel16");
             values.add("Multiply");
+            values.add("Mirror");
+            values.add("Pinwheel");
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
@@ -125,24 +127,25 @@ public:
                 values.add("Coordinate");
                 property = details.add<JsonObject>(); property["name"] = "value"; property["type"] = "text"; property["default"] = "128";
             }
-            //, "controls":[{"name":"speed","type":"range", "value":"128"}]
         }
 
-        property = root.add<JsonObject>(); property["name"] = "scripts"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "isRunning"; property["type"] = "checkbox"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "isHalted"; property["type"] = "checkbox"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "exeExist"; property["type"] = "checkbox"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "kill"; property["type"] = "button";
-            property = details.add<JsonObject>(); property["name"] = "free"; property["type"] = "button";
-            property = details.add<JsonObject>(); property["name"] = "delete"; property["type"] = "button";
-            property = details.add<JsonObject>(); property["name"] = "execute"; property["type"] = "button";
-        }
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            property = root.add<JsonObject>(); property["name"] = "scripts"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+            {
+                property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "isRunning"; property["type"] = "checkbox"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "isHalted"; property["type"] = "checkbox"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "exeExist"; property["type"] = "checkbox"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
+                property = details.add<JsonObject>(); property["name"] = "stop"; property["type"] = "button";
+                property = details.add<JsonObject>(); property["name"] = "start"; property["type"] = "button";
+                // property = details.add<JsonObject>(); property["name"] = "free"; property["type"] = "button";
+                property = details.add<JsonObject>(); property["name"] = "delete"; property["type"] = "button";
+            }
+        #endif
     }
 
     //implement business logic
@@ -170,38 +173,75 @@ public:
         } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-        } else if (equal(updatedItem.parent[0], "nodes") && (equal(updatedItem.name, "animation") || equal(updatedItem.name, "type"))) {    
+        } else if (equal(updatedItem.parent[0], "nodes") && (equal(updatedItem.name, "animation") || equal(updatedItem.name, "type"))) {
             JsonVariant node = _state.data["nodes"][updatedItem.index[0]];
-            animationsChanged = true;
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            if (updatedItem.oldValue.length()) {
-                ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
-                LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
-                if (liveScriptNode) liveScriptNode->kill(); 
-                else ESP_LOGW(TAG, "liveScriptNode not found %s", node["animation"].as<String>().c_str());
+
+            // remove or add Nodes (incl controls)
+            if (!node["animation"].isNull() && !node["type"].isNull()) { // if animation changed and type is not empty or type changed and animation not set.
+                // delete the old animation, create a new one
+                if (updatedItem.oldValue != "null") {
+                    layerP.removeNode(updatedItem.oldValue.c_str());
+                }
+
+                node["controls"].to<JsonArray>(); //clear the controls
+                Node *nodeClass = layerP.addNode(node["animation"], node["type"]); // fill the layers and effects ...
+                nodeClass->getControls(_state.data["nodes"][updatedItem.index[0]]["controls"]);
+
+                //show these controls in the UI
+                JsonObject object = _state.data.as<JsonObject>();
+                _socket->emitEvent("animations", object); //only send the updated object ...
             }
-            if (!node["animation"].isNull() && !node["type"].isNull()) {
-                LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]); //todo: can be 2 nodes with the same name ...
-                if (liveScriptNode) liveScriptNode->compileAndRun();
-                // not needed as creating the node is already running it ...
+
+            #if FT_ENABLED(FT_LIVESCRIPT)
+                // if (updatedItem.oldValue.length()) {
+                //     ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
+                //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
+                //     if (liveScriptNode) liveScriptNode->kill(); 
+                //     else ESP_LOGW(TAG, "liveScriptNode not found %s", node["animation"].as<String>().c_str());
+                // }
+                // if (!node["animation"].isNull() && !node["type"].isNull()) {
+                //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]); //todo: can be 2 nodes with the same name ...
+                //     if (liveScriptNode) liveScriptNode->compileAndRun();
+                //     // not needed as creating the node is already running it ...
+                // }
+            #endif
+        } else if (equal(updatedItem.parent[1], "controls") && equal(updatedItem.name, "value")) {    //process controls values 
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+
+            Node * nodeClass = findNode(_state.data["nodes"][updatedItem.index[0]]["animation"]);
+            if (nodeClass) nodeClass->setControls(_state.data["nodes"][updatedItem.index[0]]["controls"]);
+            else ESP_LOGW(TAG, "nodeClass not found %s", _state.data["nodes"][updatedItem.index[0]]["animation"].as<String>().c_str());
+
+            // if Modfier control changed, rerun the fixture definition
+            ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
+            if (equal(nodeClass->scriptType, "Modifier")) {
+                for (Node *node : layerP.layerV[0]->nodes) {
+                    if (equal(node->scriptType, "Fixture definition")) {
+                        ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                        node->setup();
+                    }
+                }
             }
         } else if (equal(updatedItem.parent[0], "scripts")) {    
             JsonVariant script = _state.data["scripts"][updatedItem.index[0]];
             ESP_LOGD(TAG, "handle %s[%d]%s.%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], script["name"].as<String>().c_str(), updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            if (updatedItem.oldValue != "null") {//do not run at boot!
-                LiveScriptNode *liveScriptNode = findLiveScriptNode(script["name"]);
-                if (liveScriptNode) {
-                    if (equal(updatedItem.name, "kill"))
-                        liveScriptNode->kill();
-                    if (equal(updatedItem.name, "free"))
-                        liveScriptNode->free();
-                    if (equal(updatedItem.name, "delete"))
-                        liveScriptNode->killAndDelete();
-                    if (equal(updatedItem.name, "execute"))
-                        liveScriptNode->execute();
-                    // updatedItem.value = 0;
-                } else ESP_LOGW(TAG, "liveScriptNode not found %s", script["name"].as<String>().c_str());
-            }
+            #if FT_ENABLED(FT_LIVESCRIPT)
+                if (updatedItem.oldValue != "null") {//do not run at boot!
+                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)findNode(script["name"]);
+                    if (liveScriptNode) {
+                        if (equal(updatedItem.name, "stop"))
+                            liveScriptNode->kill();
+                        if (equal(updatedItem.name, "start"))
+                            liveScriptNode->execute();
+                        // if (equal(updatedItem.name, "free"))
+                        //     liveScriptNode->free();
+                        if (equal(updatedItem.name, "delete"))
+                            liveScriptNode->killAndDelete();
+                        // updatedItem.value = 0;
+                    } else ESP_LOGW(TAG, "liveScriptNode not found %s", script["name"].as<String>().c_str());
+                }
+            #endif
         } 
         // else
                 // ESP_LOGD(TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"", updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
@@ -210,24 +250,6 @@ public:
     //run effects
     void loop()
     {
-        bool showLeds = true;
-
-        if (animationsChanged) {
-            animationsChanged = false;
-            
-            //rebuild layerP->layerV->effects
-            for (Node* node : layerP.layerV[0]->nodes) {
-                ESP_LOGD(TAG, "delete effect %s", node->name());
-                node->destructor();
-                delete node;
-            }
-            layerP.layerV[0]->nodes.clear(); //remove all effects
-            for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
-                ESP_LOGD(TAG, "create effect %s", node["animation"].as<String>().c_str());
-                layerP.addNode(node["animation"], node["type"]); // fill the layers and effects ...
-            }
-        }
-
         layerP.loop(); //run all the effects of all virtual layers (currently only one)
 
         //show connected clients on the led display
@@ -238,8 +260,7 @@ public:
             layerP.leds[i] = CRGB(0, 0, 128);
         }
 
-        // Serial.printf(" %s", animation.c_str());
-        if (showLeds) driverShow();
+        driverShow();
     }
 
     //update scripts / read only values in the UI
@@ -247,24 +268,35 @@ public:
 
         if (!_socket->getConnectedClients()) return; 
 
-        JsonDocument newData; //to only send updatedData
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            JsonDocument newData; //to only send updatedData
+            JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
+            LiveScriptNode node;
+            node.getScriptsJson(scripts);
 
-        //push read only variables
-        //use state.data or newData?
+            //only if changed
+            if (_state.data["scripts"] != newData["scripts"]) {
+                // UpdatedItem updatedItem;
+                // _state.compareRecursive("scripts", _state.data["scripts"], newData["scripts"], updatedItem); //compare and update
+                _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
+                JsonObject newDataObject = newData.as<JsonObject>();
+                _socket->emitEvent("animations", newDataObject);
+            }
 
-        JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
+            // if (_state.data["scripts"] != newData["scripts"]) {
+            //     update([&](ModuleState &state) {
 
-        LiveScriptNode node;
-        node.getScriptsJson(scripts);
+            //         ESP_LOGD(TAG, "update scripts");
 
-        //only if changed
-        if (_state.data["scripts"] != newData["scripts"]) {
-            // UpdatedItem updatedItem;
-            // _state.compareRecursive("scripts", _state.data["scripts"], newData["scripts"], updatedItem); //compare and update
-            _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-            JsonObject newDataObject = newData.as<JsonObject>();
-            _socket->emitEvent("animations", newDataObject);
-        }
+            //         UpdatedItem updatedItem;
+            //         ; //compare and update
+            //         state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
+            //         // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+            //         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+            //     }, "server");
+            // }
+
+        #endif
             
         // char buffer[256];
         // serializeJson(doc, buffer, sizeof(buffer));
@@ -278,17 +310,14 @@ public:
         }
     }
 
-    LiveScriptNode *findLiveScriptNode(const char *animation) {
+    Node *findNode(const char *animation) {
         for (Node *node : layerP.layerV[0]->nodes) {
             // Check if the node is of type LiveScriptNode
 
-            if (equal(node->name(), "LiveScriptNode")) {
-                LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
-                if (equal(liveScriptNode->animation, animation)) {
+                if (equal(node->animation, animation)) {
                     ESP_LOGD(TAG, "found %s", animation);
-                    return liveScriptNode;
+                    return node;
                 }
-            }
         }
         return nullptr;
     }

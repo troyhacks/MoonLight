@@ -10,7 +10,7 @@
     * Switch off to see the effect framerate in System Status/Metrics
     * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 leds, 24 bits is 130 fps theoretically - 120 practically)
 * Pin: Currently only 2 and 16 supported
-* Nodes: One or more processes, can be fixture definitions, mappings, effects, projections. Currently all nodes are effects.
+* Nodes: One or more processes, can be fixture definitions, mappings, effects or modifiers.
     * Nodes can have arguments
 * Scrips: Running Live scripts (WIP)
 * If a script file is updated (here or in the [File Manager](https://ewowi.github.io/MoonBase/moonbase/files/)) and the file is part of an active node, it will rerun
@@ -48,7 +48,7 @@ They represent current state of Live Script processing and will be extended as m
         * Effect: 
             * run an effect in a virtual coordinate space ✅
             * in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings ✅
-        * Modifier: Mirror, rotate, etc, multiple projections allowed (projection in StarLight) 🚧
+        * Modifier: Mirror, rotate, etc, multiple modfiers allowed (projection in StarLight) 🚧
         * Driver show: show the result on Leds (using FastLED, hpwit drivers), ArtNet, DDP, ...
 * Future situation: Nodes and noodles (2)
     * Replace the nodes table (1) by a graphical view (2)

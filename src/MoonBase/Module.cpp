@@ -65,7 +65,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
         JsonString key = stateProperty.key();
         JsonVariant stateValue = stateData[key.c_str()];
         JsonVariant newValue = newData[key.c_str()];
-        if (stateValue != newValue) { //if value changed
+        if (!newValue.isNull() && stateValue != newValue) { //if value changed, don't update if not defined in newValue
 
             if (depth != UINT8_MAX) {
                 updatedItem.parent[depth] = parent.c_str();
