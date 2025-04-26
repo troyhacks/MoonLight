@@ -25,6 +25,7 @@
 	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
     import {initCap, getTimeAgo} from '$lib/stores/moonbase_utilities';
+	import { fromJSON } from 'postcss';
 
     let { property, data = $bindable(), definition, onChange, changeOnInput} = $props();
 
@@ -177,7 +178,7 @@
                         {/if}
                     {/each}
                     {#each property.n as propertyN}
-                        {#if propertyN.type == "array"}
+                        {#if propertyN.type == "array" || propertyN.type == "controls"}
                             <div>
                                 <div class="font-bold">↓{nrofDetails(index, propertyN)}</div>
                             </div>
@@ -211,13 +212,17 @@
     {#if showEditor && property.name == propertyEditable && data[property.name] && data[property.name].length}
         <div class="divider my-0"></div>
         {#each property.n as propertyN}
-            {#if propertyN.type != "array"}
+            {#if propertyN.type == "array"}
+                <label for="{propertyN.name}">{propertyN.name}</label>
+                <ObjectArray property={propertyN} bind:data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
+            {:else if propertyN.type == "controls"}
+                {#each dataEditable[propertyN.name] as control}
+                    <MultiInput property={control} bind:value={control.value} onChange={onChange} changeOnInput={changeOnInput}></MultiInput>
+                {/each}
+            {:else}
                 <div>
                     <MultiInput property={propertyN} bind:value={dataEditable[propertyN.name]} onChange={onChange} changeOnInput={changeOnInput}></MultiInput>
                 </div>
-            {:else if propertyN.type == "array"}
-                <label for="{propertyN.name}">{propertyN.name}</label>
-                <ObjectArray property={propertyN} bind:data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
             {/if}
         {/each}
     {/if}

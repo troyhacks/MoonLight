@@ -33,7 +33,8 @@ void VirtualLayer::setup() {
 
 void VirtualLayer::loop() {
   for (Node *node: nodes) {
-    node->loop();
+    if (node->on)
+      node->loop();
   }
 
   //fadeToBlackBy(lowest value);
@@ -287,6 +288,6 @@ void VirtualLayer::addPixelsPost() {
     //   ESP_LOGD(TAG, "%d no mapping\n", x);
   }
 
-  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d +  1:%d + m:%d (p:%d)\n", size.x, size.y, size.z, nrOfLeds, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
+  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d +  1:%d + m:%d (p:%d)", size.x, size.y, size.z, nrOfLeds, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
 
 }

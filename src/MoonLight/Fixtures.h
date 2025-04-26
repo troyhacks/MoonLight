@@ -17,15 +17,14 @@ class Panel16fixture: public Node {
 
   void getControls(JsonArray controls) override {
     JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "Range"; control["value"] = width;
-    control = controls.add<JsonObject>(); control["name"] = "height"; control["type"] = "Range"; control["value"] = height;
+    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 16; control["value"] = width;
+    control = controls.add<JsonObject>(); control["name"] = "height"; control["type"] = "range"; control["default"] = 16; control["value"] = height;
   }
   
-  void setControls(JsonArray controls) override {
-    ESP_LOGD(TAG, "%s", controls[0].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[1].as<String>().c_str());
-    width = controls[0]["value"];
-    height = controls[1]["value"];
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["width"] == "bpm") width = control["value"];
+    if (control["height"] == "bpm") height = control["value"];
   }
 
   void setup() override {

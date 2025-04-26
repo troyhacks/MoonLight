@@ -24,6 +24,7 @@ public:
   VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
   const char *animation;
   const char *scriptType; //fixdef, effect, modifier, ...
+  bool on = true;
 
   //C++ constructor and destructor are not inherited, so declare it as normal functions
   virtual void constructor(VirtualLayer *layerV, const char *animation, const char *scriptType) {
@@ -40,7 +41,7 @@ public:
   virtual uint8_t dim() {return _1D;};
 
   virtual void getControls(JsonArray controls) {};
-  virtual void setControls(JsonArray controls) {};
+  virtual void setControl(JsonObject control) {};
 
   //effect and fixdef
   virtual void setup() {};

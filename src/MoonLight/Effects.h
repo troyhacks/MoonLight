@@ -45,12 +45,12 @@ public:
 
   void getControls(JsonArray controls) override {
     JsonObject control;
-    control = controls.add<JsonObject>();     control["name"] = "BPM"; control["type"] = "Range"; control["value"] = bpm;
+    control = controls.add<JsonObject>(); control["name"] = "bpm"; control["type"] = "range"; control["default"] = 60; control["value"] = bpm;
   }
 
-  void setControls(JsonArray controls) override {
-    ESP_LOGD(TAG, "%s", controls[0].as<String>().c_str());
-    bpm = controls[0]["value"];
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "bpm") bpm = control["value"];
   }
 
   const char * name() override {return "Sinelon";}
@@ -89,12 +89,12 @@ public:
 
   void getControls(JsonArray controls) override {
     JsonObject control;
-    control = controls.add<JsonObject>();     control["name"] = "speed"; control["type"] = "Range"; control["value"] = speed;
+    control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "range"; control["default"] = 5; control["value"] = speed;
   }
 
-  void setControls(JsonArray controls) override {
-    ESP_LOGD(TAG, "%s", controls[0].as<String>().c_str());
-    speed = controls[0]["value"];
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "speed") speed = control["value"];
   }
 
   const char * name() override {return "Sinus";}
@@ -135,12 +135,12 @@ public:
 
   void getControls(JsonArray controls) override {
     JsonObject control;
-    control = controls.add<JsonObject>();     control["name"] = "BPM"; control["type"] = "Range"; control["value"] = bpm;
+    control = controls.add<JsonObject>(); control["name"] = "BPM"; control["type"] = "range"; control["default"] = 120; control["value"] = bpm;
   }
 
-  void setControls(JsonArray controls) override {
-    ESP_LOGD(TAG, "%s", controls[0].as<String>().c_str());
-    bpm = controls[0]["value"];
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "BPM") bpm = control["value"];
   }
 
   void setup() override {
@@ -172,24 +172,22 @@ public:
 class LissajousEffect: public Node {
 public:
 
-  uint8_t xFrequency = 64;// = leds.effectControls.read<uint8_t>();
-  uint8_t fadeRate = 128;// = leds.effectControls.read<uint8_t>();
-  uint8_t speed = 128;// = leds.effectControls.read<uint8_t>();
+  uint8_t xFrequency = 64;
+  uint8_t fadeRate = 128;
+  uint8_t speed = 128;
 
   void getControls(JsonArray controls) override {
     JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "xFrequency"; control["type"] = "Range"; control["value"] = xFrequency;
-    control = controls.add<JsonObject>(); control["name"] = "fadeRate"; control["type"] = "Range"; control["value"] = fadeRate;
-    control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "Range"; control["value"] = speed;
+    control = controls.add<JsonObject>(); control["name"] = "xFrequency"; control["type"] = "range"; control["default"] = 64; control["value"] = xFrequency;
+    control = controls.add<JsonObject>(); control["name"] = "fadeRate"; control["type"] = "range"; control["default"] = 128; control["value"] = fadeRate;
+    control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "range"; control["default"] = 128; control["value"] = speed;
   }
 
-  void setControls(JsonArray controls) override {
-    ESP_LOGD(TAG, "%s", controls[0].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[1].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[2].as<String>().c_str());
-    xFrequency = controls[0]["value"];
-    fadeRate = controls[1]["value"];
-    speed = controls[2]["value"];
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "xFrequency") xFrequency = control["value"];
+    if (control["name"] == "fadeRate") fadeRate = control["value"];
+    if (control["name"] == "speed") speed = control["value"];
   }
 
   const char * name() override {return "Lissajous";}

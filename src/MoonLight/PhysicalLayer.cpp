@@ -107,7 +107,6 @@ PhysicalLayer::PhysicalLayer() {
 
     //run one loop of an effect
     Node* PhysicalLayer::addNode(const char * animation, const char * type) {
-        ESP_LOGD(TAG, "%s", animation);
 
         Node *node = nullptr;
         if (equal(animation, "Solid")) {
@@ -144,25 +143,24 @@ PhysicalLayer::PhysicalLayer() {
             layerV[0]->nodes.push_back(node); //add the node to the layer
         }
 
+        ESP_LOGD(TAG, "%s (s:%d)", animation, layerV[0]->nodes.size());
+
         return node;
     }
 
     bool PhysicalLayer::removeNode(const char * animation) {
         //find node in layerV[0]
-        size_t size = layerV[0]->nodes.size();
-        for (size_t i = 0; i < size; i++) {
-            ESP_LOGD(TAG, "%d %d", i, layerV[0]->nodes.size());
-            if (i< size) {
-                Node *node = layerV[0]->nodes[i];
-                ESP_LOGD(TAG, "%s %s", node->animation, animation);
-                if (equal(node->animation, animation)) {
-                    ESP_LOGD(TAG, "remove node %s", node->animation);
-                    node->destructor();
-                    delete node;
-                    layerV[0]->nodes.erase(layerV[0]->nodes.begin() + i);
-                    return true;
-                }
-            } else break;
+        for (size_t i = 0; i < layerV[0]->nodes.size(); i++) {
+            // ESP_LOGD(TAG, "%d %d", i, layerV[0]->nodes.size());
+            Node *node = layerV[0]->nodes[i];
+            // ESP_LOGD(TAG, "%s %s", node->animation, animation);
+            if (equal(node->animation, animation)) {
+                node->destructor();
+                delete node;
+                layerV[0]->nodes.erase(layerV[0]->nodes.begin() + i);
+                ESP_LOGD(TAG, "remove node %s (s:%d)", animation, layerV[0]->nodes.size());
+                return true;
+            }
         }
         return false;
     }

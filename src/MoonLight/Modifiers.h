@@ -19,6 +19,7 @@ class MultiplyModifier: public Node {
   void modifyPixelsPre() override {
     layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
     originalSize = layerV->size;
+    ESP_LOGD(TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPixel(Coord3D &pixel) override {
@@ -43,18 +44,16 @@ class MirrorModifier: public Node {
 
   void getControls(JsonArray controls) override {
     JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "mirrorX"; control["type"] = "Checkbox"; control["value"] = mirrorX;
-    control = controls.add<JsonObject>(); control["name"] = "mirrorY"; control["type"] = "Checkbox"; control["value"] = mirrorY;
-    control = controls.add<JsonObject>(); control["name"] = "mirrorZ"; control["type"] = "Checkbox"; control["value"] = mirrorZ;
+    control = controls.add<JsonObject>(); control["name"] = "mirrorX"; control["type"] = "checkbox"; control["default"] = true; control["value"] = mirrorX;
+    control = controls.add<JsonObject>(); control["name"] = "mirrorY"; control["type"] = "checkbox"; control["default"] = false; control["value"] = mirrorY;
+    control = controls.add<JsonObject>(); control["name"] = "mirrorZ"; control["type"] = "checkbox"; control["default"] = false; control["value"] = mirrorZ;
   }
   
-  void setControls(JsonArray controls) override {
-    ESP_LOGD(TAG, "%s", controls[0].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[1].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[2].as<String>().c_str());
-    mirrorX = controls[0]["value"];
-    mirrorY = controls[1]["value"];
-    mirrorZ = controls[2]["value"];
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "mirrorX") mirrorX = control["value"];
+    if (control["name"] == "mirrorY") mirrorY = control["value"];
+    if (control["name"] == "mirrorZ") mirrorZ = control["value"];
   }
 
   void modifyPixelsPre() override {
@@ -62,6 +61,7 @@ class MirrorModifier: public Node {
     if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
     if (mirrorZ) layerV->size.z = (layerV->size.z + 1) / 2;
     originalSize = layerV->size;
+    ESP_LOGD(TAG, "mirror %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPixel(Coord3D &pixel) override {
@@ -82,24 +82,20 @@ class PinwheelModifier: public Node {
 
   void getControls(JsonArray controls) override {
     JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "petals"; control["type"] = "Range"; control["value"] = petals;
-    control = controls.add<JsonObject>(); control["name"] = "swirlVal"; control["type"] = "Range"; control["value"] = swirlVal;
-    control = controls.add<JsonObject>(); control["name"] = "reverse"; control["type"] = "Checkbox"; control["value"] = reverse;
-    control = controls.add<JsonObject>(); control["name"] = "symmetry"; control["type"] = "Range"; control["value"] = symmetry;
-    control = controls.add<JsonObject>(); control["name"] = "zTwist"; control["type"] = "Range"; control["value"] = zTwist;
+    control = controls.add<JsonObject>(); control["name"] = "petals"; control["type"] = "range"; control["default"] = 60; control["value"] = petals;
+    control = controls.add<JsonObject>(); control["name"] = "swirlVal"; control["type"] = "range"; control["default"] = 30; control["value"] = swirlVal;
+    control = controls.add<JsonObject>(); control["name"] = "reverse"; control["type"] = "checkbox"; control["default"] = false; control["value"] = reverse;
+    control = controls.add<JsonObject>(); control["name"] = "symmetry"; control["type"] = "range"; control["default"] = 1; control["value"] = symmetry;
+    control = controls.add<JsonObject>(); control["name"] = "zTwist"; control["type"] = "range"; control["default"] = 0; control["value"] = zTwist;
   }
   
-  void setControls(JsonArray controls) override {
-    ESP_LOGD(TAG, "%s", controls[0].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[1].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[2].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[3].as<String>().c_str());
-    ESP_LOGD(TAG, "%s", controls[4].as<String>().c_str());
-    petals = controls[0]["value"];
-    swirlVal = controls[1]["value"];
-    reverse = controls[2]["value"];
-    symmetry = controls[3]["value"];
-    zTwist = controls[4]["value"];
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "petals") petals = control["value"];
+    if (control["name"] == "swirlVal") swirlVal = control["value"];
+    if (control["name"] == "reverse") reverse = control["value"];
+    if (control["name"] == "symmetry") symmetry = control["value"];
+    if (control["name"] == "zTwist") zTwist = control["value"];
   }
   
   void modifyPixelsPre() override {
@@ -114,6 +110,7 @@ class PinwheelModifier: public Node {
     //   layerV->size.y = 1;
     //   layerV->size.z = 1;
     // }
+    ESP_LOGD(TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
 
   }
 

@@ -82,19 +82,20 @@
         <!-- range colors: https://daisyui.com/components/range/ -->
         <input 
             type="range"
-            min={property.min} 
-            max={property.max}
+            min={property.min?property.min:0} 
+            max={property.max?property.max:255}
             step={step}
             class={"range " + (disabled == false ? (property.color=="Red"?"range-error":(property.color=="Green"?"range-success":"range-primary")) : "range-secondary")}
             {disabled}
+            title={property.default}
             bind:value={value}
             on:change={onChange}
         />
         {#if hasNumber}
             <input 
                 type="number"
-                min={property.min} 
-                max={property.max}
+                min={property.min?property.min:0} 
+                max={property.max?property.max:255}
                 step={step}
                 class="input input-bordered"
                 style="height: 2rem; width: 5rem"

@@ -38,7 +38,7 @@ public:
         values.add("Offline");
         values.add("Signal Strength");
         values.add("Priority");
-        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["min"] = 0; property["max"] = 255; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["default"] = 10;
         property = root.add<JsonObject>(); property["name"] = "millis"; property["type"] = "number"; property["ro"] = true;
 
         property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
