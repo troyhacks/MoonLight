@@ -67,20 +67,48 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
         JsonVariant newValue = newData[key.c_str()];
         if (!newValue.isNull() && stateValue != newValue) { //if value changed, don't update if not defined in newValue
 
-            if (depth != UINT8_MAX) {
+            if (depth != UINT8_MAX) { //depth starts with '-1' (no depth)
                 updatedItem.parent[depth] = parent.c_str();
                 updatedItem.index[depth] = index;
+            }
+            for (int i = uint8_t(depth + 1); i < 2; i++) { // reset deeper levels when coming back from recursion
+                updatedItem.parent[i] = "";
+                updatedItem.index[i] = UINT8_MAX;
             }
 
             if (stateValue.is<JsonArray>() || newValue.is<JsonArray>()) { // if the property is an array
                 if (stateValue.isNull()) {stateData[key.c_str()].to<JsonArray>(); stateValue = stateData[key.c_str()];} // if old value is null, set to empty array
-                JsonArray oldArray = stateValue.as<JsonArray>();
+                JsonArray stateArray = stateValue.as<JsonArray>();
                 JsonArray newArray = newValue.as<JsonArray>();
+
+                // ESP_LOGD(TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
                 
-                for (int i = 0; i < max(oldArray.size(), newArray.size()); i++) { //compare each item in the array
-                    if (oldArray.size() < newArray.size()) oldArray.add<JsonObject>(); //add new row
-                    changed = compareRecursive(key, oldArray[i], newArray[i], updatedItem, depth+1, i) || changed;
-                    if (oldArray.size() > newArray.size()) oldArray.remove(i); //remove old row
+                for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) { //compare each item in the array
+                    if (i >= stateArray.size()) { //newArray has added a row
+                        ESP_LOGD(TAG, "add %s%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        stateArray.add<JsonObject>(); //add new row
+                        changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
+                    } else if (i >= newArray.size()) { //newArray has deleted a row
+                        ESP_LOGD(TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        // newArray.add<JsonObject>(); //add dummy row
+                        changed = true; //compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
+                        //set all the values to null
+                        // UpdatedItem updatedItem; //create local updatedItem
+                        updatedItem.parent[(uint8_t)(depth+1)] = key.c_str();
+                        updatedItem.index[(uint8_t)(depth+1)] = i;
+                        for (JsonPair property : stateArray[i].as<JsonObject>()) {
+                            ESP_LOGD(TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
+                            // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
+                            updatedItem.name = property.key().c_str();
+                            updatedItem.oldValue = property.value().as<String>();
+                            updatedItem.value = JsonVariant(); // Assign an empty JsonVariant
+                            stateArray[i].remove(property.key()); //remove the property from the state row so onUpdate see it as empty
+                            if (onUpdate) onUpdate(updatedItem);
+
+                        }
+                        stateArray.remove(i); //remove the state row entirely
+                    } else //row already exists
+                        changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                 }
             } else { // if property is key/value
                 changed = true;

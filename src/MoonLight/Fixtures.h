@@ -10,21 +10,27 @@
 **/
 
 class Panel16fixture: public Node {
-  const char * name() override {return "Panel16";}
+  const char * name() override {return "Panel🚥";}
 
   uint8_t width = 16;
   uint8_t height = 16;
+  bool snake = true;
 
   void getControls(JsonArray controls) override {
+    hasFixDef = true;
     JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 16; control["value"] = width;
-    control = controls.add<JsonObject>(); control["name"] = "height"; control["type"] = "range"; control["default"] = 16; control["value"] = height;
+    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = width;
+    control = controls.add<JsonObject>(); control["name"] = "height"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = height;
+    control = controls.add<JsonObject>(); control["name"] = "snake"; control["type"] = "checkbox"; control["default"] = true; control["value"] = snake;
   }
   
   void setControl(JsonObject control) override {
     ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["width"] == "bpm") width = control["value"];
-    if (control["height"] == "bpm") height = control["value"];
+    if (control["name"] == "width") width = control["value"];
+    if (control["name"] == "height") height = control["value"];
+    if (control["name"] == "snake") snake = control["value"];
+    //if changed run setup
+    setup();
   }
 
   void setup() override {
@@ -33,7 +39,7 @@ class Panel16fixture: public Node {
     layerV->layerP->addPixelsPre();
     for (int x = 0; x<width; x++) {
       for (int y = 0; y<height; y++) {
-        layerV->layerP->addPixel({x, (x%2)?y:height-1-y, 0});
+        layerV->layerP->addPixel({x, (x%2 || !snake)?y:height-1-y, 0});
       }
     }
     layerV->layerP->addPixelsPost();

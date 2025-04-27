@@ -24,9 +24,7 @@ PhysicalLayer::PhysicalLayer() {
         layerV[0]->layerP = this;
     }
 
-    //run one loop of an effect
     bool PhysicalLayer::setup() {
-        //runs the loop of all effects / nodes in the layer, we need to fill the effects in the layer...
         for (VirtualLayer * layer: layerV) {
             layer->setup();
         }
@@ -49,6 +47,9 @@ PhysicalLayer::PhysicalLayer() {
     void PhysicalLayer::addPixelsPre() {
         ESP_LOGD(TAG, "addPixelsPre");
         indexP = 0;
+
+        //calculate physical size (pass1, pass2)
+
         //init mappingtable
         //dealloc pins
 
@@ -106,30 +107,30 @@ PhysicalLayer::PhysicalLayer() {
 
 
     //run one loop of an effect
-    Node* PhysicalLayer::addNode(const char * animation, const char * type) {
+    Node* PhysicalLayer::addNode(const char * animation) {
 
         Node *node = nullptr;
         if (equal(animation, "Solid")) {
             node = new SolidEffect();
-        } else if (equal(animation, "Random")) {
+        } else if (equal(animation, "Random🔥")) {
             node = new RandomEffect();
-        } else if (equal(animation, "Sinelon")) {
+        } else if (equal(animation, "Sinelon🔥")) {
             node = new SinelonEffect();
-        } else if (equal(animation, "Rainbow")) {
+        } else if (equal(animation, "Rainbow🔥")) {
             node = new RainbowEffect();
-        } else if (equal(animation, "Sinus")) {
+        } else if (equal(animation, "Sinus🔥")) {
             node = new SinusEffect();
-        } else if (equal(animation, "Lissajous")) {
+        } else if (equal(animation, "Lissajous🔥")) {
             node = new LissajousEffect();
-        } else if (equal(animation, "Lines")) {
+        } else if (equal(animation, "Lines🔥")) {
             node = new LinesEffect();
-        } else if (equal(animation, "Panel16")) {
+        } else if (equal(animation, "Panel🚥")) {
             node = new Panel16fixture();
-        } else if (equal(animation, "Multiply")) {
+        } else if (equal(animation, "Multiply💎")) {
             node = new MultiplyModifier();
-        } else if (equal(animation, "Mirror")) {
+        } else if (equal(animation, "Mirror💎")) {
             node = new MirrorModifier();
-        } else if (equal(animation, "Pinwheel")) {
+        } else if (equal(animation, "Pinwheel💎")) {
             node = new PinwheelModifier();
         #if FT_LIVESCRIPT
             } else {
@@ -138,7 +139,7 @@ PhysicalLayer::PhysicalLayer() {
         }
 
         if (node) {
-            node->constructor(layerV[0], animation, type); //pass the layer to the node
+            node->constructor(layerV[0], animation); //pass the layer to the node
             node->setup(); //run the setup of the effect
             layerV[0]->nodes.push_back(node); //add the node to the layer
         }

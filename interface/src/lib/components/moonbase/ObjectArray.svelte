@@ -135,10 +135,10 @@
             class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
             onclick={() => {
                 addItem(property.name);
-                onChange();
-
+                
                 //add the new item to the data
                 data[property.name].push(dataEditable);
+                onChange();
                 showEditor = true;
             }}
         >
@@ -171,7 +171,7 @@
                             <div>
                                 <div class="font-bold">{getTimeAgo(data[property.name][index][propertyN.name], currentTime)}</div>
                             </div>
-                        {:else if propertyN.type != "array" && propertyN.type != "password"}
+                        {:else if propertyN.type != "array" && propertyN.type != "controls" && propertyN.type != "password"}
                             <div>
                                 <div class="font-bold">{data[property.name][index][propertyN.name]}</div>
                             </div>

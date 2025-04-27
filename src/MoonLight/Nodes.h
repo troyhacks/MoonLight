@@ -23,14 +23,18 @@ class Node {
 public:
   VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
   const char *animation;
-  const char *scriptType; //fixdef, effect, modifier, ...
+
+  bool hasSetup = false;
+  bool hasLoop = false;
+  bool hasModifier = false;
+  bool hasFixDef = false; //Mapper?
+
   bool on = true;
 
   //C++ constructor and destructor are not inherited, so declare it as normal functions
-  virtual void constructor(VirtualLayer *layerV, const char *animation, const char *scriptType) {
+  virtual void constructor(VirtualLayer *layerV, const char *animation) {
     this->layerV = layerV;
     this->animation = animation;
-    this->scriptType = scriptType;
   }
   virtual void destructor() {
     //delete any allocated memory
@@ -59,6 +63,14 @@ public:
 #if FT_LIVESCRIPT
 class LiveScriptNode: public Node {
   public:
+
+  //controls
+  uint8_t speed = 128;
+  uint8_t intensity = 128;
+  uint8_t custom1 = 128;
+  uint8_t custom2 = 128;
+  uint8_t custom3 = 128;
+
   const char * name() override {return "LiveScriptNode";}
 
   void setup() override;
@@ -72,6 +84,9 @@ class LiveScriptNode: public Node {
   void free();
   void killAndDelete();
   void execute();
+
+  void getControls(JsonArray controls) override;
+  void setControl(JsonObject control) override;
   
 };
 
@@ -80,5 +95,6 @@ class LiveScriptNode: public Node {
 #include "Fixtures.h"
 
 #include "Effects.h"
+#include "EffectsFastLED.h"
 
 #include "Modifiers.h"

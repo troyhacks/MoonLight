@@ -83,7 +83,7 @@ class PhysicalLayer {
 
 
     //run one loop of an effect
-    Node *addNode(const char * animation, const char * type);
+    Node *addNode(const char * animation);
     bool removeNode(const char * animation);
 
     // to be called in setup, if more then one effect

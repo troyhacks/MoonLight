@@ -17,6 +17,8 @@ class MultiplyModifier: public Node {
   Coord3D originalSize;
 
   void modifyPixelsPre() override {
+    hasModifier = true;
+
     layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
     originalSize = layerV->size;
     ESP_LOGD(TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
@@ -43,6 +45,7 @@ class MirrorModifier: public Node {
   Coord3D originalSize;
 
   void getControls(JsonArray controls) override {
+    hasModifier = true;
     JsonObject control;
     control = controls.add<JsonObject>(); control["name"] = "mirrorX"; control["type"] = "checkbox"; control["default"] = true; control["value"] = mirrorX;
     control = controls.add<JsonObject>(); control["name"] = "mirrorY"; control["type"] = "checkbox"; control["default"] = false; control["value"] = mirrorY;
@@ -81,6 +84,7 @@ class PinwheelModifier: public Node {
   uint8_t zTwist   = 0;
 
   void getControls(JsonArray controls) override {
+    hasModifier = true;
     JsonObject control;
     control = controls.add<JsonObject>(); control["name"] = "petals"; control["type"] = "range"; control["default"] = 60; control["value"] = petals;
     control = controls.add<JsonObject>(); control["name"] = "swirlVal"; control["type"] = "range"; control["default"] = 30; control["value"] = swirlVal;

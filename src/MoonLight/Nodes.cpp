@@ -121,6 +121,12 @@ void LiveScriptNode::setup() {
   addExternal("uint16_t height", &layerV->size.y);
   addExternal("uint16_t depth", &layerV->size.z);
 
+  //controls
+  addExternal("uint8_t speed", &speed);
+  addExternal("uint8_t intensity", &intensity);
+  addExternal("uint8_t custom1", &custom1);
+  addExternal("uint8_t custom2", &custom2);
+  addExternal("uint8_t custom3", &custom3);
 
   for (asm_external el: external_links) {
       ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
@@ -136,7 +142,7 @@ void LiveScriptNode::compileAndRun() {
 
   //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
   // runInLoopTask.push_back([&, animation, type, error] {
-      ESP_LOGD(TAG, "%s %s", animation, scriptType);
+      ESP_LOGD(TAG, "%s", animation);
       File file = ESPFS.open(animation);
       if (file) {
         Char<32> pre;
@@ -146,15 +152,17 @@ void LiveScriptNode::compileAndRun() {
           scScript += file.readString().c_str();
           file.close();
 
-          const char * post = "";
-          if (scScript.find("loop") != std::string::npos) { //effect
-              post = "void main(){setup();while(2>1){loop();sync();}}"; //;
-          } else if (scScript.find("modifyPixel") != std::string::npos) { //modifier
-              post = "void main(){setup();}";
-          } else
-              post = "void main(){addPixelsPre();setup();addPixelsPost();}"; //fixdef
+          if (scScript.find("setup(") != std::string::npos) hasSetup = true;
+          if (scScript.find("loop(") != std::string::npos) hasLoop = true;
+          if (scScript.find("addPixel(") != std::string::npos) hasFixDef = true;
+          if (scScript.find("modifyPixel(") != std::string::npos) hasModifier = true;
 
-          scScript += post;
+          scScript += "void main(){";
+          if (hasFixDef) scScript += "addPixelsPre();";
+          if (hasSetup) scScript += "setup();";
+          if (hasFixDef) scScript += "addPixelsPost();";
+          if (hasLoop) scScript += "while(2>1){loop();sync();}";
+          scScript += "}";
 
           ESP_LOGD(TAG, "script %s", scScript.c_str());
 
@@ -197,22 +205,20 @@ void LiveScriptNode::kill() {
 }
 
 void LiveScriptNode::execute() {
-    ESP_LOGD(TAG, "%s %s", animation, scriptType);
-    if (equal(scriptType, "Fixture definition")) {
-        // executable.execute("main"); //background task (async - vs sync)
-        scriptRuntime.execute(animation, "main"); //background task (async - vs sync)
-        // pass = 1;
-        // liveM->executeTask(liveFixtureID, "c");
-        // pass = 2;
-        // liveM->executeTask(liveFixtureID, "c");
-    }
-    if (equal(scriptType, "Effect")) {
+    ESP_LOGD(TAG, "%s", animation);
+    if (hasLoop) {
         // setup : create controls
         // executable.execute("setup"); 
         // send controls to UI
         // executable.executeAsTask("main"); //background task (async - vs sync)
         scriptRuntime.executeAsTask(animation, "main"); //background task (async - vs sync)
         //assert failed: xEventGroupSync event_groups.c:228 (uxBitsToWaitFor != 0)
+    } else {
+        scriptRuntime.execute(animation, "main"); //background task (async - vs sync)
+        // pass = 1;
+        // liveM->executeTask(liveFixtureID, "c");
+        // pass = 2;
+        // liveM->executeTask(liveFixtureID, "c");
     }
 }
 
@@ -255,5 +261,25 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
         // ESP_LOGD(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
     }
 }
+
+void LiveScriptNode::getControls(JsonArray controls)  {
+    JsonObject control;
+    control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "range"; control["default"] = 128; control["value"] = speed;
+    control = controls.add<JsonObject>(); control["name"] = "intensity"; control["type"] = "range"; control["default"] = 128; control["value"] = intensity;
+    control = controls.add<JsonObject>(); control["name"] = "custom1"; control["type"] = "checkbox"; control["default"] = 128; control["value"] = custom1;
+    control = controls.add<JsonObject>(); control["name"] = "custom2"; control["type"] = "checkbox"; control["default"] = 128; control["value"] = custom3;
+    control = controls.add<JsonObject>(); control["name"] = "custom3"; control["type"] = "checkbox"; control["default"] = 128; control["value"] = custom2;
+  }
+  
+  void LiveScriptNode::setControl(JsonObject control)  {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "speed") speed = control["value"];
+    if (control["name"] == "intensity") intensity = control["value"];
+    if (control["name"] == "custom1") custom1 = control["value"];
+    if (control["name"] == "custom2") custom2 = control["value"];
+    if (control["name"] == "custom3") custom3 = control["value"];
+    //if changed run setup
+    setup();
+  }
 
 #endif

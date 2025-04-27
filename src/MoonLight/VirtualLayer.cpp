@@ -73,7 +73,8 @@ uint16_t VirtualLayer::XYZ(Coord3D &pixel) {
 
   //modifiers
   for (Node *node: nodes) { //e.g. random or scrolling or rotate modifier
-    node->modifyXYZ(pixel); //modifies the pixel
+    if (node->hasModifier && node->on)
+      node->modifyXYZ(pixel); //modifies the pixel
   }
 
   return XYZUnprojected(pixel);
@@ -241,7 +242,8 @@ void VirtualLayer::addPixelsPre() {
 
   //modifiers
   for (Node *node: nodes) {
-    node->modifyPixelsPre();
+    if (node->hasModifier && node->on)
+      node->modifyPixelsPre();
   }
 }
 
@@ -249,7 +251,8 @@ void VirtualLayer::addPixel(Coord3D pixel) {
 
   //modifiers
   for (Node *node: nodes) {
-    node->modifyPixel(pixel);
+    if (node->hasModifier && node->on)
+      node->modifyPixel(pixel);
   }
 
   uint16_t indexV = XYZUnprojected(pixel);
@@ -288,6 +291,6 @@ void VirtualLayer::addPixelsPost() {
     //   ESP_LOGD(TAG, "%d no mapping\n", x);
   }
 
-  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d +  1:%d + m:%d (p:%d)", size.x, size.y, size.z, nrOfLeds, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
+  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d + 1:%d + m:%d (p:%d)", size.x, size.y, size.z, nrOfLeds, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
 
 }

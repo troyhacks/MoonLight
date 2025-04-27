@@ -90,17 +90,17 @@ public:
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
-            values.add("Solid");
-            values.add("Random");
-            values.add("Sinelon");
-            values.add("Rainbow");
-            values.add("Sinus");
-            values.add("Lissajous");
-            values.add("Lines");
-            values.add("Panel16");
-            values.add("Multiply");
-            values.add("Mirror");
-            values.add("Pinwheel");
+            values.add("Solid🔥");
+            values.add("Random🔥");
+            values.add("Sinelon🔥");
+            values.add("Rainbow🔥");
+            values.add("Sinus🔥");
+            values.add("Lissajous🔥");
+            values.add("Lines🔥");
+            values.add("Panel🚥");
+            values.add("Multiply💎");
+            values.add("Mirror💎");
+            values.add("Pinwheel💎");
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
@@ -111,15 +111,6 @@ public:
             });
             rootFolder.close();
             property = details.add<JsonObject>(); property["name"] = "on"; property["type"] = "checkbox"; property["default"] = true;
-            property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Effect"; values = property["values"].to<JsonArray>();
-            values.add("Fixture definition");
-            values.add("Fixture mapping");
-            values.add("Effect");
-            values.add("Modifier");
-            values.add("Driver show");
-            #if FT_ENABLED(FT_LIVESCRIPT)
-                property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
-            #endif
             property = details.add<JsonObject>(); property["name"] = "controls"; property["type"] = "controls"; details = property["n"].to<JsonArray>();
             {
                 property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "speed";
@@ -155,7 +146,7 @@ public:
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (equal(updatedItem.name, "pin") || equal(updatedItem.name, "red") || equal(updatedItem.name, "green") || equal(updatedItem.name, "blue")) {
-            ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
             //addLeds twice is temp hack to make rgb sliders work
             switch (_state.data["pin"].as<int>()) {
@@ -174,31 +165,55 @@ public:
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
             ESP_LOGD(TAG, "FastLED.addLeds n:%d", layerP.nrOfLeds);
         } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
-            ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
 
         // handle nodes
-        } else if (equal(updatedItem.parent[0], "nodes")) {
-            JsonVariant node = _state.data["nodes"][updatedItem.index[0]];
+        } else if (equal(updatedItem.parent[0], "nodes")) { // onNodes
+            JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
 
-            if (equal(updatedItem.name, "animation") || equal(updatedItem.name, "type")) {
-                ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    
+            if (equal(updatedItem.name, "animation")) { //onAnimation
+
+                if (updatedItem.oldValue != "null") {
+                    ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    nodeState.remove("controls"); //remove the controls
+                    layerP.removeNode(updatedItem.oldValue.c_str());
+                }
+                
                 // remove or add Nodes (incl controls)
-                if (!node["animation"].isNull() && !node["type"].isNull()) { // if animation changed and type is not empty or type changed and animation not set.
+                if (!nodeState["animation"].isNull()) { // if animation changed // == updatedItem.value
+                    ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     // delete the old animation, create a new one
-                    if (updatedItem.oldValue != "null") {
-                        layerP.removeNode(updatedItem.oldValue.c_str());
-                    }
+                    // if (updatedItem.oldValue != "null") {
+                    //     layerP.removeNode(updatedItem.oldValue.c_str());
+                    // }
     
-                    node["controls"].to<JsonArray>(); //clear the controls
-                    Node *nodeClass = layerP.addNode(node["animation"], node["type"]); // fill the layers and effects ...
-                    nodeClass->getControls(node["controls"]);
-    
+                    Node *nodeClass = layerP.addNode(nodeState["animation"]); // fill the layers and effects ...
+                    
+                    nodeState["controls"].to<JsonArray>(); //clear the controls
+                    nodeClass->getControls(nodeState["controls"]); //create the controls
                     //show these controls in the UI
                     JsonObject object = _state.data.as<JsonObject>();
                     _socket->emitEvent("animations", object);
+
+                    //if node is modifier, rerun fixture definition
+                    if (nodeClass->hasModifier) {
+                        for (Node *node : layerP.layerV[0]->nodes) {
+                            if (node->hasFixDef && node->on) {
+                                ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                                node->setup();
+                            }
+                        }
+                    }
                 }
+
+                // if (nodeState["animation"].isNull()) {
+                //     ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                //     // delete the old animation
+                //     if (updatedItem.oldValue != "null") {
+                //         layerP.removeNode(updatedItem.oldValue.c_str());
+                //     }
+                // }
     
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     // if (updatedItem.oldValue.length()) {
@@ -215,36 +230,56 @@ public:
                 #endif
             }
             if (equal(updatedItem.name, "on")) {
-                Node * nodeClass = findNode(node["animation"]);
-                if (nodeClass)
+                Node * nodeClass = findNode(nodeState["animation"]);
+                if (nodeClass) {
                     nodeClass->on = updatedItem.value.as<bool>();
-            }
-
-            if (equal(updatedItem.parent[1], "controls") && equal(updatedItem.name, "value")) {    //process controls values 
-                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    
-                Node * nodeClass = findNode(node["animation"]);
-                if (nodeClass) nodeClass->setControl(node["controls"][updatedItem.index[1]]); //to do only send the changed control
-                else ESP_LOGW(TAG, "nodeClass not found %s", node["animation"].as<String>().c_str());
-    
-                // if Modfier control changed, rerun the fixture definition
-                ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
-                if (equal(nodeClass->scriptType, "Modifier")) {
-                    for (Node *node : layerP.layerV[0]->nodes) {
-                        if (equal(node->scriptType, "Fixture definition")) {
-                            ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
-                            node->setup();
+                    if (nodeClass->hasModifier) {
+                        for (Node *node : layerP.layerV[0]->nodes) {
+                            if (node->hasFixDef && node->on) {
+                                ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                                node->setup();
+                            }
                         }
+                    }
+                    if (nodeClass->hasFixDef && !nodeClass->on) {
+                        //if fixdef has been set to off, remove the mapping
                     }
                 }
             }
+
+            if (equal(updatedItem.parent[1], "controls") && equal(updatedItem.name, "value")) {    //process controls values 
+                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    
+                Node * nodeClass = findNode(nodeState["animation"]);
+                if (nodeClass) {
+                    nodeClass->setControl(nodeState["controls"][updatedItem.index[1]]); //to do only send the changed control
+                    // if Modfier control changed, rerun the fixture definition
+                    // find nodes which implement the Modifier interface
+                    // find nodes which implement ModifyPixelsPre and ModifyPixel
+                    // if this nodes implements ModifyPixelsPre and ModifyPixel then rerun fixdef setup
+
+                    // ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
+                    if (nodeClass->hasModifier) {
+                        for (Node *node : layerP.layerV[0]->nodes) {
+                            if (node->hasFixDef && node->on) {
+                                ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                                node->setup();
+                            }
+                        }
+                    }
+                }
+                else ESP_LOGW(TAG, "nodeClass not found %s", nodeState["animation"].as<String>().c_str());
+    
+            }
             // end Nodes
+
+        //scripts
         } else if (equal(updatedItem.parent[0], "scripts")) {    
-            JsonVariant script = _state.data["scripts"][updatedItem.index[0]];
-            ESP_LOGD(TAG, "handle %s[%d]%s.%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], script["name"].as<String>().c_str(), updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             #if FT_ENABLED(FT_LIVESCRIPT)
                 if (updatedItem.oldValue != "null") {//do not run at boot!
-                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)findNode(script["name"]);
+                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)findNode(scriptState["name"]);
                     if (liveScriptNode) {
                         if (equal(updatedItem.name, "stop"))
                             liveScriptNode->kill();
@@ -255,12 +290,12 @@ public:
                         if (equal(updatedItem.name, "delete"))
                             liveScriptNode->killAndDelete();
                         // updatedItem.value = 0;
-                    } else ESP_LOGW(TAG, "liveScriptNode not found %s", script["name"].as<String>().c_str());
+                    } else ESP_LOGW(TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
                 }
             #endif
         } 
         // else
-                // ESP_LOGD(TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"", updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //run effects
