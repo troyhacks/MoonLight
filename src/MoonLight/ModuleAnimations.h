@@ -146,7 +146,7 @@ public:
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (equal(updatedItem.name, "pin") || equal(updatedItem.name, "red") || equal(updatedItem.name, "green") || equal(updatedItem.name, "blue")) {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
             //addLeds twice is temp hack to make rgb sliders work
             switch (_state.data["pin"].as<int>()) {
@@ -165,7 +165,7 @@ public:
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
             ESP_LOGD(TAG, "FastLED.addLeds n:%d", layerP.nrOfLeds);
         } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
 
         // handle nodes
@@ -175,7 +175,7 @@ public:
             if (equal(updatedItem.name, "animation")) { //onAnimation
 
                 if (updatedItem.oldValue != "null") {
-                    ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     nodeState.remove("controls"); //remove the controls
                     layerP.removeNode(updatedItem.oldValue.c_str());
                 }
@@ -208,7 +208,7 @@ public:
                 }
 
                 // if (nodeState["animation"].isNull()) {
-                //     ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                //     ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 //     // delete the old animation
                 //     if (updatedItem.oldValue != "null") {
                 //         layerP.removeNode(updatedItem.oldValue.c_str());
@@ -248,7 +248,7 @@ public:
             }
 
             if (equal(updatedItem.parent[1], "controls") && equal(updatedItem.name, "value")) {    //process controls values 
-                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     
                 Node * nodeClass = findNode(nodeState["animation"]);
                 if (nodeClass) {
@@ -276,7 +276,7 @@ public:
         //scripts
         } else if (equal(updatedItem.parent[0], "scripts")) {    
             JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             #if FT_ENABLED(FT_LIVESCRIPT)
                 if (updatedItem.oldValue != "null") {//do not run at boot!
                     LiveScriptNode *liveScriptNode = (LiveScriptNode *)findNode(scriptState["name"]);
@@ -295,7 +295,7 @@ public:
             #endif
         } 
         // else
-            // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //run effects

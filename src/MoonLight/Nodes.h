@@ -95,6 +95,6 @@ class LiveScriptNode: public Node {
 #include "Fixtures.h"
 
 #include "Effects.h"
-#include "EffectsFastLED.h"
+// #include "EffectsFastLED.h"
 
 #include "Modifiers.h"
