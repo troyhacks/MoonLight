@@ -14,9 +14,9 @@
 	<div class="card md:card-side bg-base-200 shadow-primary shadow-2xl">
 		<figure class="bg-base-200"><img src={logo} alt="Logo" class="h-auto w-64" /></figure>
 		<div class="card-body w-80">
-			<h2 class="card-title text-center text-2xl">Welcome to MoonBase</h2>
+			<h2 class="card-title text-center text-2xl">Welcome to MoonLight</h2>
 			<p class="py-6 text-center">
-				MoonBase is a fork of ESP32-SvelteKit and add Files, Modules and much more, ready to flash on ESP32 devices.
+				MoonLight is a fork of ESP32-SvelteKit and add Files, Modules, Light control and much more, ready to flash on ESP32 devices.
 				We can be found on 
 				<a
 					href="https://discord.gg/TC8NSUSCdV"
