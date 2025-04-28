@@ -12,7 +12,7 @@ export const load = (async ({ fetch }) => {
 	return {
 		features: item,
 		title: 'MoonLight',
-		github: 'ewowi/MoonLight',
+		github: 'MoonModules/MoonLight',
 		copyright: '2025 MoonModules⚖️GPLv3',
 		appName: 'MoonLight',
 		instances: instancesJson

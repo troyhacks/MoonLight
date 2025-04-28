@@ -8,17 +8,17 @@ hide:
 
 <img width="500" src="https://github.com/user-attachments/assets/de0ab735-d547-462e-b7e3-c3f819bf9283" />
 
-* [MoonLight](https://github.com/ewowi/MoonLight) is a [MoonModules](https://moonmodules.org) project.
+* [MoonLight](https://github.com/MoonModules/MoonLight) is a [MoonModules](https://moonmodules.org) project.
 * MoonLight consist of 2 'Features': MoonBase and MoonLight
 * MoonBase = [ESP32 SvelteKit](https://github.com/theelims/ESP32-sveltekit) + [ESPLiveScript]([https://github.com/hpwit/StarLight/tree/StarAsAService](https://github.com/hpwit/ESPLiveScript)) + [StarBase](https://github.com/ewoudwijma/StarBase).
 * MoonLight = MoonBase + [StarLight as a Service](https://github.com/ewowi/StarLight/tree/StarAsAService). 
 * Discuss on [Discord/MoonLight](https://discord.gg/TC8NSUSCdV).
-* **ewowi/MoonLight is the current work in progress repo**, see [Star-Mod-Base-Light-Moon-Svelte-Live](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live). 
+* **MoonModules/MoonLight is the current work in progress repo**, see [Star-Mod-Base-Light-Moon-Svelte-Live](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live). 
 * Work in progress is shown in the [Kanban board](https://github.com/users/MoonModules/projects/2). You are more then welcome to add issues, comment on issues or help with issues.
 * See also [ESP32-sveltekit POC](https://github.com/theelims/ESP32-sveltekit/issues/68)
-* Documentation see [MoonLightDocs](https://ewowi.github.io/MoonLight/).
+* Documentation see [MoonLightDocs](https://moonmodules.org/MoonLight/).
 
-[Release 0.5.2](https://github.com/ewowi/MoonLight/releases/tag/v0.5.2) (Jan 21, 2025): 
+[Release 0.5.2](https://github.com/MoonModules/MoonLight/releases/tag/v0.5.2) (Jan 21, 2025): 
 
 <img src="https://github.com/user-attachments/assets/c655d610-53eb-4dd3-8e9e-0cfa23b97bb4"/>
 

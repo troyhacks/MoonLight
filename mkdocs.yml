@@ -41,8 +41,8 @@ site_description: >-
   MoonLight is a fork of ESP32-SvelteKit and add Files, Modules, Light control and much more, ready to flash on ESP32 devices. This is a MoonModules.org project.
 
 # Repository
-repo_name: ewowi/MoonLight
-repo_url: https://github.com/ewowi/MoonLight
+repo_name: MoonModules/MoonLight
+repo_url: https://github.com/MoonModules/MoonLight
 
 theme:
   name: material

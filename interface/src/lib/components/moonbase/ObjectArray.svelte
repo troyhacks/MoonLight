@@ -1,8 +1,8 @@
 <!--
    @title     MoonBase
    @file      MultiInput.svelte
-   @repo      https://github.com/ewowi/MoonLight, submit changes to this file as PRs
-   @Authors   https://github.com/ewowi/MoonLight/commits/main
+   @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
+   @Authors   https://github.com/MoonModules/MoonLight/commits/main
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com

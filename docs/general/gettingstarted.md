@@ -4,7 +4,7 @@
 
 * Open GitKraken Press + / New tab and select Clone a Repo (Or another git management tool)
 * Select the folder on your local drive where to copy to (e.g. /github/ewowi)
-* Copy [MoonLight.git](https://github.com/ewowi/MoonLight.git) and paste in the URL field of GitKraken
+* Copy [MoonLight.git](https://github.com/MoonModules/MoonLight.git) and paste in the URL field of GitKraken
 * Press clone the repo
 * Open VSCode
 * Install the PlatformIO IDE extension
@@ -24,7 +24,7 @@
 
 WIP...
 
-[install](https://github.com/ewowi/MoonLight/blob/main/docs/general/index.html)
+[install](https://github.com/MoonModules/MoonLight/blob/main/docs/general/index.html)
 
 * release 0.5.4, for latest build follow installation developer
 * This is WIP, looks like issue with erasing the board and setting the partitions right ...
@@ -58,7 +58,7 @@ WIP...
     * Create a node, select the 'hardcoded animations' (Random, Sinelon, Rainbow, Sinus), you should see it on your panel
     * Create more nodes with other animations, they will all run at the same time 
 * Live Scripts: Go to MoonBase / Files and create or upload Live scripts.
-    * Examples: [Live scripts](https://github.com/ewowi/MoonLight/tree/main/misc/livescripts)
+    * Examples: [Live scripts](https://github.com/MoonModules/MoonLight/tree/main/misc/livescripts)
     * Back to Animations, select any of the Live scripts you uploaded, check the Led Panel and / or Serial Output for results
     * Open the Edit area and change things in the code, see the Serial Output for results
 
@@ -66,8 +66,8 @@ WIP...
 
 ## Developing
 
-* Read the [ESP32 Sveltekit docs](https://ewowi.github.io/MoonLight/esp32sveltekit/)
-* Read [Customizing Sveltekit](https://ewowi.github.io/MoonLight/general/customizingsveltekit/)
+* Read the [ESP32 Sveltekit docs](https://moonmodules.org/MoonLight/esp32sveltekit/)
+* Read [Customizing Sveltekit](https://moonmodules.org/MoonLight/general/customizingsveltekit/)
 * Instead of cloning the repo directly from MoonLight as described above, create a fork first so you have your own environment to make changes to. See also Pull Requests below.
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
 * Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.
@@ -77,7 +77,7 @@ WIP...
 * Want to make changes: fork the repo and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
 
     * Login to your own github account
-    * Fork: go to [ewowi/MoonLight](https://github.com/ewowi/MoonLight/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonLight
+    * Fork: go to [MoonModules/MoonLight](https://github.com/MoonModules/MoonLight/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonLight
     * Press Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
       
       <img width="90" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
