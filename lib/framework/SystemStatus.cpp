@@ -30,6 +30,9 @@
 #elif CONFIG_IDF_TARGET_ESP32C6
 #include "esp32c6/rom/rtc.h"
 #define ESP_PLATFORM "ESP32-C6";
+#elif CONFIG_IDF_TARGET_ESP32P4
+#include "esp32p4/rom/rtc.h"
+#define ESP_PLATFORM "ESP32-P4";
 #else
 #error Target CONFIG_IDF_TARGET is not supported
 #endif
@@ -142,7 +145,11 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
     root["fs_total"] = ESPFS.totalBytes();
     root["fs_used"] = ESPFS.usedBytes();
     root["core_temp"] = temperatureRead();
-    root["cpu_reset_reason"] = verbosePrintResetReason(rtc_get_reset_reason(0));
+    #if CONFIG_IDF_TARGET_ESP32P4
+        root["cpu_reset_reason"] = verbosePrintResetReason(esp_rom_get_reset_reason(0));
+    #else
+        root["cpu_reset_reason"] = verbosePrintResetReason(rtc_get_reset_reason(0));
+    #endif
     root["uptime"] = millis() / 1000;
 
     return response.send();
