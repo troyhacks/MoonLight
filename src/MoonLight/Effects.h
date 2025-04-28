@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#if FT_MOONLIGHT
+
 class SolidEffect: public Node {
   public:
 
@@ -212,3 +214,5 @@ public:
     }
   }
 };
+
+#endif

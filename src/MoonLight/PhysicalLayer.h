@@ -11,6 +11,8 @@
 
 #pragma once
 
+#if FT_MOONLIGHT
+
 #undef TAG
 #define TAG "💫"
 
@@ -90,3 +92,5 @@ class PhysicalLayer {
     void initPixelsToBlend();
 
 };
+
+#endif //FT_MOONLIGHT

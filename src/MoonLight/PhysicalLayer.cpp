@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#if FT_MOONLIGHT
+
 #include "PhysicalLayer.h"
 
 #include "VirtualLayer.h"
@@ -173,3 +175,5 @@ PhysicalLayer::PhysicalLayer() {
         for (uint16_t indexP = 0; indexP < pixelsToBlend.size(); indexP++)
           pixelsToBlend[indexP] = false;
     }
+
+#endif //FT_MOONLIGHT

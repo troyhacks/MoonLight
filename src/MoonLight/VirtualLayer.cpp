@@ -9,6 +9,7 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#if FT_MOONLIGHT
 
 #include "VirtualLayer.h"
 #include "PhysicalLayer.h"
@@ -294,3 +295,5 @@ void VirtualLayer::addPixelsPost() {
   ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d + 1:%d + m:%d (p:%d)", size.x, size.y, size.z, nrOfLeds, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
 
 }
+
+#endif //FT_MOONLIGHT

@@ -11,6 +11,8 @@
 
 #pragma once
 
+#if FT_MOONLIGHT
+
 #include <Arduino.h>
 #include <vector>
 #include <FastLED.h>
@@ -107,3 +109,5 @@ class VirtualLayer {
     void addPixelsPost();
 
 };
+
+#endif

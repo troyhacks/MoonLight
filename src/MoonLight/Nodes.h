@@ -11,6 +11,8 @@
 
 #pragma once
 
+#if FT_MOONLIGHT
+
 #define _1D 1
 #define _2D 2
 #define _3D 3
@@ -98,3 +100,5 @@ class LiveScriptNode: public Node {
 // #include "EffectsFastLED.h"
 
 #include "Modifiers.h"
+
+#endif //FT_MOONLIGHT

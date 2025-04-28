@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#if FT_MOONLIGHT
+
 class Panel16fixture: public Node {
   const char * name() override {return "Panel🚥";}
 
@@ -45,3 +47,5 @@ class Panel16fixture: public Node {
     layerV->layerP->addPixelsPost();
   }
 };
+
+#endif //FT_MOONLIGHT

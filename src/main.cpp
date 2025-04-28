@@ -127,7 +127,9 @@ void loop()
         if (millis() - lastTime50ms > 50)
         {
             lastTime50ms = millis();
-            moduleAnimations.loop50ms();
+            #if FT_ENABLED(FT_MOONLIGHT)
+                moduleAnimations.loop50ms();
+            #endif
             
             //1s loop
             static int lastTime1s = 0;
@@ -135,7 +137,9 @@ void loop()
             {
                 lastTime1s = millis();
                 moduleInstances.loop1s();
-                moduleAnimations.loop1s();
+                #if FT_ENABLED(FT_MOONLIGHT)
+                    moduleAnimations.loop1s();
+                #endif
                 moduleDemo.loop1s();
 
                 //10s loop

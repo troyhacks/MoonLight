@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#if FT_MOONLIGHT
+
 class MultiplyModifier: public Node {
   const char * name() override {return "Multiply";}
 
@@ -149,3 +151,5 @@ class PinwheelModifier: public Node {
     // ppf("pixel %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", pixel.x, pixel.y, pixel.z, mapped.x, mapped.y, mapped.z, angle, value);
   }
 };
+
+#endif
