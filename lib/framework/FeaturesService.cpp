@@ -114,11 +114,25 @@ void FeaturesService::createJSON(JsonObject &root)
         root[element.feature.c_str()] = element.enabled;
     }
     
-    //Custom
+    //🌙
     #if FT_ENABLED(FT_MOONBASE)
         root["moonbase"] = true;
+
+        //💫
         #if FT_ENABLED(FT_MOONLIGHT)
             root["moonlight"] = true;
+
+            #if FT_ENABLED(FT_LIVESCRIPT)
+                root["livescript"] = true;
+            #else
+                root["livescript"] = false;
+            #endif
+            
+            #if FT_ENABLED(FT_MONITOR)
+                root["monitor"] = true;
+            #else
+                root["monitor"] = false;
+            #endif
         #else
             root["moonlight"] = false;
         #endif
@@ -126,9 +140,4 @@ void FeaturesService::createJSON(JsonObject &root)
         root["moonbase"] = false;
     #endif
 
-    #if FT_ENABLED(FT_LIVESCRIPT)
-        root["livescript"] = true;
-    #else
-        root["livescript"] = false;
-    #endif
 }

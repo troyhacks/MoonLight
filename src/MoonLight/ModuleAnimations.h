@@ -64,7 +64,9 @@ public:
             });
         #endif
 
-        // _socket->registerEvent("animationsRO");
+        #if FT_ENABLED(FT_MONITOR)
+            _socket->registerEvent("monitor");
+        #endif
     }
 
     //define the data model
@@ -86,6 +88,10 @@ public:
         property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = 2; values = property["values"].to<JsonArray>();
         values.add("2");
         values.add("16");
+
+        #if FT_ENABLED(FT_MONITOR)
+            property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
+        #endif
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -312,6 +318,17 @@ public:
         }
 
         driverShow();
+    }
+
+    void loop50ms() {
+        #if FT_ENABLED(FT_MONITOR)
+            if (!_socket->getConnectedClients()) return; 
+            static int monitorMillis = 0;
+            if (millis() - monitorMillis >= layerP.nrOfLeds / 12 && _state.data["monitorOn"]) { //max 12000 leds per second -> 1 second for 12000 leds
+                monitorMillis = millis();
+                _socket->emitEvent("monitor", (char *)layerP.leds, MIN(layerP.nrOfLeds, NUM_LEDS) * sizeof(CRGB));// + 3); //3 bytes for type and factor and ...
+            }
+        #endif
     }
 
     //update scripts / read only values in the UI

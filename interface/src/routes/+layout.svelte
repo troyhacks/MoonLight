@@ -20,6 +20,7 @@
 	import type { RSSI } from '$lib/types/models';
 	import type { Battery } from '$lib/types/models';
 	import type { DownloadOTA } from '$lib/types/models';
+	import Monitor from './moonbase/monitor/Monitor.svelte'; // 🌙
 
 	interface Props {
 		data: LayoutData;
@@ -145,6 +146,12 @@
 			<!-- Status bar content here -->
 			<Statusbar />
 
+			<!-- 🌙 Show Monitor Don't show if captive portal -->
+			{#if (!window.location.href.includes("192.168.4.1") && page.data.features.monitor)}
+				<br>
+				<Monitor />
+			{/if}
+		
 			<!-- Main page content here -->
 			{@render children?.()}
 		</div>

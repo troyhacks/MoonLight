@@ -40,7 +40,9 @@ static float _time(float j) {
 }
 
 void sync() {
-    delay(1); //feed the watchdog
+    static uint32_t frameCounter = 0;
+    frameCounter++;
+    delay(1); //feed the watchdog, otherwise watchdog will reset the ESP
 }
 
 void addExternal(string definition, void * ptr) {

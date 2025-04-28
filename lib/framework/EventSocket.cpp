@@ -106,22 +106,6 @@ esp_err_t EventSocket::onFrame(PsychicWebSocketRequest *request, httpd_ws_frame 
 
 void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *originId, bool onlyToSameOrigin)
 {
-    // Only process valid events
-    if (!isEventValid(event))
-    {
-        ESP_LOGW(TAG, "Method tried to emit unregistered event: %s", event.c_str());
-        return;
-    }
-
-    int originSubscriptionId = originId[0] ? atoi(originId) : -1;
-    xSemaphoreTake(clientSubscriptionsMutex, portMAX_DELAY);
-    auto &subscriptions = client_subscriptions[event];
-    if (subscriptions.empty())
-    {
-        xSemaphoreGive(clientSubscriptionsMutex);
-        return;
-    }
-
     JsonDocument doc;
     doc["event"] = event;
     doc["data"] = jsonObject;
@@ -143,13 +127,38 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
     // null terminate the string
     output[len] = '\0';
 
+    emitEvent(event, output, len, originId, onlyToSameOrigin); //🌙
+
+    delete[] output;
+}
+
+//🌙 extracted from above function for FT_MONITOR, which uses char *output
+void EventSocket::emitEvent(String event, char *output, size_t len, const char *originId, bool onlyToSameOrigin)
+{
+    // Only process valid events
+    if (!isEventValid(event))
+    {
+        ESP_LOGW(TAG, "Method tried to emit unregistered event: %s", event.c_str());
+        return;
+    }
+
+    int originSubscriptionId = originId[0] ? atoi(originId) : -1;
+    xSemaphoreTake(clientSubscriptionsMutex, portMAX_DELAY);
+    auto &subscriptions = client_subscriptions[event];
+    if (subscriptions.empty())
+    {
+        xSemaphoreGive(clientSubscriptionsMutex);
+        return;
+    }
+
     // if onlyToSameOrigin == true, send the message back to the origin
     if (onlyToSameOrigin && originSubscriptionId > 0)
     {
         auto *client = _socket.getClient(originSubscriptionId);
         if (client)
         {
-            ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
+            if (event != "monitor")
+            // ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
 #if FT_ENABLED(EVENT_USE_JSON)
             client->sendMessage(HTTPD_WS_TYPE_TEXT, output, len);
 #else
@@ -170,7 +179,8 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
                 subscriptions.remove(subscription);
                 continue;
             }
-            ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
+            if (event != "monitor")
+                ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
 #if FT_ENABLED(EVENT_USE_JSON)
             client->sendMessage(HTTPD_WS_TYPE_TEXT, output, len);
 #else
@@ -179,7 +189,6 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
         }
     }
 
-    delete[] output;
     xSemaphoreGive(clientSubscriptionsMutex);
 }
 
