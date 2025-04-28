@@ -2,9 +2,9 @@
 
 ### Customize UI and app specific
 
-This is a checklist, More info on most of the items can be found in the ESP32-Sveltekit specific documentation [ESP32 SvelteKit](https://ewowi.github.io/MoonBase/esp32sveltekit/), [Build Tools](https://ewowi.github.io/MoonBase/gettingstarted/), [Front end](https://ewowi.github.io/MoonBase/sveltekit/) and [Back End](https://ewowi.github.io/MoonBase/statefulservice/)
+This is a checklist, More info on most of the items can be found in the ESP32-Sveltekit specific documentation [ESP32 SvelteKit](https://ewowi.github.io/MoonLight/esp32sveltekit/), [Build Tools](https://ewowi.github.io/MoonLight/gettingstarted/), [Front end](https://ewowi.github.io/MoonLight/sveltekit/) and [Back End](https://ewowi.github.io/MoonLight/statefulservice/)
 
-* {custom} = MoonBase / MoonLight
+* {custom} = MoonLight or name of a forked repo
 
 * docs/media/
     * add {custom}-logo.png (used in mkdocs.yml)

@@ -1,10 +1,10 @@
 /**
     @title     MoonBase
     @file      Module.cpp
-    @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
-    @Authors   https://github.com/ewowi/MoonBase/commits/main
-    @Doc       https://ewowi.github.io/MoonBase/modules/modules/
-    @Copyright © 2025 Github MoonBase Commit Authors
+    @repo      https://github.com/ewowi/MoonLight, submit changes to this file as PRs
+    @Authors   https://github.com/ewowi/MoonLight/commits/main
+    @Doc       https://ewowi.github.io/MoonLight/modules/modules/
+    @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
@@ -242,7 +242,7 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
     JsonArray details; // if a property is an array, this is the details of the array
     JsonArray values; // if a property is a select, this is the values of the select
 
-    property = root.add<JsonObject>(); property["name"] = "text"; property["type"] = "text"; property["default"] = "MoonBase";
+    property = root.add<JsonObject>(); property["name"] = "text"; property["type"] = "text"; property["default"] = "MoonLight";
 }
 
 void Module::onUpdate(UpdatedItem &updatedItem) {

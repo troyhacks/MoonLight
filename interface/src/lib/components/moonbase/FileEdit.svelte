@@ -1,10 +1,10 @@
 <!--
    @title     MoonBase
    @file      FileEdit.svelte
-   @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
-   @Authors   https://github.com/ewowi/MoonBase/commits/main
-   @Doc       https://ewowi.github.io/MoonBase/components/#fileedit
-   @Copyright © 2025 Github MoonBase Commit Authors
+   @repo      https://github.com/ewowi/MoonLight, submit changes to this file as PRs
+   @Authors   https://github.com/ewowi/MoonLight/commits/main
+   @Doc       https://ewowi.github.io/MoonLight/components/#fileedit
+   @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 

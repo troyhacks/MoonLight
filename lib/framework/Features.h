@@ -62,16 +62,22 @@
 #define EVENT_USE_JSON 0
 #endif
 
-//custom
-
+//🌙
 #ifndef FT_MOONBASE
 #define FT_MOONBASE 1
 #endif
 
+//💫
+#ifndef FT_MONITOR
+#define FT_MONITOR 1
+#endif
+
+//💫
 #ifndef FT_MOONLIGHT
 #define FT_MOONLIGHT 1
 #endif
 
+//💫
 #ifndef FT_LIVESCRIPT
 #define FT_LIVESCRIPT 1
 #endif

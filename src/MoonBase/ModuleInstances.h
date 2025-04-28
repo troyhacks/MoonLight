@@ -1,10 +1,10 @@
 /**
     @title     MoonBase
     @file      ModuleInstances.h
-    @repo      https://github.com/ewowi/MoonBase, submit changes to this file as PRs
-    @Authors   https://github.com/ewowi/MoonBase/commits/main
-    @Doc       https://ewowi.github.io/MoonBase/modules/module/demo/
-    @Copyright © 2025 Github MoonBase Commit Authors
+    @repo      https://github.com/ewowi/MoonLight, submit changes to this file as PRs
+    @Authors   https://github.com/ewowi/MoonLight/commits/main
+    @Doc       https://ewowi.github.io/MoonLight/modules/module/demo/
+    @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
@@ -64,7 +64,7 @@ public:
 
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0]?updatedItem.parent[0]:"---", updatedItem.index[0], updatedItem.parent[1]?updatedItem.parent[1]:"---", updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop1s() {

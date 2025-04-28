@@ -6,20 +6,25 @@
 
 * On: lights on or off
 * Brightness: brightness of the LEDs when on
+* RGB Sliders: control each color seperately.
+* Presets: Control pad style, store or retrieve a set of nodes with their controls. WIP
 * driverOn: sends LED output to ESP32 gpio pins.
     * Switch off to see the effect framerate in System Status/Metrics
     * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 leds, 24 bits is 130 fps theoretically - 120 practically)
 * Pin: Currently only 2 and 16 supported
-* Nodes: One or more processes, can be fixture definitions, mappings, effects or modifiers.
-    * Nodes can have arguments
+* Nodes: One or more processes, 
+    * Can be fixture definitions, effects or modifiers (in theory one node can also be a combination of these)
+    * On/off button defines if a node is active or not
+    * Nodes define their own controls
+    * A node can be a precompiled Node or a livescript (loaded in the file system)
 * Scrips: Running Live scripts (WIP)
-* If a script file is updated (here or in the [File Manager](https://ewowi.github.io/MoonBase/moonbase/files/)) and the file is part of an active node, it will rerun
+* If a script file is updated (here or in the [File Manager](https://ewowi.github.io/MoonLight/moonbase/files/)) and the file is part of an active node, it will rerun
 
 <img width="498" alt="Screenshot 2025-03-29 at 14 12 01" src="https://github.com/user-attachments/assets/3a5a3743-c0a4-4456-96cb-f4abd0d01450" />
 
 ### Scripts
 
-Example scripts can be found in [Live scripts](https://github.com/ewowi/MoonBase/tree/main/misc/livescripts) - WIP
+Example scripts can be found in [Live scripts](https://github.com/ewowi/MoonLight/tree/main/misc/livescripts) - WIP
 
 They represent current state of Live Script processing and will be extended as more functionality will be added.
 
@@ -36,19 +41,18 @@ They represent current state of Live Script processing and will be extended as m
 <img width="500" src="https://github.com/user-attachments/assets/6f76a2d6-fce1-4c72-9ade-ee5fbd056c88" />
 
 * Multiple Nodes can be created (1)
-    * Each node can have properties (compare controls in WLED / StarLight)
-    * Each node can run precompile code or Live scripts (with or without loop) 🚧
+    * Each node can have controls (compare controls in WLED / StarLight) ✅
+    * Each node can run precompile code or Live scripts (with or without loop) ✅
     * Each node has a type:
         * Fixture definition: tell where each pixture is in a 1D/2D/3D physical coordinate space (based on StarLight) ✅
-        * Fixture mapping: change the fixture to a 1D/2D/3D virtual coordinate space
-            * A fixture mapping is for a specific fixture dimension and effect dimension
-            * e.g. if the fixture is a globe, you can map that to 2D using mercator projection mapping
-            * if the fixture is 200x200 you can map it to 50x50
-            * if the fixture is 2D, a 1D effect can be shown as a circle or a bar (as WLED expand1D)
         * Effect: 
             * run an effect in a virtual coordinate space ✅
             * in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings ✅
         * Modifier: Mirror, rotate, etc, multiple modfiers allowed (projection in StarLight) 🚧
+            * A modifier can also map fixture dimensions to effect dimensions: change the fixture to a 1D/2D/3D virtual coordinate space
+                * e.g. if the fixture is a globe, you can map that to 2D using mercator projection mapping
+                * if the fixture is 200x200 you can map it to 50x50
+                * if the fixture is 2D, a 1D effect can be shown as a circle or a bar (as WLED expand1D)
         * Driver show: show the result on Leds (using FastLED, hpwit drivers), ArtNet, DDP, ...
 * Future situation: Nodes and noodles (2)
     * Replace the nodes table (1) by a graphical view (2)
@@ -63,8 +67,8 @@ They represent current state of Live Script processing and will be extended as m
     * Virtual pixels can be 1D, 2D or 3D. Physical pixels also, in any combination
         * Using x + y * sizeX + z * sizeX * sizeY 🚧
     * set/getPixelColor functions used in effects using the MappingTable ✅
-    * Nodes manipulate the MappingTable and/or interfere in the effects loop
-    * A Virtual Layer gets updated if fixture, mapping or dimensions change 🚧
+    * Nodes manipulate the MappingTable and/or interfere in the effects loop 🚧
+    * A Virtual Layer mapping gets updated if fixture, mapping or dimensions change 🚧
     * An effect uses a virtual layer. One Virtual layer can have multiple effects. ✅
 * Physical layer
     * CRGB leds[NUM_LEDS] are physical pixels (as in FASTLED) ✅
@@ -75,8 +79,8 @@ They represent current state of Live Script processing and will be extended as m
 
 ### Server
 
-[ModuleAnimations.h](https://github.com/ewowi/MoonBase/blob/main/src/MoonLight/ModuleAnimations.h)
+[ModuleAnimations.h](https://github.com/ewowi/MoonLight/blob/main/src/MoonLight/ModuleAnimations.h)
 
 ### UI
 
-Generated by [Module.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/moonbase/module/Module.svelte)
+Generated by [Module.svelte](https://github.com/ewowi/MoonLight/blob/main/interface/src/routes/moonbase/module/Module.svelte)

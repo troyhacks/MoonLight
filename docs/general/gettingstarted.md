@@ -3,8 +3,8 @@
 ## Installation - Developer
 
 * Open GitKraken Press + / New tab and select Clone a Repo (Or another git management tool)
-* Select the folder on your local drive where to copy to (e.g. /github/MoonModules)
-* Copy [MoonBase.git](https://github.com/ewowi/MoonBase.git) or [MoonLight.git](https://github.com/MoonModules/MoonLight.git) and paste in the URL field of GitKraken
+* Select the folder on your local drive where to copy to (e.g. /github/ewowi)
+* Copy [MoonLight.git](https://github.com/ewowi/MoonLight.git) and paste in the URL field of GitKraken
 * Press clone the repo
 * Open VSCode
 * Install the PlatformIO IDE extension
@@ -24,7 +24,7 @@
 
 WIP...
 
-[install](https://github.com/ewowi/MoonBase/blob/main/docs/general/index.html)
+[install](https://github.com/ewowi/MoonLight/blob/main/docs/general/index.html)
 
 * release 0.5.4, for latest build follow installation developer
 * This is WIP, looks like issue with erasing the board and setting the partitions right ...
@@ -32,7 +32,7 @@ WIP...
 
 ## Configuration
 
-* In case of a newly flashed board, a Wifi access point (AP) will be created. Go to your Wifi settings on your computer and find the new Wifi AP (starts with MoonBase, MoonLight or ESPSvelteKit)
+* In case of a newly flashed board, a Wifi access point (AP) will be created. Go to your Wifi settings on your computer and find the new Wifi AP (starts with MoonLight)
     * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
 * Connect to the AP (no password needed), a captive portal will show with a welcome screen.
     * There seems to be an issue in the captive portal showing Connection to device lost repeatedly. In that case, close the captive portal and open the app in a brower using 192.168.4.1
@@ -46,9 +46,7 @@ WIP...
     * Alternatively, find the IP by checking your router or by looking at the log in the Serial Monitor (see above)
 * (sometimes it takes a while to load pages for the first time, might be related to caching of javascript, on the issuelist)
 
-## MoonBase specific
-
-At the moment MoonBase is the work in progress repo and temporary also contains LED functionality (MoonLight / Animations), will move later to the MoonLight repo.
+## MoonLight specific
 
 * Connect a 256 leds panel to the board on Pin 2 or 16
   
@@ -60,7 +58,7 @@ At the moment MoonBase is the work in progress repo and temporary also contains 
     * Create a node, select the 'hardcoded animations' (Random, Sinelon, Rainbow, Sinus), you should see it on your panel
     * Create more nodes with other animations, they will all run at the same time 
 * Live Scripts: Go to MoonBase / Files and create or upload Live scripts.
-    * Examples: [Live scripts](https://github.com/ewowi/MoonBase/tree/main/misc/livescripts)
+    * Examples: [Live scripts](https://github.com/ewowi/MoonLight/tree/main/misc/livescripts)
     * Back to Animations, select any of the Live scripts you uploaded, check the Led Panel and / or Serial Output for results
     * Open the Edit area and change things in the code, see the Serial Output for results
 
@@ -68,9 +66,9 @@ At the moment MoonBase is the work in progress repo and temporary also contains 
 
 ## Developing
 
-* Read the [ESP32 Sveltekit docs](https://ewowi.github.io/MoonBase/esp32sveltekit/)
-* Read [Customizing Sveltekit](https://ewowi.github.io/MoonBase/general/customizingsveltekit/)
-* Instead of cloning the repo directly from the MoonBase or MoonLight as described above, create a fork first so you have your own environment to make changes to. See also Pull Requests below.
+* Read the [ESP32 Sveltekit docs](https://ewowi.github.io/MoonLight/esp32sveltekit/)
+* Read [Customizing Sveltekit](https://ewowi.github.io/MoonLight/general/customizingsveltekit/)
+* Instead of cloning the repo directly from MoonLight as described above, create a fork first so you have your own environment to make changes to. See also Pull Requests below.
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
 * Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.
 
@@ -79,14 +77,14 @@ At the moment MoonBase is the work in progress repo and temporary also contains 
 * Want to make changes: fork the repo and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
 
     * Login to your own github account
-    * Fork: go to [ewowi/MoonBase](https://github.com/ewowi/MoonBase/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonBase
+    * Fork: go to [ewowi/MoonLight](https://github.com/ewowi/MoonLight/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonLight
     * Press Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
       
       <img width="90" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
 
     * Go to the file you want to change press edit and make the changes. E.g. change executable.execute("main") to executable.executeAsTask("main")
     * Press Commit Changes..., enter a commit message and an extended description, Press Commit Changes
-    * Go back to the homepage of your fork [myfork/MoonBase](https://github.com/ewoudwijma/MoonBase). There is a message inviting to create a Pull Request. Press Compare & pull request.
+    * Go back to the homepage of your fork [myfork/MoonLight](https://github.com/ewoudwijma/MoonLight). There is a message inviting to create a Pull Request. Press Compare & pull request.
       
       <img width="350" alt="Screenshot 2025-04-15 at 14 59 15" src="https://github.com/user-attachments/assets/410aa517-99eb-4907-b1a3-db7f38abb194" />
   
@@ -95,4 +93,4 @@ At the moment MoonBase is the work in progress repo and temporary also contains 
       
       <img width="350" alt="Screenshot 2025-04-15 at 15 02 33" src="https://github.com/user-attachments/assets/53bc8b2e-a078-46a5-b926-25d581ec8202" />
   
-    * The upstream repo (MoonBase or MoonLight) can now process this PR
+    * The upstream MoonLight repo can now process this PR

@@ -3,7 +3,7 @@
 <img width="300" src="https://github.com/user-attachments/assets/8750fc86-cbde-46ef-9392-9d6810340b52" />
 
 
-MoonBase has made a number of commits which are general purpose and could be added to upstream [ESP32 SvelteKit](https://github.com/theelims/ESP32-sveltekit). Pending changes are ready to add in pull-requests as they are branched from the upstream repo.
+MoonLight has made a number of commits which are general purpose and could be added to upstream [ESP32 SvelteKit](https://github.com/theelims/ESP32-sveltekit). Pending changes are ready to add in pull-requests as they are branched from the upstream repo.
 Below lists are ordered in terms of likelyhood to be accepted:
 
 ## Pending - Ready to PR
@@ -13,21 +13,21 @@ Below lists are ordered in terms of likelyhood to be accepted:
 * ⚠️ [compile-warnings](https://github.com/theelims/ESP32-sveltekit/commit/8a4dc4171c37d04754744f76513c2d2a08b0662d): role and tab index
 * 💡 [service-name-string](https://github.com/theelims/ESP32-sveltekit/commit/05a7bd9a12999e087d0b05a62859d263679cc76a): Allow service names to be non string literals (e.g. done in MoonBase-Modules)
     * ⚠️ [EventSocket emitEvent: use String type](https://github.com/theelims/ESP32-sveltekit/commit/54c4a44eb95be2fe344bb78f022c8afcbbd8c731)
-* ⚠️ [no-emit-no-clients](https://github.com/ewowi/MoonBase/commit/c024c2ff656511c67625b3dce3642d6560724482)
+* ⚠️ [no-emit-no-clients](https://github.com/ewowi/MoonLight/commit/c024c2ff656511c67625b3dce3642d6560724482)
 * 💡 [system-status-metrics](https://github.com/theelims/ESP32-sveltekit/commit/352cfe3e376b25f7470ad4f764cdf54f7069c645): use max instead of first
-* 💡 [help-to-docs](https://github.com/theelims/ESP32-sveltekit/commit/2c2d2fae5c37b220bc61dfb1ba6655485de6547f): Help link to github.io docs e.g. [animations](https://ewowi.github.io/MoonBase/moonbase/module/animations)
-* 💡 [System metrics](https://ewowi.github.io/MoonBase/system/metrics/)
+* 💡 [help-to-docs](https://github.com/theelims/ESP32-sveltekit/commit/2c2d2fae5c37b220bc61dfb1ba6655485de6547f): Help link to github.io docs e.g. [animations](https://ewowi.github.io/MoonLight/moonbase/module/animations)
+* 💡 [System metrics](https://ewowi.github.io/MoonLight/system/metrics/)
     * Loops per second (performance)
-* 💡 [System status](https://ewowi.github.io/MoonBase/system/status/)
+* 💡 [System status](https://ewowi.github.io/MoonLight/system/status/)
     * Loops per second (performance)
 * 💡 [menu-href-unique](https://github.com/theelims/ESP32-sveltekit/commit/92acbd046e478bccf7eec469e0dab5dcda53c0ae): Allow multiple modules using same Module.svelte
 * 💡 [measure-battery-pin](https://github.com/theelims/ESP32-sveltekit/commit/bcd3abd1f981d48d7a76c5ee71fc99f4fe54eb08)
 
 ## Pending - WIP
 
-* [File Manager](https://ewowi.github.io/MoonBase/moonbase/files/)
-* [Instances](https://ewowi.github.io/MoonBase/moonbase/module/instances/)
-* [MoonBase-Modules](https://ewowi.github.io/MoonBase/moonbase/modules/)
+* [File Manager](https://ewowi.github.io/MoonLight/moonbase/files/)
+* [Instances](https://ewowi.github.io/MoonLight/moonbase/module/instances/)
+* [MoonBase-Modules](https://ewowi.github.io/MoonLight/moonbase/modules/)
 
 ## Submitted
 

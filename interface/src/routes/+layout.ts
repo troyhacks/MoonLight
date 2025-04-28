@@ -11,10 +11,10 @@ export const load = (async ({ fetch }) => {
 	const instancesJson = await instances.json();
 	return {
 		features: item,
-		title: 'MoonBase',
-		github: 'ewowi/MoonBase',
+		title: 'MoonLight',
+		github: 'ewowi/MoonLight',
 		copyright: '2025 MoonModules⚖️GPLv3',
-		appName: 'MoonBase',
+		appName: 'MoonLight',
 		instances: instancesJson
 	};
 }) satisfies LayoutLoad;

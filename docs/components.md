@@ -156,6 +156,7 @@ modals.open(ConfirmDialog, {
 
 This modal is based on [svelte-modals](https://svelte-modals.mattjennings.io/) where you can find further information.
 
+🌙
 ## MoonBase components
 
 <img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/>

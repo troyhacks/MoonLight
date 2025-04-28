@@ -17,11 +17,13 @@
 #include <LightStateService.h>
 #include <PsychicHttpServer.h>
 
+// 🌙
 #if FT_ENABLED(FT_MOONBASE)
     #include "MoonBase/FilesService.h"
     #include "MoonBase/ModuleInstances.h"
     #include "MoonBase/ModuleDemo.h"
 
+    // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         #include "MoonLight/ModuleAnimations.h"
     #endif
@@ -32,8 +34,11 @@
 #undef TAG
 #define TAG "🌙"
 
-SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB, otherwise 8K, to allow multiple scripts loaded at boot
-//to do: needed as during boot scripts are run in looptask, later in httpd. Move scripts to same task...
+// 💫 
+#if FT_ENABLED(FT_LIVESCRIPT)
+    SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB, otherwise 8K, to allow multiple scripts loaded at boot
+    //to do: needed as during boot scripts are run in looptask, later in httpd. Move scripts to same task...
+#endif
 
 PsychicHttpServer server;
 
@@ -46,11 +51,13 @@ LightStateService lightStateService = LightStateService(&server,
                                                         &esp32sveltekit,
                                                         &lightMqttSettingsService);
 
+// 🌙
 #if FT_ENABLED(FT_MOONBASE)
     FilesService filesService = FilesService(&server, &esp32sveltekit);
     ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit, &filesService);
     ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
 
+    // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit, &filesService);
     #endif
@@ -61,11 +68,12 @@ void setup()
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
-    // delay(5000); // to capture all the serial output
+    // delay(5000); // 🌙 to capture all the serial output
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
 
+    // 🌙
     #if FT_ENABLED(FT_MOONBASE)
         filesService.begin();
         moduleInstances.begin();
@@ -104,32 +112,43 @@ void setup()
 
 void loop()
 {
-    esp32sveltekit.lps++;
+    esp32sveltekit.lps++; // 🌙
 
+    // 🌙
     #if FT_ENABLED(FT_MOONBASE)
 
+        // 💫
         #if FT_ENABLED(FT_MOONLIGHT)
             moduleAnimations.loop();
         #endif
 
-        //1s loop
-        static int lastTime1s = 0;
-        if (millis() - lastTime1s > 1000)
+        //50ms loop
+        static int lastTime50ms = 0;
+        if (millis() - lastTime50ms > 50)
         {
-            lastTime1s = millis();
-            moduleInstances.loop1s();
-            moduleAnimations.loop1s();
-            moduleDemo.loop1s();
-
-            //10s loop
-            static int lastTime10s = 0;
-            if (millis() - lastTime10s > 10000)
+            lastTime50ms = millis();
+            moduleAnimations.loop50ms();
+            
+            //1s loop
+            static int lastTime1s = 0;
+            if (millis() - lastTime1s > 1000)
             {
-                lastTime10s = millis();
-                moduleInstances.loop10s();
+                lastTime1s = millis();
+                moduleInstances.loop1s();
+                moduleAnimations.loop1s();
+                moduleDemo.loop1s();
+
+                //10s loop
+                static int lastTime10s = 0;
+                if (millis() - lastTime10s > 10000)
+                {
+                    lastTime10s = millis();
+                    moduleInstances.loop10s();
+                }
             }
         }
 
+        // 🌙
         while (!runInLoopTask.empty()) {
             ESP_LOGD(TAG, "Running queued function");
             runInLoopTask.back()(); //calls the last function

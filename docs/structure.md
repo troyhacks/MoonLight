@@ -56,9 +56,10 @@ The menu consists of an array of menu items. These are defined as follows:
 
 <img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/>
 
+
 !!! info 
 
-    Note: In MoonBase matching is not done on title but on href, which is not compared with page.ts title but with page.url.pathname + page.url.search (see Menu.svelte)
+    Note 🌙: In MoonBase matching is not done on title but on href, which is not compared with page.ts title but with page.url.pathname + page.url.search (see Menu.svelte)
 
 A minimum `+page.ts` looks like this:
 

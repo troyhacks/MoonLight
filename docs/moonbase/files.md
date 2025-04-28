@@ -21,12 +21,12 @@
 * confirmDelete: when delete button pressed
 * socket files / handleFileState (->folderListFromBreadCrumbs)
 
-Using component FileEdit, see [Components](https://ewowi.github.io/MoonBase/components/#fileedit)
+Using component FileEdit, see [Components](https://ewowi.github.io/MoonLight/components/#fileedit)
 
 ### Server
 
-[FilesService.h](https://github.com/ewowi/MoonBase/blob/main/src/MoonBase/FilesService.h) and [FilesService.cpp](https://github.com/ewowi/MoonBase/blob/main/src/MoonBase/FilesService.cpp)
+[FilesService.h](https://github.com/ewowi/MoonLight/blob/main/src/MoonBase/FilesService.h) and [FilesService.cpp](https://github.com/ewowi/MoonLight/blob/main/src/MoonBase/FilesService.cpp)
 
 ### UI
 
-[Files.svelte](https://github.com/ewowi/MoonBase/blob/main/interface/src/routes/moonbase/files/Files.svelte)
+[Files.svelte](https://github.com/ewowi/MoonLight/blob/main/interface/src/routes/moonbase/files/Files.svelte)
