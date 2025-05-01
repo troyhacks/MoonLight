@@ -74,12 +74,12 @@ struct Lights {
     byte channels[MAX_CHANNELS];
     MovingHead movingHeads[MAX_CHANNELS / sizeof(MovingHead)];
     CrazyCurtain crazyCurtain[MAX_CHANNELS / sizeof(CrazyCurtain)]; // 6 bytes
-    Coord3D positions[MAX_CHANNELS / sizeof(Coord3D)]; //for lights definition / pass == 1
+    Coord3D positions[MAX_CHANNELS / sizeof(Coord3D)]; //for layout / pass == 1, send positions to monitor / preview
   };
   // std::vector<size_t> universes; //tells at which byte the universe starts
 };
 
-//contains the Lights structure/definition and implements lights definition functions (add*, modify*)
+//contains the Lights structure/definition and implements layout functions (add*, modify*)
 class PhysicalLayer {
 
     public:
@@ -98,10 +98,10 @@ class PhysicalLayer {
 
     
     uint8_t pass = 0; //'class global' so addLight/Pin functions know which pass it is in
-    void addLightsPre();
-    static void addPin(uint8_t pinNr);
+    void addLayoutPre();
+    void addPin(uint8_t pinNr);
     void addLight(Coord3D position);
-    void addLightsPost();
+    void addLayoutPost();
 
     // an effect is using a virtual layer: tell the effect in which layer to run...
 

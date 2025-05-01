@@ -190,11 +190,11 @@ class VirtualLayer {
     void fill_solid(const CRGB& color);
     void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
 
-    void addLightsPre();
+    void addLayoutPre();
 
     void addLight(Coord3D position);
 
-    void addLightsPost();
+    void addLayoutPost();
 
 };
 

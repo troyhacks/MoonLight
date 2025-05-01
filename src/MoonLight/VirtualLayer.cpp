@@ -91,11 +91,11 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
 }
 uint16_t VirtualLayer::XYZ(Coord3D &position) {
 
-  //modifiers
-  for (Node *node: nodes) { //e.g. random or scrolling or rotate modifier
-    if (node->hasModifier && node->on)
-      node->modifyXYZ(position); //modifies the position
-  }
+  //XYZ modifiers
+  // for (Node *node: nodes) { //e.g. random or scrolling or rotate modifier
+  //   if (node->hasModifier && node->on)
+  //     node->modifyXYZ(position); //modifies the position
+  // }
 
   return XYZUnprojected(position);
 }
@@ -248,7 +248,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   }
 }
 
-void VirtualLayer::addLightsPre() {
+void VirtualLayer::addLayoutPre() {
   for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
     mappingTableIndex.clear();
   }
@@ -264,7 +264,7 @@ void VirtualLayer::addLightsPre() {
   //modifiers
   for (Node *node: nodes) {
     if (node->hasModifier && node->on)
-      node->modifyLightsPre();
+      node->modifyLayout();
   }
 }
 
@@ -284,7 +284,7 @@ void VirtualLayer::addLight(Coord3D position) {
   addIndexP(mappingTable[indexV], layerP->lights.header.nrOfLights);
 }
 
-void VirtualLayer::addLightsPost() {
+void VirtualLayer::addLayoutPost() {
   // prepare logging:
   uint16_t nrOfPhysical = 0;
   uint16_t nrOfPhysicalM = 0;

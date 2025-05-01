@@ -10,7 +10,7 @@ void add(int leds, int radius) {
   }
 }
 
-void addLights() {
+void addLayout() {
   addPin(2); //not working yet
 
   add(1, 0);

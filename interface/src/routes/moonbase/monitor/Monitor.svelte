@@ -35,7 +35,7 @@
 		//fixChange
 		if (type == ct_Position) {
 			console.log(lights)
-			handleLightsDefinition(header, data);
+			handleLayout(header, data);
 		} else if (type == ct_Leds) {
 			if (!done)
 				console.log("Monitor.handleMonitor", data);
@@ -47,8 +47,8 @@
 		}
 	};
 
-	const handleLightsDefinition = (header: Uint8Array, positions: Uint8Array) => {
-		console.log("Monitor.handleLightsDefinition", header, positions);
+	const handleLayout = (header: Uint8Array, positions: Uint8Array) => {
+		console.log("Monitor.handleLayout", header, positions);
 		// data.forEach((value, index) => {
     	//     console.log(`Index ${index}: ${value}`);
 	    // });

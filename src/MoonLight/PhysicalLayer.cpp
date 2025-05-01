@@ -49,7 +49,7 @@ PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "addPin %d", pinNr);
     }
 
-    void PhysicalLayer::addLightsPre() {
+    void PhysicalLayer::addLayoutPre() {
         lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
         ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
 
@@ -61,7 +61,7 @@ PhysicalLayer::PhysicalLayer() {
         } else {
             for (VirtualLayer * layer: layerV) {
                 //add the lights in the virtual layer
-                layer->addLightsPre();
+                layer->addLayoutPre();
             }
         }
     }
@@ -69,7 +69,7 @@ PhysicalLayer::PhysicalLayer() {
     void PhysicalLayer::addLight(Coord3D position) {
         
         if (pass == 1) {
-            // ESP_LOGD(TAG, "addLight %d,%d,%d", position.x, position.y, position.z);
+            // ESP_LOGD(TAG, "%d,%d,%d", position.x, position.y, position.z);
             if (lights.header.nrOfLights >= MAX_CHANNELS / sizeof(Coord3D)) {
                 //send the positions to the UI _socket_emit
                 //reset the index and continue...
@@ -86,7 +86,7 @@ PhysicalLayer::PhysicalLayer() {
         lights.header.nrOfLights++;
     }
 
-    void PhysicalLayer::addLightsPost() {
+    void PhysicalLayer::addLayoutPost() {
         if (pass == 1) {
             lights.header.size += Coord3D{1,1,1};
             ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.leds));
@@ -96,7 +96,7 @@ PhysicalLayer::PhysicalLayer() {
             ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
-                layer->addLightsPost();
+                layer->addLayoutPost();
             }
             initLightsToBlend();
         }
@@ -126,7 +126,7 @@ PhysicalLayer::PhysicalLayer() {
         } else if (equal(animation, "Lines🔥")) {
             node = new LinesEffect();
         } else if (equal(animation, "Panel🚥")) {
-            node = new Panel16Definition();
+            node = new Panel16Layout();
         } else if (equal(animation, "Multiply💎")) {
             node = new MultiplyModifier();
         } else if (equal(animation, "Mirror💎")) {

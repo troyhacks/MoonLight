@@ -18,7 +18,7 @@ class MultiplyModifier: public Node {
   bool    mirror = false;
   Coord3D originalSize;
 
-  void modifyLightsPre() override {
+  void modifyLayout() override {
     hasModifier = true;
 
     layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
@@ -61,7 +61,7 @@ class MirrorModifier: public Node {
     if (control["name"] == "mirrorZ") mirrorZ = control["value"];
   }
 
-  void modifyLightsPre() override {
+  void modifyLayout() override {
     if (mirrorX) layerV->size.x = (layerV->size.x + 1) / 2;
     if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
     if (mirrorZ) layerV->size.z = (layerV->size.z + 1) / 2;
@@ -104,7 +104,7 @@ class PinwheelModifier: public Node {
     if (control["name"] == "zTwist") zTwist = control["value"];
   }
   
-  void modifyLightsPre() override {
+  void modifyLayout() override {
     // if (leds.projectionDimension > _1D && leds.effectDimension > _1D) {
       layerV->size.y = sqrt(sq(max(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
                             sq(max(layerV->size.y - layerV->middle.y, layerV->middle.y))) + 1; // Adjust y before x

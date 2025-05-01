@@ -29,7 +29,7 @@ public:
   bool hasSetup = false;
   bool hasLoop = false; //equal to hasEffect?
   bool hasModifier = false;
-  bool hasLightsDef = false; //Mapper?
+  bool hasLayout = false; //Mapper?
 
   bool on = false; //onUpdate will set it on
 
@@ -49,19 +49,19 @@ public:
   virtual void getControls(JsonArray controls) {};
   virtual void setControl(JsonObject control) {};
 
-  //effect and lights definition
+  //effect and layout
   virtual void setup() {};
 
   //effect and modifier
   virtual void loop() {}
 
-  //lights definition
+  //layout
   virtual void map() {}
 
   //modifier
-  virtual void modifyLightsPre() {}
+  virtual void modifyLayout() {}
   virtual void modifyLight(Coord3D &position) {} //not const as position is changed
-  virtual void modifyXYZ(Coord3D &position) {}
+  // virtual void modifyXYZ(Coord3D &position) {}
 };
   
 
@@ -99,7 +99,7 @@ class LiveScriptNode: public Node {
 
 #endif
 
-#include "Lights.h"
+#include "Layouts.h"
 
 #include "Effects.h"
 // #include "EffectsFastLED.h"

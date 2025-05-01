@@ -203,10 +203,10 @@ public:
                     JsonObject object = _state.data.as<JsonObject>();
                     _socket->emitEvent("animations", object);
 
-                    //if node is a modifier, run the lights definition
+                    //if node is a modifier, run the layout definition
                     if (nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
-                            if (node->hasLightsDef && node->on) {
+                            if (node->hasLayout && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
                                 layerP.pass = 2; //only virtual mapping
                                 node->map();
@@ -243,15 +243,15 @@ public:
                     nodeClass->on = updatedItem.value.as<bool>();
                     if (nodeClass->on && nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
-                            if (node->hasLightsDef && node->on) {
+                            if (node->hasLayout && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
                                 layerP.pass = 2; //only virtual mapping
                                 node->map();
                             }
                         }
                     }
-                    if (nodeClass->hasLightsDef && !nodeClass->on) {
-                        //if lights definition has been set to off, remove the mapping
+                    if (nodeClass->hasLayout && !nodeClass->on) {
+                        //if layout has been set to off, remove the mapping
                     }
                 }
             }
@@ -262,15 +262,15 @@ public:
                 Node * nodeClass = findNode(nodeState["animation"]);
                 if (nodeClass) {
                     nodeClass->setControl(nodeState["controls"][updatedItem.index[1]]); //to do only send the changed control
-                    // if Modfier control changed, run the lights definition
+                    // if Modfier control changed, run the layout
                     // find nodes which implement the Modifier interface
-                    // find nodes which implement modifyLightsPre and modifyLight
-                    // if this nodes implements modifyLightsPre and modifyLight then run lights def setup
+                    // find nodes which implement modifyLayout and modifyLight
+                    // if this nodes implements modifyLayout and modifyLight then run lights lyayout map
 
                     // ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
                     if (nodeClass->on && nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
-                            if (node->hasLightsDef && node->on) {
+                            if (node->hasLayout && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
                                 layerP.pass = 2; //only virtual mapping
                                 node->map();

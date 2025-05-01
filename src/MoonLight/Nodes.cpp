@@ -19,13 +19,13 @@
 Node *gNode = nullptr;
 
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
-static void _addLightsPre() {gNode->layerV->layerP->addLightsPre();}
+static void _addLayoutPre() {gNode->layerV->layerP->addLayoutPre();}
 static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
-static void _addLightsPost() {gNode->layerV->layerP->addLightsPost();}
+static void _addLayoutPost() {gNode->layerV->layerP->addLayoutPost();}
 
-static void _modifyLightsPre() {gNode->modifyLightsPre();}
-// static void _modifyLight() {gNode->modifyLight();}
-// static void _modifyXYZ() {gNode->modifyXYZ();}
+static void _modifyLayout() {gNode->modifyLayout();}
+// static void _modifyLight() {gNode->modifyLight();} //need &position parameter
+// static void _modifyXYZ() {gNode->modifyXYZ();}//need &position parameter
 
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
 static void _sLC(uint16_t indexV, CRGB color) {gNode->layerV->setLightColor(indexV, color);}
@@ -108,10 +108,10 @@ void LiveScriptNode::setup() {
 
   //MoonLight functions
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
-  addExternal(    "void addLightsPre()", (void *)_addLightsPre);
+  addExternal(    "void addLayoutPre()", (void *)_addLayoutPre);
   addExternal(    "void addLight(uint16_t,uint16_t,uint16_t)", (void *)_addLight);
-  addExternal(    "void addLightsPost()", (void *)_addLightsPost);
-  addExternal(    "void modifyLightsPre()", (void *)_modifyLightsPre);
+  addExternal(    "void addLayoutPost()", (void *)_addLayoutPost);
+  addExternal(    "void modifyLayout()", (void *)_modifyLayout);
 //   addExternal(    "void modifyLight(uint16_t,uint16_t,uint16_t)", (void *)_modifyLight);
 //   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
 
@@ -157,14 +157,15 @@ void LiveScriptNode::compileAndRun() {
 
           if (scScript.find("setup()") != std::string::npos) hasSetup = true;
           if (scScript.find("loop()") != std::string::npos) hasLoop = true;
-          if (scScript.find("addLights()") != std::string::npos) hasLightsDef = true;
+          if (scScript.find("addLayout()") != std::string::npos) hasLayout = true;
           if (scScript.find("modifyLight(") != std::string::npos) hasModifier = true;
+        //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
-          if (hasLightsDef) scScript += "void map(){addLightsPre();addLights();addLightsPost();}"; //add map() function
+          if (hasLayout) scScript += "void map(){addLayoutPre();addLayout();addLayoutPost();}"; //add map() function
           //add main function
           scScript += "void main(){";
           if (hasSetup) scScript += "setup();";
-          if (hasLoop) scScript += "while(2>1){if(on){loop();sync();}else delay(1);}"; //loop must pauze when lights definition changes pass == 1! delay to avoid idle
+          if (hasLoop) scScript += "while(2>1){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
           scScript += "}";
 
           ESP_LOGD(TAG, "script %s", scScript.c_str());
@@ -210,7 +211,7 @@ void LiveScriptNode::kill() {
 void LiveScriptNode::execute() {
     ESP_LOGD(TAG, "%s", animation);
 
-    if (hasLightsDef) {
+    if (hasLayout) {
         map();
     }
 
@@ -227,9 +228,9 @@ void LiveScriptNode::execute() {
 }
 
 void LiveScriptNode::map() {
-    if (hasLightsDef) {
+    if (hasLayout) {
         for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-            scriptRuntime.execute(animation, "remap"); 
+            scriptRuntime.execute(animation, "map"); 
     }
 }
 
