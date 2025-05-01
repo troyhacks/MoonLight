@@ -1,16 +1,9 @@
-uint8_t intensityControl = 128;
-uint8_t speedControl = 128;
-
-void setup()
-{
-}
-
 void loop() {
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
-      uint8_t pixelHue8 = inoise8(x * intensityControl, y * intensityControl, now() / (16 - speedControl/16));
-      // leds.setPixelColor(leds.XY(x, y), ColorFromPalette(leds.palette, pixelHue8));
-      sCFP(y*width+x, pixelHue8, 255);
+      uint8_t lightHue8 = inoise8(x * intensity, y * intensity, now() / (16 - speed/16));
+      // leds.setLightColor(leds.XY(x, y), ColorFromPalette(leds.palette, lightHue8));
+      sCFP(y*width+x, lightHue8, 255);
     }
   }
 }

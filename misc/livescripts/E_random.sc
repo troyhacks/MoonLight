@@ -4,10 +4,3 @@ void setup() {
 void loop() {
   leds[random16(255)] = CRGB(0, 0, 255);
 }
-void main() {
-  setup();
-  while (true) {
-    loop();
-    sync();
- }
-}

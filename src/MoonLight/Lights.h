@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      Fixtures.h
+    @file      Lights.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/general/utilities/
@@ -11,7 +11,22 @@
 
 #if FT_MOONLIGHT
 
-class Panel16fixture: public Node {
+class LightsNode: public Node {
+public:
+
+  //calls addLights functions, non virtual, only addLights can be redefined in derived class
+  void map() {
+    layerV->layerP->addLightsPre();
+    addLights();
+    layerV->layerP->addLightsPost();
+  }
+
+  virtual void addLights() {
+  }
+
+};
+
+class Panel16Definition: public LightsNode {
   const char * name() override {return "Panel🚥";}
 
   uint8_t width = 16;
@@ -19,7 +34,7 @@ class Panel16fixture: public Node {
   bool snake = true;
 
   void getControls(JsonArray controls) override {
-    hasFixDef = true;
+    hasLightsDef = true;
     JsonObject control;
     control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = width;
     control = controls.add<JsonObject>(); control["name"] = "height"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = height;
@@ -31,21 +46,27 @@ class Panel16fixture: public Node {
     if (control["name"] == "width") width = control["value"];
     if (control["name"] == "height") height = control["value"];
     if (control["name"] == "snake") snake = control["value"];
-    //if changed run setup
-    setup();
+    //if changed run remap
+    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+      map(); //calls also addLights
   }
 
   void setup() override {
+    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+      map(); //calls also addLights
 
-    //create panel 16
-    layerV->layerP->addPixelsPre();
+  }
+
+  void addLights() override {
+    layerV->layerP->addPin(2); //not working yet
+
     for (int x = 0; x<width; x++) {
       for (int y = 0; y<height; y++) {
-        layerV->layerP->addPixel({x, (x%2 || !snake)?y:height-1-y, 0});
+        layerV->layerP->addLight({x, (x%2 || !snake)?y:height-1-y, 0});
       }
     }
-    layerV->layerP->addPixelsPost();
   }
+
 };
 
 #endif //FT_MOONLIGHT

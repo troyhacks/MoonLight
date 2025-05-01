@@ -26,6 +26,25 @@ void fastled_fill_rainbow(struct CRGB * targetArray, int numToFill, uint8_t init
   fill_rainbow(targetArray, numToFill, initialhue, deltahue);
 }
 
+VirtualLayer::~VirtualLayer() {
+  ESP_LOGD(TAG, "destructor");
+  fadeToBlackBy(255); //clear the leds
+
+  for (Node *node: nodes) {
+    node->destructor();
+    delete node;
+  }
+  nodes.clear();
+
+  //clear array of array of indexes
+  for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
+    mappingTableIndex.clear();
+  }
+  mappingTableIndexes.clear();
+  //clear mapping table
+  mappingTable.clear();
+}
+
 void VirtualLayer::setup() {
   for (Node *node: nodes) {
     node->setup();
@@ -48,11 +67,11 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
     case m_color:
     // case m_rgbColor:
       physMap.indexP = indexP;
-      physMap.mapType = m_onePixel;
+      physMap.mapType = m_oneLight;
       break;
-    case m_onePixel: {
+    case m_oneLight: {
       uint16_t oldIndexP = physMap.indexP;
-      // change to more_pixels and add the old indexP and new indexP to the multiple indexP array
+      // change to m_moreLights and add the old indexP and new indexP to the multiple indexP array
       mappingTableIndexesSizeUsed++; //add a new slot in the mappingTableIndexes
       if (mappingTableIndexes.size() < mappingTableIndexesSizeUsed)
         mappingTableIndexes.push_back({oldIndexP, indexP});
@@ -60,9 +79,9 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
         mappingTableIndexes[mappingTableIndexesSizeUsed-1] = {oldIndexP, indexP};
 
         physMap.indexes = mappingTableIndexesSizeUsed - 1; //array position
-        physMap.mapType = m_morePixels;
+        physMap.mapType = m_moreLights;
       break; }
-    case m_morePixels:
+    case m_moreLights:
       // mappingTableIndexes.reserve(physMap.indexes+1);
       mappingTableIndexes[physMap.indexes].push_back(indexP);
       // ESP_LOGD(TAG, " more %d", mappingTableIndexes.size());
@@ -70,21 +89,21 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
   }
   // ESP_LOGD(TAG, "\n");
 }
-uint16_t VirtualLayer::XYZ(Coord3D &pixel) {
+uint16_t VirtualLayer::XYZ(Coord3D &position) {
 
   //modifiers
   for (Node *node: nodes) { //e.g. random or scrolling or rotate modifier
     if (node->hasModifier && node->on)
-      node->modifyXYZ(pixel); //modifies the pixel
+      node->modifyXYZ(position); //modifies the position
   }
 
-  return XYZUnprojected(pixel);
+  return XYZUnprojected(position);
 }
 
-void VirtualLayer::setPixelColor(const uint16_t indexV, const CRGB& color) {
+void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
   // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
   if (indexV < mappingTable.size()) {
-    // ESP_LOGD(TAG, "setPixelColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTable.size());
+    // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTable.size());
     switch (mappingTable[indexV].mapType) {
       case m_color:{
         mappingTable[indexV].rgb14 = ((min(color.r + 3, 255) >> 3) << 9) + 
@@ -92,7 +111,7 @@ void VirtualLayer::setPixelColor(const uint16_t indexV, const CRGB& color) {
                                       (min(color.b + 7, 255) >> 4);
         break;
       }
-      case m_onePixel: {
+      case m_oneLight: {
         uint16_t indexP = mappingTable[indexV].indexP;
         //temp fix for cube202020 (some curtains are bgr)
         // if (indexP > 2800) {
@@ -101,9 +120,9 @@ void VirtualLayer::setPixelColor(const uint16_t indexV, const CRGB& color) {
         //   fix->ledsP[indexP].b = color.r;
         // }
         // else
-        layerP->leds[indexP] = layerP->pixelsToBlend[indexP]?blend(color, layerP->leds[indexP], layerP->globalBlend):color;
+        layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend):color;
         break; }
-      case m_morePixels:
+      case m_moreLights:
         if (mappingTable[indexV].indexes < mappingTableIndexes.size())
           for (uint16_t indexP: mappingTableIndexes[mappingTable[indexV].indexes]) {
             // if (indexP > 2800) {
@@ -111,30 +130,31 @@ void VirtualLayer::setPixelColor(const uint16_t indexV, const CRGB& color) {
             //   fix->ledsP[indexP].g = color.g;
             //   fix->ledsP[indexP].b = color.r;
             // } else
-            layerP->leds[indexP] = layerP->pixelsToBlend[indexP]?blend(color, layerP->leds[indexP], layerP->globalBlend): color;
+            layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend): color;
           }
         else
-          ESP_LOGW(TAG, "dev setPixelColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
+          ESP_LOGW(TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
         break;
       default: ;
     }
   }
   else if (indexV < NUM_LEDS) {//no mapping
-    layerP->leds[indexV] = layerP->pixelsToBlend[indexV]?blend(color, layerP->leds[indexV], layerP->globalBlend): color;
+    layerP->lights.leds[indexV] = layerP->lightsToBlend[indexV]?blend(color, layerP->lights.leds[indexV], layerP->globalBlend): color;
+    // layerP->lights.dmxChannels[indexV] = (byte*)&color;
   }
   // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
   // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-  //   ESP_LOGW(TAG, " dev sPC %d >= %d", indexV, STARLIGHT_NUM_LEDS);
+  //   ESP_LOGW(TAG, " dev sLC %d >= %d", indexV, STARLIGHT_NUM_LEDS);
 }
 
-CRGB VirtualLayer::getPixelColor(const uint16_t indexV) const {
+CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
   if (indexV < mappingTable.size()) {
     switch (mappingTable[indexV].mapType) {
-      case m_onePixel:
-        return layerP->leds[mappingTable[indexV].indexP]; 
+      case m_oneLight:
+        return layerP->lights.leds[mappingTable[indexV].indexP]; 
         break;
-      case m_morePixels:
-        return layerP->leds[mappingTableIndexes[mappingTable[indexV].indexes][0]]; //any will do as they are all the same
+      case m_moreLights:
+        return layerP->lights.leds[mappingTableIndexes[mappingTable[indexV].indexes][0]]; //any will do as they are all the same
         break;
       default: // m_color:
         return CRGB((mappingTable[indexV].rgb14 >> 9) << 3, 
@@ -144,7 +164,7 @@ CRGB VirtualLayer::getPixelColor(const uint16_t indexV) const {
     }
   }
   else if (indexV < NUM_LEDS) //no mapping
-    return layerP->leds[indexV];
+    return layerP->lights.leds[indexV];
   else {
     // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
     // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, STARLIGHT_MAXLEDS);
@@ -152,83 +172,83 @@ CRGB VirtualLayer::getPixelColor(const uint16_t indexV) const {
   }
 }
 
-void VirtualLayer::setPixelsToBlend() {
+void VirtualLayer::setLightsToBlend() {
   for (const std::vector<uint16_t>& mappingTableIndex: mappingTableIndexes) {
       for (const uint16_t indexP: mappingTableIndex)
-      layerP->pixelsToBlend[indexP] = true;
+      layerP->lightsToBlend[indexP] = true;
     }
     for (const PhysMap &physMap: mappingTable) {
-      if (physMap.mapType == m_onePixel)
-      layerP->pixelsToBlend[physMap.indexP] = true;
+      if (physMap.mapType == m_oneLight)
+      layerP->lightsToBlend[physMap.indexP] = true;
     }
 }
 
 void VirtualLayer::fadeToBlackBy(const uint8_t fadeBy) {
-  // if (effectDimension < projectionDimension) { //only process the effect pixels (so modifiers can do things with the other dimension)
+  // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
-  //       CRGB color = getPixelColor({x,y,0});
+  //       CRGB color = getLightColor({x,y,0});
   //       color.nscale8(255-fadeBy);
-  //       setPixelColor({x,y,0}, color);
+  //       setLightColor({x,y,0}, color);
   //     }
   //   }
   // } else 
   if (layerP->layerV.size() == 1) { //faster, else manual 
-    fastled_fadeToBlackBy(layerP->leds, layerP->nrOfLeds, fadeBy);
+    fastled_fadeToBlackBy(layerP->lights.leds, layerP->lights.header.nrOfLights, fadeBy);
   } else {
-    for (uint16_t index = 0; index < nrOfLeds; index++) {
-      CRGB color = getPixelColor(index);
+    for (uint16_t index = 0; index < nrOfLights; index++) {
+      CRGB color = getLightColor(index);
       color.nscale8(255-fadeBy);
-      setPixelColor(index, color);
+      setLightColor(index, color);
     }
   }
 }
 
 void VirtualLayer::fill_solid(const CRGB& color) {
-  // if (effectDimension < projectionDimension) { //only process the effect pixels (so modifiers can do things with the other dimension)
+  // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
-  //       setPixelColor({x,y,0}, color);
+  //       setLightColor({x,y,0}, color);
   //     }
   //   }
   // } else 
   if (layerP->layerV.size() == 1) { //faster, else manual 
-    fastled_fill_solid(layerP->leds, layerP->nrOfLeds, color);
+    fastled_fill_solid(layerP->lights.leds, layerP->lights.header.nrOfLights, color);
   } else {
-    for (uint16_t index = 0; index < nrOfLeds; index++)
-      setPixelColor(index, color);
+    for (uint16_t index = 0; index < nrOfLights; index++)
+      setLightColor(index, color);
   }
 }
 
 void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue) {
-  // if (effectDimension < projectionDimension) { //only process the effect pixels (so modifiers can do things with the other dimension)
+  // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   CHSV hsv;
   //   hsv.hue = initialhue;
   //   hsv.val = 255;
   //   hsv.sat = 240;
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
-  //       setPixelColor({x,y,0}, hsv);
+  //       setLightColor({x,y,0}, hsv);
   //       hsv.hue += deltahue;
   //     }
   //   }
   // } else 
   if (layerP->layerV.size() == 1) { //faster, else manual 
-    fastled_fill_rainbow(layerP->leds, layerP->nrOfLeds, initialhue, deltahue);
+    fastled_fill_rainbow(layerP->lights.leds, layerP->lights.header.nrOfLights, initialhue, deltahue);
   } else {
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
     hsv.sat = 240;
 
-    for (uint16_t index = 0; index < nrOfLeds; index++) {
-      setPixelColor(index, hsv);
+    for (uint16_t index = 0; index < nrOfLights; index++) {
+      setLightColor(index, hsv);
       hsv.hue += deltahue;
     }
   }
 }
 
-void VirtualLayer::addPixelsPre() {
+void VirtualLayer::addLightsPre() {
   for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
     mappingTableIndex.clear();
   }
@@ -237,49 +257,49 @@ void VirtualLayer::addPixelsPre() {
   for (size_t i = 0; i < mappingTable.size(); i++) {
     mappingTable[i] = PhysMap();
   }
-  nrOfLeds = 0;
+  nrOfLights = 0;
 
-  size = layerP->size; //physical size
+  size = layerP->lights.header.size; //start with the physical size
 
   //modifiers
   for (Node *node: nodes) {
     if (node->hasModifier && node->on)
-      node->modifyPixelsPre();
+      node->modifyLightsPre();
   }
 }
 
-void VirtualLayer::addPixel(Coord3D pixel) {
+void VirtualLayer::addLight(Coord3D position) {
 
   //modifiers
   for (Node *node: nodes) {
     if (node->hasModifier && node->on)
-      node->modifyPixel(pixel);
+      node->modifyLight(position);
   }
 
-  uint16_t indexV = XYZUnprojected(pixel);
-  if (indexV >= nrOfLeds) {
+  uint16_t indexV = XYZUnprojected(position);
+  if (indexV >= nrOfLights) {
     mappingTable.resize(indexV + 1); //make sure the index fits
-    nrOfLeds = indexV + 1;
+    nrOfLights = indexV + 1;
   }
-  addIndexP(mappingTable[indexV], layerP->indexP);
+  addIndexP(mappingTable[indexV], layerP->lights.header.nrOfLights);
 }
 
-void VirtualLayer::addPixelsPost() {
+void VirtualLayer::addLightsPost() {
   // prepare logging:
   uint16_t nrOfPhysical = 0;
   uint16_t nrOfPhysicalM = 0;
   uint16_t nrOfColor = 0;
-  for (size_t i = 0; i< nrOfLeds; i++) {
+  for (size_t i = 0; i< nrOfLights; i++) {
     PhysMap &map = mappingTable[i];
     switch (map.mapType) {
       case m_color:
         nrOfColor++;
         break;
-      case m_onePixel:
+      case m_oneLight:
         // ESP_LOGD(TAG,"%d mapping =1: #ledsP : %d", i, map.indexP);
         nrOfPhysical++;
         break;
-      case m_morePixels:
+      case m_moreLights:
         // Char<32> str;
         for (uint16_t indexP: mappingTableIndexes[map.indexes]) {
           // str += indexP;
@@ -292,7 +312,7 @@ void VirtualLayer::addPixelsPost() {
     //   ESP_LOGD(TAG, "%d no mapping\n", x);
   }
 
-  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d + 1:%d + m:%d (p:%d)", size.x, size.y, size.z, nrOfLeds, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
+  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d + 1:%d + m:%d (p:%d)", size.x, size.y, size.z, nrOfLights, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
 
 }
 

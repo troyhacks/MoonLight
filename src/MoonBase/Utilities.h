@@ -13,7 +13,46 @@
 
 #include <Arduino.h>
 #include "ArduinoJson.h"
+// struct Coord3D16 {
+//     uint16_t x;
+//     uint16_t y;
+//     uint16_t z;
+// };
 
+struct Coord3D {
+    int x;
+    int y;
+    int z;
+    //Minus / delta (abs)
+    Coord3D operator-(const Coord3D rhs) const {
+        return Coord3D{x - rhs.x, y - rhs.y, z - rhs.z};;
+    }
+    Coord3D operator+(const Coord3D rhs) const {
+        return Coord3D{x + rhs.x, y + rhs.y, z + rhs.z};
+    }
+    Coord3D operator*(const Coord3D rhs) const {
+        return Coord3D{x * rhs.x, y * rhs.y, z * rhs.z};
+    }
+    Coord3D operator/(const Coord3D rhs) const {
+        return Coord3D{x / rhs.x, y / rhs.y, z / rhs.z};
+    }
+    Coord3D operator%(const Coord3D rhs) const {
+        return Coord3D{x % rhs.x, y % rhs.y, z % rhs.z};
+    }
+
+    Coord3D operator+=(const Coord3D rhs) {
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
+        return *this;
+      }
+    
+    Coord3D maximum(const Coord3D rhs) const {
+        return Coord3D{max(x, rhs.x), max(y, rhs.y), max(z, rhs.z)};
+    }
+};
+
+  
 //convenience function to compare two char strings
 static bool equal(const char *a, const char *b) {
     if (a == nullptr || b == nullptr) {

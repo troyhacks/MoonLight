@@ -13,12 +13,12 @@
     * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 leds, 24 bits is 130 fps theoretically - 120 practically)
 * Pin: Currently only 2 and 16 supported
 * Nodes: One or more processes, 
-    * Can be fixture definitions, effects or modifiers (in theory one node can also be a combination of these)
+    * Can be lights definitions, effects or modifiers (in fact one node can also be a combination of these)
     * On/off button defines if a node is active or not
     * Nodes define their own controls
     * A node can be a precompiled Node or a livescript (loaded in the file system)
 * Scrips: Running Live scripts (WIP)
-* If a script file is updated (here or in the [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)) and the file is part of an active node, it will rerun
+* If a script file is updated (here or in the [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)) and the file is part of an active node, it will recompile
 
 <img width="498" alt="Screenshot 2025-03-29 at 14 12 01" src="https://github.com/user-attachments/assets/3a5a3743-c0a4-4456-96cb-f4abd0d01450" />
 
@@ -44,34 +44,34 @@ They represent current state of Live Script processing and will be extended as m
     * Each node can have controls (compare controls in WLED / StarLight) ✅
     * Each node can run precompile code or Live scripts (with or without loop) ✅
     * Each node has a type:
-        * Fixture definition: tell where each pixture is in a 1D/2D/3D physical coordinate space (based on StarLight) ✅
+        * Lights definition: tell where each light is in a 1D/2D/3D physical coordinate space (based on StarLight) ✅
         * Effect: 
             * run an effect in a virtual coordinate space ✅
             * in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings ✅
         * Modifier: Mirror, rotate, etc, multiple modfiers allowed (projection in StarLight) 🚧
-            * A modifier can also map fixture dimensions to effect dimensions: change the fixture to a 1D/2D/3D virtual coordinate space
-                * e.g. if the fixture is a globe, you can map that to 2D using mercator projection mapping
-                * if the fixture is 200x200 you can map it to 50x50
-                * if the fixture is 2D, a 1D effect can be shown as a circle or a bar (as WLED expand1D)
+            * A modifier can also map lights dimensions to effect dimensions: change the lights to a 1D/2D/3D virtual coordinate space
+                * e.g. if the light is a globe, you can map that to 2D using mercator projection mapping
+                * if the light is 200x200 you can map it to 50x50
+                * if the light is 2D, a 1D effect can be shown as a circle or a bar (as WLED expand1D)
         * Driver show: show the result on Leds (using FastLED, hpwit drivers), ArtNet, DDP, ...
 * Future situation: Nodes and noodles (2)
     * Replace the nodes table (1) by a graphical view (2)
 * Virtual Layer (MappingTable) (3)
-    * Array of arrays. Outer array is virtual pixels, inner array is physical pixels. ✅
+    * Array of arrays. Outer array is virtual lights, inner array is physical lights. ✅
     * Implemented efficiently using the StarLight PhysMap struct ✅
     * e.g. [[],[0],[1,2],[3,4,5],[6,7,8,9]] ✅
-        * first virtual pixel is not mapped to a physical pixel
-        * second virtual pixel is mapped to physical pixel 0
-        * third virtual pixel is mapped to physical pixels 1 and 2
+        * first virtual light is not mapped to a physical light
+        * second virtual light is mapped to physical light 0
+        * third virtual light is mapped to physical lights 1 and 2
         * and so on
-    * Virtual pixels can be 1D, 2D or 3D. Physical pixels also, in any combination
+    * Virtual lights can be 1D, 2D or 3D. Physical lights also, in any combination
         * Using x + y * sizeX + z * sizeX * sizeY 🚧
-    * set/getPixelColor functions used in effects using the MappingTable ✅
+    * set/getLightColor functions used in effects using the MappingTable ✅
     * Nodes manipulate the MappingTable and/or interfere in the effects loop 🚧
-    * A Virtual Layer mapping gets updated if fixture, mapping or dimensions change 🚧
+    * A Virtual Layer mapping gets updated if a lights definition, mapping or dimensions change 🚧
     * An effect uses a virtual layer. One Virtual layer can have multiple effects. ✅
 * Physical layer
-    * CRGB leds[NUM_LEDS] are physical pixels (as in FASTLED) ✅
+    * CRGB leds[NUM_LEDS] are physical lights (as in FASTLED) ✅
     * A Physical layer has one or more virtual layers and a virtual layer has one or more effects using it. ✅
 * Presets/playlist: change (part of) the nodes model
 

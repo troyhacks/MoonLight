@@ -157,19 +157,19 @@ public:
             //addLeds twice is temp hack to make rgb sliders work
             switch (_state.data["pin"].as<int>()) {
                 case 2:
-                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
+                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
+                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
                     break;
                 case 16:
-                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.leds, 0, layerP.nrOfLeds).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
+                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
+                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
                     break;
                 default:
                     ESP_LOGD(TAG, "unknown pin %d", _state.data["pin"].as<int>());
             }
             FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-            ESP_LOGD(TAG, "FastLED.addLeds n:%d", layerP.nrOfLeds);
+            ESP_LOGD(TAG, "FastLED.addLeds n:%d", layerP.lights.header.nrOfLights);
         } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
@@ -199,15 +199,17 @@ public:
                     nodeState["controls"].to<JsonArray>(); //clear the controls
                     nodeClass->getControls(nodeState["controls"]); //create the controls
                     //show these controls in the UI
+                    //save ??
                     JsonObject object = _state.data.as<JsonObject>();
                     _socket->emitEvent("animations", object);
 
-                    //if node is modifier, rerun fixture definition
+                    //if node is a modifier, run the lights definition
                     if (nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
-                            if (node->hasFixDef && node->on) {
+                            if (node->hasLightsDef && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
-                                node->setup();
+                                layerP.pass = 2; //only virtual mapping
+                                node->map();
                             }
                         }
                     }
@@ -239,16 +241,17 @@ public:
                 Node * nodeClass = findNode(nodeState["animation"]);
                 if (nodeClass) {
                     nodeClass->on = updatedItem.value.as<bool>();
-                    if (nodeClass->hasModifier) {
+                    if (nodeClass->on && nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
-                            if (node->hasFixDef && node->on) {
+                            if (node->hasLightsDef && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
-                                node->setup();
+                                layerP.pass = 2; //only virtual mapping
+                                node->map();
                             }
                         }
                     }
-                    if (nodeClass->hasFixDef && !nodeClass->on) {
-                        //if fixdef has been set to off, remove the mapping
+                    if (nodeClass->hasLightsDef && !nodeClass->on) {
+                        //if lights definition has been set to off, remove the mapping
                     }
                 }
             }
@@ -259,17 +262,18 @@ public:
                 Node * nodeClass = findNode(nodeState["animation"]);
                 if (nodeClass) {
                     nodeClass->setControl(nodeState["controls"][updatedItem.index[1]]); //to do only send the changed control
-                    // if Modfier control changed, rerun the fixture definition
+                    // if Modfier control changed, run the lights definition
                     // find nodes which implement the Modifier interface
-                    // find nodes which implement ModifyPixelsPre and ModifyPixel
-                    // if this nodes implements ModifyPixelsPre and ModifyPixel then rerun fixdef setup
+                    // find nodes which implement modifyLightsPre and modifyLight
+                    // if this nodes implements modifyLightsPre and modifyLight then run lights def setup
 
                     // ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
-                    if (nodeClass->hasModifier) {
+                    if (nodeClass->on && nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
-                            if (node->hasFixDef && node->on) {
+                            if (node->hasLightsDef && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
-                                node->setup();
+                                layerP.pass = 2; //only virtual mapping
+                                node->map();
                             }
                         }
                     }
@@ -307,14 +311,15 @@ public:
     //run effects
     void loop()
     {
-        layerP.loop(); //run all the effects of all virtual layers (currently only one)
+        if (layerP.lights.header.type == ct_Leds) //otherwise lights is used for positions etc.
+            layerP.loop(); //run all the effects of all virtual layers (currently only one)
 
         //show connected clients on the led display
         // static uint8_t lastConnectedClients = 0;
         // if (_socket->getConnectedClients() == 0) lastConnectedClients++;
         for (int i = 0; i < _socket->getConnectedClients(); i++) {
             // ESP_LOGD(TAG, "socket %d", i);
-            layerP.leds[i] = CRGB(0, 0, 128);
+            layerP.lights.leds[i] = CRGB(0, 0, 128);
         }
 
         driverShow();
@@ -322,11 +327,19 @@ public:
 
     void loop50ms() {
         #if FT_ENABLED(FT_MONITOR)
-            if (!_socket->getConnectedClients()) return; 
+
             static int monitorMillis = 0;
-            if (millis() - monitorMillis >= layerP.nrOfLeds / 12 && _state.data["monitorOn"]) { //max 12000 leds per second -> 1 second for 12000 leds
+            if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 leds per second -> 1 second for 12000 leds
                 monitorMillis = millis();
-                _socket->emitEvent("monitor", (char *)layerP.leds, MIN(layerP.nrOfLeds, NUM_LEDS) * sizeof(CRGB));// + 3); //3 bytes for type and factor and ...
+                
+                if (layerP.lights.header.type == ct_Position) { //send to UI
+                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
+                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * sizeof(Coord3D), MAX_CHANNELS));
+                    layerP.lights.header.type = ct_Leds; //back to normal
+                } else if (layerP.lights.header.type == ct_Leds) {//send to UI
+                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
+                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * sizeof(CRGB), MAX_CHANNELS));
+                }
             }
         #endif
     }
@@ -373,7 +386,7 @@ public:
 
     void driverShow()
     {
-        if (_state.data["driverOn"] && FastLED.count()) {
+        if (layerP.lights.header.type == ct_Leds && _state.data["driverOn"] && FastLED.count()) {
             FastLED.show();
         }
     }

@@ -27,11 +27,11 @@ public:
   const char *animation;
 
   bool hasSetup = false;
-  bool hasLoop = false;
+  bool hasLoop = false; //equal to hasEffect?
   bool hasModifier = false;
-  bool hasFixDef = false; //Mapper?
+  bool hasLightsDef = false; //Mapper?
 
-  bool on = true;
+  bool on = false; //onUpdate will set it on
 
   //C++ constructor and destructor are not inherited, so declare it as normal functions
   virtual void constructor(VirtualLayer *layerV, const char *animation) {
@@ -49,16 +49,19 @@ public:
   virtual void getControls(JsonArray controls) {};
   virtual void setControl(JsonObject control) {};
 
-  //effect and fixdef
+  //effect and lights definition
   virtual void setup() {};
 
   //effect and modifier
   virtual void loop() {}
 
+  //lights definition
+  virtual void map() {}
+
   //modifier
-  virtual void modifyPixelsPre() {}
-  virtual void modifyPixel(Coord3D &pixel) {} //not const as pixel is changed
-  virtual void modifyXYZ(Coord3D &pixel) {}
+  virtual void modifyLightsPre() {}
+  virtual void modifyLight(Coord3D &position) {} //not const as position is changed
+  virtual void modifyXYZ(Coord3D &position) {}
 };
   
 
@@ -89,12 +92,14 @@ class LiveScriptNode: public Node {
 
   void getControls(JsonArray controls) override;
   void setControl(JsonObject control) override;
+
+  void map() override;
   
 };
 
 #endif
 
-#include "Fixtures.h"
+#include "Lights.h"
 
 #include "Effects.h"
 // #include "EffectsFastLED.h"

@@ -5,12 +5,14 @@ void add(int leds, int radius) {
   for (int i = 0; i<leds; i++) {
     int x = width / 2.0 + ((sin8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
     int y = height / 2.0 + ((cos8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
-    addPixel(x, y, 0);
+    addLight(x, y, 0);
     printf("%d %d %d\n", leds,x,y);
   }
 }
 
-void setup() {
+void addLights() {
+  addPin(2); //not working yet
+
   add(1, 0);
   add(8, 13);
   add(12, 23);

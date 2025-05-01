@@ -1,6 +1,3 @@
-uint8_t intensityControl = 128;
-uint8_t speedControl = 128;
-
 #define PI 3.1415926535
 int nb_branches;
 uint8_t C_X;
@@ -29,7 +26,7 @@ void setup()
 
 void loop() {
 
-  nb_branches = intensityControl / 25;
+  nb_branches = intensity / 25;
 
   for (uint8_t x = 0; x < width; x++) {
     for (uint8_t y = 0; y < height; y++) {
@@ -37,8 +34,8 @@ void loop() {
       uint8_t radius = rMapRadius[x*height+y];
       uint16_t intensity = sin8(sin8((angle * 4 - radius*mapp) / 4 + t) + radius*mapp - 2*t+ angle * nb_branches);
 
-      sPC(y*width+x, hsv(2*t - radius*mapp, 255, intensity));
+      sLC(y*width+x, hsv(2*t - radius*mapp, 255, intensity));
     }
   }
-  t = now * speedControl / 32 / 25; //speedControl 0..8, 40 changes per second
+  t = now * speed / 32 / 25; //speed 0..8, 40 changes per second
 }

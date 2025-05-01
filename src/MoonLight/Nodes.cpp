@@ -19,17 +19,17 @@
 Node *gNode = nullptr;
 
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
-static void _addPixelsPre() {gNode->layerV->layerP->addPixelsPre();}
-static void _addPixel(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addPixel({x, y, z});}
-static void _addPixelsPost() {gNode->layerV->layerP->addPixelsPost();}
+static void _addLightsPre() {gNode->layerV->layerP->addLightsPre();}
+static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
+static void _addLightsPost() {gNode->layerV->layerP->addLightsPost();}
 
-static void _modifyPixelsPre() {gNode->modifyPixelsPre();}
-// static void _modifyPixel() {gNode->modifyPixel();}
+static void _modifyLightsPre() {gNode->modifyLightsPre();}
+// static void _modifyLight() {gNode->modifyLight();}
 // static void _modifyXYZ() {gNode->modifyXYZ();}
 
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
-static void _sPC(uint16_t pixel, CRGB color) {gNode->layerV->setPixelColor(pixel, color);}
-static void _sCFP(uint16_t pixel, uint8_t index, uint8_t brightness) { gNode->layerV->setPixelColor(pixel, ColorFromPalette(PartyColors_p, index, brightness));}
+static void _sLC(uint16_t indexV, CRGB color) {gNode->layerV->setLightColor(indexV, color);}
+static void _sCFP(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setLightColor(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
 
 static float _triangle(float j) {return 1.0 - fabs(fmod(2 * j, 2.0) - 1.0);}
 static float _time(float j) {
@@ -108,22 +108,23 @@ void LiveScriptNode::setup() {
 
   //MoonLight functions
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
-  addExternal(    "void addPixelsPre()", (void *)_addPixelsPre);
-  addExternal(    "void addPixel(uint16_t,uint16_t,uint16_t)", (void *)_addPixel);
-  addExternal(    "void addPixelsPost()", (void *)_addPixelsPost);
-  addExternal(    "void modifyPixelsPre()", (void *)_modifyPixelsPre);
-//   addExternal(    "void modifyPixel(uint16_t,uint16_t,uint16_t)", (void *)_modifyPixel);
+  addExternal(    "void addLightsPre()", (void *)_addLightsPre);
+  addExternal(    "void addLight(uint16_t,uint16_t,uint16_t)", (void *)_addLight);
+  addExternal(    "void addLightsPost()", (void *)_addLightsPost);
+  addExternal(    "void modifyLightsPre()", (void *)_modifyLightsPre);
+//   addExternal(    "void modifyLight(uint16_t,uint16_t,uint16_t)", (void *)_modifyLight);
 //   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
-  addExternal(   "CRGB* leds", (void *)layerV->layerP->leds);
-  addExternal(    "void sPC(uint16_t,CRGB)", (void *)_sPC);
+  addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);
+  addExternal(    "void sLC(uint16_t,CRGB)", (void *)_sLC);
   addExternal(    "void sCFP(uint16_t,uint8_t,uint8_t)", (void *)_sCFP);
   addExternal("uint16_t width", &layerV->size.x);
   addExternal("uint16_t height", &layerV->size.y);
   addExternal("uint16_t depth", &layerV->size.z);
+  addExternal("bool on", &on);
 
-  //controls
+  //controls (WLED Nostalgia)
   addExternal("uint8_t speed", &speed);
   addExternal("uint8_t intensity", &intensity);
   addExternal("uint8_t custom1", &custom1);
@@ -148,22 +149,22 @@ void LiveScriptNode::compileAndRun() {
       File file = ESPFS.open(animation);
       if (file) {
         Char<32> pre;
-        pre.format("#define NUM_LEDS %d\n", layerV->nrOfLeds);
+        pre.format("#define NUM_LEDS %d\n", layerV->nrOfLights);
 
           std::string scScript = pre.c_str();
           scScript += file.readString().c_str();
           file.close();
 
-          if (scScript.find("setup(") != std::string::npos) hasSetup = true;
-          if (scScript.find("loop(") != std::string::npos) hasLoop = true;
-          if (scScript.find("addPixel(") != std::string::npos) hasFixDef = true;
-          if (scScript.find("modifyPixel(") != std::string::npos) hasModifier = true;
+          if (scScript.find("setup()") != std::string::npos) hasSetup = true;
+          if (scScript.find("loop()") != std::string::npos) hasLoop = true;
+          if (scScript.find("addLights()") != std::string::npos) hasLightsDef = true;
+          if (scScript.find("modifyLight(") != std::string::npos) hasModifier = true;
 
+          if (hasLightsDef) scScript += "void map(){addLightsPre();addLights();addLightsPost();}"; //add map() function
+          //add main function
           scScript += "void main(){";
-          if (hasFixDef) scScript += "addPixelsPre();";
           if (hasSetup) scScript += "setup();";
-          if (hasFixDef) scScript += "addPixelsPost();";
-          if (hasLoop) scScript += "while(2>1){loop();sync();}";
+          if (hasLoop) scScript += "while(2>1){if(on){loop();sync();}else delay(1);}"; //loop must pauze when lights definition changes pass == 1! delay to avoid idle
           scScript += "}";
 
           ESP_LOGD(TAG, "script %s", scScript.c_str());
@@ -208,6 +209,11 @@ void LiveScriptNode::kill() {
 
 void LiveScriptNode::execute() {
     ESP_LOGD(TAG, "%s", animation);
+
+    if (hasLightsDef) {
+        map();
+    }
+
     if (hasLoop) {
         // setup : create controls
         // executable.execute("setup"); 
@@ -216,11 +222,14 @@ void LiveScriptNode::execute() {
         scriptRuntime.executeAsTask(animation, "main"); //background task (async - vs sync)
         //assert failed: xEventGroupSync event_groups.c:228 (uxBitsToWaitFor != 0)
     } else {
-        scriptRuntime.execute(animation, "main"); //background task (async - vs sync)
-        // pass = 1;
-        // liveM->executeTask(liveFixtureID, "c");
-        // pass = 2;
-        // liveM->executeTask(liveFixtureID, "c");
+        scriptRuntime.execute(animation, "main");
+    }
+}
+
+void LiveScriptNode::map() {
+    if (hasLightsDef) {
+        for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+            scriptRuntime.execute(animation, "remap"); 
     }
 }
 
@@ -268,9 +277,9 @@ void LiveScriptNode::getControls(JsonArray controls)  {
     JsonObject control;
     control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "range"; control["default"] = 128; control["value"] = speed;
     control = controls.add<JsonObject>(); control["name"] = "intensity"; control["type"] = "range"; control["default"] = 128; control["value"] = intensity;
-    control = controls.add<JsonObject>(); control["name"] = "custom1"; control["type"] = "checkbox"; control["default"] = 128; control["value"] = custom1;
-    control = controls.add<JsonObject>(); control["name"] = "custom2"; control["type"] = "checkbox"; control["default"] = 128; control["value"] = custom3;
-    control = controls.add<JsonObject>(); control["name"] = "custom3"; control["type"] = "checkbox"; control["default"] = 128; control["value"] = custom2;
+    control = controls.add<JsonObject>(); control["name"] = "custom1"; control["type"] = "range"; control["default"] = 128; control["value"] = custom1;
+    control = controls.add<JsonObject>(); control["name"] = "custom2"; control["type"] = "range"; control["default"] = 128; control["value"] = custom3;
+    control = controls.add<JsonObject>(); control["name"] = "custom3"; control["type"] = "range"; control["default"] = 128; control["value"] = custom2;
   }
   
   void LiveScriptNode::setControl(JsonObject control)  {

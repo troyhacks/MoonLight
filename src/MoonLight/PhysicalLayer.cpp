@@ -19,7 +19,10 @@
 
 PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "constructor");
-        initPixelsToBlend();
+
+        lights.header.type = ct_Leds;
+
+        initLightsToBlend();
 
         //create one layer - temporary
         layerV.push_back(new VirtualLayer());
@@ -35,7 +38,7 @@ PhysicalLayer::PhysicalLayer() {
 
     //run one loop of an effect
     bool PhysicalLayer::loop() {
-        //runs the loop of all effects / nodes in the layer, we need to fill the effects in the layer...
+        //runs the loop of all effects / nodes in the layer
         for (VirtualLayer * layer: layerV) {
             layer->loop();
         }
@@ -46,62 +49,58 @@ PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "addPin %d", pinNr);
     }
 
-    void PhysicalLayer::addPixelsPre() {
-        ESP_LOGD(TAG, "addPixelsPre");
-        indexP = 0;
+    void PhysicalLayer::addLightsPre() {
+        lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
+        ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
 
-        //calculate physical size (pass1, pass2)
-
-        //init mappingtable
-        //dealloc pins
-
-        //correct ledsP if > 255 (in case of circles)
-        // maxFactor = max(max(max(fixSize2.x, fixSize2.y), fixSize2.z) / 256.0, 1.0);
-
-        // set ledsPExtended
-        // ledsPExtended.type = 1; //definition, stop effects loop
-        // ledsPExtended.ledFactor *= maxFactor;
-    
-        for (VirtualLayer * layer: layerV) {
-            //add the pixel in the virtual layer
-            layer->addPixelsPre();
+        if (pass == 1) {
+            lights.header.size = {0,0,0};
+            lights.header.type = ct_count; //in progress...
+            delay(100); //wait to stop effects
+            //dealloc pins
+        } else {
+            for (VirtualLayer * layer: layerV) {
+                //add the lights in the virtual layer
+                layer->addLightsPre();
+            }
         }
-
-        //for each effect node
-        //  set virtual size based on physical start and end, ... scaling ...
-        //  modifiers can change the size...
     }
 
-    void PhysicalLayer::addPixel(Coord3D pixel) {
-        // ESP_LOGD(TAG, "addPixel %d,%d,%d", pixel.x, pixel.y, pixel.z);
+    void PhysicalLayer::addLight(Coord3D position) {
+        
+        if (pass == 1) {
+            // ESP_LOGD(TAG, "addLight %d,%d,%d", position.x, position.y, position.z);
+            if (lights.header.nrOfLights >= MAX_CHANNELS / sizeof(Coord3D)) {
+                //send the positions to the UI _socket_emit
+                //reset the index and continue...
+            } else
+                lights.positions[lights.header.nrOfLights] = {(uint16_t)position.x, (uint16_t)position.y, (uint16_t)position.z};
 
-        //add the pixel in ledsP (for preview)
-        // ledsP[indexP].r = pixel.x / maxFactor;
-        // ledsP[indexP].g = pixel.y / maxFactor;
-        // ledsP[indexP].b = pixel.z / maxFactor;
-
-        for (VirtualLayer * layer: layerV) {
-            //add the pixel in the virtual layer
-            layer->addPixel(pixel);
+                lights.header.size = lights.header.size.maximum(position);
+        } else {
+            for (VirtualLayer * layer: layerV) {
+                //add the position in the virtual layer
+                layer->addLight(position);
+            }
         }
-        //for each effect node
-        //  modifiers can change the pixel...
-        //  indexV = XYZUnprojected(pixel); //using virtual size first...
-        //  mappingTable[indexV].addIndexP(effect Node, indexP);
-
-        indexP++;
+        lights.header.nrOfLights++;
     }
 
-    void PhysicalLayer::addPixelsPost() {
-        ESP_LOGD(TAG, "addPixelsPost %d", indexP);
-        //calculate physical size (pass1, pass2)
-
-        for (VirtualLayer * layer: layerV) {
-            //add the pixel in the virtual layer
-            layer->addPixelsPost();
+    void PhysicalLayer::addLightsPost() {
+        if (pass == 1) {
+            lights.header.size += Coord3D{1,1,1};
+            ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.leds));
+            //send the positions to the UI _socket_emit
+            lights.header.type = ct_Position; //filled with positions, set back to ct_Leds in Animations
+        } else {
+            ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
+            for (VirtualLayer * layer: layerV) {
+                //add the position in the virtual layer
+                layer->addLightsPost();
+            }
+            initLightsToBlend();
         }
 
-        initPixelsToBlend();
         //driver init // alloc pins
     }
 
@@ -127,7 +126,7 @@ PhysicalLayer::PhysicalLayer() {
         } else if (equal(animation, "Lines🔥")) {
             node = new LinesEffect();
         } else if (equal(animation, "Panel🚥")) {
-            node = new Panel16fixture();
+            node = new Panel16Definition();
         } else if (equal(animation, "Multiply💎")) {
             node = new MultiplyModifier();
         } else if (equal(animation, "Mirror💎")) {
@@ -169,11 +168,11 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     // to be called in setup, if more then one effect
-    void PhysicalLayer::initPixelsToBlend() {
-        pixelsToBlend.reserve(nrOfLeds);
+    void PhysicalLayer::initLightsToBlend() {
+        lightsToBlend.reserve(lights.header.nrOfLights);
 
-        for (uint16_t indexP = 0; indexP < pixelsToBlend.size(); indexP++)
-          pixelsToBlend[indexP] = false;
+        for (uint16_t indexP = 0; indexP < lightsToBlend.size(); indexP++)
+          lightsToBlend[indexP] = false;
     }
 
 #endif //FT_MOONLIGHT

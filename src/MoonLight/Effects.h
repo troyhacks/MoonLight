@@ -36,7 +36,7 @@ class RandomEffect: public Node {
 
   void loop() override {
       layerV->fadeToBlackBy(70);
-      layerV->setPixelColor(random16(layerV->nrOfLeds), CRGB(255, random8(), 0));
+      layerV->setLightColor(random16(layerV->nrOfLights), CRGB(255, random8(), 0));
   }
 };
 
@@ -63,8 +63,8 @@ public:
 
   void loop() override {
     layerV->fadeToBlackBy(20);
-    int pos = beatsin16( bpm, 0, layerV->nrOfLeds );
-    layerV->setPixelColor(pos, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
+    int pos = beatsin16( bpm, 0, layerV->nrOfLights );
+    layerV->setLightColor(pos, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
   }
 };
 
@@ -112,13 +112,13 @@ public:
     static uint16_t phase = 0; // Tracks the phase of the sine wave
     uint8_t brightness = 255;
     
-    for (uint16_t i = 0; i < layerV->nrOfLeds; i++) {
+    for (uint16_t i = 0; i < layerV->nrOfLights; i++) {
         // Calculate the sine wave value for the current LED
-        uint8_t wave = sin8((i * 255 / layerV->nrOfLeds) + phase);
+        uint8_t wave = sin8((i * 255 / layerV->nrOfLights) + phase);
         // Map the sine wave value to a color hue
         uint8_t hue = wave + hueOffset;
         // Set the LED color using the calculated hue
-        layerV->setPixelColor(i, CHSV(hue, 255, brightness));
+        layerV->setLightColor(i, CHSV(hue, 255, brightness));
     }
 
     // Increment the phase to animate the wave
@@ -158,14 +158,14 @@ public:
 
     for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
       int colorNr = (frameNr / layerV->size.y) % 3;
-      layerV->setPixelColor(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
+      layerV->setLightColor(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
     }
 
     pos = {0,0,0};
     pos.y = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.y ); //instead of call%height
     for (pos.x = 0; pos.x <  layerV->size.x; pos.x++) {
       int colorNr = (frameNr / layerV->size.x) % 3;
-      layerV->setPixelColor(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
+      layerV->setLightColor(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
     }
     (frameNr)++;
   }
@@ -210,7 +210,11 @@ public:
         locn.y = cos8(phase/2 + i*2);
         locn.x = (layerV->size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
         locn.y = (layerV->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "leds.size.y > 2" is needed to avoid div/0 in map()
-        layerV->setPixelColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
+        // layerV->setLightColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
+        layerV->setLight(locn, ColorFromPalette(palette, millis()/100+i, 255));
+        // MovingHead mh;
+        // mh.tilt = locn.y;
+        // layerV->setLight(locn, mh);
     }
   }
 };

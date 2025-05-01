@@ -48,7 +48,7 @@ Below lists are ordered in terms of likelyhood to be accepted:
 * Add Monitor
     * socket.ts: add else listeners.get("monitor")?.forEach((listener) => listener(new Uint8Array(message.data)));
     * EventSocket.cpp: add void EventSocket::emitEvent with char * argument
-* Add MoonBase / MoonLight specific functionality (Currently fixtures and effects)
+* Add MoonBase / MoonLight specific functionality
 * ESP32SvelteKit.cpp: 
     * CPU load (and main.cpp)
     * comment response.addHeader("Cache-Control", "public, immutable, max-age=31536000");
