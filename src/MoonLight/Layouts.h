@@ -26,7 +26,7 @@ public:
 
 };
 
-class Panel16Layout: public LayoutNode {
+class PanelLayout: public LayoutNode {
   const char * name() override {return "Panel🚥";}
 
   uint8_t width = 16;
@@ -52,6 +52,7 @@ class Panel16Layout: public LayoutNode {
   }
 
   void setup() override {
+    //redundant?
     for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
       map(); //calls also addLayout
 
@@ -64,6 +65,40 @@ class Panel16Layout: public LayoutNode {
       for (int y = 0; y<height; y++) {
         layerV->layerP->addLight({x, (x%2 || !snake)?y:height-1-y, 0});
       }
+    }
+  }
+
+};
+
+class MovingHeadLayout: public LayoutNode {
+  const char * name() override {return "MovingHead🚥";}
+
+  uint8_t width = 4; //default 4 moving heads
+
+  void getControls(JsonArray controls) override {
+    hasLayout = true;
+    JsonObject control;
+    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = width;
+  }
+  
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "width") width = control["value"];
+    //if changed run map
+    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+      map(); //calls also addLayout
+  }
+
+  void setup() override {
+    //redundant?
+    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+      map(); //calls also addLayout
+
+  }
+
+  void addLayout() override {
+    for (int x = 0; x<width; x++) {
+      layerV->layerP->addLight({x, 0, 0});
     }
   }
 

@@ -85,7 +85,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 
                 for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) { //compare each item in the array
                     if (i >= stateArray.size()) { //newArray has added a row
-                        ESP_LOGD(TAG, "add %s%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        ESP_LOGD(TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
                         stateArray.add<JsonObject>(); //add new row
                         changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                     } else if (i >= newArray.size()) { //newArray has deleted a row

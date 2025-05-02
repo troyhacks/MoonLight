@@ -1,167 +1,115 @@
 //based on https://github.com/jasonsturges/threejs-sveltekit/blob/main/src/lib/scene.ts
 // also check https://github.com/threlte/threlte
 
-import {
-    BoxGeometry, SphereGeometry,
-    // DirectionalLight,
-    // HemisphereLight,
-    Mesh,
-    MeshStandardMaterial, MeshBasicMaterial, Color,
-    PerspectiveCamera,
-    Scene,
-    WebGLRenderer
-  } from 'three';
+let gl: WebGLRenderingContext;
+let program: WebGLProgram;
+let positionBuffer: WebGLBuffer;
 
-  const scene = new Scene();
-  
-  const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 500);
-  camera.position.z = 15;
-//   camera.lookAt(5, 5, 5);
-  
-  const geometry = new BoxGeometry();
-  
-  const material = new MeshStandardMaterial({
-      color: 0x00ff00,
-      metalness: 0.132
-  });
-  
-//   const cube = new Mesh(geometry, material);
-//   scene.add(cube);
+export const vertices: number[] = [];
+export let colors: number[] = [];
+
+export function clearColors() {
+  colors = [];
+}
+
+let colorBuffer: WebGLBuffer; // Buffer for color data
+
+export const updateScene = (vertices: number[], colors: number[]) => {
+  if (!gl) return; 
+
+  // Bind the position buffer and upload the vertex data
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+  // Bind the color buffer and upload the color data
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+  // Clear the canvas
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // Draw the points
+  gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
+};
 
 
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-
-//   import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-//   import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-
-// let textMesh:Mesh;
-//   const loader = new FontLoader();
-//     loader.load( 'https://raw.githubusercontent.com/mrdoob/three.js/refs/heads/dev/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
-
-//     console.log(font)
-// 	const geometry = new TextGeometry( 'MoonModules', {
-// 		font: font,
-//         size: 2,
-//         height: 0.1,
-//         curveSegments: 32,
-//         bevelEnabled: true,
-//         bevelThickness: 0.03,
-//         bevelSize: 0.02,
-//         bevelOffset: 0,
-//         bevelSegments: 4,		// size: 10,
-// 		// depth: 5,
-// 		// curveSegments: 12,
-// 		// bevelEnabled: true,
-// 		// bevelThickness: 1,
-// 		// bevelSize: 8,
-// 		// bevelOffset: 0,
-// 		// bevelSegments: 5
-// 	} );
-//     console.log("geometry", geometry);
-//     textMesh = new Mesh(geometry, material);
-//     scene.add(textMesh);
-// }
-// ,function ( xhr ) {
-// 		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-// 	},
-
-// 	// onError callback
-// 	function ( err ) {
-// 		console.log( 'An error happened' );
-// 	} );
-  
-  // const directionalLight = new DirectionalLight(0x9090aa);
-  // directionalLight.position.set(-10, 10, -10).normalize();
-  // scene.add(directionalLight);
-  
-  // const hemisphereLight = new HemisphereLight(0xffffff, 0x444444);
-  // hemisphereLight.position.set(1, 1, 1);
-  // scene.add(hemisphereLight);
-  
-  let renderer:WebGLRenderer;
-
-  let canvas:HTMLCanvasElement;
-  
-  const animate = () => {
-      requestAnimationFrame(animate);
-    //   if (textMesh) {
-    //     textMesh.rotation.x += 0.01;
-    //     textMesh.rotation.y += 0.01;
-    //   }
-    // scene.rotation.x += 0.01;
-    // scene.rotation.y += 0.01;
-    // scene.rotation.z += 0.01;
-      renderer.render(scene, camera);
-  };
-  
-  const resize = () => {
-        if (canvas.parentNode && canvas.parentNode.clientWidth && canvas.parentNode.clientHeight) {
-        // console.log("resizing",canvas.parentNode.clientWidth, canvas.parentNode.clientHeight)
-      renderer.setSize(canvas.parentNode.clientWidth, canvas.parentNode.clientHeight);
-      camera.aspect = canvas.parentNode.clientWidth / canvas.parentNode.clientHeight;
-        }
-      camera.updateProjectionMatrix();
-  };
-  
-  // https://stackoverflow.com/questions/30359830/how-do-i-clear-three-js-scene
-  function clearThree(obj: any){
-    while(obj.children.length > 0){ 
-      clearThree(obj.children[0]);
-      obj.remove(obj.children[0]);
-    }
-    if(obj.geometry) obj.geometry.dispose();
-  
-    if(obj.material){ 
-      //in case of map, bumpMap, normalMap, envMap ...
-      Object.keys(obj.material).forEach(prop => {
-        if(!obj.material[prop])
+export function createScene(el: HTMLCanvasElement) {
+      // Initialize WebGL
+      gl = el.getContext("webgl");
+      if (!gl) {
+          console.error("WebGL not supported");
           return;
-        if(obj.material[prop] !== null && typeof obj.material[prop].dispose === 'function')                                  
-          obj.material[prop].dispose();                                                      
-      })
-      obj.material.dispose();
+      }
+
+      // Set up shaders
+      const vertexShaderSource = `
+  precision mediump float;
+  attribute vec3 aPosition;
+  attribute vec4 aColor; // Color attribute
+  varying vec4 vColor;   // Pass color to the fragment shader
+
+  void main() {
+    gl_PointSize = 20.0;
+    gl_Position = vec4(aPosition, 1.0);
+    vColor = aColor; // Pass the color to the fragment shader
+  }
+  `;
+      const fragmentShaderSource = `
+  precision mediump float;
+    varying vec4 vColor;
+
+    void main() {
+      gl_FragColor = vColor;
     }
-  } 
+      `;
 
-  export const createScene = (el:HTMLCanvasElement) => {
-      canvas = el;
-      // scene.clear();
-      clearThree(scene)
+      const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+      const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-      renderer = new WebGLRenderer({ antialias: true, canvas: el });
-      renderer.setClearColor( 0xffffff, 0); //clear background see https://stackoverflow.com/questions/16177056/changing-three-js-background-to-transparent-or-other-color
-      renderer.render(scene, camera); //show a clear screen ...
+      program = createProgram(gl, vertexShader, fragmentShader);
+      gl.useProgram(program);
 
-      let controls = new OrbitControls( camera, renderer.domElement );
+      // Set up position buffer
+      positionBuffer = gl.createBuffer();
+      const positionAttributeLocation = gl.getAttribLocation(program, "aPosition");
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.enableVertexAttribArray(positionAttributeLocation);
+      gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 
-      resize();
-      animate();
-  };
-  
-  export const addLed = (size: any, x: any, y: any, z:any) => {
-    // console.log("adding led", size, x, y, z);
-    let geometry = new SphereGeometry(size);
-    const material = new MeshBasicMaterial({transparent: true, opacity: 1.0});
-    material.color = new Color(0.5,0,0.5);
-    const mesh = new Mesh( geometry, material );
-    mesh.position.set(x, y, z);
-    // mesh.name = outputsIndex + " - " + ledsIndex++;
-    scene.add( mesh );
-    };
+      // Set up color buffer
+      colorBuffer = gl.createBuffer();
+      const colorAttributeLocation = gl.getAttribLocation(program, "aColor");
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+      gl.enableVertexAttribArray(colorAttributeLocation);
+      gl.vertexAttribPointer(colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
 
-    // export const colorLed = (x: any, y: any, z:any, r: any, g: any, b:any) => {
-    export const colorLed = (ledIndex:any, r: any, g: any, b:any) => {
-        // console.log("coloring led", x, y, z, r, g, b);
-        // let ledIndex = x + y*10 + z * 100;
-        //assuming all childred are Spheres/leds
-        if (scene.children[ledIndex] && scene.children[ledIndex].material) {
-            if (r+g+b<1)
-                scene.children[ledIndex].material.opacity = r+g+b;//.05;
-            else {
-                scene.children[ledIndex].material.opacity = 1;
-            }
-            scene.children[ledIndex].material.color = new Color(r, g, b);
-        }
-    };
+      // Set up WebGL viewport
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+      gl.clearColor(0, 0, 0, 1);
+      gl.enable(gl.DEPTH_TEST);
+}
 
-  window.addEventListener('resize', resize);
+const createShader = (gl: WebGLRenderingContext, type: number, source: string): WebGLShader => {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      throw new Error("Shader compilation failed");
+  }
+  return shader;
+};
+
+const createProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram => {
+  const program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error(gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      throw new Error("Program linking failed");
+  }
+  return program;
+};

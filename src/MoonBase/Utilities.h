@@ -61,6 +61,14 @@ static bool equal(const char *a, const char *b) {
     return strcmp(a, b) == 0;
 }
 
+static bool contains(const char *a, const char *b) {
+    if (a == nullptr || b == nullptr) {
+        return false;
+    }
+    return strnstr(a, b, sizeof(a)) != nullptr;
+}
+
+
 //See https://discord.com/channels/473448917040758787/718943978636050542/1357670679196991629
 template <size_t N>
 struct Char {

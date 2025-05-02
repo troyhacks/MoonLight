@@ -25,6 +25,98 @@ class SolidEffect: public Node {
   }
 };
 
+//BouncingBalls inspired by WLED
+#define maxNumBalls 16
+//each needs 12 bytes
+struct Ball {
+  unsigned long lastBounceTime;
+  float impactVelocity;
+  float height;
+};
+
+class BouncingBallsEffect: public Node {
+  public:
+
+  uint8_t grav = 128;
+  uint8_t numBalls = 8;
+
+  void getControls(JsonArray controls) override {
+    JsonObject control;
+    control = controls.add<JsonObject>(); control["name"] = "grav"; control["type"] = "range"; control["default"] = 128; control["value"] = grav;
+    control = controls.add<JsonObject>(); control["name"] = "numBalls"; control["type"] = "range"; control["default"] = 8; control["min"] = 1; control["max"] = maxNumBalls; control["value"] = numBalls;
+  }
+
+  void setControl(JsonObject control) override {
+    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+    if (control["name"] == "grav") grav = control["value"];
+    if (control["name"] == "numBalls") numBalls = control["value"];
+  }
+
+  //binding of loop persistent values (pointers)
+  Ball balls[16][maxNumBalls];
+
+  const char * name() override {return "BouncingBalls";}
+  uint8_t dim() override {return _1D;}
+  const char * tags() override {return "💡";}
+
+  void setup() override {}
+
+  void loop() override {
+    layerV->fadeToBlackBy(100);
+
+    // non-chosen color is a random color
+    const float gravity = -9.81f; // standard value of gravity
+    // const bool hasCol2 = SEGCOLOR(2);
+    const unsigned long time = millis();
+
+    //not necessary as effectControls is cleared at setup(LedsLayer &leds)
+    // if (call == 0) {
+    //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
+    // }
+
+    for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being
+    for (size_t i = 0; i < numBalls; i++) {
+      float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
+      float timeSec = timeSinceLastBounce/1000.0f;
+      balls[y][i].height = (0.5f * gravity * timeSec + balls[y][i].impactVelocity) * timeSec; // avoid use pow(x, 2) - its extremely slow !
+
+      if (balls[y][i].height <= 0.0f) {
+        balls[y][i].height = 0.0f;
+        //damping for better effect using multiple balls
+        float dampening = 0.9f - float(i)/float(numBalls * numBalls); // avoid use pow(x, 2) - its extremely slow !
+        balls[y][i].impactVelocity = dampening * balls[y][i].impactVelocity;
+        balls[y][i].lastBounceTime = time;
+
+        if (balls[y][i].impactVelocity < 0.015f) {
+          float impactVelocityStart = sqrtf(-2.0f * gravity) * random8(5,11)/10.0f; // randomize impact velocity
+          balls[y][i].impactVelocity = impactVelocityStart;
+        }
+      } else if (balls[y][i].height > 1.0f) {
+        continue; // do not draw OOB ball
+      }
+
+      // uint32_t color = SEGCOLOR(0);
+      // if (leds.palette) {
+      //   color = leds.color_wheel(i*(256/MAX(numBalls, 8)));
+      // } 
+      // else if (hasCol2) {
+      //   color = SEGCOLOR(i % NUM_COLORS);
+      // }
+
+      int pos = roundf(balls[y][i].height * (layerV->size.x - 1));
+
+      CRGBPalette16 palette = PartyColors_p;
+
+      CRGB color = ColorFromPalette(palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
+
+      layerV->setLight({pos, y, 0}, color);
+      // if (leds.size.x<32) leds.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
+      // else           leds.setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+    } //balls      layerV->fill_solid(CRGB::White);
+    }
+  }
+};
+
 class RandomEffect: public Node {
   public:
 
@@ -63,8 +155,10 @@ public:
 
   void loop() override {
     layerV->fadeToBlackBy(20);
-    int pos = beatsin16( bpm, 0, layerV->nrOfLights );
-    layerV->setLightColor(pos, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
+    for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being    
+      int pos = beatsin16( bpm, 0, layerV->size.x-1, y * 100 );
+      layerV->setLightColor({pos,y,0}, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
+    }
   }
 };
 
@@ -219,4 +313,35 @@ public:
   }
 };
 
+class MovingHeadEffect: public Node {
+  public:
+  
+    uint8_t bpm;
+  
+    void getControls(JsonArray controls) override {
+      JsonObject control;
+      control = controls.add<JsonObject>(); control["name"] = "bpm"; control["type"] = "range"; control["default"] = 30; control["value"] = bpm;
+    }
+  
+    void setControl(JsonObject control) override {
+      if (control["name"] == "bpm") bpm = control["value"];
+    }
+  
+    void loop() override {
+      layerV->fadeToBlackBy(255); //reset all channels
+
+      int pos = beatsin16( bpm, 0, layerV->size.x-1);
+      CRGB color = CHSV( millis()/50, 255, 255);
+
+      MovingHead mh;
+      mh.red = color.red;
+      mh.green = color.green;
+      mh.blue = color.blue;
+      mh.tilt = beatsin8(bpm, 0, 255);
+      mh.pan = beatsin8(bpm, 0, 255);
+      mh.roll = beatsin8(bpm, 0, 255);
+      layerV->setLight({pos,0,0}, mh);
+    }
+  };
+  
 #endif

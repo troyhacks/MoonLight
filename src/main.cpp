@@ -26,6 +26,7 @@
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         #include "MoonLight/ModuleAnimations.h"
+        #include "MoonLight/ModuleArtnet.h"
     #endif
 #endif
 
@@ -60,6 +61,7 @@ LightStateService lightStateService = LightStateService(&server,
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit, &filesService);
+        ModuleArtnet moduleArtnet = ModuleArtnet(&server, &esp32sveltekit, &filesService);
     #endif
 #endif
     
@@ -81,6 +83,7 @@ void setup()
 
         #if FT_ENABLED(FT_MOONLIGHT)
             moduleAnimations.begin();
+            moduleArtnet.begin();
         #endif
     #endif
 
@@ -121,6 +124,14 @@ void loop()
         #if FT_ENABLED(FT_MOONLIGHT)
             moduleAnimations.loop();
         #endif
+
+        //20ms loop
+        static int lastTime20ms = 0;
+        if (millis() - lastTime20ms > 20)
+        {
+            lastTime20ms = millis();
+            moduleArtnet.loop20ms();
+        }
 
         //50ms loop
         static int lastTime50ms = 0;

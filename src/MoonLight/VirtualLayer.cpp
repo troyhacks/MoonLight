@@ -120,7 +120,8 @@ void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
         //   fix->ledsP[indexP].b = color.r;
         // }
         // else
-        layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend):color;
+        // layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend):color;
+        layerP->lights.leds[indexP] = color;
         break; }
       case m_moreLights:
         if (mappingTable[indexV].indexes < mappingTableIndexes.size())
@@ -130,7 +131,8 @@ void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
             //   fix->ledsP[indexP].g = color.g;
             //   fix->ledsP[indexP].b = color.r;
             // } else
-            layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend): color;
+            // layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend): color;
+            layerP->lights.leds[indexP] = color;
           }
         else
           ESP_LOGW(TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
@@ -139,7 +141,8 @@ void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
     }
   }
   else if (indexV < NUM_LEDS) {//no mapping
-    layerP->lights.leds[indexV] = layerP->lightsToBlend[indexV]?blend(color, layerP->lights.leds[indexV], layerP->globalBlend): color;
+    // layerP->lights.leds[indexV] = layerP->lightsToBlend[indexV]?blend(color, layerP->lights.leds[indexV], layerP->globalBlend): color;
+    layerP->lights.leds[indexV] = color;
     // layerP->lights.dmxChannels[indexV] = (byte*)&color;
   }
   // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect

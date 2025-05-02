@@ -28,17 +28,20 @@ class ModuleAnimations : public Module
 {
 public:
 
+    PsychicHttpServer *_server;
+
     ModuleAnimations(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
         FilesService *filesService
     ) : Module("animations", server, sveltekit, filesService) {
         ESP_LOGD(TAG, "constructor");
+        _server = server;
     }
 
     void begin() {
         Module::begin();
 
-        ESP_LOGD(TAG, "");
+        ESP_LOGD(TAG, "L:%d LH:%d  N:%d PL:%d VL:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(VirtualLayer));
 
         #if FT_ENABLED(FT_LIVESCRIPT)
             //create a handler which recompiles the animation when the file of the current animation changes in the File Manager
@@ -66,6 +69,21 @@ public:
 
         #if FT_ENABLED(FT_MONITOR)
             _socket->registerEvent("monitor");
+            _server->on("/rest/monitorLayout", HTTP_GET, [&](PsychicRequest *request) {
+                ESP_LOGD(TAG, "rest monitor triggered");
+
+                //trigger pass 1 mapping of layout
+                for (Node *node : layerP.layerV[0]->nodes) {
+                    if (node->hasLayout && node->on) {
+                        ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                        for (layerP.pass = 1; layerP.pass <=1; layerP.pass++) //only virtual mapping
+                            node->map();
+                    }
+                }
+
+                PsychicJsonResponse response = PsychicJsonResponse(request, false);
+                return response.send();
+            });
         #endif
     }
 
@@ -97,13 +115,16 @@ public:
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random"; values = property["values"].to<JsonArray>();
             values.add("Solid🔥");
+            values.add("BouncingBalls🔥");
             values.add("Random🔥");
             values.add("Sinelon🔥");
             values.add("Rainbow🔥");
             values.add("Sinus🔥");
             values.add("Lissajous🔥");
+            values.add("MovingHead🔥");
             values.add("Lines🔥");
             values.add("Panel🚥");
+            values.add("MovingHead🚥");
             values.add("Multiply💎");
             values.add("Mirror💎");
             values.add("Pinwheel💎");
@@ -181,14 +202,14 @@ public:
             if (equal(updatedItem.name, "animation")) { //onAnimation
 
                 if (updatedItem.oldValue != "null") {
-                    ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     nodeState.remove("controls"); //remove the controls
                     layerP.removeNode(updatedItem.oldValue.c_str());
                 }
                 
                 // remove or add Nodes (incl controls)
                 if (!nodeState["animation"].isNull()) { // if animation changed // == updatedItem.value
-                    ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     // delete the old animation, create a new one
                     // if (updatedItem.oldValue != "null") {
                     //     layerP.removeNode(updatedItem.oldValue.c_str());
@@ -208,8 +229,8 @@ public:
                         for (Node *node : layerP.layerV[0]->nodes) {
                             if (node->hasLayout && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
-                                layerP.pass = 2; //only virtual mapping
-                                node->map();
+                                for (layerP.pass = 1; layerP.pass <=2; layerP.pass++) //only virtual mapping
+                                    node->map();
                             }
                         }
                     }
@@ -241,12 +262,12 @@ public:
                 Node * nodeClass = findNode(nodeState["animation"]);
                 if (nodeClass) {
                     nodeClass->on = updatedItem.value.as<bool>();
-                    if (nodeClass->on && nodeClass->hasModifier) {
+                    if (nodeClass->hasModifier) { //nodeClass->on && 
                         for (Node *node : layerP.layerV[0]->nodes) {
                             if (node->hasLayout && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
-                                layerP.pass = 2; //only virtual mapping
-                                node->map();
+                                for (layerP.pass = 1; layerP.pass <=2; layerP.pass++) //only virtual mapping
+                                    node->map();
                             }
                         }
                     }
@@ -271,9 +292,9 @@ public:
                     if (nodeClass->on && nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
                             if (node->hasLayout && node->on) {
-                                ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
-                                layerP.pass = 2; //only virtual mapping
-                                node->map();
+                                ESP_LOGD(TAG, "Modifier control changed -> setup layout %s", node->animation);
+                                for (layerP.pass = 1; layerP.pass <= 2; layerP.pass++) //only virtual mapping
+                                    node->map();
                             }
                         }
                     }

@@ -8,6 +8,7 @@ nav:
       - general/pull-requests.md
   - "MoonLight":
       - moonbase/module/animations.md
+      - moonbase/module/artnet.md
   - "MoonBase":
       - moonbase/modules.md
       - moonbase/files.md

@@ -48,13 +48,19 @@ struct CRGBW {
 };
 
 struct MovingHead {
-  uint8_t pan; //0-255
-  uint8_t tilt; //0-255
-  byte dmxChannels[13]; //same size as 5 leds
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  uint8_t pan;
+  uint8_t tilt;
+  uint8_t roll;
+  byte channels[9]; //dummy
 };
 
 struct CrazyCurtain {
-  CRGB useful;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
   byte ccp[3];
 };
 
@@ -62,9 +68,11 @@ struct LightsHeader {
   uint8_t type = ct_Leds; //default
   uint8_t ledFactor = 1;
   uint8_t ledSize = 4; //mm
+  uint8_t dummy1;
   uint16_t nrOfLights = 256;
   Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
-};
+  uint8_t dummy2[4];
+}; // fill with dummies to make size 24
 
 struct Lights {
   LightsHeader header;

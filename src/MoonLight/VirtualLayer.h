@@ -85,16 +85,16 @@ class VirtualLayer {
     void fadeToBlackBy(const uint8_t fadeBy);
 
     template <typename T>
-    void setLight(const Coord3D &position, const T& xcv) {setLight(XYZUnprojected(position), xcv);}
+    void setLight(const Coord3D &position, const T& value) {setLight(XYZUnprojected(position), value);}
     template <typename T>
-    void setLight(const uint16_t indexV, const T& xcv) {  // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
+    void setLight(const uint16_t indexV, const T& value) {  // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
       if (indexV < mappingTable.size()) {
         // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTable.size());
         switch (mappingTable[indexV].mapType) {
           case m_color:{
             //only room for storing colors
             if (std::is_same<T, CRGB>::value) {
-              const byte* valueAsBytes = reinterpret_cast<const byte*>(&xcv);
+              const byte* valueAsBytes = reinterpret_cast<const byte*>(&value);
               mappingTable[indexV].rgb14 = ((min(valueAsBytes[0] + 3, 255) >> 3) << 9) + 
                                          ((min(valueAsBytes[1] + 3, 255) >> 3) << 4) + 
                                           (min(valueAsBytes[2] + 7, 255) >> 4);
@@ -110,10 +110,7 @@ class VirtualLayer {
             //   fix->ledsP[indexP].b = color.r;
             // }
             // else
-            const byte* valueAsBytes = reinterpret_cast<const byte*>(&xcv);
-            for (size_t i = 0; i < sizeof(T); ++i) {
-              layerP->lights.channels[indexP*sizeof(T)+i] = valueAsBytes[i];
-            }
+            memcpy(&layerP->lights.channels[indexP*sizeof(T)], &value, sizeof(T));
       
             // &layerP->lights.channels[indexP*sizeof(T)] = valueAsBytes;
             break; }
@@ -125,12 +122,7 @@ class VirtualLayer {
                 //   fix->ledsP[indexP].g = color.g;
                 //   fix->ledsP[indexP].b = color.r;
                 // } else
-                const byte* valueAsBytes = reinterpret_cast<const byte*>(&xcv);
-                // memcpy(layerP->lights.channels[indexP*sizeof(T)], valueAsBytes, sizeof(T));
-                // memcpy(valueAsBytes, layerP->lights.channels[indexP*sizeof(T)], sizeof(T));
-                for (size_t i = 0; i < sizeof(T); ++i) {
-                  layerP->lights.channels[indexP*sizeof(T)+i] = valueAsBytes[i];
-                }
+                memcpy(&layerP->lights.channels[indexP*sizeof(T)], &value, sizeof(T));
               }
             else
               ESP_LOGW(TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
@@ -139,10 +131,7 @@ class VirtualLayer {
         }
       }
       else if (indexV < NUM_LEDS) {//no mapping
-        const byte* valueAsBytes = reinterpret_cast<const byte*>(&xcv);
-        for (size_t i = 0; i < sizeof(T); ++i) {
-          layerP->lights.channels[indexV*sizeof(T)+i] = valueAsBytes[i];
-        }
+        memcpy(&layerP->lights.channels[indexV*sizeof(T)], &value, sizeof(T));
       }
         // layerP->lights.dmxChannels[indexV] = (byte*)&color;
       // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
@@ -156,15 +145,15 @@ class VirtualLayer {
       if (indexV < mappingTable.size()) {
         switch (mappingTable[indexV].mapType) {
           case m_oneLight:
-            return layerP->lights.leds[mappingTable[indexV].indexP]; 
+            return layerP->lights.channels[mappingTable[indexV].indexP * sizeof(T)]; 
             break;
           case m_moreLights:
-            return layerP->lights.leds[mappingTableIndexes[mappingTable[indexV].indexes][0]]; //any will do as they are all the same
+            return layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * sizeof(T)]; //any will do as they are all the same
             break;
           default: // m_color:
             return T();
             // if (std::is_same<T, CRGB>::value) {
-            //   const byte* valueAsBytes = reinterpret_cast<const byte*>(&xcv);
+            //   const byte* valueAsBytes = reinterpret_cast<const byte*>(&value);
             //   mappingTable[indexV].rgb14 = ((min(valueAsBytes[0] + 3, 255) >> 3) << 9) + 
             //                             ((min(valueAsBytes[1] + 3, 255) >> 3) << 4) + 
             //                               (min(valueAsBytes[2] + 7, 255) >> 4);
@@ -176,7 +165,7 @@ class VirtualLayer {
         }
       }
       else if (indexV < NUM_LEDS) //no mapping
-        return layerP->lights.leds[indexV];
+        return layerP->lights.channels[indexV * sizeof(T)];
       else {
         // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
         // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, STARLIGHT_MAXLEDS);

@@ -113,6 +113,8 @@ PhysicalLayer::PhysicalLayer() {
         Node *node = nullptr;
         if (equal(animation, "Solid")) {
             node = new SolidEffect();
+        } else if (equal(animation, "BouncingBalls🔥")) {
+            node = new BouncingBallsEffect();
         } else if (equal(animation, "Random🔥")) {
             node = new RandomEffect();
         } else if (equal(animation, "Sinelon🔥")) {
@@ -123,10 +125,14 @@ PhysicalLayer::PhysicalLayer() {
             node = new SinusEffect();
         } else if (equal(animation, "Lissajous🔥")) {
             node = new LissajousEffect();
+        } else if (equal(animation, "MovingHead🔥")) {
+            node = new MovingHeadEffect();
         } else if (equal(animation, "Lines🔥")) {
             node = new LinesEffect();
         } else if (equal(animation, "Panel🚥")) {
-            node = new Panel16Layout();
+            node = new PanelLayout();
+        } else if (equal(animation, "MovingHead🚥")) {
+            node = new MovingHeadLayout();
         } else if (equal(animation, "Multiply💎")) {
             node = new MultiplyModifier();
         } else if (equal(animation, "Mirror💎")) {
