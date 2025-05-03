@@ -11,8 +11,6 @@
 	let height = -1;
 	let depth = -1;
 
-	let str = "Monitor";
-
 	let done = false; //temp to show one instance of monitor data receiced
 
 	// enum ChannelType {
@@ -49,14 +47,9 @@
 
 		let type:number = header[0];
 		
-		//fixChange
-		if (type == ct_Position) {
-			console.log(lights)
-			handleLayout(header, data);
-		} else if (type == ct_Leds) {
+		if (type == ct_Leds) {
 			if (!done) {
-				createScene(el);
-				requestLayout();
+				requestLayout(); //ask for positions
 				console.log("Monitor.handleMonitor", data);
 				done = true;
 			}
@@ -68,10 +61,11 @@
 				const b = data[index + 2] / 255;
 				const a = 1.0; // Full opacity
 				colors.push(r, g, b, a);
-
-				// str = "("+ data[index] + "," + data[index+1] + "," + data[index+2] + ")," + str;
 			}
 			updateScene(vertices, colors);
+		} else if (type == ct_Position) { //layout Change
+			// console.log(lights)
+			handleLayout(header, data);
 		}
 	};
 
@@ -79,10 +73,7 @@
 		console.log("Monitor.handleLayout positions", header, positions);
 
 		//rebuild scene
-		// createScene(el);
-
-		str = "Header: " + header + "\n";
-		str += "Data Size: " + positions.length / 12 + "\n";
+		createScene(el);
 
 		let ledFactor: number = 1;//header[1];
 		let ledSize: number = header[2];
@@ -94,16 +85,15 @@
 
 		for (let index = 0; index < positions.length; index +=12) {
 			// console.log(data[index], data[index+1], data[index+2]);
-			//this is weird...
+			//this is weird... where is the first position?
 			let x = (positions[index-1] * 256 + positions[index]) / ledFactor;
 			let y = (positions[index+3] * 256 + positions[index+4]) / ledFactor;
 			let z = (positions[index+7] * 256 + positions[index+8]) / ledFactor;
 
-			str += "("+ x + "," + y + "," + z + "),";
-
-			x = (x / (width - 1)) * 2.0 - 1.0;
-			y = (y / (height - 1)) * 2.0 - 1.0;
-			z = 0;//(z / (depth - 1)) * 2.0 - 1.0; //todo
+			//set to -1,1 coordinate system of webGL
+			x = width==1?0:(x / (width - 1)) * 2.0 - 1.0;
+			y = height==1?0:(y / (height - 1)) * 2.0 - 1.0;
+			z = depth==1?0:(z / (depth - 1)) * 2.0 - 1.0;
 
 			vertices.push(x, y, z);
 		}
@@ -131,10 +121,9 @@
 		<span>Monitor</span>
 	{/snippet}
 
-	<!-- <div class="w-full overflow-x-auto"> -->
+	<div class="w-full overflow-x-auto">
 	 <div>
-		<canvas bind:this={el} width="800" height="600"></canvas>
-		<textarea  class="w-full h-full" readonly>{str}</textarea>
+		<canvas bind:this={el} width="720" height="720"></canvas>
 	</div>
 
 </SettingsCard>

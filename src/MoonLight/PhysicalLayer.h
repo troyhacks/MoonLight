@@ -114,8 +114,8 @@ class PhysicalLayer {
     // an effect is using a virtual layer: tell the effect in which layer to run...
 
     //run one loop of an effect
-    Node *addNode(const char * animation);
-    bool removeNode(const char * animation);
+    Node *addNode(const char * animation, uint8_t index);
+    void removeNode(Node * node);
 
     // to be called in setup, if more then one effect
     void initLightsToBlend();

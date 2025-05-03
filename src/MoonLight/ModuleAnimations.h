@@ -201,22 +201,16 @@ public:
 
             if (equal(updatedItem.name, "animation")) { //onAnimation
 
-                if (updatedItem.oldValue != "null") {
-                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                    nodeState.remove("controls"); //remove the controls
-                    layerP.removeNode(updatedItem.oldValue.c_str());
-                }
-                
+                Node *oldNode = layerP.layerV[0]->nodes.size() > updatedItem.index[0]?layerP.layerV[0]->nodes[updatedItem.index[0]]:nullptr;
+                bool newNode = false;
                 // remove or add Nodes (incl controls)
                 if (!nodeState["animation"].isNull()) { // if animation changed // == updatedItem.value
                     ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                    // delete the old animation, create a new one
-                    // if (updatedItem.oldValue != "null") {
-                    //     layerP.removeNode(updatedItem.oldValue.c_str());
-                    // }
     
-                    Node *nodeClass = layerP.addNode(nodeState["animation"]); // fill the layers and effects ...
-                    
+                    Node *nodeClass = layerP.addNode(nodeState["animation"], updatedItem.index[0]);
+                    nodeClass->on = nodeState["on"];
+                    newNode = true;
+
                     nodeState["controls"].to<JsonArray>(); //clear the controls
                     nodeClass->getControls(nodeState["controls"]); //create the controls
                     //show these controls in the UI
@@ -236,14 +230,14 @@ public:
                     }
                 }
 
-                // if (nodeState["animation"].isNull()) {
-                //     ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                //     // delete the old animation
-                //     if (updatedItem.oldValue != "null") {
-                //         layerP.removeNode(updatedItem.oldValue.c_str());
-                //     }
-                // }
-    
+                if (updatedItem.oldValue != "null" && oldNode) {
+                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    // if (!newNode)
+                    //     layerP.layerV[0]->nodes.pop_back();
+                    // nodeState.remove("controls"); //remove the controls
+                    layerP.removeNode(oldNode);
+                }
+                    
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     // if (updatedItem.oldValue.length()) {
                     //     ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
@@ -258,8 +252,9 @@ public:
                     // }
                 #endif
             }
+
             if (equal(updatedItem.name, "on")) {
-                Node * nodeClass = findNode(nodeState["animation"]);
+                Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                 if (nodeClass) {
                     nodeClass->on = updatedItem.value.as<bool>();
                     if (nodeClass->hasModifier) { //nodeClass->on && 
@@ -280,7 +275,7 @@ public:
             if (equal(updatedItem.parent[1], "controls") && equal(updatedItem.name, "value")) {    //process controls values 
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     
-                Node * nodeClass = findNode(nodeState["animation"]);
+                Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                 if (nodeClass) {
                     nodeClass->setControl(nodeState["controls"][updatedItem.index[1]]); //to do only send the changed control
                     // if Modfier control changed, run the layout

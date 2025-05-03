@@ -43,6 +43,12 @@ struct UpdatedItem {
         index[0] = UINT8_MAX;
         index[1] = UINT8_MAX;
     }
+
+    const char *parentX() { return equal(parent[1],"")?parent[0]:parent[1];}
+    uint8_t indexX() { return index[1]==UINT8_MAX?index[0]:index[1];}
+
+    const char *grandParent() { return equal(parent[1],"")?parent[1]:parent[0];}
+    uint8_t grandIndex() { return index[1]==UINT8_MAX?index[1]:index[0];}
 };
 
 class ModuleState

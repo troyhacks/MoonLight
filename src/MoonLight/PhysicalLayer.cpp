@@ -108,7 +108,7 @@ PhysicalLayer::PhysicalLayer() {
 
 
     //run one loop of an effect
-    Node* PhysicalLayer::addNode(const char * animation) {
+    Node* PhysicalLayer::addNode(const char * animation, uint8_t index) {
 
         Node *node = nullptr;
         if (equal(animation, "Solid")) {
@@ -148,7 +148,11 @@ PhysicalLayer::PhysicalLayer() {
         if (node) {
             node->constructor(layerV[0], animation); //pass the layer to the node
             node->setup(); //run the setup of the effect
-            layerV[0]->nodes.push_back(node); //add the node to the layer
+            // layerV[0]->nodes.reserve(index+1);
+            if (layerV[0]->nodes.size() <= index)
+                layerV[0]->nodes.push_back(node);
+            else
+                layerV[0]->nodes[index] = node; //add the node to the layer
         }
 
         ESP_LOGD(TAG, "%s (s:%d)", animation, layerV[0]->nodes.size());
@@ -156,22 +160,13 @@ PhysicalLayer::PhysicalLayer() {
         return node;
     }
 
-    bool PhysicalLayer::removeNode(const char * animation) {
-        //find node in layerV[0]
-        for (size_t i = 0; i < layerV[0]->nodes.size(); i++) {
-            // ESP_LOGD(TAG, "%d %d", i, layerV[0]->nodes.size());
-            Node *node = layerV[0]->nodes[i];
-            // ESP_LOGD(TAG, "%s %s", node->animation, animation);
-            if (equal(node->animation, animation)) {
-                node->destructor();
-                delete node;
-                layerV[0]->nodes.erase(layerV[0]->nodes.begin() + i);
-                ESP_LOGD(TAG, "remove node %s (s:%d)", animation, layerV[0]->nodes.size());
-                return true;
-            }
-        }
-        return false;
+    void PhysicalLayer::removeNode(Node *node) {
+        ESP_LOGD(TAG, "remove node (s:%d)", layerV[0]->nodes.size());
+        node->destructor();
+        delete node;
+        // layerV[0]->nodes[index] = nullptr;
     }
+
 
     // to be called in setup, if more then one effect
     void PhysicalLayer::initLightsToBlend() {

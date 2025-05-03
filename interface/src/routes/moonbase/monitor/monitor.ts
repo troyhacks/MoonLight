@@ -8,30 +8,7 @@ let positionBuffer: WebGLBuffer;
 export const vertices: number[] = [];
 export let colors: number[] = [];
 
-export function clearColors() {
-  colors = [];
-}
-
 let colorBuffer: WebGLBuffer; // Buffer for color data
-
-export const updateScene = (vertices: number[], colors: number[]) => {
-  if (!gl) return; 
-
-  // Bind the position buffer and upload the vertex data
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-  // Bind the color buffer and upload the color data
-  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-  // Clear the canvas
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  // Draw the points
-  gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
-};
-
 
 export function createScene(el: HTMLCanvasElement) {
       // Initialize WebGL
@@ -49,7 +26,7 @@ export function createScene(el: HTMLCanvasElement) {
   varying vec4 vColor;   // Pass color to the fragment shader
 
   void main() {
-    gl_PointSize = 20.0;
+    gl_PointSize = 10.0;
     gl_Position = vec4(aPosition, 1.0);
     vColor = aColor; // Pass the color to the fragment shader
   }
@@ -91,12 +68,14 @@ export function createScene(el: HTMLCanvasElement) {
 
 const createShader = (gl: WebGLRenderingContext, type: number, source: string): WebGLShader => {
   const shader = gl.createShader(type);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error(gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      throw new Error("Shader compilation failed");
+  if (shader) {
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        throw new Error("Shader compilation failed");
+    }
   }
   return shader;
 };
@@ -112,4 +91,26 @@ const createProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fra
       throw new Error("Program linking failed");
   }
   return program;
+};
+
+export function clearColors() {
+  colors = [];
+}
+
+export const updateScene = (vertices: number[], colors: number[]) => {
+  if (!gl) return; 
+
+  // Bind the position buffer and upload the vertex data
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+  // Bind the color buffer and upload the color data
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+  // Clear the canvas
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // Draw the points
+  gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
 };
