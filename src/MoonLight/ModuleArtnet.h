@@ -26,7 +26,7 @@ class ModuleArtnet : public Module
 {
 public:
 
-    IPAddress targetIp; //tbd: targetip also configurable from fixtures and artnet instead of pin output
+    IPAddress controllerIP; //tbd: controllerIP also configurable from fixtures and artnet instead of pin output
     std::vector<uint16_t> hardware_outputs = {1024,1024,1024,1024,1024,1024,1024,1024};
     std::vector<uint16_t> hardware_outputs_universe_start = { 0,7,14,21,28,35,42,49 }; //7*170 = 1190 leds => last universe not completely used
     size_t sequenceNumber = 0;
@@ -45,7 +45,7 @@ public:
         JsonArray values; // if a property is a select, this is the values of the select
 
         property = root.add<JsonObject>(); property["name"] = "on"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "targetIP"; property["type"] = "number"; property["min"] = 2; property["max"] = 255; property["default"] = 11;
+        property = root.add<JsonObject>(); property["name"] = "controllerIP"; property["type"] = "number"; property["min"] = 2; property["max"] = 255; property["default"] = 11;
 
         property = root.add<JsonObject>(); property["name"] = "outputs"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -63,19 +63,19 @@ public:
 
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (equal(updatedItem.name, "targetIP")) {
-            targetIp[0] = WiFi.localIP()[0];
-            targetIp[1] = WiFi.localIP()[1];
-            targetIp[2] = WiFi.localIP()[2];
-            targetIp[3] = updatedItem.value;
+        if (equal(updatedItem.name, "controllerIP")) {
+            controllerIP[3] = updatedItem.value;
+            ESP_LOGD(TAG, "controllerIP = %s", controllerIP.toString().c_str());
         }
         else if (equal(updatedItem.parent[0], "outputs")) { // onNodes
             JsonVariant outputs = _state.data["outputs"][updatedItem.index[0]];
 
             if (equal(updatedItem.name, "start")) { //onStart
+                ESP_LOGD(TAG, "Start[%d] = %d", updatedItem.index[0], updatedItem.value.as<int>());
                 hardware_outputs_universe_start[updatedItem.index[0]] = updatedItem.value;
             }
             if (equal(updatedItem.name, "size")) { //onStart
+                ESP_LOGD(TAG, "Size[%d] = %d", updatedItem.index[0], updatedItem.value.as<int>());
                 hardware_outputs[updatedItem.index[0]] = updatedItem.value;
             }
         }
@@ -87,14 +87,17 @@ void loop20ms() {
 
     // if(!mdls->isConnected) return;
 
-
     if (!_state.data["on"]) return;
 
-    if(!targetIp) return;
+    controllerIP[0] = WiFi.localIP()[0];
+    controllerIP[1] = WiFi.localIP()[1];
+    controllerIP[2] = WiFi.localIP()[2];
+
+    if(!controllerIP) return;
 
     // if(!eff->newFrame) return;
 
-    // uint8_t bri = mdl->linearToLogarithm(fix->bri);
+    uint8_t bri = layerP.lights.header.brightness;
 
     // calculate the number of UDP packets we need to send
 
@@ -113,53 +116,55 @@ void loop20ms() {
     
     for (uint_fast16_t hardware_output = 0; hardware_output < hardware_outputs.size(); hardware_output++) { //loop over all outputs
         
-        if (bufferOffset > layerP.lights.header.nrOfLights * sizeof(CRGB)) {
-        // This stop is reached if we don't have enough pixels for the defined Art-Net output.
-        return; // stop when we hit end of LEDs
+        if (bufferOffset > layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight) {
+            // This stop is reached if we don't have enough pixels for the defined Art-Net output.
+            return; // stop when we hit end of LEDs
         }
 
         hardware_output_universe = hardware_outputs_universe_start[hardware_output];
 
-        uint_fast16_t channels_remaining = hardware_outputs[hardware_output] * sizeof(CRGB);
+        uint_fast16_t channels_remaining = hardware_outputs[hardware_output] * layerP.lights.header.channelsPerLight;
 
         while (channels_remaining > 0) {
-        const uint_fast16_t ARTNET_CHANNELS_PER_PACKET = 510; // 512/4=128 RGBW LEDs, 510/3=170 RGB LEDs
+            const uint_fast16_t ARTNET_CHANNELS_PER_PACKET = 510; // 512/4=128 RGBW LEDs, 510/3=170 RGB LEDs
 
-        uint_fast16_t packetSize = ARTNET_CHANNELS_PER_PACKET;
+            uint_fast16_t packetSize = ARTNET_CHANNELS_PER_PACKET;
 
-        if (channels_remaining < ARTNET_CHANNELS_PER_PACKET) {
-            packetSize = channels_remaining;
-            channels_remaining = 0;
-        } else {
-            channels_remaining -= packetSize;
-        }
+            if (channels_remaining < ARTNET_CHANNELS_PER_PACKET) {
+                packetSize = channels_remaining;
+                channels_remaining = 0;
+            } else {
+                channels_remaining -= packetSize;
+            }
 
-        // set the parts of the Art-Net packet header that change:
-        packet_buffer[12] = sequenceNumber;
-        packet_buffer[14] = hardware_output_universe;
-        packet_buffer[16] = packetSize >> 8;
-        packet_buffer[17] = packetSize;
+            // set the parts of the Art-Net packet header that change:
+            packet_buffer[12] = sequenceNumber;
+            packet_buffer[14] = hardware_output_universe;
+            packet_buffer[16] = packetSize >> 8;
+            packet_buffer[17] = packetSize;
 
-        // bulk copy the buffer range to the packet buffer after the header 
-        memcpy(packet_buffer+18, (&layerP.lights.channels[0])+bufferOffset, packetSize); //start from the first byte of ledsP[0]
+            // bulk copy the buffer range to the packet buffer after the header 
+            memcpy(packet_buffer+18, (&layerP.lights.channels[0])+bufferOffset, packetSize); //start from the first byte of ledsP[0]
 
-        //no brightness scaling for the time being
-        // for (int i = 18; i < packetSize+18; i+=sizeof(CRGB)) {
-        //     // set brightness all at once - seems slightly faster than scale8()?
-        //     // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
-        //     packet_buffer[i] = (packet_buffer[i] * bri) >> 8;
-        //     packet_buffer[i+1] = (packet_buffer[i+1] * bri) >> 8;
-        //     packet_buffer[i+2] = (packet_buffer[i+2] * bri) >> 8; 
-        // }
+            //no brightness scaling for the time being
+            for (int i = 18; i < packetSize+18; i+= layerP.lights.header.channelsPerLight) {
+                // set brightness all at once - seems slightly faster than scale8()?
+                // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
+                
+                //to do: only correct light channels !!!
+                packet_buffer[i] = (packet_buffer[i] * bri) >> 8;
+                packet_buffer[i+1] = (packet_buffer[i+1] * bri) >> 8;
+                packet_buffer[i+2] = (packet_buffer[i+2] * bri) >> 8; 
+            }
 
-        bufferOffset += packetSize;
-        
-        if (!artnetudp.writeTo(packet_buffer, packetSize+18, targetIp, ARTNET_DEFAULT_PORT)) {
-            Serial.print("🐛");
-            return; // borked
-        }
+            bufferOffset += packetSize;
+            
+            if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, ARTNET_DEFAULT_PORT)) {
+                Serial.print("🐛");
+                return; // borked
+            }
 
-        hardware_output_universe++;
+            hardware_output_universe++;
         }
     }
   }   //loop20ms

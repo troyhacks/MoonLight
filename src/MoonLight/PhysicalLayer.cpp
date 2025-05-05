@@ -22,7 +22,7 @@ PhysicalLayer::PhysicalLayer() {
 
         lights.header.type = ct_Leds;
 
-        initLightsToBlend();
+        // initLightsToBlend();
 
         //create one layer - temporary
         layerV.push_back(new VirtualLayer());
@@ -40,7 +40,7 @@ PhysicalLayer::PhysicalLayer() {
     bool PhysicalLayer::loop() {
         //runs the loop of all effects / nodes in the layer
         for (VirtualLayer * layer: layerV) {
-            layer->loop();
+            if (layer) layer->loop(); //if (layer) needed when deleting rows ...
         }
         return true;
     }
@@ -98,7 +98,7 @@ PhysicalLayer::PhysicalLayer() {
                 //add the position in the virtual layer
                 layer->addLayoutPost();
             }
-            initLightsToBlend();
+            // initLightsToBlend();
         }
 
         //driver init // alloc pins
@@ -111,7 +111,7 @@ PhysicalLayer::PhysicalLayer() {
     Node* PhysicalLayer::addNode(const char * animation, uint8_t index) {
 
         Node *node = nullptr;
-        if (equal(animation, "Solid")) {
+        if (equal(animation, "Solid🔥")) {
             node = new SolidEffect();
         } else if (equal(animation, "BouncingBalls🔥")) {
             node = new BouncingBallsEffect();
@@ -167,13 +167,12 @@ PhysicalLayer::PhysicalLayer() {
         // layerV[0]->nodes[index] = nullptr;
     }
 
+    // // to be called in setup, if more then one effect
+    // void PhysicalLayer::initLightsToBlend() {
+    //     lightsToBlend.reserve(lights.header.nrOfLights);
 
-    // to be called in setup, if more then one effect
-    void PhysicalLayer::initLightsToBlend() {
-        lightsToBlend.reserve(lights.header.nrOfLights);
-
-        for (uint16_t indexP = 0; indexP < lightsToBlend.size(); indexP++)
-          lightsToBlend[indexP] = false;
-    }
+    //     for (uint16_t indexP = 0; indexP < lightsToBlend.size(); indexP++)
+    //       lightsToBlend[indexP] = false;
+    // }
 
 #endif //FT_MOONLIGHT

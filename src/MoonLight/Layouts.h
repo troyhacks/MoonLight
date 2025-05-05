@@ -14,14 +14,31 @@
 class LayoutNode: public Node {
 public:
 
+  void setup() override {
+    layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB); //default
+
+    //redundant?
+    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+      map(); //calls also addLayout
+  }
+
   //calls addLayout functions, non virtual, only addLayout can be redefined in derived class
   void map() {
-    layerV->layerP->addLayoutPre();
-    addLayout();
-    layerV->layerP->addLayoutPost();
+
+    if (on) {
+      layerV->layerP->addLayoutPre();
+      addLayout();
+      layerV->layerP->addLayoutPost();
+    } else {
+      layerV->resetMapping();
+    }
   }
 
   virtual void addLayout() {
+  }
+
+  virtual void destructor() {
+    layerV->resetMapping();
   }
 
 };
@@ -47,15 +64,7 @@ class PanelLayout: public LayoutNode {
     if (control["name"] == "height") height = control["value"];
     if (control["name"] == "snake") snake = control["value"];
     //if changed run map
-    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-      map(); //calls also addLayout
-  }
-
-  void setup() override {
-    //redundant?
-    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-      map(); //calls also addLayout
-
+    setup();
   }
 
   void addLayout() override {
@@ -90,10 +99,8 @@ class MovingHeadLayout: public LayoutNode {
   }
 
   void setup() override {
-    //redundant?
-    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-      map(); //calls also addLayout
-
+    LayoutNode::setup();
+    layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead);
   }
 
   void addLayout() override {

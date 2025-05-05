@@ -47,20 +47,20 @@ class VirtualLayer {
 
   public:
 
+    uint16_t nrOfLights = 256;
     Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
     Coord3D middle = {8,8,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
 
+    //they will be reused to avoid fragmentation
     std::vector<PhysMap> mappingTable;
     std::vector<std::vector<uint16_t>> mappingTableIndexes;
-
-    //they will be reused to avoid fragmentation
-    uint16_t nrOfLights = 256;
+    uint16_t mappingTableSizeUsed = 0; 
     uint16_t mappingTableIndexesSizeUsed = 0; 
 
     PhysicalLayer *layerP; //physical leds the virtual leds are mapped to
     std::vector<Node *> nodes;
-    // Node *liveNode = nullptr;
   
+    uint8_t fadeMin;
 
     VirtualLayer() {
       ESP_LOGD(TAG, "constructor");
@@ -71,6 +71,7 @@ class VirtualLayer {
     void setup();
     void loop();
 
+    void resetMapping();
     void addIndexP(PhysMap &physMap, uint16_t indexP);
 
     uint16_t XYZ(Coord3D &position);
@@ -83,13 +84,14 @@ class VirtualLayer {
     void setLightColor(const uint16_t indexV, const CRGB& color); //uses leds
     CRGB getLightColor(const uint16_t indexV) const;
     void fadeToBlackBy(const uint8_t fadeBy);
+    void fadeToBlackMin();
 
     template <typename T>
     void setLight(const Coord3D &position, const T& value) {setLight(XYZUnprojected(position), value);}
     template <typename T>
     void setLight(const uint16_t indexV, const T& value) {  // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
-      if (indexV < mappingTable.size()) {
-        // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTable.size());
+      if (indexV < mappingTableSizeUsed) {
+        // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
         switch (mappingTable[indexV].mapType) {
           case m_color:{
             //only room for storing colors
@@ -142,7 +144,7 @@ class VirtualLayer {
 
     template <typename T>
     T getLight(const uint16_t indexV) const {
-      if (indexV < mappingTable.size()) {
+      if (indexV < mappingTableSizeUsed) {
         switch (mappingTable[indexV].mapType) {
           case m_oneLight:
             return layerP->lights.channels[mappingTable[indexV].indexP * sizeof(T)]; 
@@ -174,7 +176,7 @@ class VirtualLayer {
     }
 
     //to be called in loop, if more then one effect
-    void setLightsToBlend(); //uses leds
+    // void setLightsToBlend(); //uses leds
 
     void fill_solid(const CRGB& color);
     void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);

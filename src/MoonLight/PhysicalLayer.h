@@ -51,10 +51,14 @@ struct MovingHead {
   uint8_t red;
   uint8_t green;
   uint8_t blue;
-  uint8_t pan;
-  uint8_t tilt;
-  uint8_t roll;
-  byte channels[9]; //dummy
+  uint8_t white;
+  uint8_t x_move;
+  uint8_t x_move_fine;
+  uint8_t y_move;
+  uint8_t y_move_fine;
+  uint8_t slow_to_fast;
+  uint8_t dimmer;
+  uint8_t strobe;
 };
 
 struct CrazyCurtain {
@@ -68,11 +72,12 @@ struct LightsHeader {
   uint8_t type = ct_Leds; //default
   uint8_t ledFactor = 1;
   uint8_t ledSize = 4; //mm
-  uint8_t dummy1;
+  uint8_t brightness;
   uint16_t nrOfLights = 256;
-  Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
-  uint8_t dummy2[4];
-}; // fill with dummies to make size 24
+  Coord3D size = {16,16,1}; //12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
+  uint8_t channelsPerLight = 3; //RGB default
+  uint8_t dummy2[3];
+}; // fill with dummies to make size 24, be aware of padding so do not change order of vars
 
 struct Lights {
   LightsHeader header;
@@ -94,8 +99,8 @@ class PhysicalLayer {
 
     Lights lights; //the physical lights
 
-    std::vector<bool> lightsToBlend; //this is a 1-bit vector !!! overlapping effects will blend
-    uint8_t globalBlend = 128; // to do add as UI control...
+    // std::vector<bool> lightsToBlend; //this is a 1-bit vector !!! overlapping effects will blend
+    // uint8_t globalBlend = 128; // to do add as UI control...
 
     std::vector<VirtualLayer *> layerV; // the virtual layers using this physical layer 
 

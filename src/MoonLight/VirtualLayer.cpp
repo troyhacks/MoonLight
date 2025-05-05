@@ -52,14 +52,27 @@ void VirtualLayer::setup() {
 }
 
 void VirtualLayer::loop() {
+  fadeToBlackMin();
+
   for (Node *node: nodes) {
     if (node->on)
       node->loop();
   }
-
-  //fadeToBlackBy(lowest value);
-
 };
+
+void VirtualLayer::resetMapping() {
+
+  for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
+    mappingTableIndex.clear();
+  }
+  mappingTableIndexesSizeUsed = 0; //do not clear mappingTableIndexes, reuse it
+
+  for (size_t i = 0; i < mappingTable.size(); i++) { //this cannot be removed ...
+    mappingTable[i] = PhysMap();
+  }
+  mappingTableSizeUsed = 0;
+
+}
 
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
   // ESP_LOGD(TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
@@ -102,8 +115,8 @@ uint16_t VirtualLayer::XYZ(Coord3D &position) {
 
 void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
   // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
-  if (indexV < mappingTable.size()) {
-    // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTable.size());
+  if (indexV < mappingTableSizeUsed) {
+    // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
     switch (mappingTable[indexV].mapType) {
       case m_color:{
         mappingTable[indexV].rgb14 = ((min(color.r + 3, 255) >> 3) << 9) + 
@@ -151,7 +164,7 @@ void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
 }
 
 CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
-  if (indexV < mappingTable.size()) {
+  if (indexV < mappingTableSizeUsed) {
     switch (mappingTable[indexV].mapType) {
       case m_oneLight:
         return layerP->lights.leds[mappingTable[indexV].indexP]; 
@@ -175,35 +188,45 @@ CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
   }
 }
 
-void VirtualLayer::setLightsToBlend() {
-  for (const std::vector<uint16_t>& mappingTableIndex: mappingTableIndexes) {
-      for (const uint16_t indexP: mappingTableIndex)
-      layerP->lightsToBlend[indexP] = true;
-    }
-    for (const PhysMap &physMap: mappingTable) {
-      if (physMap.mapType == m_oneLight)
-      layerP->lightsToBlend[physMap.indexP] = true;
-    }
-}
+// void VirtualLayer::setLightsToBlend() {
+//   for (const std::vector<uint16_t>& mappingTableIndex: mappingTableIndexes) {
+//       for (const uint16_t indexP: mappingTableIndex)
+//       layerP->lightsToBlend[indexP] = true;
+//     }
+//     for (const PhysMap &physMap: mappingTable) {
+//       if (physMap.mapType == m_oneLight)
+//       layerP->lightsToBlend[physMap.indexP] = true;
+//     }
+// }
 
 void VirtualLayer::fadeToBlackBy(const uint8_t fadeBy) {
-  // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
-  //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
-  //     for (int x=0; x<size.x; x++) {
-  //       CRGB color = getLightColor({x,y,0});
-  //       color.nscale8(255-fadeBy);
-  //       setLightColor({x,y,0}, color);
-  //     }
-  //   }
-  // } else 
-  if (layerP->layerV.size() == 1) { //faster, else manual 
-    fastled_fadeToBlackBy(layerP->lights.leds, layerP->lights.header.nrOfLights, fadeBy);
-  } else {
-    for (uint16_t index = 0; index < nrOfLights; index++) {
-      CRGB color = getLightColor(index);
-      color.nscale8(255-fadeBy);
-      setLightColor(index, color);
+  fadeMin = fadeMin?MIN(fadeMin, fadeBy): fadeBy;
+}
+
+void VirtualLayer::fadeToBlackMin() {
+  if (fadeMin > 0) { //at least one fadeBy
+
+    uint8_t fadeBy = fadeMin;// + fadeMax / div;
+    // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
+    //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
+    //     for (int x=0; x<size.x; x++) {
+    //       CRGB color = getLightColor({x,y,0});
+    //       color.nscale8(255-fadeBy);
+    //       setLightColor({x,y,0}, color);
+    //     }
+    //   }
+    // } else 
+    if (layerP->layerV.size() == 1) { //faster, else manual 
+      fastled_fadeToBlackBy(layerP->lights.leds, layerP->lights.header.nrOfLights, fadeBy);
+    } else {
+      for (uint16_t index = 0; index < nrOfLights; index++) {
+        CRGB color = getLightColor(index);
+        color.nscale8(255-fadeBy);
+        setLightColor(index, color);
+      }
     }
+    //reset fade
+    fadeMin = 0; //no fade
   }
 }
 
@@ -252,16 +275,10 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
 }
 
 void VirtualLayer::addLayoutPre() {
-  for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
-    mappingTableIndex.clear();
-  }
-  mappingTableIndexesSizeUsed = 0; //do not clear mappingTableIndexes, reuse it
 
-  for (size_t i = 0; i < mappingTable.size(); i++) {
-    mappingTable[i] = PhysMap();
-  }
+  resetMapping();
+
   nrOfLights = 0;
-
   size = layerP->lights.header.size; //start with the physical size
 
   //modifiers
@@ -283,6 +300,7 @@ void VirtualLayer::addLight(Coord3D position) {
   if (indexV >= nrOfLights) {
     mappingTable.resize(indexV + 1); //make sure the index fits
     nrOfLights = indexV + 1;
+    mappingTableSizeUsed = nrOfLights;
   }
   addIndexP(mappingTable[indexV], layerP->lights.header.nrOfLights);
 }

@@ -123,7 +123,7 @@
 
 	<div class="w-full overflow-x-auto">
 	 <div>
-		<canvas bind:this={el} width="720" height="720"></canvas>
+		<canvas bind:this={el} width="720" height="360"></canvas>
 	</div>
 
 </SettingsCard>
