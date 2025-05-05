@@ -317,30 +317,61 @@ class MovingHeadEffect: public Node {
   public:
   
     uint8_t bpm;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    uint8_t white = 0;
   
     void getControls(JsonArray controls) override {
       JsonObject control;
       control = controls.add<JsonObject>(); control["name"] = "bpm"; control["type"] = "range"; control["default"] = 30; control["value"] = bpm;
+      control = controls.add<JsonObject>(); control["name"] = "red"; control["type"] = "range"; control["default"] = 30; control["value"] = red; control["color"] = "Red";
+      control = controls.add<JsonObject>(); control["name"] = "green"; control["type"] = "range"; control["default"] = 30; control["value"] = green; control["color"] = "Green";
+      control = controls.add<JsonObject>(); control["name"] = "blue"; control["type"] = "range"; control["default"] = 30; control["value"] = blue; control["color"] = "Blue";
+      control = controls.add<JsonObject>(); control["name"] = "white"; control["type"] = "range"; control["default"] = 0; control["value"] = white;
     }
   
     void setControl(JsonObject control) override {
       if (control["name"] == "bpm") bpm = control["value"];
+      if (control["name"] == "red") red = control["value"];
+      if (control["name"] == "green") green = control["value"];
+      if (control["name"] == "blue") blue = control["value"];
+      if (control["name"] == "white") white = control["value"];
     }
   
     void loop() override {
       layerV->fadeToBlackBy(255); //reset all channels
+      for (int i=0; i<layerV->size.x * layerV->layerP->lights.header.channelsPerLight; i++) {
+        layerV->layerP->lights.leds[i] = CRGB::Black;
+      }
 
       int pos = beatsin16( bpm, 0, layerV->size.x-1);
       CRGB color = CHSV( millis()/50, 255, 255);
 
-      MovingHead mh;
-      mh.red = color.red;
-      mh.green = color.green;
-      mh.blue = color.blue;
-      mh.tilt = beatsin8(bpm, 0, 255);
-      mh.pan = beatsin8(bpm, 0, 255);
-      mh.roll = beatsin8(bpm, 0, 255);
-      layerV->setLight({pos,0,0}, mh);
+      CRGBW mh;
+      mh.red = color.red;//(millis()/1000 % 3) == 0 ? 255 : 0;
+      mh.green = color.green;//(millis()/1000 % 3) == 1 ? 255 : 0;
+      mh.blue = color.blue;//(millis()/1000 % 3) == 2 ? 255 : 0;
+      // mh.ccp[0] = 0;
+      // mh.ccp[1] = 0;
+      // mh.ccp[2] = 0;
+      mh.white = white;
+      // mh.x_move = 0;
+      // mh.x_move_fine = 0;
+      // mh.y_move = 0;
+      // mh.y_move_fine = 0;
+      // mh.slow_to_fast = 0;
+      // mh.dimmer = 0;
+      // mh.strobe = 0;
+
+      // mh.x_move = beatsin8(bpm, 0, 255);
+      // mh.y_move = beatsin8(bpm, 0, 255);
+      // mh.red = color.red;
+      // mh.green = color.green;
+      // mh.blue = color.blue;
+      // for (int i=0; i<layerV->size.x; i++) {
+        layerV->setLight({pos,0,0}, mh);
+      // }
     }
   };
   
