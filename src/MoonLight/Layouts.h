@@ -79,28 +79,51 @@ class PanelLayout: public LayoutNode {
 
 };
 
-class MovingHeadLayout: public LayoutNode {
-  const char * name() override {return "MovingHead🚥";}
+class DMXLayout: public LayoutNode {
 
   uint8_t width = 4; //default 4 moving heads
+  uint8_t type = ct_LedsRGBW; //default 4 moving heads
 
   void getControls(JsonArray controls) override {
     hasLayout = true;
     JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = width;
-  }
+    JsonArray values;
+    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 4; control["max"] = 32; control["value"] = width;
+    control = controls.add<JsonObject>(); control["name"] = "type"; control["type"] = "select"; control["default"] = "CRGBW"; values = control["values"].to<JsonArray>();
+    values.add("CRGB");
+    values.add("CRGBW");
+    values.add("CrazyCurtain");
+    values.add("Movinghead");
+    switch (type) {
+      case ct_LedsRGBW: control["value"] = "CRGBW"; break;
+      case ct_CrazyCurtain: control["value"] = "CrazyCurtain"; break;
+      case ct_MovingHead: control["value"] = "Movinghead"; break;
+      default: control["value"] = "CRGB"; break;
+    };
+}
   
   void setControl(JsonObject control) override {
     ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
     if (control["name"] == "width") width = control["value"];
+    if (control["name"] == "type") {
+        if ( control["value"] == "CRGBW") type = ct_LedsRGBW;
+        else if ( control["value"] == "CrazyCurtain") type = ct_CrazyCurtain;
+        else if ( control["value"] == "Movinghead") type = ct_MovingHead;
+        else type = ct_Leds;
+    }
     //if changed run map
-    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-      map(); //calls also addLayout
+    setup();
   }
 
   void setup() override {
     LayoutNode::setup();
-    layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead);
+    switch (type) {
+      case ct_LedsRGBW: layerV->layerP->lights.header.channelsPerLight = sizeof(CRGBW); break;
+      case ct_CrazyCurtain: layerV->layerP->lights.header.channelsPerLight = sizeof(CrazyCurtain); break;
+      case ct_MovingHead: layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead); break;
+      default: layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB); break;
+    };
+    
   }
 
   void addLayout() override {

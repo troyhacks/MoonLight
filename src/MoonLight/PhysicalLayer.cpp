@@ -127,12 +127,14 @@ PhysicalLayer::PhysicalLayer() {
             node = new LissajousEffect();
         } else if (equal(animation, "MovingHead🔥")) {
             node = new MovingHeadEffect();
+        } else if (equal(animation, "RGBWPar🔥")) {
+            node = new RGBWParEffect();
         } else if (equal(animation, "Lines🔥")) {
             node = new LinesEffect();
         } else if (equal(animation, "Panel🚥")) {
             node = new PanelLayout();
-        } else if (equal(animation, "MovingHead🚥")) {
-            node = new MovingHeadLayout();
+        } else if (equal(animation, "DMX🚥")) {
+            node = new DMXLayout();
         } else if (equal(animation, "Multiply💎")) {
             node = new MultiplyModifier();
         } else if (equal(animation, "Mirror💎")) {

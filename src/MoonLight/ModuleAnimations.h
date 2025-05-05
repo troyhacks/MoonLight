@@ -122,9 +122,10 @@ public:
             values.add("Sinus🔥");
             values.add("Lissajous🔥");
             values.add("MovingHead🔥");
+            values.add("RGBWPar🔥");
             values.add("Lines🔥");
             values.add("Panel🚥");
-            values.add("MovingHead🚥");
+            values.add("DMX🚥");
             values.add("Multiply💎");
             values.add("Mirror💎");
             values.add("Pinwheel💎");

@@ -47,18 +47,20 @@ struct CRGBW {
   uint8_t white;
 };
 
-struct MovingHead {
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  uint8_t white;
+struct MovingHead { //11 or 13 channel (channel mode selection)
   uint8_t x_move;
   uint8_t x_move_fine;
   uint8_t y_move;
   uint8_t y_move_fine;
-  uint8_t slow_to_fast;
+  uint8_t axis_slow_to_fast;
   uint8_t dimmer;
   uint8_t strobe;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  uint8_t white;
+  // uint8_t mode;
+  // uint8_t rest;
 };
 
 struct CrazyCurtain {

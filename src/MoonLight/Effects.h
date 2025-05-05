@@ -306,9 +306,6 @@ public:
         locn.y = (layerV->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "leds.size.y > 2" is needed to avoid div/0 in map()
         // layerV->setLightColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
         layerV->setLight(locn, ColorFromPalette(palette, millis()/100+i, 255));
-        // MovingHead mh;
-        // mh.tilt = locn.y;
-        // layerV->setLight(locn, mh);
     }
   }
 };
@@ -317,10 +314,63 @@ class MovingHeadEffect: public Node {
   public:
   
     uint8_t bpm;
+    uint8_t pan;
+    uint8_t tilt;
+  
+    void getControls(JsonArray controls) override {
+      JsonObject control;
+      control = controls.add<JsonObject>(); control["name"] = "bpm"; control["type"] = "range"; control["default"] = 30; control["value"] = bpm;
+      control = controls.add<JsonObject>(); control["name"] = "pan"; control["type"] = "range"; control["default"] = 0; control["value"] = pan;
+      control = controls.add<JsonObject>(); control["name"] = "tilt"; control["type"] = "range"; control["default"] = 0; control["value"] = tilt; 
+    }
+  
+    void setControl(JsonObject control) override {
+      if (control["name"] == "bpm") bpm = control["value"];
+      if (control["name"] == "pan") pan = control["value"];
+      if (control["name"] == "tilt") tilt = control["value"];
+    }
+  
+    void loop() override {
+      for (int i=0; i<layerV->size.x; i++) {
+
+        MovingHead mh;
+
+        int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
+        CRGB color = CHSV( millis()/50, 255, 255);
+
+        if (i == pos) {
+          mh.red = color.red;
+          mh.green = color.green;
+          mh.blue = color.blue;
+          mh.white = 0;
+        } else  {
+          mh.red = 0;
+          mh.green = 0;
+          mh.blue = 0;
+          mh.white = 0;
+        }
+  
+        mh.x_move = pan;
+        mh.x_move_fine = 255;
+        mh.y_move = tilt;
+        mh.y_move_fine = 255;
+        mh.axis_slow_to_fast = 0;
+        mh.dimmer = 255;
+        mh.strobe = 0;
+
+        layerV->setLight({i,0,0}, mh);
+      }
+    }
+  };
+
+class RGBWParEffect: public Node {
+  public:
+  
+    uint8_t bpm;
     uint8_t red;
     uint8_t green;
     uint8_t blue;
-    uint8_t white = 0;
+    uint8_t white;
   
     void getControls(JsonArray controls) override {
       JsonObject control;
@@ -345,33 +395,14 @@ class MovingHeadEffect: public Node {
         layerV->layerP->lights.leds[i] = CRGB::Black;
       }
 
-      int pos = beatsin16( bpm, 0, layerV->size.x-1);
-      CRGB color = CHSV( millis()/50, 255, 255);
+      int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
 
-      CRGBW mh;
-      mh.red = color.red;//(millis()/1000 % 3) == 0 ? 255 : 0;
-      mh.green = color.green;//(millis()/1000 % 3) == 1 ? 255 : 0;
-      mh.blue = color.blue;//(millis()/1000 % 3) == 2 ? 255 : 0;
-      // mh.ccp[0] = 0;
-      // mh.ccp[1] = 0;
-      // mh.ccp[2] = 0;
-      mh.white = white;
-      // mh.x_move = 0;
-      // mh.x_move_fine = 0;
-      // mh.y_move = 0;
-      // mh.y_move_fine = 0;
-      // mh.slow_to_fast = 0;
-      // mh.dimmer = 0;
-      // mh.strobe = 0;
-
-      // mh.x_move = beatsin8(bpm, 0, 255);
-      // mh.y_move = beatsin8(bpm, 0, 255);
-      // mh.red = color.red;
-      // mh.green = color.green;
-      // mh.blue = color.blue;
-      // for (int i=0; i<layerV->size.x; i++) {
-        layerV->setLight({pos,0,0}, mh);
-      // }
+      CRGBW rgbw;
+      rgbw.red = red;
+      rgbw.green = green;
+      rgbw.blue = blue;
+      rgbw.white = white;
+      layerV->setLight({pos,0,0}, rgbw);
     }
   };
   
