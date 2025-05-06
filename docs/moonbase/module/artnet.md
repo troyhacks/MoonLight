@@ -1,14 +1,26 @@
 # Artnet module
 
-<img width="519" alt="image" src="https://github.com/user-attachments/assets/96a0483d-8044-4145-82fc-edbc0563e62d" />
+<img width="395" alt="image" src="https://github.com/user-attachments/assets/824f1d7b-881d-458b-ad1f-9a81c483b71f" />
 
 ## Functional
 
-default
+This module sends the content of the Lights array every 50ms in artnet compatible packages to an artnet conrroller specified by the IP address provided.
+
+Example of compatible controllers can be found [here](https://moonmodules.org/hardware/):
+
+* [Artnet-LED-controller](https://s.click.aliexpress.com/e/_Ex9uaOk)
+
+<img width="300" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88">
+
+supports this setup:
 ```cpp
     std::vector<uint16_t> hardware_outputs = {1024,1024,1024,1024,1024,1024,1024,1024};
     std::vector<uint16_t> hardware_outputs_universe_start = { 0,7,14,21,28,35,42,49 }; //7*170 = 1190 leds => last universe not completely used
 ```
+
+* [Artnet-DMX controller](https://s.click.aliexpress.com/e/_ExRrKe4)
+
+<img width="300" src="https://github.com/user-attachments/assets/e3d605b6-a023-4abb-b604-77b44267b1a3">
 
 ## Technical
 
