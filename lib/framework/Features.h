@@ -69,17 +69,17 @@
 
 //💫
 #ifndef FT_MONITOR
-#define FT_MONITOR 1
+#define FT_MONITOR 0
 #endif
 
 //💫
 #ifndef FT_MOONLIGHT
-#define FT_MOONLIGHT 1
+#define FT_MOONLIGHT 0
 #endif
 
 //💫
 #ifndef FT_LIVESCRIPT
-#define FT_LIVESCRIPT 1
+#define FT_LIVESCRIPT 0
 #endif
 
 #endif

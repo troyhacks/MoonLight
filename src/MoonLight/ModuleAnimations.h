@@ -96,14 +96,14 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
         property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["default"] = 10;
-        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["default"] = 128; property["color"] = "Red";
-        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["default"] = 128; property["color"] = "Green";
-        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["default"] = 128; property["color"] = "Blue";
+        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["default"] = 255; property["color"] = "Red";
+        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["default"] = 255; property["color"] = "Green";
+        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["default"] = 255; property["color"] = "Blue";
         property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "select"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
         values.add("Preset1");
         values.add("Preset2");
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = 2; values = property["values"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = "16"; values = property["values"].to<JsonArray>();
         values.add("2");
         values.add("16");
 

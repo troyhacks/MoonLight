@@ -20,6 +20,20 @@ hide:
 
 [Release 0.5.2](https://github.com/MoonModules/MoonLight/releases/tag/v0.5.2) (Jan 21, 2025): 
 
+# Acknowledgements
+
+MoonLight uses the following repositories:
+
+* https://github.com/theelims/ESP32-sveltekit
+* https://github.com/hoeken/PsychicHttp
+* https://github.com/theelims/PsychicMqttClient
+* https://github.com/bblanchon/ArduinoJson
+* https://github.com/FastLED/FastLED
+* https://github.com/hpwit/ESPLiveScript
+* https://github.com/hpwit/I2SClocklessLedDriver
+* https://github.com/hpwit/I2SClocklessVirtualLedDriver
+* https://github.com/netmindz/WLED-sync
+
 <img src="https://github.com/user-attachments/assets/c655d610-53eb-4dd3-8e9e-0cfa23b97bb4"/>
 
 ## License

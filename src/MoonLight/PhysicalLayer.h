@@ -125,7 +125,7 @@ class PhysicalLayer {
     void removeNode(Node * node);
 
     // to be called in setup, if more then one effect
-    void initLightsToBlend();
+    // void initLightsToBlend();
 
 };
 

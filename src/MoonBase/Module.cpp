@@ -37,10 +37,15 @@ void ModuleState::setupData() {
         else
             ESP_LOGW(TAG, "no definition");
 
-        JsonObject root = data.to<JsonObject>();
-
-        setDefaults(root, definition.as<JsonArray>());
-    }
+        //create a new json for the defaults
+        JsonDocument doc;
+        setDefaults(doc.to<JsonObject>(), definition.as<JsonArray>());
+            
+        //assign the new defaults to state and run onUpdate
+        data.to<JsonObject>();
+        UpdatedItem updatedItem;
+        compareRecursive("", data, doc.as<JsonObject>(), updatedItem);
+}
 
     //to do: check if the file matches the definition
 }

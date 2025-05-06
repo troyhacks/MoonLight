@@ -1,6 +1,6 @@
 {
-	"name": "moonbase",
-	"version": "0.2.0",
+	"name": "moonlight",
+	"version": "0.5.5",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
