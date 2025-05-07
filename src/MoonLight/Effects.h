@@ -355,7 +355,7 @@ class MovingHeadEffect: public Node {
         mh.y_move = tilt;
         mh.y_move_fine = 255;
         mh.axis_slow_to_fast = 0;
-        mh.dimmer = 255;
+        mh.dimmer = layerV->layerP->lights.header.brightness;
         mh.strobe = 0;
 
         layerV->setLight({i,0,0}, mh);

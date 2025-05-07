@@ -4,7 +4,11 @@
 
 ## Functional
 
-* <img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/> Performance: loops per second: nr of times main loop is executed (
+* <img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/> Performance: loops per second: nr of times main loop is executed
+
+* Sleep: Device is set in low power mode.
+* Restart: The device will restart
+* Factory reset: all settings will be removed.
 
 ## Technical
 

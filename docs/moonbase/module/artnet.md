@@ -4,7 +4,7 @@
 
 ## Functional
 
-This module sends the content of the Lights array every 50ms in artnet compatible packages to an artnet conrroller specified by the IP address provided.
+This module sends the content of the Lights array every 50ms in Artnet compatible packages to an artnet controller specified by the IP address provided.
 
 Example of compatible controllers can be found [here](https://moonmodules.org/hardware/):
 
