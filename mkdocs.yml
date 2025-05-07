@@ -23,6 +23,7 @@ nav:
   - "System":
       - system/status.md
       - system/metrics.md
+      - system/update.md
   - "ESP32 SvelteKit": 
       - esp32sveltekit.md
   - "Build Tools":
