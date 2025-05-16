@@ -1,6 +1,6 @@
 # System Update
 
-<img width="522" alt="image" src="https://github.com/user-attachments/assets/55696186-9dea-460c-bcfd-a77080b300be" />
+<img width="522" alt="image" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
 
 ## Functional
 
