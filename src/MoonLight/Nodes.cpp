@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+
+#if FT_MOONLIGHT
 #include "Nodes.h"
 
 #if FT_LIVESCRIPT
@@ -312,4 +314,5 @@ void LiveScriptNode::addControls(JsonArray controls)  {
     // setup();
   }
 
+#endif
 #endif

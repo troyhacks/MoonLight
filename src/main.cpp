@@ -130,7 +130,9 @@ void loop()
         if (millis() - lastTime20ms > 20)
         {
             lastTime20ms = millis();
-            moduleArtnet.loop20ms();
+            #if FT_ENABLED(FT_MOONLIGHT)
+                moduleArtnet.loop20ms();
+            #endif
         }
 
         //50ms loop

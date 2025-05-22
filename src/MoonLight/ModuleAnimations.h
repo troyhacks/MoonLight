@@ -12,7 +12,7 @@
 #ifndef ModuleAnimations_h
 #define ModuleAnimations_h
 
-#if FT_MOONLIGHT == 1
+#if FT_MOONLIGHT
 
 #undef TAG
 #define TAG "💫"
