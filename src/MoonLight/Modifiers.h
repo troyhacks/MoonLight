@@ -46,21 +46,13 @@ class MirrorModifier: public Node {
   bool mirrorZ = false;
   Coord3D originalSize;
 
-  void getControls(JsonArray controls) override {
+  void addControls(JsonArray controls) override {
     hasModifier = true;
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "mirrorX"; control["type"] = "checkbox"; control["default"] = true; control["value"] = mirrorX;
-    control = controls.add<JsonObject>(); control["name"] = "mirrorY"; control["type"] = "checkbox"; control["default"] = false; control["value"] = mirrorY;
-    control = controls.add<JsonObject>(); control["name"] = "mirrorZ"; control["type"] = "checkbox"; control["default"] = false; control["value"] = mirrorZ;
+    addControl(controls, &mirrorX, "mirrorX", "checkbox", true);
+    addControl(controls, &mirrorY, "mirrorY", "checkbox", false);
+    addControl(controls, &mirrorZ, "mirrorZ", "checkbox", false);
   }
   
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "mirrorX") mirrorX = control["value"];
-    if (control["name"] == "mirrorY") mirrorY = control["value"];
-    if (control["name"] == "mirrorZ") mirrorZ = control["value"];
-  }
-
   void modifyLayout() override {
     if (mirrorX) layerV->size.x = (layerV->size.x + 1) / 2;
     if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
@@ -85,23 +77,13 @@ class PinwheelModifier: public Node {
   uint8_t symmetry = 1;
   uint8_t zTwist   = 0;
 
-  void getControls(JsonArray controls) override {
+  void addControls(JsonArray controls) override {
     hasModifier = true;
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "petals"; control["type"] = "range"; control["default"] = 60; control["value"] = petals;
-    control = controls.add<JsonObject>(); control["name"] = "swirlVal"; control["type"] = "range"; control["default"] = 30; control["value"] = swirlVal;
-    control = controls.add<JsonObject>(); control["name"] = "reverse"; control["type"] = "checkbox"; control["default"] = false; control["value"] = reverse;
-    control = controls.add<JsonObject>(); control["name"] = "symmetry"; control["type"] = "range"; control["default"] = 1; control["value"] = symmetry;
-    control = controls.add<JsonObject>(); control["name"] = "zTwist"; control["type"] = "range"; control["default"] = 0; control["value"] = zTwist;
-  }
-  
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "petals") petals = control["value"];
-    if (control["name"] == "swirlVal") swirlVal = control["value"];
-    if (control["name"] == "reverse") reverse = control["value"];
-    if (control["name"] == "symmetry") symmetry = control["value"];
-    if (control["name"] == "zTwist") zTwist = control["value"];
+    addControl(controls, &petals, "petals", "range", 60);
+    addControl(controls, &swirlVal, "swirlVal", "range", 30);
+    addControl(controls, &reverse, "reverse", "checkbox", false);
+    addControl(controls, &symmetry, "symmetry", "range", 1);
+    addControl(controls, &zTwist, "zTwist", "range", 0);
   }
   
   void modifyLayout() override {

@@ -18,6 +18,7 @@
 
 Node *gNode = nullptr;
 
+// static void _addControl(uint8_t a1) {ESP_LOGD(TAG, "%d", a1);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLayoutPre() {gNode->layerV->layerP->addLayoutPre();}
 static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
@@ -107,6 +108,7 @@ void LiveScriptNode::setup() {
   addExternal(   "float triangle(float)", (void *)_triangle);
 
   //MoonLight functions
+//   addExternal(    "void addControl(uint8_t)", (void *)_getControl);
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
   addExternal(    "void addLayoutPre()", (void *)_addLayoutPre);
   addExternal(    "void addLight(uint16_t,uint16_t,uint16_t)", (void *)_addLight);
@@ -274,24 +276,40 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
     }
 }
 
-void LiveScriptNode::getControls(JsonArray controls)  {
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "range"; control["default"] = 128; control["value"] = speed;
-    control = controls.add<JsonObject>(); control["name"] = "intensity"; control["type"] = "range"; control["default"] = 128; control["value"] = intensity;
-    control = controls.add<JsonObject>(); control["name"] = "custom1"; control["type"] = "range"; control["default"] = 128; control["value"] = custom1;
-    control = controls.add<JsonObject>(); control["name"] = "custom2"; control["type"] = "range"; control["default"] = 128; control["value"] = custom3;
-    control = controls.add<JsonObject>(); control["name"] = "custom3"; control["type"] = "range"; control["default"] = 128; control["value"] = custom2;
+void LiveScriptNode::addControls(JsonArray controls)  {
+    addControl(controls, &speed, "speed", "range", 128);
+    addControl(controls, &intensity, "intensity", "range", 128);
+    addControl(controls, &custom1, "custom1", "range", 128);
+    addControl(controls, &custom2, "custom2", "range", 128);
+    addControl(controls, &custom3, "custom3", "range", 128);
+    
+    //if (exist addControls) scriptRuntime.execute(animation, "addControls"); 
+    //
+    // script example
+    // uint8_t speed = 128;
+    // uint8_t intensity = 128;
+    // uint8_t custom1 = 128;
+    // uint8_t custom2 = 128;
+    // uint8_t custom3 = 128;
+    // void addControls() {
+    //     addControl(&speed, "speed", "range", 128);
+    //     addControl(&intensity, "intensity", "range", 128);
+    //     addControl(&custom1, "custom1", "range", 128);
+    //     addControl(&custom2, "custom2", "range", 128);
+    //     addControl(&custom3, "custom3", "range", 128);
+    // }
+    //
+    // implementation:
+    // addExternal(    "void addControl(uint32,const char*,const char*,int,int,int)", (void *)_addControl);
+    // _addControl(pointerToScriptVariable, const char *name, const char *type, int default, int min = INT_MIN, int max = INT_MAX);
+
   }
   
-  void LiveScriptNode::setControl(JsonObject control)  {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "speed") speed = control["value"];
-    if (control["name"] == "intensity") intensity = control["value"];
-    if (control["name"] == "custom1") custom1 = control["value"];
-    if (control["name"] == "custom2") custom2 = control["value"];
-    if (control["name"] == "custom3") custom3 = control["value"];
-    //if changed run setup
-    setup();
+  void LiveScriptNode::updateControl(JsonObject control)  {
+    Node::updateControl(control); //call base class
+
+    //if changed run setup needed??? (todo: if hasLayout then rerun mapping needed ..., if modifier then done by ModuleAnimations...)
+    // setup();
   }
 
 #endif

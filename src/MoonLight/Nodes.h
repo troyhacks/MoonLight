@@ -46,8 +46,78 @@ public:
   virtual const char * tags() {return "";}
   virtual uint8_t dim() {return _1D;};
 
-  virtual void getControls(JsonArray controls) {};
-  virtual void setControl(JsonObject control) {};
+  virtual void addControls(JsonArray controls) {};
+
+  template <class ControlType, class PointerType>
+  JsonObject addControl(JsonArray controls, PointerType pointer2, const char *name, const char *type, ControlType defaul, int min = INT_MIN, int max = INT_MAX) {
+    uint32_t pointer = (uint32_t)pointer2;
+    JsonObject control = controls.add<JsonObject>(); 
+    control["name"] = name;
+    control["type"] = type;
+    control["default"] = defaul;
+    control["p"] = pointer;
+    if (min != INT_MIN) control["min"] = min;
+    if (max != INT_MAX) control["max"] = max;
+
+    //setValue
+    if (control["type"] == "range" || control["type"] == "pin") {
+      uint8_t *valuePointer = (uint8_t *)pointer;
+      control["value"] = *valuePointer;
+    }
+    else if (control["type"] == "select") {
+      char *valuePointer = (char *)pointer;
+      control["value"] = valuePointer;
+    }
+    else if (control["type"] == "number") {
+      uint16_t *valuePointer = (uint16_t *)pointer;
+      control["value"] = *valuePointer;
+    }
+    else if (control["type"] == "checkbox") {
+      bool *valuePointer = (bool *)pointer;
+      control["value"] = *valuePointer;
+    }
+    // else if (control["type"] == "coord3D") {
+    //   Coord3D *valuePointer = (Coord3D *)pointer;
+      // control["value"] = *valuePointer;
+    // }
+    else
+      ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+
+    return control;
+  };
+
+  virtual void updateControl(JsonObject control) {
+    if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
+      ESP_LOGD(TAG, "%s = %s %s %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), control["p"].as<String>().c_str());
+      int pointer = control["p"];
+
+      if (control["type"] == "range" || control["type"] == "pin") {
+        uint8_t *valuePointer = (uint8_t *)pointer;
+        *valuePointer = control["value"];
+        ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+      }
+      else if (control["type"] == "select") {
+        char *valuePointer = (char *)pointer;
+        strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
+      }
+      else if (control["type"] == "number") {
+        uint16_t *valuePointer = (uint16_t *)pointer;
+        *valuePointer = control["value"];
+      }
+      else if (control["type"] == "checkbox") {
+        bool *valuePointer = (bool *)pointer;
+        *valuePointer = control["value"];
+      }
+      // else if (control["type"] == "coord3D") {
+      //   Coord3D *valuePointer = (Coord3D *)pointer;
+      //   *valuePointer = value;
+      // }
+      else
+        ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+
+    }
+
+  };
 
   //effect and layout
   virtual void setup() {};
@@ -90,8 +160,8 @@ class LiveScriptNode: public Node {
   void killAndDelete();
   void execute();
 
-  void getControls(JsonArray controls) override;
-  void setControl(JsonObject control) override;
+  void addControls(JsonArray controls) override;
+  void updateControl(JsonObject control) override;
 
   void map() override;
   

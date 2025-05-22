@@ -221,14 +221,14 @@ public:
 
                     // nodeState.remove("controls"); //clear the controls
                     nodeState["controls"].to<JsonArray>(); //clear the controls
-                    nodeClass->getControls(nodeState["controls"]); //create the controls
-                    //show these controls in the UI
+                    nodeClass->addControls(nodeState["controls"]); //create the controls
+
+                    //show these controls in the UI, send notifiers to listeners...
                     //save ??
                     // JsonObject object = _state.data.as<JsonObject>();
                     // _socket->emitEvent("animations", object);
-
                     update([&](ModuleState &state) {
-                        ESP_LOGD(TAG, "update scripts");
+                        ESP_LOGD(TAG, "update due to new animation %s", updatedItem.value.as<String>().c_str());
 
                         // UpdatedItem updatedItem;
                         ; //compare and update
@@ -236,6 +236,9 @@ public:
                         // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
                         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                     }, "server");
+                    ESP_LOGD(TAG, "update due to new animation %s done", updatedItem.value.as<String>().c_str());
+
+                    //make sure "p" is also updated
 
 
                     //if node is a modifier, run the layout definition
@@ -300,10 +303,10 @@ public:
 
             if (equal(updatedItem.parent[1], "controls") && equal(updatedItem.name, "value")) {    //process controls values 
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be remoced by onAnimation
+                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be removed by onAnimation
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {
-                        nodeClass->setControl(nodeState["controls"][updatedItem.index[1]]); //to do only send the changed control
+                        nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
                         // if Modfier control changed, run the layout
                         // find nodes which implement the Modifier interface
                         // find nodes which implement modifyLayout and modifyLight

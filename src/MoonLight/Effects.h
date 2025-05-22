@@ -40,16 +40,11 @@ class BouncingBallsEffect: public Node {
   uint8_t grav = 128;
   uint8_t numBalls = 8;
 
-  void getControls(JsonArray controls) override {
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "grav"; control["type"] = "range"; control["default"] = 128; control["value"] = grav;
-    control = controls.add<JsonObject>(); control["name"] = "numBalls"; control["type"] = "range"; control["default"] = 8; control["min"] = 1; control["max"] = maxNumBalls; control["value"] = numBalls;
-  }
-
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "grav") grav = control["value"];
-    if (control["name"] == "numBalls") numBalls = control["value"];
+  void addControls(JsonArray controls) override {
+    addControl(controls, &grav, "grav", "range", 128);
+    addControl(controls, &numBalls, "numBalls", "range", 8, 1, maxNumBalls);
+    ESP_LOGD(TAG, "");
+    serializeJson(controls, Serial); Serial.println();
   }
 
   //binding of loop persistent values (pointers)
@@ -137,14 +132,8 @@ public:
 
   uint8_t bpm = 60;
 
-  void getControls(JsonArray controls) override {
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "bpm"; control["type"] = "range"; control["default"] = 60; control["value"] = bpm;
-  }
-
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "bpm") bpm = control["value"];
+  void addControls(JsonArray controls) override {
+    addControl(controls, &bpm, "bpm", "range", 60);
   }
 
   const char * name() override {return "Sinelon";}
@@ -183,21 +172,13 @@ public:
 
   uint8_t speed = 5;
 
-  void getControls(JsonArray controls) override {
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "range"; control["default"] = 5; control["value"] = speed;
-  }
-
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "speed") speed = control["value"];
+  void addControls(JsonArray controls) override {
+    addControl(controls, &speed, "speed", "range", 5);
   }
 
   const char * name() override {return "Sinus";}
   uint8_t dim() override {return _1D;}
   const char * tags() override {return "💡";}
-
-  void setup() override {}
 
   void loop() override {
     layerV->fadeToBlackBy(70);
@@ -229,17 +210,8 @@ public:
 
   uint8_t bpm = 120;
 
-  void getControls(JsonArray controls) override {
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "BPM"; control["type"] = "range"; control["default"] = 120; control["value"] = bpm;
-  }
-
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "BPM") bpm = control["value"];
-  }
-
-  void setup() override {
+  void addControls(JsonArray controls) override {
+    addControl(controls, &bpm, "bpm", "range", 120);
   }
 
   void loop() override {
@@ -272,18 +244,10 @@ public:
   uint8_t fadeRate = 128;
   uint8_t speed = 128;
 
-  void getControls(JsonArray controls) override {
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "xFrequency"; control["type"] = "range"; control["default"] = 64; control["value"] = xFrequency;
-    control = controls.add<JsonObject>(); control["name"] = "fadeRate"; control["type"] = "range"; control["default"] = 128; control["value"] = fadeRate;
-    control = controls.add<JsonObject>(); control["name"] = "speed"; control["type"] = "range"; control["default"] = 128; control["value"] = speed;
-  }
-
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "xFrequency") xFrequency = control["value"];
-    if (control["name"] == "fadeRate") fadeRate = control["value"];
-    if (control["name"] == "speed") speed = control["value"];
+  void addControls(JsonArray controls) override {
+    addControl(controls, &xFrequency, "xFrequency", "range", 64);
+    addControl(controls, &fadeRate, "fadeRate", "range", 128);
+    addControl(controls, &speed, "speed", "range", 128);
   }
 
   const char * name() override {return "Lissajous";}
@@ -317,17 +281,10 @@ class MovingHeadEffect: public Node {
     uint8_t pan;
     uint8_t tilt;
   
-    void getControls(JsonArray controls) override {
-      JsonObject control;
-      control = controls.add<JsonObject>(); control["name"] = "bpm"; control["type"] = "range"; control["default"] = 30; control["value"] = bpm;
-      control = controls.add<JsonObject>(); control["name"] = "pan"; control["type"] = "range"; control["default"] = 0; control["value"] = pan;
-      control = controls.add<JsonObject>(); control["name"] = "tilt"; control["type"] = "range"; control["default"] = 0; control["value"] = tilt; 
-    }
-  
-    void setControl(JsonObject control) override {
-      if (control["name"] == "bpm") bpm = control["value"];
-      if (control["name"] == "pan") pan = control["value"];
-      if (control["name"] == "tilt") tilt = control["value"];
+    void addControls(JsonArray controls) override {
+      addControl(controls, &bpm, "bpm", "range", 30);
+      addControl(controls, &pan, "pan", "range", 0);
+      addControl(controls, &tilt, "tilt", "range", 0);
     }
   
     void loop() override {
@@ -372,21 +329,12 @@ class RGBWParEffect: public Node {
     uint8_t blue;
     uint8_t white;
   
-    void getControls(JsonArray controls) override {
-      JsonObject control;
-      control = controls.add<JsonObject>(); control["name"] = "bpm"; control["type"] = "range"; control["default"] = 30; control["value"] = bpm;
-      control = controls.add<JsonObject>(); control["name"] = "red"; control["type"] = "range"; control["default"] = 30; control["value"] = red; control["color"] = "Red";
-      control = controls.add<JsonObject>(); control["name"] = "green"; control["type"] = "range"; control["default"] = 30; control["value"] = green; control["color"] = "Green";
-      control = controls.add<JsonObject>(); control["name"] = "blue"; control["type"] = "range"; control["default"] = 30; control["value"] = blue; control["color"] = "Blue";
-      control = controls.add<JsonObject>(); control["name"] = "white"; control["type"] = "range"; control["default"] = 0; control["value"] = white;
-    }
-  
-    void setControl(JsonObject control) override {
-      if (control["name"] == "bpm") bpm = control["value"];
-      if (control["name"] == "red") red = control["value"];
-      if (control["name"] == "green") green = control["value"];
-      if (control["name"] == "blue") blue = control["value"];
-      if (control["name"] == "white") white = control["value"];
+    void addControls(JsonArray controls) override {
+      addControl(controls, &bpm, "bpm", "range", 30);
+      addControl(controls, &red, "red", "range", 30); //control["color"] = "Red"; ...
+      addControl(controls, &green, "green", "range", 30);
+      addControl(controls, &blue, "blue", "range", 30);
+      addControl(controls, &white, "white", "range", 0);
     }
   
     void loop() override {

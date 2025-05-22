@@ -116,16 +116,22 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                         changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                 }
             } else { // if property is key/value
-                changed = true;
-                updatedItem.name = key.c_str();
-                updatedItem.oldValue = stateValue.as<String>();
-                updatedItem.value = newValue;
-                stateData[key.c_str()] = newValue; //update state
-                
-                // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-                // ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                if (key.c_str() == "p") {
+                    ESP_LOGD(TAG, "do not update %s", key.c_str());
+                } else {
+                    changed = true;
+                    updatedItem.name = key.c_str();
+                    updatedItem.oldValue = stateValue.as<String>();
+                    updatedItem.value = newValue;
+                    stateData[key.c_str()] = newValue; //update state
 
-                if (onUpdate) onUpdate(updatedItem);
+                    // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+                    // ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+
+                    if (onUpdate) onUpdate(updatedItem);
+
+                }
+                
             }
         }
     }

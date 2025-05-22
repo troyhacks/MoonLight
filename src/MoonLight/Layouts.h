@@ -22,6 +22,14 @@ public:
       map(); //calls also addLayout
   }
 
+  void updateControl(JsonObject control) override {
+
+    Node::updateControl(control);
+
+    //if changed run map
+    setup();
+  }
+
   //calls addLayout functions, non virtual, only addLayout can be redefined in derived class
   void map() {
 
@@ -50,23 +58,13 @@ class PanelLayout: public LayoutNode {
   uint8_t height = 16;
   bool snake = true;
 
-  void getControls(JsonArray controls) override {
+  void addControls(JsonArray controls) override {
     hasLayout = true;
-    JsonObject control;
-    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = width;
-    control = controls.add<JsonObject>(); control["name"] = "height"; control["type"] = "range"; control["default"] = 16; control["max"] = 32; control["value"] = height;
-    control = controls.add<JsonObject>(); control["name"] = "snake"; control["type"] = "checkbox"; control["default"] = true; control["value"] = snake;
+    addControl(controls, &width, "width", "range", 16, 1, 32);
+    addControl(controls, &height, "height", "range", 16, 1, 32);
+    addControl(controls, &snake, "snake", "checkbox", true);
   }
   
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "width") width = control["value"];
-    if (control["name"] == "height") height = control["value"];
-    if (control["name"] == "snake") snake = control["value"];
-    //if changed run map
-    setup();
-  }
-
   void addLayout() override {
     layerV->layerP->addPin(2); //not working yet
 
@@ -82,48 +80,25 @@ class PanelLayout: public LayoutNode {
 class DMXLayout: public LayoutNode {
 
   uint8_t width = 4; //default 4 moving heads
-  uint8_t type = ct_LedsRGBW; //default 4 moving heads
+  char type[32] = "CRGBW";
 
-  void getControls(JsonArray controls) override {
+  void addControls(JsonArray controls) override {
     hasLayout = true;
-    JsonObject control;
-    JsonArray values;
-    control = controls.add<JsonObject>(); control["name"] = "width"; control["type"] = "range"; control["default"] = 4; control["max"] = 32; control["value"] = width;
-    control = controls.add<JsonObject>(); control["name"] = "type"; control["type"] = "select"; control["default"] = "CRGBW"; values = control["values"].to<JsonArray>();
+    addControl(controls, &width, "width", "range", 4, 1, 32);
+    JsonObject control = addControl(controls, &type, "type", "select", "CRGBW", 1, 32);
+    JsonArray values = control["values"].to<JsonArray>();
     values.add("CRGB");
     values.add("CRGBW");
     values.add("CrazyCurtain");
     values.add("Movinghead");
-    switch (type) {
-      case ct_LedsRGBW: control["value"] = "CRGBW"; break;
-      case ct_CrazyCurtain: control["value"] = "CrazyCurtain"; break;
-      case ct_MovingHead: control["value"] = "Movinghead"; break;
-      default: control["value"] = "CRGB"; break;
-    };
-}
-  
-  void setControl(JsonObject control) override {
-    ESP_LOGD(TAG, "%s = %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
-    if (control["name"] == "width") width = control["value"];
-    if (control["name"] == "type") {
-        if ( control["value"] == "CRGBW") type = ct_LedsRGBW;
-        else if ( control["value"] == "CrazyCurtain") type = ct_CrazyCurtain;
-        else if ( control["value"] == "Movinghead") type = ct_MovingHead;
-        else type = ct_Leds;
-    }
-    //if changed run map
-    setup();
   }
-
+  
   void setup() override {
     LayoutNode::setup();
-    switch (type) {
-      case ct_LedsRGBW: layerV->layerP->lights.header.channelsPerLight = sizeof(CRGBW); break;
-      case ct_CrazyCurtain: layerV->layerP->lights.header.channelsPerLight = sizeof(CrazyCurtain); break;
-      case ct_MovingHead: layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead); break;
-      default: layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB); break;
-    };
-    
+    if (equal(type, "CRGBW")) layerV->layerP->lights.header.channelsPerLight = sizeof(CRGBW);
+    else if (equal(type, "CrazyCurtain")) layerV->layerP->lights.header.channelsPerLight = sizeof(CrazyCurtain);
+    else if (equal(type, "Movinghead")) layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead);
+    else layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB);
   }
 
   void addLayout() override {

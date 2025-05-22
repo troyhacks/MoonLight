@@ -45,4 +45,3 @@ MoonLight uses the following repositories:
 ## License
 
 MoonBase, MoonLight ⚖️ GPL-v3
-ESP32 SvelteKit see [ESP32 SvelteKit license](https://github.com/theelims/ESP32-sveltekit?tab=License-1-ov-file#)

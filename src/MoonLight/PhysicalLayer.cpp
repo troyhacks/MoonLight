@@ -151,7 +151,7 @@ PhysicalLayer::PhysicalLayer() {
             node->constructor(layerV[0], animation); //pass the layer to the node
             node->setup(); //run the setup of the effect
             // layerV[0]->nodes.reserve(index+1);
-            if (layerV[0]->nodes.size() <= index)
+            if (index >= layerV[0]->nodes.size())
                 layerV[0]->nodes.push_back(node);
             else
                 layerV[0]->nodes[index] = node; //add the node to the layer
