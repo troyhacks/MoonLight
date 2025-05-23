@@ -129,6 +129,7 @@ public:
             values.add("SphereMoveEffect🔥");
             values.add("DMX🚥");
             values.add("Panel🚥");
+            values.add("Rings🚥");
             values.add("Mirror💎");
             values.add("Multiply💎");
             values.add("Pinwheel💎");

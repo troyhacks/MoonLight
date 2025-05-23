@@ -140,6 +140,8 @@ PhysicalLayer::PhysicalLayer() {
             node = new DMXLayout();
         } else if (equal(animation, "Panel🚥")) {
             node = new PanelLayout();
+        } else if (equal(animation, "Rings🚥")) {
+            node = new RingsLayout();
         } else if (equal(animation, "Mirror💎")) {
             node = new MirrorModifier();
         } else if (equal(animation, "Multiply💎")) {
