@@ -115,19 +115,22 @@ public:
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random🔥"; values = property["values"].to<JsonArray>();
             values.add("Solid🔥");
+            //alphabetically from here
             values.add("BouncingBalls🔥");
-            values.add("Random🔥");
-            values.add("Sinelon🔥");
-            values.add("Rainbow🔥");
-            values.add("Sinus🔥");
+            values.add("Lines🔥");
             values.add("Lissajous🔥");
             values.add("MovingHead🔥");
+            values.add("Rainbow🔥");
+            values.add("Random🔥");
+            values.add("RipplesEffect🔥");
             values.add("RGBWPar🔥");
-            values.add("Lines🔥");
-            values.add("Panel🚥");
+            values.add("Sinelon🔥");
+            values.add("Sinus🔥");
+            values.add("SphereMoveEffect🔥");
             values.add("DMX🚥");
-            values.add("Multiply💎");
+            values.add("Panel🚥");
             values.add("Mirror💎");
+            values.add("Multiply💎");
             values.add("Pinwheel💎");
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");

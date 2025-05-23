@@ -113,32 +113,37 @@ PhysicalLayer::PhysicalLayer() {
         Node *node = nullptr;
         if (equal(animation, "Solid🔥")) {
             node = new SolidEffect();
+        //alphabetically from here
         } else if (equal(animation, "BouncingBalls🔥")) {
             node = new BouncingBallsEffect();
-        } else if (equal(animation, "Random🔥")) {
-            node = new RandomEffect();
-        } else if (equal(animation, "Sinelon🔥")) {
-            node = new SinelonEffect();
-        } else if (equal(animation, "Rainbow🔥")) {
-            node = new RainbowEffect();
-        } else if (equal(animation, "Sinus🔥")) {
-            node = new SinusEffect();
+        } else if (equal(animation, "Lines🔥")) {
+            node = new LinesEffect();
         } else if (equal(animation, "Lissajous🔥")) {
             node = new LissajousEffect();
         } else if (equal(animation, "MovingHead🔥")) {
             node = new MovingHeadEffect();
+        } else if (equal(animation, "Rainbow🔥")) {
+            node = new RainbowEffect();
+        } else if (equal(animation, "Random🔥")) {
+            node = new RandomEffect();
+        } else if (equal(animation, "RipplesEffect🔥")) {
+            node = new RipplesEffect();
         } else if (equal(animation, "RGBWPar🔥")) {
             node = new RGBWParEffect();
-        } else if (equal(animation, "Lines🔥")) {
-            node = new LinesEffect();
-        } else if (equal(animation, "Panel🚥")) {
-            node = new PanelLayout();
+        } else if (equal(animation, "Sinelon🔥")) {
+            node = new SinelonEffect();
+        } else if (equal(animation, "Sinus🔥")) {
+            node = new SinusEffect();
+        } else if (equal(animation, "SphereMoveEffect🔥")) {
+            node = new SphereMoveEffect();
         } else if (equal(animation, "DMX🚥")) {
             node = new DMXLayout();
-        } else if (equal(animation, "Multiply💎")) {
-            node = new MultiplyModifier();
+        } else if (equal(animation, "Panel🚥")) {
+            node = new PanelLayout();
         } else if (equal(animation, "Mirror💎")) {
             node = new MirrorModifier();
+        } else if (equal(animation, "Multiply💎")) {
+            node = new MultiplyModifier();
         } else if (equal(animation, "Pinwheel💎")) {
             node = new PinwheelModifier();
         #if FT_LIVESCRIPT

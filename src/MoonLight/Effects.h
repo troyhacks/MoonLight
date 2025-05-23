@@ -25,6 +25,8 @@ class SolidEffect: public Node {
   }
 };
 
+//alphabetically from here
+
 //BouncingBalls inspired by WLED
 #define maxNumBalls 16
 //each needs 12 bytes
@@ -53,8 +55,6 @@ class BouncingBallsEffect: public Node {
   const char * name() override {return "BouncingBalls";}
   uint8_t dim() override {return _1D;}
   const char * tags() override {return "💡";}
-
-  void setup() override {}
 
   void loop() override {
     layerV->fadeToBlackBy(100);
@@ -91,8 +91,8 @@ class BouncingBallsEffect: public Node {
       }
 
       // uint32_t color = SEGCOLOR(0);
-      // if (leds.palette) {
-      //   color = leds.color_wheel(i*(256/MAX(numBalls, 8)));
+      // if (layerV->palette) {
+      //   color = layerV->color_wheel(i*(256/MAX(numBalls, 8)));
       // } 
       // else if (hasCol2) {
       //   color = SEGCOLOR(i % NUM_COLORS);
@@ -105,99 +105,10 @@ class BouncingBallsEffect: public Node {
       CRGB color = ColorFromPalette(palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
       layerV->setLight({pos, y, 0}, color);
-      // if (leds.size.x<32) leds.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
-      // else           leds.setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+      // if (layerV->size.x<32) layerV->setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
+      // else           layerV->setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
     } //balls      layerV->fill_solid(CRGB::White);
     }
-  }
-};
-
-class RandomEffect: public Node {
-  public:
-
-  const char * name() override {return "Random";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
-
-  void setup() override {}
-
-  void loop() override {
-      layerV->fadeToBlackBy(70);
-      layerV->setLightColor(random16(layerV->nrOfLights), CRGB(255, random8(), 0));
-  }
-};
-
-class SinelonEffect: public Node {
-public:
-
-  uint8_t bpm = 60;
-
-  void addControls(JsonArray controls) override {
-    addControl(controls, &bpm, "bpm", "range", 60);
-  }
-
-  const char * name() override {return "Sinelon";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
-
-  void setup() override {}
-
-  void loop() override {
-    layerV->fadeToBlackBy(20);
-    for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being    
-      int pos = beatsin16( bpm, 0, layerV->size.x-1, y * 100 );
-      layerV->setLightColor({pos,y,0}, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
-    }
-  }
-};
-
-class RainbowEffect: public Node {
-public:
-
-  const char * name() override {return "Rainbow";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
-
-  void setup() override {}
-
-  void loop() override {
-    static uint8_t hue = 0;
-    layerV->fill_rainbow(hue++, 7);
-  }
-};
-
-//AI generated
-class SinusEffect: public Node {
-public:
-
-  uint8_t speed = 5;
-
-  void addControls(JsonArray controls) override {
-    addControl(controls, &speed, "speed", "range", 5);
-  }
-
-  const char * name() override {return "Sinus";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
-
-  void loop() override {
-    layerV->fadeToBlackBy(70);
-
-    uint8_t hueOffset =  millis() / 10;
-    static uint16_t phase = 0; // Tracks the phase of the sine wave
-    uint8_t brightness = 255;
-    
-    for (uint16_t i = 0; i < layerV->nrOfLights; i++) {
-        // Calculate the sine wave value for the current LED
-        uint8_t wave = sin8((i * 255 / layerV->nrOfLights) + phase);
-        // Map the sine wave value to a color hue
-        uint8_t hue = wave + hueOffset;
-        // Set the LED color using the calculated hue
-        layerV->setLightColor(i, CHSV(hue, 255, brightness));
-    }
-
-    // Increment the phase to animate the wave
-    phase += speed;
   }
 };
 
@@ -267,7 +178,7 @@ public:
         locn.x = sin8(phase/2 + (i*xFrequency)/64);
         locn.y = cos8(phase/2 + i*2);
         locn.x = (layerV->size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
-        locn.y = (layerV->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "leds.size.y > 2" is needed to avoid div/0 in map()
+        locn.y = (layerV->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "layerV->size.y > 2" is needed to avoid div/0 in map()
         // layerV->setLightColor(locn, ColorFromPalette(palette, millis()/100+i, 255));
         layerV->setLight(locn, ColorFromPalette(palette, millis()/100+i, 255));
     }
@@ -277,81 +188,240 @@ public:
 class MovingHeadEffect: public Node {
   public:
   
-    uint8_t bpm;
-    uint8_t pan;
-    uint8_t tilt;
-  
-    void addControls(JsonArray controls) override {
-      addControl(controls, &bpm, "bpm", "range", 30);
-      addControl(controls, &pan, "pan", "range", 0);
-      addControl(controls, &tilt, "tilt", "range", 0);
+  uint8_t bpm;
+  uint8_t pan;
+  uint8_t tilt;
+
+  void addControls(JsonArray controls) override {
+    addControl(controls, &bpm, "bpm", "range", 30);
+    addControl(controls, &pan, "pan", "range", 0);
+    addControl(controls, &tilt, "tilt", "range", 0);
+  }
+
+  void loop() override {
+    for (int i=0; i<layerV->size.x; i++) {
+
+      MovingHead mh;
+
+      int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
+      CRGB color = CHSV( millis()/50, 255, 255);
+
+      if (i == pos) {
+        mh.red = color.red;
+        mh.green = color.green;
+        mh.blue = color.blue;
+        mh.white = 0;
+      } else  {
+        mh.red = 0;
+        mh.green = 0;
+        mh.blue = 0;
+        mh.white = 0;
+      }
+
+      mh.x_move = pan;
+      mh.x_move_fine = 255;
+      mh.y_move = tilt;
+      mh.y_move_fine = 255;
+      mh.axis_slow_to_fast = 0;
+      mh.dimmer = layerV->layerP->lights.header.brightness;
+      mh.strobe = 0;
+
+      layerV->setLight({i,0,0}, mh);
     }
+  }
+};
+
+class RainbowEffect: public Node {
+public:
+
+  const char * name() override {return "Rainbow";}
+  uint8_t dim() override {return _1D;}
+  const char * tags() override {return "💡";}
+
+  void setup() override {}
+
+  void loop() override {
+    static uint8_t hue = 0;
+    layerV->fill_rainbow(hue++, 7);
+  }
+};
+
+class RandomEffect: public Node {
+  public:
+
+  const char * name() override {return "Random";}
+  uint8_t dim() override {return _1D;}
+  const char * tags() override {return "💡";}
+
+  void loop() override {
+      layerV->fadeToBlackBy(70);
+      layerV->setLightColor(random16(layerV->nrOfLights), CRGB(255, random8(), 0));
+  }
+};
+
+class RipplesEffect: public Node {
+  const char * name() override {return "Ripples";}
+  uint8_t dim() override {return _3D;}
+  const char * tags() override {return "💫";}
   
-    void loop() override {
-      for (int i=0; i<layerV->size.x; i++) {
+  uint8_t speed;
+  uint8_t interval;
 
-        MovingHead mh;
+  void addControls(JsonArray controls) override {
+    addControl(controls, &speed, "speed", "range", 50);
+    addControl(controls, &interval, "interval", "range", 128);
+  }
 
-        int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
-        CRGB color = CHSV( millis()/50, 255, 255);
+  void loop() override {
 
-        if (i == pos) {
-          mh.red = color.red;
-          mh.green = color.green;
-          mh.blue = color.blue;
-          mh.white = 0;
-        } else  {
-          mh.red = 0;
-          mh.green = 0;
-          mh.blue = 0;
-          mh.white = 0;
-        }
-  
-        mh.x_move = pan;
-        mh.x_move_fine = 255;
-        mh.y_move = tilt;
-        mh.y_move_fine = 255;
-        mh.axis_slow_to_fast = 0;
-        mh.dimmer = layerV->layerP->lights.header.brightness;
-        mh.strobe = 0;
+    float ripple_interval = 1.3f * ((255.0f - interval)/128.0f) * sqrtf(layerV->size.y);
+    float time_interval = millis()/(100.0 - speed)/((256.0f-128.0f)/20.0f);
 
-        layerV->setLight({i,0,0}, mh);
+    layerV->fadeToBlackBy(255);
+
+    Coord3D pos = {0,0,0};
+    for (pos.z=0; pos.z<layerV->size.z; pos.z++) {
+      for (pos.x=0; pos.x<layerV->size.x; pos.x++) {
+
+        float d = distance(layerV->size.x/2.0f, layerV->size.z/2.0f, 0.0f, (float)pos.x, (float)pos.z, 0.0f) / 9.899495f * layerV->size.y;
+        pos.y = floor(layerV->size.y/2.0f * (1 + sinf(d/ripple_interval + time_interval))); //between 0 and layerV->size.y
+
+        layerV->setLight(pos, CHSV( millis()/50 + random8(64), 200, 255));
       }
     }
-  };
+  }
+};
 
 class RGBWParEffect: public Node {
   public:
   
-    uint8_t bpm;
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t white;
-  
-    void addControls(JsonArray controls) override {
-      addControl(controls, &bpm, "bpm", "range", 30);
-      addControl(controls, &red, "red", "range", 30); //control["color"] = "Red"; ...
-      addControl(controls, &green, "green", "range", 30);
-      addControl(controls, &blue, "blue", "range", 30);
-      addControl(controls, &white, "white", "range", 0);
-    }
-  
-    void loop() override {
-      layerV->fadeToBlackBy(255); //reset all channels
-      for (int i=0; i<layerV->size.x * layerV->layerP->lights.header.channelsPerLight; i++) {
-        layerV->layerP->lights.leds[i] = CRGB::Black;
-      }
+  uint8_t bpm;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  uint8_t white;
 
-      int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
+  void addControls(JsonArray controls) override {
+    addControl(controls, &bpm, "bpm", "range", 30);
+    addControl(controls, &red, "red", "range", 30); //control["color"] = "Red"; ...
+    addControl(controls, &green, "green", "range", 30);
+    addControl(controls, &blue, "blue", "range", 30);
+    addControl(controls, &white, "white", "range", 0);
+  }
 
-      CRGBW rgbw;
-      rgbw.red = red;
-      rgbw.green = green;
-      rgbw.blue = blue;
-      rgbw.white = white;
-      layerV->setLight({pos,0,0}, rgbw);
+  void loop() override {
+    layerV->fadeToBlackBy(255); //reset all channels
+    for (int i=0; i<layerV->size.x * layerV->layerP->lights.header.channelsPerLight; i++) {
+      layerV->layerP->lights.leds[i] = CRGB::Black;
     }
-  };
+
+    int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
+
+    CRGBW rgbw;
+    rgbw.red = red;
+    rgbw.green = green;
+    rgbw.blue = blue;
+    rgbw.white = white;
+    layerV->setLight({pos,0,0}, rgbw);
+  }
+};
   
+class SinelonEffect: public Node {
+public:
+
+  uint8_t bpm = 60;
+
+  void addControls(JsonArray controls) override {
+    addControl(controls, &bpm, "bpm", "range", 60);
+  }
+
+  const char * name() override {return "Sinelon";}
+  uint8_t dim() override {return _1D;}
+  const char * tags() override {return "💡";}
+
+  void setup() override {}
+
+  void loop() override {
+    layerV->fadeToBlackBy(20);
+    for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being    
+      int pos = beatsin16( bpm, 0, layerV->size.x-1, y * 100 );
+      layerV->setLightColor({pos,y,0}, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
+    }
+  }
+};
+
+//AI generated
+class SinusEffect: public Node {
+  public:
+
+  uint8_t speed = 5;
+
+  void addControls(JsonArray controls) override {
+    addControl(controls, &speed, "speed", "range", 5);
+  }
+
+  const char * name() override {return "Sinus";}
+  uint8_t dim() override {return _1D;}
+  const char * tags() override {return "💡";}
+
+  void loop() override {
+    layerV->fadeToBlackBy(70);
+
+    uint8_t hueOffset =  millis() / 10;
+    static uint16_t phase = 0; // Tracks the phase of the sine wave
+    uint8_t brightness = 255;
+    
+    for (uint16_t i = 0; i < layerV->nrOfLights; i++) {
+        // Calculate the sine wave value for the current LED
+        uint8_t wave = sin8((i * 255 / layerV->nrOfLights) + phase);
+        // Map the sine wave value to a color hue
+        uint8_t hue = wave + hueOffset;
+        // Set the LED color using the calculated hue
+        layerV->setLightColor(i, CHSV(hue, 255, brightness));
+    }
+
+    // Increment the phase to animate the wave
+    phase += speed;
+  }
+};
+
+class SphereMoveEffect: public Node {
+  const char * name() override {return "SphereMove";}
+  uint8_t dim() override {return _3D;}
+  const char * tags() override {return "💫";}
+
+  uint8_t speed;
+  
+  void addControls(JsonArray controls) override {
+    addControl(controls, &speed, "speed", "range", 50, 0, 99);
+  }
+
+  void loop() override {
+
+    layerV->fadeToBlackBy(255);
+
+    float time_interval = millis()/(100 - speed)/((256.0f-128.0f)/20.0f);
+
+    Coord3D origin;
+    origin.x = layerV->size.x / 2.0 * ( 1.0 + sinf(time_interval));
+    origin.y = layerV->size.y / 2.0 * ( 1.0 + cosf(time_interval));
+    origin.z = layerV->size.z / 2.0 * ( 1.0 + cosf(time_interval));
+
+    float diameter = 2.0f+sinf(time_interval/3.0f);
+
+    Coord3D pos;
+    for (pos.x=0; pos.x<layerV->size.x; pos.x++) {
+        for (pos.y=0; pos.y<layerV->size.y; pos.y++) {
+            for (pos.z=0; pos.z<layerV->size.z; pos.z++) {
+                float d = distance(pos.x, pos.y, pos.z, origin.x, origin.y, origin.z);
+
+                if (d>diameter && d<diameter + 1.0) {
+                  layerV->setLight(pos, CHSV( millis()/50 + random8(64), 200, 255));
+                }
+            }
+        }
+    }
+  }
+}; // SphereMove3DEffect
+
 #endif

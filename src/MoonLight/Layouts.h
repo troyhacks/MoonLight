@@ -51,31 +51,7 @@ public:
 
 };
 
-class PanelLayout: public LayoutNode {
-  const char * name() override {return "Panel🚥";}
-
-  uint8_t width = 16;
-  uint8_t height = 16;
-  bool snake = true;
-
-  void addControls(JsonArray controls) override {
-    hasLayout = true;
-    addControl(controls, &width, "width", "range", 16, 1, 32);
-    addControl(controls, &height, "height", "range", 16, 1, 32);
-    addControl(controls, &snake, "snake", "checkbox", true);
-  }
-  
-  void addLayout() override {
-    layerV->layerP->addPin(2); //not working yet
-
-    for (int x = 0; x<width; x++) {
-      for (int y = 0; y<height; y++) {
-        layerV->layerP->addLight({x, (x%2 || !snake)?y:height-1-y, 0});
-      }
-    }
-  }
-
-};
+//alphabetically from here
 
 class DMXLayout: public LayoutNode {
 
@@ -104,6 +80,36 @@ class DMXLayout: public LayoutNode {
   void addLayout() override {
     for (int x = 0; x<width; x++) {
       layerV->layerP->addLight({x, 0, 0});
+    }
+  }
+
+};
+
+class PanelLayout: public LayoutNode {
+  const char * name() override {return "Panel🚥";}
+
+  uint8_t width = 16;
+  uint8_t height = 16;
+  uint8_t depth = 1;
+  bool snake = true;
+
+  void addControls(JsonArray controls) override {
+    hasLayout = true;
+    addControl(controls, &width, "width", "range", 16, 1, 32);
+    addControl(controls, &height, "height", "range", 16, 1, 32);
+    addControl(controls, &depth, "depth", "range", 1, 1, 32);
+    addControl(controls, &snake, "snake", "checkbox", true);
+  }
+  
+  void addLayout() override {
+    layerV->layerP->addPin(2); //not working yet
+
+    for (int x = 0; x<width; x++) {
+      for (int y = 0; y<height; y++) {
+        for (int z = 0; z<depth; z++) {
+          layerV->layerP->addLight({x, (x%2 || !snake)?y:height-1-y, z});
+        }
+      }
     }
   }
 

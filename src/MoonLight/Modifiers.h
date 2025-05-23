@@ -11,32 +11,7 @@
 
 #if FT_MOONLIGHT
 
-class MultiplyModifier: public Node {
-  const char * name() override {return "Multiply";}
-
-  Coord3D proMulti = {2,2,2};
-  bool    mirror = false;
-  Coord3D originalSize;
-
-  void modifyLayout() override {
-    hasModifier = true;
-
-    layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
-    originalSize = layerV->size;
-    ESP_LOGD(TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
-  }
-
-  void modifyLight(Coord3D &position) override {
-    if (mirror) {
-      Coord3D mirrors = position / originalSize; // Place the light in the right quadrant
-      position = position % originalSize;
-      if (mirrors.x %2 != 0) position.x = originalSize.x - 1 - position.x;
-      if (mirrors.y %2 != 0) position.y = originalSize.y - 1 - position.y;
-      if (mirrors.z %2 != 0) position.z = originalSize.z - 1 - position.z;
-    }
-    else position = position % originalSize;
-  }
-};
+//alphabetically from here
 
 class MirrorModifier: public Node {
   const char * name() override {return "Mirror";}
@@ -65,6 +40,33 @@ class MirrorModifier: public Node {
     if (mirrorX && position.x >= originalSize.x) position.x = originalSize.x * 2 - 1 - position.x;
     if (mirrorY && position.y >= originalSize.y) position.y = originalSize.y * 2 - 1 - position.y;
     if (mirrorZ && position.z >= originalSize.z) position.z = originalSize.z * 2 - 1 - position.z;
+  }
+};
+
+class MultiplyModifier: public Node {
+  const char * name() override {return "Multiply";}
+
+  Coord3D proMulti = {2,2,2};
+  bool    mirror = false;
+  Coord3D originalSize;
+
+  void modifyLayout() override {
+    hasModifier = true;
+
+    layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
+    originalSize = layerV->size;
+    ESP_LOGD(TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+  }
+
+  void modifyLight(Coord3D &position) override {
+    if (mirror) {
+      Coord3D mirrors = position / originalSize; // Place the light in the right quadrant
+      position = position % originalSize;
+      if (mirrors.x %2 != 0) position.x = originalSize.x - 1 - position.x;
+      if (mirrors.y %2 != 0) position.y = originalSize.y - 1 - position.y;
+      if (mirrors.z %2 != 0) position.z = originalSize.z - 1 - position.z;
+    }
+    else position = position % originalSize;
   }
 };
 
@@ -99,7 +101,6 @@ class PinwheelModifier: public Node {
     //   layerV->size.z = 1;
     // }
     ESP_LOGD(TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
-
   }
 
   void modifyLight(Coord3D &position) override {
