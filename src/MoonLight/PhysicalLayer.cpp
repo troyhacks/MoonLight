@@ -111,51 +111,35 @@ PhysicalLayer::PhysicalLayer() {
     Node* PhysicalLayer::addNode(const char * animation, uint8_t index) {
 
         Node *node = nullptr;
-        if (equal(animation, "Solid🔥")) {
-            node = new SolidEffect();
+        if (equal(animation, SolidEffect::name())) node = new SolidEffect();
         //alphabetically from here
-        } else if (equal(animation, "BouncingBalls🔥")) {
-            node = new BouncingBallsEffect();
-        } else if (equal(animation, "Lines🔥")) {
-            node = new LinesEffect();
-        } else if (equal(animation, "Lissajous🔥")) {
-            node = new LissajousEffect();
-        } else if (equal(animation, "MovingHead🔥")) {
-            node = new MovingHeadEffect();
-        } else if (equal(animation, "Rainbow🔥")) {
-            node = new RainbowEffect();
-        } else if (equal(animation, "Random🔥")) {
-            node = new RandomEffect();
-        } else if (equal(animation, "RipplesEffect🔥")) {
-            node = new RipplesEffect();
-        } else if (equal(animation, "RGBWPar🔥")) {
-            node = new RGBWParEffect();
-        } else if (equal(animation, "Sinelon🔥")) {
-            node = new SinelonEffect();
-        } else if (equal(animation, "Sinus🔥")) {
-            node = new SinusEffect();
-        } else if (equal(animation, "SphereMoveEffect🔥")) {
-            node = new SphereMoveEffect();
-        } else if (equal(animation, "DMX🚥")) {
-            node = new DMXLayout();
-        } else if (equal(animation, "Panel🚥")) {
-            node = new PanelLayout();
-        } else if (equal(animation, "Rings🚥")) {
-            node = new RingsLayout();
-        } else if (equal(animation, "Mirror💎")) {
-            node = new MirrorModifier();
-        } else if (equal(animation, "Multiply💎")) {
-            node = new MultiplyModifier();
-        } else if (equal(animation, "Pinwheel💎")) {
-            node = new PinwheelModifier();
+        else if (equal(animation, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
+        else if (equal(animation, LinesEffect::name())) node = new LinesEffect();
+        else if (equal(animation, LissajousEffect::name())) node = new LissajousEffect();
+        else if (equal(animation, MovingHeadEffect::name())) node = new MovingHeadEffect();
+        else if (equal(animation, RainbowEffect::name())) node = new RainbowEffect();
+        else if (equal(animation, RandomEffect::name())) node = new RandomEffect();
+        else if (equal(animation, RipplesEffect::name())) node = new RipplesEffect();
+        else if (equal(animation, RGBWParEffect::name())) node = new RGBWParEffect();
+        else if (equal(animation, SinelonEffect::name())) node = new SinelonEffect();
+        else if (equal(animation, SinusEffect::name())) node = new SinusEffect();
+        else if (equal(animation, SphereMoveEffect::name())) node = new SphereMoveEffect();
+        else if (equal(animation, DMXLayout::name())) node = new DMXLayout();
+        else if (equal(animation, PanelLayout::name())) node = new PanelLayout();
+        else if (equal(animation, RingsLayout::name())) node = new RingsLayout();
+        else if (equal(animation, MirrorModifier::name())) node = new MirrorModifier();
+        else if (equal(animation, MultiplyModifier::name())) node = new MultiplyModifier();
+        else if (equal(animation, PinwheelModifier::name())) node = new PinwheelModifier();
         #if FT_LIVESCRIPT
-            } else {
-                node = new LiveScriptNode();
+            else {
+                LiveScriptNode *liveScriptNode = new LiveScriptNode();
+                liveScriptNode->animation = animation; //set the (file)name of the script
+                node = liveScriptNode;
         #endif
         }
 
         if (node) {
-            node->constructor(layerV[0], animation); //pass the layer to the node
+            node->constructor(layerV[0]); //pass the layer to the node
             node->setup(); //run the setup of the effect
             // layerV[0]->nodes.reserve(index+1);
             if (index >= layerV[0]->nodes.size())

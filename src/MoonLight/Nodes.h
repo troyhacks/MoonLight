@@ -23,8 +23,11 @@
 
 class Node {
 public:
+  static const char * name() {return "noname";}
+  static const char * tags() {return "";}
+  static uint8_t dim() {return _1D;};
+
   VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
-  const char *animation;
 
   bool hasSetup = false;
   bool hasLoop = false; //equal to hasEffect?
@@ -34,17 +37,12 @@ public:
   bool on = false; //onUpdate will set it on
 
   //C++ constructor and destructor are not inherited, so declare it as normal functions
-  virtual void constructor(VirtualLayer *layerV, const char *animation) {
+  virtual void constructor(VirtualLayer *layerV) {
     this->layerV = layerV;
-    this->animation = animation;
   }
   virtual void destructor() {
     //delete any allocated memory
   }
-
-  virtual const char * name() {return "noname";}
-  virtual const char * tags() {return "";}
-  virtual uint8_t dim() {return _1D;};
 
   virtual void addControls(JsonArray controls) {};
 
@@ -139,14 +137,18 @@ public:
 class LiveScriptNode: public Node {
   public:
 
+  static const char * name() {return "LiveScriptNode⚙️";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "⚙️";}
+
+  const char *animation;
+
   //controls
   uint8_t speed = 128;
   uint8_t intensity = 128;
   uint8_t custom1 = 128;
   uint8_t custom2 = 128;
   uint8_t custom3 = 128;
-
-  const char * name() override {return "LiveScriptNode";}
 
   void setup() override;
   void loop() override;

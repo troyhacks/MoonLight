@@ -54,6 +54,9 @@ public:
 //alphabetically from here
 
 class DMXLayout: public LayoutNode {
+  public:
+
+  static const char * name() {return "DMX🚥";}
 
   uint8_t width = 4; //default 4 moving heads
   char type[32] = "CRGBW";
@@ -86,7 +89,11 @@ class DMXLayout: public LayoutNode {
 };
 
 class PanelLayout: public LayoutNode {
-  const char * name() override {return "Panel🚥";}
+  public:
+
+  static const char * name() {return "Panel🚥";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "🚥💡";}
 
   uint8_t width = 16;
   uint8_t height = 16;
@@ -116,7 +123,11 @@ class PanelLayout: public LayoutNode {
 };
 
 class RingsLayout: public LayoutNode {
-  const char * name() override {return "Rings🚥";}
+  public:
+
+  static const char * name() {return "Rings🚥";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🚥💡";}
 
   uint8_t width = 16;
   uint8_t height = 16;

@@ -14,7 +14,11 @@
 //alphabetically from here
 
 class MirrorModifier: public Node {
-  const char * name() override {return "Mirror";}
+  public:
+
+  static const char * name() {return "Mirror💎";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "💎💡";}
 
   bool mirrorX = true;
   bool mirrorY = false;
@@ -44,7 +48,11 @@ class MirrorModifier: public Node {
 };
 
 class MultiplyModifier: public Node {
-  const char * name() override {return "Multiply";}
+  public:
+
+  static const char * name() {return "Multiply💎";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "💎💡";}
 
   Coord3D proMulti = {2,2,2};
   bool    mirror = false;
@@ -71,7 +79,11 @@ class MultiplyModifier: public Node {
 };
 
 class PinwheelModifier: public Node {
-  const char * name() override {return "Pinwheel";}
+  public:
+
+  static const char * name() {return "Pinwheel💎";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "💎💡";}
 
   uint8_t petals   = 60; // Initalize petal first for modifyLight
   uint8_t swirlVal = 30;

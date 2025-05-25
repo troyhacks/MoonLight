@@ -58,7 +58,7 @@ public:
 
                             if (updatedItem == animation) {
                                 ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)findNode(node["animation"]);
+                                LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
                                 if (liveScriptNode) liveScriptNode->compileAndRun();
                             }
                         }
@@ -75,7 +75,7 @@ public:
                 //trigger pass 1 mapping of layout
                 for (Node *node : layerP.layerV[0]->nodes) {
                     if (node->hasLayout && node->on) {
-                        ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                        ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
                         for (layerP.pass = 1; layerP.pass <=1; layerP.pass++) //only virtual mapping
                             node->map();
                     }
@@ -114,25 +114,25 @@ public:
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random🔥"; values = property["values"].to<JsonArray>();
-            values.add("Solid🔥");
+            values.add(SolidEffect::name());
             //alphabetically from here
-            values.add("BouncingBalls🔥");
-            values.add("Lines🔥");
-            values.add("Lissajous🔥");
-            values.add("MovingHead🔥");
-            values.add("Rainbow🔥");
-            values.add("Random🔥");
-            values.add("RipplesEffect🔥");
-            values.add("RGBWPar🔥");
-            values.add("Sinelon🔥");
-            values.add("Sinus🔥");
-            values.add("SphereMoveEffect🔥");
-            values.add("DMX🚥");
-            values.add("Panel🚥");
-            values.add("Rings🚥");
-            values.add("Mirror💎");
-            values.add("Multiply💎");
-            values.add("Pinwheel💎");
+            values.add(BouncingBallsEffect::name());
+            values.add(LinesEffect::name());
+            values.add(LissajousEffect::name());
+            values.add(MovingHeadEffect::name());
+            values.add(RainbowEffect::name());
+            values.add(RandomEffect::name());
+            values.add(RipplesEffect::name());
+            values.add(RGBWParEffect::name());
+            values.add(SinelonEffect::name());
+            values.add(SinusEffect::name());
+            values.add(SphereMoveEffect::name());
+            values.add(DMXLayout::name());
+            values.add(PanelLayout::name());
+            values.add(RingsLayout::name());
+            values.add(MirrorModifier::name());
+            values.add(MultiplyModifier::name());
+            values.add(PinwheelModifier::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
@@ -249,7 +249,7 @@ public:
                     if (nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
                             if (node->hasLayout && node->on) {
-                                ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                                ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
                                 for (layerP.pass = 1; layerP.pass <=2; layerP.pass++) //only virtual mapping
                                     node->map();
                             }
@@ -291,7 +291,7 @@ public:
                         if (nodeClass->hasModifier) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
                             for (Node *node : layerP.layerV[0]->nodes) {
                                 if (node->hasLayout && node->on) {
-                                    ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->animation);
+                                    ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
                                     for (layerP.pass = 1; layerP.pass <=2; layerP.pass++) //only virtual mapping
                                         node->map();
                                 }
@@ -320,7 +320,7 @@ public:
                         if (nodeClass->on && nodeClass->hasModifier) {
                             for (Node *node : layerP.layerV[0]->nodes) {
                                 if (node->hasLayout && node->on) {
-                                    ESP_LOGD(TAG, "Modifier control changed -> setup layout %s", node->animation);
+                                    ESP_LOGD(TAG, "Modifier control changed -> setup layout %s", node->name());
                                     for (layerP.pass = 1; layerP.pass <= 2; layerP.pass++) //only virtual mapping
                                         node->map();
                                 }
@@ -338,7 +338,7 @@ public:
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             #if FT_ENABLED(FT_LIVESCRIPT)
                 if (updatedItem.oldValue != "null") {//do not run at boot!
-                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)findNode(scriptState["name"]);
+                    LiveScriptNode *liveScriptNode = findLiveScriptNode(scriptState["name"]);
                     if (liveScriptNode) {
                         if (equal(updatedItem.name, "stop"))
                             liveScriptNode->kill();
@@ -438,14 +438,17 @@ public:
         }
     }
 
-    Node *findNode(const char *animation) {
+    LiveScriptNode *findLiveScriptNode(const char *animation) {
         for (Node *node : layerP.layerV[0]->nodes) {
             // Check if the node is of type LiveScriptNode
+            LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
+            if (liveScriptNode) {
 
-                if (equal(node->animation, animation)) {
+                if (equal(liveScriptNode->animation, animation)) {
                     ESP_LOGD(TAG, "found %s", animation);
-                    return node;
+                    return liveScriptNode;
                 }
+            }
         }
         return nullptr;
     }

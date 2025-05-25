@@ -14,9 +14,9 @@
 class SolidEffect: public Node {
   public:
 
-  const char * name() override {return "Solid";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
+  static const char * name() {return "Solid🔥💡";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
 
   void setup() override {}
 
@@ -39,6 +39,10 @@ struct Ball {
 class BouncingBallsEffect: public Node {
   public:
 
+  static const char * name() {return "BouncingBalls🔥💡";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
+
   uint8_t grav = 128;
   uint8_t numBalls = 8;
 
@@ -51,10 +55,6 @@ class BouncingBallsEffect: public Node {
 
   //binding of loop persistent values (pointers)
   Ball balls[16][maxNumBalls];
-
-  const char * name() override {return "BouncingBalls";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
 
   void loop() override {
     layerV->fadeToBlackBy(100);
@@ -115,9 +115,9 @@ class BouncingBallsEffect: public Node {
 class LinesEffect: public Node {
 public:
 
-  const char * name() override {return "Lines";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
+  static const char * name() {return "Lines🔥💡";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
 
   uint8_t bpm = 120;
 
@@ -151,6 +151,10 @@ public:
 class LissajousEffect: public Node {
 public:
 
+  static const char * name() {return "Lissajous🔥";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
+
   uint8_t xFrequency = 64;
   uint8_t fadeRate = 128;
   uint8_t speed = 128;
@@ -160,12 +164,6 @@ public:
     addControl(controls, &fadeRate, "fadeRate", "range", 128);
     addControl(controls, &speed, "speed", "range", 128);
   }
-
-  const char * name() override {return "Lissajous";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
-
-  void setup() override {}
 
   void loop() override {
     CRGBPalette16 palette = PartyColors_p;
@@ -187,7 +185,9 @@ public:
 
 class MovingHeadEffect: public Node {
   public:
-  
+
+  static const char * name() {return "MovingHead🔥";}
+
   uint8_t bpm;
   uint8_t pan;
   uint8_t tilt;
@@ -234,11 +234,9 @@ class MovingHeadEffect: public Node {
 class RainbowEffect: public Node {
 public:
 
-  const char * name() override {return "Rainbow";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
-
-  void setup() override {}
+  static const char * name() {return "Rainbow🔥";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
 
   void loop() override {
     static uint8_t hue = 0;
@@ -249,9 +247,9 @@ public:
 class RandomEffect: public Node {
   public:
 
-  const char * name() override {return "Random";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
+  static const char * name() {return "Random🔥";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
 
   void loop() override {
       layerV->fadeToBlackBy(70);
@@ -260,9 +258,11 @@ class RandomEffect: public Node {
 };
 
 class RipplesEffect: public Node {
-  const char * name() override {return "Ripples";}
-  uint8_t dim() override {return _3D;}
-  const char * tags() override {return "💫";}
+  public:
+
+  static const char * name() {return "Ripples🔥";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "🔥💫";}
   
   uint8_t speed;
   uint8_t interval;
@@ -294,7 +294,9 @@ class RipplesEffect: public Node {
 
 class RGBWParEffect: public Node {
   public:
-  
+
+  static const char * name() {return "RGBWPar🔥";}
+
   uint8_t bpm;
   uint8_t red;
   uint8_t green;
@@ -329,17 +331,15 @@ class RGBWParEffect: public Node {
 class SinelonEffect: public Node {
 public:
 
+  static const char * name() {return "Sinelon🔥";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
+
   uint8_t bpm = 60;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &bpm, "bpm", "range", 60);
   }
-
-  const char * name() override {return "Sinelon";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
-
-  void setup() override {}
 
   void loop() override {
     layerV->fadeToBlackBy(20);
@@ -354,15 +354,15 @@ public:
 class SinusEffect: public Node {
   public:
 
+  static const char * name() {return "Sinus🔥";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🔥💡";}
+
   uint8_t speed = 5;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &speed, "speed", "range", 5);
   }
-
-  const char * name() override {return "Sinus";}
-  uint8_t dim() override {return _1D;}
-  const char * tags() override {return "💡";}
 
   void loop() override {
     layerV->fadeToBlackBy(70);
@@ -386,9 +386,11 @@ class SinusEffect: public Node {
 };
 
 class SphereMoveEffect: public Node {
-  const char * name() override {return "SphereMove";}
-  uint8_t dim() override {return _3D;}
-  const char * tags() override {return "💫";}
+  public:
+
+  static const char * name() {return "SphereMove🔥";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "🔥💫";}
 
   uint8_t speed;
   
