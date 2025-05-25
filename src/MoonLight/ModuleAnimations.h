@@ -94,23 +94,6 @@ public:
         JsonArray details = root; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["default"] = 10;
-        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["default"] = 255; property["color"] = "Red";
-        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["default"] = 255; property["color"] = "Green";
-        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["default"] = 255; property["color"] = "Blue";
-        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "select"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
-        values.add("Preset1");
-        values.add("Preset2");
-        property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = "16"; values = property["values"].to<JsonArray>();
-        values.add("2");
-        values.add("16");
-
-        #if FT_ENABLED(FT_MONITOR)
-            property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
-        #endif
-
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random🔥"; values = property["values"].to<JsonArray>();
@@ -154,56 +137,13 @@ public:
                 property = details.add<JsonObject>(); property["name"] = "value"; property["type"] = "text"; property["default"] = "128";
             }
         }
-
-        #if FT_ENABLED(FT_LIVESCRIPT)
-            property = root.add<JsonObject>(); property["name"] = "scripts"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-            {
-                property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "isRunning"; property["type"] = "checkbox"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "isHalted"; property["type"] = "checkbox"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "exeExist"; property["type"] = "checkbox"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
-                property = details.add<JsonObject>(); property["name"] = "stop"; property["type"] = "button";
-                property = details.add<JsonObject>(); property["name"] = "start"; property["type"] = "button";
-                // property = details.add<JsonObject>(); property["name"] = "free"; property["type"] = "button";
-                property = details.add<JsonObject>(); property["name"] = "delete"; property["type"] = "button";
-            }
-        #endif
     }
 
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (equal(updatedItem.name, "pin") || equal(updatedItem.name, "red") || equal(updatedItem.name, "green") || equal(updatedItem.name, "blue")) {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-
-            //addLeds twice is temp hack to make rgb sliders work
-            switch (_state.data["pin"].as<int>()) {
-                case 2:
-                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    break;
-                case 16:
-                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    break;
-                default:
-                    ESP_LOGD(TAG, "unknown pin %d", _state.data["pin"].as<int>());
-            }
-            FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
-            // layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
-            // FastLED.setBrightness(layerP.lights.header.brightness);
-            ESP_LOGD(TAG, "FastLED.addLeds n:%d", layerP.lights.header.nrOfLights);
-        } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
-            FastLED.setBrightness(layerP.lights.header.brightness);
-
         // handle nodes
-        } else if (equal(updatedItem.parent[0], "nodes")) { // onNodes
+        if (equal(updatedItem.parent[0], "nodes")) { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
 
             if (equal(updatedItem.name, "animation")) { //onAnimation
@@ -331,35 +271,13 @@ public:
                 }
             }
             // end Nodes
-
-        //scripts
-        } else if (equal(updatedItem.parent[0], "scripts")) {    
-            JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            #if FT_ENABLED(FT_LIVESCRIPT)
-                if (updatedItem.oldValue != "null") {//do not run at boot!
-                    LiveScriptNode *liveScriptNode = findLiveScriptNode(scriptState["name"]);
-                    if (liveScriptNode) {
-                        if (equal(updatedItem.name, "stop"))
-                            liveScriptNode->kill();
-                        if (equal(updatedItem.name, "start"))
-                            liveScriptNode->execute();
-                        // if (equal(updatedItem.name, "free"))
-                        //     liveScriptNode->free();
-                        if (equal(updatedItem.name, "delete"))
-                            liveScriptNode->killAndDelete();
-                        // updatedItem.value = 0;
-                    } else ESP_LOGW(TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
-                }
-            #endif
-        } 
+        }
         // else
         // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //run effects
-    void loop()
-    {
+    void loop() {
         if (layerP.lights.header.type == ct_Leds) //otherwise lights is used for positions etc.
             layerP.loop(); //run all the effects of all virtual layers (currently only one)
 
@@ -391,46 +309,6 @@ public:
         #endif
     }
 
-    //update scripts / read only values in the UI
-    void loop1s() {
-
-        if (!_socket->getConnectedClients()) return; 
-
-        #if FT_ENABLED(FT_LIVESCRIPT)
-            JsonDocument newData; //to only send updatedData
-            JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
-            LiveScriptNode node;
-            node.getScriptsJson(scripts);
-
-            //only if changed
-            if (_state.data["scripts"] != newData["scripts"]) {
-                // UpdatedItem updatedItem;
-                // _state.compareRecursive("scripts", _state.data["scripts"], newData["scripts"], updatedItem); //compare and update
-                _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-                JsonObject newDataObject = newData.as<JsonObject>();
-                _socket->emitEvent("animations", newDataObject);
-            }
-
-            // if (_state.data["scripts"] != newData["scripts"]) {
-            //     update([&](ModuleState &state) {
-
-            //         ESP_LOGD(TAG, "update scripts");
-
-            //         UpdatedItem updatedItem;
-            //         ; //compare and update
-            //         state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-            //         // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
-            //         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-            //     }, "server");
-            // }
-
-        #endif
-            
-        // char buffer[256];
-        // serializeJson(doc, buffer, sizeof(buffer));
-        // ESP_LOGD(TAG, "livescripts %s", buffer);
-    }
-
     void driverShow()
     {
         if (layerP.lights.header.type == ct_Leds && _state.data["driverOn"] && FastLED.count()) {
@@ -438,20 +316,22 @@ public:
         }
     }
 
-    LiveScriptNode *findLiveScriptNode(const char *animation) {
-        for (Node *node : layerP.layerV[0]->nodes) {
-            // Check if the node is of type LiveScriptNode
-            LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
-            if (liveScriptNode) {
+    #if FT_ENABLED(FT_LIVESCRIPT)
+        LiveScriptNode *findLiveScriptNode(const char *animation) {
+            for (Node *node : layerP.layerV[0]->nodes) {
+                // Check if the node is of type LiveScriptNode
+                LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
+                if (liveScriptNode) {
 
-                if (equal(liveScriptNode->animation, animation)) {
-                    ESP_LOGD(TAG, "found %s", animation);
-                    return liveScriptNode;
+                    if (equal(liveScriptNode->animation, animation)) {
+                        ESP_LOGD(TAG, "found %s", animation);
+                        return liveScriptNode;
+                    }
                 }
             }
+            return nullptr;
         }
-        return nullptr;
-    }
+    #endif
   
 }; // class ModuleAnimations
 

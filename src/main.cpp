@@ -25,7 +25,11 @@
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
+        #include "MoonLight/ModuleLightsControl.h"
         #include "MoonLight/ModuleAnimations.h"
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            #include "MoonLight/ModuleLiveScripts.h"
+        #endif
         #include "MoonLight/ModuleArtnet.h"
     #endif
 #endif
@@ -43,7 +47,7 @@
 
 PsychicHttpServer server;
 
-ESP32SvelteKit esp32sveltekit(&server, 120);
+ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 160, default is 120
 
 LightMqttSettingsService lightMqttSettingsService = LightMqttSettingsService(&server,
                                                                              &esp32sveltekit);
@@ -60,7 +64,11 @@ LightStateService lightStateService = LightStateService(&server,
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
+        ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &filesService);
         ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit, &filesService);
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &filesService);
+        #endif
         ModuleArtnet moduleArtnet = ModuleArtnet(&server, &esp32sveltekit, &filesService);
     #endif
 #endif
@@ -82,7 +90,11 @@ void setup()
         moduleDemo.begin();
 
         #if FT_ENABLED(FT_MOONLIGHT)
+            moduleLightsControl.begin();
             moduleAnimations.begin();
+            #if FT_ENABLED(FT_LIVESCRIPT)
+                moduleLiveScripts.begin();
+            #endif
             moduleArtnet.begin();
         #endif
     #endif
@@ -151,7 +163,9 @@ void loop()
                 lastTime1s = millis();
                 moduleInstances.loop1s();
                 #if FT_ENABLED(FT_MOONLIGHT)
-                    moduleAnimations.loop1s();
+                    #if FT_ENABLED(FT_LIVESCRIPT)
+                        moduleLiveScripts.loop1s();
+                    #endif
                 #endif
                 moduleDemo.loop1s();
 

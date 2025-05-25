@@ -55,9 +55,21 @@
 			feature: page.data.features.moonlight,
 			submenu: [
 				{
+					title: 'Control',
+					icon: BulbIcon,
+					href: '/moonbase/module?module=lightsControl',
+					feature: page.data.features.moonlight,
+				},
+				{
 					title: 'Animations',
 					icon: BulbIcon,
 					href: '/moonbase/module?module=animations',
+					feature: page.data.features.moonlight,
+				},
+				{
+					title: 'Live Scripts',
+					icon: BulbIcon,
+					href: '/moonbase/module?module=liveScripts',
 					feature: page.data.features.moonlight,
 				},
 				{

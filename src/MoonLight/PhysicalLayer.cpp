@@ -135,8 +135,8 @@ PhysicalLayer::PhysicalLayer() {
                 LiveScriptNode *liveScriptNode = new LiveScriptNode();
                 liveScriptNode->animation = animation; //set the (file)name of the script
                 node = liveScriptNode;
+            }
         #endif
-        }
 
         if (node) {
             node->constructor(layerV[0]); //pass the layer to the node
