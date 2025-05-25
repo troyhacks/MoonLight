@@ -1,6 +1,6 @@
-# Control module
+# Lights Control module
 
-<img width="396" alt="image" src="https://github.com/user-attachments/assets/877ef196-e01e-4aa9-bb63-0d29efc15237" />
+<img width="396" alt="image" src="https://github.com/user-attachments/assets/98865f0b-c966-405c-8522-f4e05bc424f2" />
 
 ## Functional
 
