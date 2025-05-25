@@ -13,8 +13,6 @@
     * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 leds, 24 bits is 130 fps theoretically - 120 practically)
 * Pin: Currently only 2 and 16 supported: todo: move to lights layout nodes
 
-<img width="498" alt="Screenshot 2025-03-29 at 14 12 01" src="https://github.com/user-attachments/assets/3a5a3743-c0a4-4456-96cb-f4abd0d01450" />
-
 ## Technical
 
 Controls is the interface to control lights for the UI, but also for all protocols eg. HA, DMX, etc
