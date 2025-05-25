@@ -1,6 +1,6 @@
 # Animations module
 
-<img width="396" alt="image" src="https://github.com/user-attachments/assets/877ef196-e01e-4aa9-bb63-0d29efc15237" />
+<img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
 ## Functional
 
