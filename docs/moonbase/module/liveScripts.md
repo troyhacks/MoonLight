@@ -1,12 +1,13 @@
 # Live Scripts module
 
-<img width="396" alt="image" src="https://github.com/user-attachments/assets/877ef196-e01e-4aa9-bb63-0d29efc15237" />
+<img width="396" alt="image" src="https://github.com/user-attachments/assets/953346f2-780d-4c61-8e73-7ba7bd228041" />
 
 ## Functional
 
-* Scrips: Running Live scripts (WIP)
+This module shows all running live scripts
 
-<img width="498" alt="Screenshot 2025-03-29 at 14 12 01" src="https://github.com/user-attachments/assets/3a5a3743-c0a4-4456-96cb-f4abd0d01450" />
+* Scrips: Running Live scripts (WIP)
+* Press the edit button to stop start or kill a script (current bug: double click the button)
 
 ### Scripts
 
