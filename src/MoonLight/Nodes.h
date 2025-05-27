@@ -33,6 +33,7 @@ public:
   bool hasLoop = false; //equal to hasEffect?
   bool hasModifier = false;
   bool hasLayout = false; //Mapper?
+  bool hasAddControls = false; //Mapper?
 
   bool on = false; //onUpdate will set it on
 

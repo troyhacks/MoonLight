@@ -21,7 +21,7 @@
 Node *gNode = nullptr;
 JsonArray gControls;
 
-static void _addControl(char *name, char* type, int defaul) {ESP_LOGD(TAG, "%s %s %d", name, type, defaul);gNode->addControl(gControls, nullptr, name, type, defaul);}
+static void _addControl(void * ptr, char *name, char* type, int defaul, int min = INT_MIN, int max = INT_MAX) {ESP_LOGD(TAG, "%p %s %s %d (%d-%d)", ptr,  name, type, defaul, min, max);gNode->addControl(gControls, ptr, name, type, defaul, min, max);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLayoutPre() {gNode->layerV->layerP->addLayoutPre();}
 static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
@@ -32,8 +32,8 @@ static void _modifyLayout() {gNode->modifyLayout();}
 // static void _modifyXYZ() {gNode->modifyXYZ();}//need &position parameter
 
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
-static void _sLC(uint16_t indexV, CRGB color) {gNode->layerV->setLightColor(indexV, color);}
-static void _sCFP(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setLightColor(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
+static void _setLight(uint16_t indexV, CRGB color) {gNode->layerV->setLightColor(indexV, color);}
+static void _setLightPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setLightColor(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
 
 static float _triangle(float j) {return 1.0 - fabs(fmod(2 * j, 2.0) - 1.0);}
 static float _time(float j) {
@@ -111,7 +111,7 @@ void LiveScriptNode::setup() {
   addExternal(   "float triangle(float)", (void *)_triangle);
 
   //MoonLight functions
-  addExternal(    "void addControl(char*,char*,int)", (void *)_addControl);
+  addExternal(    "void addControl(void*,char*,char*,int, int, int)", (void *)_addControl);
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
   addExternal(    "void addLayoutPre()", (void *)_addLayoutPre);
   addExternal(    "void addLight(uint16_t,uint16_t,uint16_t)", (void *)_addLight);
@@ -119,28 +119,24 @@ void LiveScriptNode::setup() {
   addExternal(    "void modifyLayout()", (void *)_modifyLayout);
 //   addExternal(    "void modifyLight(uint16_t,uint16_t,uint16_t)", (void *)_modifyLight);
 //   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
-    //for virtual driver (but keep enabled to avoid compile errors when used in non virtual context
-    addExternal("uint8_t colorOrder", &layerV->layerP->ledsDriver.colorOrder);
-    addExternal("uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
-    addExternal("uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
-    addExternal("uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
-    addExternal("uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
+
+
+  //MoonLight physical and virtual driver vars
+  //  but keep enabled to avoid compile errors when used in non virtual context
+  addExternal( "uint8_t colorOrder", &layerV->layerP->ledsDriver.colorOrder);
+  addExternal( "uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
+  addExternal( "uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
+  addExternal( "uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
+  addExternal( "uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
   addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);
-  addExternal(    "void sLC(uint16_t,CRGB)", (void *)_sLC);
-  addExternal(    "void sCFP(uint16_t,uint8_t,uint8_t)", (void *)_sCFP);
+  addExternal(    "void setLight(uint16_t,CRGB)", (void *)_setLight);
+  addExternal(    "void setLightPal(uint16_t,uint8_t,uint8_t)", (void *)_setLightPal);
   addExternal("uint16_t width", &layerV->size.x);
   addExternal("uint16_t height", &layerV->size.y);
   addExternal("uint16_t depth", &layerV->size.z);
   addExternal("bool on", &on);
-
-  //controls (WLED Nostalgia)
-  addExternal("uint8_t speed", &speed);
-  addExternal("uint8_t intensity", &intensity);
-  addExternal("uint8_t custom1", &custom1);
-  addExternal("uint8_t custom2", &custom2);
-  addExternal("uint8_t custom3", &custom3);
 
   for (asm_external el: external_links) {
       ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
@@ -170,6 +166,7 @@ void LiveScriptNode::compileAndRun() {
           if (scScript.find("loop()") != std::string::npos) hasLoop = true;
           if (scScript.find("addLayout()") != std::string::npos) hasLayout = true;
           if (scScript.find("modifyLight(") != std::string::npos) hasModifier = true;
+          if (scScript.find("addControls(") != std::string::npos) hasAddControls = true;
         //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
           if (hasLayout) scScript += "void map(){addLayoutPre();addLayout();addLayoutPost();}"; //add map() function
@@ -286,43 +283,19 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
 }
 
 void LiveScriptNode::addControls(JsonArray controls)  {
-    // addControl(controls, &speed, "speed", "range", 128);
-    // addControl(controls, &intensity, "intensity", "range", 128);
-    // addControl(controls, &custom1, "custom1", "range", 128);
-    // addControl(controls, &custom2, "custom2", "range", 128);
-    // addControl(controls, &custom3, "custom3", "range", 128);
 
-    gControls = controls; //store the controls for later use in _addControl
+    gControls = controls; //store the controls for use in _addControl
     
-    //if (exist addControls) 
-    scriptRuntime.execute(animation, "addControls"); 
-    //
-    // script example
-    // uint8_t speed = 128;
-    // uint8_t intensity = 128;
-    // uint8_t custom1 = 128;
-    // uint8_t custom2 = 128;
-    // uint8_t custom3 = 128;
-    // void addControls() {
-    //     addControl(&speed, "speed", "range", 128);
-    //     addControl(&intensity, "intensity", "range", 128);
-    //     addControl(&custom1, "custom1", "range", 128);
-    //     addControl(&custom2, "custom2", "range", 128);
-    //     addControl(&custom3, "custom3", "range", 128);
-    // }
-    //
-    // implementation:
-    // addExternal(    "void addControl(uint32,const char*,const char*,int,int,int)", (void *)_addControl);
-    // _addControl(pointerToScriptVariable, const char *name, const char *type, int default, int min = INT_MIN, int max = INT_MAX);
+    if (hasAddControls) 
+        scriptRuntime.execute(animation, "addControls"); 
+}
 
-  }
-  
-  void LiveScriptNode::updateControl(JsonObject control)  {
+void LiveScriptNode::updateControl(JsonObject control)  {
     Node::updateControl(control); //call base class
 
     //if changed run setup needed??? (todo: if hasLayout then rerun mapping needed ..., if modifier then done by ModuleAnimations...)
     // setup();
-  }
+}
 
 #endif
 #endif

@@ -7,12 +7,12 @@ uint8_t rMapRadius[NUM_LEDS];
 uint8_t rMapAngle[NUM_LEDS];
 uint32_t t = 0; //=speed
 
-uint8_t speed2;
-uint8_t intensity2;
+uint8_t speed;
+uint8_t branches;
 
 void addControls() {
-  addControl("speed", "range", 128);
-  addControl("intensity", "range", 128);
+  addControl(&speed, "speed", "range", 128, 1, 255);
+  addControl(&branches, "branches", "range", 4, 1, 8);
 }
 
 void setup()
@@ -34,15 +34,13 @@ void setup()
 
 void loop() {
 
-  nb_branches = intensity / 25;
-
   for (uint8_t x = 0; x < width; x++) {
     for (uint8_t y = 0; y < height; y++) {
       uint8_t angle = rMapAngle[x*height+y];
       uint8_t radius = rMapRadius[x*height+y];
-      uint16_t intensity = sin8(sin8((angle * 4 - radius*mapp) / 4 + t) + radius*mapp - 2*t+ angle * nb_branches);
+      uint16_t intensity = sin8(sin8((angle * 4 - radius*mapp) / 4 + t) + radius*mapp - 2*t + angle * branches);
 
-      sLC(y*width+x, hsv(2*t - radius*mapp, 255, intensity));
+      setLight(y*width+x, hsv(2*t - radius*mapp, 255, intensity));
     }
   }
   t = now() * speed / 32 / 25; //speed 0..8, 40 changes per second

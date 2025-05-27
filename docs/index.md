@@ -50,7 +50,7 @@ MoonLight uses the following repositories:
 
 MoonBase, MoonLight ⚖️ GPL-v3
 
-If you run a commercial project using MoonLight, think about sponsoring MoonLight development: it ensures the code your products rely on stays actively maintained. We can also give your project exposure to the MoonLight community.
+If you are an individual user and want to support the development or if you run a commercial project using MoonLight, think about sponsoring MoonLight development: it ensures the code your products rely on stays actively maintained. We can also give your project exposure to the MoonLight community by listing it on this page.
 
 https://github.com/sponsors/ewowi
 [PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)
