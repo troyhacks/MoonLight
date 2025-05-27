@@ -19,8 +19,9 @@
 #include "ESPLiveScript.h"
 
 Node *gNode = nullptr;
+JsonArray gControls;
 
-// static void _addControl(uint8_t a1) {ESP_LOGD(TAG, "%d", a1);}
+static void _addControl(char *name, char* type, int defaul) {ESP_LOGD(TAG, "%s %s %d", name, type, defaul);gNode->addControl(gControls, nullptr, name, type, defaul);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLayoutPre() {gNode->layerV->layerP->addLayoutPre();}
 static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
@@ -110,7 +111,7 @@ void LiveScriptNode::setup() {
   addExternal(   "float triangle(float)", (void *)_triangle);
 
   //MoonLight functions
-//   addExternal(    "void addControl(uint8_t)", (void *)_getControl);
+  addExternal(    "void addControl(char*,char*,int)", (void *)_addControl);
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
   addExternal(    "void addLayoutPre()", (void *)_addLayoutPre);
   addExternal(    "void addLight(uint16_t,uint16_t,uint16_t)", (void *)_addLight);
@@ -178,7 +179,7 @@ void LiveScriptNode::compileAndRun() {
           if (hasLoop) scScript += "while(2>1){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
           scScript += "}";
 
-          ESP_LOGD(TAG, "script %s", scScript.c_str());
+          ESP_LOGD(TAG, "script \n%s", scScript.c_str());
 
           // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
           // ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
@@ -285,13 +286,16 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
 }
 
 void LiveScriptNode::addControls(JsonArray controls)  {
-    addControl(controls, &speed, "speed", "range", 128);
-    addControl(controls, &intensity, "intensity", "range", 128);
-    addControl(controls, &custom1, "custom1", "range", 128);
-    addControl(controls, &custom2, "custom2", "range", 128);
-    addControl(controls, &custom3, "custom3", "range", 128);
+    // addControl(controls, &speed, "speed", "range", 128);
+    // addControl(controls, &intensity, "intensity", "range", 128);
+    // addControl(controls, &custom1, "custom1", "range", 128);
+    // addControl(controls, &custom2, "custom2", "range", 128);
+    // addControl(controls, &custom3, "custom3", "range", 128);
+
+    gControls = controls; //store the controls for later use in _addControl
     
-    //if (exist addControls) scriptRuntime.execute(animation, "addControls"); 
+    //if (exist addControls) 
+    scriptRuntime.execute(animation, "addControls"); 
     //
     // script example
     // uint8_t speed = 128;

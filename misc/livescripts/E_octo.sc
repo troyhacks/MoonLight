@@ -7,6 +7,14 @@ uint8_t rMapRadius[NUM_LEDS];
 uint8_t rMapAngle[NUM_LEDS];
 uint32_t t = 0; //=speed
 
+uint8_t speed2;
+uint8_t intensity2;
+
+void addControls() {
+  addControl("speed", "range", 128);
+  addControl("intensity", "range", 128);
+}
+
 void setup()
 {
   C_X = width / 2;
@@ -37,5 +45,5 @@ void loop() {
       sLC(y*width+x, hsv(2*t - radius*mapp, 255, intensity));
     }
   }
-  t = now * speed / 32 / 25; //speed 0..8, 40 changes per second
+  t = now() * speed / 32 / 25; //speed 0..8, 40 changes per second
 }

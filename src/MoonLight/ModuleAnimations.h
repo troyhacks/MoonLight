@@ -53,13 +53,26 @@ public:
                     // loop over all changed files (normally only one)
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current animation, recompile it (to do: multiple animations)
-                        for (JsonObject node: _state.data["nodes"].as<JsonArray>()) {
-                            String animation = node["animation"];
+                        for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
+                            String animation = nodeState["animation"];
 
                             if (updatedItem == animation) {
                                 ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                                LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
+                                LiveScriptNode *liveScriptNode = findLiveScriptNode(nodeState["animation"]);
                                 if (liveScriptNode) liveScriptNode->compileAndRun();
+
+                                nodeState["controls"].to<JsonArray>(); //clear the controls
+                                liveScriptNode->addControls(nodeState["controls"].as<JsonArray>()); //update controls
+                                update([&](ModuleState &state) {
+                                    ESP_LOGD(TAG, "update due to new node %s", animation.c_str());
+
+                                    // UpdatedItem updatedItem;
+                                    ; //compare and update
+                                    // state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
+                                    // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+                                    return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+                                }, "server");
+                                ESP_LOGD(TAG, "update due to new node %s done", animation.c_str());
                             }
                         }
                     }

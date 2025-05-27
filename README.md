@@ -45,3 +45,12 @@ MoonLight uses the following repositories:
 ## License
 
 MoonBase, MoonLight ⚖️ GPL-v3
+
+If you run a commercial project using MoonLight, think about sponsoring MoonLight development: it ensures the code your products rely on stays actively maintained. We can also give your project exposure to the MoonLight community.
+
+https://github.com/sponsors/ewowi
+[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)
+
+## Disclaimer
+
+Using this software is the users responsibility as it is not bug free. Therefore contributors of this repo are not reliable for anything including but not limited to spontaneous combustion of the entire led strip, the house and the inevitable heat death of the universe

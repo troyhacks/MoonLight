@@ -57,29 +57,31 @@ public:
     if (min != INT_MIN) control["min"] = min;
     if (max != INT_MAX) control["max"] = max;
 
-    //setValue
-    if (control["type"] == "range" || control["type"] == "pin") {
-      uint8_t *valuePointer = (uint8_t *)pointer;
-      control["value"] = *valuePointer;
+    if (pointer) {
+      //setValue
+      if (control["type"] == "range" || control["type"] == "pin") {
+        uint8_t *valuePointer = (uint8_t *)pointer;
+        control["value"] = *valuePointer;
+      }
+      else if (control["type"] == "select") {
+        char *valuePointer = (char *)pointer;
+        control["value"] = valuePointer;
+      }
+      else if (control["type"] == "number") {
+        uint16_t *valuePointer = (uint16_t *)pointer;
+        control["value"] = *valuePointer;
+      }
+      else if (control["type"] == "checkbox") {
+        bool *valuePointer = (bool *)pointer;
+        control["value"] = *valuePointer;
+      }
+      // else if (control["type"] == "coord3D") {
+      //   Coord3D *valuePointer = (Coord3D *)pointer;
+        // control["value"] = *valuePointer;
+      // }
+      else
+        ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
     }
-    else if (control["type"] == "select") {
-      char *valuePointer = (char *)pointer;
-      control["value"] = valuePointer;
-    }
-    else if (control["type"] == "number") {
-      uint16_t *valuePointer = (uint16_t *)pointer;
-      control["value"] = *valuePointer;
-    }
-    else if (control["type"] == "checkbox") {
-      bool *valuePointer = (bool *)pointer;
-      control["value"] = *valuePointer;
-    }
-    // else if (control["type"] == "coord3D") {
-    //   Coord3D *valuePointer = (Coord3D *)pointer;
-      // control["value"] = *valuePointer;
-    // }
-    else
-      ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
 
     return control;
   };
@@ -89,32 +91,32 @@ public:
       ESP_LOGD(TAG, "%s = %s %s %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), control["p"].as<String>().c_str());
       int pointer = control["p"];
 
-      if (control["type"] == "range" || control["type"] == "pin") {
-        uint8_t *valuePointer = (uint8_t *)pointer;
-        *valuePointer = control["value"];
-        ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+      if (pointer) {
+        if (control["type"] == "range" || control["type"] == "pin") {
+          uint8_t *valuePointer = (uint8_t *)pointer;
+          *valuePointer = control["value"];
+          ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+        }
+        else if (control["type"] == "select") {
+          char *valuePointer = (char *)pointer;
+          strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
+        }
+        else if (control["type"] == "number") {
+          uint16_t *valuePointer = (uint16_t *)pointer;
+          *valuePointer = control["value"];
+        }
+        else if (control["type"] == "checkbox") {
+          bool *valuePointer = (bool *)pointer;
+          *valuePointer = control["value"];
+        }
+        // else if (control["type"] == "coord3D") {
+        //   Coord3D *valuePointer = (Coord3D *)pointer;
+        //   *valuePointer = value;
+        // }
+        else
+          ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
       }
-      else if (control["type"] == "select") {
-        char *valuePointer = (char *)pointer;
-        strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
-      }
-      else if (control["type"] == "number") {
-        uint16_t *valuePointer = (uint16_t *)pointer;
-        *valuePointer = control["value"];
-      }
-      else if (control["type"] == "checkbox") {
-        bool *valuePointer = (bool *)pointer;
-        *valuePointer = control["value"];
-      }
-      // else if (control["type"] == "coord3D") {
-      //   Coord3D *valuePointer = (Coord3D *)pointer;
-      //   *valuePointer = value;
-      // }
-      else
-        ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
-
     }
-
   };
 
   //effect and layout
