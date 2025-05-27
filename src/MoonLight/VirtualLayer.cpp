@@ -160,7 +160,7 @@ void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
   }
   // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
   // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-  //   ESP_LOGW(TAG, " dev sLC %d >= %d", indexV, STARLIGHT_NUM_LEDS);
+  //   ESP_LOGW(TAG, " dev sLC %d >= %d", indexV, ML_MAXLEDS);
 }
 
 CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
@@ -183,7 +183,7 @@ CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
     return layerP->lights.leds[indexV];
   else {
     // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, STARLIGHT_MAXLEDS);
+    // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, ML_MAXLEDS);
     return CRGB::Black;
   }
 }

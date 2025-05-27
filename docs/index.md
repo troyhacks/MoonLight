@@ -19,7 +19,6 @@ MoonLight functionality is aimed at running effects on multiple lights. It's pri
 
 <img width="400" src="https://github.com/user-attachments/assets/09143feb-1356-463c-bc23-6982ef3eeb42"/>
 
-
 MoonLight is a [MoonModules.org](https://moonmodules.org) project. MoonModules is a group of lighting enthusiasts who also made WLED MM and contribute to WLED. Where WLED (MM) is aimed at 1D and 2D effects and LED setups, MoonLight is build to support 2D and 3D effects and multiple light setups. MoonLight has been built from scratch using the experience gained working on WLED (MM).
 
 * Latest release can be found [here](https://github.com/MoonModules/MoonLight/releases). Release v0.5.5 is a developer release and works towards MoonLight 0.6.0 which is aimed at end users and is expected in September 2025. Containing presets controller pad, user friendly installer, physical and virtual driver for large displays, WLED audio sync and more.
@@ -29,6 +28,7 @@ MoonLight is a [MoonModules.org](https://moonmodules.org) project. MoonModules i
 * See [Star-Mod-Base-Light-Moon-Svelte-Live](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live) how MoonLight evolved from StarMod, StarBase, StarLight, MoonBase. 
 * Documentation see [MoonLightDocs](https://moonmodules.org/MoonLight/).
 * We need developers: to create new layouts, effects and modifiers, to create ci-automations, to connect Midi controllers, to make web installers, to improve the UI or whatever good idea you have. Contact us on [Discord](https://discord.com/channels/700041398778331156/1203994211301728296) or [Reddit](https://reddit.com/r/moonmodules) if you want to help!
+* If you appreciate this project, a star on the repo would be awesome: [![GitHub stars](https://img.shields.io/github/stars/MoonModules/MoonLight?style=social)](https://github.com/MoonModules/MoonLight/stargazers)
 
 ## Acknowledgements
 

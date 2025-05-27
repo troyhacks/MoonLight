@@ -13,13 +13,14 @@
 
 class LayoutNode: public Node {
 public:
+  bool requestMap = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
 
   void setup() override {
+    hasLayout = true;
+
     layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB); //default
 
-    //redundant?
-    for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-      map(); //calls also addLayout
+    requestMap = true;
   }
 
   void updateControl(JsonObject control) override {
@@ -27,7 +28,7 @@ public:
     Node::updateControl(control);
 
     //if changed run map
-    setup();
+    requestMap = true;
   }
 
   //calls addLayout functions, non virtual, only addLayout can be redefined in derived class
@@ -49,6 +50,22 @@ public:
     layerV->resetMapping();
   }
 
+  void addLight(Coord3D position) {
+    layerV->layerP->addLight(position);
+  }
+
+  void addPin(uint8_t pinNr) {
+    layerV->layerP->addPin(pinNr);
+  }
+
+  void loop() override {
+    if (requestMap) { //not too early? otherwise change to loop1s
+      requestMap = false;
+      for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+        map(); //calls also addLayout
+    }
+  }
+
 };
 
 //alphabetically from here
@@ -62,7 +79,6 @@ class DMXLayout: public LayoutNode {
   char type[32] = "CRGBW";
 
   void addControls(JsonArray controls) override {
-    hasLayout = true;
     addControl(controls, &width, "width", "range", 4, 1, 32);
     JsonObject control = addControl(controls, &type, "type", "select", "CRGBW", 1, 32);
     JsonArray values = control["values"].to<JsonArray>();
@@ -82,7 +98,7 @@ class DMXLayout: public LayoutNode {
 
   void addLayout() override {
     for (int x = 0; x<width; x++) {
-      layerV->layerP->addLight({x, 0, 0});
+      addLight({x, 0, 0});
     }
   }
 
@@ -99,25 +115,26 @@ class PanelLayout: public LayoutNode {
   uint8_t height = 16;
   uint8_t depth = 1;
   bool snake = true;
+  uint8_t pin = 2;
 
   void addControls(JsonArray controls) override {
-    hasLayout = true;
     addControl(controls, &width, "width", "range", 16, 1, 32);
     addControl(controls, &height, "height", "range", 16, 1, 32);
     addControl(controls, &depth, "depth", "range", 1, 1, 32);
     addControl(controls, &snake, "snake", "checkbox", true);
+    addControl(controls, &pin, "pin", "number", 16, 1, 48);
   }
   
   void addLayout() override {
-    layerV->layerP->addPin(2); //not working yet
-
+    
     for (int x = 0; x<width; x++) {
       for (int y = 0; y<height; y++) {
         for (int z = 0; z<depth; z++) {
-          layerV->layerP->addLight({x, (x%2 || !snake)?y:height-1-y, z});
+          addLight({x, (x%2 || !snake)?y:height-1-y, z});
         }
       }
     }
+    addPin(pin);
   }
 
 };
@@ -131,18 +148,22 @@ class RingsLayout: public LayoutNode {
 
   uint8_t width = 16;
   uint8_t height = 16;
+  uint8_t pin = 2;
+
+  void addControls(JsonArray controls) override {
+    addControl(controls, &pin, "pin", "number", 2, 1, 48);
+  }
 
   void add(int leds, int radius) {
     for (int i = 0; i<leds; i++) {
       int x = width / 2.0 + ((sin8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
       int y = height / 2.0 + ((cos8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
-      layerV->layerP->addLight({x, y, 0});
+      addLight({x, y, 0});
     }
   }
 
   void addLayout() override{
-    layerV->layerP->addPin(2); //not working yet
-
+    
     add(1, 0);
     add(8, 13);
     add(12, 23);
@@ -152,6 +173,8 @@ class RingsLayout: public LayoutNode {
     add(40, 63);
     add(48, 73);
     add(60, 83);
+
+    addPin(pin);
   }
 };
 

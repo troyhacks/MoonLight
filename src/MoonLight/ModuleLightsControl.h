@@ -58,9 +58,6 @@ public:
         values.add("Preset1");
         values.add("Preset2");
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "pin"; property["type"] = "select"; property["default"] = "16"; values = property["values"].to<JsonArray>();
-        values.add("2");
-        values.add("16");
 
         #if FT_ENABLED(FT_MONITOR)
             property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
@@ -71,35 +68,43 @@ public:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (equal(updatedItem.name, "pin") || equal(updatedItem.name, "red") || equal(updatedItem.name, "green") || equal(updatedItem.name, "blue")) {
+        if (equal(updatedItem.name, "red") || equal(updatedItem.name, "green") || equal(updatedItem.name, "blue")) {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-
-            //addLeds twice is temp hack to make rgb sliders work
-            switch (_state.data["pin"].as<int>()) {
-                case 2:
-                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    break;
-                case 16:
-                    FastLED.addLeds<WS2812B, 2, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    FastLED.addLeds<WS2812B, 16, GRB>(layerP.lights.leds, 0, layerP.lights.header.nrOfLights).setCorrection(CRGB(_state.data["red"],_state.data["green"],_state.data["blue"]));
-                    break;
-                default:
-                    ESP_LOGD(TAG, "unknown pin %d", _state.data["pin"].as<int>());
-            }
-            FastLED.setMaxPowerInMilliWatts(10000); // 5v, 2000mA, to protect usb while developing
-            // layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
-            // FastLED.setBrightness(layerP.lights.header.brightness);
-            ESP_LOGD(TAG, "FastLED.addLeds n:%d", layerP.lights.header.nrOfLights);
+            layerP.ledsDriver.setColorCorrection(_state.data["red"], _state.data["green"], _state.data["blue"]);
         } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
-            FastLED.setBrightness(layerP.lights.header.brightness);
-
+            layerP.ledsDriver.setBrightness(layerP.lights.header.brightness);
+        }
         // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
-}
-  
+
+    //ledsDriver.show
+    void loop() {
+        if (layerP.lights.header.type == ct_Leds && _state.data["driverOn"])
+            layerP.ledsDriver.show();
+    }
+
+    void loop50ms() {
+        #if FT_ENABLED(FT_MONITOR)
+
+            static int monitorMillis = 0;
+            if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 leds per second -> 1 second for 12000 leds
+                monitorMillis = millis();
+                
+                if (layerP.lights.header.type == ct_Position) { //send to UI
+                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
+                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * sizeof(Coord3D), MAX_CHANNELS));
+                    layerP.lights.header.type = ct_Leds; //back to normal
+                } else if (layerP.lights.header.type == ct_Leds) {//send to UI
+                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
+                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
+                }
+            }
+        #endif
+    }
+
+
 }; // class ModuleLightsControl
 
 #endif

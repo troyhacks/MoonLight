@@ -152,7 +152,13 @@ public:
                 bool newNode = false;
 
                 if (updatedItem.oldValue != "null") {
-                    nodeState.remove("controls"); //remove the controls, node itself removed after new node is placed
+                    if (nodeState.isNull()) {
+                        ESP_LOGW(TAG, "nodeState is null!");
+                    } else {
+                        // ESP_LOGD(TAG, "nodeState: %s", nodeState.as<String>().c_str());
+                        nodeState.remove("controls"); //remove the controls, node itself removed after new node is placed ... assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL)
+                        // nodeState["controls"].to<JsonArray>(); //clear the controls
+                    }
                 }
 
                 // remove or add Nodes (incl controls)
@@ -170,9 +176,9 @@ public:
                     //show these controls in the UI, send notifiers to listeners...
                     //save ??
                     // JsonObject object = _state.data.as<JsonObject>();
-                    // _socket->emitEvent("animations", object);
+                    // _socket->emitEvent(_moduleName, object);
                     update([&](ModuleState &state) {
-                        ESP_LOGD(TAG, "update due to new animation %s", updatedItem.value.as<String>().c_str());
+                        ESP_LOGD(TAG, "update due to new node %s", updatedItem.value.as<String>().c_str());
 
                         // UpdatedItem updatedItem;
                         ; //compare and update
@@ -180,18 +186,16 @@ public:
                         // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
                         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                     }, "server");
-                    ESP_LOGD(TAG, "update due to new animation %s done", updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
 
                     //make sure "p" is also updated
-
 
                     //if node is a modifier, run the layout definition
                     if (nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
                             if (node->hasLayout && node->on) {
                                 ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
-                                for (layerP.pass = 1; layerP.pass <=2; layerP.pass++) //only virtual mapping
-                                    node->map();
+                                node->setup();
                             }
                         }
                     }
@@ -226,20 +230,21 @@ public:
                 if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be remoced by onAnimation
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {
-                        ESP_LOGD(TAG, "on %s", updatedItem.name);
+                        ESP_LOGD(TAG, "on %s %d", updatedItem.name, updatedItem.value.as<bool>());
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
                         if (nodeClass->hasModifier) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
                             for (Node *node : layerP.layerV[0]->nodes) {
                                 if (node->hasLayout && node->on) {
                                     ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
-                                    for (layerP.pass = 1; layerP.pass <=2; layerP.pass++) //only virtual mapping
-                                        node->map();
+                                    node->setup();
                                 }
                             }
                         }
                         if (nodeClass->hasLayout) {
                             //if layout has been set to off, remove the mapping
                             nodeClass->setup(); // rerun setup (which checks for on)
+                            if (!nodeClass->on)
+                                nodeClass->loop(); // run the loop once to update the layout (off cancels the loop)
                         }
                     }
                 }
@@ -261,8 +266,7 @@ public:
                             for (Node *node : layerP.layerV[0]->nodes) {
                                 if (node->hasLayout && node->on) {
                                     ESP_LOGD(TAG, "Modifier control changed -> setup layout %s", node->name());
-                                    for (layerP.pass = 1; layerP.pass <= 2; layerP.pass++) //only virtual mapping
-                                        node->map();
+                                    node->setup();
                                 }
                             }
                         }
@@ -286,34 +290,6 @@ public:
         //     // ESP_LOGD(TAG, "socket %d", i);
         //     layerP.lights.leds[i] = CRGB(0, 0, 128);
         // }
-
-        driverShow();
-    }
-
-    void loop50ms() {
-        #if FT_ENABLED(FT_MONITOR)
-
-            static int monitorMillis = 0;
-            if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 leds per second -> 1 second for 12000 leds
-                monitorMillis = millis();
-                
-                if (layerP.lights.header.type == ct_Position) { //send to UI
-                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * sizeof(Coord3D), MAX_CHANNELS));
-                    layerP.lights.header.type = ct_Leds; //back to normal
-                } else if (layerP.lights.header.type == ct_Leds) {//send to UI
-                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
-                }
-            }
-        #endif
-    }
-
-    void driverShow()
-    {
-        if (layerP.lights.header.type == ct_Leds && _state.data["driverOn"] && FastLED.count()) {
-            FastLED.show();
-        }
     }
 
     #if FT_ENABLED(FT_LIVESCRIPT)

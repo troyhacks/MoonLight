@@ -135,6 +135,7 @@ void loop()
         // 💫
         #if FT_ENABLED(FT_MOONLIGHT)
             moduleAnimations.loop();
+            moduleLightsControl.loop();
         #endif
 
         //20ms loop
@@ -153,7 +154,7 @@ void loop()
         {
             lastTime50ms = millis();
             #if FT_ENABLED(FT_MOONLIGHT)
-                moduleAnimations.loop50ms();
+                moduleLightsControl.loop50ms();
             #endif
             
             //1s loop

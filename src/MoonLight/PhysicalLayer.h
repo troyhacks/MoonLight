@@ -26,6 +26,8 @@
 
 // #include "VirtualLayer.h"
 
+#include "LedsDriver.h"
+
 class VirtualLayer; //Forward as PhysicalLayer refers back to VirtualLayer
 class Node; //Forward as PhysicalLayer refers back to Node
 class Modifier; //Forward as PhysicalLayer refers back to Modifier
@@ -111,12 +113,14 @@ class PhysicalLayer {
     bool setup();
     bool loop();
 
-    
     uint8_t pass = 0; //'class global' so addLight/Pin functions know which pass it is in
     void addLayoutPre();
-    void addPin(uint8_t pinNr);
     void addLight(Coord3D position);
+    void addPin(uint8_t pinNr);
     void addLayoutPost();
+    
+    std::vector<SortedPin> sortedPins;
+    LedsDriver ledsDriver; 
 
     // an effect is using a virtual layer: tell the effect in which layer to run...
 

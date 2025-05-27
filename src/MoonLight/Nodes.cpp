@@ -118,6 +118,11 @@ void LiveScriptNode::setup() {
   addExternal(    "void modifyLayout()", (void *)_modifyLayout);
 //   addExternal(    "void modifyLight(uint16_t,uint16_t,uint16_t)", (void *)_modifyLight);
 //   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
+          //for virtual driver (but keep enabled to avoid compile errors when used in non virtual context
+    addExternal("uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
+    addExternal("uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
+    addExternal("uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
+    addExternal("uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
   addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);

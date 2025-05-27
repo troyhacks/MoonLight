@@ -45,10 +45,6 @@ PhysicalLayer::PhysicalLayer() {
         return true;
     }
     
-    void PhysicalLayer::addPin(uint8_t pinNr) {
-        ESP_LOGD(TAG, "addPin %d", pinNr);
-    }
-
     void PhysicalLayer::addLayoutPre() {
         lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
         ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
@@ -63,6 +59,7 @@ PhysicalLayer::PhysicalLayer() {
                 //add the lights in the virtual layer
                 layer->addLayoutPre();
             }
+            sortedPins.clear(); //clear the added pins for the next pass
         }
     }
 
@@ -75,8 +72,8 @@ PhysicalLayer::PhysicalLayer() {
                 //reset the index and continue...
             } else
                 lights.positions[lights.header.nrOfLights] = {(uint16_t)position.x, (uint16_t)position.y, (uint16_t)position.z};
-
-                lights.header.size = lights.header.size.maximum(position);
+            
+            lights.header.size = lights.header.size.maximum(position);
         } else {
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
@@ -84,6 +81,36 @@ PhysicalLayer::PhysicalLayer() {
             }
         }
         lights.header.nrOfLights++;
+    }
+
+    void PhysicalLayer::addPin(uint8_t pinNr) {
+        if (pass == 2) {
+            ESP_LOGD(TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
+
+            SortedPin previousPin;
+            if (!sortedPins.empty()) {
+                previousPin = sortedPins.back(); //get the last added pin
+                if (previousPin.pin == pinNr) { //if the same pin, just increase the number of leds
+                    previousPin.nrOfLights += lights.header.nrOfLights - previousPin.startLed;
+                    sortedPins.back() = previousPin; //update the last added pin
+                    return; //no need to add a new pin
+                }
+            } else {
+                previousPin.startLed = 0; //first pin, start at 0
+                previousPin.nrOfLights = 0;
+            }
+
+            //0 400
+            //400 400
+            //800 400
+
+            SortedPin sortedPin;
+            sortedPin.startLed = previousPin.startLed + previousPin.nrOfLights; //start at the end of the previous pin
+            sortedPin.nrOfLights = lights.header.nrOfLights - sortedPin.startLed;
+            sortedPin.pin = pinNr; //the pin number
+
+            sortedPins.push_back(sortedPin);
+        }
     }
 
     void PhysicalLayer::addLayoutPost() {
@@ -99,9 +126,18 @@ PhysicalLayer::PhysicalLayer() {
                 layer->addLayoutPost();
             }
             // initLightsToBlend();
-        }
 
-        //driver init // alloc pins
+            // if pins defined
+            if (!sortedPins.empty()) {
+
+                //sort the vector by the starLed
+                std::sort(sortedPins.begin(), sortedPins.end(), [](const SortedPin &a, const SortedPin &b) {return a.startLed < b.startLed;});
+
+                ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
+
+            } //pins defined
+
+        }
     }
 
     // an effect is using a virtual layer: tell the effect in which layer to run...
