@@ -141,7 +141,7 @@
     }
     ESP_LOGD(TAG, "]\n");
 
-    for (int i=0; i< ML_MAXLEDS; i++) lights.leds[i] = CRGB::Black; //avoid very bright pixels during reboot (WIP)
+    for (int i=0; i< MAX_LEDS; i++) lights.leds[i] = CRGB::Black; //avoid very bright pixels during reboot (WIP)
 
     // pinsM->allocatePin(clockPin, "Leds", "Clock");
     // pinsM->allocatePin(latchPin, "Leds", "Latch");

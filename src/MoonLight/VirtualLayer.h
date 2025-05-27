@@ -132,13 +132,13 @@ class VirtualLayer {
           default: ;
         }
       }
-      else if (indexV < NUM_LEDS) {//no mapping
+      else if (indexV * sizeof(T) < MAX_CHANNELS) {//no mapping
         memcpy(&layerP->lights.channels[indexV*sizeof(T)], &value, sizeof(T));
       }
         // layerP->lights.dmxChannels[indexV] = (byte*)&color;
       // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
       // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-      //   ESP_LOGW(TAG, " dev sLC %d >= %d", indexV, ML_MAXLEDS);
+      //   ESP_LOGW(TAG, " dev sLC %d >= %d", indexV, MAX_LEDS);
     }
 
 
@@ -166,11 +166,11 @@ class VirtualLayer {
             break;
         }
       }
-      else if (indexV < NUM_LEDS) //no mapping
+      else if (indexV * sizeof(T) < MAX_CHANNELS) //no mapping
         return layerP->lights.channels[indexV * sizeof(T)];
       else {
         // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-        // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, ML_MAXLEDS);
+        // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
         return T();
       }
     }

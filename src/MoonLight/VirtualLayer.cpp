@@ -153,14 +153,14 @@ void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
       default: ;
     }
   }
-  else if (indexV < NUM_LEDS) {//no mapping
+  else if (indexV < MAX_LEDS) {//no mapping
     // layerP->lights.leds[indexV] = layerP->lightsToBlend[indexV]?blend(color, layerP->lights.leds[indexV], layerP->globalBlend): color;
     layerP->lights.leds[indexV] = color;
     // layerP->lights.dmxChannels[indexV] = (byte*)&color;
   }
   // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
   // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-  //   ESP_LOGW(TAG, " dev sLC %d >= %d", indexV, ML_MAXLEDS);
+  //   ESP_LOGW(TAG, " dev sLC %d >= %d", indexV, MAX_LEDS);
 }
 
 CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
@@ -179,11 +179,11 @@ CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
         break;
     }
   }
-  else if (indexV < NUM_LEDS) //no mapping
+  else if (indexV < MAX_LEDS) //no mapping
     return layerP->lights.leds[indexV];
   else {
     // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, ML_MAXLEDS);
+    // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
     return CRGB::Black;
   }
 }

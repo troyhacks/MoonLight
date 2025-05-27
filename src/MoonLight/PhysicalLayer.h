@@ -16,8 +16,11 @@
 #undef TAG
 #define TAG "💫"
 
-#define MAX_CHANNELS 8192*3 //physical leds
-#define NUM_LEDS MAX_CHANNELS / 3 //physical leds
+#ifndef MAX_LEDS
+  #define MAX_LEDS 8192 //physical leds 
+#endif
+
+#define MAX_CHANNELS MAX_LEDS*3 //physical channels
 
 #include <Arduino.h>
 #include <vector>
@@ -86,7 +89,7 @@ struct LightsHeader {
 struct Lights {
   LightsHeader header;
   union {
-    CRGB leds[NUM_LEDS];
+    CRGB leds[MAX_LEDS];
     CRGBW ledsRGBW[MAX_CHANNELS / sizeof(CRGBW)];
     byte channels[MAX_CHANNELS];
     MovingHead movingHeads[MAX_CHANNELS / sizeof(MovingHead)];
