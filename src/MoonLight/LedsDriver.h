@@ -26,7 +26,9 @@ struct Lights; //forward
 class LedsDriver {
 public:
 
-//for virtual driver (but keep enabled to avoid compile errors when used in non virtual context
+  //clockless driver (check FastLED support...)
+  uint8_t colorOrder = 3; //GRB is default for WS2812 (not for FastLED yet: see pio.ini)
+  //for virtual driver (but keep enabled to avoid compile errors when used in non virtual context
   uint8_t clockPin = 3; //3 for S3, 26 for ESP32 (wrover)
   uint8_t latchPin = 46; //46 for S3, 27 for ESP32 (wrover)
   uint8_t clockFreq = 10; //clockFreq==10?clock_1000KHZ:clockFreq==11?clock_1111KHZ:clockFreq==12?clock_1123KHZ:clock_800KHZ

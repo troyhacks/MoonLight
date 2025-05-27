@@ -61,7 +61,6 @@
         #if ML_LIVE_MAPPING
           driver.setMapLed(&mapLed);
         #endif
-        driver.setGamma(gammaRed/255.0, gammaGreen/255.0, gammaBlue/255.0);
         //void initled(uint8_t *leds, int *Pinsq, int *sizes, int num_strips, colorarrangment cArr)
       #endif
     //   Variable("Fixture", "brightness").triggerEvent(onChange, UINT8_MAX, true); //set brightness (init is true so bri value not send via udp)
@@ -170,7 +169,6 @@
     #if ML_LIVE_MAPPING
       driver.setMapLed(&mapLed);
     #endif
-    // driver.setGamma(gammaRed/255.0, gammaGreen/255.0, gammaBlue/255.0);
 
     // if (driver.driverInit) driver.showPixels(WAIT);  //avoid very bright pixels during reboot (WIP)
     driver.setBrightness(10); //avoid very bright pixels during reboot (WIP)
