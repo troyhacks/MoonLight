@@ -34,6 +34,7 @@ WIP...
 
 * In case of a newly flashed board, a Wifi access point (AP) will be created. Go to your Wifi settings on your computer and find the new Wifi AP (starts with MoonLight)
     * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
+    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this. 
 * Connect to the AP (no password needed), a captive portal will show with a welcome screen.
     * There seems to be an issue in the captive portal showing Connection to device lost repeatedly. In that case, close the captive portal and open the app in a brower using 192.168.4.1
 * Go to the menu and select Wifi / Wifi Station
@@ -55,14 +56,15 @@ WIP...
 * For latest DMX support 
     * [Pknight Artnet DMX 512](https://s.click.aliexpress.com/e/_ExQK8Dc)
     * [Toy Moving heads](https://s.click.aliexpress.com/e/_Eju7k6Q) (warning: projected lights show the individual rgb colors)
-* Connect the 256 leds panel to the board on Pin 2 or 16
+* Connect the 256 leds panel to the board on a suitable pin (e.g. Pin 2 or 16)
   
    <img width="350" src="https://github.com/user-attachments/assets/1623a751-5f4b-463b-a6f3-a642c2bc52bf"/>
    
 * Go to the UI in the browser
 * Go to MoonLight / Animations
     * Select Pin 2 or 16
-    * Create a node, select the 'hardcoded animations' (Random, Sinelon, Rainbow, Sinus), you should see it on your panel
+    * Create a layout node, e.g. Panel🚥 and set the controls: width and height 16, depth 1, pin: the pin the panel is connected to
+    * Create an effect node, select the 'hardcoded animations' (Random, Sinelon, Rainbow, Sinus), you should see it on your panel
     * Create more nodes with other animations, they will all run at the same time 
 * Live Scripts: Go to MoonBase / Files and create or upload Live scripts.
     * Examples: [Live scripts](https://github.com/MoonModules/MoonLight/tree/main/misc/livescripts)

@@ -155,9 +155,11 @@ public:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
+        TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
         // handle nodes
         if (equal(updatedItem.parent[0], "nodes")) { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
+            serializeJson(nodeState, Serial);
 
             if (equal(updatedItem.name, "animation")) { //onAnimation
 
@@ -176,14 +178,19 @@ public:
 
                 // remove or add Nodes (incl controls)
                 if (!nodeState["animation"].isNull()) { // if animation changed // == updatedItem.value
-                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
     
                     Node *nodeClass = layerP.addNode(nodeState["animation"], updatedItem.index[0]);
                     nodeClass->on = nodeState["on"];
                     newNode = true;
 
-                    // nodeState.remove("controls"); //clear the controls
-                    nodeState["controls"].to<JsonArray>(); //clear the controls
+                    if (nodeState.isNull()) {
+                        ESP_LOGW(TAG, "nodeState is null!");
+                    } else {
+                        // ESP_LOGD(TAG, "nodeState: %s", nodeState.as<String>().c_str());
+                        // nodeState.remove("controls"); //remove the controls, node itself removed after new node is placed ... assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL)
+                        nodeState["controls"].to<JsonArray>(); //clear the controls
+                    }
                     nodeClass->addControls(nodeState["controls"]); //create the controls
 
                     //show these controls in the UI, send notifiers to listeners...

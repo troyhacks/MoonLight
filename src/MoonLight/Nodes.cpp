@@ -13,6 +13,39 @@
 #if FT_MOONLIGHT
 #include "Nodes.h"
 
+void Node::updateControl(JsonObject control) {
+    if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
+        ESP_LOGD(TAG, "%s = %s %s %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), control["p"].as<String>().c_str());
+        int pointer = control["p"];
+
+        if (pointer) {
+        if (control["type"] == "range" || control["type"] == "pin") {
+            uint8_t *valuePointer = (uint8_t *)pointer;
+            *valuePointer = control["value"];
+            ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+        }
+        else if (control["type"] == "select") {
+            char *valuePointer = (char *)pointer;
+            strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
+        }
+        else if (control["type"] == "number") {
+            uint16_t *valuePointer = (uint16_t *)pointer;
+            *valuePointer = control["value"];
+        }
+        else if (control["type"] == "checkbox") {
+            bool *valuePointer = (bool *)pointer;
+            *valuePointer = control["value"];
+        }
+        // else if (control["type"] == "coord3D") {
+        //   Coord3D *valuePointer = (Coord3D *)pointer;
+        //   *valuePointer = value;
+        // }
+        else
+            ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+        }
+    }
+};
+
 #if FT_LIVESCRIPT
 
 #define USE_FASTLED //as ESPLiveScript.h calls hsv ! one of the reserved functions!!
@@ -297,5 +330,6 @@ void LiveScriptNode::updateControl(JsonObject control)  {
     // setup();
 }
 
-#endif
-#endif
+#endif //FT_LIVESCRIPT
+
+#endif //FT_MOONLIGHT

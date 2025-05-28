@@ -44,7 +44,7 @@ public:
         JsonArray details; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "on"; property["type"] = "checkbox"; property["default"] = true;
+        property = root.add<JsonObject>(); property["name"] = "on"; property["type"] = "checkbox"; property["default"] = false;
         property = root.add<JsonObject>(); property["name"] = "controllerIP"; property["type"] = "number"; property["min"] = 2; property["max"] = 255; property["default"] = 11;
 
         property = root.add<JsonObject>(); property["name"] = "outputs"; property["type"] = "array"; details = property["n"].to<JsonArray>();
@@ -52,7 +52,6 @@ public:
             property = details.add<JsonObject>(); property["name"] = "start"; property["type"] = "number"; property["default"] = 0; property["min"] = 3; property["max"] = 32; 
             property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 1024;
         }
-
 
         // {"hostName":"MoonBase","connectionMode":"Priority","savedNetworks":[],"invoices":[{"number":1000,"name":"ewowi","date":"2025-03-21", "lines":[{"service":"con", "price":124}]}]}
 

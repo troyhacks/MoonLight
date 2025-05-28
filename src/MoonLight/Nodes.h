@@ -45,6 +45,16 @@ public:
     //delete any allocated memory
   }
 
+    //effect and layout
+  virtual void setup() {};
+
+  //effect, layout and modifier
+  virtual void loop() {}
+
+  //layout
+  virtual void map() {}
+
+  //effect, layout and modifier
   virtual void addControls(JsonArray controls) {};
 
   template <class ControlType, class PointerType>
@@ -87,47 +97,7 @@ public:
     return control;
   };
 
-  virtual void updateControl(JsonObject control) {
-    if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
-      ESP_LOGD(TAG, "%s = %s %s %s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), control["p"].as<String>().c_str());
-      int pointer = control["p"];
-
-      if (pointer) {
-        if (control["type"] == "range" || control["type"] == "pin") {
-          uint8_t *valuePointer = (uint8_t *)pointer;
-          *valuePointer = control["value"];
-          ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
-        }
-        else if (control["type"] == "select") {
-          char *valuePointer = (char *)pointer;
-          strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
-        }
-        else if (control["type"] == "number") {
-          uint16_t *valuePointer = (uint16_t *)pointer;
-          *valuePointer = control["value"];
-        }
-        else if (control["type"] == "checkbox") {
-          bool *valuePointer = (bool *)pointer;
-          *valuePointer = control["value"];
-        }
-        // else if (control["type"] == "coord3D") {
-        //   Coord3D *valuePointer = (Coord3D *)pointer;
-        //   *valuePointer = value;
-        // }
-        else
-          ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
-      }
-    }
-  };
-
-  //effect and layout
-  virtual void setup() {};
-
-  //effect and modifier
-  virtual void loop() {}
-
-  //layout
-  virtual void map() {}
+  virtual void updateControl(JsonObject control);
 
   //modifier
   virtual void modifyLayout() {}
@@ -146,17 +116,15 @@ class LiveScriptNode: public Node {
 
   const char *animation;
 
-  //controls
-  uint8_t speed = 128;
-  uint8_t intensity = 128;
-  uint8_t custom1 = 128;
-  uint8_t custom2 = 128;
-  uint8_t custom3 = 128;
-
   void setup() override;
   void loop() override;
   void destructor() override;
 
+  void addControls(JsonArray controls) override;
+  void updateControl(JsonObject control) override;
+
+  void map() override;
+  
   void getScriptsJson(JsonArray scripts);
 
   void compileAndRun();
@@ -165,11 +133,6 @@ class LiveScriptNode: public Node {
   void killAndDelete();
   void execute();
 
-  void addControls(JsonArray controls) override;
-  void updateControl(JsonObject control) override;
-
-  void map() override;
-  
 };
 
 #endif

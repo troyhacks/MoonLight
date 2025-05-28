@@ -8,14 +8,14 @@
 * Brightness: brightness of the LEDs when on
 * RGB Sliders: control each color seperately.
 * Presets: Control pad style, store or retrieve a set of nodes with their controls. WIP
-* driverOn: sends LED output to ESP32 gpio pins.
+* Driver On: sends LED output to ESP32 gpio pins.
     * Switch off to see the effect framerate in System Status/Metrics
     * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 leds, 24 bits is 130 fps theoretically - 120 practically)
-* Pin: Currently only 2 and 16 supported: todo: move to lights layout nodes
+* Monitor On: sends LED output the monitor in the UI.
 
 ## Technical
 
-Controls is the interface to control lights for the UI, but also for all protocols eg. HA, DMX, etc
+Controls is the interface to control lights for the UI, but also for all protocols eg. HA, DMX, Hardware buttons, displays etc
 e.g. a DMX controller, can control presets, but not individual preset details.
 
 * See [Modules](../modules.md)

@@ -114,11 +114,11 @@ void FeaturesService::createJSON(JsonObject &root)
         root[element.feature.c_str()] = element.enabled;
     }
     
-    //🌙
+    // 🌙
     #if FT_ENABLED(FT_MOONBASE)
         root["moonbase"] = true;
 
-        //💫
+        // 💫
         #if FT_ENABLED(FT_MOONLIGHT)
             root["moonlight"] = true;
 

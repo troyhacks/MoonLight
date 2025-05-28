@@ -87,11 +87,12 @@ void APSettingsService::manageAP()
 void APSettingsService::startAP()
 {
 #ifdef SERIAL_INFO
-    Serial.println("Starting software access point");
+    Serial.printf("Starting software access point %s (%d %d %d) (%s %s %s)\n", _state.ssid.c_str(), _state.channel, _state.ssidHidden, _state.maxClients, _state.localIP.toString().c_str(), _state.gatewayIP.toString().c_str(), _state.subnetMask.toString().c_str()); // 🌙
 #endif
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str(), _state.channel, _state.ssidHidden, _state.maxClients);
-#if CONFIG_IDF_TARGET_ESP32C3 | LOLIN_WIFI_FIX
+    delay(100); // 🌙 give some time for the AP to start
+#if CONFIG_IDF_TARGET_ESP32C3 | LOLIN_WIFI_FIX // 🌙
     WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
 #endif
     if (!_dnsServer)

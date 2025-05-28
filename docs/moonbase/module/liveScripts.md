@@ -4,6 +4,9 @@
 
 ## Functional
 
+MoonLight is based on nodes (see animations) where each node can run precompiled layouts, effects or modifiers but alternatively, each node can also run a live script, uploaded on the esp32 file system (.sc files).
+Currently this only works on esp32-S3 boards as normal esp32 boards do not have enough memory to flash MoonLight with the Live Scripts option.
+
 This module shows all running live scripts
 
 * Scrips: Running Live scripts (WIP)
@@ -20,7 +23,6 @@ They represent current state of Live Script processing and will be extended as m
 * See [Modules](../modules.md)
 * Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc animation is choosen
     * To do: kill running scripts, e.g. when changing effects
-* To do: use Nodes arguments as arguments to scripts or hardcoded effects
 
 ### Server
 

@@ -78,7 +78,7 @@ void setup()
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
-    // delay(5000); // 🌙 to capture all the serial output
+    delay(5000); // 🌙 to capture all the serial output
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();

@@ -127,12 +127,12 @@ void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *or
     // null terminate the string
     output[len] = '\0';
 
-    emitEvent(event, output, len, originId, onlyToSameOrigin); //🌙
+    emitEvent(event, output, len, originId, onlyToSameOrigin); // 🌙
 
     delete[] output;
 }
 
-//🌙 extracted from above function for FT_MONITOR, which uses char *output
+// 🌙 extracted from above function for FT_MONITOR, which uses char *output
 void EventSocket::emitEvent(String event, char *output, size_t len, const char *originId, bool onlyToSameOrigin)
 {
     // Only process valid events

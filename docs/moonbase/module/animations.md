@@ -7,19 +7,20 @@
 * Nodes: One or more processes, 
     * Can be light layouts, effects or modifiers (in fact one node can also be a combination of these)
     * On/off button defines if a node is active or not
-    * Nodes define their own controls
     * A node can be a precompiled Node or a livescript (loaded in the file system)
-* If a live script file is updated (here or in the [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)) and the file is part of an active node, it will recompile
+    * Nodes define their own controls which are dynamically shown in the UI (changes when the node changes). Also livescripts can define their own controls using addControl(s)
+* If a live script file is updated (here or in the [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)) and the file is part of an active node, it will recompile and reload controls
 
 <img width="498" alt="Screenshot 2025-03-29 at 14 12 01" src="https://github.com/user-attachments/assets/3a5a3743-c0a4-4456-96cb-f4abd0d01450" />
 
 ## Technical
 
 * See [Modules](../modules.md)
-* Upon changing a pin, FastLED.addLeds will rerun
+* Upon changing a pin, driver.init will rerun (FastLED.addLeds, PD and VD driver.init)
 * Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc animation is choosen
     * To do: kill running scripts, e.g. when changing effects
-* To do: use Nodes arguments as arguments to scripts or hardcoded effects
+* [Nodes.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): class Node (constructor, destructor, setup, loop, hasFunctions, map, modify, addControl(s), updateControl)
+* [Nodes.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): implement LiveScriptNode
 
 ### Mapping model (WIP)
 
