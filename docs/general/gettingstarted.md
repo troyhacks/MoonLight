@@ -62,7 +62,6 @@ WIP...
    
 * Go to the UI in the browser
 * Go to MoonLight / Animations
-    * Select Pin 2 or 16
     * Create a layout node, e.g. Panel🚥 and set the controls: width and height 16, depth 1, pin: the pin the panel is connected to
     * Create an effect node, select the 'hardcoded animations' (Random, Sinelon, Rainbow, Sinus), you should see it on your panel
     * Create more nodes with other animations, they will all run at the same time 

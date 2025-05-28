@@ -159,7 +159,7 @@ public:
         // handle nodes
         if (equal(updatedItem.parent[0], "nodes")) { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
-            serializeJson(nodeState, Serial);
+            // serializeJson(nodeState, Serial);
 
             if (equal(updatedItem.name, "animation")) { //onAnimation
 
