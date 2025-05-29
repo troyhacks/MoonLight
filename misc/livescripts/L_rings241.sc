@@ -1,17 +1,22 @@
 #define width 16
 #define height 16
 
+uint8_t pin;
+
+void addControls() {
+  addControl(&pin, "pin", "number", 16, 1, 48);
+}
+
 void add(int leds, int radius) {
   for (int i = 0; i<leds; i++) {
     int x = width / 2.0 + ((sin8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
     int y = height / 2.0 + ((cos8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
     addLight(x, y, 0);
-    printf("%d %d %d\n", leds,x,y);
+    //printf("%d %d %d\n", leds,x,y);
   }
 }
 
 void addLayout() {
-  addPin(2); //not working yet
 
   add(1, 0);
   add(8, 13);
@@ -22,4 +27,6 @@ void addLayout() {
   add(40, 63);
   add(48, 73);
   add(60, 83);
+
+  addPin(pin);
 }

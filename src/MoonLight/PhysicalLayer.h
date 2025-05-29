@@ -38,7 +38,7 @@ class Modifier; //Forward as PhysicalLayer refers back to Modifier
 enum ChannelType {
   ct_Leds,
   ct_LedsRGBW,
-  ct_Position,
+  ct_Vacant,
   ct_Channels,
   ct_MovingHead,
   ct_CrazyCurtain,
@@ -83,7 +83,8 @@ struct LightsHeader {
   uint16_t nrOfLights = 256;
   Coord3D size = {16,16,1}; //12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint8_t channelsPerLight = 3; //RGB default
-  uint8_t dummy2[3];
+  uint8_t isPositions = 0; //default
+  uint8_t dummy2[2];
 }; // fill with dummies to make size 24, be aware of padding so do not change order of vars
 
 struct Lights {

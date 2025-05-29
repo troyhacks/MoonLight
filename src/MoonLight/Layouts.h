@@ -11,100 +11,38 @@
 
 #if FT_MOONLIGHT
 
-class LayoutNode: public Node {
-public:
-  bool requestMap = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
-
-  void setup() override {
-    hasLayout = true;
-
-    layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB); //default
-
-    requestMap = true;
-  }
-
-  void updateControl(JsonObject control) override {
-
-    Node::updateControl(control);
-
-    //if changed run map
-    requestMap = true;
-  }
-
-  //calls addLayout functions, non virtual, only addLayout can be redefined in derived class
-  void map() {
-
-    if (on) {
-      layerV->layerP->addLayoutPre();
-      addLayout();
-      layerV->layerP->addLayoutPost();
-    } else {
-      layerV->resetMapping();
-    }
-  }
-
-  virtual void addLayout() {
-  }
-
-  virtual void destructor() {
-    layerV->resetMapping();
-  }
-
-  void addLight(Coord3D position) {
-    layerV->layerP->addLight(position);
-  }
-
-  void addPin(uint8_t pinNr) {
-    layerV->layerP->addPin(pinNr);
-  }
-
-  void loop() override {
-    if (requestMap) { //not too early? otherwise change to loop1s
-      requestMap = false;
-      for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-        map(); //calls also addLayout
-    }
-  }
-
-};
-
 //alphabetically from here
 
-class DMXLayout: public LayoutNode {
+class DMXLayout: public Node {
   public:
 
   static const char * name() {return "DMX🚥";}
 
   uint8_t width = 4; //default 4 moving heads
-  char type[32] = "CRGBW";
+  uint8_t pin = 2;
+
+  void setup() override {
+    hasLayout = true;
+    Node::setup();
+    layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead);
+    layerV->layerP->lights.header.type = ct_MovingHead;
+  }
 
   void addControls(JsonArray controls) override {
     addControl(controls, &width, "width", "range", 4, 1, 32);
-    JsonObject control = addControl(controls, &type, "type", "select", "CRGBW", 1, 32);
-    JsonArray values = control["values"].to<JsonArray>();
-    values.add("CRGB");
-    values.add("CRGBW");
-    values.add("CrazyCurtain");
-    values.add("Movinghead");
+    addControl(controls, &pin, "pin", "number", 16, 1, 48);
   }
   
-  void setup() override {
-    LayoutNode::setup();
-    if (equal(type, "CRGBW")) layerV->layerP->lights.header.channelsPerLight = sizeof(CRGBW);
-    else if (equal(type, "CrazyCurtain")) layerV->layerP->lights.header.channelsPerLight = sizeof(CrazyCurtain);
-    else if (equal(type, "Movinghead")) layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead);
-    else layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB);
-  }
-
   void addLayout() override {
     for (int x = 0; x<width; x++) {
       addLight({x, 0, 0});
     }
+    addPin(pin); //needed to slow down the dmx stream ... wip
   }
 
 };
 
-class PanelLayout: public LayoutNode {
+class PanelLayout: public Node {
   public:
 
   static const char * name() {return "Panel🚥";}
@@ -124,7 +62,12 @@ class PanelLayout: public LayoutNode {
     addControl(controls, &snake, "snake", "checkbox", true);
     addControl(controls, &pin, "pin", "number", 16, 1, 48);
   }
-  
+
+  void setup() override {
+    hasLayout = true;
+    Node::setup();
+  }
+
   void addLayout() override {
     
     for (int x = 0; x<width; x++) {
@@ -139,7 +82,7 @@ class PanelLayout: public LayoutNode {
 
 };
 
-class RingsLayout: public LayoutNode {
+class RingsLayout: public Node {
   public:
 
   static const char * name() {return "Rings🚥";}
@@ -152,6 +95,10 @@ class RingsLayout: public LayoutNode {
 
   void addControls(JsonArray controls) override {
     addControl(controls, &pin, "pin", "number", 2, 1, 48);
+  }
+  void setup() override {
+    hasLayout = true;
+    Node::setup();
   }
 
   void add(int leds, int radius) {

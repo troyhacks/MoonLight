@@ -81,7 +81,7 @@ public:
 
     //ledsDriver.show
     void loop() {
-        if (layerP.lights.header.type == ct_Leds && _state.data["driverOn"])
+        if (layerP.lights.header.isPositions == 0 && _state.data["driverOn"])
             layerP.ledsDriver.show();
     }
 
@@ -92,11 +92,11 @@ public:
             if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 leds per second -> 1 second for 12000 leds
                 monitorMillis = millis();
                 
-                if (layerP.lights.header.type == ct_Position) { //send to UI
+                if (layerP.lights.header.isPositions == 10) { //send to UI
                     if (_socket->getConnectedClients() && _state.data["monitorOn"])
                         _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * sizeof(Coord3D), MAX_CHANNELS));
-                    layerP.lights.header.type = ct_Leds; //back to normal
-                } else if (layerP.lights.header.type == ct_Leds) {//send to UI
+                    layerP.lights.header.isPositions = 0;
+                } else if (layerP.lights.header.isPositions == 0) {//send to UI
                     if (_socket->getConnectedClients() && _state.data["monitorOn"])
                         _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
                 }

@@ -45,6 +45,9 @@ public:
 
   void show();
 
+  static void preKill();
+  static void postKill();
+
 };
 
 #endif //FT_MOONLIGHT

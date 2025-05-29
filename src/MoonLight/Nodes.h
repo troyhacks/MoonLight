@@ -29,11 +29,9 @@ public:
 
   VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
 
-  bool hasSetup = false;
-  bool hasLoop = false; //equal to hasEffect?
-  bool hasModifier = false;
-  bool hasLayout = false; //Mapper?
-  bool hasAddControls = false; //Mapper?
+  bool hasLayout = false; //run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2) 
+  bool requestMap = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
+  bool hasModifier = false; //modifier new Node, on/off, control changed: run layout.requestMap. addLayoutPre: modifyLayout, addLight: modifyLight (todo XYZ: modifyXYZ)
 
   bool on = false; //onUpdate will set it on
 
@@ -41,18 +39,14 @@ public:
   virtual void constructor(VirtualLayer *layerV) {
     this->layerV = layerV;
   }
-  virtual void destructor() {
-    //delete any allocated memory
-  }
 
-    //effect and layout
-  virtual void setup() {};
-
-  //effect, layout and modifier
-  virtual void loop() {}
-
-  //layout
-  virtual void map() {}
+  //effect and layout
+  virtual void setup() {
+    if (hasLayout) {
+      layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB); //default
+      requestMap = true;
+    }
+  };
 
   //effect, layout and modifier
   virtual void addControls(JsonArray controls) {};
@@ -97,12 +91,54 @@ public:
     return control;
   };
 
-  virtual void updateControl(JsonObject control);
+  virtual void updateControl(JsonObject control); // see Nodes.cpp for implementation
+
+  //effect, layout and modifier (?)
+  virtual void loop() {
+    if (requestMap) { //not too early? otherwise change to loop1s
+      requestMap = false;
+      if (on) {
+        for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+          map(); //calls also addLayout
+      } else {
+        layerV->resetMapping();
+      }
+    }
+  }
+
+  //layout
+
+  //calls addLayout functions, non virtual, only addLayout can be redefined in derived class
+  virtual void map() {
+    if (hasLayout) {
+      ESP_LOGD(TAG, "%s", name());
+      layerV->layerP->addLayoutPre();
+      addLayout();
+      layerV->layerP->addLayoutPost();
+    }
+  }
+
+  virtual void addLayout() {} //the definition of the layout, called by map()
+
+  void addLight(Coord3D position) {
+    layerV->layerP->addLight(position);
+  }
+
+  void addPin(uint8_t pinNr) {
+    layerV->layerP->addPin(pinNr);
+  }
 
   //modifier
   virtual void modifyLayout() {}
   virtual void modifyLight(Coord3D &position) {} //not const as position is changed
-  // virtual void modifyXYZ(Coord3D &position) {}
+  virtual void modifyXYZ(Coord3D &position) {}
+
+  virtual void destructor() {
+    //delete any allocated memory
+    if (hasLayout)
+      layerV->resetMapping();
+  }
+
 };
   
 
@@ -114,25 +150,31 @@ class LiveScriptNode: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "⚙️";}
 
-  const char *animation;
+  bool hasSetup = false;
+  bool hasLoop = false;
+  bool hasAddControls = false;
 
-  void setup() override;
-  void loop() override;
+  const char *animation; //which animation (file) to run
+
+  void setup() override; //addExternal, compileAndRun
+  
+  void addControls(JsonArray controls) override; //call addControls in LiveScript
+  
+  void loop() override; //call Node.loop to process requestMap. todo: sync with script...
+
+  //layout
+  void map() override; // call map in LiveScript
+  
   void destructor() override;
 
-  void addControls(JsonArray controls) override;
-  void updateControl(JsonObject control) override;
-
-  void map() override;
-  
-  void getScriptsJson(JsonArray scripts);
-
+  // LiveScript functions
   void compileAndRun();
+  void execute();
   void kill();
   void free();
   void killAndDelete();
-  void execute();
-
+  void getScriptsJson(JsonArray scripts);
+  
 };
 
 #endif

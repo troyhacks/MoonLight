@@ -18,8 +18,6 @@ class SolidEffect: public Node {
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "🔥💡";}
 
-  void setup() override {}
-
   void loop() override {
       layerV->fill_solid(CRGB::White);
   }
@@ -49,8 +47,8 @@ class BouncingBallsEffect: public Node {
   void addControls(JsonArray controls) override {
     addControl(controls, &grav, "grav", "range", 128);
     addControl(controls, &numBalls, "numBalls", "range", 8, 1, maxNumBalls);
-    ESP_LOGD(TAG, "");
-    serializeJson(controls, Serial); Serial.println();
+    // ESP_LOGD(TAG, "");
+    // serializeJson(controls, Serial); Serial.println();
   }
 
   //binding of loop persistent values (pointers)
@@ -69,45 +67,45 @@ class BouncingBallsEffect: public Node {
     //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     // }
 
-    for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being
-    for (size_t i = 0; i < numBalls; i++) {
-      float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
-      float timeSec = timeSinceLastBounce/1000.0f;
-      balls[y][i].height = (0.5f * gravity * timeSec + balls[y][i].impactVelocity) * timeSec; // avoid use pow(x, 2) - its extremely slow !
+    for (int y =0; y < MIN(layerV->size.y,16); y++) { //Min for the time being
+      for (size_t i = 0; i < MIN(numBalls, maxNumBalls); i++) {
+        float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
+        float timeSec = timeSinceLastBounce/1000.0f;
+        balls[y][i].height = (0.5f * gravity * timeSec + balls[y][i].impactVelocity) * timeSec; // avoid use pow(x, 2) - its extremely slow !
 
-      if (balls[y][i].height <= 0.0f) {
-        balls[y][i].height = 0.0f;
-        //damping for better effect using multiple balls
-        float dampening = 0.9f - float(i)/float(numBalls * numBalls); // avoid use pow(x, 2) - its extremely slow !
-        balls[y][i].impactVelocity = dampening * balls[y][i].impactVelocity;
-        balls[y][i].lastBounceTime = time;
+        if (balls[y][i].height <= 0.0f) {
+          balls[y][i].height = 0.0f;
+          //damping for better effect using multiple balls
+          float dampening = 0.9f - float(i)/float(numBalls * numBalls); // avoid use pow(x, 2) - its extremely slow !
+          balls[y][i].impactVelocity = dampening * balls[y][i].impactVelocity;
+          balls[y][i].lastBounceTime = time;
 
-        if (balls[y][i].impactVelocity < 0.015f) {
-          float impactVelocityStart = sqrtf(-2.0f * gravity) * random8(5,11)/10.0f; // randomize impact velocity
-          balls[y][i].impactVelocity = impactVelocityStart;
+          if (balls[y][i].impactVelocity < 0.015f) {
+            float impactVelocityStart = sqrtf(-2.0f * gravity) * random8(5,11)/10.0f; // randomize impact velocity
+            balls[y][i].impactVelocity = impactVelocityStart;
+          }
+        } else if (balls[y][i].height > 1.0f) {
+          continue; // do not draw OOB ball
         }
-      } else if (balls[y][i].height > 1.0f) {
-        continue; // do not draw OOB ball
-      }
 
-      // uint32_t color = SEGCOLOR(0);
-      // if (layerV->palette) {
-      //   color = layerV->color_wheel(i*(256/MAX(numBalls, 8)));
-      // } 
-      // else if (hasCol2) {
-      //   color = SEGCOLOR(i % NUM_COLORS);
-      // }
+        // uint32_t color = SEGCOLOR(0);
+        // if (layerV->palette) {
+        //   color = layerV->color_wheel(i*(256/MAX(numBalls, 8)));
+        // } 
+        // else if (hasCol2) {
+        //   color = SEGCOLOR(i % NUM_COLORS);
+        // }
 
-      int pos = roundf(balls[y][i].height * (layerV->size.x - 1));
+        int pos = roundf(balls[y][i].height * (layerV->size.x - 1));
 
-      CRGBPalette16 palette = PartyColors_p;
+        CRGBPalette16 palette = PartyColors_p;
 
-      CRGB color = ColorFromPalette(palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
+        CRGB color = ColorFromPalette(palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
-      layerV->setLight({pos, y, 0}, color);
-      // if (layerV->size.x<32) layerV->setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
-      // else           layerV->setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
-    } //balls      layerV->fill_solid(CRGB::White);
+        layerV->setLight({pos, y, 0}, color);
+        // if (layerV->size.x<32) layerV->setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
+        // else           layerV->setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+      } //balls      layerV->fill_solid(CRGB::White);
     }
   }
 };

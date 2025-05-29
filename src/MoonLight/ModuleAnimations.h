@@ -88,8 +88,8 @@ public:
                 //trigger pass 1 mapping of layout
                 for (Node *node : layerP.layerV[0]->nodes) {
                     if (node->hasLayout && node->on) {
-                        ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
-                        for (layerP.pass = 1; layerP.pass <=1; layerP.pass++) //only virtual mapping
+                        ESP_LOGD(TAG, "Monitor request -> layout map 1 %s", node->name());
+                        for (layerP.pass = 1; layerP.pass <=1; layerP.pass++) //only pass1: virtual mapping
                             node->map();
                     }
                 }
@@ -159,6 +159,7 @@ public:
         // handle nodes
         if (equal(updatedItem.parent[0], "nodes")) { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
+            const char *animation = nodeState["animation"];
             // serializeJson(nodeState, Serial);
 
             if (equal(updatedItem.name, "animation")) { //onAnimation
@@ -213,9 +214,9 @@ public:
                     //if node is a modifier, run the layout definition
                     if (nodeClass->hasModifier) {
                         for (Node *node : layerP.layerV[0]->nodes) {
-                            if (node->hasLayout && node->on) {
-                                ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
-                                node->setup();
+                            if (node->hasLayout) {
+                                ESP_LOGD(TAG, "Modifier created -> remap layout %s", node->name());
+                                node->requestMap = true; //request mapping
                             }
                         }
                     }
@@ -254,15 +255,15 @@ public:
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
                         if (nodeClass->hasModifier) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
                             for (Node *node : layerP.layerV[0]->nodes) {
-                                if (node->hasLayout && node->on) {
-                                    ESP_LOGD(TAG, "Modifier control changed -> setup %s", node->name());
-                                    node->setup();
+                                if (node->hasLayout) {
+                                    ESP_LOGD(TAG, "Modifier on/off -> remap layout %s", node->name());
+                                    node->requestMap = true; //request mapping
                                 }
                             }
                         }
                         if (nodeClass->hasLayout) {
-                            //if layout has been set to off, remove the mapping
-                            nodeClass->setup(); // rerun setup (which checks for on)
+                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s", animation);
+                            nodeClass->requestMap = true; // rerun setup (which checks for on)
                             if (!nodeClass->on)
                                 nodeClass->loop(); // run the loop once to update the layout (off cancels the loop)
                         }
@@ -284,9 +285,9 @@ public:
                         // ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
                         if (nodeClass->on && nodeClass->hasModifier) {
                             for (Node *node : layerP.layerV[0]->nodes) {
-                                if (node->hasLayout && node->on) {
-                                    ESP_LOGD(TAG, "Modifier control changed -> setup layout %s", node->name());
-                                    node->setup();
+                                if (node->hasLayout) {
+                                    ESP_LOGD(TAG, "Modifier control changed -> remap layout %s", node->name());
+                                    node->requestMap = true; //request mapping
                                 }
                             }
                         }
@@ -302,7 +303,7 @@ public:
 
     //run effects
     void loop() {
-        if (layerP.lights.header.type == ct_Leds) //otherwise lights is used for positions etc.
+        if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
             layerP.loop(); //run all the effects of all virtual layers (currently only one)
 
         //show connected clients on the led display

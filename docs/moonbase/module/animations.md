@@ -15,6 +15,23 @@
 
 ## Technical
 
+* Nodes
+    * See Nodes.h: class Node
+        * name(): name of the node
+        * hasFunctions: enables features of the Node (Layout, Modifier)
+        * on: (de)activates the node
+        * constructor: sets the corresponding layer
+        * setup: if layout sets channelsPerLight and request map
+    * Nodes manipulate the leds / channels array and the virtual to physical layer mappings.
+    * specify which functions (layout, effect, modifier): One node in general implements one, but can also implement all three (e.g. Moving Head...  wip...)
+        * layout
+        * effect
+        * modifier
+    * Live scripts
+        * See Nodes.h / nodes.cpp
+    * Lights
+        * Regular patterns (CRGB as default but also others like Moving Head ...)
+
 * See [Modules](../modules.md)
 * Upon changing a pin, driver.init will rerun (FastLED.addLeds, PD and VD driver.init)
 * Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc animation is choosen

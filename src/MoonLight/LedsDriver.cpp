@@ -76,7 +76,7 @@
       driver.setGamma(red/255.0, green/255.0, blue/255.0);
   }
 
-  void LedsDriver::show(){
+  void LedsDriver::show() {
     // if statement needed as we need to wait until the driver is initialised
     #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
       if (driver.ledsbuff != nullptr)
@@ -87,6 +87,9 @@
     #endif
   }
 
+  void LedsDriver::preKill() {}
+  void LedsDriver::postKill() {}
+  
 #elif HP_VIRTUAL_DRIVER //see https://github.com/ewowi/I2SClocklessVirtualLedDriver read me
   
   // #define NUM_LEDS_PER_STRIP 256 // for I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY ...
@@ -190,6 +193,27 @@
       driver.showPixels(WAIT);
   }
 
+  void LedsDriver::preKill()
+  {
+    ESP_LOGD(TAG, "");
+    // LEDS specific
+    //tbd: move this to LedModFixture...
+    #if HP_PHYSICAL_DRIVER || HP_VIRTUAL_DRIVER
+      driver.__enableDriver = false;
+      while (driver.isDisplaying) {};
+      //delay(20);
+    #endif
+  }
+  void LedsDriver::postKill()
+  {
+    ESP_LOGD(TAG, "");
+    // LEDS specific
+    #if HP_PHYSICAL_DRIVER || HP_VIRTUAL_DRIVER
+      // delay(10);
+      driver.__enableDriver = true;
+    #endif
+  }
+
 #elif MM_HUB75_DRIVER
   #include "WhateverHubDriver.h"
   static WhateverHubDriver driver;
@@ -200,6 +224,8 @@
   }
   void LedsDriver::show(){
   }
+  void LedsDriver::preKill() {}
+  void LedsDriver::postKill() {}
 
 #else //FastLED driver
 
@@ -435,6 +461,8 @@
         FastLED.show();
     }
   }
+  void LedsDriver::preKill() {}
+  void LedsDriver::postKill() {}
 
 #endif
 #endif //FT_MOONLIGHT

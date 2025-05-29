@@ -15,7 +15,12 @@
 
 ## Technical
 
-Controls is the interface to control lights for the UI, but also for all protocols eg. HA, DMX, Hardware buttons, displays etc
+* Drivers
+    * FastLED
+    * Physical driver
+    * Virtual driver
+
+Light Controls is the interface to control lights for the UI, but also for all protocols eg. HA, DMX, Hardware buttons, displays etc
 e.g. a DMX controller, can control presets, but not individual preset details.
 
 * See [Modules](../modules.md)

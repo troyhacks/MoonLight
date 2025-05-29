@@ -44,6 +44,12 @@ void Node::updateControl(JsonObject control) {
             ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
         }
     }
+
+    //if changed run map
+    if (hasLayout) {
+      ESP_LOGD(TAG, "layout control changed -> remap layout %s", name());
+      requestMap = true;
+    }
 };
 
 #if FT_LIVESCRIPT
@@ -175,12 +181,46 @@ void LiveScriptNode::setup() {
       ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
   }
 
-  compileAndRun();
-}
-
-void LiveScriptNode::compileAndRun() {
+  runningPrograms.setPrekill(layerV->layerP->ledsDriver.preKill, layerV->layerP->ledsDriver.postKill); //for clockless driver...
   runningPrograms.setFunctionToSync(sync);
 
+  compileAndRun();
+
+    //   Node::setup(); //call Node::setup to handle requestMap: no need to run as 
+}
+
+void LiveScriptNode::addControls(JsonArray controls)  {
+
+    gControls = controls; //store the controls for use in _addControl
+    
+    if (hasAddControls) 
+        scriptRuntime.execute(animation, "addControls"); 
+}
+
+void LiveScriptNode::loop() {
+
+    // if (isSyncalled)
+    //     while (!resetSync)
+    //     {
+    //     }
+
+    Node::loop(); //call Node::loop to handle requestMap and on
+}
+
+void LiveScriptNode::map() {
+    if (hasLayout) {
+        scriptRuntime.execute(animation, "map"); 
+    }
+}
+
+void LiveScriptNode::destructor() {
+    ESP_LOGD(TAG, "%s", animation);
+    scriptRuntime.kill(animation);
+}
+
+// LiveScriptNode functions
+
+void LiveScriptNode::compileAndRun() {
   //send UI spinner
 
   //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
@@ -239,21 +279,17 @@ void LiveScriptNode::compileAndRun() {
   //stop UI spinner      
 }
 
-void LiveScriptNode::destructor() {
-    ESP_LOGD(TAG, "%s", animation);
-    scriptRuntime.kill(animation);
-}
-
-void LiveScriptNode::kill() {
-    ESP_LOGD(TAG, "%s", animation);
-    scriptRuntime.kill(animation);
-}
-
 void LiveScriptNode::execute() {
     ESP_LOGD(TAG, "%s", animation);
 
+    //similar to the requestMap in layout.setup.
     if (hasLayout) {
-        map();
+      if (on) {
+        for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
+          map(); //calls also addLayout
+      } else {
+        layerV->resetMapping();
+      }
     }
 
     if (hasLoop) {
@@ -268,11 +304,9 @@ void LiveScriptNode::execute() {
     }
 }
 
-void LiveScriptNode::map() {
-    if (hasLayout) {
-        for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-            scriptRuntime.execute(animation, "map"); 
-    }
+void LiveScriptNode::kill() {
+    ESP_LOGD(TAG, "%s", animation);
+    scriptRuntime.kill(animation);
 }
 
 void LiveScriptNode::free() {
@@ -286,14 +320,6 @@ void LiveScriptNode::killAndDelete() {
     // scriptRuntime.free(animation);
     scriptRuntime.deleteExe(animation);
 };
-
-void LiveScriptNode::loop() {
-
-    // if (isSyncalled)
-    //     while (!resetSync)
-    //     {
-    //     }
-}
 
 void LiveScriptNode::getScriptsJson(JsonArray scripts) {
     for (Executable &exec: scriptRuntime._scExecutables) {
@@ -313,21 +339,6 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
         object["execute"] = 0;
         // ESP_LOGD(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
     }
-}
-
-void LiveScriptNode::addControls(JsonArray controls)  {
-
-    gControls = controls; //store the controls for use in _addControl
-    
-    if (hasAddControls) 
-        scriptRuntime.execute(animation, "addControls"); 
-}
-
-void LiveScriptNode::updateControl(JsonObject control)  {
-    Node::updateControl(control); //call base class
-
-    //if changed run setup needed??? (todo: if hasLayout then rerun mapping needed ..., if modifier then done by ModuleAnimations...)
-    // setup();
 }
 
 #endif //FT_LIVESCRIPT

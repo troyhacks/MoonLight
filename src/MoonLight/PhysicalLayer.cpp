@@ -20,7 +20,8 @@
 PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "constructor");
 
-        lights.header.type = ct_Leds;
+        lights.header.type = ct_Leds; //default
+        lights.header.channelsPerLight = sizeof(CRGB); //RGB default
 
         // initLightsToBlend();
 
@@ -51,7 +52,7 @@ PhysicalLayer::PhysicalLayer() {
 
         if (pass == 1) {
             lights.header.size = {0,0,0};
-            lights.header.type = ct_count; //in progress...
+            lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects
             //dealloc pins
         } else {
@@ -118,7 +119,7 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.size += Coord3D{1,1,1};
             ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.leds));
             //send the positions to the UI _socket_emit
-            lights.header.type = ct_Position; //filled with positions, set back to ct_Leds in Animations
+            lights.header.isPositions = 10; //filled with positions, set back to ct_Leds in Animations
         } else {
             ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
             for (VirtualLayer * layer: layerV) {

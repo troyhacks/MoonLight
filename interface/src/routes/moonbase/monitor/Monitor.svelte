@@ -16,7 +16,7 @@
 	// enum ChannelType {
 	const ct_Leds=0
 	// 	ct_LedsRGBW,
-	const ct_Position=2
+	// const ct_Vacant=2
 	// 	ct_Channels,
 	// 	ct_MovingHead,
 	// 	ct_CrazyCurtain,
@@ -46,8 +46,9 @@
         const data = lights.slice(headerLength);
 
 		let type:number = header[0];
+		let isPositions:number = header[21];
 		
-		if (type == ct_Leds) {
+		if (!(isPositions==10)) { //(type == ct_Leds) {
 			if (!done) {
 				requestLayout(); //ask for positions
 				console.log("Monitor.handleMonitor", data);
@@ -63,7 +64,7 @@
 				colors.push(r, g, b, a);
 			}
 			updateScene(vertices, colors);
-		} else if (type == ct_Position) { //layout Change
+		} else { //layout Change
 			// console.log(lights)
 			handleLayout(header, data);
 		}

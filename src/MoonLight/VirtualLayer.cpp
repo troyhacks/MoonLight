@@ -105,10 +105,10 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
 uint16_t VirtualLayer::XYZ(Coord3D &position) {
 
   //XYZ modifiers
-  // for (Node *node: nodes) { //e.g. random or scrolling or rotate modifier
-  //   if (node->hasModifier && node->on)
-  //     node->modifyXYZ(position); //modifies the position
-  // }
+  for (Node *node: nodes) { //e.g. random or scrolling or rotate modifier
+    if (node->hasModifier && node->on)
+      node->modifyXYZ(position); //modifies the position
+  }
 
   return XYZUnprojected(position);
 }
