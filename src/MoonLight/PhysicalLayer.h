@@ -40,7 +40,8 @@ enum ChannelType {
   ct_LedsRGBW,
   ct_Vacant,
   ct_Channels,
-  ct_MovingHead,
+  ct_MovingHeadMiniLed,
+  ct_MovingHead19x15,
   ct_CrazyCurtain,
   ct_count
 };
@@ -52,7 +53,7 @@ struct CRGBW {
   uint8_t white;
 };
 
-struct MovingHead { //11 or 13 channel (channel mode selection)
+struct MovingHeadMiniLed { //11 or 13 channel (channel mode selection)
   uint8_t x_move;
   uint8_t x_move_fine;
   uint8_t y_move;
@@ -66,6 +67,60 @@ struct MovingHead { //11 or 13 channel (channel mode selection)
   uint8_t white;
   // uint8_t mode;
   // uint8_t rest;
+
+  void initValues() {
+    x_move = 0;
+    x_move_fine = 255; //default full speed
+    y_move = 0;
+    y_move_fine = 255; //default full speed
+    axis_slow_to_fast = 0; //default no slow to fast
+    dimmer = 255; //default full brightness
+    strobe = 0; //default no strobe
+    red = 0;
+    green = 0;
+    blue = 0;
+    white = 0; //default no white
+    // mode = 0; //default no mode
+    // rest = 0; //default no rest
+  }
+};
+
+struct MovingHead19x15 { //16channel mode
+  uint8_t x_move;
+  uint8_t y_move;
+  uint8_t axis_slow_to_fast;
+  uint8_t dimmer;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  uint8_t white;
+  uint8_t strobe;
+  uint8_t focus;
+  uint8_t macroFun;
+  uint8_t macroSpeed;
+  uint8_t x_move_fine;
+  uint8_t y_move_fine;
+  uint8_t reset;
+  uint8_t colorTemp;
+
+  void initValues() {
+    x_move = 0;
+    y_move = 0;
+    axis_slow_to_fast = 0;
+    dimmer = 255; //default full brightness
+    red = 0;
+    green = 0;
+    blue = 0;
+    white = 0;
+    strobe = 0; //default no strobe
+    focus = 0; //default no focus
+    macroFun = 0; //default no macro function
+    macroSpeed = 0; //default no macro speed
+    x_move_fine = 255; //default full speed
+    y_move_fine = 255; //default full speed
+    reset = 0; //default no reset
+    colorTemp = 0; //default no color temperature
+  }
 };
 
 struct CrazyCurtain {
@@ -93,7 +148,8 @@ struct Lights {
     CRGB leds[MAX_LEDS];
     CRGBW ledsRGBW[MAX_CHANNELS / sizeof(CRGBW)];
     byte channels[MAX_CHANNELS];
-    MovingHead movingHeads[MAX_CHANNELS / sizeof(MovingHead)];
+    MovingHead19x15 movingHeads19x15[MAX_CHANNELS / sizeof(MovingHead19x15)];
+    MovingHeadMiniLed movingHeadsMiniLed[MAX_CHANNELS / sizeof(MovingHeadMiniLed)];
     CrazyCurtain crazyCurtain[MAX_CHANNELS / sizeof(CrazyCurtain)]; // 6 bytes
     Coord3D positions[MAX_CHANNELS / sizeof(Coord3D)]; //for layout / pass == 1, send positions to monitor / preview
   };

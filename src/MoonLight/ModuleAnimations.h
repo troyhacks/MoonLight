@@ -41,7 +41,7 @@ public:
     void begin() {
         Module::begin();
 
-        ESP_LOGD(TAG, "L:%d(%d) LH:%d N:%d PL:%d(%d) VL:%d MH:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(MovingHead));
+        ESP_LOGD(TAG, "L:%d(%d) LH:%d N:%d PL:%d(%d) VL:%d MH:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(MovingHeadMiniLed));
 
         #if FT_ENABLED(FT_LIVESCRIPT)
             //create a handler which recompiles the animation when the file of the current animation changes in the File Manager
@@ -115,7 +115,8 @@ public:
             values.add(BouncingBallsEffect::name());
             values.add(LinesEffect::name());
             values.add(LissajousEffect::name());
-            values.add(MovingHeadEffect::name());
+            values.add(MovingHead19x15Effect::name());
+            values.add(MovingHeadMiniLedEffect::name());
             values.add(RainbowEffect::name());
             values.add(RandomEffect::name());
             values.add(RipplesEffect::name());
@@ -123,7 +124,8 @@ public:
             values.add(SinelonEffect::name());
             values.add(SinusEffect::name());
             values.add(SphereMoveEffect::name());
-            values.add(DMXLayout::name());
+            values.add(MovingHead19x15Layout::name());
+            values.add(MovingHeadMiniLedLayout::name());
             values.add(PanelLayout::name());
             values.add(RingsLayout::name());
             values.add(MirrorModifier::name());
@@ -172,7 +174,8 @@ public:
                         ESP_LOGW(TAG, "nodeState is null!");
                     } else {
                         // ESP_LOGD(TAG, "nodeState: %s", nodeState.as<String>().c_str());
-                        nodeState.remove("controls"); //remove the controls, node itself removed after new node is placed ... assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL)
+                        nodeState.remove("controls"); //remove the controls, node itself removed after new node is placed ... 
+                        //assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL)
                         // nodeState["controls"].to<JsonArray>(); //clear the controls
                     }
                 }

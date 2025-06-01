@@ -181,10 +181,10 @@ public:
   }
 };
 
-class MovingHeadEffect: public Node {
+class MovingHeadMiniLedEffect: public Node {
   public:
 
-  static const char * name() {return "MovingHead🔥";}
+  static const char * name() {return "MovingHeadMiniLed🔥";}
 
   uint8_t bpm;
   uint8_t pan;
@@ -199,7 +199,8 @@ class MovingHeadEffect: public Node {
   void loop() override {
     for (int i=0; i<layerV->size.x; i++) {
 
-      MovingHead mh;
+      MovingHeadMiniLed mh;
+      mh.initValues();
 
       int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
       CRGB color = CHSV( millis()/50, 255, 255);
@@ -208,21 +209,54 @@ class MovingHeadEffect: public Node {
         mh.red = color.red;
         mh.green = color.green;
         mh.blue = color.blue;
-        mh.white = 0;
-      } else  {
-        mh.red = 0;
-        mh.green = 0;
-        mh.blue = 0;
-        mh.white = 0;
       }
 
       mh.x_move = pan;
-      mh.x_move_fine = 255;
       mh.y_move = tilt;
-      mh.y_move_fine = 255;
-      mh.axis_slow_to_fast = 0;
       mh.dimmer = layerV->layerP->lights.header.brightness;
-      mh.strobe = 0;
+
+      layerV->setLight({i,0,0}, mh);
+    }
+  }
+};
+
+class MovingHead19x15Effect: public Node {
+  public:
+
+  static const char * name() {return "MovingHead19x15";}
+
+  uint8_t bpm;
+  uint8_t pan;
+  uint8_t tilt;
+  uint8_t focus;
+
+  void addControls(JsonArray controls) override {
+    addControl(controls, &bpm, "bpm", "range", 30);
+    addControl(controls, &pan, "pan", "range", 0);
+    addControl(controls, &tilt, "tilt", "range", 0);
+    addControl(controls, &focus, "focus", "range", 0);
+  }
+
+  void loop() override {
+    for (int i=0; i<layerV->size.x; i++) {
+
+      MovingHead19x15 mh;
+      mh.initValues();
+
+      int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
+      CRGB color = CHSV( millis()/50, 255, 255);
+
+      if (i == pos) {
+        mh.red = color.red;
+        mh.green = color.green;
+        mh.blue = color.blue;
+      }
+
+      mh.x_move = pan;
+      mh.y_move = tilt;
+      mh.focus = focus;
+      mh.dimmer = layerV->layerP->lights.header.brightness;
+
 
       layerV->setLight({i,0,0}, mh);
     }
@@ -258,7 +292,7 @@ class RandomEffect: public Node {
 class RipplesEffect: public Node {
   public:
 
-  static const char * name() {return "Ripples🔥";}
+  static const char * name() {return "Ripples🔥🧊💫";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "🔥💫";}
   

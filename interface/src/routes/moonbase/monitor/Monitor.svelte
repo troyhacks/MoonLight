@@ -18,7 +18,8 @@
 	// 	ct_LedsRGBW,
 	// const ct_Vacant=2
 	// 	ct_Channels,
-	// 	ct_MovingHead,
+	// 	ct_MovingHeadMiniLed,
+	// 	ct_MovingHead19x15,
 	// 	ct_CrazyCurtain,
 	// 	ct_count
 	// };
