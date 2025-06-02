@@ -20,8 +20,7 @@
 PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "constructor");
 
-        lights.header.type = ct_Leds; //default
-        lights.header.channelsPerLight = sizeof(CRGB); //RGB default
+        lights.header.resetOffsets(); //reset the offsets to default
 
         // initLightsToBlend();
 
@@ -153,8 +152,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(animation, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
         else if (equal(animation, LinesEffect::name())) node = new LinesEffect();
         else if (equal(animation, LissajousEffect::name())) node = new LissajousEffect();
-        else if (equal(animation, MovingHead19x15Effect::name())) node = new MovingHead19x15Effect();
-        else if (equal(animation, MovingHeadMiniLedEffect::name())) node = new MovingHeadMiniLedEffect();
+        else if (equal(animation, MovingHeadEffect::name())) node = new MovingHeadEffect();
         else if (equal(animation, RainbowEffect::name())) node = new RainbowEffect();
         else if (equal(animation, RandomEffect::name())) node = new RandomEffect();
         else if (equal(animation, RipplesEffect::name())) node = new RipplesEffect();
@@ -162,8 +160,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(animation, SinelonEffect::name())) node = new SinelonEffect();
         else if (equal(animation, SinusEffect::name())) node = new SinusEffect();
         else if (equal(animation, SphereMoveEffect::name())) node = new SphereMoveEffect();
-        else if (equal(animation, MovingHead19x15Layout::name())) node = new MovingHead19x15Layout();
-        else if (equal(animation, MovingHeadMiniLedLayout::name())) node = new MovingHeadMiniLedLayout();
+        else if (equal(animation, MovingHeadLayout::name())) node = new MovingHeadLayout();
         else if (equal(animation, PanelLayout::name())) node = new PanelLayout();
         else if (equal(animation, RingsLayout::name())) node = new RingsLayout();
         else if (equal(animation, MirrorModifier::name())) node = new MirrorModifier();

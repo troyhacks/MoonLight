@@ -43,7 +43,7 @@ public:
   //effect and layout
   virtual void setup() {
     if (hasLayout) {
-      layerV->layerP->lights.header.channelsPerLight = sizeof(CRGB); //default
+      layerV->layerP->lights.header.resetOffsets(); //reset offsets to default
       requestMap = true;
     }
   };

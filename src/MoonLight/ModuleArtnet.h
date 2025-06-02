@@ -151,9 +151,9 @@ void loop20ms() {
                 // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
                 
                 //to do: only correct light channels !!!
-                packet_buffer[i] = (packet_buffer[i] * bri) >> 8;
-                packet_buffer[i+1] = (packet_buffer[i+1] * bri) >> 8;
-                packet_buffer[i+2] = (packet_buffer[i+2] * bri) >> 8; 
+                packet_buffer[i+layerP.lights.header.offsetRGB] = (packet_buffer[i+layerP.lights.header.offsetRGB] * bri) >> 8;
+                packet_buffer[i+1+layerP.lights.header.offsetRGB] = (packet_buffer[i+1+layerP.lights.header.offsetRGB] * bri) >> 8;
+                packet_buffer[i+2+layerP.lights.header.offsetRGB] = (packet_buffer[i+2+layerP.lights.header.offsetRGB] * bri) >> 8; 
             }
 
             bufferOffset += packetSize;

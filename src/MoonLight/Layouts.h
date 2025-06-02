@@ -13,10 +13,10 @@
 
 //alphabetically from here
 
-class MovingHeadMiniLedLayout: public Node {
+class MovingHeadLayout: public Node {
   public:
 
-  static const char * name() {return "MovingHeadMiniLed🚥";}
+  static const char * name() {return "MovingHead🚥";}
 
   uint8_t width = 4; //default 4 moving heads
   uint8_t pin = 2;
@@ -24,37 +24,13 @@ class MovingHeadMiniLedLayout: public Node {
   void setup() override {
     hasLayout = true;
     Node::setup();
-    layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHeadMiniLed);
-    layerV->layerP->lights.header.type = ct_MovingHeadMiniLed;
-  }
-
-  void addControls(JsonArray controls) override {
-    addControl(controls, &width, "width", "range", 4, 1, 32);
-    addControl(controls, &pin, "pin", "number", 16, 1, 48);
-  }
-  
-  void addLayout() override {
-    for (int x = 0; x<width; x++) {
-      addLight({x, 0, 0});
-    }
-    addPin(pin); //needed to slow down the dmx stream ... wip
-  }
-
-};
-
-class MovingHead19x15Layout: public Node {
-  public:
-
-  static const char * name() {return "MovingHead19x15🚥";}
-
-  uint8_t width = 4; //default 4 moving heads
-  uint8_t pin = 2;
-
-  void setup() override {
-    hasLayout = true;
-    Node::setup();
-    layerV->layerP->lights.header.channelsPerLight = sizeof(MovingHead19x15);
-    layerV->layerP->lights.header.type = ct_MovingHead19x15;
+    
+    layerV->layerP->lights.header.channelsPerLight = 16;
+    layerV->layerP->lights.header.offsetPan = 0;
+    layerV->layerP->lights.header.offsetTilt = 1;
+    layerV->layerP->lights.header.offsetBrightness = 3;
+    layerV->layerP->lights.header.offsetRGB = 4;
+    layerV->layerP->lights.header.offsetZoom = 9;
   }
 
   void addControls(JsonArray controls) override {

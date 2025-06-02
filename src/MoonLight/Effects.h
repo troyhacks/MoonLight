@@ -181,84 +181,42 @@ public:
   }
 };
 
-class MovingHeadMiniLedEffect: public Node {
+class MovingHeadEffect: public Node {
   public:
 
-  static const char * name() {return "MovingHeadMiniLed🔥";}
+  static const char * name() {return "MovingHead🔥";}
 
   uint8_t bpm;
   uint8_t pan;
   uint8_t tilt;
+  uint8_t zoom;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &bpm, "bpm", "range", 30);
     addControl(controls, &pan, "pan", "range", 0);
     addControl(controls, &tilt, "tilt", "range", 0);
+    addControl(controls, &zoom, "zoom", "range", 0);
   }
 
   void loop() override {
     for (int i=0; i<layerV->size.x; i++) {
 
-      MovingHeadMiniLed mh;
-      mh.initValues();
-
       int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
       CRGB color = CHSV( millis()/50, 255, 255);
 
+      byte light[16]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight
+      memset(light, 0, sizeof(light)); //set light to 0
+      
       if (i == pos) {
-        mh.red = color.red;
-        mh.green = color.green;
-        mh.blue = color.blue;
+        layerV->layerP->lights.header.setRGB(light, color);
       }
+      
+      layerV->layerP->lights.header.setPan(light, pan);
+      layerV->layerP->lights.header.setTilt(light, tilt);
+      layerV->layerP->lights.header.setZoom(light, zoom);
+      layerV->layerP->lights.header.setBrightness(light, layerV->layerP->lights.header.brightness);
 
-      mh.x_move = pan;
-      mh.y_move = tilt;
-      mh.dimmer = layerV->layerP->lights.header.brightness;
-
-      layerV->setLight({i,0,0}, mh);
-    }
-  }
-};
-
-class MovingHead19x15Effect: public Node {
-  public:
-
-  static const char * name() {return "MovingHead19x15";}
-
-  uint8_t bpm;
-  uint8_t pan;
-  uint8_t tilt;
-  uint8_t focus;
-
-  void addControls(JsonArray controls) override {
-    addControl(controls, &bpm, "bpm", "range", 30);
-    addControl(controls, &pan, "pan", "range", 0);
-    addControl(controls, &tilt, "tilt", "range", 0);
-    addControl(controls, &focus, "focus", "range", 0);
-  }
-
-  void loop() override {
-    for (int i=0; i<layerV->size.x; i++) {
-
-      MovingHead19x15 mh;
-      mh.initValues();
-
-      int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
-      CRGB color = CHSV( millis()/50, 255, 255);
-
-      if (i == pos) {
-        mh.red = color.red;
-        mh.green = color.green;
-        mh.blue = color.blue;
-      }
-
-      mh.x_move = pan;
-      mh.y_move = tilt;
-      mh.focus = focus;
-      mh.dimmer = layerV->layerP->lights.header.brightness;
-
-
-      layerV->setLight({i,0,0}, mh);
+      layerV->setLight({i,0,0}, light);
     }
   }
 };
@@ -351,12 +309,13 @@ class RGBWParEffect: public Node {
 
     int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
 
-    CRGBW rgbw;
-    rgbw.red = red;
-    rgbw.green = green;
-    rgbw.blue = blue;
-    rgbw.white = white;
-    layerV->setLight({pos,0,0}, rgbw);
+    byte light[4];
+    memset(light, 0, sizeof(light)); //set light to 0
+    
+    layerV->layerP->lights.header.setRGB(light, CRGB(red, green, blue));
+    layerV->layerP->lights.header.setWhite(light, white);
+
+    layerV->setLight({pos,0,0}, light);
   }
 };
   

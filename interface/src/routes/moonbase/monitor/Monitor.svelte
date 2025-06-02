@@ -13,17 +13,6 @@
 
 	let done = false; //temp to show one instance of monitor data receiced
 
-	// enum ChannelType {
-	const ct_Leds=0
-	// 	ct_LedsRGBW,
-	// const ct_Vacant=2
-	// 	ct_Channels,
-	// 	ct_MovingHeadMiniLed,
-	// 	ct_MovingHead19x15,
-	// 	ct_CrazyCurtain,
-	// 	ct_count
-	// };
-
 	//ask the server to run the mapping, the resulting positions are sent by websocket monitor
 	const requestLayout = async () => {
 		// try {
@@ -46,7 +35,8 @@
         const header = lights.slice(0, headerLength);
         const data = lights.slice(headerLength);
 
-		let type:number = header[0];
+		let channelsPerLight:number = header[15];
+		let offsetRGB:number = header[16];
 		let isPositions:number = header[21];
 		
 		if (!(isPositions==10)) { //(type == ct_Leds) {
@@ -56,11 +46,11 @@
 				done = true;
 			}
 			clearColors();
-			for (let index = 0; index < data.length; index +=3) {
+			for (let index = 0; index < data.length; index +=channelsPerLight) {
 				// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
-				const r = data[index] / 255;
-				const g = data[index + 1] / 255;
-				const b = data[index + 2] / 255;
+				const r = data[index + offsetRGB] / 255;
+				const g = data[index + 1 + offsetRGB] / 255;
+				const b = data[index + 2 + offsetRGB] / 255;
 				const a = 1.0; // Full opacity
 				colors.push(r, g, b, a);
 			}
@@ -78,10 +68,10 @@
 		createScene(el);
 
 		let ledFactor: number = 1;//header[1];
-		let ledSize: number = header[2];
-		width = header[7] * 256 + header[8];
-		height = header[11] * 256 + header[12];
-		depth = header[15] * 256 + header[16];
+		let ledSize: number = header[23];
+		width = header[1] * 256 + header[0];
+		height = header[5] * 256 + header[4];
+		depth = header[9] * 256 + header[8];
 
 		console.log("Monitor.handleLayout", ledFactor, ledSize, width, height, depth);
 

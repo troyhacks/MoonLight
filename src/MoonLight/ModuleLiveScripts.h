@@ -38,9 +38,6 @@ public:
 
     void begin() {
         Module::begin();
-
-        ESP_LOGD(TAG, "L:%d(%d) LH:%d N:%d PL:%d(%d) VL:%d MH:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(MovingHeadMiniLed));
-
     }
 
     //define the data model

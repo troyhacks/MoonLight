@@ -35,122 +35,64 @@ class VirtualLayer; //Forward as PhysicalLayer refers back to VirtualLayer
 class Node; //Forward as PhysicalLayer refers back to Node
 class Modifier; //Forward as PhysicalLayer refers back to Modifier
 
-enum ChannelType {
-  ct_Leds,
-  ct_LedsRGBW,
-  ct_Vacant,
-  ct_Channels,
-  ct_MovingHeadMiniLed,
-  ct_MovingHead19x15,
-  ct_CrazyCurtain,
-  ct_count
-};
-
-struct CRGBW {
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  uint8_t white;
-};
-
-struct MovingHeadMiniLed { //11 or 13 channel (channel mode selection)
-  uint8_t x_move;
-  uint8_t x_move_fine;
-  uint8_t y_move;
-  uint8_t y_move_fine;
-  uint8_t axis_slow_to_fast;
-  uint8_t dimmer;
-  uint8_t strobe;
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  uint8_t white;
-  // uint8_t mode;
-  // uint8_t rest;
-
-  void initValues() {
-    x_move = 0;
-    x_move_fine = 255; //default full speed
-    y_move = 0;
-    y_move_fine = 255; //default full speed
-    axis_slow_to_fast = 0; //default no slow to fast
-    dimmer = 255; //default full brightness
-    strobe = 0; //default no strobe
-    red = 0;
-    green = 0;
-    blue = 0;
-    white = 0; //default no white
-    // mode = 0; //default no mode
-    // rest = 0; //default no rest
-  }
-};
-
-struct MovingHead19x15 { //16channel mode
-  uint8_t x_move;
-  uint8_t y_move;
-  uint8_t axis_slow_to_fast;
-  uint8_t dimmer;
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  uint8_t white;
-  uint8_t strobe;
-  uint8_t focus;
-  uint8_t macroFun;
-  uint8_t macroSpeed;
-  uint8_t x_move_fine;
-  uint8_t y_move_fine;
-  uint8_t reset;
-  uint8_t colorTemp;
-
-  void initValues() {
-    x_move = 0;
-    y_move = 0;
-    axis_slow_to_fast = 0;
-    dimmer = 255; //default full brightness
-    red = 0;
-    green = 0;
-    blue = 0;
-    white = 0;
-    strobe = 0; //default no strobe
-    focus = 0; //default no focus
-    macroFun = 0; //default no macro function
-    macroSpeed = 0; //default no macro speed
-    x_move_fine = 255; //default full speed
-    y_move_fine = 255; //default full speed
-    reset = 0; //default no reset
-    colorTemp = 0; //default no color temperature
-  }
-};
-
-struct CrazyCurtain {
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  byte ccp[3];
-};
-
 struct LightsHeader {
-  uint8_t type = ct_Leds; //default
-  uint8_t ledFactor = 1;
-  uint8_t ledSize = 4; //mm
-  uint8_t brightness;
-  uint16_t nrOfLights = 256;
-  Coord3D size = {16,16,1}; //12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
+  Coord3D size = {16,16,1}; //max position of light, counted by addLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
+  uint16_t nrOfLights = 256; //nr of physical lights, counted by addLight
+  uint8_t brightness; //brightness set by light control
   uint8_t channelsPerLight = 3; //RGB default
-  uint8_t isPositions = 0; //default
+  uint8_t offsetRGB = 0; //RGB default
+  uint8_t offsetPan = -1;
+  uint8_t offsetTilt = -1;
+  uint8_t offsetZoom = -1;
+  uint8_t offsetBrightness = -1;
+  uint8_t isPositions = 0; //is the lights.positions array filled with positions
+  // uint8_t ledFactor = 1; //factor to multiply the positions with 
+  // uint8_t ledSize = 4; //mm size of each light, used in monitor ...
   uint8_t dummy2[2];
+
+  //support for more channels, like white, pan, tilt etc.
+
+  void resetOffsets() {
+    channelsPerLight = 3; //RGB default
+    offsetRGB = 0;
+    offsetPan = -1;
+    offsetTilt = -1;
+    offsetZoom = -1;
+    offsetBrightness = -1;
+  }
+
+  void setRGB(byte *light, const CRGB &color) {
+    light[offsetRGB] = color.red;
+    light[offsetRGB + 1] = color.green;
+    light[offsetRGB + 2] = color.blue;
+  }
+  void setWhite(byte *light, const uint8_t white) {
+    if (offsetRGB != -1)
+      light[offsetRGB + 3] = white;
+  }
+  void setPan(byte *light, const uint8_t pan) {
+    if (offsetPan != -1)
+      light[offsetPan] = pan;
+  }
+  void setTilt(byte *light, const uint8_t tilt) {
+    if (offsetTilt != -1)
+     light[offsetTilt] = tilt;
+  }
+  void setZoom(byte *light, const uint8_t zoom) {
+    if (offsetZoom != -1)
+     light[offsetZoom] = zoom;
+  }
+  void setBrightness(byte *light, const uint8_t brightness) {
+    if (offsetBrightness != -1)
+      light[offsetBrightness] = brightness;
+  }
 }; // fill with dummies to make size 24, be aware of padding so do not change order of vars
 
 struct Lights {
   LightsHeader header;
   union {
     CRGB leds[MAX_LEDS];
-    CRGBW ledsRGBW[MAX_CHANNELS / sizeof(CRGBW)];
     byte channels[MAX_CHANNELS];
-    MovingHead19x15 movingHeads19x15[MAX_CHANNELS / sizeof(MovingHead19x15)];
-    MovingHeadMiniLed movingHeadsMiniLed[MAX_CHANNELS / sizeof(MovingHeadMiniLed)];
-    CrazyCurtain crazyCurtain[MAX_CHANNELS / sizeof(CrazyCurtain)]; // 6 bytes
     Coord3D positions[MAX_CHANNELS / sizeof(Coord3D)]; //for layout / pass == 1, send positions to monitor / preview
   };
   // std::vector<size_t> universes; //tells at which byte the universe starts
