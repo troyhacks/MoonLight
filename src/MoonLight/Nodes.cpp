@@ -71,8 +71,8 @@ static void _modifyLayout() {gNode->modifyLayout();}
 // static void _modifyXYZ() {gNode->modifyXYZ();}//need &position parameter
 
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
-static void _setLight(uint16_t indexV, CRGB color) {gNode->layerV->setLightColor(indexV, color);}
-static void _setLightPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setLightColor(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
+static void _setLight(uint16_t indexV, CRGB color) {gNode->layerV->setLight(indexV, color);}
+static void _setLightPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setLight(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
 
 static float _triangle(float j) {return 1.0 - fabs(fmod(2 * j, 2.0) - 1.0);}
 static float _time(float j) {
@@ -207,7 +207,7 @@ void LiveScriptNode::loop() {
     Node::loop(); //call Node::loop to handle requestMap and on
 }
 
-void LiveScriptNode::map() {
+void LiveScriptNode::mapLayout() {
     if (hasLayout) {
         scriptRuntime.execute(animation, "map"); 
     }
@@ -242,7 +242,7 @@ void LiveScriptNode::compileAndRun() {
           if (scScript.find("addControls(") != std::string::npos) hasAddControls = true;
         //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
-          if (hasLayout) scScript += "void map(){addLayoutPre();addLayout();addLayoutPost();}"; //add map() function
+          if (hasLayout) scScript += "void mapLayout(){addLayoutPre();addLayout();addLayoutPost();}"; //add mapLayout() function
           //add main function
           scScript += "void main(){";
           if (hasSetup) scScript += "setup();";
@@ -286,7 +286,7 @@ void LiveScriptNode::execute() {
     if (hasLayout) {
       if (on) {
         for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-          map(); //calls also addLayout
+          mapLayout(); //calls also addLayout
       } else {
         layerV->resetMapping();
       }

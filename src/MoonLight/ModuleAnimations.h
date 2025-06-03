@@ -38,6 +38,41 @@ public:
         _server = server;
     }
 
+    void updateControls(uint8_t index) {
+        ESP_LOGD(TAG, "updateControls %d < %d ?", index, _state.data["nodes"].size());
+        if (index < _state.data["nodes"].size()) {
+            JsonVariant nodeState = _state.data["nodes"][index];
+            ESP_LOGD(TAG, "updateControls found nodeState %d", index);
+            nodeState["controls"].to<JsonArray>(); //clear the controls
+            if (index < layerP.layerV[0]->nodes.size()) {
+                Node *node = layerP.layerV[0]->nodes[index];
+                ESP_LOGD(TAG, "updateControls found node class %d", index);
+                if (node) {
+                    node->addControls(nodeState["controls"].as<JsonArray>()); //update controls
+
+                    // for (JsonVariant control : nodeState["controls"].as<JsonArray>()) {
+                    //     ESP_LOGD(TAG, "updateControls control %s", control["name"].as<String>().c_str());
+                    // }
+
+                    // serializeJson(nodeState, Serial); Serial.println();
+
+                    // JsonObject object = _state.data.as<JsonObject>();
+                    // _socket->emitEvent(_moduleName, object);
+
+                    update([&](ModuleState &state) {
+                        // ESP_LOGD(TAG, "update due to new node %s", animation.c_str());
+
+                        // UpdatedItem updatedItem;
+                        ; //compare and update
+                        // state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
+                        // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+                    }, "server");
+                }
+            }
+        }
+    }
+
     void begin() {
         Module::begin();
 
@@ -51,6 +86,7 @@ public:
                     // loop over all changed files (normally only one)
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current animation, recompile it (to do: multiple animations)
+                        uint8_t index = 0;
                         for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
                             String animation = nodeState["animation"];
 
@@ -59,19 +95,11 @@ public:
                                 LiveScriptNode *liveScriptNode = findLiveScriptNode(nodeState["animation"]);
                                 if (liveScriptNode) liveScriptNode->compileAndRun();
 
-                                nodeState["controls"].to<JsonArray>(); //clear the controls
-                                liveScriptNode->addControls(nodeState["controls"].as<JsonArray>()); //update controls
-                                update([&](ModuleState &state) {
-                                    ESP_LOGD(TAG, "update due to new node %s", animation.c_str());
+                                updateControls(index);
 
-                                    // UpdatedItem updatedItem;
-                                    ; //compare and update
-                                    // state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-                                    // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
-                                    return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                                }, "server");
                                 ESP_LOGD(TAG, "update due to new node %s done", animation.c_str());
                             }
+                            index++;
                         }
                     }
                 });
@@ -88,7 +116,7 @@ public:
                     if (node->hasLayout && node->on) {
                         ESP_LOGD(TAG, "Monitor request -> layout map 1 %s", node->name());
                         for (layerP.pass = 1; layerP.pass <=1; layerP.pass++) //only pass1: virtual mapping
-                            node->map();
+                            node->mapLayout();
                     }
                 }
 
@@ -111,9 +139,11 @@ public:
             values.add(SolidEffect::name());
             //alphabetically from here
             values.add(BouncingBallsEffect::name());
+            values.add(GEQEffect::name());
             values.add(LinesEffect::name());
             values.add(LissajousEffect::name());
             values.add(MovingHeadEffect::name());
+            values.add(PaintBrushEffect::name());
             values.add(RainbowEffect::name());
             values.add(RandomEffect::name());
             values.add(RipplesEffect::name());
@@ -127,6 +157,7 @@ public:
             values.add(MirrorModifier::name());
             values.add(MultiplyModifier::name());
             values.add(PinwheelModifier::name());
+            values.add(AudioSyncMod::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
@@ -155,58 +186,27 @@ public:
     {
         TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
         // handle nodes
-        if (equal(updatedItem.parent[0], "nodes")) { // onNodes
+        if (updatedItem.parent[0] == "nodes") { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
             const char *animation = nodeState["animation"];
-            // serializeJson(nodeState, Serial);
+            // serializeJson(nodeState, Serial); Serial.println();
 
-            if (equal(updatedItem.name, "animation")) { //onAnimation
+            if (updatedItem.name == "animation") { //onAnimation
 
                 Node *oldNode = layerP.layerV[0]->nodes.size() > updatedItem.index[0]?layerP.layerV[0]->nodes[updatedItem.index[0]]:nullptr; //find the node in the nodes list
                 bool newNode = false;
 
-                if (updatedItem.oldValue != "null") {
-                    if (nodeState.isNull()) {
-                        ESP_LOGW(TAG, "nodeState is null!");
-                    } else {
-                        // ESP_LOGD(TAG, "nodeState: %s", nodeState.as<String>().c_str());
-                        nodeState.remove("controls"); //remove the controls, node itself removed after new node is placed ... 
-                        //assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL)
-                        // nodeState["controls"].to<JsonArray>(); //clear the controls
-                    }
-                }
-
                 // remove or add Nodes (incl controls)
                 if (!nodeState["animation"].isNull()) { // if animation changed // == updatedItem.value
-                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
     
                     Node *nodeClass = layerP.addNode(nodeState["animation"], updatedItem.index[0]);
                     nodeClass->on = nodeState["on"];
                     newNode = true;
 
-                    if (nodeState.isNull()) {
-                        ESP_LOGW(TAG, "nodeState is null!");
-                    } else {
-                        // ESP_LOGD(TAG, "nodeState: %s", nodeState.as<String>().c_str());
-                        // nodeState.remove("controls"); //remove the controls, node itself removed after new node is placed ... assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL)
-                        nodeState["controls"].to<JsonArray>(); //clear the controls
-                    }
-                    nodeClass->addControls(nodeState["controls"]); //create the controls
+                    updateControls(updatedItem.index[0]); //update controls of the new node
 
-                    //show these controls in the UI, send notifiers to listeners...
-                    //save ??
-                    // JsonObject object = _state.data.as<JsonObject>();
-                    // _socket->emitEvent(_moduleName, object);
-                    update([&](ModuleState &state) {
-                        ESP_LOGD(TAG, "update due to new node %s", updatedItem.value.as<String>().c_str());
-
-                        // UpdatedItem updatedItem;
-                        ; //compare and update
-                        // state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-                        // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
-                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                    }, "server");
-                    ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.c_str());
 
                     //make sure "p" is also updated
 
@@ -223,7 +223,7 @@ public:
 
                 //if a node existed and no new node in place, remove 
                 if (updatedItem.oldValue != "null" && oldNode) {
-                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
                     if (!newNode) {
                         layerP.layerV[0]->nodes.pop_back();
                         ESP_LOGD(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], layerP.layerV[0]->nodes.size());
@@ -246,12 +246,12 @@ public:
                 #endif
             }
 
-            if (equal(updatedItem.name, "on")) {
+            if (updatedItem.name == "on") {
                 if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be remoced by onAnimation
+                    ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.c_str(), layerP.layerV[0]->nodes.size());
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {
-                        ESP_LOGD(TAG, "on %s %d", updatedItem.name, updatedItem.value.as<bool>());
-                        nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
+                        nodeClass->on = updatedItem.value == "true"; //set nodeclass on/off
                         if (nodeClass->hasModifier) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
                             for (Node *node : layerP.layerV[0]->nodes) {
                                 if (node->hasLayout) {
@@ -270,8 +270,8 @@ public:
                 }
             }
 
-            if (equal(updatedItem.parent[1], "controls") && equal(updatedItem.name, "value")) {    //process controls values 
-                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
+                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
                 if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be removed by onAnimation
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {

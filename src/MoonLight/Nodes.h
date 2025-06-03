@@ -99,7 +99,7 @@ public:
       requestMap = false;
       if (on) {
         for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-          map(); //calls also addLayout
+          mapLayout(); //calls also addLayout
       } else {
         layerV->resetMapping();
       }
@@ -109,7 +109,7 @@ public:
   //layout
 
   //calls addLayout functions, non virtual, only addLayout can be redefined in derived class
-  virtual void map() {
+  virtual void mapLayout() {
     if (hasLayout) {
       ESP_LOGD(TAG, "%s", name());
       layerV->layerP->addLayoutPre();
@@ -118,7 +118,7 @@ public:
     }
   }
 
-  virtual void addLayout() {} //the definition of the layout, called by map()
+  virtual void addLayout() {} //the definition of the layout, called by mapLayout()
 
   void addLight(Coord3D position) {
     layerV->layerP->addLight(position);
@@ -163,7 +163,7 @@ class LiveScriptNode: public Node {
   void loop() override; //call Node.loop to process requestMap. todo: sync with script...
 
   //layout
-  void map() override; // call map in LiveScript
+  void mapLayout() override; // call map in LiveScript
   
   void destructor() override;
 
@@ -179,11 +179,17 @@ class LiveScriptNode: public Node {
 
 #endif
 
+//data shared between nodes
+static byte geq[16]= {0};
+static float volume;
+
 #include "Layouts.h"
 
 #include "Effects.h"
 // #include "EffectsFastLED.h"
 
 #include "Modifiers.h"
+
+#include "Mods.h"
 
 #endif //FT_MOONLIGHT

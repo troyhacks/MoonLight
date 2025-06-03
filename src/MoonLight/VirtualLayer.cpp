@@ -113,81 +113,6 @@ uint16_t VirtualLayer::XYZ(Coord3D &position) {
   return XYZUnprojected(position);
 }
 
-void VirtualLayer::setLightColor(const uint16_t indexV, const CRGB& color) {
-  // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
-  if (indexV < mappingTableSizeUsed) {
-    // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
-    switch (mappingTable[indexV].mapType) {
-      case m_color:{
-        mappingTable[indexV].rgb14 = ((min(color.r + 3, 255) >> 3) << 9) + 
-                                     ((min(color.g + 3, 255) >> 3) << 4) + 
-                                      (min(color.b + 7, 255) >> 4);
-        break;
-      }
-      case m_oneLight: {
-        uint16_t indexP = mappingTable[indexV].indexP;
-        //temp fix for cube202020 (some curtains are bgr)
-        // if (indexP > 2800) {
-        //   fix->ledsP[indexP].r = color.b;
-        //   fix->ledsP[indexP].g = color.g;
-        //   fix->ledsP[indexP].b = color.r;
-        // }
-        // else
-        // layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend):color;
-        layerP->lights.leds[indexP] = color;
-        break; }
-      case m_moreLights:
-        if (mappingTable[indexV].indexes < mappingTableIndexes.size())
-          for (uint16_t indexP: mappingTableIndexes[mappingTable[indexV].indexes]) {
-            // if (indexP > 2800) {
-            //   fix->ledsP[indexP].r = color.b;
-            //   fix->ledsP[indexP].g = color.g;
-            //   fix->ledsP[indexP].b = color.r;
-            // } else
-            // layerP->lights.leds[indexP] = layerP->lightsToBlend[indexP]?blend(color, layerP->lights.leds[indexP], layerP->globalBlend): color;
-            layerP->lights.leds[indexP] = color;
-          }
-        else
-          ESP_LOGW(TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
-        break;
-      default: ;
-    }
-  }
-  else if (indexV < MAX_LEDS) {//no mapping
-    // layerP->lights.leds[indexV] = layerP->lightsToBlend[indexV]?blend(color, layerP->lights.leds[indexV], layerP->globalBlend): color;
-    layerP->lights.leds[indexV] = color;
-    // layerP->lights.dmxChannels[indexV] = (byte*)&color;
-  }
-  // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-  // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-  //   ESP_LOGW(TAG, " dev setLight %d >= %d", indexV, MAX_LEDS);
-}
-
-CRGB VirtualLayer::getLightColor(const uint16_t indexV) const {
-  if (indexV < mappingTableSizeUsed) {
-    switch (mappingTable[indexV].mapType) {
-      case m_oneLight:
-        return layerP->lights.leds[mappingTable[indexV].indexP]; 
-        break;
-      case m_moreLights:
-        return layerP->lights.leds[mappingTableIndexes[mappingTable[indexV].indexes][0]]; //any will do as they are all the same
-        break;
-      default: // m_color:
-        return CRGB((mappingTable[indexV].rgb14 >> 9) << 3, 
-                    (mappingTable[indexV].rgb14 >> 4) << 3, 
-                     mappingTable[indexV].rgb14       << 4);
-        break;
-    }
-  }
-  else if (indexV < MAX_LEDS) //no mapping
-    return layerP->lights.leds[indexV];
-  else {
-    // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
-    return CRGB::Black;
-  }
-}
-
 // void VirtualLayer::setLightsToBlend() {
 //   for (const std::vector<uint16_t>& mappingTableIndex: mappingTableIndexes) {
 //       for (const uint16_t indexP: mappingTableIndex)
@@ -210,9 +135,9 @@ void VirtualLayer::fadeToBlackMin() {
     // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
     //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
     //     for (int x=0; x<size.x; x++) {
-    //       CRGB color = getLightColor({x,y,0});
+    //       CRGB color = getLight({x,y,0});
     //       color.nscale8(255-fadeBy);
-    //       setLightColor({x,y,0}, color);
+    //       setLight({x,y,0}, color);
     //     }
     //   }
     // } else 
@@ -220,9 +145,9 @@ void VirtualLayer::fadeToBlackMin() {
       fastled_fadeToBlackBy(layerP->lights.leds, layerP->lights.header.nrOfLights, fadeBy);
     } else {
       for (uint16_t index = 0; index < nrOfLights; index++) {
-        CRGB color = getLightColor(index);
+        CRGB color = getLight<CRGB>(index);
         color.nscale8(255-fadeBy);
-        setLightColor(index, color);
+        setLight(index, color);
       }
     }
     //reset fade
@@ -234,7 +159,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
   // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
-  //       setLightColor({x,y,0}, color);
+  //       setLight({x,y,0}, color);
   //     }
   //   }
   // } else 
@@ -242,7 +167,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
     fastled_fill_solid(layerP->lights.leds, layerP->lights.header.nrOfLights, color);
   } else {
     for (uint16_t index = 0; index < nrOfLights; index++)
-      setLightColor(index, color);
+      setLight(index, color);
   }
 }
 
@@ -254,7 +179,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   //   hsv.sat = 240;
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
-  //       setLightColor({x,y,0}, hsv);
+  //       setLight({x,y,0}, hsv);
   //       hsv.hue += deltahue;
   //     }
   //   }
@@ -268,7 +193,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
     hsv.sat = 240;
 
     for (uint16_t index = 0; index < nrOfLights; index++) {
-      setLightColor(index, hsv);
+      setLight(index, hsv);
       hsv.hue += deltahue;
     }
   }

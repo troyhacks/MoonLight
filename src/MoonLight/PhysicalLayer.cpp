@@ -150,9 +150,11 @@ PhysicalLayer::PhysicalLayer() {
         if (equal(animation, SolidEffect::name())) node = new SolidEffect();
         //alphabetically from here
         else if (equal(animation, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
+        else if (equal(animation, GEQEffect::name())) node = new GEQEffect();
         else if (equal(animation, LinesEffect::name())) node = new LinesEffect();
         else if (equal(animation, LissajousEffect::name())) node = new LissajousEffect();
         else if (equal(animation, MovingHeadEffect::name())) node = new MovingHeadEffect();
+        else if (equal(animation, PaintBrushEffect::name())) node = new PaintBrushEffect();
         else if (equal(animation, RainbowEffect::name())) node = new RainbowEffect();
         else if (equal(animation, RandomEffect::name())) node = new RandomEffect();
         else if (equal(animation, RipplesEffect::name())) node = new RipplesEffect();
@@ -166,6 +168,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(animation, MirrorModifier::name())) node = new MirrorModifier();
         else if (equal(animation, MultiplyModifier::name())) node = new MultiplyModifier();
         else if (equal(animation, PinwheelModifier::name())) node = new PinwheelModifier();
+        else if (equal(animation, AudioSyncMod::name())) node = new AudioSyncMod();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = new LiveScriptNode();

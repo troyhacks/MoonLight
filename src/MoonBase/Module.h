@@ -29,26 +29,20 @@
 
 #include "Utilities.h"
 
-//sizeof was 160 chars -> 80 -> 40
+//sizeof was 160 chars -> 80
 struct UpdatedItem {
-    const char *parent[2]; //24 -> 8
+    String parent[2]; //24 -> 32
     uint8_t index[2]; //2x1 = 2
-    const char *name; //16 -> 4
+    String name; //16 -> 16
     String oldValue; //32 -> 16, smaller then 11 bytes mostly
-    JsonVariant value; //8
+    String value; //8->16
 
     UpdatedItem() {
-        parent[0] = nullptr; //will be checked in onUpdate
-        parent[1] = nullptr;
+        parent[0] = ""; //will be checked in onUpdate
+        parent[1] = "";
         index[0] = UINT8_MAX;
         index[1] = UINT8_MAX;
     }
-
-    const char *parentX() { return equal(parent[1],"")?parent[0]:parent[1];}
-    uint8_t indexX() { return index[1]==UINT8_MAX?index[0]:index[1];}
-
-    const char *grandParent() { return equal(parent[1],"")?parent[1]:parent[0];}
-    uint8_t grandIndex() { return index[1]==UINT8_MAX?index[1]:index[0];}
 };
 
 class ModuleState
@@ -64,7 +58,6 @@ public:
 
     static void read(ModuleState &state, JsonObject &root);
     static StateUpdateResult update(JsonObject &root, ModuleState &state);
-
 };
 
 class Module : public StatefulService<ModuleState>

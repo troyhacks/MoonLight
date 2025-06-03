@@ -68,11 +68,11 @@ public:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (equal(updatedItem.name, "red") || equal(updatedItem.name, "green") || equal(updatedItem.name, "blue")) {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        if (updatedItem.name == "red" || updatedItem.name == "green" || updatedItem.name == "blue") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
             layerP.ledsDriver.setColorCorrection(_state.data["red"], _state.data["green"], _state.data["blue"]);
-        } else if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
             layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
             layerP.ledsDriver.setBrightness(layerP.lights.header.brightness);
         }

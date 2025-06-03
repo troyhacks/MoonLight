@@ -58,7 +58,7 @@ class PanelLayout: public Node {
   uint8_t height = 16;
   uint8_t depth = 1;
   bool snake = true;
-  uint8_t pin = 2;
+  uint8_t pin = 16;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &width, "width", "range", 16, 1, 32);

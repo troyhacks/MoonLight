@@ -14,7 +14,7 @@
 
 #include <ESP32SvelteKit.h>
 
-std::vector<std::function<void()>> runInLoopTask; //see .h
+std::vector<std::function<void()>> runInLoopTask; // 🌙 see .h
 
 ESP32SvelteKit::ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEndpoints) : _server(server),
                                                                                           _numberEndpoints(numberEndpoints),
@@ -247,8 +247,8 @@ void ESP32SvelteKit::_loop()
         if (millis() - lastTime > 1000)
         {
             lastTime = millis();
-            _analyticsService.lps = lps;
-            lps = 0;
+            _analyticsService.lps = lps; // 🌙
+            lps = 0; // 🌙
             #if FT_BATTERY && BATTERY_PIN && BATTERY_MV
                 float mV = analogReadMilliVolts(BATTERY_PIN) * 2.0;
                 float perc = (mV - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%

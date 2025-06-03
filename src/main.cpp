@@ -183,8 +183,8 @@ void loop()
         // 🌙
         while (!runInLoopTask.empty()) {
             ESP_LOGD(TAG, "Running queued function");
-            runInLoopTask.back()(); //calls the last function
-            runInLoopTask.pop_back();
+            runInLoopTask.front()(); // calls the first function
+            runInLoopTask.erase(runInLoopTask.begin());
         }
 
     #endif

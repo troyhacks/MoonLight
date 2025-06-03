@@ -83,12 +83,12 @@ enum class ConnectionStatus
     STA_MQTT
 };
 
-extern std::vector<std::function<void()>> runInLoopTask; //functions to be called in main loopTask (to avoid https to run out of stack space)
+extern std::vector<std::function<void()>> runInLoopTask; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
 
 class ESP32SvelteKit
 {
 public:
-    uint16_t lps = 0;
+    uint16_t lps = 0; // 🌙
 
     ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEndpoints = 115);
 
