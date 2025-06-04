@@ -297,7 +297,7 @@ public:
 class MovingHeadEffect: public Node {
   public:
 
-  static const char * name() {return "MovingHead🔥";}
+  static const char * name() {return "MovingHead🔥 ♫💫";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
@@ -306,6 +306,7 @@ class MovingHeadEffect: public Node {
   uint8_t range = 20;;
   bool autoMove = false;
   bool audioReactive = false;
+  bool invert = false;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &bpm, "bpm", "range", 30, 0, 255);
@@ -315,6 +316,7 @@ class MovingHeadEffect: public Node {
     addControl(controls, &autoMove, "autoMove", "checkbox", false);
     addControl(controls, &range, "range", "range", 20, 0, 255);
     addControl(controls, &audioReactive, "audioReactive", "checkbox", false);
+    addControl(controls, &invert, "invert", "checkbox", false);
   }
 
   void loop() override {
@@ -341,9 +343,9 @@ class MovingHeadEffect: public Node {
           }
         }
       }
-      
-      layerV->layerP->lights.header.setPan(light, autoMove?beatsin8(bpm, pan-range, pan + range): pan); //if automove, pan the light over a range
-      layerV->layerP->lights.header.setTilt(light, autoMove?beatsin8(bpm, tilt - range, tilt + range): tilt);
+
+      layerV->layerP->lights.header.setPan(light, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && i%2==0)?128:0): pan); //if automove, pan the light over a range
+      layerV->layerP->lights.header.setTilt(light, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && i%2==0)?128:0): tilt);
       layerV->layerP->lights.header.setZoom(light, zoom);
       layerV->layerP->lights.header.setBrightness(light, layerV->layerP->lights.header.brightness);
 
