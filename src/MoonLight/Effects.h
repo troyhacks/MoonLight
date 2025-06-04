@@ -299,33 +299,51 @@ class MovingHeadEffect: public Node {
 
   static const char * name() {return "MovingHead🔥";}
 
-  uint8_t bpm;
-  uint8_t pan;
-  uint8_t tilt;
-  uint8_t zoom;
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 0;
+  uint8_t range = 20;;
+  bool autoMove = false;
+  bool audioReactive = false;
 
   void addControls(JsonArray controls) override {
-    addControl(controls, &bpm, "bpm", "range", 30);
-    addControl(controls, &pan, "pan", "range", 0);
-    addControl(controls, &tilt, "tilt", "range", 0);
-    addControl(controls, &zoom, "zoom", "range", 0);
+    addControl(controls, &bpm, "bpm", "range", 30, 0, 255);
+    addControl(controls, &pan, "pan", "range", 175, 0, 255);
+    addControl(controls, &tilt, "tilt", "range", 90, 0, 255);
+    addControl(controls, &zoom, "zoom", "range", 20, 0, 255);
+    addControl(controls, &autoMove, "autoMove", "checkbox", false);
+    addControl(controls, &range, "range", "range", 20, 0, 255);
+    addControl(controls, &audioReactive, "audioReactive", "checkbox", false);
   }
 
   void loop() override {
+
     for (int i=0; i<layerV->size.x; i++) {
 
-      int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
-      CRGB color = CHSV( millis()/50, 255, 255);
-
-      byte light[16]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight
+      byte light[24]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight (yet)
       memset(light, 0, sizeof(light)); //set light to 0
       
-      if (i == pos) {
-        layerV->layerP->lights.header.setRGB(light, color);
+      if (audioReactive) {
+        uint8_t nrOfLights = layerV->size.x * 3;
+        uint8_t  delta = 256 / nrOfLights;
+
+        //set the 3 led groups for each moving head light
+        for (int j=0; j<3; j++) {
+          layerV->layerP->lights.header.offsetRGB = 4 + j * 4;
+          layerV->layerP->lights.header.setRGB(light, CHSV( (i + j*3) * delta, 255, geq[(i * 3 + j) % 16]));
+        }
+      } else {
+        if (i == beatsin8(bpm, 0, layerV->size.x - 1)) { //sinelon over moving heads
+          for (int j=0; j<3; j++) {
+            layerV->layerP->lights.header.offsetRGB = 4 + j * 4;
+            layerV->layerP->lights.header.setRGB(light, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
+          }
+        }
       }
       
-      layerV->layerP->lights.header.setPan(light, pan);
-      layerV->layerP->lights.header.setTilt(light, tilt);
+      layerV->layerP->lights.header.setPan(light, autoMove?beatsin8(bpm, pan-range, pan + range): pan); //if automove, pan the light over a range
+      layerV->layerP->lights.header.setTilt(light, autoMove?beatsin8(bpm, tilt - range, tilt + range): tilt);
       layerV->layerP->lights.header.setZoom(light, zoom);
       layerV->layerP->lights.header.setBrightness(light, layerV->layerP->lights.header.brightness);
 

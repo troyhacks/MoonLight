@@ -25,12 +25,12 @@ class MovingHeadLayout: public Node {
     hasLayout = true;
     Node::setup();
     
-    layerV->layerP->lights.header.channelsPerLight = 16;
+    layerV->layerP->lights.header.channelsPerLight = 24;
     layerV->layerP->lights.header.offsetPan = 0;
     layerV->layerP->lights.header.offsetTilt = 1;
     layerV->layerP->lights.header.offsetBrightness = 3;
     layerV->layerP->lights.header.offsetRGB = 4;
-    layerV->layerP->lights.header.offsetZoom = 9;
+    layerV->layerP->lights.header.offsetZoom = 17;
   }
 
   void addControls(JsonArray controls) override {
