@@ -60,7 +60,7 @@ void Node::updateControl(JsonObject control) {
 Node *gNode = nullptr;
 JsonArray gControls;
 
-static void _addControl(void * ptr, char *name, char* type, int defaul, int min = INT_MIN, int max = INT_MAX) {ESP_LOGD(TAG, "%p %s %s %d (%d-%d)", ptr,  name, type, defaul, min, max);gNode->addControl(gControls, ptr, name, type, defaul, min, max);}
+static void _addControl(void * ptr, char *name, char* type, int defaul, int min = 0, int max = 255) {ESP_LOGD(TAG, "%p %s %s %d (%d-%d)", ptr,  name, type, defaul, min, max);gNode->addControl(gControls, ptr, name, type, defaul, min, max);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLayoutPre() {gNode->layerV->layerP->addLayoutPre();}
 static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
@@ -82,10 +82,14 @@ static float _time(float j) {
     return myVal;
 }
 
+volatile xSemaphoreHandle WaitAnimationSync = NULL;
+
 void sync() {
     static uint32_t frameCounter = 0;
     frameCounter++;
     delay(1); //feed the watchdog, otherwise watchdog will reset the ESP
+    // Serial.print("s");
+    xSemaphoreTake(WaitAnimationSync, portMAX_DELAY);
 }
 
 void addExternal(string definition, void * ptr) {
@@ -125,6 +129,10 @@ Parser parser = Parser();
 void LiveScriptNode::setup() {
     
   // ESP_LOGD(TAG, "animation %s", animation);
+    if (WaitAnimationSync == NULL)
+    {
+        WaitAnimationSync = xSemaphoreCreateBinary();
+    }
 
   if (animation[0] != '/') { //no sc script
       return;
@@ -190,11 +198,15 @@ void LiveScriptNode::setup() {
 }
 
 void LiveScriptNode::addControls(JsonArray controls)  {
-
-    gControls = controls; //store the controls for use in _addControl
+    //called from ModuleAnimations.updateControls (via onUpdate: loopTask)
     
-    if (hasAddControls) 
+    if (hasAddControls) {
+        gControls = controls; //store the controls for use in _addControl
+        ESP_LOGD(TAG, "%s execute addControls", animation);
         scriptRuntime.execute(animation, "addControls"); 
+        // ESP_LOGD(TAG, "%s kill", animation);
+        // scriptRuntime.kill(animation); //script should automatically kill itself after addControls
+    }
 }
 
 void LiveScriptNode::loop() {
@@ -205,11 +217,13 @@ void LiveScriptNode::loop() {
     //     }
 
     Node::loop(); //call Node::loop to handle requestMap and on
+    // Serial.print("l");
+    xSemaphoreGive(WaitAnimationSync);
 }
 
 void LiveScriptNode::mapLayout() {
     if (hasLayout) {
-        scriptRuntime.execute(animation, "map"); 
+        scriptRuntime.execute(animation, "mapLayout"); 
     }
 }
 
@@ -246,21 +260,21 @@ void LiveScriptNode::compileAndRun() {
           //add main function
           scScript += "void main(){";
           if (hasSetup) scScript += "setup();";
-          if (hasLoop) scScript += "while(2>1){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
+          if (hasLoop) scScript += "while(true){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
           scScript += "}";
 
           ESP_LOGD(TAG, "script \n%s", scScript.c_str());
 
-          // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-          // ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+          TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
+          ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
   
           // ESP_LOGD(TAG, "parsing %s", scScript.c_str());
 
           Executable executable = parser.parseScript(&scScript); // note that this class will be deleted after the function call !!!
           executable.name = animation;
-          ESP_LOGD(TAG, "parsing %s done\n", animation);
+          ESP_LOGD(TAG, "parsing %s done", animation);
           scriptRuntime.addExe(executable); //if already exists, delete it first
-          ESP_LOGD(TAG, "addExe success %s\n", executable.exeExist?"true":"false");
+          ESP_LOGD(TAG, "addExe success %s", executable.exeExist?"true":"false");
 
           gNode = this; //todo: this is not working well with multiple scripts running!!!
 
@@ -272,7 +286,6 @@ void LiveScriptNode::compileAndRun() {
           //send error to client ... not working yet
           // error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
           // _state.data["nodes"][2]["error"] = executable.error.error_message;
-
       }
   // });
   
@@ -286,7 +299,7 @@ void LiveScriptNode::execute() {
     if (hasLayout) {
       if (on) {
         for (layerV->layerP->pass = 1; layerV->layerP->pass <= 2; layerV->layerP->pass++)
-          mapLayout(); //calls also addLayout
+          mapLayout(); //calls addLayout
       } else {
         layerV->resetMapping();
       }
@@ -297,9 +310,11 @@ void LiveScriptNode::execute() {
         // executable.execute("setup"); 
         // send controls to UI
         // executable.executeAsTask("main"); //background task (async - vs sync)
+        ESP_LOGD(TAG, "%s executeAsTask main", animation);
         scriptRuntime.executeAsTask(animation, "main"); //background task (async - vs sync)
         //assert failed: xEventGroupSync event_groups.c:228 (uxBitsToWaitFor != 0)
     } else {
+        ESP_LOGD(TAG, "%s execute main", animation);
         scriptRuntime.execute(animation, "main");
     }
 }

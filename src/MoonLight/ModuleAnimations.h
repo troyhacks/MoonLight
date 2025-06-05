@@ -39,19 +39,21 @@ public:
     }
 
     void updateControls(uint8_t index) {
-        ESP_LOGD(TAG, "updateControls %d < %d ?", index, _state.data["nodes"].size());
+        ESP_LOGD(TAG, "%d < %d ?", index, _state.data["nodes"].size());
         if (index < _state.data["nodes"].size()) {
             JsonVariant nodeState = _state.data["nodes"][index];
-            ESP_LOGD(TAG, "updateControls found nodeState %d", index);
-            nodeState["controls"].to<JsonArray>(); //clear the controls
+            ESP_LOGD(TAG, "found nodeState %d", index);
+            // serializeJson(nodeState["controls"], Serial); Serial.println();
+            //only delete the controls if new node
+            // nodeState["controls"].to<JsonArray>(); //clear the controls
             if (index < layerP.layerV[0]->nodes.size()) {
                 Node *node = layerP.layerV[0]->nodes[index];
-                ESP_LOGD(TAG, "updateControls found node class %d", index);
+                ESP_LOGD(TAG, "found node class %d", index);
                 if (node) {
                     node->addControls(nodeState["controls"].as<JsonArray>()); //update controls
 
                     // for (JsonVariant control : nodeState["controls"].as<JsonArray>()) {
-                    //     ESP_LOGD(TAG, "updateControls control %s", control["name"].as<String>().c_str());
+                    //     ESP_LOGD(TAG, "control %s", control["name"].as<String>().c_str());
                     // }
 
                     // serializeJson(nodeState, Serial); Serial.println();
@@ -93,9 +95,11 @@ public:
                             if (updatedItem == animation) {
                                 ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
                                 LiveScriptNode *liveScriptNode = findLiveScriptNode(nodeState["animation"]);
-                                if (liveScriptNode) liveScriptNode->compileAndRun();
+                                if (liveScriptNode) {
+                                    liveScriptNode->compileAndRun();
 
-                                updateControls(index);
+                                    updateControls(index);
+                                }
 
                                 ESP_LOGD(TAG, "update due to new node %s done", animation.c_str());
                             }
@@ -198,8 +202,19 @@ public:
 
                 // remove or add Nodes (incl controls)
                 if (!nodeState["animation"].isNull()) { // if animation changed // == updatedItem.value
+
+                    //if old node exists then remove it's controls
+                    if (updatedItem.oldValue != "null") {
+                        ESP_LOGD(TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+                        nodeState.remove("controls"); //remove the controls from the nodeState
+                    }
+
                     ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
     
+                    if (nodeState["controls"].isNull()) { //if controls are not set, create empty array
+                        nodeState["controls"].to<JsonArray>(); //clear the controls
+                    }
+
                     Node *nodeClass = layerP.addNode(nodeState["animation"], updatedItem.index[0]);
                     nodeClass->on = nodeState["on"];
                     newNode = true;

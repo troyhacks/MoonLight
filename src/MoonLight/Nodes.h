@@ -52,8 +52,17 @@ public:
   virtual void addControls(JsonArray controls) {};
 
   template <class ControlType, class PointerType>
-  JsonObject addControl(JsonArray controls, PointerType pointer2, const char *name, const char *type, ControlType defaul, int min = INT_MIN, int max = INT_MAX) {
+  JsonObject addControl(JsonArray controls, PointerType pointer2, const char *name, const char *type, ControlType defaul, int min = 0, int max = 255) {
     uint32_t pointer = (uint32_t)pointer2;
+
+    // if control already exists only update it's pointer
+    for (JsonObject control : controls) {
+      if (control["name"] == name) {
+        ESP_LOGD(TAG, "update control %s %s %d", name, type, defaul);
+        control["p"] = pointer;
+        return control;
+      }
+    }
     JsonObject control = controls.add<JsonObject>(); 
     control["name"] = name;
     control["type"] = type;
@@ -66,18 +75,22 @@ public:
       //setValue
       if (control["type"] == "range" || control["type"] == "pin") {
         uint8_t *valuePointer = (uint8_t *)pointer;
+        *valuePointer = defaul;
         control["value"] = *valuePointer;
       }
       else if (control["type"] == "select") {
         char *valuePointer = (char *)pointer;
+        *valuePointer = defaul;
         control["value"] = valuePointer;
       }
       else if (control["type"] == "number") {
         uint16_t *valuePointer = (uint16_t *)pointer;
+        *valuePointer = defaul;
         control["value"] = *valuePointer;
       }
       else if (control["type"] == "checkbox") {
         bool *valuePointer = (bool *)pointer;
+        *valuePointer = defaul;
         control["value"] = *valuePointer;
       }
       // else if (control["type"] == "coord3D") {

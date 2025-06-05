@@ -14,9 +14,9 @@
 class SolidEffect: public Node {
   public:
 
-  static const char * name() {return "Solid🔥💡";}
+  static const char * name() {return "Solid 🔥 💡";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "🔥💡";}
+  static const char * tags() {return "";}
 
   void loop() override {
       layerV->fill_solid(CRGB::White);
@@ -37,12 +37,12 @@ struct Ball {
 class BouncingBallsEffect: public Node {
   public:
 
-  static const char * name() {return "BouncingBalls🔥💡";}
+  static const char * name() {return "BouncingBalls 🔥 💡";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "🔥💡";}
+  static const char * tags() {return "";}
 
-  uint8_t grav = 128;
-  uint8_t numBalls = 8;
+  uint8_t grav;
+  uint8_t numBalls;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &grav, "grav", "range", 128);
@@ -113,14 +113,14 @@ class BouncingBallsEffect: public Node {
 class GEQEffect: public Node {
 public:
 
-  static const char * name() {return "GEQ🔥 ♫💡";}
+  static const char * name() {return "GEQ 🔥 ♫💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t fadeOut = 255;
-  uint8_t ripple = 128;
-  bool colorBars = false;
-  bool smoothBars = true;
+  uint8_t fadeOut;
+  uint8_t ripple;
+  bool colorBars;
+  bool smoothBars;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &fadeOut, "fadeOut", "range", 255, 0, 255);
@@ -227,11 +227,11 @@ public:
 class LinesEffect: public Node {
 public:
 
-  static const char * name() {return "Lines🔥💡";}
+  static const char * name() {return "Lines 🔥 💡";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "🔥💡";}
+  static const char * tags() {return "";}
 
-  uint8_t bpm = 120;
+  uint8_t bpm;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &bpm, "bpm", "range", 120);
@@ -263,13 +263,13 @@ public:
 class LissajousEffect: public Node {
 public:
 
-  static const char * name() {return "Lissajous🔥";}
+  static const char * name() {return "Lissajous 🔥 💡";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "🔥💡";}
+  static const char * tags() {return "";}
 
-  uint8_t xFrequency = 64;
-  uint8_t fadeRate = 128;
-  uint8_t speed = 128;
+  uint8_t xFrequency;
+  uint8_t fadeRate;
+  uint8_t speed;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &xFrequency, "xFrequency", "range", 64, 0, 255);
@@ -297,16 +297,16 @@ public:
 class MovingHeadEffect: public Node {
   public:
 
-  static const char * name() {return "MovingHead🔥 ♫💫";}
+  static const char * name() {return "MovingHead 🔥 ♫💫";}
 
-  uint8_t bpm = 30;
-  uint8_t pan = 175;
-  uint8_t tilt = 90;
-  uint8_t zoom = 0;
-  uint8_t range = 20;;
-  bool autoMove = false;
-  bool audioReactive = false;
-  bool invert = false;
+  uint8_t bpm;
+  uint8_t pan;
+  uint8_t tilt;
+  uint8_t zoom;
+  uint8_t range;
+  bool autoMove;
+  bool audioReactive;
+  bool invert;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &bpm, "bpm", "range", 30, 0, 255);
@@ -357,9 +357,9 @@ class MovingHeadEffect: public Node {
 class RainbowEffect: public Node {
 public:
 
-  static const char * name() {return "Rainbow🔥";}
+  static const char * name() {return "Rainbow 🔥";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "🔥💡";}
+  static const char * tags() {return "";}
 
   void loop() override {
     static uint8_t hue = 0;
@@ -372,17 +372,17 @@ public:
 class PaintBrushEffect: public Node {
 public:
 
-  static const char * name() {return "Paintbrush🔥 ♫💡";}
+  static const char * name() {return "Paintbrush 🔥 ♫🧊💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t oscillatorOffset = 6 *  160/255;
-  uint8_t numLines = 255;
-  uint8_t fadeRate = 40;
-  uint8_t minLength = 0;
-  bool color_chaos = false;
-  bool soft = true;
-  bool phase_chaos = false;
+  uint8_t oscillatorOffset;
+  uint8_t numLines;
+  uint8_t fadeRate;
+  uint8_t minLength;
+  bool color_chaos;
+  bool soft;
+  bool phase_chaos;
   
   void addControls(JsonArray controls) override {
     addControl(controls, &oscillatorOffset, "oscillatorOffset", "range", 6 *  160/255, 0, 16);
@@ -449,7 +449,7 @@ public:
 class RandomEffect: public Node {
   public:
 
-  static const char * name() {return "Random🔥";}
+  static const char * name() {return "Random 🔥";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -462,7 +462,7 @@ class RandomEffect: public Node {
 class RipplesEffect: public Node {
   public:
 
-  static const char * name() {return "Ripples🔥 🧊💫";}
+  static const char * name() {return "Ripples 🔥 🧊💫";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
   
@@ -497,7 +497,7 @@ class RipplesEffect: public Node {
 class RGBWParEffect: public Node {
   public:
 
-  static const char * name() {return "RGBWPar🔥";}
+  static const char * name() {return "RGBWPar 🔥";}
 
   uint8_t bpm;
   uint8_t red;
@@ -534,11 +534,11 @@ class RGBWParEffect: public Node {
 class SinelonEffect: public Node {
 public:
 
-  static const char * name() {return "Sinelon🔥";}
+  static const char * name() {return "Sinelon 🔥";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t bpm = 60;
+  uint8_t bpm;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &bpm, "bpm", "range", 60);
@@ -557,11 +557,11 @@ public:
 class SinusEffect: public Node {
   public:
 
-  static const char * name() {return "Sinus🔥";}
+  static const char * name() {return "Sinus 🔥";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t speed = 5;
+  uint8_t speed;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &speed, "speed", "range", 5);
@@ -591,7 +591,7 @@ class SinusEffect: public Node {
 class SphereMoveEffect: public Node {
   public:
 
-  static const char * name() {return "SphereMove🔥 🧊💫";}
+  static const char * name() {return "SphereMove 🔥 🧊💫";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 

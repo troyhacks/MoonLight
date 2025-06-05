@@ -16,11 +16,16 @@
 class MovingHeadLayout: public Node {
   public:
 
-  static const char * name() {return "MovingHead🚥";}
+  static const char * name() {return "MovingHead 🚥";}
 
-  uint8_t width = 4; //default 4 moving heads
-  uint8_t pin = 2;
+  uint8_t width;
+  uint8_t pin;
 
+  void addControls(JsonArray controls) override {
+    addControl(controls, &width, "width", "range", 4, 1, 32); //default 4 moving heads
+    addControl(controls, &pin, "pin", "number", 16, 1, 48);
+  }
+  
   void setup() override {
     hasLayout = true;
     Node::setup();
@@ -33,11 +38,6 @@ class MovingHeadLayout: public Node {
     layerV->layerP->lights.header.offsetZoom = 17;
   }
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &width, "width", "range", 4, 1, 32);
-    addControl(controls, &pin, "pin", "number", 16, 1, 48);
-  }
-  
   void addLayout() override {
     for (int x = 0; x<width; x++) {
       addLight({x, 0, 0});
@@ -50,15 +50,15 @@ class MovingHeadLayout: public Node {
 class PanelLayout: public Node {
   public:
 
-  static const char * name() {return "Panel🚥";}
+  static const char * name() {return "Panel 🚥";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "🚥💡";}
+  static const char * tags() {return "";}
 
-  uint8_t width = 16;
-  uint8_t height = 16;
-  uint8_t depth = 1;
-  bool snake = true;
-  uint8_t pin = 16;
+  uint8_t width;
+  uint8_t height;
+  uint8_t depth;
+  bool snake;
+  uint8_t pin;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &width, "width", "range", 16, 1, 32);
@@ -90,17 +90,19 @@ class PanelLayout: public Node {
 class RingsLayout: public Node {
   public:
 
-  static const char * name() {return "Rings🚥";}
+  static const char * name() {return "Rings 🚥";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "🚥💡";}
+  static const char * tags() {return "";}
 
-  uint8_t width = 16;
-  uint8_t height = 16;
-  uint8_t pin = 2;
+  uint8_t pin;
 
   void addControls(JsonArray controls) override {
     addControl(controls, &pin, "pin", "number", 2, 1, 48);
   }
+
+  uint8_t width = 16;
+  uint8_t height = 16;
+
   void setup() override {
     hasLayout = true;
     Node::setup();

@@ -16,21 +16,22 @@
 class MirrorModifier: public Node {
   public:
 
-  static const char * name() {return "Mirror💎";}
+  static const char * name() {return "Mirror 💎 💡";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "💎💡";}
+  static const char * tags() {return "";}
 
-  bool mirrorX = true;
-  bool mirrorY = false;
-  bool mirrorZ = false;
-  Coord3D originalSize;
-
+  bool mirrorX;
+  bool mirrorY;
+  bool mirrorZ;
+  
   void addControls(JsonArray controls) override {
     hasModifier = true;
     addControl(controls, &mirrorX, "mirrorX", "checkbox", true);
     addControl(controls, &mirrorY, "mirrorY", "checkbox", false);
     addControl(controls, &mirrorZ, "mirrorZ", "checkbox", false);
   }
+
+  Coord3D originalSize;
   
   void modifyLayout() override {
     if (mirrorX) layerV->size.x = (layerV->size.x + 1) / 2;
@@ -50,9 +51,9 @@ class MirrorModifier: public Node {
 class MultiplyModifier: public Node {
   public:
 
-  static const char * name() {return "Multiply💎";}
+  static const char * name() {return "Multiply 💎 💡";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "💎💡";}
+  static const char * tags() {return "";}
 
   Coord3D proMulti = {2,2,2};
   bool    mirror = false;
@@ -81,15 +82,15 @@ class MultiplyModifier: public Node {
 class PinwheelModifier: public Node {
   public:
 
-  static const char * name() {return "Pinwheel💎";}
+  static const char * name() {return "Pinwheel 💎 💡";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "💎💡";}
+  static const char * tags() {return "";}
 
-  uint8_t petals   = 60; // Initalize petal first for modifyLight
-  uint8_t swirlVal = 30;
-  bool    reverse  = false;
-  uint8_t symmetry = 1;
-  uint8_t zTwist   = 0;
+  uint8_t petals;
+  uint8_t swirlVal;
+  bool    reverse;
+  uint8_t symmetry;
+  uint8_t zTwist;
 
   void addControls(JsonArray controls) override {
     hasModifier = true;
