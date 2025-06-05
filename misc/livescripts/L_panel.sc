@@ -2,7 +2,7 @@ uint8_t width;
 uint8_t height;
 uint8_t pin;
 
-void addControls() {
+void setup() {
   addControl(&width, "width", "range", 16, 1, 32);
   addControl(&height, "height", "range", 16, 1, 32);
   addControl(&pin, "pin", "number", 16, 1, 48);

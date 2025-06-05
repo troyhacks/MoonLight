@@ -38,43 +38,6 @@ public:
         _server = server;
     }
 
-    void updateControls(uint8_t index) {
-        ESP_LOGD(TAG, "%d < %d ?", index, _state.data["nodes"].size());
-        if (index < _state.data["nodes"].size()) {
-            JsonVariant nodeState = _state.data["nodes"][index];
-            ESP_LOGD(TAG, "found nodeState %d", index);
-            // serializeJson(nodeState["controls"], Serial); Serial.println();
-            //only delete the controls if new node
-            // nodeState["controls"].to<JsonArray>(); //clear the controls
-            if (index < layerP.layerV[0]->nodes.size()) {
-                Node *node = layerP.layerV[0]->nodes[index];
-                ESP_LOGD(TAG, "found node class %d", index);
-                if (node) {
-                    node->addControls(nodeState["controls"].as<JsonArray>()); //update controls
-
-                    // for (JsonVariant control : nodeState["controls"].as<JsonArray>()) {
-                    //     ESP_LOGD(TAG, "control %s", control["name"].as<String>().c_str());
-                    // }
-
-                    // serializeJson(nodeState, Serial); Serial.println();
-
-                    // JsonObject object = _state.data.as<JsonObject>();
-                    // _socket->emitEvent(_moduleName, object);
-
-                    update([&](ModuleState &state) {
-                        // ESP_LOGD(TAG, "update due to new node %s", animation.c_str());
-
-                        // UpdatedItem updatedItem;
-                        ; //compare and update
-                        // state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-                        // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
-                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                    }, "server");
-                }
-            }
-        }
-    }
-
     void begin() {
         Module::begin();
 
@@ -94,11 +57,16 @@ public:
 
                             if (updatedItem == animation) {
                                 ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                                LiveScriptNode *liveScriptNode = findLiveScriptNode(nodeState["animation"]);
+                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["animation"]);
                                 if (liveScriptNode) {
                                     liveScriptNode->compileAndRun();
 
-                                    updateControls(index);
+                                    //wait until setup has been executed?
+
+                                    //update state to UI
+                                    update([&](ModuleState &state) {
+                                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+                                    }, "server");
                                 }
 
                                 ESP_LOGD(TAG, "update due to new node %s done", animation.c_str());
@@ -139,7 +107,7 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = "Random🔥"; values = property["values"].to<JsonArray>();
+            property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = RandomEffect::name(); values = property["values"].to<JsonArray>();
             values.add(SolidEffect::name());
             //alphabetically from here
             values.add(BouncingBallsEffect::name());
@@ -215,11 +183,16 @@ public:
                         nodeState["controls"].to<JsonArray>(); //clear the controls
                     }
 
-                    Node *nodeClass = layerP.addNode(nodeState["animation"], updatedItem.index[0]);
+                    Node *nodeClass = layerP.addNode(updatedItem.index[0], nodeState["animation"], nodeState["controls"]);
                     nodeClass->on = nodeState["on"];
                     newNode = true;
 
-                    updateControls(updatedItem.index[0]); //update controls of the new node
+                    //wait until setup has been executed?
+
+                    //update state to UI
+                    update([&](ModuleState &state) {
+                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+                    }, "server");
 
                     ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.c_str());
 
@@ -326,23 +299,6 @@ public:
         //     layerP.lights.leds[i] = CRGB(0, 0, 128);
         // }
     }
-
-    #if FT_ENABLED(FT_LIVESCRIPT)
-        LiveScriptNode *findLiveScriptNode(const char *animation) {
-            for (Node *node : layerP.layerV[0]->nodes) {
-                // Check if the node is of type LiveScriptNode
-                LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
-                if (liveScriptNode) {
-
-                    if (equal(liveScriptNode->animation, animation)) {
-                        ESP_LOGD(TAG, "found %s", animation);
-                        return liveScriptNode;
-                    }
-                }
-            }
-            return nullptr;
-        }
-    #endif
   
 }; // class ModuleAnimations
 

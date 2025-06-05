@@ -144,7 +144,7 @@ PhysicalLayer::PhysicalLayer() {
 
 
     //run one loop of an effect
-    Node* PhysicalLayer::addNode(const char * animation, uint8_t index) {
+    Node* PhysicalLayer::addNode(const uint8_t index, const char * animation, const JsonArray controls) {
 
         Node *node = nullptr;
         if (equal(animation, SolidEffect::name())) node = new SolidEffect();
@@ -178,7 +178,7 @@ PhysicalLayer::PhysicalLayer() {
         #endif
 
         if (node) {
-            node->constructor(layerV[0]); //pass the layer to the node
+            node->constructor(layerV[0], controls); //pass the layer to the node
             node->setup(); //run the setup of the effect
             // layerV[0]->nodes.reserve(index+1);
             if (index >= layerV[0]->nodes.size())

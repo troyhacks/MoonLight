@@ -127,7 +127,7 @@ class PhysicalLayer {
     // an effect is using a virtual layer: tell the effect in which layer to run...
 
     //run one loop of an effect
-    Node *addNode(const char * animation, uint8_t index);
+    Node *addNode(const uint8_t index, const char * animation, const JsonArray controls);
     void removeNode(Node * node);
 
     // to be called in setup, if more then one effect

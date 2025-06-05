@@ -44,11 +44,9 @@ class BouncingBallsEffect: public Node {
   uint8_t grav;
   uint8_t numBalls;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &grav, "grav", "range", 128);
-    addControl(controls, &numBalls, "numBalls", "range", 8, 1, maxNumBalls);
-    // ESP_LOGD(TAG, "");
-    // serializeJson(controls, Serial); Serial.println();
+  void setup() override {
+    addControl(&grav, "grav", "range", 128);
+    addControl(&numBalls, "numBalls", "range", 8, 1, maxNumBalls);
   }
 
   //binding of loop persistent values (pointers)
@@ -122,18 +120,17 @@ public:
   bool colorBars;
   bool smoothBars;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &fadeOut, "fadeOut", "range", 255, 0, 255);
-    addControl(controls, &ripple, "ripple", "range", 128, 0, 255);
-    addControl(controls, &colorBars, "colorBars", "checkbox", false);
-    addControl(controls, &smoothBars, "smoothBars", "checkbox", true);
-  }
-
   uint16_t *previousBarHeight; //array
   unsigned long step;
 
   void setup() override {
     Node::setup();
+
+    addControl(&fadeOut, "fadeOut", "range", 255);
+    addControl(&ripple, "ripple", "range", 128);
+    addControl(&colorBars, "colorBars", "checkbox", false);
+    addControl(&smoothBars, "smoothBars", "checkbox", true);
+
     previousBarHeight = (uint16_t*)malloc(layerV->size.x * sizeof(uint16_t));
     if (!previousBarHeight) {
       ESP_LOGE(TAG, "GEQEffect: malloc failed for previousBarHeight");
@@ -143,6 +140,7 @@ public:
     step = millis();
   }
   void destructor() override {
+      ESP_LOGI(TAG, "free previousBarHeight");
     if (previousBarHeight) {
       free(previousBarHeight);
       previousBarHeight = nullptr;
@@ -233,8 +231,8 @@ public:
 
   uint8_t bpm;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &bpm, "bpm", "range", 120);
+  void setup() override {
+    addControl(&bpm, "bpm", "range", 120);
   }
 
   void loop() override {
@@ -271,10 +269,10 @@ public:
   uint8_t fadeRate;
   uint8_t speed;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &xFrequency, "xFrequency", "range", 64, 0, 255);
-    addControl(controls, &fadeRate, "fadeRate", "range", 128, 0, 255);
-    addControl(controls, &speed, "speed", "range", 128, 0, 255);
+  void setup() override {
+    addControl(&xFrequency, "xFrequency", "range", 64);
+    addControl(&fadeRate, "fadeRate", "range", 128);
+    addControl(&speed, "speed", "range", 128);
   }
 
   void loop() override {
@@ -308,15 +306,15 @@ class MovingHeadEffect: public Node {
   bool audioReactive;
   bool invert;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &bpm, "bpm", "range", 30, 0, 255);
-    addControl(controls, &pan, "pan", "range", 175, 0, 255);
-    addControl(controls, &tilt, "tilt", "range", 90, 0, 255);
-    addControl(controls, &zoom, "zoom", "range", 20, 0, 255);
-    addControl(controls, &autoMove, "autoMove", "checkbox", false);
-    addControl(controls, &range, "range", "range", 20, 0, 255);
-    addControl(controls, &audioReactive, "audioReactive", "checkbox", false);
-    addControl(controls, &invert, "invert", "checkbox", false);
+  void setup() override {
+    addControl(&bpm, "bpm", "range", 30);
+    addControl(&pan, "pan", "range", 175);
+    addControl(&tilt, "tilt", "range", 90);
+    addControl(&zoom, "zoom", "range", 20);
+    addControl(&autoMove, "autoMove", "checkbox", false);
+    addControl(&range, "range", "range", 20);
+    addControl(&audioReactive, "audioReactive", "checkbox", false);
+    addControl(&invert, "invert", "checkbox", false);
   }
 
   void loop() override {
@@ -384,14 +382,14 @@ public:
   bool soft;
   bool phase_chaos;
   
-  void addControls(JsonArray controls) override {
-    addControl(controls, &oscillatorOffset, "oscillatorOffset", "range", 6 *  160/255, 0, 16);
-    addControl(controls, &numLines, "numLines", "range", 255, 2, 255);
-    addControl(controls, &fadeRate, "fadeRate", "range", 40, 0, 128);
-    addControl(controls, &minLength, "minLength", "range", 0);
-    addControl(controls, &color_chaos, "color_chaos", "checkbox", false);
-    addControl(controls, &soft, "soft", "checkbox", true);
-    addControl(controls, &phase_chaos, "phase_chaos", "checkbox", false);
+  void setup() override {
+    addControl(&oscillatorOffset, "oscillatorOffset", "range", 6 *  160/255, 0, 16);
+    addControl(&numLines, "numLines", "range", 255, 2, 255);
+    addControl(&fadeRate, "fadeRate", "range", 40, 0, 128);
+    addControl(&minLength, "minLength", "range", 0);
+    addControl(&color_chaos, "color_chaos", "checkbox", false);
+    addControl(&soft, "soft", "checkbox", true);
+    addControl(&phase_chaos, "phase_chaos", "checkbox", false);
   }
 
   uint16_t aux0Hue;
@@ -469,9 +467,9 @@ class RipplesEffect: public Node {
   uint8_t speed;
   uint8_t interval;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &speed, "speed", "range", 50);
-    addControl(controls, &interval, "interval", "range", 128);
+  void setup() override {
+    addControl(&speed, "speed", "range", 50);
+    addControl(&interval, "interval", "range", 128);
   }
 
   void loop() override {
@@ -505,12 +503,12 @@ class RGBWParEffect: public Node {
   uint8_t blue;
   uint8_t white;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &bpm, "bpm", "range", 30);
-    addControl(controls, &red, "red", "range", 30); //control["color"] = "Red"; ...
-    addControl(controls, &green, "green", "range", 30);
-    addControl(controls, &blue, "blue", "range", 30);
-    addControl(controls, &white, "white", "range", 0);
+  void setup() override {
+    addControl(&bpm, "bpm", "range", 30);
+    addControl(&red, "red", "range", 30); //control["color"] = "Red"; ...
+    addControl(&green, "green", "range", 30);
+    addControl(&blue, "blue", "range", 30);
+    addControl(&white, "white", "range", 0);
   }
 
   void loop() override {
@@ -540,8 +538,8 @@ public:
 
   uint8_t bpm;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &bpm, "bpm", "range", 60);
+  void setup() override {
+    addControl(&bpm, "bpm", "range", 60);
   }
 
   void loop() override {
@@ -563,8 +561,8 @@ class SinusEffect: public Node {
 
   uint8_t speed;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &speed, "speed", "range", 5);
+  void setup() override {
+    addControl(&speed, "speed", "range", 5);
   }
 
   void loop() override {
@@ -597,8 +595,8 @@ class SphereMoveEffect: public Node {
 
   uint8_t speed;
   
-  void addControls(JsonArray controls) override {
-    addControl(controls, &speed, "speed", "range", 50, 0, 99);
+  void setup() override {
+    addControl(&speed, "speed", "range", 50, 0, 99);
   }
 
   void loop() override {

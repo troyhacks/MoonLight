@@ -21,15 +21,13 @@ class MovingHeadLayout: public Node {
   uint8_t width;
   uint8_t pin;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &width, "width", "range", 4, 1, 32); //default 4 moving heads
-    addControl(controls, &pin, "pin", "number", 16, 1, 48);
-  }
-  
   void setup() override {
     hasLayout = true;
     Node::setup();
     
+    addControl(&width, "width", "range", 4, 1, 32); //default 4 moving heads
+    addControl(&pin, "pin", "number", 16, 1, 48);
+
     layerV->layerP->lights.header.channelsPerLight = 24;
     layerV->layerP->lights.header.offsetPan = 0;
     layerV->layerP->lights.header.offsetTilt = 1;
@@ -60,17 +58,15 @@ class PanelLayout: public Node {
   bool snake;
   uint8_t pin;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &width, "width", "range", 16, 1, 32);
-    addControl(controls, &height, "height", "range", 16, 1, 32);
-    addControl(controls, &depth, "depth", "range", 1, 1, 32);
-    addControl(controls, &snake, "snake", "checkbox", true);
-    addControl(controls, &pin, "pin", "number", 16, 1, 48);
-  }
-
   void setup() override {
     hasLayout = true;
     Node::setup();
+    
+    addControl(&width, "width", "range", 16, 1, 32);
+    addControl(&height, "height", "range", 16, 1, 32);
+    addControl(&depth, "depth", "range", 1, 1, 32);
+    addControl(&snake, "snake", "checkbox", true);
+    addControl(&pin, "pin", "number", 16, 1, 48);
   }
 
   void addLayout() override {
@@ -96,16 +92,14 @@ class RingsLayout: public Node {
 
   uint8_t pin;
 
-  void addControls(JsonArray controls) override {
-    addControl(controls, &pin, "pin", "number", 2, 1, 48);
-  }
-
   uint8_t width = 16;
   uint8_t height = 16;
-
+  
   void setup() override {
     hasLayout = true;
     Node::setup();
+
+    addControl(&pin, "pin", "number", 2, 1, 48);
   }
 
   void add(int leds, int radius) {

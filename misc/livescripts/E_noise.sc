@@ -1,7 +1,7 @@
 uint8_t speed;
 uint8_t intensity;
 
-void addControls() {
+void setup() {
   addControl(&speed, "speed", "range", 128, 1, 255);
   addControl(&intensity, "intensity", "range", 128, 1, 255);
 }

@@ -24,11 +24,11 @@ class MirrorModifier: public Node {
   bool mirrorY;
   bool mirrorZ;
   
-  void addControls(JsonArray controls) override {
+  void setup() override {
     hasModifier = true;
-    addControl(controls, &mirrorX, "mirrorX", "checkbox", true);
-    addControl(controls, &mirrorY, "mirrorY", "checkbox", false);
-    addControl(controls, &mirrorZ, "mirrorZ", "checkbox", false);
+    addControl(&mirrorX, "mirrorX", "checkbox", true);
+    addControl(&mirrorY, "mirrorY", "checkbox", false);
+    addControl(&mirrorZ, "mirrorZ", "checkbox", false);
   }
 
   Coord3D originalSize;
@@ -92,13 +92,13 @@ class PinwheelModifier: public Node {
   uint8_t symmetry;
   uint8_t zTwist;
 
-  void addControls(JsonArray controls) override {
+  void setup() override {
     hasModifier = true;
-    addControl(controls, &petals, "petals", "range", 60);
-    addControl(controls, &swirlVal, "swirlVal", "range", 30);
-    addControl(controls, &reverse, "reverse", "checkbox", false);
-    addControl(controls, &symmetry, "symmetry", "range", 1);
-    addControl(controls, &zTwist, "zTwist", "range", 0);
+    addControl(&petals, "petals", "range", 60);
+    addControl(&swirlVal, "swirlVal", "range", 30);
+    addControl(&reverse, "reverse", "checkbox", false);
+    addControl(&symmetry, "symmetry", "range", 1);
+    addControl(&zTwist, "zTwist", "range", 0);
   }
   
   void modifyLayout() override {

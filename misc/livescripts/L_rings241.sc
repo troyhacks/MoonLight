@@ -3,7 +3,7 @@
 
 uint8_t pin;
 
-void addControls() {
+void setup() {
   addControl(&pin, "pin", "number", 16, 1, 48);
 }
 

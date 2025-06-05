@@ -359,7 +359,9 @@ class VirtualLayer {
       }
     }
   }
- 
+
+  Node *findLiveScriptNode(const char *animation);
+
 };
 
 #endif

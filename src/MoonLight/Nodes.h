@@ -28,16 +28,20 @@ public:
   static uint8_t dim() {return _1D;};
 
   VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
+  JsonArray controls;
 
   bool hasLayout = false; //run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2) 
   bool requestMap = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
   bool hasModifier = false; //modifier new Node, on/off, control changed: run layout.requestMap. addLayoutPre: modifyLayout, addLight: modifyLight (todo XYZ: modifyXYZ)
+  // bool addedControl = false;
+  virtual bool isLiveScriptNode() const { return false; }
 
   bool on = false; //onUpdate will set it on
 
   //C++ constructor and destructor are not inherited, so declare it as normal functions
-  virtual void constructor(VirtualLayer *layerV) {
+  virtual void constructor(VirtualLayer *layerV, JsonArray controls) {
     this->layerV = layerV;
+    this->controls = controls;
   }
 
   //effect and layout
@@ -49,10 +53,8 @@ public:
   };
 
   //effect, layout and modifier
-  virtual void addControls(JsonArray controls) {};
-
   template <class ControlType, class PointerType>
-  JsonObject addControl(JsonArray controls, PointerType pointer2, const char *name, const char *type, ControlType defaul, int min = 0, int max = 255) {
+  JsonObject addControl(PointerType pointer2, const char *name, const char *type, ControlType defaul, int min = 0, int max = 255) {
     uint32_t pointer = (uint32_t)pointer2;
 
     // if control already exists only update it's pointer
@@ -159,19 +161,18 @@ public:
 class LiveScriptNode: public Node {
   public:
 
-  static const char * name() {return "LiveScriptNode⚙️";}
+  static const char * name() {return "LiveScriptNode ⚙️";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "⚙️";}
+  static const char * tags() {return "";}
 
   bool hasSetup = false;
   bool hasLoop = false;
-  bool hasAddControls = false;
+  bool hasAddControl = false;
+  bool isLiveScriptNode() const override { return true; }
 
   const char *animation; //which animation (file) to run
 
   void setup() override; //addExternal, compileAndRun
-  
-  void addControls(JsonArray controls) override; //call addControls in LiveScript
   
   void loop() override; //call Node.loop to process requestMap. todo: sync with script...
 

@@ -262,4 +262,20 @@ void VirtualLayer::addLayoutPost() {
 
 }
 
+    #if FT_LIVESCRIPT
+        Node *VirtualLayer::findLiveScriptNode(const char *animation) {
+            for (Node *node : nodes) {
+                if (node && node->isLiveScriptNode()) {
+                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
+                    if (equal(liveScriptNode->animation, animation)) {
+                        ESP_LOGD(TAG, "found %s", animation);
+                        return liveScriptNode;
+                    }
+                }
+            }
+            return nullptr;
+        }
+    #endif
+  
+
 #endif //FT_MOONLIGHT

@@ -58,9 +58,8 @@ void Node::updateControl(JsonObject control) {
 #include "ESPLiveScript.h"
 
 Node *gNode = nullptr;
-JsonArray gControls;
 
-static void _addControl(void * ptr, char *name, char* type, int defaul, int min = 0, int max = 255) {ESP_LOGD(TAG, "%p %s %s %d (%d-%d)", ptr,  name, type, defaul, min, max);gNode->addControl(gControls, ptr, name, type, defaul, min, max);}
+static void _addControl(void * ptr, char *name, char* type, int defaul, int min = 0, int max = 255) {ESP_LOGD(TAG, "%p %s %s %d (%d-%d)", ptr,  name, type, defaul, min, max);gNode->addControl(ptr, name, type, defaul, min, max);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLayoutPre() {gNode->layerV->layerP->addLayoutPre();}
 static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
@@ -197,18 +196,6 @@ void LiveScriptNode::setup() {
     //   Node::setup(); //call Node::setup to handle requestMap: no need to run as 
 }
 
-void LiveScriptNode::addControls(JsonArray controls)  {
-    //called from ModuleAnimations.updateControls (via onUpdate: loopTask)
-    
-    if (hasAddControls) {
-        gControls = controls; //store the controls for use in _addControl
-        ESP_LOGD(TAG, "%s execute addControls", animation);
-        scriptRuntime.execute(animation, "addControls"); 
-        // ESP_LOGD(TAG, "%s kill", animation);
-        // scriptRuntime.kill(animation); //script should automatically kill itself after addControls
-    }
-}
-
 void LiveScriptNode::loop() {
 
     // if (isSyncalled)
@@ -253,7 +240,6 @@ void LiveScriptNode::compileAndRun() {
           if (scScript.find("loop()") != std::string::npos) hasLoop = true;
           if (scScript.find("addLayout()") != std::string::npos) hasLayout = true;
           if (scScript.find("modifyLight(") != std::string::npos) hasModifier = true;
-          if (scScript.find("addControls(") != std::string::npos) hasAddControls = true;
         //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
           if (hasLayout) scScript += "void mapLayout(){addLayoutPre();addLayout();addLayoutPost();}"; //add mapLayout() function

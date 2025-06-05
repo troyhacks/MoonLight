@@ -10,13 +10,11 @@ uint32_t t = 0; //=speed
 uint8_t speed;
 uint8_t branches;
 
-void addControls() {
-  addControl(&speed, "speed", "range", 128, 1, 255);
-  addControl(&branches, "branches", "range", 4, 1, 8);
-}
-
 void setup()
 {
+  addControl(&speed, "speed", "range", 128, 1, 255);
+  addControl(&branches, "branches", "range", 4, 1, 8);
+
   C_X = width / 2;
   C_Y = height / 2;
   mapp = 255 / width;

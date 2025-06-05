@@ -73,7 +73,7 @@ public:
             JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
             if (updatedItem.oldValue != "null") {//do not run at boot!
-                LiveScriptNode *liveScriptNode = findLiveScriptNode(scriptState["name"]);
+                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(scriptState["name"]);
                 if (liveScriptNode) {
                     if (updatedItem.name == "stop")
                         liveScriptNode->kill();
@@ -106,8 +106,11 @@ public:
             // UpdatedItem updatedItem;
             // _state.compareRecursive("scripts", _state.data["scripts"], newData["scripts"], updatedItem); //compare and update
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
-            JsonObject newDataObject = newData.as<JsonObject>();
-            _socket->emitEvent("animations", newDataObject);
+            // JsonObject newDataObject = newData.as<JsonObject>();
+            // _socket->emitEvent("animations", newDataObject);
+            update([&](ModuleState &state) {
+                return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+            }, "server");
         }
 
         // if (_state.data["scripts"] != newData["scripts"]) {
@@ -128,21 +131,6 @@ public:
         // ESP_LOGD(TAG, "livescripts %s", buffer);
     }
 
-    LiveScriptNode *findLiveScriptNode(const char *animation) {
-        for (Node *node : layerP.layerV[0]->nodes) {
-            // Check if the node is of type LiveScriptNode
-            LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
-            if (liveScriptNode) {
-
-                if (equal(liveScriptNode->animation, animation)) {
-                    ESP_LOGD(TAG, "found %s", animation);
-                    return liveScriptNode;
-                }
-            }
-        }
-        return nullptr;
-    }
-  
 }; // class ModuleLiveScripts
 
 #endif
