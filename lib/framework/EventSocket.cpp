@@ -158,7 +158,7 @@ void EventSocket::emitEvent(String event, char *output, size_t len, const char *
         if (client)
         {
             if (event != "monitor")
-            // ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
+                ESP_LOGV(TAG, "Emitting event: %s to %s[%u], Message[%d]: %s", event.c_str(), client->remoteIP().toString().c_str(), client->socket(), len, output);
 #if FT_ENABLED(EVENT_USE_JSON)
             client->sendMessage(HTTPD_WS_TYPE_TEXT, output, len);
 #else

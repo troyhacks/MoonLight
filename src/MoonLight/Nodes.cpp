@@ -81,7 +81,7 @@ static float _time(float j) {
     return myVal;
 }
 
-volatile xSemaphoreHandle WaitAnimationSync = NULL;
+volatile xSemaphoreHandle WaitAnimationSync = xSemaphoreCreateBinary();
 
 void sync() {
     static uint32_t frameCounter = 0;
@@ -128,10 +128,6 @@ Parser parser = Parser();
 void LiveScriptNode::setup() {
     
   // ESP_LOGD(TAG, "animation %s", animation);
-    if (WaitAnimationSync == NULL)
-    {
-        WaitAnimationSync = xSemaphoreCreateBinary();
-    }
 
   if (animation[0] != '/') { //no sc script
       return;
@@ -198,12 +194,7 @@ void LiveScriptNode::setup() {
 
 void LiveScriptNode::loop() {
 
-    // if (isSyncalled)
-    //     while (!resetSync)
-    //     {
-    //     }
-
-    Node::loop(); //call Node::loop to handle requestMap and on
+    Node::loop(); //call Node::loop to handle requestMap
     // Serial.print("l");
     xSemaphoreGive(WaitAnimationSync);
 }
@@ -303,6 +294,7 @@ void LiveScriptNode::execute() {
         ESP_LOGD(TAG, "%s execute main", animation);
         scriptRuntime.execute(animation, "main");
     }
+    ESP_LOGD(TAG, "%s execute started", animation);
 }
 
 void LiveScriptNode::kill() {

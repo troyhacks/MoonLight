@@ -163,12 +163,15 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(animation, SinelonEffect::name())) node = new SinelonEffect();
         else if (equal(animation, SinusEffect::name())) node = new SinusEffect();
         else if (equal(animation, SphereMoveEffect::name())) node = new SphereMoveEffect();
+
         else if (equal(animation, MovingHeadLayout::name())) node = new MovingHeadLayout();
         else if (equal(animation, PanelLayout::name())) node = new PanelLayout();
         else if (equal(animation, RingsLayout::name())) node = new RingsLayout();
+
         else if (equal(animation, MirrorModifier::name())) node = new MirrorModifier();
         else if (equal(animation, MultiplyModifier::name())) node = new MultiplyModifier();
         else if (equal(animation, PinwheelModifier::name())) node = new PinwheelModifier();
+        
         else if (equal(animation, AudioSyncMod::name())) node = new AudioSyncMod();
         #if FT_LIVESCRIPT
             else {

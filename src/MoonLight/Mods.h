@@ -28,7 +28,7 @@ static struct Audio {
 class AudioSyncMod: public Node {
   public:
 
-  static const char * name() {return "AudioSync☸️ ♫";}
+  static const char * name() {return "AudioSync ☸️ ♫";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
