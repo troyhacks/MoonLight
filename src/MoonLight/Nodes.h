@@ -193,9 +193,7 @@ class LiveScriptNode: public Node {
 
 #endif
 
-//data shared between nodes
-static byte geq[16]= {0};
-static float volume;
+#include "Mods.h"
 
 #include "Layouts.h"
 
@@ -203,7 +201,5 @@ static float volume;
 // #include "EffectsFastLED.h"
 
 #include "Modifiers.h"
-
-#include "Mods.h"
 
 #endif //FT_MOONLIGHT

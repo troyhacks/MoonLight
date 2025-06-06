@@ -150,6 +150,7 @@ PhysicalLayer::PhysicalLayer() {
         if (equal(animation, SolidEffect::name())) node = new SolidEffect();
         //alphabetically from here
         else if (equal(animation, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
+        else if (equal(animation, FreqMatrixEffect::name())) node = new FreqMatrixEffect();
         else if (equal(animation, GEQEffect::name())) node = new GEQEffect();
         else if (equal(animation, LinesEffect::name())) node = new LinesEffect();
         else if (equal(animation, LissajousEffect::name())) node = new LissajousEffect();

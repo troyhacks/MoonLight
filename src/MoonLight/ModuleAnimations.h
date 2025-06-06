@@ -111,6 +111,7 @@ public:
             values.add(SolidEffect::name());
             //alphabetically from here
             values.add(BouncingBallsEffect::name());
+            values.add(FreqMatrixEffect::name());
             values.add(GEQEffect::name());
             values.add(LinesEffect::name());
             values.add(LissajousEffect::name());

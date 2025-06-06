@@ -16,6 +16,15 @@
 
 //alphabetically from here
 
+#define MAX_FREQUENCY   11025          // sample frequency / 2 (as per Nyquist criterion)
+
+//data shared between nodes
+static struct Audio {
+  byte bands[16]= {0}; // Our calculated freq. channel result table to be used by effects
+  float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
+  float majorPeak; // FFT: strongest (peak) frequency
+} audio;
+
 class AudioSyncMod: public Node {
   public:
 
@@ -34,13 +43,17 @@ class AudioSyncMod: public Node {
       ESP_LOGW(TAG, "AudioSync: Initialized");
     }
     if (sync.read()) {
-      memcpy(geq, sync.fftResult, NUM_GEQ_CHANNELS);
-      volume = sync.volumeSmth;
-      // if (geq[0] > 0) {
-      //   ESP_LOGD(TAG, "AudioSync: %d %f", geq[0], volume);
+      memcpy(audio.bands, sync.fftResult, NUM_GEQ_CHANNELS);
+      audio.volume = sync.volumeSmth;
+      audio.majorPeak = sync.FFT_MajorPeak;
+      // if (audio.bands[0] > 0) {
+      //   ESP_LOGD(TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);
       // }
     }
   }
 };
+
+static AudioSyncMod *audioNode;
+
 
 #endif

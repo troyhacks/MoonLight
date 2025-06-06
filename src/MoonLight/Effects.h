@@ -108,6 +108,69 @@ class BouncingBallsEffect: public Node {
   }
 };
 
+class FreqMatrixEffect: public Node {
+public:
+
+  static const char * name() {return "FreqMatrix 🔥 ♪💡";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "";}
+
+  uint8_t speed;
+  uint8_t fx;
+  uint8_t lowBin;
+  uint8_t highBin;
+  uint8_t sensitivity10;
+
+  void setup() override {
+    addControl(&speed, "speed", "range", 255);
+    addControl(&fx, "fx", "range", 128);
+    addControl(&lowBin, "lowBin", "range", 18);
+    addControl(&highBin, "highBin", "range", 48);
+    addControl(&sensitivity10, "sensitivity", "range", 30, 10, 100);
+  }
+
+  uint8_t aux0;
+
+  void loop() override {
+    uint8_t secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
+    if((speed > 254) || (aux0 != secondHand)) {   // WLEDMM allow run run at full speed
+      aux0 = secondHand;
+
+      // Pixel brightness (value) based on volume * sensitivity * intensity
+      // uint_fast8_t sensitivity10 = map(sensitivity, 0, 31, 10, 100); // reduced resolution slider // WLEDMM sensitivity * 10, to avoid losing precision
+      int pixVal = audio.volume * (float)fx * (float)sensitivity10 / 2560.0f; // WLEDMM 2560 due to sensitivity * 10
+      if (pixVal > 255) pixVal = 255;  // make a brightness from the last avg
+
+      CRGB color = CRGB::Black;
+
+      if (audio.majorPeak > MAX_FREQUENCY) audio.majorPeak = 1;
+      // MajorPeak holds the freq. value which is most abundant in the last sample.
+      // With our sampling rate of 10240Hz we have a usable freq range from roughtly 80Hz to 10240/2 Hz
+      // we will treat everything with less than 65Hz as 0
+
+      if ((audio.majorPeak > 80.0f) && (audio.volume > 0.25f)) { // WLEDMM
+        // Pixel color (hue) based on major frequency
+        int upperLimit = 80 + 42 * highBin;
+        int lowerLimit = 80 + 3 * lowBin;
+        //uint8_t i =  lowerLimit!=upperLimit ? map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // (original formula) may under/overflow - so we enforce uint8_t
+        int freqMapped =  lowerLimit!=upperLimit ? map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // WLEDMM preserve overflows
+        uint8_t i = abs(freqMapped) & 0xFF;  // WLEDMM we embrace overflow ;-) by "modulo 256"
+
+        color = CHSV(i, 240, (uint8_t)pixVal); // implicit conversion to RGB supplied by FastLED
+      }
+
+      // shift the pixels one pixel up
+      layerV->setLight(0, color);
+      for (int x = layerV->size.x - 1; x >= 0; x--) {
+        if (x!=0) color = layerV->getLight<CRGB>(x-1);
+        for (int y = 0; y < layerV->size.y; y++)
+          for (int z = 0; z < layerV->size.z; z++)
+            layerV->setLight({x,y,z}, color);
+      }
+    }
+  }
+};
+
 class GEQEffect: public Node {
 public:
 
@@ -133,7 +196,7 @@ public:
 
     previousBarHeight = (uint16_t*)malloc(layerV->size.x * sizeof(uint16_t));
     if (!previousBarHeight) {
-      ESP_LOGE(TAG, "GEQEffect: malloc failed for previousBarHeight");
+      ESP_LOGE(TAG, "malloc failed for previousBarHeight");
       return;
     }
     memset(previousBarHeight, 0, layerV->size.x * sizeof(uint16_t)); // initialize to 0
@@ -148,7 +211,7 @@ public:
   }
 
   void loop() override {
-    const int NUM_BANDS = 16 ; // map(layerV->custom1, 0, 255, 1, 16);
+    const int NUM_BANDS = NUM_GEQ_CHANNELS ; // map(layerV->custom1, 0, 255, 1, 16);
 
     #ifdef SR_DEBUG
     uint8_t samplePeak = *(uint8_t*)um_data->u_data[3];
@@ -178,18 +241,18 @@ public:
       remaining--; //consume remaining
 
       // ppf("x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
-      uint8_t frBand = ((NUM_BANDS < 16) && (NUM_BANDS > 1)) ? map(band, 0, NUM_BANDS - 1, 0, 15):band; // always use full range. comment out this line to get the previous behaviour.
+      uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):band; // always use full range. comment out this line to get the previous behaviour.
       // frBand = constrain(frBand, 0, 15); //WLEDMM can never be out of bounds (I think...)
       uint16_t colorIndex = frBand * 17; //WLEDMM 0.255
-      uint16_t bandHeight = geq[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
+      uint16_t bandHeight = audio.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
 
       // WLEDMM begin - smooth out bars
       if ((pos.x > 0) && (pos.x < (layerV->size.x-1)) && (smoothBars)) {
         // get height of next (right side) bar
         uint8_t nextband = (remaining < 1)? band +1: band;
-        nextband = constrain(nextband, 0, 15);  // just to be sure
-        frBand = ((NUM_BANDS < 16) && (NUM_BANDS > 1)) ? map(nextband, 0, NUM_BANDS - 1, 0, 15):nextband; // always use full range. comment out this line to get the previous behaviour.
-        uint16_t nextBandHeight = geq[frBand];
+        nextband = constrain(nextband, 0, NUM_GEQ_CHANNELS-1);  // just to be sure
+        frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? map(nextband, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):nextband; // always use full range. comment out this line to get the previous behaviour.
+        uint16_t nextBandHeight = audio.bands[frBand];
         // smooth Band height
         bandHeight = (7*bandHeight + 3*lastBandHeight + 3*nextBandHeight) / 12;   // yeees, its 12 not 13 (10% amplification)
         bandHeight = constrain(bandHeight, 0, 255);   // remove potential over/underflows
@@ -331,7 +394,7 @@ class MovingHeadEffect: public Node {
         //set the 3 led groups for each moving head light
         for (int j=0; j<3; j++) {
           layerV->layerP->lights.header.offsetRGB = 4 + j * 4;
-          layerV->layerP->lights.header.setRGB(light, CHSV( (i + j*3) * delta, 255, geq[(i * 3 + j) % 16]));
+          layerV->layerP->lights.header.setRGB(light, CHSV( (i + j*3) * delta, 255, audio.bands[(i * 3 + j) % 16]));
         }
       } else {
         if (i == beatsin8(bpm, 0, layerV->size.x - 1)) { //sinelon over moving heads
@@ -412,22 +475,22 @@ public:
     for (size_t i = 0; i < numLines; i++) {
       byte bin = map(i,0,numLines,0,15);
       
-      byte x1 = beatsin8(oscillatorOffset*1 + geq[0]/16, 0, (cols-1), geq[bin], aux1Chaos);
-      byte x2 = beatsin8(oscillatorOffset*2 + geq[0]/16, 0, (cols-1), geq[bin], aux1Chaos);
-      byte y1 = beatsin8(oscillatorOffset*3 + geq[0]/16, 0, (rows-1), geq[bin], aux1Chaos);
-      byte y2 = beatsin8(oscillatorOffset*4 + geq[0]/16, 0, (rows-1), geq[bin], aux1Chaos);
+      byte x1 = beatsin8(oscillatorOffset*1 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
+      byte x2 = beatsin8(oscillatorOffset*2 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
+      byte y1 = beatsin8(oscillatorOffset*3 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
+      byte y2 = beatsin8(oscillatorOffset*4 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
       byte z1;
       byte z2;
       int length;
       if (depth > 1) {
-        z1 = beatsin8(oscillatorOffset*5 + geq[0]/16, 0, (depth-1), geq[bin], aux1Chaos);
-        z2 = beatsin8(oscillatorOffset*6 + geq[0]/16, 0, (depth-1), geq[bin], aux1Chaos);
+        z1 = beatsin8(oscillatorOffset*5 + audio.bands[0]/16, 0, (depth-1), audio.bands[bin], aux1Chaos);
+        z2 = beatsin8(oscillatorOffset*6 + audio.bands[0]/16, 0, (depth-1), audio.bands[bin], aux1Chaos);
 
         length = sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1) + (z2-z1) * (z2-z1));
       } else 
         length = sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1));
 
-      length = map8(geq[bin],0,length);
+      length = map8(audio.bands[bin],0,length);
 
       if (length > max(1, (int)minLength)) {
         CRGB color;

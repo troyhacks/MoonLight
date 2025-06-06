@@ -142,12 +142,14 @@ class VirtualLayer {
   T getLight(const uint16_t indexV) const {
     if (indexV < mappingTableSizeUsed) {
       switch (mappingTable[indexV].mapType) {
-        case m_oneLight:
-          return layerP->lights.channels[mappingTable[indexV].indexP * sizeof(T)]; 
-          break;
-        case m_moreLights:
-          return layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * sizeof(T)]; //any will do as they are all the same
-          break;
+        case m_oneLight: {
+          T* b = (T*)&layerP->lights.channels[mappingTable[indexV].indexP * sizeof(T)];
+          return *b; 
+          break; }
+        case m_moreLights: {
+          T* b = (T*)&layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * sizeof(T)]; //any will do as they are all the same
+          return *b;
+          break; }
         default: // m_color:
           return T();
           // if (std::is_same<T, CRGB>::value) {
@@ -162,9 +164,10 @@ class VirtualLayer {
           break;
       }
     }
-    else if (indexV * sizeof(T) < MAX_CHANNELS) //no mapping
-      return layerP->lights.channels[indexV * sizeof(T)];
-    else {
+    else if (indexV * sizeof(T) < MAX_CHANNELS) { //no mapping
+      T* b = (T*)&layerP->lights.channels[indexV * sizeof(T)];
+      return *b;
+    } else {
       // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
       // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
       return T();
