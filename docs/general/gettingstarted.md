@@ -28,6 +28,7 @@
 * Currently supported devices: 
     * ESP32 and ESP32-S3 (n16r8) fresh install and update
     * ESP32-Wrover and olimex-esp32-p4 update only (P4 highly experimental, crashes guaranteed! )
+* The installer recognises the board and automatically selects the right firmware
 * Safari does not support installing things on ESP devices. Use Google Chrome or Microsoft Edge.
 * Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
 * See also [ESP-Web-Tools-Tutorial](https://github.com/witnessmenow/ESP-Web-Tools-Tutorial/blob/main/README.md)

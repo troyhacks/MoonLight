@@ -10,7 +10,7 @@
       "parts": [
         { "path": "./esp32-bootloader.bin", "offset": 4096 },
         { "path": "./esp32-partitions.bin", "offset": 32768 },
-        { "path": "./boot_app0.bin", "offset": 57344 },
+        { "path": "./boot-app0.bin", "offset": 57344 },
         { "path": "./MoonLight_esp32dev_0-5-6.bin", "offset": 65536 }
       ]
     },
@@ -25,7 +25,7 @@
       "parts": [
         { "path": "./esp32-s3-bootloader.bin", "offset": 0 },
         { "path": "./esp32-s3-partitions.bin", "offset": 32768 },
-        { "path": "./boot_app0.bin", "offset": 57344 },
+        { "path": "./boot-app0.bin", "offset": 57344 },
         { "path": "./MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-6.bin", "offset": 65536 }
       ]
     },
