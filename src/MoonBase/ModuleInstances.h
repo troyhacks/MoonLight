@@ -19,7 +19,7 @@
 #include "Utilities.h"
 
 struct UDPMessage {
-    byte rommel[6];
+    uint8_t rommel[6];
     Char<32> name;
 };
 
@@ -45,7 +45,7 @@ public:
         JsonArray values; // if a property is a select, this is the values of the select
 
         Char<32> instanceName;
-        instanceName = "MoonBase-";
+        instanceName = "MoonLight-";
         uint8_t mac[6];
         esp_read_mac(mac, ESP_MAC_WIFI_STA);
         char macStr[5] = {0};
@@ -127,7 +127,7 @@ public:
             
             UDPMessage message;
             message.name = _state.data["instanceName"].as<String>().c_str();
-            instanceUDP.write((byte *)&message, sizeof(message));
+            instanceUDP.write((uint8_t *)&message, sizeof(message));
             instanceUDP.endPacket();
             // ESP_LOGD(TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
 

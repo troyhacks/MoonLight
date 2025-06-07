@@ -30,7 +30,7 @@ struct PhysMap {
     union {
       struct {                 //condensed rgb
         uint16_t rgb14: 14;    //14 bits (554 RGB)
-        byte mapType:2;        //2 bits (4)
+        uint8_t mapType:2;        //2 bits (4)
       }; //16 bits
       uint16_t indexP: 14;   //16384 one physical light (type==1) index to ledsP array
       uint16_t indexes:14;  //16384 multiple physical lights (type==2) index in std::vector<std::vector<uint16_t>> mappingTableIndexes;

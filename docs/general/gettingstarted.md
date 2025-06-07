@@ -26,7 +26,7 @@ WIP...
 
 [install](https://github.com/MoonModules/MoonLight/blob/main/docs/general/index.html)
 
-* release 0.5.5, for latest build follow installation developer
+* release 0.5.6, for latest build follow installation developer
 * This is WIP, looks like issue with erasing the board and setting the partitions right ...
 * Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
 
@@ -79,6 +79,19 @@ WIP...
 * Instead of cloning the repo directly from MoonLight as described above, create a fork first so you have your own environment to make changes to. See also Pull Requests below.
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
 * Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.
+* Serial Log shows which code is from which library using emoji:
+    <img width="350" src="https://github.com/user-attachments/assets/7379307c-24d7-41c2-ac87-79761167dc68" />
+
+    * 🐼: ESP-SvelteKit
+    * 🔮: PsychicHTTP
+    * 🐸: Live Scripts
+    * 🌙: MoonBase
+    * 💫: MoonLight
+    🌙 and 💫 is also used in code comments of ESP32-SvelteKit to show where changes to upstream have been made.
+* The following ESP32-SvelteKit features have been switched off in the default builts (they can be switched on if you want to use them, see [features.ini](https://github.com/MoonModules/MoonLight/blob/main/features.ini))
+    *   -D FT_SECURITY=0
+    *   -D FT_SLEEP=0
+    *   -D FT_BATTERY=0
 
 ## Pull Requests
 

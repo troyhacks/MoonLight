@@ -94,6 +94,7 @@
   
   // #define NUM_LEDS_PER_STRIP 256 // for I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY ...
 
+  #undef CORE_DEBUG_LEVEL
   #define CORE_DEBUG_LEVEL 0 //surpress ESP_LOGE compile error, increase to 6 when debugging
   //catch errors from library, enable when debugging
   // #define ICVD_LOGD(tag, format, ...) ppf(format, ##__VA_ARGS__)
@@ -113,6 +114,7 @@
     #define I2S_MAPPING_MODE (I2S_MAPPING_MODE_OPTION_NONE) //works but mapping using MoonLight mappingTable needed
   #endif
 
+  #undef TAG
   #define TAG "🐸" // for S3 (todo also for non s3...)
 
   #include "I2SClocklessVirtualLedDriver.h"
