@@ -2,43 +2,53 @@
 
 ## Installation - End user
 
-MoonLight can be installed on an ESP32 using [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html).
+* Step 1: Get an ESP32 or ESP32-S3 (preferred, support large setups and Live Scripts). Boards we use are [ESP32](https://s.click.aliexpress.com/e/_EyrmQyw) or [ESP32-S3](https://s.click.aliexpress.com/e/_DBAtJ2H). Get a ws2812 LED strip or a [LED panel](https://s.click.aliexpress.com/e/_EGx8Hhu) (preferred). Connect the strip or panel to the board on a suitable pin (e.g. Pin 2 or 16)
 
-This installer let you flash an ESP32 board connected via USB directly from a web browser and installs the latest release of MoonLight (currently v0.5.6).
-Currenly new ESP32 and ESP32-S3 boards can be installed with the installer. Other boards will follow later. The installer detects the board automatically.
-The Web Installer works on Google Chrome or Microsoft Edge or similar browsers. Safari does not support installing things on ESP devices. Driver software might be needed to have the webinstaller recognise the board. If you try to install and no boards are detected, a screen will popup inviting you to install the driver.
+* Step 2: Connect an ESP32(-S3) via USB
 
-The install process looks as follows:
-
-* Step 1: Connect an ESP32 to USB
-* Step 2: Click this link to go to the web installer: [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html). Press Connect. You should see the ESP32 board (if not sure disconnect and connect and see which serial port is used):
+* Step 3: Click this link to go to the web installer: [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html). The Web Installer works on Google Chrome or Microsoft Edge or similar browsers. Safari does not support installing things on ESP devices. Driver software might be needed to have the webinstaller recognise the board. The installer detects the board automatically. If you try to install and no boards are detected, a screen will popup inviting you to install the driver. Press Connect. You should see the ESP32 board (if not sure disconnect and connect and see which serial port is used):
 
    <img width="350" alt="Screenshot 2025-06-07 at 20 54 17" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
 
-* Step 3: Connect to the board, then select Install MoonLight
+* Step 4: Connect to the board, then select Install MoonLight
 
    <img width="200" alt="Screenshot 2025-06-07 at 20 54 31" src="https://github.com/user-attachments/assets/a0a8d92c-dae2-4cfe-ac78-bc7cacb24724" />
 
-* Step 4: Choose to erase the board first or not. Erase if you have a new board or want to start fresh. Do not erase if you want to update an existing MoonLight installation. Erase deletes all settings and requires to re-connect to WiFi.
+* Step 5: Choose to erase the board first or not. Erase if you have a new board or want to start fresh. Do not erase if you want to update an existing MoonLight installation. Erase deletes all settings and requires to re-connect to WiFi.
 
    <img width="250" alt="Screenshot 2025-06-07 at 20 54 42" src="https://github.com/user-attachments/assets/35045317-520d-427c-894e-418693877831" />
 
-* Step 5: Confirm and install
+* Step 6: Confirm and install
   
    <img width="200" alt="Screenshot 2025-06-07 at 20 54 51" src="https://github.com/user-attachments/assets/25c05a6c-d2ef-41cb-b83c-fc40a60c6ccc" />
    <img width="200" alt="Screenshot 2025-06-07 at 20 55 00" src="https://github.com/user-attachments/assets/b2391752-51c4-400e-b95c-4fa865e93595" />
    <img width="200" alt="Screenshot 2025-06-07 at 20 57 30" src="https://github.com/user-attachments/assets/5e2ceefd-4c31-4b72-a228-f29373b677ac" />
 
-* Step 5: Optionally Press Logs and Console
+* Step 7: Optionally Press Logs and Console
 
    <img width="350" alt="Screenshot 2025-06-07 at 20 57 54" src="https://github.com/user-attachments/assets/9ac753dc-93b7-4f79-9419-0c81d1a4bc26" />
 
    You can see the serial logging of the board. In case you see nothing you can press reset board, now you should see the logging.
 
-* Step 6: Make a WiFi connection to the board, it should present itself in the list of WiFi access points.
+* Step 8: Make a WiFi connection to the board, it should present itself in the list of WiFi access points.
   
    <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
 
+* Step 9: MoonLight will show up in a web browser (all browsers supported). A new install will take some time to show up (up to a minute or sometimes 2). On some browsers, e.g. Safari MoonLight pops up showing Connection to device lost repeatedly. In that case, close this browser window and open MoonLight in a brower using 192.168.4.1 as URL. You will see this screen, select WiFi Station.
+  
+   <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
+
+* Step 10: Enter your local WiFi network credentials:
+
+   <img width="400" alt="Screenshot 2025-06-07 at 20 59 34" src="https://github.com/user-attachments/assets/38f6cb86-e44c-478e-9910-1b0614c99292" />
+
+Step 11: Press Add Network and apply settings. After connecting to your local network you will see this screen showing the new IP address of your MoonLight board. If you don't know the IP address of your board anymore you can go to step 3 and 4 and step 7 and check the IP address in the Serial logging. Advanced tip: Use [ESP32Instances](https://github.com/ewowi/ESP32Instances) to discover the ESP32 nodes on your network (using nodeJS and html)
+
+   <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
+
+Step 12: Go to your WiFi settings and connect to your local network and enter the IP address of your MoonLight board in a browser and go to MoonLight Animations. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. After setting the right pin the strip or panel should show lights.
+
+   <img width="400" alt="Screenshot 2025-06-07 at 21 01 02" src="https://github.com/user-attachments/assets/5d4d581f-5586-43c0-a5ea-02930effc3d8" />
 
 * Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
 * See also [ESP-Web-Tools-Tutorial](https://github.com/witnessmenow/ESP-Web-Tools-Tutorial/blob/main/README.md)
@@ -63,23 +73,6 @@ The install process looks as follows:
 * The firmware is now flashed to your board, after flashing the board will reboot
 * Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
 
-## Configuration
-
-* In case of a newly flashed board, a Wifi access point (AP) will be created. Go to your Wifi settings on your computer and find the new Wifi AP (starts with MoonLight)
-    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
-    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this. 
-* Connect to the AP (no password needed), a captive portal will show with a welcome screen.
-    * There seems to be an issue in the captive portal showing Connection to device lost repeatedly. In that case, close the captive portal and open the app in a brower using 192.168.4.1
-* Go to the menu and select Wifi / Wifi Station
-* Press (+) and enter the SSID and the password of your Wifi Network
-* Press Add Network and Apply settings
-* The board will reconnect to your Wifi Network
-* Go back to your Wifi Network on your computer
-* Find out the new IP of the board
-    * New: Use [ESP32Instances](https://github.com/ewowi/ESP32Instances) to discover the ESP32 nodes on your network (using nodeJS and html)
-    * Alternatively, find the IP by checking your router or by looking at the log in the Serial Monitor (see above)
-* (sometimes it takes a while to load pages for the first time, might be related to caching of javascript, on the issuelist)
-
 ## MoonLight specific
 
 * Buy some hardware e.g.:
@@ -90,21 +83,20 @@ The install process looks as follows:
     * [Pknight Artnet DMX 512](https://s.click.aliexpress.com/e/_ExQK8Dc)
     * [Toy Moving heads](https://s.click.aliexpress.com/e/_Eju7k6Q) (warning: projected lights show the individual rgb colors)
     * [Recommended moving heads](https://moonmodules.org/hardware/#moving-heads)
-* Connect the 256 leds panel to the board on a suitable pin (e.g. Pin 2 or 16)
   
    <img width="350" src="https://github.com/user-attachments/assets/1623a751-5f4b-463b-a6f3-a642c2bc52bf"/>
    
-* Go to the UI in the browser
-* Go to MoonLight / Animations
-    * Create a layout node, e.g. Panel🚥 and set the controls: width and height 16, depth 1, pin: the pin the panel is connected to
-    * Create an effect node (🔥) you should see the effect on your panel and on the Monitor (refresh UI if not)
-    * Create more nodes with other animations, they will all run at the same time 
 * Live Scripts: Go to MoonBase / Files and create or upload Live scripts.
     * Examples: [Live scripts](https://github.com/MoonModules/MoonLight/tree/main/misc/livescripts)
     * Back to Animations, select any of the Live scripts you uploaded, check the Led Panel and / or Serial Output for results
     * Open the Edit area and change things in the code, see the Serial Output for results
 
 <img width="350" src="https://github.com/user-attachments/assets/56bdd019-927b-40cc-9199-9bc6344f8d8b" />
+
+* Issues
+    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
+    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this. 
+
 
 ## Developing
 
