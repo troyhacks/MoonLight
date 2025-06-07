@@ -24,7 +24,7 @@
 
 WIP...
 
-[install](https://github.com/MoonModules/MoonLight/blob/main/docs/general/index.html)
+[install](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/index.html)
 
 * release 0.5.6, for latest build follow installation developer
 * This is WIP, looks like issue with erasing the board and setting the partitions right ...
@@ -80,7 +80,8 @@ WIP...
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
 * Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.
 * Serial Log shows which code is from which library using emoji:
-    <img width="350" src="https://github.com/user-attachments/assets/7379307c-24d7-41c2-ac87-79761167dc68" />
+
+   <img width="500" alt="Screenshot 2025-06-07 at 12 09 06" src="https://github.com/user-attachments/assets/9ac673d3-6303-40ee-b2a0-26a0befbda01" />
 
     * 🐼: ESP-SvelteKit
     * 🔮: PsychicHTTP
