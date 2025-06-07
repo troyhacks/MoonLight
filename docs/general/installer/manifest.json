@@ -8,25 +8,25 @@
     {
       "chipFamily": "ESP32",
       "parts": [
-        { "path": "./MoonLight_esp32dev_0-5-6.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32dev_0-5-6.bin", "offset": 65536 }
       ]
     },
     {
       "chipFamily": "ESP32-Wrover",
       "parts": [
-        { "path": "./MoonLight_esp-wrover-kit_0-5-6.bin", "offset": 0 }
+        { "path": "./MoonLight_esp-wrover-kit_0-5-6.bin", "offset": 65536 }
       ]
     },
     {
       "chipFamily": "ESP32-S3",
       "parts": [
-        { "path": "./MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-6.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-6.bin", "offset": 65536 }
       ]
     },
     {
       "chipFamily": "ESP32-P4",
       "parts": [
-        { "path": "./MoonLight_olimex-esp32-p4_0-5-6.bin", "offset": 0 }
+        { "path": "./MoonLight_olimex-esp32-p4_0-5-6.bin", "offset": 65536 }
       ]
     }
   ]

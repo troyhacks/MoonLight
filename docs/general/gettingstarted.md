@@ -24,11 +24,12 @@
 
 WIP...
 
-[Install Release 0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer.html)
+[Install Release 0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html)
 
 * release 0.5.6, for latest build follow installation developer
 * This is WIP, looks like issue with erasing the board and setting the partitions right ...
 * Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
+* See also [ESP-Web-Tools-Tutorial](https://github.com/witnessmenow/ESP-Web-Tools-Tutorial/blob/main/README.md)
 
 ## Configuration
 
