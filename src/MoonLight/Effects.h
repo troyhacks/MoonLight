@@ -277,7 +277,7 @@ public:
       }
 
       if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
-        layerV->setLight({pos.x, layerV->size.y - previousBarHeight[pos.x]}, CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
+        layerV->setLight({pos.x, layerV->size.y - previousBarHeight[pos.x]}, (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
 
       if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
 
@@ -549,7 +549,7 @@ class RipplesEffect: public Node {
         float d = distance(layerV->size.x/2.0f, layerV->size.z/2.0f, 0.0f, (float)pos.x, (float)pos.z, 0.0f) / 9.899495f * layerV->size.y;
         pos.y = floor(layerV->size.y/2.0f * (1 + sinf(d/ripple_interval + time_interval))); //between 0 and layerV->size.y
 
-        layerV->setLight(pos, CHSV( millis()/50 + random8(64), 200, 255));
+        layerV->setLight(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
       }
     }
   }
@@ -609,7 +609,7 @@ public:
     layerV->fadeToBlackBy(20);
     for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being    
       int pos = beatsin16( bpm, 0, layerV->size.x-1, y * 100 );
-      layerV->setLight({pos,y,0}, CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
+      layerV->setLight({pos,y,0}, (CRGB)CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
     }
   }
 };
@@ -641,7 +641,7 @@ class SinusEffect: public Node {
         // Map the sine wave value to a color hue
         uint8_t hue = wave + hueOffset;
         // Set the LED color using the calculated hue
-        layerV->setLight(i, CHSV(hue, 255, brightness));
+        layerV->setLight(i, (CRGB)CHSV(hue, 255, brightness));
     }
 
     // Increment the phase to animate the wave
@@ -682,7 +682,7 @@ class SphereMoveEffect: public Node {
                 float d = distance(pos.x, pos.y, pos.z, origin.x, origin.y, origin.z);
 
                 if (d>diameter && d<diameter + 1.0) {
-                  layerV->setLight(pos, CHSV( millis()/50 + random8(64), 200, 255));
+                  layerV->setLight(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
                 }
             }
         }
