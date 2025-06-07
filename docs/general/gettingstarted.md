@@ -1,5 +1,48 @@
 # Getting started
 
+## Installation - End user
+
+MoonLight can be installed on an ESP32 using [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html).
+
+This installer let you flash an ESP32 board connected via USB directly from a web browser and installs the latest release of MoonLight (currently v0.5.6).
+Currenly new ESP32 and ESP32-S3 boards can be installed with the installer. Other boards will follow later. The installer detects the board automatically.
+The Web Installer works on Google Chrome or Microsoft Edge or similar browsers. Safari does not support installing things on ESP devices. Driver software might be needed to have the webinstaller recognise the board. If you try to install and no boards are detected, a screen will popup inviting you to install the driver.
+
+The install process looks as follows:
+
+* Step 1: Connect an ESP32 to USB
+* Step 2: Click this link to go to the web installer: [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html). Press Connect. You should see the ESP32 board (if not sure disconnect and connect and see which serial port is used):
+
+   <img width="350" alt="Screenshot 2025-06-07 at 20 54 17" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
+
+* Step 3: Connect to the board, then select Install MoonLight
+
+   <img width="200" alt="Screenshot 2025-06-07 at 20 54 31" src="https://github.com/user-attachments/assets/a0a8d92c-dae2-4cfe-ac78-bc7cacb24724" />
+
+* Step 4: Choose to erase the board first or not. Erase if you have a new board or want to start fresh. Do not erase if you want to update an existing MoonLight installation. Erase deletes all settings and requires to re-connect to WiFi.
+
+   <img width="250" alt="Screenshot 2025-06-07 at 20 54 42" src="https://github.com/user-attachments/assets/35045317-520d-427c-894e-418693877831" />
+
+* Step 5: Confirm and install
+  
+   <img width="200" alt="Screenshot 2025-06-07 at 20 54 51" src="https://github.com/user-attachments/assets/25c05a6c-d2ef-41cb-b83c-fc40a60c6ccc" />
+   <img width="200" alt="Screenshot 2025-06-07 at 20 55 00" src="https://github.com/user-attachments/assets/b2391752-51c4-400e-b95c-4fa865e93595" />
+   <img width="200" alt="Screenshot 2025-06-07 at 20 57 30" src="https://github.com/user-attachments/assets/5e2ceefd-4c31-4b72-a228-f29373b677ac" />
+
+* Step 5: Optionally Press Logs and Console
+
+   <img width="350" alt="Screenshot 2025-06-07 at 20 57 54" src="https://github.com/user-attachments/assets/9ac753dc-93b7-4f79-9419-0c81d1a4bc26" />
+
+   You can see the serial logging of the board. In case you see nothing you can press reset board, now you should see the logging.
+
+* Step 6: Make a WiFi connection to the board, it should present itself in the list of WiFi access points.
+  
+   <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
+
+
+* Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
+* See also [ESP-Web-Tools-Tutorial](https://github.com/witnessmenow/ESP-Web-Tools-Tutorial/blob/main/README.md)
+
 ## Installation - Developer
 
 * Open GitKraken Press + / New tab and select Clone a Repo (Or another git management tool)
@@ -19,19 +62,6 @@
 * Press PlaformIO:Upload (->) on the statusbar
 * The firmware is now flashed to your board, after flashing the board will reboot
 * Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
-
-## Installation - End user
-
-[Install Release 0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html)
-
-* Release 0.5.6, for latest build: see installation developer above
-* Currently supported devices: 
-    * ESP32 and ESP32-S3 (n16r8) fresh install and update
-    * ESP32-Wrover and olimex-esp32-p4 update only (P4 highly experimental, crashes guaranteed! )
-* The installer recognises the board and automatically selects the right firmware
-* Safari does not support installing things on ESP devices. Use Google Chrome or Microsoft Edge.
-* Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
-* See also [ESP-Web-Tools-Tutorial](https://github.com/witnessmenow/ESP-Web-Tools-Tutorial/blob/main/README.md)
 
 ## Configuration
 
