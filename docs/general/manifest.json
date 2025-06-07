@@ -6,9 +6,33 @@
   "new_install_prompt_erase": true,
   "builds": [
     {
-      "chipFamily": "ESP32-S3",
+      "chipFamily": "MoonLight_esp32dev_0-5-6",
       "parts": [
-        { "path": "./esp32-s3-devkitc-1-n16r8v.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32dev_0-5-6.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "MoonLight_esp-wrover-kit_0-5-6",
+      "parts": [
+        { "path": "./MoonLight_esp-wrover-kit_0-5-6.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-6",
+      "parts": [
+        { "path": "./MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-6.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "MoonLight_esp32-s3-devkitc-1-n8r8v_0-5-6",
+      "parts": [
+        { "path": "./MoonLight_esp32-s3-devkitc-1-n8r8v_0-5-6.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "MoonLight_olimex-esp32-p4_0-5-6",
+      "parts": [
+        { "path": "./MoonLight_olimex-esp32-p4_0-5-6.bin", "offset": 0 }
       ]
     }
   ]

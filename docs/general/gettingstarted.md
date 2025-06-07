@@ -24,7 +24,7 @@
 
 WIP...
 
-[install](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/index.html)
+[Install Release 0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer.html)
 
 * release 0.5.6, for latest build follow installation developer
 * This is WIP, looks like issue with erasing the board and setting the partitions right ...
