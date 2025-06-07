@@ -20,7 +20,7 @@
 
 //data shared between nodes
 static struct Audio {
-  byte bands[16]= {0}; // Our calculated freq. channel result table to be used by effects
+  uint8_t bands[16]= {0}; // Our calculated freq. channel result table to be used by effects
   float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
   float majorPeak; // FFT: strongest (peak) frequency
 } audio;

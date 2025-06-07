@@ -123,7 +123,7 @@ public:
 
   void setup() override {
     addControl(&speed, "speed", "range", 255);
-    addControl(&fx, "fx", "range", 128);
+    addControl(&fx, "soundFX", "range", 128);
     addControl(&lowBin, "lowBin", "range", 18);
     addControl(&highBin, "highBin", "range", 48);
     addControl(&sensitivity10, "sensitivity", "range", 30, 10, 100);
@@ -384,7 +384,7 @@ class MovingHeadEffect: public Node {
 
     for (int i=0; i<layerV->size.x; i++) {
 
-      byte light[24]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight (yet)
+      uint8_t light[24]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight (yet)
       memset(light, 0, sizeof(light)); //set light to 0
       
       if (audioReactive) {
@@ -465,7 +465,7 @@ public:
 
     CRGBPalette16 palette = PartyColors_p;
 
-    // byte numLines = map8(nrOfLines,1,64);
+    // uint8_t numLines = map8(nrOfLines,1,64);
     
     (aux0Hue)++;  // hue
     layerV->fadeToBlackBy(fadeRate);
@@ -473,14 +473,14 @@ public:
     aux1Chaos = phase_chaos?random8():0;
 
     for (size_t i = 0; i < numLines; i++) {
-      byte bin = map(i,0,numLines,0,15);
+      uint8_t bin = map(i,0,numLines,0,15);
       
-      byte x1 = beatsin8(oscillatorOffset*1 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
-      byte x2 = beatsin8(oscillatorOffset*2 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
-      byte y1 = beatsin8(oscillatorOffset*3 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
-      byte y2 = beatsin8(oscillatorOffset*4 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
-      byte z1;
-      byte z2;
+      uint8_t x1 = beatsin8(oscillatorOffset*1 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
+      uint8_t x2 = beatsin8(oscillatorOffset*2 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
+      uint8_t y1 = beatsin8(oscillatorOffset*3 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
+      uint8_t y2 = beatsin8(oscillatorOffset*4 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
+      uint8_t z1;
+      uint8_t z2;
       int length;
       if (depth > 1) {
         z1 = beatsin8(oscillatorOffset*5 + audio.bands[0]/16, 0, (depth-1), audio.bands[bin], aux1Chaos);
@@ -582,7 +582,7 @@ class RGBWParEffect: public Node {
 
     int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
 
-    byte light[4];
+    uint8_t light[4];
     memset(light, 0, sizeof(light)); //set light to 0
     
     layerV->layerP->lights.header.setRGB(light, CRGB(red, green, blue));

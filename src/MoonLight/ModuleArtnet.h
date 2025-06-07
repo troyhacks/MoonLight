@@ -20,7 +20,7 @@
 #define ARTNET_DEFAULT_PORT 6454
 
 const size_t ART_NET_HEADER_SIZE = 12;
-const byte   ART_NET_HEADER[] PROGMEM = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
+const uint8_t   ART_NET_HEADER[] PROGMEM = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
 
 class ModuleArtnet : public Module
 {
@@ -100,7 +100,7 @@ void loop20ms() {
 
     // calculate the number of UDP packets we need to send
 
-    byte packet_buffer[ART_NET_HEADER_SIZE + 6 + 512];
+    uint8_t packet_buffer[ART_NET_HEADER_SIZE + 6 + 512];
     memcpy(packet_buffer, ART_NET_HEADER, 12); // copy in the Art-Net header.
 
     AsyncUDP artnetudp;// AsyncUDP so we can just blast packets.

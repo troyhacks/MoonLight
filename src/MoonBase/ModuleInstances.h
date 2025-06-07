@@ -19,7 +19,7 @@
 #include "Utilities.h"
 
 struct UDPMessage {
-    byte rommel[6];
+    uint8_t rommel[6];
     Char<32> name;
 };
 
@@ -127,7 +127,7 @@ public:
             
             UDPMessage message;
             message.name = _state.data["instanceName"].as<String>().c_str();
-            instanceUDP.write((byte *)&message, sizeof(message));
+            instanceUDP.write((uint8_t *)&message, sizeof(message));
             instanceUDP.endPacket();
             // ESP_LOGD(TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
 

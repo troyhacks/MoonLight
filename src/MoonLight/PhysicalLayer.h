@@ -61,28 +61,28 @@ struct LightsHeader {
     offsetBrightness = -1;
   }
 
-  void setRGB(byte *light, const CRGB &color) {
+  void setRGB(uint8_t *light, const CRGB &color) {
     light[offsetRGB] = color.red;
     light[offsetRGB + 1] = color.green;
     light[offsetRGB + 2] = color.blue;
   }
-  void setWhite(byte *light, const uint8_t white) {
+  void setWhite(uint8_t *light, const uint8_t white) {
     if (offsetRGB != -1)
       light[offsetRGB + 3] = white;
   }
-  void setPan(byte *light, const uint8_t pan) {
+  void setPan(uint8_t *light, const uint8_t pan) {
     if (offsetPan != -1)
       light[offsetPan] = pan;
   }
-  void setTilt(byte *light, const uint8_t tilt) {
+  void setTilt(uint8_t *light, const uint8_t tilt) {
     if (offsetTilt != -1)
      light[offsetTilt] = tilt;
   }
-  void setZoom(byte *light, const uint8_t zoom) {
+  void setZoom(uint8_t *light, const uint8_t zoom) {
     if (offsetZoom != -1)
      light[offsetZoom] = zoom;
   }
-  void setBrightness(byte *light, const uint8_t brightness) {
+  void setBrightness(uint8_t *light, const uint8_t brightness) {
     if (offsetBrightness != -1)
       light[offsetBrightness] = brightness;
   }
@@ -92,7 +92,7 @@ struct Lights {
   LightsHeader header;
   union {
     CRGB leds[MAX_LEDS];
-    byte channels[MAX_CHANNELS];
+    uint8_t channels[MAX_CHANNELS];
     Coord3D positions[MAX_CHANNELS / sizeof(Coord3D)]; //for layout / pass == 1, send positions to monitor / preview
   };
   // std::vector<size_t> universes; //tells at which byte the universe starts
