@@ -45,7 +45,7 @@ public:
         JsonArray values; // if a property is a select, this is the values of the select
 
         Char<32> instanceName;
-        instanceName = "MoonBase-";
+        instanceName = "MoonLight-";
         uint8_t mac[6];
         esp_read_mac(mac, ESP_MAC_WIFI_STA);
         char macStr[5] = {0};
