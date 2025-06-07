@@ -22,12 +22,11 @@
 
 ## Installation - End user
 
-WIP...
-
 [Install Release 0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html)
 
-* release 0.5.6, for latest build follow installation developer
-* This is WIP, looks like issue with erasing the board and setting the partitions right ...
+* Release 0.5.6, for latest build follow installation developer
+* Safari does not support installing things on ESP devices. Use Google Chrome or Microsoft Edge.
+* Currently no fresh installs possible but only update as the config only updates the binary, not boot and partition
 * Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
 * See also [ESP-Web-Tools-Tutorial](https://github.com/witnessmenow/ESP-Web-Tools-Tutorial/blob/main/README.md)
 
@@ -57,6 +56,7 @@ WIP...
 * For latest DMX support 
     * [Pknight Artnet DMX 512](https://s.click.aliexpress.com/e/_ExQK8Dc)
     * [Toy Moving heads](https://s.click.aliexpress.com/e/_Eju7k6Q) (warning: projected lights show the individual rgb colors)
+    * [Recommended moving heads](https://moonmodules.org/hardware/#moving-heads)
 * Connect the 256 leds panel to the board on a suitable pin (e.g. Pin 2 or 16)
   
    <img width="350" src="https://github.com/user-attachments/assets/1623a751-5f4b-463b-a6f3-a642c2bc52bf"/>
@@ -64,7 +64,7 @@ WIP...
 * Go to the UI in the browser
 * Go to MoonLight / Animations
     * Create a layout node, e.g. Panel🚥 and set the controls: width and height 16, depth 1, pin: the pin the panel is connected to
-    * Create an effect node, select the 'hardcoded animations' (Random, Sinelon, Rainbow, Sinus), you should see it on your panel
+    * Create an effect node (🔥) you should see the effect on your panel and on the Monitor (refresh UI if not)
     * Create more nodes with other animations, they will all run at the same time 
 * Live Scripts: Go to MoonBase / Files and create or upload Live scripts.
     * Examples: [Live scripts](https://github.com/MoonModules/MoonLight/tree/main/misc/livescripts)
