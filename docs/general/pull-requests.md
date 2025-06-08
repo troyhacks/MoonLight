@@ -31,16 +31,17 @@ Below lists are ordered in terms of likelyhood to be accepted:
 
 ## Submitted
 
+* None ATM
+
+## Merged into ESP32-Sveltekit
+
+* [Expands menu on selected subitem](https://github.com/theelims/ESP32-sveltekit/pull/77)
+* [Add file.close in fileHandler handleRequest](https://github.com/theelims/ESP32-sveltekit/pull/73)
 * [Refactor System Status and Metrics](https://github.com/theelims/ESP32-sveltekit/pull/78)
     * Add free_psram, used_psram and psram_size in Analytics (models.ts) and analytics_data (analytics.ts) and show in UI (SystemMetrics.svelte)
     * Send psram data only if psramFound (SystemStatus.svelte, AnalyticsService.h, SystemStatus.cpp)
 * [Wifi: Multiple edits bug resolved](https://github.com/theelims/ESP32-sveltekit/pull/81)
 * [ESPD_LOGx: replace first argument with TAG and define TAG as 🐼](https://github.com/theelims/ESP32-sveltekit/pull/85)
-
-## Accepted
-
-* [Expands menu on selected subitem](https://github.com/theelims/ESP32-sveltekit/pull/77)
-* [Add file.close in fileHandler handleRequest](https://github.com/theelims/ESP32-sveltekit/pull/73)
 
 ### Other improvements
 
