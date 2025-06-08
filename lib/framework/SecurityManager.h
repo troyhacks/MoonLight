@@ -20,13 +20,13 @@
 #include <PsychicHttp.h>
 #include <list>
 
+#define SVK_TAG "🐼"
+
 #define ACCESS_TOKEN_PARAMATER "access_token"
 
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
-
-#define SVK_TAG "🐼"
 
 class User
 {
