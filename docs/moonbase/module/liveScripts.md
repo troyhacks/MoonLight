@@ -30,6 +30,12 @@ This module shows all running live scripts
 
 <img width="398" alt="image" src="https://github.com/user-attachments/assets/0ccb7e23-c3cc-4dfa-8d89-9fc86b1ff5f5" />
 
+**Setp 5**: Live scripts can be edited in the node press the ✐-button of a live script node and press the v next to Edit <livescript.sc> and the same edit window as in Step 2 opens. Do your edits and press save. The  script recompiles and will restart the effect. (Alternatively if a script is running and you edit a file in the file manager, the script will also recompile and rerun.
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/4552d564-85ea-454f-a6c4-5265146cdcfc" />
+
+**Step 6**: An overview of running live scripts can be found in [MoonLight / LiveScripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts) 
+
 ## Technical
 
 * See [Modules](../modules.md)
