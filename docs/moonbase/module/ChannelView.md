@@ -1,5 +1,7 @@
 # Channel View
 
+<img width="250" alt="image" src="https://github.com/user-attachments/assets/436790f3-b392-43cb-882d-eefd3a2f438c" />
+
 ## Functional
 
 Shows each channel within the light array. e.g. for a LED strip or panel each light is 3 (or 4 in case of RGBW) channels. For multichannel lights like Moving heads.
