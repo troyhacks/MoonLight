@@ -46,17 +46,21 @@ public:
             _filesService->addUpdateHandler([&](const String &originId)
             { 
                 ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
-                //read the file state
+                //read the file state (read all files and folders on FS and collect changes)
                 _filesService->read([&](FilesState &filesState) {
                     // loop over all changed files (normally only one)
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current animation, recompile it (to do: multiple animations)
+                        ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                        if (equal(updatedItem.c_str(), "/config/animations.json")) {
+                            ESP_LOGD(TAG, " animations updated -> call update %s", updatedItem.c_str());
+                        }
                         uint8_t index = 0;
                         for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
                             String animation = nodeState["animation"];
 
                             if (updatedItem == animation) {
-                                ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                                ESP_LOGD(TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                                 LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["animation"]);
                                 if (liveScriptNode) {
                                     liveScriptNode->compileAndRun();
@@ -174,11 +178,11 @@ public:
 
                     //if old node exists then remove it's controls
                     if (updatedItem.oldValue != "null") {
-                        ESP_LOGD(TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+                        ESP_LOGD(TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                         nodeState.remove("controls"); //remove the controls from the nodeState
                     }
 
-                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
     
                     if (nodeState["controls"].isNull()) { //if controls are not set, create empty array
                         nodeState["controls"].to<JsonArray>(); //clear the controls
@@ -195,7 +199,7 @@ public:
                         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                     }, "server");
 
-                    ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.c_str());
+                    ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
 
                     //make sure "p" is also updated
 
@@ -212,7 +216,7 @@ public:
 
                 //if a node existed and no new node in place, remove 
                 if (updatedItem.oldValue != "null" && oldNode) {
-                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     if (!newNode) {
                         layerP.layerV[0]->nodes.pop_back();
                         ESP_LOGD(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], layerP.layerV[0]->nodes.size());
@@ -237,10 +241,10 @@ public:
 
             if (updatedItem.name == "on") {
                 if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be remoced by onAnimation
-                    ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.c_str(), layerP.layerV[0]->nodes.size());
+                    ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.as<String>().c_str(), layerP.layerV[0]->nodes.size());
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {
-                        nodeClass->on = updatedItem.value == "true"; //set nodeclass on/off
+                        nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
                         if (nodeClass->hasModifier) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
                             for (Node *node : layerP.layerV[0]->nodes) {
                                 if (node->hasLayout) {
@@ -260,7 +264,7 @@ public:
             }
 
             if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
-                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be removed by onAnimation
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {

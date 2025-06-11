@@ -63,23 +63,23 @@ public:
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "controllerIP") {
-            controllerIP[3] = atoi(updatedItem.value.c_str());
+            controllerIP[3] = updatedItem.value.as<uint8_t>();
             ESP_LOGD(TAG, "controllerIP = %s", controllerIP.toString().c_str());
         }
         else if (updatedItem.parent[0] == "outputs") { // onNodes
             JsonVariant outputs = _state.data["outputs"][updatedItem.index[0]];
 
             if (updatedItem.name == "start") { //onStart
-                ESP_LOGD(TAG, "Start[%d] = %s", updatedItem.index[0], updatedItem.value.c_str());
-                hardware_outputs_universe_start[updatedItem.index[0]] = atoi(updatedItem.value.c_str());
+                ESP_LOGD(TAG, "Start[%d] = %d", updatedItem.index[0], updatedItem.value.as<uint8_t>());
+                hardware_outputs_universe_start[updatedItem.index[0]] = updatedItem.value.as<uint8_t>();
             }
             if (updatedItem.name == "size") { //onStart
-                ESP_LOGD(TAG, "Size[%d] = %d", updatedItem.index[0], updatedItem.value.c_str());
-                hardware_outputs[updatedItem.index[0]] = atoi(updatedItem.value.c_str());
+                ESP_LOGD(TAG, "Size[%d] = %d", updatedItem.index[0], updatedItem.value.as<uint8_t>());
+                hardware_outputs[updatedItem.index[0]] = updatedItem.value.as<uint8_t>();
             }
         }
         else
-            ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+            ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
 void loop20ms() {

@@ -73,10 +73,10 @@ void setupDefinition(JsonArray root) override{
 ```cpp
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (equal(updatedItem.name, "lightsOn") || equal(updatedItem.name, "brightness")) {
+        if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-        } else if (equal(updatedItem.parent[0], "nodes") && equal(updatedItem.name, "animation")) {    
+        } else if (updatedItem.parent[0] == "nodes" && updatedItem.name == "animation") {    
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue.length())
                 ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());

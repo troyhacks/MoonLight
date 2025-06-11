@@ -110,6 +110,8 @@ class PhysicalLayer {
 
     std::vector<VirtualLayer *> layerV; // the virtual layers using this physical layer 
 
+    CRGBPalette16 palette = PartyColors_p;
+
     PhysicalLayer();
 
     bool setup();

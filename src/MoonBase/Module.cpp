@@ -106,7 +106,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                             // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
                             updatedItem.name = property.key().c_str();
                             updatedItem.oldValue = property.value().as<String>();
-                            updatedItem.value = ""; // Assign an empty JsonVariant
+                            updatedItem.value = JsonVariant(); // Assign an empty JsonVariant
                             stateArray[i].remove(property.key()); //remove the property from the state row so onUpdate see it as empty
                             if (onUpdate) onUpdate(updatedItem);
 
@@ -120,12 +120,11 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                     changed = true;
                     updatedItem.name = key.c_str();
                     updatedItem.oldValue = stateValue.as<String>();
-                    serializeJson(newValue, updatedItem.value);
-
                     stateData[updatedItem.name] = newValue; //update the value in stateData, should not be done in runLoopTask as FS update then misses the change!!
+                    updatedItem.value = stateData[updatedItem.name]; //store the stateData item (convenience)
                     
                     runInLoopTask.push_back([&, updatedItem, stateData]() mutable { //mutable as updatedItem is called by reference (&)
-                        // ESP_LOGD(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.c_str());
+                        // ESP_LOGD(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
                         if (onUpdate) onUpdate(updatedItem);
                         // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
                         // ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
@@ -259,7 +258,7 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
 }
 
 void Module::onUpdate(UpdatedItem &updatedItem) {
-    ESP_LOGW(TAG, "not implemented %s = %s", updatedItem.name, updatedItem.value.c_str());
+    ESP_LOGW(TAG, "not implemented %s = %s", updatedItem.name, updatedItem.value.as<String>().c_str());
 }
 
 

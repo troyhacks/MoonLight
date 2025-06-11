@@ -34,6 +34,35 @@
         clearInterval(interval);
     });
 
+    if (property.type == "pad") {
+        property.rows = [];
+        for (let y = 0; y < 8; y++) {
+            let columns = [];
+            for (let x = 0; x < 8; x++) {
+                columns.push(x + y * 8 + 1);
+            }
+            property.rows.push(columns);
+        }
+    }
+
+    let dragSource: { row: number, col: number } | null = null;
+
+    function handleDragStart(event: DragEvent, row: number, col: number) {
+        dragSource = { row, col };
+        // Optionally, set drag data for external DnD
+        event.dataTransfer?.setData('text/plain', `${row},${col}`);
+    }
+
+    function handleDrop(event: DragEvent, targetRow: number, targetCol: number) {
+        if (dragSource && property.rows) {
+            // Swap the cells
+            const temp = property.rows[dragSource.row][dragSource.col];
+            property.rows[dragSource.row][dragSource.col] = property.rows[targetRow][targetCol];
+            property.rows[targetRow][targetCol] = temp;
+            dragSource = null;
+        }
+    }
+
 </script>
 
 <label class="label cursor-pointer" for={property.name}>
@@ -156,6 +185,29 @@
     <button class="btn btn-primary" type="button" on:click={(event:any) => {if (value==null) value = 1; else value++; onChange(event)}}
     >{property.name}</button
     >
+{:else if property.type == "pad"}
+    <div class="flex flex-col space-y-2">
+        {#each property.rows as row, rowIndex}
+            <div class="flex flex-row space-x-2">
+                {#each row as cell, colIndex}
+                    <button
+                        class="btn btn-square btn-primary w-18 h-18 text-xl"
+                        type="button"
+                        draggable="true"
+                        on:dragstart={(event) => handleDragStart(event, rowIndex, colIndex)}
+                        on:dragover|preventDefault
+                        on:drop={(event) => handleDrop(event, rowIndex, colIndex)}
+                        on:click={(event:any) => {console.log(rowIndex, colIndex, cell); value = cell; onChange(event)}}                    >
+                        {cell}
+                    </button>
+                {/each}
+            </div>
+        {/each}
+    </div>
+    <!-- btn btn-square btn-primary gives you square, colored buttons (DaisyUI).
+flex flex-col and flex flex-row create the grid layout (TailwindCSS).
+Adjust space-x-2 and space-y-2 for spacing. -->
+
 {:else}
     <input 
         type={property.type}

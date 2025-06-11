@@ -96,9 +96,7 @@ class BouncingBallsEffect: public Node {
 
         int pos = roundf(balls[y][i].height * (layerV->size.x - 1));
 
-        CRGBPalette16 palette = PartyColors_p;
-
-        CRGB color = ColorFromPalette(palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
+        CRGB color = ColorFromPalette(layerV->layerP->palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
         layerV->setLight({pos, y, 0}, color);
         // if (layerV->size.x<32) layerV->setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
@@ -271,7 +269,7 @@ public:
         if (colorBars) //color_vertical / color bars toggle
           colorIndex = map(pos.y, 0, layerV->size.y-1, 0, 255);
 
-        ledColor = ColorFromPalette(PartyColors_p, (uint8_t)colorIndex);
+        ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
 
         layerV->setLight({pos.x, layerV->size.y - 1 - pos.y}, ledColor);
       }
@@ -339,8 +337,6 @@ public:
   }
 
   void loop() override {
-    CRGBPalette16 palette = PartyColors_p;
-
     layerV->fadeToBlackBy(fadeRate);
     uint_fast16_t phase = millis() * speed / 256;  // allow user to control rotation speed, speed between 0 and 255!
     Coord3D locn = {0,0,0};
@@ -350,7 +346,7 @@ public:
         locn.y = cos8(phase/2 + i*2);
         locn.x = (layerV->size.x < 2) ? 1 : (map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
         locn.y = (layerV->size.y < 2) ? 1 : (map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "layerV->size.y > 2" is needed to avoid div/0 in map()
-        layerV->setLight(locn, ColorFromPalette(palette, millis()/100+i, 255));
+        layerV->setLight(locn, ColorFromPalette(layerV->layerP->palette, millis()/100+i, 255));
     }
   }
 };
@@ -463,8 +459,6 @@ public:
     const uint16_t rows = layerV->size.y;
     const uint16_t depth = layerV->size.z;
 
-    CRGBPalette16 palette = PartyColors_p;
-
     // uint8_t numLines = map8(nrOfLines,1,64);
     
     (aux0Hue)++;  // hue
@@ -495,9 +489,9 @@ public:
       if (length > max(1, (int)minLength)) {
         CRGB color;
         if (color_chaos)
-          color = ColorFromPalette(palette, i * 255 / numLines + ((aux0Hue)&0xFF), 255);
+          color = ColorFromPalette(layerV->layerP->palette, i * 255 / numLines + ((aux0Hue)&0xFF), 255);
         else
-          color = ColorFromPalette(palette, map(i, 0, numLines, 0, 255), 255);
+          color = ColorFromPalette(layerV->layerP->palette, map(i, 0, numLines, 0, 255), 255);
         if (depth > 1)
           layerV->drawLine3D(x1, y1, z1, x2, y2, z2, color, soft, length); // no soft implemented in 3D yet
         else

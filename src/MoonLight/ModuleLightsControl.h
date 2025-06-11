@@ -54,7 +54,17 @@ public:
         property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["default"] = 255; property["color"] = "Red";
         property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["default"] = 255; property["color"] = "Green";
         property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["default"] = 255; property["color"] = "Blue";
-        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "select"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "palette"; property["type"] = "select"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
+        values.add("CloudColors");
+        values.add("LavaColors");
+        values.add("OceanColors");
+        values.add("ForestColors");
+        values.add("RainbowColors");
+        values.add("RainbowStripeColors");
+        values.add("PartyColors");
+        values.add("HeatColors");
+        values.add("RandomColors");
+        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "pad"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
         values.add("Preset1");
         values.add("Preset2");
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
@@ -69,14 +79,37 @@ public:
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "red" || updatedItem.name == "green" || updatedItem.name == "blue") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.ledsDriver.setColorCorrection(_state.data["red"], _state.data["green"], _state.data["blue"]);
         } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.c_str());
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
             layerP.ledsDriver.setBrightness(layerP.lights.header.brightness);
-        }
-        // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        } else if (updatedItem.name == "palette") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            // String value = _state.data["palette"];//updatedItem.oldValue;
+            if (updatedItem.value == "CloudColors") layerP.palette = CloudColors_p;
+            else if (updatedItem.value == "LavaColors") layerP.palette = LavaColors_p;
+            else if (updatedItem.value == "OceanColors") layerP.palette = OceanColors_p;
+            else if (updatedItem.value == "ForestColors") layerP.palette = ForestColors_p;
+            else if (updatedItem.value == "RainbowColors") layerP.palette = RainbowColors_p;
+            else if (updatedItem.value == "RainbowStripeColors") layerP.palette = RainbowStripeColors_p;
+            else if (updatedItem.value == "PartyColors") layerP.palette = PartyColors_p;
+            else if (updatedItem.value == "HeatColors") layerP.palette = HeatColors_p;
+            else if (updatedItem.value == "RandomColors") {
+                for (int i=0; i < sizeof(layerP.palette.entries) / sizeof(CRGB); i++) {
+                    layerP.palette[i] = CHSV(random8(), 255, 255); //take the max saturation, max brightness of the colorwheel
+                }
+            }
+            else {
+                layerP.palette = PartyColors_p; //should never occur
+            }
+            // layerP.palette = LavaColors_p;
+        } else if (updatedItem.name == "preset") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            //copy the file to the hidden folder...
+        } else 
+            ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //ledsDriver.show
