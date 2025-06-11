@@ -4,6 +4,7 @@
 
 ## Functional
 
+Controls:
 * On: lights on or off
 * Brightness: brightness of the LEDs when on
 * RGB Sliders: control each color seperately.
@@ -12,7 +13,10 @@
 * Driver On: sends LED output to ESP32 gpio pins.
     * Switch off to see the effect framerate in System Status/Metrics
     * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 leds, 24 bits is 130 fps theoretically - 120 practically)
+    * Will move to driver node later ...
 * Monitor On: sends LED output the monitor in the UI.
+
+A MoonLight instance can expose itself as an Artnet device (DMX mode) where above controls will be the channels to control by Artnet controllers (it can be an Artnet DMX receiver but also an ArtNet LEDs receiver, and it can be an ArtNet sender - See ArtNet Module) - WIP (only ArtNet sender is currently implemented)
 
 ## Technical
 
