@@ -64,9 +64,7 @@ public:
         values.add("PartyColors");
         values.add("HeatColors");
         values.add("RandomColors");
-        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "pad"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
-        values.add("Preset1");
-        values.add("Preset2");
+        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "pad";  property["width"] = 8; property["height"] = 8; property["size"] = 18;
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
 
         #if FT_ENABLED(FT_MONITOR)

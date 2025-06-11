@@ -31,6 +31,7 @@
             #include "MoonLight/ModuleLiveScripts.h"
         #endif
         #include "MoonLight/ModuleArtnet.h"
+        #include "MoonLight/ModuleChannelView.h"
     #endif
 #endif
 
@@ -70,6 +71,7 @@ LightStateService lightStateService = LightStateService(&server,
             ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &filesService);
         #endif
         ModuleArtnet moduleArtnet = ModuleArtnet(&server, &esp32sveltekit, &filesService);
+        ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit, &filesService);
     #endif
 #endif
     
@@ -96,6 +98,7 @@ void setup()
                 moduleLiveScripts.begin();
             #endif
             moduleArtnet.begin();
+            moduleChannelView.begin();
         #endif
     #endif
 

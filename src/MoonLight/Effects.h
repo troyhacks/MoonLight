@@ -594,15 +594,20 @@ public:
   static const char * tags() {return "";}
 
   uint8_t bpm;
+  uint8_t fade;
+  bool sawTooth;
 
   void setup() override {
     addControl(&bpm, "bpm", "range", 60);
+    addControl(&fade, "fade", "range", 20);
+    addControl(&sawTooth, "sawTooth", "checkbox", false);
   }
 
   void loop() override {
-    layerV->fadeToBlackBy(20);
+    layerV->fadeToBlackBy(fade);
     for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being    
-      int pos = beatsin16( bpm, 0, layerV->size.x-1, y * 100 );
+      int pos = sawTooth?map(beat16(bpm, y*100), 0, UINT16_MAX, 0, layerV->size.x-1 )
+                        :beatsin16( bpm, 0, layerV->size.x-1, y * 100 );
       layerV->setLight({pos,y,0}, (CRGB)CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
     }
   }

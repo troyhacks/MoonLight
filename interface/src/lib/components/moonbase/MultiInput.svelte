@@ -36,9 +36,9 @@
 
     if (property.type == "pad") {
         property.rows = [];
-        for (let y = 0; y < 8; y++) {
+        for (let y = 0; y < property.height; y++) {
             let columns = [];
-            for (let x = 0; x < 8; x++) {
+            for (let x = 0; x < property.width; x++) {
                 columns.push(x + y * 8 + 1);
             }
             property.rows.push(columns);
@@ -191,13 +191,16 @@
             <div class="flex flex-row space-x-2">
                 {#each row as cell, colIndex}
                     <button
-                        class="btn btn-square btn-primary w-18 h-18 text-xl"
+                        class="btn btn-square btn-primary w-{property.size} h-{property.size} text-xl rounded-lg"
                         type="button"
                         draggable="true"
                         on:dragstart={(event) => handleDragStart(event, rowIndex, colIndex)}
                         on:dragover|preventDefault
                         on:drop={(event) => handleDrop(event, rowIndex, colIndex)}
-                        on:click={(event:any) => {console.log(rowIndex, colIndex, cell); value = cell; onChange(event)}}                    >
+                        on:click={(event:any) => {console.log(rowIndex, colIndex, cell); value = cell; onChange(event)}}
+                        on:mouseenter={(event:any) => {if (property.hover) {console.log("mousenter", rowIndex, colIndex, cell); value = cell; onChange(event)}}}
+                        on:mouseleave={(event:any) => {if (false) {console.log("mouseleave", rowIndex, colIndex, cell); value = cell; onChange(event)}}}
+                    >
                         {cell}
                     </button>
                 {/each}
