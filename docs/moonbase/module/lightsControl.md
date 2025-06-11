@@ -1,12 +1,13 @@
 # Lights Control module
 
-<img width="396" alt="image" src="https://github.com/user-attachments/assets/98865f0b-c966-405c-8522-f4e05bc424f2" />
+<img width="399" alt="image" src="https://github.com/user-attachments/assets/a79f12b6-9cd6-4d98-8d75-14f663a6da93" />
 
 ## Functional
 
 * On: lights on or off
 * Brightness: brightness of the LEDs when on
 * RGB Sliders: control each color seperately.
+* Palette: Global palette setting, used by all effects
 * Presets: Control pad style, store or retrieve a set of nodes with their controls. WIP
 * Driver On: sends LED output to ESP32 gpio pins.
     * Switch off to see the effect framerate in System Status/Metrics
@@ -27,7 +28,7 @@ e.g. a DMX controller, can control presets, but not individual preset details.
 
 ### Server
 
-[ModuleAnimations.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleControl.h)
+[ModuleLightsControl.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
 
 ### UI
 
