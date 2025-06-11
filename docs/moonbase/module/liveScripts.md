@@ -12,11 +12,23 @@ This module shows all running live scripts
 * Scrips: Running Live scripts (WIP)
 * Press the edit button to stop start or kill a script (current bug: double click the button)
 
-### Scripts
+### How to run a live script
 
-Example scripts can be found in [Live scripts](https://github.com/MoonModules/MoonLight/tree/main/misc/livescripts) - WIP
+**Step 1**: Select [Moonbase / File Manager](https://moonmodules.org/MoonLight/moonbase/files/) from the menu and select a location to store live scripts. Create a **folder** if needed (press the second + button):
 
-They represent current state of Live Script processing and will be extended as more functionality will be added.
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/85eeccf2-3f0d-4bf2-ba0a-e3407ff05fc2" />
+
+**Step 2**: Go to this folder and create a **file** (press the first + button). Give the file a name ending with .sc and enter the code. See [github livescripts](https://github.com/MoonModules/MoonLight/tree/main/misc/livescripts) for example scripts (E_*.sc files are effects L_*.sc files are layouts). Alternatively you can also upload a live script with by pressing the Upload File button. Press save:
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/3b7eca3c-ae57-43f6-910e-3fc03f6fa380" />
+
+**Step 3**: Select [ MoonLight / Animations](https://moonmodules.org/MoonLight/moonbase/module/animations/) from the menu. Create a new effect node (🔥) by pressing the + button or update an existing effect node (🔥) by pressing the ✐-button. Open the drop down and scroll to the bottom where live script files are shown
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/60f99421-aa74-4aa7-805d-05125cc5f222" />
+
+**Step 4**: Select the script, the script will be compiled (takes a second or so) and executed. You can see the effect controls on the bottom of the screen (speed and branches in this example), change them to customise the effect: 
+
+<img width="398" alt="image" src="https://github.com/user-attachments/assets/0ccb7e23-c3cc-4dfa-8d89-9fc86b1ff5f5" />
 
 ## Technical
 
