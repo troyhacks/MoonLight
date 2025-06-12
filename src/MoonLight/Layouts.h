@@ -13,6 +13,58 @@
 
 //alphabetically from here
 
+class HumanSizedCubeLayout: public Node {
+  public:
+
+  static const char * name() {return "Human Sized Cube 🚥 🧊💫";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  uint8_t width;
+  uint8_t height;
+  uint8_t depth;
+  // bool snake;
+  uint8_t pin;
+
+  void setup() override {
+    hasLayout = true;
+    Node::setup();
+    
+    addControl(&width, "width", "range", 10, 1, 20);
+    addControl(&height, "height", "range", 10, 1, 20);
+    addControl(&depth, "depth", "range", 10, 1, 20);
+    // addControl(&snake, "snake", "checkbox", true);
+    addControl(&pin, "pin", "number", 16, 1, 48);
+  }
+
+  void addLayout() override {
+
+    //front: z = 0
+    for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight({x+1, y+1, 0});
+    addPin(pin);
+
+    //above: y = 0
+    for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight({x+1, 0, z+1});
+    addPin(pin-1); //update with real values (move to controls)
+
+    //back: z = depth+1
+    for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight({x+1, y+1, depth+1});
+    addPin(pin-2); //update with real values (move to controls)
+
+    //below: y = height+1
+    for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight({x+1, height+1, z+1});
+    addPin(pin-3); //update with real values (move to controls)
+
+    //left: x = 0
+    for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight({0, y+1, z+1});
+    addPin(pin-4); //update with real values (move to controls)
+
+    //right: x = width+1
+    for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight({width+1, y+1, z+1});
+    addPin(pin-5); //update with real values (move to controls)
+  }
+};
+
 class MovingHeadLayout: public Node {
   public:
 

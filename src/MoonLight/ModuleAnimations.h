@@ -129,6 +129,7 @@ public:
             values.add(SphereMoveEffect::name());
             values.add(WaveEffect::name());
 
+            values.add(HumanSizedCubeLayout::name());
             values.add(MovingHeadLayout::name());
             values.add(PanelLayout::name());
             values.add(RingsLayout::name());

@@ -164,6 +164,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(animation, SinusEffect::name())) node = new SinusEffect();
         else if (equal(animation, SphereMoveEffect::name())) node = new SphereMoveEffect();
 
+        else if (equal(animation, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
         else if (equal(animation, MovingHeadLayout::name())) node = new MovingHeadLayout();
         else if (equal(animation, PanelLayout::name())) node = new PanelLayout();
         else if (equal(animation, RingsLayout::name())) node = new RingsLayout();
