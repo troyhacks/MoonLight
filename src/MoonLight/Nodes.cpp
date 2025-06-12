@@ -19,12 +19,12 @@ void Node::updateControl(JsonObject control) {
         int pointer = control["p"];
 
         if (pointer) {
-        if (control["type"] == "range" || control["type"] == "pin") {
+        if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
             uint8_t *valuePointer = (uint8_t *)pointer;
             *valuePointer = control["value"];
             ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
         }
-        else if (control["type"] == "select") {
+        else if (control["type"] == "selectFile") {
             char *valuePointer = (char *)pointer;
             strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
         }
@@ -73,9 +73,8 @@ void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue)
 static void _setLight(uint16_t indexV, CRGB color) {gNode->layerV->setLight(indexV, color);}
 static void _setLightPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setLight(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
 
-static float _triangle(float j) {return 1.0 - fabs(fmod(2 * j, 2.0) - 1.0);}
 static float _time(float j) {
-    float myVal = millis();;
+    float myVal = millis();
     myVal = myVal / 65535 / j;           // PixelBlaze uses 1000/65535 = .015259. 
     myVal = fmod(myVal, 1.0);               // ewowi: with 0.015 as input, you get fmod(millis/1000,1.0), which has a period of 1 second, sounds right
     return myVal;
@@ -150,7 +149,7 @@ void LiveScriptNode::setup() {
   addExternal( "uint8_t inoise8(uint16_t,uint16_t,uint16_t)", (void *)(uint8_t (*)(uint16_t,uint16_t,uint16_t))inoise8);
   addExternal(   "float hypot(float,float)", (void*)(float (*)(float,float))hypot);
   addExternal(   "float time(float)", (void *)_time);
-  addExternal(   "float triangle(float)", (void *)_triangle);
+  addExternal( "uint8_t triangle8(uint8_t)", (void *)triangle8);
 
   //MoonLight functions
   addExternal(    "void addControl(void*,char*,char*,int, int, int)", (void *)_addControl);

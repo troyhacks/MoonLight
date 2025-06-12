@@ -88,6 +88,15 @@ struct LightsHeader {
   }
 }; // fill with dummies to make size 24, be aware of padding so do not change order of vars
 
+// Helper function to generate a triangle wave similar to beat16
+inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
+    uint8_t beat = beat8(bpm, timebase);
+    if (beat < 128)
+        return beat * 2; // rising edge
+    else
+        return (255 - ((beat - 128) * 2)); // falling edge
+}
+
 struct Lights {
   LightsHeader header;
   union {

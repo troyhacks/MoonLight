@@ -160,7 +160,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(animation, RandomEffect::name())) node = new RandomEffect();
         else if (equal(animation, RipplesEffect::name())) node = new RipplesEffect();
         else if (equal(animation, RGBWParEffect::name())) node = new RGBWParEffect();
-        else if (equal(animation, SinelonEffect::name())) node = new SinelonEffect();
+        else if (equal(animation, WaveEffect::name())) node = new WaveEffect();
         else if (equal(animation, SinusEffect::name())) node = new SinusEffect();
         else if (equal(animation, SphereMoveEffect::name())) node = new SphereMoveEffect();
 

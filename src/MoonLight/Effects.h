@@ -586,33 +586,6 @@ class RGBWParEffect: public Node {
   }
 };
   
-class SinelonEffect: public Node {
-public:
-
-  static const char * name() {return "Sinelon 🔥";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
-
-  uint8_t bpm;
-  uint8_t fade;
-  bool sawTooth;
-
-  void setup() override {
-    addControl(&bpm, "bpm", "range", 60);
-    addControl(&fade, "fade", "range", 20);
-    addControl(&sawTooth, "sawTooth", "checkbox", false);
-  }
-
-  void loop() override {
-    layerV->fadeToBlackBy(fade);
-    for (int y =0; MIN(y<layerV->size.y,16); y++) { //Min for the time being    
-      int pos = sawTooth?map(beat16(bpm, y*100), 0, UINT16_MAX, 0, layerV->size.x-1 )
-                        :beatsin16( bpm, 0, layerV->size.x-1, y * 100 );
-      layerV->setLight({pos,y,0}, (CRGB)CHSV( millis()/50, 255, 255)); //= CRGB(255, random8(), 0);
-    }
-  }
-};
-
 //AI generated
 class SinusEffect: public Node {
   public:
@@ -688,5 +661,60 @@ class SphereMoveEffect: public Node {
     }
   }
 }; // SphereMove3DEffect
+
+class WaveEffect: public Node {
+public:
+
+  static const char * name() {return "Wave 🔥💫";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "";}
+
+  uint8_t bpm;
+  uint8_t fade;
+  uint8_t type;
+
+  void setup() override {
+    addControl(&bpm, "bpm", "range", 60);
+    addControl(&fade, "fade", "range", 20);
+    JsonObject property = addControl(&type, "type", "select", 0); 
+    JsonArray values = property["values"].to<JsonArray>();
+    values.add("Saw");
+    values.add("Triangle");
+    values.add("Sinus");
+    values.add("Square");
+    // values.add("Time");
+  }
+
+  void loop() override {
+    layerV->fadeToBlackBy(fade);
+
+    CRGB color = CHSV( millis()/50, 255, 255);
+
+    uint8_t prevPos = layerV->size.x/2; //somewhere in the middle
+
+    for (int y = 0; y<layerV->size.y; y++) {
+      int pos = 0;
+
+      //delay over y-axis..timebase ...
+      switch (type) {
+        case 0: pos = map(beat8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
+        case 1: pos = map(triangle8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
+        case 2: pos = beatsin8( bpm, 0, layerV->size.x-1, y * 100 ); break;
+        case 3: pos = beat8(bpm, y*100) > 128? 0 : layerV->size.x-1; break;
+        // case 3: pos = map(_time(bpm), 0, UINT16_MAX, 0, layerV->size.x-1 ); break;
+        default: pos = 0;
+      }
+
+      //connect saw and square
+      if (abs(prevPos - pos) > layerV->size.x / 2) {
+        for (int x=0;x<layerV->size.x; x++)
+          layerV->setLight({x, y, 0}, color);
+      }
+
+      layerV->setLight({pos, y, 0}, color); //= CRGB(255, random8(), 0);
+      prevPos = pos;
+    }
+  }
+};
 
 #endif

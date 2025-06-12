@@ -87,8 +87,8 @@
         on:change={onChange}
         class="select select-bordered">
         <slot></slot>
-        {#each property.values as value}
-            <option value={value}>
+        {#each property.values as value, index}
+            <option value={property.type == "selectFile"?value:index}>
                 {value}
             </option>
         {/each}

@@ -125,12 +125,14 @@ public:
             values.add(RandomEffect::name());
             values.add(RipplesEffect::name());
             values.add(RGBWParEffect::name());
-            values.add(SinelonEffect::name());
             values.add(SinusEffect::name());
             values.add(SphereMoveEffect::name());
+            values.add(WaveEffect::name());
+
             values.add(MovingHeadLayout::name());
             values.add(PanelLayout::name());
             values.add(RingsLayout::name());
+
             values.add(MirrorModifier::name());
             values.add(MultiplyModifier::name());
             values.add(PinwheelModifier::name());

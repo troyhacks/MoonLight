@@ -75,12 +75,12 @@ public:
 
     if (pointer) {
       //setValue
-      if (control["type"] == "range" || control["type"] == "pin") {
+      if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
         uint8_t *valuePointer = (uint8_t *)pointer;
         *valuePointer = defaul;
         control["value"] = *valuePointer;
       }
-      else if (control["type"] == "select") {
+      else if (control["type"] == "selectFile") {
         char *valuePointer = (char *)pointer;
         *valuePointer = defaul;
         control["value"] = valuePointer;

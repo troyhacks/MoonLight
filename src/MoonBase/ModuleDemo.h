@@ -34,7 +34,7 @@ public:
         JsonArray values; // if a property is a select, this is the values of the select
 
         property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonBase";
-        property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = 1; values = property["values"].to<JsonArray>();
         values.add("Offline");
         values.add("Signal Strength");
         values.add("Priority");

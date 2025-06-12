@@ -54,7 +54,7 @@ public:
         property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["default"] = 255; property["color"] = "Red";
         property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["default"] = 255; property["color"] = "Green";
         property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["default"] = 255; property["color"] = "Blue";
-        property = root.add<JsonObject>(); property["name"] = "palette"; property["type"] = "select"; property["default"] = "Preset1"; values = property["values"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "palette"; property["type"] = "select"; property["default"] = 6; values = property["values"].to<JsonArray>();
         values.add("CloudColors");
         values.add("LavaColors");
         values.add("OceanColors");
@@ -86,15 +86,15 @@ public:
         } else if (updatedItem.name == "palette") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             // String value = _state.data["palette"];//updatedItem.oldValue;
-            if (updatedItem.value == "CloudColors") layerP.palette = CloudColors_p;
-            else if (updatedItem.value == "LavaColors") layerP.palette = LavaColors_p;
-            else if (updatedItem.value == "OceanColors") layerP.palette = OceanColors_p;
-            else if (updatedItem.value == "ForestColors") layerP.palette = ForestColors_p;
-            else if (updatedItem.value == "RainbowColors") layerP.palette = RainbowColors_p;
-            else if (updatedItem.value == "RainbowStripeColors") layerP.palette = RainbowStripeColors_p;
-            else if (updatedItem.value == "PartyColors") layerP.palette = PartyColors_p;
-            else if (updatedItem.value == "HeatColors") layerP.palette = HeatColors_p;
-            else if (updatedItem.value == "RandomColors") {
+            if (updatedItem.value == 0) layerP.palette = CloudColors_p;
+            else if (updatedItem.value == 1) layerP.palette = LavaColors_p;
+            else if (updatedItem.value == 2) layerP.palette = OceanColors_p;
+            else if (updatedItem.value == 3) layerP.palette = ForestColors_p;
+            else if (updatedItem.value == 4) layerP.palette = RainbowColors_p;
+            else if (updatedItem.value == 5) layerP.palette = RainbowStripeColors_p;
+            else if (updatedItem.value == 6) layerP.palette = PartyColors_p;
+            else if (updatedItem.value == 7) layerP.palette = HeatColors_p;
+            else if (updatedItem.value == 8) {
                 for (int i=0; i < sizeof(layerP.palette.entries) / sizeof(CRGB); i++) {
                     layerP.palette[i] = CHSV(random8(), 255, 255); //take the max saturation, max brightness of the colorwheel
                 }
