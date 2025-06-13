@@ -1,6 +1,10 @@
 //based on https://github.com/jasonsturges/threejs-sveltekit/blob/main/src/lib/scene.ts
 // also check https://github.com/threlte/threlte
 
+import { mat4 } from 'gl-matrix';
+
+let uMVPLocation: WebGLUniformLocation;
+
 let gl: WebGLRenderingContext;
 let program: WebGLProgram;
 let positionBuffer: WebGLBuffer;
@@ -23,11 +27,12 @@ export function createScene(el: HTMLCanvasElement) {
   precision mediump float;
   attribute vec3 aPosition;
   attribute vec4 aColor; // Color attribute
+  uniform mat4 uMVP; // Model-View-Projection matrix
   varying vec4 vColor;   // Pass color to the fragment shader
 
   void main() {
     gl_PointSize = 10.0;
-    gl_Position = vec4(aPosition, 1.0);
+    gl_Position = uMVP * vec4(aPosition, 1.0);
     vColor = aColor; // Pass the color to the fragment shader
   }
   `;
@@ -45,6 +50,8 @@ export function createScene(el: HTMLCanvasElement) {
 
       program = createProgram(gl, vertexShader, fragmentShader);
       gl.useProgram(program);
+
+      uMVPLocation = gl.getUniformLocation(program, "uMVP");
 
       // Set up position buffer
       positionBuffer = gl.createBuffer();
@@ -100,6 +107,10 @@ export function clearColors() {
 export const updateScene = (vertices: number[], colors: number[]) => {
   if (!gl) return; 
 
+    // Set the MVP matrix
+  const mvp = getMVPMatrix();
+  gl.uniformMatrix4fv(uMVPLocation, false, mvp);
+
   // Bind the position buffer and upload the vertex data
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -114,3 +125,24 @@ export const updateScene = (vertices: number[], colors: number[]) => {
   // Draw the points
   gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
 };
+
+function getMVPMatrix(): Float32Array {
+  const aspect = gl.canvas.width / gl.canvas.height;
+  const fov = Math.PI / 4; // 45 degrees
+  const near = 0.1;
+  const far = 100.0;
+
+  const projection = mat4.create();
+  mat4.perspective(projection, fov, aspect, near, far);
+
+  const view = mat4.create();
+  mat4.lookAt(view, [0, 0, 5], [0, 0, 0], [0, 1, 0]); // Camera at (0,0,5) looking at origin
+
+  const model = mat4.create(); // Identity
+
+  const mvp = mat4.create();
+  mat4.multiply(mvp, projection, view);
+  mat4.multiply(mvp, mvp, model);
+
+  return mvp;
+}

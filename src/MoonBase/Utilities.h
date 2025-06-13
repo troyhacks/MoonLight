@@ -13,31 +13,40 @@
 
 #include <Arduino.h>
 #include "ArduinoJson.h"
-// struct Coord3D16 {
-//     uint16_t x;
-//     uint16_t y;
-//     uint16_t z;
-// };
 
 struct Coord3D {
-    int x;
-    int y;
-    int z;
+    uint8_t x;
+    uint8_t y;
+    uint8_t z;
+
+    // Coord3D() : x(0), y(0), z(0) {} // Default constructor
+
+    // Coord3D (uint8_t x, uint8_t y, uint8_t z) {
+    //     this->x = x;
+    //     this->y = y;
+    //     this->z = z;
+    // }
+    // Coord3D (int x, int y, int z) {
+    //     this->x = x;
+    //     this->y = y;
+    //     this->z = z;
+    // }
     //Minus / delta (abs)
     Coord3D operator-(const Coord3D rhs) const {
-        return Coord3D{x - rhs.x, y - rhs.y, z - rhs.z};;
+        return Coord3D{uint8_t(x - rhs.x), uint8_t(y - rhs.y), uint8_t(z - rhs.z)};
+        // return intToCoord3D(x - rhs.x, y - rhs.y, z - rhs.z);
     }
     Coord3D operator+(const Coord3D rhs) const {
-        return Coord3D{x + rhs.x, y + rhs.y, z + rhs.z};
+        return Coord3D{uint8_t(x + rhs.x), uint8_t(y + rhs.y), uint8_t(z + rhs.z)};
     }
     Coord3D operator*(const Coord3D rhs) const {
-        return Coord3D{x * rhs.x, y * rhs.y, z * rhs.z};
+        return Coord3D{uint8_t(x * rhs.x), uint8_t(y * rhs.y), uint8_t(z * rhs.z)};
     }
     Coord3D operator/(const Coord3D rhs) const {
-        return Coord3D{x / rhs.x, y / rhs.y, z / rhs.z};
+        return Coord3D{uint8_t(x / rhs.x), uint8_t(y / rhs.y), uint8_t(z / rhs.z)};
     }
     Coord3D operator%(const Coord3D rhs) const {
-        return Coord3D{x % rhs.x, y % rhs.y, z % rhs.z};
+        return Coord3D{uint8_t(x % rhs.x), uint8_t(y % rhs.y), uint8_t(z % rhs.z)};
     }
 
     Coord3D operator+=(const Coord3D rhs) {
@@ -50,9 +59,13 @@ struct Coord3D {
     Coord3D maximum(const Coord3D rhs) const {
         return Coord3D{max(x, rhs.x), max(y, rhs.y), max(z, rhs.z)};
     }
+
 };
 
-  
+static Coord3D intToCoord3D(int x, int y, int z) {
+  return {uint8_t(x), uint8_t(y), uint8_t(z)};
+}
+
 //convenience function to compare two char strings
 static bool equal(const char *a, const char *b) {
     if (a == nullptr || b == nullptr) {

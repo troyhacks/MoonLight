@@ -65,7 +65,7 @@ class BouncingBallsEffect: public Node {
     //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     // }
 
-    for (int y =0; y < MIN(layerV->size.y,16); y++) { //Min for the time being
+    for (uint8_t y =0; y < MIN(layerV->size.y,16); y++) { //Min for the time being
       for (size_t i = 0; i < MIN(numBalls, maxNumBalls); i++) {
         float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
         float timeSec = timeSinceLastBounce/1000.0f;
@@ -94,7 +94,7 @@ class BouncingBallsEffect: public Node {
         //   color = SEGCOLOR(i % NUM_COLORS);
         // }
 
-        int pos = roundf(balls[y][i].height * (layerV->size.x - 1));
+        uint8_t pos = roundf(balls[y][i].height * (layerV->size.x - 1));
 
         CRGB color = ColorFromPalette(layerV->layerP->palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
@@ -159,10 +159,10 @@ public:
 
       // shift the pixels one pixel up
       layerV->setLight(0, color);
-      for (int x = layerV->size.x - 1; x >= 0; x--) {
+      for (uint8_t x = layerV->size.x - 1; x >= 0; x--) {
         if (x!=0) color = layerV->getLight<CRGB>(x-1);
-        for (int y = 0; y < layerV->size.y; y++)
-          for (int z = 0; z < layerV->size.z; z++)
+        for (uint8_t y = 0; y < layerV->size.y; y++)
+          for (uint8_t z = 0; z < layerV->size.z; z++)
             layerV->setLight({x,y,z}, color);
       }
     }
@@ -271,11 +271,11 @@ public:
 
         ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
 
-        layerV->setLight({pos.x, layerV->size.y - 1 - pos.y}, ledColor);
+        layerV->setLight(intToCoord3D(pos.x, layerV->size.y - 1 - pos.y, 0), ledColor);
       }
 
       if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
-        layerV->setLight({pos.x, layerV->size.y - previousBarHeight[pos.x]}, (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
+        layerV->setLight(intToCoord3D(pos.x, layerV->size.y - previousBarHeight[pos.x], 0), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
 
       if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
 
@@ -378,7 +378,7 @@ class MovingHeadEffect: public Node {
 
   void loop() override {
 
-    for (int i=0; i<layerV->size.x; i++) {
+    for (uint8_t i=0; i<layerV->size.x; i++) {
 
       uint8_t light[24]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight (yet)
       memset(light, 0, sizeof(light)); //set light to 0
@@ -574,7 +574,7 @@ class RGBWParEffect: public Node {
       layerV->layerP->lights.leds[i] = CRGB::Black;
     }
 
-    int pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
+    uint8_t pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
 
     uint8_t light[4];
     memset(light, 0, sizeof(light)); //set light to 0
@@ -692,8 +692,8 @@ public:
 
     uint8_t prevPos = layerV->size.x/2; //somewhere in the middle
 
-    for (int y = 0; y<layerV->size.y; y++) {
-      int pos = 0;
+    for (uint8_t y = 0; y<layerV->size.y; y++) {
+      uint8_t pos = 0;
 
       //delay over y-axis..timebase ...
       switch (type) {
@@ -707,7 +707,7 @@ public:
 
       //connect saw and square
       if (abs(prevPos - pos) > layerV->size.x / 2) {
-        for (int x=0;x<layerV->size.x; x++)
+        for (uint8_t x=0; x<layerV->size.x; x++)
           layerV->setLight({x, y, 0}, color);
       }
 

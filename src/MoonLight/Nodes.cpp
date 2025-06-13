@@ -62,7 +62,7 @@ Node *gNode = nullptr;
 static void _addControl(void * ptr, char *name, char* type, int defaul, int min = 0, int max = 255) {ESP_LOGD(TAG, "%p %s %s %d (%d-%d)", ptr,  name, type, defaul, min, max);gNode->addControl(ptr, name, type, defaul, min, max);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLayoutPre() {gNode->layerV->layerP->addLayoutPre();}
-static void _addLight(uint16_t x, uint16_t y, uint16_t z) {gNode->layerV->layerP->addLight({x, y, z});}
+static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layerV->layerP->addLight({x, y, z});}
 static void _addLayoutPost() {gNode->layerV->layerP->addLayoutPost();}
 
 static void _modifyLayout() {gNode->modifyLayout();}
@@ -155,7 +155,7 @@ void LiveScriptNode::setup() {
   addExternal(    "void addControl(void*,char*,char*,int, int, int)", (void *)_addControl);
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
   addExternal(    "void addLayoutPre()", (void *)_addLayoutPre);
-  addExternal(    "void addLight(uint16_t,uint16_t,uint16_t)", (void *)_addLight);
+  addExternal(    "void addLight(uint8_t,uint8_t,uint8_t)", (void *)_addLight);
   addExternal(    "void addLayoutPost()", (void *)_addLayoutPost);
   addExternal(    "void modifyLayout()", (void *)_modifyLayout);
 //   addExternal(    "void modifyLight(uint16_t,uint16_t,uint16_t)", (void *)_modifyLight);

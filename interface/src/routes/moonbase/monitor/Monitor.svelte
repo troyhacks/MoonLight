@@ -35,9 +35,10 @@
         const header = lights.slice(0, headerLength);
         const data = lights.slice(headerLength);
 
-		let channelsPerLight:number = header[15];
-		let offsetRGB:number = header[16];
-		let isPositions:number = header[21];
+		let isPositions:number = header[0];
+		let nrOfLights = header[4] + 256 * header[5];
+		let channelsPerLight:number = header[7];
+		let offsetRGB:number = header[8];
 		
 		if (!(isPositions==10)) { //(type == ct_Leds) {
 			if (!done) {
@@ -46,7 +47,7 @@
 				done = true;
 			}
 			clearColors();
-			for (let index = 0; index < data.length; index +=channelsPerLight) {
+			for (let index = 0; index < nrOfLights * channelsPerLight; index +=channelsPerLight) {
 				// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
 				const r = data[index + offsetRGB] / 255;
 				const g = data[index + 1 + offsetRGB] / 255;
@@ -69,18 +70,20 @@
 
 		let ledFactor: number = 1;//header[1];
 		let ledSize: number = header[23];
-		width = header[1] * 256 + header[0];
-		height = header[5] * 256 + header[4];
-		depth = header[9] * 256 + header[8];
+		width = header[1];
+		height = header[2];
+		depth = header[3];
 
-		console.log("Monitor.handleLayout", ledFactor, ledSize, width, height, depth);
+		let nrOfLights = header[4] + 256 * header[5];
 
-		for (let index = 0; index < positions.length; index +=12) {
+		console.log("Monitor.handleLayout", ledFactor, ledSize, nrOfLights, width, height, depth);
+
+		for (let index = 0; index < nrOfLights * 3; index +=3) {
 			// console.log(data[index], data[index+1], data[index+2]);
 			//this is weird... where is the first position?
-			let x = (positions[index-1] * 256 + positions[index]) / ledFactor;
-			let y = (positions[index+3] * 256 + positions[index+4]) / ledFactor;
-			let z = (positions[index+7] * 256 + positions[index+8]) / ledFactor;
+			let x = positions[index] / ledFactor;
+			let y = positions[index+1] / ledFactor;
+			let z = positions[index+2] / ledFactor;
 
 			//set to -1,1 coordinate system of webGL
 			//width -1 etc as 0,0 should be top left, not bottom right

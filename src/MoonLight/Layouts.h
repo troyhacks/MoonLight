@@ -40,27 +40,27 @@ class HumanSizedCubeLayout: public Node {
   void addLayout() override {
 
     //front: z = 0
-    for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight({x+1, y+1, 0});
+    for (uint8_t x = 0; x<width; x++) for (uint8_t y = 0; y<height; y++) addLight(intToCoord3D(x+1, y+1, 0));
     addPin(pin);
 
-    //above: y = 0
-    for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight({x+1, 0, z+1});
+    //back: z = depth+1
+    for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight(intToCoord3D(x+1, y+1, depth+1));
     addPin(pin-1); //update with real values (move to controls)
 
-    //back: z = depth+1
-    for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight({x+1, y+1, depth+1});
+    //above: y = 0
+    for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(intToCoord3D(x+1, 0, z+1));
     addPin(pin-2); //update with real values (move to controls)
 
     //below: y = height+1
-    for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight({x+1, height+1, z+1});
+    for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(intToCoord3D(x+1, height+1, z+1));
     addPin(pin-3); //update with real values (move to controls)
 
     //left: x = 0
-    for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight({0, y+1, z+1});
+    for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(intToCoord3D(0, y+1, z+1));
     addPin(pin-4); //update with real values (move to controls)
 
     //right: x = width+1
-    for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight({width+1, y+1, z+1});
+    for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(intToCoord3D(width+1, y+1, z+1));
     addPin(pin-5); //update with real values (move to controls)
   }
 };
@@ -89,7 +89,7 @@ class MovingHeadLayout: public Node {
   }
 
   void addLayout() override {
-    for (int x = 0; x<width; x++) {
+    for (uint8_t x = 0; x<width; x++) {
       addLight({x, 0, 0});
     }
     addPin(pin); //needed to slow down the dmx stream ... wip
@@ -123,10 +123,10 @@ class PanelLayout: public Node {
 
   void addLayout() override {
     
-    for (int x = 0; x<width; x++) {
-      for (int y = 0; y<height; y++) {
-        for (int z = 0; z<depth; z++) {
-          addLight({x, (x%2 || !snake)?y:height-1-y, z});
+    for (uint8_t x = 0; x<width; x++) {
+      for (uint8_t y = 0; y<height; y++) {
+        for (uint8_t z = 0; z<depth; z++) {
+          addLight(intToCoord3D(x, (x%2 || !snake)?y:height-1-y, z));
         }
       }
     }
@@ -156,8 +156,8 @@ class RingsLayout: public Node {
 
   void add(int leds, int radius) {
     for (int i = 0; i<leds; i++) {
-      int x = width / 2.0 + ((sin8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
-      int y = height / 2.0 + ((cos8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
+      uint8_t x = width / 2.0 + ((sin8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
+      uint8_t y = height / 2.0 + ((cos8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
       addLight({x, y, 0});
     }
   }

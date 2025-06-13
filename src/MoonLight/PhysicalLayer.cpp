@@ -71,7 +71,7 @@ PhysicalLayer::PhysicalLayer() {
                 //send the positions to the UI _socket_emit
                 //reset the index and continue...
             } else
-                lights.positions[lights.header.nrOfLights] = {(uint16_t)position.x, (uint16_t)position.y, (uint16_t)position.z};
+                lights.positions[lights.header.nrOfLights] = {position.x, position.y, position.z};
             
             lights.header.size = lights.header.size.maximum(position);
         } else {

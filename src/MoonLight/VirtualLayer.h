@@ -188,7 +188,7 @@ class VirtualLayer {
 
   void addLayoutPost();
 
-  void drawLine(int x0, int y0, int x1, int y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) {
+  void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) {
 
     // WLEDMM shorten line according to depth
     if (depth < UINT8_MAX) {
@@ -228,16 +228,16 @@ class VirtualLayer {
       }
       float gradient = x1-x0 == 0 ? 1.0f : float(y1-y0) / float(x1-x0);
       float intersectY = y0;
-      for (int x = x0; x <= x1; x++) {
+      for (uint8_t x = x0; x <= x1; x++) {
         unsigned keep = float(0xFFFF) * (intersectY-int(intersectY)); // how much color to keep
         unsigned seep = 0xFFFF - keep; // how much background to keep
-        int y = int(intersectY);
+        uint8_t y = uint8_t(intersectY);
         if (steep) std::swap(x,y);  // temporarily swap if steep
         // pixel coverage is determined by fractional part of y co-ordinate
         // WLEDMM added out-of-bounds check: "unsigned(x) < cols" catches negative numbers _and_ too large values
         setLight({x, y, 0}, blend(color, getLight<CRGB>({x, y, 0}), keep));
-        int xx = x+int(steep);
-        int yy = y+int(!steep);
+        uint8_t xx = x+uint8_t(steep);
+        uint8_t yy = y+uint8_t(!steep);
         setLight({xx, yy, 0}, blend(color, getLight<CRGB>({xx, yy, 0}), seep));
       
         intersectY += gradient;
@@ -261,7 +261,7 @@ class VirtualLayer {
     drawLine3D(a.x, a.y, a.z, b.x, b.y, b.z, color, soft, depth);
   }
   //to do: merge with drawLine to support 2D and 3D
-  void drawLine3D(int x1, int y1, int z1, int x2, int y2, int z2, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX)
+  void drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX)
   {
         // WLEDMM shorten line according to depth
     if (depth < UINT8_MAX) {

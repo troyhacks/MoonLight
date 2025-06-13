@@ -103,8 +103,8 @@ class PinwheelModifier: public Node {
   
   void modifyLayout() override {
     // if (leds.projectionDimension > _1D && leds.effectDimension > _1D) {
-      layerV->size.y = sqrt(sq(max(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
-                            sq(max(layerV->size.y - layerV->middle.y, layerV->middle.y))) + 1; // Adjust y before x
+      layerV->size.y = sqrt(sq(max<uint8_t>(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
+                            sq(max<uint8_t>(layerV->size.y - layerV->middle.y, layerV->middle.y))) + 1; // Adjust y before x
       layerV->size.x = petals;
       layerV->size.z = 1;
     // }
