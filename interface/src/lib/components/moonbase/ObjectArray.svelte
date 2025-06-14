@@ -107,7 +107,7 @@
 
 	function deleteItem(propertyName: string, index: number) {
 		// Check if item is currently been edited and delete as well
-		if (data[propertyName][index].animation === dataEditable.animation) {
+		if (data[propertyName][index].name === dataEditable.name) {
 			addItem(propertyName);
 		}
 		// Remove item from array

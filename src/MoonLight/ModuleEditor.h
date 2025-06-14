@@ -1,16 +1,16 @@
 /**
     @title     MoonLight
-    @file      ModuleAnimations.h
+    @file      ModuleEditor.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/modules/module/animations/
+    @Doc       https://moonmodules.org/MoonLight/modules/module/editor/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
-#ifndef ModuleAnimations_h
-#define ModuleAnimations_h
+#ifndef ModuleEditor_h
+#define ModuleEditor_h
 
 #if FT_MOONLIGHT
 
@@ -24,16 +24,16 @@
 
 PhysicalLayer layerP; //global declaration of the physical layer
 
-class ModuleAnimations : public Module
+class ModuleEditor : public Module
 {
 public:
 
     PsychicHttpServer *_server;
 
-    ModuleAnimations(PsychicHttpServer *server,
+    ModuleEditor(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
         FilesService *filesService
-    ) : Module("animations", server, sveltekit, filesService) {
+    ) : Module("editor", server, sveltekit, filesService) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
     }
@@ -42,7 +42,7 @@ public:
         Module::begin();
 
         #if FT_ENABLED(FT_LIVESCRIPT)
-            //create a handler which recompiles the animation when the file of the current animation changes in the File Manager
+            //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
             _filesService->addUpdateHandler([&](const String &originId)
             { 
                 ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
@@ -50,18 +50,18 @@ public:
                 _filesService->read([&](FilesState &filesState) {
                     // loop over all changed files (normally only one)
                     for (auto updatedItem : filesState.updatedItems) {
-                        //if file is the current animation, recompile it (to do: multiple animations)
+                        //if file is the current live script, recompile it (to do: multiple live effects)
                         ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                        if (equal(updatedItem.c_str(), "/config/animations.json")) {
-                            ESP_LOGD(TAG, " animations updated -> call update %s", updatedItem.c_str());
+                        if (equal(updatedItem.c_str(), "/config/editor.json")) {
+                            ESP_LOGD(TAG, " editor.json updated -> call update %s", updatedItem.c_str());
                         }
                         uint8_t index = 0;
                         for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-                            String animation = nodeState["animation"];
+                            String name = nodeState["name"];
 
-                            if (updatedItem == animation) {
+                            if (updatedItem == name) {
                                 ESP_LOGD(TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["animation"]);
+                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
                                 if (liveScriptNode) {
                                     liveScriptNode->compileAndRun();
 
@@ -73,7 +73,7 @@ public:
                                     }, "server");
                                 }
 
-                                ESP_LOGD(TAG, "update due to new node %s done", animation.c_str());
+                                ESP_LOGD(TAG, "update due to new node %s done", name.c_str());
                             }
                             index++;
                         }
@@ -111,7 +111,7 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "animation"; property["type"] = "selectFile"; property["default"] = RandomEffect::name(); values = property["values"].to<JsonArray>();
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; property["default"] = RandomEffect::name(); values = property["values"].to<JsonArray>();
             values.add(SolidEffect::name());
             //alphabetically from here
             values.add(BouncingBallsEffect::name());
@@ -168,16 +168,16 @@ public:
         // handle nodes
         if (updatedItem.parent[0] == "nodes") { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
-            const char *animation = nodeState["animation"];
+            const char *nodeName = nodeState["name"];
             // serializeJson(nodeState, Serial); Serial.println();
 
-            if (updatedItem.name == "animation") { //onAnimation
+            if (updatedItem.name == "name") { //onName
 
                 Node *oldNode = layerP.layerV[0]->nodes.size() > updatedItem.index[0]?layerP.layerV[0]->nodes[updatedItem.index[0]]:nullptr; //find the node in the nodes list
                 bool newNode = false;
 
                 // remove or add Nodes (incl controls)
-                if (!nodeState["animation"].isNull()) { // if animation changed // == updatedItem.value
+                if (!nodeState["name"].isNull()) { // if name changed // == updatedItem.value
 
                     //if old node exists then remove it's controls
                     if (updatedItem.oldValue != "null") {
@@ -191,7 +191,7 @@ public:
                         nodeState["controls"].to<JsonArray>(); //clear the controls
                     }
 
-                    Node *nodeClass = layerP.addNode(updatedItem.index[0], nodeState["animation"], nodeState["controls"]);
+                    Node *nodeClass = layerP.addNode(updatedItem.index[0], nodeState["name"], nodeState["controls"]);
                     nodeClass->on = nodeState["on"];
                     newNode = true;
 
@@ -230,12 +230,12 @@ public:
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     // if (updatedItem.oldValue.length()) {
                     //     ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]);
+                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]);
                     //     if (liveScriptNode) liveScriptNode->kill(); 
-                    //     else ESP_LOGW(TAG, "liveScriptNode not found %s", node["animation"].as<String>().c_str());
+                    //     else ESP_LOGW(TAG, "liveScriptNode not found %s", node["name"].as<String>().c_str());
                     // }
-                    // if (!node["animation"].isNull() && !node["type"].isNull()) {
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["animation"]); //todo: can be 2 nodes with the same name ...
+                    // if (!node["name"].isNull() && !node["type"].isNull()) {
+                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]); //todo: can be 2 nodes with the same name ...
                     //     if (liveScriptNode) liveScriptNode->compileAndRun();
                     //     // not needed as creating the node is already running it ...
                     // }
@@ -243,7 +243,7 @@ public:
             }
 
             if (updatedItem.name == "on") {
-                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be remoced by onAnimation
+                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) {
                     ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.as<String>().c_str(), layerP.layerV[0]->nodes.size());
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {
@@ -257,7 +257,7 @@ public:
                             }
                         }
                         if (nodeClass->hasLayout) {
-                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s", animation);
+                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s", nodeName);
                             nodeClass->requestMap = true; // rerun setup (which checks for on)
                             if (!nodeClass->on)
                                 nodeClass->loop(); // run the loop once to update the layout (off cancels the loop)
@@ -268,7 +268,7 @@ public:
 
             if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) { //could be removed by onAnimation
+                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) {
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass) {
                         nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
@@ -287,7 +287,7 @@ public:
                             }
                         }
                     }
-                    else ESP_LOGW(TAG, "nodeClass not found %s", nodeState["animation"].as<String>().c_str());
+                    else ESP_LOGW(TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
                 }
             }
             // end Nodes
@@ -308,7 +308,7 @@ public:
         // }
     }
   
-}; // class ModuleAnimations
+}; // class ModuleEditor
 
 #endif
 #endif

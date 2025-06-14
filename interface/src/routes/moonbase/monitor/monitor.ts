@@ -128,7 +128,7 @@ export const updateScene = (vertices: number[], colors: number[]) => {
 
 function getMVPMatrix(): Float32Array {
   const aspect = gl.canvas.width / gl.canvas.height;
-  const fov = Math.PI / 4; // 45 degrees
+  const fov = Math.PI / 6; // from 4 (45 degrees) to 6
   const near = 0.1;
   const far = 100.0;
 

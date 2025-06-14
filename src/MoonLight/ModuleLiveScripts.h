@@ -20,7 +20,7 @@
 
 #include "../MoonBase/Module.h"
 
-#include "ModuleAnimations.h"
+#include "ModuleEditor.h"
 
 class ModuleLiveScripts : public Module
 {
@@ -107,7 +107,7 @@ public:
             // _state.compareRecursive("scripts", _state.data["scripts"], newData["scripts"], updatedItem); //compare and update
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
             // JsonObject newDataObject = newData.as<JsonObject>();
-            // _socket->emitEvent("animations", newDataObject);
+            // _socket->emitEvent("editor", newDataObject);
             update([&](ModuleState &state) {
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
             }, "server");

@@ -20,7 +20,7 @@
 #include "FastLED.h"
 #include "../MoonBase/Module.h"
 
-#include "ModuleAnimations.h"
+#include "ModuleEditor.h"
 
 class ModuleLightsControl : public Module
 {

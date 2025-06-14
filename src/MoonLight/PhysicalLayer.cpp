@@ -118,7 +118,7 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.size += Coord3D{1,1,1};
             ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.leds));
             //send the positions to the UI _socket_emit
-            lights.header.isPositions = 10; //filled with positions, set back to ct_Leds in Animations
+            lights.header.isPositions = 10; //filled with positions, set back to ct_Leds in ModuleEditor
         } else {
             ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
             for (VirtualLayer * layer: layerV) {
@@ -144,40 +144,40 @@ PhysicalLayer::PhysicalLayer() {
 
 
     //run one loop of an effect
-    Node* PhysicalLayer::addNode(const uint8_t index, const char * animation, const JsonArray controls) {
+    Node* PhysicalLayer::addNode(const uint8_t index, const char * name, const JsonArray controls) {
 
         Node *node = nullptr;
-        if (equal(animation, SolidEffect::name())) node = new SolidEffect();
+        if (equal(name, SolidEffect::name())) node = new SolidEffect();
         //alphabetically from here
-        else if (equal(animation, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
-        else if (equal(animation, FreqMatrixEffect::name())) node = new FreqMatrixEffect();
-        else if (equal(animation, GEQEffect::name())) node = new GEQEffect();
-        else if (equal(animation, LinesEffect::name())) node = new LinesEffect();
-        else if (equal(animation, LissajousEffect::name())) node = new LissajousEffect();
-        else if (equal(animation, MovingHeadEffect::name())) node = new MovingHeadEffect();
-        else if (equal(animation, PaintBrushEffect::name())) node = new PaintBrushEffect();
-        else if (equal(animation, RainbowEffect::name())) node = new RainbowEffect();
-        else if (equal(animation, RandomEffect::name())) node = new RandomEffect();
-        else if (equal(animation, RipplesEffect::name())) node = new RipplesEffect();
-        else if (equal(animation, RGBWParEffect::name())) node = new RGBWParEffect();
-        else if (equal(animation, WaveEffect::name())) node = new WaveEffect();
-        else if (equal(animation, SinusEffect::name())) node = new SinusEffect();
-        else if (equal(animation, SphereMoveEffect::name())) node = new SphereMoveEffect();
+        else if (equal(name, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
+        else if (equal(name, FreqMatrixEffect::name())) node = new FreqMatrixEffect();
+        else if (equal(name, GEQEffect::name())) node = new GEQEffect();
+        else if (equal(name, LinesEffect::name())) node = new LinesEffect();
+        else if (equal(name, LissajousEffect::name())) node = new LissajousEffect();
+        else if (equal(name, MovingHeadEffect::name())) node = new MovingHeadEffect();
+        else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
+        else if (equal(name, RainbowEffect::name())) node = new RainbowEffect();
+        else if (equal(name, RandomEffect::name())) node = new RandomEffect();
+        else if (equal(name, RipplesEffect::name())) node = new RipplesEffect();
+        else if (equal(name, RGBWParEffect::name())) node = new RGBWParEffect();
+        else if (equal(name, WaveEffect::name())) node = new WaveEffect();
+        else if (equal(name, SinusEffect::name())) node = new SinusEffect();
+        else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
 
-        else if (equal(animation, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
-        else if (equal(animation, MovingHeadLayout::name())) node = new MovingHeadLayout();
-        else if (equal(animation, PanelLayout::name())) node = new PanelLayout();
-        else if (equal(animation, RingsLayout::name())) node = new RingsLayout();
+        else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
+        else if (equal(name, MovingHeadLayout::name())) node = new MovingHeadLayout();
+        else if (equal(name, PanelLayout::name())) node = new PanelLayout();
+        else if (equal(name, RingsLayout::name())) node = new RingsLayout();
 
-        else if (equal(animation, MirrorModifier::name())) node = new MirrorModifier();
-        else if (equal(animation, MultiplyModifier::name())) node = new MultiplyModifier();
-        else if (equal(animation, PinwheelModifier::name())) node = new PinwheelModifier();
+        else if (equal(name, MirrorModifier::name())) node = new MirrorModifier();
+        else if (equal(name, MultiplyModifier::name())) node = new MultiplyModifier();
+        else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
         
-        else if (equal(animation, AudioSyncMod::name())) node = new AudioSyncMod();
+        else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = new LiveScriptNode();
-                liveScriptNode->animation = animation; //set the (file)name of the script
+                liveScriptNode->animation = name; //set the (file)name of the script
                 node = liveScriptNode;
             }
         #endif
@@ -192,7 +192,7 @@ PhysicalLayer::PhysicalLayer() {
                 layerV[0]->nodes[index] = node; //add the node to the layer
         }
 
-        ESP_LOGD(TAG, "%s (s:%d)", animation, layerV[0]->nodes.size());
+        ESP_LOGD(TAG, "%s (s:%d)", name, layerV[0]->nodes.size());
 
         return node;
     }
