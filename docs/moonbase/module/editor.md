@@ -1,4 +1,4 @@
-# Animations module
+# Editor module
 
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
@@ -34,7 +34,7 @@
 
 * See [Modules](../modules.md)
 * Upon changing a pin, driver.init will rerun (FastLED.addLeds, PD and VD driver.init)
-* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc animation is choosen
+* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
     * To do: kill running scripts, e.g. when changing effects
 * [Nodes.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): class Node (constructor, destructor, setup, loop, hasFunctions, map, modify, addControl(s), updateControl)
 * [Nodes.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): implement LiveScriptNode
@@ -82,7 +82,7 @@
 
 ### Server
 
-[ModuleAnimations.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleAnimations.h)
+[ModuleEditor.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleEditor.h)
 
 ### UI
 

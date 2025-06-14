@@ -61,9 +61,9 @@
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Animations',
+					title: 'Editor',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=animations',
+					href: '/moonbase/module?module=editor',
 					feature: page.data.features.moonlight,
 				},
 				{

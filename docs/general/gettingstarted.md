@@ -46,7 +46,7 @@
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
 
-* **Step 12**: Go to your WiFi settings and connect to your local WiFi network and enter the IP address of your MoonLight board in a browser and go to **MoonLight Animations**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. After setting the right pin the strip or panel should show lights.
+* **Step 12**: Go to your WiFi settings and connect to your local WiFi network and enter the IP address of your MoonLight board in a browser and go to **MoonLight Editor**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. After setting the right pin the strip or panel should show lights.
 
    <img width="400" alt="Screenshot 2025-06-07 at 21 01 02" src="https://github.com/user-attachments/assets/5d4d581f-5586-43c0-a5ea-02930effc3d8" />
 
@@ -94,7 +94,7 @@
    
 * Live Scripts: Go to MoonBase / Files and create or upload Live scripts.
     * Examples: [Live scripts](https://github.com/MoonModules/MoonLight/tree/main/misc/livescripts)
-    * Back to Animations, select any of the Live scripts you uploaded, check the Led Panel and / or Serial Output for results
+    * Back to Editor, select any of the Live scripts you uploaded, check the Led Panel and / or Serial Output for results
     * Open the Edit area and change things in the code, see the Serial Output for results
 
 <img width="350" src="https://github.com/user-attachments/assets/56bdd019-927b-40cc-9199-9bc6344f8d8b" />

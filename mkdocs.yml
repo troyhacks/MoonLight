@@ -8,9 +8,10 @@ nav:
       - general/pull-requests.md
   - "MoonLight":
       - moonbase/module/lightsControl.md
-      - moonbase/module/animations.md
+      - moonbase/module/editor.md
       - moonbase/module/liveScripts.md
       - moonbase/module/artnet.md
+      - moonbase/module/channelView.md
   - "MoonBase":
       - moonbase/modules.md
       - moonbase/files.md

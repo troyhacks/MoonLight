@@ -26,7 +26,7 @@
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         #include "MoonLight/ModuleLightsControl.h"
-        #include "MoonLight/ModuleAnimations.h"
+        #include "MoonLight/ModuleEditor.h"
         #if FT_ENABLED(FT_LIVESCRIPT)
             #include "MoonLight/ModuleLiveScripts.h"
         #endif
@@ -66,7 +66,7 @@ LightStateService lightStateService = LightStateService(&server,
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &filesService);
-        ModuleAnimations moduleAnimations = ModuleAnimations(&server, &esp32sveltekit, &filesService);
+        ModuleEditor moduleEditor = ModuleEditor(&server, &esp32sveltekit, &filesService);
         #if FT_ENABLED(FT_LIVESCRIPT)
             ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &filesService);
         #endif
@@ -93,7 +93,7 @@ void setup()
 
         #if FT_ENABLED(FT_MOONLIGHT)
             moduleLightsControl.begin();
-            moduleAnimations.begin();
+            moduleEditor.begin();
             #if FT_ENABLED(FT_LIVESCRIPT)
                 moduleLiveScripts.begin();
             #endif
@@ -137,7 +137,7 @@ void loop()
 
         // 💫
         #if FT_ENABLED(FT_MOONLIGHT)
-            moduleAnimations.loop();
+            moduleEditor.loop();
             moduleLightsControl.loop();
         #endif
 

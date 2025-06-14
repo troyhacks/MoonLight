@@ -4,7 +4,7 @@
 
 ## Functional
 
-MoonLight is based on nodes (see animations) where each node can run precompiled layouts, effects or modifiers but alternatively, each node can also run a live script, uploaded on the esp32 file system (.sc files).
+MoonLight is based on nodes (see [editor](https://moonmodules.org/MoonLight/moonbase/module/editor/)) where each node can run precompiled layouts, effects or modifiers but alternatively, each node can also run a live script, uploaded on the esp32 file system (.sc files).
 Currently this only works on esp32-S3 boards as normal esp32 boards do not have enough memory to flash MoonLight with the Live Scripts option.
 
 This module shows all running live scripts
@@ -22,7 +22,7 @@ This module shows all running live scripts
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/3b7eca3c-ae57-43f6-910e-3fc03f6fa380" />
 
-**Step 3**: Select [ MoonLight / Animations](https://moonmodules.org/MoonLight/moonbase/module/animations/) from the menu. Create a new effect node (🔥) by pressing the + button or update an existing effect node (🔥) by pressing the ✐-button. Open the drop down and scroll to the bottom where live script files are shown
+**Step 3**: Select [ MoonLight / Editor](https://moonmodules.org/MoonLight/moonbase/module/editor/) from the menu. Create a new effect node (🔥) by pressing the + button or update an existing effect node (🔥) by pressing the ✐-button. Open the drop down and scroll to the bottom where live script files are shown
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/60f99421-aa74-4aa7-805d-05125cc5f222" />
 
@@ -39,12 +39,12 @@ This module shows all running live scripts
 ## Technical
 
 * See [Modules](../modules.md)
-* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc animation is choosen
+* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
     * To do: kill running scripts, e.g. when changing effects
 
 ### Server
 
-[ModuleAnimations.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLiveScripts.h)
+[ModuleLiveScripts.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLiveScripts.h)
 
 ### UI
 

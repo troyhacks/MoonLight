@@ -8,7 +8,7 @@ A module is a generic building block to create server and UI functionality which
 
 MoonBase-Modules are inspired by WLED usermods, further developed in StarBase and now in MoonLight (using the ESP32-Sveltekit infrastructure)
 
-See [Demo](module/demo.md), [Instances](module/instances.md) and [Animations](module/animations.md) for examples
+See [Demo](module/demo.md), [Instances](module/instances.md) and [Editor](module/editor.md) for examples
 
 Press the ? on any module to go to the documentation.
 
@@ -68,7 +68,7 @@ void setupDefinition(JsonArray root) override{
 
 * Implement function **onUpdate** to define what happens if data changes
     * struct UpdatedItem defines the update (parent property (including index in case of multiple records), name of property and value)
-    * This runs in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleAnimations](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleAnimations.h)) - as httpd stack has been increased runInLoopTask is less needed
+    * This runs in the httpd / webserver task. To run it in the main (application task use runInLoopTask - see [ModuleEditor](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleEditor.h)) - as httpd stack has been increased runInLoopTask is less needed
 
 ```cpp
     void onUpdate(UpdatedItem &updatedItem) override
@@ -76,7 +76,7 @@ void setupDefinition(JsonArray root) override{
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
-        } else if (updatedItem.parent[0] == "nodes" && updatedItem.name == "animation") {    
+        } else if (updatedItem.parent[0] == "nodes" && updatedItem.name == "name") {    
             ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue.length())
                 ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
@@ -95,22 +95,16 @@ void setupDefinition(JsonArray root) override{
         if (!_socket->getConnectedClients()) return; 
 
         JsonDocument newData; //to only send updatedData
-
         JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
+        LiveScriptNode node;
+        node.getScriptsJson(scripts);
 
-        for (Executable &exec: scriptRuntime._scExecutables) {
-            JsonObject object = scripts.add<JsonObject>();
-            object["name"] = exec.name;
-            object["isRunning"] = exec.isRunning();
-            object["isHalted"] = exec.isHalted;
-            object["exeExist"] = exec.exeExist;
-            object["kill"] = 0;
-        }
-
+        //only if changed
         if (_state.data["scripts"] != newData["scripts"]) {
-            _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles - WIP
-            JsonObject newDataObject = newData.as<JsonObject>();
-            _socket->emitEvent("animationsRO", newDataObject); //RO is WIP, maybe use "animations" also for readonly
+            _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
+            update([&](ModuleState &state) {
+                return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+            }, "server");
         }
     }
 ```
@@ -135,7 +129,7 @@ submenu: [
       title: 'Module Demo',
       icon: BulbIcon,
       href: '/moonbase/module?module=demo',
-      feature: page.data.features.liveanimation,
+      feature: page.data.features.moonlight,
    },
 ]
 ```
@@ -144,7 +138,7 @@ submenu: [
 
 ### Readonly data
 
-A module can consist of data which is edited by the user (e.g. selecting an animation to run) and data which is send from the server to the UI (e.g. a list of running processes). Currently both type of valuas are stored in state data and definition. Distinguished by property["ro"] = true in setupDefinition. So the client uses state data and definition to build a screen with both types visually mixed together (what is desirable). Currently there are 2 websocket events: one for the entire state (including readonly) and one only for readonly which only contains the changed values. Module.svelte handles readonly differently by the function handleRO which calls updateRecursive which only update the parts of the data which has changed.
+A module can consist of data which is edited by the user (e.g. selecting a live script to run) and data which is send from the server to the UI (e.g. a list of running processes). Currently both type of valuas are stored in state data and definition. Distinguished by property["ro"] = true in setupDefinition. So the client uses state data and definition to build a screen with both types visually mixed together (what is desirable). Currently there are 2 websocket events: one for the entire state (including readonly) and one only for readonly which only contains the changed values. Module.svelte handles readonly differently by the function handleRO which calls updateRecursive which only update the parts of the data which has changed.
 
 It might be arguable that readonly variables are not stored in state data.
 

@@ -87,10 +87,9 @@
 
 			//set to -1,1 coordinate system of webGL
 			//width -1 etc as 0,0 should be top left, not bottom right
-			//0.9 to avoid leds being out of viewport
-			x = width==1?0:(((width-1-x) / (width - 1)) * 2.0 - 1.0)*0.9;
-			y = height==1?0:(((height-1-y) / (height - 1)) * 2.0 - 1.0)*0.9;
-			z = depth==1?0:(((depth-1-z) / (depth - 1)) * 2.0 - 1.0)*0.9;
+			x = width==1?0:(((width-1-x) / (width - 1)) * 2.0 - 1.0);
+			y = height==1?0:(((height-1-y) / (height - 1)) * 2.0 - 1.0);
+			z = depth==1?0:(((depth-1-z) / (depth - 1)) * 2.0 - 1.0);
 
 			vertices.push(x, y, z);
 		}
