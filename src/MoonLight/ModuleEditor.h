@@ -57,11 +57,11 @@ public:
                         }
                         uint8_t index = 0;
                         for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-                            String name = nodeState["name"];
+                            String nodeName = nodeState["nodeName"];
 
-                            if (updatedItem == name) {
+                            if (updatedItem == nodeName) {
                                 ESP_LOGD(TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
+                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["nodeName"]);
                                 if (liveScriptNode) {
                                     liveScriptNode->compileAndRun();
 
@@ -73,7 +73,7 @@ public:
                                     }, "server");
                                 }
 
-                                ESP_LOGD(TAG, "update due to new node %s done", name.c_str());
+                                ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());
                             }
                             index++;
                         }
@@ -111,7 +111,7 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; property["default"] = RandomEffect::name(); values = property["values"].to<JsonArray>();
+            property = details.add<JsonObject>(); property["name"] = "nodeName"; property["type"] = "selectFile"; property["default"] = RandomEffect::name(); values = property["values"].to<JsonArray>();
             values.add(SolidEffect::name());
             //alphabetically from here
             values.add(BouncingBallsEffect::name());
@@ -168,16 +168,16 @@ public:
         // handle nodes
         if (updatedItem.parent[0] == "nodes") { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
-            const char *nodeName = nodeState["name"];
+            const char *nodeName = nodeState["nodeName"];
             // serializeJson(nodeState, Serial); Serial.println();
 
-            if (updatedItem.name == "name") { //onName
+            if (updatedItem.name == "nodeName") { //onName
 
                 Node *oldNode = layerP.layerV[0]->nodes.size() > updatedItem.index[0]?layerP.layerV[0]->nodes[updatedItem.index[0]]:nullptr; //find the node in the nodes list
                 bool newNode = false;
 
                 // remove or add Nodes (incl controls)
-                if (!nodeState["name"].isNull()) { // if name changed // == updatedItem.value
+                if (!nodeState["nodeName"].isNull()) { // if name changed // == updatedItem.value
 
                     //if old node exists then remove it's controls
                     if (updatedItem.oldValue != "null") {
@@ -191,7 +191,7 @@ public:
                         nodeState["controls"].to<JsonArray>(); //clear the controls
                     }
 
-                    Node *nodeClass = layerP.addNode(updatedItem.index[0], nodeState["name"], nodeState["controls"]);
+                    Node *nodeClass = layerP.addNode(updatedItem.index[0], nodeState["nodeName"], nodeState["controls"]);
                     nodeClass->on = nodeState["on"];
                     newNode = true;
 
@@ -230,12 +230,12 @@ public:
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     // if (updatedItem.oldValue.length()) {
                     //     ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]);
+                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]);
                     //     if (liveScriptNode) liveScriptNode->kill(); 
-                    //     else ESP_LOGW(TAG, "liveScriptNode not found %s", node["name"].as<String>().c_str());
+                    //     else ESP_LOGW(TAG, "liveScriptNode not found %s", node["nodeName"].as<String>().c_str());
                     // }
-                    // if (!node["name"].isNull() && !node["type"].isNull()) {
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]); //todo: can be 2 nodes with the same name ...
+                    // if (!node["nodeName"].isNull() && !node["type"].isNull()) {
+                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]); //todo: can be 2 nodes with the same name ...
                     //     if (liveScriptNode) liveScriptNode->compileAndRun();
                     //     // not needed as creating the node is already running it ...
                     // }
@@ -257,7 +257,7 @@ public:
                             }
                         }
                         if (nodeClass->hasLayout) {
-                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s", nodeName);
+                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s (on:%d)", nodeName, nodeClass->on);
                             nodeClass->requestMap = true; // rerun setup (which checks for on)
                             if (!nodeClass->on)
                                 nodeClass->loop(); // run the loop once to update the layout (off cancels the loop)
@@ -287,7 +287,7 @@ public:
                             }
                         }
                     }
-                    else ESP_LOGW(TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
+                    else ESP_LOGW(TAG, "nodeClass not found %s", nodeState["nodeName"].as<String>().c_str());
                 }
             }
             // end Nodes

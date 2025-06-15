@@ -142,7 +142,7 @@ void loop()
         #endif
 
         //20ms loop
-        static int lastTime20ms = 0;
+        static unsigned long lastTime20ms = 0;
         if (millis() - lastTime20ms > 20)
         {
             lastTime20ms = millis();
@@ -152,7 +152,7 @@ void loop()
         }
 
         //50ms loop
-        static int lastTime50ms = 0;
+        static unsigned long lastTime50ms = 0;
         if (millis() - lastTime50ms > 50)
         {
             lastTime50ms = millis();
@@ -161,7 +161,7 @@ void loop()
             #endif
             
             //1s loop
-            static int lastTime1s = 0;
+            static unsigned long lastTime1s = 0;
             if (millis() - lastTime1s > 1000)
             {
                 lastTime1s = millis();
@@ -174,7 +174,7 @@ void loop()
                 moduleDemo.loop1s();
 
                 //10s loop
-                static int lastTime10s = 0;
+                static unsigned long lastTime10s = 0;
                 if (millis() - lastTime10s > 10000)
                 {
                     lastTime10s = millis();
