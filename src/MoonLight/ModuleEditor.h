@@ -218,6 +218,8 @@ public:
                             }
                         }
                     }
+                    else
+                        ESP_LOGW(TAG, "Node %d not found", nodeName);
                 }
 
                 //if a node existed and no new node in place, remove 
