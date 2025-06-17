@@ -14,12 +14,23 @@
 class SolidEffect: public Node {
   public:
 
-  static const char * name() {return "Solid 🔥 💡";}
+  static const char * name() {return "Solid 🔥💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+
+  void setup() override {
+    addControl(&red, "red", "range", 182);
+    addControl(&green, "green", "range", 15);
+    addControl(&blue, "blue", "range", 98);
+
+  }
+
   void loop() override {
-      layerV->fill_solid(CRGB::White);
+      layerV->fill_solid(CRGB(red, green, blue));
   }
 };
 
@@ -37,7 +48,7 @@ struct Ball {
 class BouncingBallsEffect: public Node {
   public:
 
-  static const char * name() {return "BouncingBalls 🔥 💡";}
+  static const char * name() {return "BouncingBalls 🔥🎨💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -109,7 +120,7 @@ class BouncingBallsEffect: public Node {
 class FreqMatrixEffect: public Node {
 public:
 
-  static const char * name() {return "FreqMatrix 🔥 ♪💡";}
+  static const char * name() {return "FreqMatrix 🔥♪💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -172,7 +183,7 @@ public:
 class GEQEffect: public Node {
 public:
 
-  static const char * name() {return "GEQ 🔥 ♫💡";}
+  static const char * name() {return "GEQ 🔥🎨♫💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -286,7 +297,7 @@ public:
 class LinesEffect: public Node {
 public:
 
-  static const char * name() {return "Lines 🔥 💡";}
+  static const char * name() {return "Lines 🔥💫";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -322,7 +333,7 @@ public:
 class LissajousEffect: public Node {
 public:
 
-  static const char * name() {return "Lissajous 🔥 💡";}
+  static const char * name() {return "Lissajous 🔥🎨💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -354,7 +365,7 @@ public:
 class MovingHeadEffect: public Node {
   public:
 
-  static const char * name() {return "MovingHead 🔥 ♫💫";}
+  static const char * name() {return "MovingHead 🔥♫💫";}
 
   uint8_t bpm;
   uint8_t pan;
@@ -429,7 +440,7 @@ public:
 class PaintBrushEffect: public Node {
 public:
 
-  static const char * name() {return "Paintbrush 🔥 ♫🧊💡";}
+  static const char * name() {return "Paintbrush 🔥🎨♫🧊💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -517,7 +528,7 @@ class RandomEffect: public Node {
 class RipplesEffect: public Node {
   public:
 
-  static const char * name() {return "Ripples 🔥 🧊💫";}
+  static const char * name() {return "Ripples 🔥🧊💫";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
   
@@ -624,7 +635,7 @@ class SinusEffect: public Node {
 class SphereMoveEffect: public Node {
   public:
 
-  static const char * name() {return "SphereMove 🔥 🧊💫";}
+  static const char * name() {return "SphereMove 🔥🧊💫";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 

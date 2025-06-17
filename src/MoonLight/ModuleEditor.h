@@ -168,7 +168,6 @@ public:
         // handle nodes
         if (updatedItem.parent[0] == "nodes") { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
-            const char *nodeName = nodeState["nodeName"];
             // serializeJson(nodeState, Serial); Serial.println();
 
             if (updatedItem.name == "nodeName") { //onName
@@ -177,7 +176,7 @@ public:
                 bool newNode = false;
 
                 // remove or add Nodes (incl controls)
-                if (!nodeState["nodeName"].isNull()) { // if name changed // == updatedItem.value
+                if (!updatedItem.value.isNull()) { // if name changed // == updatedItem.value
 
                     //if old node exists then remove it's controls
                     if (updatedItem.oldValue != "null") {
@@ -191,7 +190,7 @@ public:
                         nodeState["controls"].to<JsonArray>(); //clear the controls
                     }
 
-                    Node *nodeClass = layerP.addNode(updatedItem.index[0], nodeState["nodeName"], nodeState["controls"]);
+                    Node *nodeClass = layerP.addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);
 
                     if(nodeClass != nullptr) {
                         nodeClass->on = nodeState["on"];
@@ -219,7 +218,7 @@ public:
                         }
                     }
                     else
-                        ESP_LOGW(TAG, "Node %d not found", nodeName);
+                        ESP_LOGW(TAG, "Node %d not found", updatedItem.value.as<String>().c_str());
                 }
 
                 //if a node existed and no new node in place, remove 
@@ -262,7 +261,7 @@ public:
                             }
                         }
                         if (nodeClass->hasLayout) {
-                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s (on:%d)", nodeName, nodeClass->on);
+                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s (on:%d)", nodeState["nodeName"].as<String>().c_str(), nodeClass->on);
                             nodeClass->requestMap = true; // rerun setup (which checks for on)
                             if (!nodeClass->on)
                                 nodeClass->loop(); // run the loop once to update the layout (off cancels the loop)
