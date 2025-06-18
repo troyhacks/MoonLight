@@ -5,6 +5,7 @@
 ## Functional
 
 Controls:
+
 * On: lights on or off
 * Brightness: brightness of the LEDs when on
 * RGB Sliders: control each color seperately.

@@ -117,6 +117,68 @@ class BouncingBallsEffect: public Node {
   }
 };
 
+//DistortionWaves inspired by WLED, ldirko and blazoncek, https://editor.soulmatelights.com/gallery/1089-distorsion-waves
+static uint8_t gamma8(uint8_t b) { //we do nothing with gamma for now
+  return b;
+}
+
+class DistortionWavesEffect: public Node {
+public:
+  static const char * name() {return "DistortionWaves 🔥💡";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  uint8_t speed;
+  uint8_t scale; 
+
+  void setup() override {
+    addControl(&speed, "speed", "range", 4, 0, 8);
+    addControl(&scale, "scale", "range", 4, 0, 8);
+  }
+
+  void loop() override {
+    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+
+    uint8_t  w = 2;
+
+    uint16_t a  = millis()/32;
+    uint16_t a2 = a/2;
+    uint16_t a3 = a/3;
+
+    uint16_t cx =  beatsin8(10-speed,0,layerV->size.x-1)*scale;
+    uint16_t cy =  beatsin8(12-speed,0,layerV->size.y-1)*scale;
+    uint16_t cx1 = beatsin8(13-speed,0,layerV->size.x-1)*scale;
+    uint16_t cy1 = beatsin8(15-speed,0,layerV->size.y-1)*scale;
+    uint16_t cx2 = beatsin8(17-speed,0,layerV->size.x-1)*scale;
+    uint16_t cy2 = beatsin8(14-speed,0,layerV->size.y-1)*scale;
+    
+    uint16_t xoffs = 0;
+    Coord3D pos = {0,0,0};
+    for (pos.x = 0; pos.x < layerV->size.x; pos.x++) {
+      xoffs += scale;
+      uint16_t yoffs = 0;
+
+      for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
+        yoffs += scale;
+
+        byte rdistort = cos8((cos8(((pos.x<<3)+a )&255)+cos8(((pos.y<<3)-a2)&255)+a3   )&255)>>1; 
+        byte gdistort = cos8((cos8(((pos.x<<3)-a2)&255)+cos8(((pos.y<<3)+a3)&255)+a+32 )&255)>>1; 
+        byte bdistort = cos8((cos8(((pos.x<<3)+a3)&255)+cos8(((pos.y<<3)-a) &255)+a2+64)&255)>>1; 
+
+        byte valueR = rdistort+ w*  (a- ( ((xoffs - cx)  * (xoffs - cx)  + (yoffs - cy)  * (yoffs - cy))>>7  ));
+        byte valueG = gdistort+ w*  (a2-( ((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1))>>7 ));
+        byte valueB = bdistort+ w*  (a3-( ((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2))>>7 ));
+
+        valueR = gamma8(cos8(valueR));
+        valueG = gamma8(cos8(valueG));
+        valueB = gamma8(cos8(valueB));
+
+        layerV->setLight(pos, CRGB(valueR, valueG, valueB));
+      }
+    }
+  }
+}; // DistortionWaves
+
 class FreqMatrixEffect: public Node {
 public:
 
