@@ -85,6 +85,7 @@ enum class ConnectionStatus
 };
 
 extern std::vector<std::function<void()>> runInLoopTask; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
+extern bool safeModeMB; // 🌙 true when the ESP32 is in safe mode, false when it is not
 
 class ESP32SvelteKit
 {

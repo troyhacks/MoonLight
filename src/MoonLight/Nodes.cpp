@@ -12,6 +12,8 @@
 #if FT_MOONLIGHT
 #include "Nodes.h"
 
+#include <ESP32SvelteKit.h> //for safeModeMB
+
 void Node::updateControl(JsonObject control) {
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
         ESP_LOGD(TAG, "%s = %s t:%s p:%s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), control["p"].as<String>().c_str());
@@ -262,6 +264,11 @@ void LiveScriptNode::compileAndRun() {
 }
 
 void LiveScriptNode::execute() {
+
+    if (safeModeMB) {
+        ESP_LOGW(TAG, "Safe mode enabled, not executing script %s", animation);
+        return;
+    }
     ESP_LOGD(TAG, "%s", animation);
 
     //similar to the requestMapLayout in layout.setup.

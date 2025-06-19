@@ -14,6 +14,8 @@
 
 #include <WiFiSettingsService.h>
 
+#include <ESP32SvelteKit.h> // 🌙 safeMode
+
 WiFiSettingsService::WiFiSettingsService(PsychicHttpServer *server,
                                          FS *fs,
                                          SecurityManager *securityManager,
@@ -254,6 +256,7 @@ void WiFiSettingsService::updateRSSI()
     JsonDocument doc;
     doc["rssi"] = WiFi.RSSI();
     doc["ssid"] = WiFi.isConnected() ? WiFi.SSID() : "disconnected";
+    doc["safeMode"] = safeModeMB; // 🌙
     JsonObject jsonObject = doc.as<JsonObject>();
     _socket->emitEvent(EVENT_RSSI, jsonObject);
 }

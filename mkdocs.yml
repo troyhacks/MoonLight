@@ -7,6 +7,7 @@ nav:
       - general/customizingsveltekit.md
       - general/pull-requests.md
   - "MoonLight":
+      - moonlight/general.md
       - moonbase/module/lightsControl.md
       - moonbase/module/editor.md
       - moonbase/module/liveScripts.md

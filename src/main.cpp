@@ -80,6 +80,11 @@ void setup()
 
     // delay(5000); // 🌙 to capture all the serial output
 
+    // 🌙 safeMode
+    if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW) { //see verbosePrintResetReason
+        safeModeMB = true;
+    }
+
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
 

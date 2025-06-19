@@ -100,6 +100,7 @@ export type Analytics = {
 export type RSSI = {
 	rssi: number;
 	ssid: string;
+	safeMode: boolean; // 🌙 safeMode Indicates if the system is in safe mode
 };
 
 export type Battery = {
@@ -127,6 +128,7 @@ export type StaticSystemInformation = {
 	flash_chip_size: number;
 	flash_chip_speed: number;
 	cpu_reset_reason: string;
+	safeMode: boolean; // 🌙 safeMode Indicates if the system is in safe mode
 };
 
 export type SystemInformation = Analytics & StaticSystemInformation;

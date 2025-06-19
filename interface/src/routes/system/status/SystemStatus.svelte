@@ -160,7 +160,7 @@
 	{/snippet}
 	{#snippet title()}
 		<span >System Status</span>
-		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div>
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div> <!-- 🌙 link to docs -->
 	{/snippet}
 
 	<div class="w-full overflow-x-auto">
@@ -283,6 +283,18 @@
 						<div class="font-bold">Reset Reason</div>
 						<div class="text-sm opacity-75">
 							{systemInformation.cpu_reset_reason}
+						</div>
+					</div>
+				</div>
+
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<Power class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">Safe mode</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.safeMode}
 						</div>
 					</div>
 				</div>

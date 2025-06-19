@@ -17,6 +17,8 @@
 
 #include "Nodes.h"
 
+#include <ESP32SvelteKit.h> //for safeModeMB
+
 PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "constructor");
 
@@ -62,7 +64,12 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::addLight(Coord3D position) {
-        
+
+        if (safeModeMB && lights.header.nrOfLights > 1023) {
+            ESP_LOGW(TAG, "Safe mode enabled, not adding lights > 1023");
+            return;
+        }
+
         if (pass == 1) {
             // ESP_LOGD(TAG, "%d,%d,%d", position.x, position.y, position.z);
             if (lights.header.nrOfLights >= MAX_CHANNELS / sizeof(Coord3D)) {

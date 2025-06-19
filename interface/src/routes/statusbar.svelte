@@ -44,10 +44,16 @@
 		<label for="main-menu" class="btn btn-ghost btn-circle btn-sm drawer-button lg:hidden"
 			><Hamburger class="h-6 w-auto" /></label
 		>
-		<span class="px-2 text-xl font-bold lg:text-2xl">{page.data.instances.instanceName}</span>
+		<span class="px-2 text-xl font-bold lg:text-2xl">{page.data.instances.instanceName}</span> <!-- 🌙 -->
 	</div>
 	<div class="indicator flex-none">
 		<UpdateIndicator />
+	</div>
+	<!-- 🌙 safeMode -->
+	<div class="indicator flex-none">
+		{#if $telemetry.rssi.safeMode}
+			🛡️
+		{/if}
 	</div>
 	<div class="flex-none">
 		{#if $telemetry.rssi.disconnected}

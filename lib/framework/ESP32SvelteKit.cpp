@@ -15,6 +15,7 @@
 #include <ESP32SvelteKit.h>
 
 std::vector<std::function<void()>> runInLoopTask; // 🌙 see .h
+bool safeModeMB = false; // 🌙 see .h
 
 ESP32SvelteKit::ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEndpoints) : _server(server),
                                                                                           _numberEndpoints(numberEndpoints),
