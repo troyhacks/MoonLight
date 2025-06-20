@@ -151,13 +151,19 @@ class RingsLayout: public Node {
     hasLayout = true;
     Node::setup();
 
-    addControl(&pin, "pin", "number", 2, 1, 48);
+    addControl(&pin, "pin", "number", 16, 1, 48);
   }
 
   void add(int leds, int radius) {
+    width = 16; height = 16; //declaration of default values above doesn't seem to work...strange...
+
     for (int i = 0; i<leds; i++) {
-      uint8_t x = width / 2.0 + ((sin8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
-      uint8_t y = height / 2.0 + ((cos8(255 * i / leds) - 127) / 127.0) * radius / 10.0;
+      uint8_t x = width / 2.0;
+      uint8_t y = height / 2.0;
+      if (leds != 1) {
+        x = width / 2.0 + ((sin8(255 * i / (leds-1)) - 127) / 127.0) * radius / 10.0;
+        y = height / 2.0 + ((cos8(255 * i / (leds-1)) - 127) / 127.0) * radius / 10.0;
+      }
       addLight({x, y, 0});
     }
   }

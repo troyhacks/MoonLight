@@ -102,7 +102,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                         updatedItem.parent[(uint8_t)(depth+1)] = key.c_str();
                         updatedItem.index[(uint8_t)(depth+1)] = i;
                         for (JsonPair property : stateArray[i].as<JsonObject>()) {
-                            ESP_LOGD(TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
+                            // ESP_LOGD(TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
                             // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
                             updatedItem.name = property.key().c_str();
                             updatedItem.oldValue = property.value().as<String>();

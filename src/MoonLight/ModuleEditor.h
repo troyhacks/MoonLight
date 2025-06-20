@@ -107,6 +107,7 @@ public:
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "nodeName"; property["type"] = "selectFile"; property["default"] = RandomEffect::name(); values = property["values"].to<JsonArray>();
+
             values.add(SolidEffect::name());
             //alphabetically from here
             values.add(BouncingBallsEffect::name());
@@ -168,7 +169,7 @@ public:
 
             if (updatedItem.name == "nodeName") { //onName
 
-                Node *oldNode = layerP.layerV[0]->nodes.size() > updatedItem.index[0]?layerP.layerV[0]->nodes[updatedItem.index[0]]:nullptr; //find the node in the nodes list
+                Node *oldNode = updatedItem.index[0] < layerP.layerV[0]->nodes.size()?layerP.layerV[0]->nodes[updatedItem.index[0]]:nullptr; //find the node in the nodes list
                 bool newNode = false;
 
                 // remove or add Nodes (incl controls)
@@ -217,10 +218,29 @@ public:
                 if (updatedItem.oldValue != "null" && oldNode) {
                     ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     if (!newNode) {
-                        layerP.layerV[0]->nodes.pop_back();
+                        //remove oldNode from the nodes list 
+                        for (uint8_t i = 0; i < layerP.layerV[0]->nodes.size(); i++) {
+                            if (layerP.layerV[0]->nodes[i] == oldNode) {
+                                ESP_LOGD(TAG, "remove node %d", i);
+                                layerP.layerV[0]->nodes.erase(layerP.layerV[0]->nodes.begin() + i);
+                                break;
+                            }
+                        }
                         ESP_LOGD(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], layerP.layerV[0]->nodes.size());
                     }
-                    layerP.removeNode(oldNode);
+
+                    if (oldNode->hasModifier) {
+                        ESP_LOGD(TAG, "Modifier %s deleted -> remap layout", updatedItem.oldValue.c_str());
+                        layerP.layerV[0]->requestMapVirtual = true;
+                    }
+                    if (oldNode->hasLayout) {
+                        ESP_LOGD(TAG, "Layout %s deleted -> remap layout", updatedItem.oldValue.c_str());
+                        layerP.layerV[0]->requestMapPhysical = true;
+                        layerP.layerV[0]->requestMapVirtual = true;
+                    }
+
+                    // delay(100); //let loopTask finish the current loop before removing the node
+                    // layerP.removeNode(oldNode, updatedItem.oldValue.c_str()); //remove the node from the layer, which will also remove the controls
                 }
                     
                 #if FT_ENABLED(FT_LIVESCRIPT)
@@ -239,10 +259,10 @@ public:
             }
 
             if (updatedItem.name == "on") {
-                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) {
+                if (updatedItem.index[0] < layerP.layerV[0]->nodes.size()) {
                     ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.as<String>().c_str(), layerP.layerV[0]->nodes.size());
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
-                    if (nodeClass) {
+                    if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
                         ESP_LOGD(TAG, "  nodeclass m:%d l:%d", nodeClass->hasModifier, nodeClass->hasLayout);
                         if (nodeClass->hasModifier) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
@@ -262,9 +282,9 @@ public:
 
             if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                if (layerP.layerV[0]->nodes.size() > updatedItem.index[0]) {
+                if (updatedItem.index[0] < layerP.layerV[0]->nodes.size()) {
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
-                    if (nodeClass) {
+                    if (nodeClass != nullptr) {
                         nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
                         // if Modfier control changed, run the layout
                         // find nodes which implement the Modifier interface

@@ -273,8 +273,9 @@ public:
     memset(previousBarHeight, 0, layerV->size.x * sizeof(uint16_t)); // initialize to 0
     step = millis();
   }
+
   void destructor() override {
-      ESP_LOGI(TAG, "free previousBarHeight");
+    ESP_LOGI(TAG, "free previousBarHeight");
     if (previousBarHeight) {
       free(previousBarHeight);
       previousBarHeight = nullptr;

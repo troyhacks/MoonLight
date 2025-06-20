@@ -129,8 +129,14 @@ public:
 
   virtual void destructor() {
     //delete any allocated memory
-    if (hasLayout)
-      layerV->resetMapping();
+    if (hasModifier) {
+        // ESP_LOGD(TAG, "Modifier deleted -> remap layout %s", nodeState["nodeName"].as<String>().c_str());
+        layerV->requestMapVirtual = true;
+    }
+    if (hasLayout) {
+      layerV->requestMapPhysical = true; //request mapPhysical to update the layout
+      layerV->requestMapVirtual = true; //request mapVirtual to update the layout
+    }
   }
 
 };
