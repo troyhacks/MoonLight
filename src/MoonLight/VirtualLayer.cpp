@@ -31,7 +31,7 @@ VirtualLayer::~VirtualLayer() {
   fadeToBlackBy(255); //clear the leds
 
   for (Node *node: nodes) {
-    node->destructor();
+    // node->destructor();
     delete node;
   }
   nodes.clear();
@@ -159,13 +159,22 @@ void VirtualLayer::fadeToBlackMin() {
     //     }
     //   }
     // } else 
-    if (layerP->layerV.size() == 1) { //faster, else manual 
-      fastled_fadeToBlackBy(layerP->lights.leds, layerP->lights.header.nrOfLights, fadeBy);
-    } else {
+    if (layerP->lights.header.channelsPerLight == 3) { //CRGB lights
+      if (layerP->layerV.size() == 1) { //faster, else manual 
+        fastled_fadeToBlackBy(layerP->lights.leds, layerP->lights.header.nrOfLights, fadeBy);
+      } else {
+        for (uint16_t index = 0; index < nrOfLights; index++) {
+          CRGB color = getLight<CRGB>(index);
+          color.nscale8(255-fadeBy);
+          setLight(index, color);
+        }
+      }
+    } else { //multichannel lights
       for (uint16_t index = 0; index < nrOfLights; index++) {
-        CRGB color = getLight<CRGB>(index);
-        color.nscale8(255-fadeBy);
-        setLight(index, color);
+        uint8_t *channels = getLight(index); //direct access to the channels
+        for (uint8_t i = 0; i < layerP->lights.header.channelsPerLight; i++) {
+          channels[i] = (channels[i] * (255 - fadeBy)) / 255; //fade by nscale8
+        }
       }
     }
     //reset fade

@@ -73,20 +73,20 @@ struct LightsHeader {
     offsetRGB2 = -1;
   }
 
-  void setRGB(uint8_t *light, const CRGB &color) {
-    light[offsetRGB] = color.red;
-    light[offsetRGB + 1] = color.green;
-    light[offsetRGB + 2] = color.blue;
-  }
-  void setWhite(uint8_t *light, const uint8_t white) {if (offsetRGB != -1) light[offsetRGB + 3] = white;}
-  void setBrightness(uint8_t *light, const uint8_t brightness) {if (offsetBrightness != -1) light[offsetBrightness] = brightness;}
-  void setPan(uint8_t *light, const uint8_t pan) {if (offsetPan != -1) light[offsetPan] = pan;}
-  void setTilt(uint8_t *light, const uint8_t tilt) {if (offsetTilt != -1)light[offsetTilt] = tilt;}
-  void setZoom(uint8_t *light, const uint8_t zoom) {if (offsetZoom != -1)light[offsetZoom] = zoom;}
-  void setRotate(uint8_t *light, const uint8_t rotate) {if (offsetRotate != -1)light[offsetRotate] = rotate;}
-  void setGobo(uint8_t *light, const uint8_t gobo) {if (offsetGobo != -1)light[offsetGobo] = gobo;}
-  void setRGB1(uint8_t *light, const CRGB &color) {if (offsetRGB1) {light[offsetRGB1] = color.red;light[offsetRGB1 + 1] = color.green;light[offsetRGB1 + 2] = color.blue;}}
-  void setRGB2(uint8_t *light, const CRGB &color) {if (offsetRGB2) {light[offsetRGB2] = color.red;light[offsetRGB2 + 1] = color.green;light[offsetRGB2 + 2] = color.blue;}}
+  // void setRGB(uint8_t *light, const CRGB &color) {
+  //   light[offsetRGB] = color.red;
+  //   light[offsetRGB + 1] = color.green;
+  //   light[offsetRGB + 2] = color.blue;
+  // }
+  // void setWhite(uint8_t *light, const uint8_t white) {if (offsetWhite != -1) light[offsetWhite] = white;}
+  // void setBrightness(uint8_t *light, const uint8_t brightness) {if (offsetBrightness != -1) light[offsetBrightness] = brightness;}
+  // void setPan(uint8_t *light, const uint8_t pan) {if (offsetPan != -1) light[offsetPan] = pan;}
+  // void setTilt(uint8_t *light, const uint8_t tilt) {if (offsetTilt != -1)light[offsetTilt] = tilt;}
+  // void setZoom(uint8_t *light, const uint8_t zoom) {if (offsetZoom != -1)light[offsetZoom] = zoom;}
+  // void setRotate(uint8_t *light, const uint8_t rotate) {if (offsetRotate != -1)light[offsetRotate] = rotate;}
+  // void setGobo(uint8_t *light, const uint8_t gobo) {if (offsetGobo != -1)light[offsetGobo] = gobo;}
+  // void setRGB1(uint8_t *light, const CRGB &color) {if (offsetRGB1) {light[offsetRGB1] = color.red;light[offsetRGB1 + 1] = color.green;light[offsetRGB1 + 2] = color.blue;}}
+  // void setRGB2(uint8_t *light, const CRGB &color) {if (offsetRGB2) {light[offsetRGB2] = color.red;light[offsetRGB2 + 1] = color.green;light[offsetRGB2 + 2] = color.blue;}}
 }; // fill with dummies to make size 24, be aware of padding so do not change order of vars
 
 // Helper function to generate a triangle wave similar to beat16

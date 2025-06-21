@@ -116,7 +116,7 @@ public:
             values.add(GEQEffect::name());
             values.add(LinesEffect::name());
             values.add(LissajousEffect::name());
-            values.add(MovingHeadEffect::name());
+            values.add(MovingHeadLayoutAndEffect::name());
             values.add(PaintBrushEffect::name());
             values.add(RainbowEffect::name());
             values.add(RandomEffect::name());
@@ -127,7 +127,6 @@ public:
             values.add(WaveEffect::name());
 
             values.add(HumanSizedCubeLayout::name());
-            values.add(MovingHeadLayout::name());
             values.add(PanelLayout::name());
             values.add(RingsLayout::name());
 
@@ -240,7 +239,7 @@ public:
                     }
 
                     // delay(100); //let loopTask finish the current loop before removing the node
-                    // layerP.removeNode(oldNode, updatedItem.oldValue.c_str()); //remove the node from the layer, which will also remove the controls
+                    // layerP.removeNode(oldNode); //remove the node from the layer, which will also remove the controls
                 }
                     
                 #if FT_ENABLED(FT_LIVESCRIPT)

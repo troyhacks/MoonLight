@@ -201,9 +201,11 @@ void LiveScriptNode::addLayout() {
     }
 }
 
-void LiveScriptNode::destructor() {
-    ESP_LOGD(TAG, "%s", animation);
-    scriptRuntime.kill(animation);
+LiveScriptNode::~LiveScriptNode() {
+    if (animation != nullptr) { //in case not defined
+        ESP_LOGD(TAG, "%s", animation);
+        scriptRuntime.kill(animation);
+    }
 }
 
 // LiveScriptNode functions

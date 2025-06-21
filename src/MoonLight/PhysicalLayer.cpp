@@ -159,7 +159,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, GEQEffect::name())) node = new GEQEffect();
         else if (equal(name, LinesEffect::name())) node = new LinesEffect();
         else if (equal(name, LissajousEffect::name())) node = new LissajousEffect();
-        else if (equal(name, MovingHeadEffect::name())) node = new MovingHeadEffect();
+        else if (equal(name, MovingHeadLayoutAndEffect::name())) node = new MovingHeadLayoutAndEffect();
         else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
         else if (equal(name, RainbowEffect::name())) node = new RainbowEffect();
         else if (equal(name, RandomEffect::name())) node = new RandomEffect();
@@ -170,7 +170,6 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
 
         else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
-        else if (equal(name, MovingHeadLayout::name())) node = new MovingHeadLayout();
         else if (equal(name, PanelLayout::name())) node = new PanelLayout();
         else if (equal(name, RingsLayout::name())) node = new RingsLayout();
 
@@ -204,8 +203,8 @@ PhysicalLayer::PhysicalLayer() {
 
     void PhysicalLayer::removeNode(Node *node) {
         ESP_LOGD(TAG, "remove node (s:%d)", layerV[0]->nodes.size());
-        node->destructor();
-        delete node;
+        // node->destructor(); //now ˜destructor is called in Node destructor
+        //delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
         // layerV[0]->nodes[index] = nullptr;
     }
 

@@ -65,38 +65,6 @@ class HumanSizedCubeLayout: public Node {
   }
 };
 
-class MovingHeadLayout: public Node {
-  public:
-
-  static const char * name() {return "MovingHead 🚥";}
-
-  uint8_t width;
-  uint8_t pin;
-
-  void setup() override {
-    hasLayout = true;
-    Node::setup();
-    
-    addControl(&width, "width", "range", 4, 1, 32); //default 4 moving heads
-    addControl(&pin, "pin", "number", 16, 1, 48);
-
-    layerV->layerP->lights.header.channelsPerLight = 24;
-    layerV->layerP->lights.header.offsetPan = 0;
-    layerV->layerP->lights.header.offsetTilt = 1;
-    layerV->layerP->lights.header.offsetBrightness = 3;
-    layerV->layerP->lights.header.offsetRGB = 4;
-    layerV->layerP->lights.header.offsetZoom = 17;
-  }
-
-  void addLayout() override {
-    for (uint8_t x = 0; x<width; x++) {
-      addLight({x, 0, 0});
-    }
-    addPin(pin); //needed to slow down the dmx stream ... wip
-  }
-
-};
-
 class PanelLayout: public Node {
   public:
 

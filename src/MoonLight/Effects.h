@@ -109,7 +109,7 @@ class BouncingBallsEffect: public Node {
 
         CRGB color = ColorFromPalette(layerV->layerP->palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
-        layerV->setLight({pos, y, 0}, color);
+        layerV->setRGB({pos, y, 0}, color);
         // if (layerV->size.x<32) layerV->setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
         // else           layerV->setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
       } //balls      layerV->fill_solid(CRGB::White);
@@ -208,7 +208,7 @@ public:
       aux0 = secondHand;
 
       // Pixel brightness (value) based on volume * sensitivity * intensity
-      // uint_fast8_t sensitivity10 = map(sensitivity, 0, 31, 10, 100); // reduced resolution slider // WLEDMM sensitivity * 10, to avoid losing precision
+      // uint_fast8_t sensitivity10 = ::map(sensitivity, 0, 31, 10, 100); // reduced resolution slider // WLEDMM sensitivity * 10, to avoid losing precision
       int pixVal = audio.volume * (float)fx * (float)sensitivity10 / 2560.0f; // WLEDMM 2560 due to sensitivity * 10
       if (pixVal > 255) pixVal = 255;  // make a brightness from the last avg
 
@@ -223,8 +223,8 @@ public:
         // Pixel color (hue) based on major frequency
         int upperLimit = 80 + 42 * highBin;
         int lowerLimit = 80 + 3 * lowBin;
-        //uint8_t i =  lowerLimit!=upperLimit ? map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // (original formula) may under/overflow - so we enforce uint8_t
-        int freqMapped =  lowerLimit!=upperLimit ? map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // WLEDMM preserve overflows
+        //uint8_t i =  lowerLimit!=upperLimit ? ::map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // (original formula) may under/overflow - so we enforce uint8_t
+        int freqMapped =  lowerLimit!=upperLimit ? ::map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // WLEDMM preserve overflows
         uint8_t i = abs(freqMapped) & 0xFF;  // WLEDMM we embrace overflow ;-) by "modulo 256"
 
         color = CHSV(i, 240, (uint8_t)pixVal); // implicit conversion to RGB supplied by FastLED
@@ -274,7 +274,7 @@ public:
     step = millis();
   }
 
-  void destructor() override {
+  ~GEQEffect() {
     ESP_LOGI(TAG, "free previousBarHeight");
     if (previousBarHeight) {
       free(previousBarHeight);
@@ -283,7 +283,7 @@ public:
   }
 
   void loop() override {
-    const int NUM_BANDS = NUM_GEQ_CHANNELS ; // map(layerV->custom1, 0, 255, 1, 16);
+    const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layerV->custom1, 0, 255, 1, 16);
 
     #ifdef SR_DEBUG
     uint8_t samplePeak = *(uint8_t*)um_data->u_data[3];
@@ -296,7 +296,7 @@ public:
     }
 
     int fadeoutDelay = (256 - fadeOut) / 64; //256..1 -> 4..0
-    size_t beat = map(beat16( fadeOut), 0, UINT16_MAX, 0, fadeoutDelay-1 ); // instead of call%fadeOutDelay
+    size_t beat = ::map(beat16( fadeOut), 0, UINT16_MAX, 0, fadeoutDelay-1 ); // instead of call%fadeOutDelay
 
     if ((fadeoutDelay <= 1 ) || (beat == 0)) layerV->fadeToBlackBy(fadeOut);
 
@@ -313,7 +313,7 @@ public:
       remaining--; //consume remaining
 
       // ppf("x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
-      uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):band; // always use full range. comment out this line to get the previous behaviour.
+      uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):band; // always use full range. comment out this line to get the previous behaviour.
       // frBand = constrain(frBand, 0, 15); //WLEDMM can never be out of bounds (I think...)
       uint16_t colorIndex = frBand * 17; //WLEDMM 0.255
       uint16_t bandHeight = audio.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
@@ -323,25 +323,25 @@ public:
         // get height of next (right side) bar
         uint8_t nextband = (remaining < 1)? band +1: band;
         nextband = constrain(nextband, 0, NUM_GEQ_CHANNELS-1);  // just to be sure
-        frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? map(nextband, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):nextband; // always use full range. comment out this line to get the previous behaviour.
+        frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(nextband, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):nextband; // always use full range. comment out this line to get the previous behaviour.
         uint16_t nextBandHeight = audio.bands[frBand];
         // smooth Band height
         bandHeight = (7*bandHeight + 3*lastBandHeight + 3*nextBandHeight) / 12;   // yeees, its 12 not 13 (10% amplification)
         bandHeight = constrain(bandHeight, 0, 255);   // remove potential over/underflows
-        colorIndex = map(pos.x, 0, layerV->size.x-1, 0, 255); //WLEDMM
+        colorIndex = ::map(pos.x, 0, layerV->size.x-1, 0, 255); //WLEDMM
       }
       lastBandHeight = bandHeight; // remember BandHeight (left side) for next iteration
-      uint16_t barHeight = map(bandHeight, 0, 255, 0, layerV->size.y); // Now we map bandHeight to barHeight. do not subtract -1 from layerV->size.y here
+      uint16_t barHeight = ::map(bandHeight, 0, 255, 0, layerV->size.y); // Now we map bandHeight to barHeight. do not subtract -1 from layerV->size.y here
       // WLEDMM end
 
-      if (barHeight > layerV->size.y) barHeight = layerV->size.y;                      // WLEDMM map() can "overshoot" due to rounding errors
+      if (barHeight > layerV->size.y) barHeight = layerV->size.y;                      // WLEDMM ::map() can "overshoot" due to rounding errors
       if (barHeight > previousBarHeight[pos.x]) previousBarHeight[pos.x] = barHeight; //drive the peak up
 
       CRGB ledColor = CRGB::Black;
 
       for (pos.y=0; pos.y < barHeight; pos.y++) {
         if (colorBars) //color_vertical / color bars toggle
-          colorIndex = map(pos.y, 0, layerV->size.y-1, 0, 255);
+          colorIndex = ::map(pos.y, 0, layerV->size.y-1, 0, 255);
 
         ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
 
@@ -376,7 +376,7 @@ public:
     layerV->fadeToBlackBy(255);
 
     Coord3D pos = {0,0,0};
-    pos.x = map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.x ); //instead of call%width
+    pos.x = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.x ); //instead of call%width
 
     for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
       int colorNr = (frameNr / layerV->size.y) % 3;
@@ -384,7 +384,7 @@ public:
     }
 
     pos = {0,0,0};
-    pos.y = map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.y ); //instead of call%height
+    pos.y = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.y ); //instead of call%height
     for (pos.x = 0; pos.x <  layerV->size.x; pos.x++) {
       int colorNr = (frameNr / layerV->size.x) % 3;
       layerV->setLight<CRGB>(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
@@ -418,17 +418,17 @@ public:
         //WLEDMM: stick to the original calculations of xlocn and ylocn
         locn.x = sin8(phase/2 + (i*xFrequency)/64);
         locn.y = cos8(phase/2 + i*2);
-        locn.x = (layerV->size.x < 2) ? 1 : (map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
-        locn.y = (layerV->size.y < 2) ? 1 : (map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "layerV->size.y > 2" is needed to avoid div/0 in map()
-        layerV->setLight(locn, ColorFromPalette(layerV->layerP->palette, millis()/100+i, 255));
+        locn.x = (layerV->size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
+        locn.y = (layerV->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "layerV->size.y > 2" is needed to avoid div/0 in ::map()
+        layerV->setRGB(locn, ColorFromPalette(layerV->layerP->palette, millis()/100+i, 255));
     }
   }
 };
 
-class MovingHeadEffect: public Node {
+class MovingHeadLayoutAndEffect: public Node {
   public:
 
-  static const char * name() {return "MovingHead 🔥♫💫";}
+  static const char * name() {return "MovingHead 🚥🔥♫💫";}
 
   uint8_t bpm;
   uint8_t pan;
@@ -439,6 +439,9 @@ class MovingHeadEffect: public Node {
   bool audioReactive;
   bool invert;
 
+  uint8_t width;
+  uint8_t pin;
+
   void setup() override {
     addControl(&bpm, "bpm", "range", 30);
     addControl(&pan, "pan", "range", 175);
@@ -448,39 +451,56 @@ class MovingHeadEffect: public Node {
     addControl(&range, "range", "range", 20);
     addControl(&audioReactive, "audioReactive", "checkbox", false);
     addControl(&invert, "invert", "checkbox", false);
+
+    hasLayout = true;
+    Node::setup();
+    
+    addControl(&width, "width", "range", 4, 1, 32); //default 4 moving heads
+    addControl(&pin, "pin", "number", 16, 1, 48);
+
+    layerV->layerP->lights.header.channelsPerLight = 24;
+    layerV->layerP->lights.header.offsetPan = 0;
+    layerV->layerP->lights.header.offsetTilt = 1;
+    layerV->layerP->lights.header.offsetBrightness = 3;
+    layerV->layerP->lights.header.offsetRGB = 4;
+    layerV->layerP->lights.header.offsetRGB1 = 8;
+    layerV->layerP->lights.header.offsetRGB2 = 12;
+    layerV->layerP->lights.header.offsetZoom = 17;
+  }
+
+  void addLayout() override {
+    for (uint8_t x = 0; x<width; x++) {
+      addLight({x, 0, 0});
+    }
+    addPin(pin); //needed to slow down the dmx stream ... wip
   }
 
   void loop() override {
 
     for (uint8_t i=0; i<layerV->size.x; i++) {
 
-      uint8_t light[24]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight (yet)
-      memset(light, 0, sizeof(light)); //set light to 0
-      
+      layerV->fadeToBlackBy(255); //set all channels to 0
+
       if (audioReactive) {
         uint8_t nrOfLights = layerV->size.x * 3;
         uint8_t  delta = 256 / nrOfLights;
 
         //set the 3 led groups for each moving head light
-        for (int j=0; j<3; j++) {
-          layerV->layerP->lights.header.offsetRGB = 4 + j * 4;
-          layerV->layerP->lights.header.setRGB(light, CHSV( (i + j*3) * delta, 255, audio.bands[(i * 3 + j) % 16]));
-        }
+        layerV->setRGB({i,0,0}, CHSV( (i) * delta, 255, audio.bands[(i * 3) % 16]));
+        layerV->setRGB1({i,0,0}, CHSV( (i + 3) * delta, 255, audio.bands[(i * 3 + 1) % 16]));
+        layerV->setRGB2({i,0,0}, CHSV( (i + 6) * delta, 255, audio.bands[(i * 3 + 2) % 16]));
       } else {
         if (i == beatsin8(bpm, 0, layerV->size.x - 1)) { //sinelon over moving heads
-          for (int j=0; j<3; j++) {
-            layerV->layerP->lights.header.offsetRGB = 4 + j * 4;
-            layerV->layerP->lights.header.setRGB(light, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
-          }
+          layerV->setRGB({i,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
+          layerV->setRGB1({i,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
+          layerV->setRGB2({i,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
         }
       }
 
-      layerV->layerP->lights.header.setPan(light, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && i%2==0)?128:0): pan); //if automove, pan the light over a range
-      layerV->layerP->lights.header.setTilt(light, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && i%2==0)?128:0): tilt);
-      layerV->layerP->lights.header.setZoom(light, zoom);
-      layerV->layerP->lights.header.setBrightness(light, layerV->layerP->lights.header.brightness);
-
-      layerV->setLight({i,0,0}, light);
+      layerV->setPan({i,0,0}, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && i%2==0)?128:0): pan); //if automove, pan the light over a range
+      layerV->setTilt({i,0,0}, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && i%2==0)?128:0): tilt);
+      layerV->setZoom({i,0,0}, zoom);
+      layerV->setBrightness({i,0,0}, layerV->layerP->lights.header.brightness);
     }
   }
 };
@@ -541,7 +561,7 @@ public:
     aux1Chaos = phase_chaos?random8():0;
 
     for (size_t i = 0; i < numLines; i++) {
-      uint8_t bin = map(i,0,numLines,0,15);
+      uint8_t bin = ::map(i,0,numLines,0,15);
       
       uint8_t x1 = beatsin8(oscillatorOffset*1 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
       uint8_t x2 = beatsin8(oscillatorOffset*2 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
@@ -565,7 +585,7 @@ public:
         if (color_chaos)
           color = ColorFromPalette(layerV->layerP->palette, i * 255 / numLines + ((aux0Hue)&0xFF), 255);
         else
-          color = ColorFromPalette(layerV->layerP->palette, map(i, 0, numLines, 0, 255), 255);
+          color = ColorFromPalette(layerV->layerP->palette, ::map(i, 0, numLines, 0, 255), 255);
         if (depth > 1)
           layerV->drawLine3D(x1, y1, z1, x2, y2, z2, color, soft, length); // no soft implemented in 3D yet
         else
@@ -644,19 +664,11 @@ class RGBWParEffect: public Node {
 
   void loop() override {
     layerV->fadeToBlackBy(255); //reset all channels
-    for (int i=0; i<layerV->size.x * layerV->layerP->lights.header.channelsPerLight; i++) {
-      layerV->layerP->lights.leds[i] = CRGB::Black;
-    }
 
     uint8_t pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
 
-    uint8_t light[4];
-    memset(light, 0, sizeof(light)); //set light to 0
-    
-    layerV->layerP->lights.header.setRGB(light, CRGB(red, green, blue));
-    layerV->layerP->lights.header.setWhite(light, white);
-
-    layerV->setLight({pos,0,0}, light);
+    layerV->setRGB({pos,0,0}, CRGB(red, green, blue));
+    layerV->setWhite({pos,0,0}, white);
   }
 };
   
@@ -771,11 +783,11 @@ public:
 
       //delay over y-axis..timebase ...
       switch (type) {
-        case 0: pos = map(beat8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
-        case 1: pos = map(triangle8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
+        case 0: pos = ::map(beat8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
+        case 1: pos = ::map(triangle8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
         case 2: pos = beatsin8( bpm, 0, layerV->size.x-1, y * 100 ); break;
         case 3: pos = beat8(bpm, y*100) > 128? 0 : layerV->size.x-1; break;
-        // case 3: pos = map(_time(bpm), 0, UINT16_MAX, 0, layerV->size.x-1 ); break;
+        // case 3: pos = ::map(_time(bpm), 0, UINT16_MAX, 0, layerV->size.x-1 ); break;
         default: pos = 0;
       }
 

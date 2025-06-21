@@ -37,7 +37,7 @@ public:
 
   bool on = false; //onUpdate will set it on
 
-  //C++ constructor and destructor are not inherited, so declare it as normal functions
+  //C++ constructor is not inherited, so declare it as normal functions
   virtual void constructor(VirtualLayer *layerV, JsonArray controls) {
     this->layerV = layerV;
     this->controls = controls;
@@ -127,8 +127,9 @@ public:
   virtual void modifyLight(Coord3D &position) {} //not const as position is changed
   virtual void modifyXYZ(Coord3D &position) {}
 
-  virtual void destructor() {
+  virtual ~Node() {
     //delete any allocated memory
+
     if (hasModifier) {
         // ESP_LOGD(TAG, "Modifier deleted -> remap layout %s", nodeState["nodeName"].as<String>().c_str());
         layerV->requestMapVirtual = true;
@@ -155,7 +156,7 @@ class LiveScriptNode: public Node {
   bool hasAddControl = false;
   bool isLiveScriptNode() const override { return true; }
 
-  const char *animation; //which animation (file) to run
+  const char *animation = nullptr; //which animation (file) to run
 
   void setup() override; //addExternal, compileAndRun
   
@@ -164,7 +165,7 @@ class LiveScriptNode: public Node {
   //layout
   void addLayout() override; // call map in LiveScript
   
-  void destructor() override;
+  ~LiveScriptNode(); 
 
   // LiveScript functions
   void compileAndRun();
