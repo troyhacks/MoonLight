@@ -34,30 +34,34 @@ Typically a node will define a layout (🚥), or an effect (🔥), or a modifier
 ## Nodes
 
 Emoji coding:
-🔥 Effect
-🚥 Layout
-💎 Modifier
-☸️ Supporting node
-🎨 Using palette
-💡 WLED origin
-💫 MoonLight origin
-♫ Audio reactive FFT based
-♪ Audio reactive volume based
-🧊 3D
+
+* 🔥 Effect
+* 🚥 Layout
+* 💎 Modifier
+* ☸️ Supporting node
+* 🎨 Using palette
+* 💡 WLED origin
+* 💫 MoonLight origin
+* ♫ Audio reactive FFT based
+* ♪ Audio reactive volume based
+* 🧊 3D
 
 ### Effect 🔥 Nodes
+🚧
 
-## PanTilt script
+#### PanTilt script
 
-See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
-
-Sends a beatsin to Pan and Tilt which can be sent to Moving Heads
-Controls: BPM, Middle Pan and Tilt, Range and invert
-Usage: Add this effect if moving heads are configured. RGB effects can be added seperately e.g. wave to light up the moving heads in wave patterns
+* Sends a beatsin to Pan and Tilt which can be sent to Moving Heads
+* Controls: BPM, Middle Pan and Tilt, Range and invert
+* Usage: Add this effect if moving heads are configured. RGB effects can be added seperately e.g. wave to light up the moving heads in wave patterns
+* See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
+* Run script see [How to run a live script](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/#how-to-run-a-live-script)
 
 ### Layout 🚥 Nodes
+🚧
 
 ### Modifier 💎 Nodes
+🚧
 
 ## Archive
 
