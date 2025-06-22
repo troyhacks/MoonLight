@@ -196,15 +196,17 @@ PhysicalLayer::PhysicalLayer() {
                 layerV[0]->nodes[index] = node; //add the node to the layer
         }
 
-        ESP_LOGD(TAG, "%s (s:%d)", name, layerV[0]->nodes.size());
+        ESP_LOGD(TAG, "%s (s:%d p:%p)", name, layerV[0]->nodes.size(), node);
 
         return node;
     }
 
     void PhysicalLayer::removeNode(Node *node) {
-        ESP_LOGD(TAG, "remove node (s:%d)", layerV[0]->nodes.size());
+        ESP_LOGD(TAG, "remove node (s:%d p:%p)", layerV[0]->nodes.size(), node);
         // node->destructor(); //now ˜destructor is called in Node destructor
-        //delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
+        // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
+        // //can cause a crash if it has addControl ...  (e.g. panel layout)
+        
         // layerV[0]->nodes[index] = nullptr;
     }
 

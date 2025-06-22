@@ -38,7 +38,7 @@ void loop() {
       uint8_t radius = rMapRadius[x*height+y];
       uint16_t intensity = sin8(sin8((angle * 4 - radius*mapp) / 4 + t) + radius*mapp - 2*t + angle * branches);
 
-      setLight(y*width+x, hsv(2*t - radius*mapp, 255, intensity));
+      setRGB(y*width+x, hsv(2*t - radius*mapp, 255, intensity));
     }
   }
   t = now() * speed / 32 / 25; //speed 0..8, 40 changes per second

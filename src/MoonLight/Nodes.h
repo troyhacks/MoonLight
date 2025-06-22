@@ -130,14 +130,8 @@ public:
   virtual ~Node() {
     //delete any allocated memory
 
-    if (hasModifier) {
-        // ESP_LOGD(TAG, "Modifier deleted -> remap layout %s", nodeState["nodeName"].as<String>().c_str());
-        layerV->requestMapVirtual = true;
-    }
-    if (hasLayout) {
-      layerV->requestMapPhysical = true; //request mapPhysical to update the layout
-      layerV->requestMapVirtual = true; //request mapVirtual to update the layout
-    }
+    ESP_LOGD(TAG, "Node destructor %d %d", hasLayout, hasModifier);
+
   }
 
 };
@@ -173,7 +167,7 @@ class LiveScriptNode: public Node {
   void kill();
   void free();
   void killAndDelete();
-  void getScriptsJson(JsonArray scripts);
+  static void getScriptsJson(JsonArray scripts);
   
 };
 

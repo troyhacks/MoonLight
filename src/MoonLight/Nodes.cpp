@@ -71,8 +71,8 @@ static void _modifyLayout() {gNode->modifyLayout();}
 // static void _modifyXYZ() {gNode->modifyXYZ();}//need &position parameter
 
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
-static void _setLight(uint16_t indexV, CRGB color) {gNode->layerV->setLight(indexV, color);}
-static void _setLightPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setLight(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
+static void _setRGB(uint16_t indexV, CRGB color) {gNode->layerV->setRGB(indexV, color);}
+static void _setRGBPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setRGB(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
 
 static float _time(float j) {
     float myVal = millis();
@@ -133,13 +133,15 @@ void LiveScriptNode::setup() {
       return;
   }
 
+  //make sure types in below functions are correct !!! otherwise livescript will crash
+
   //generic functions
   addExternal("uint32_t millis()", (void *)millis);
   addExternal("uint32_t now()", (void *)millis); //todo: synchronized time (sys->now)
   addExternal("uint16_t random16(uint16_t)", (void *)(uint16_t (*)(uint16_t))random16);
-  addExternal(    "void delay(uint8_t)", (void *)delay);
-  addExternal(    "void pinMode(int,int)", (void *)pinMode);
-  addExternal(    "void digitalWrite(int,int)", (void *)digitalWrite);
+  addExternal(    "void delay(uint32_t)", (void *)delay);
+  addExternal(    "void pinMode(uint8_t,uint8_t)", (void *)pinMode);
+  addExternal(    "void digitalWrite(uint8_t,uint8_t)", (void *)digitalWrite);
 
   //trigonometric functions
   addExternal(   "float sin(float)", (void *)(float (*)(float))sin);
@@ -171,12 +173,12 @@ void LiveScriptNode::setup() {
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
   addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);
-  addExternal(    "void setLight(uint16_t,CRGB)", (void *)_setLight);
-  addExternal(    "void setLightPal(uint16_t,uint8_t,uint8_t)", (void *)_setLightPal);
-  addExternal("uint16_t width", &layerV->size.x);
-  addExternal("uint16_t height", &layerV->size.y);
-  addExternal("uint16_t depth", &layerV->size.z);
-  addExternal("bool on", &on);
+  addExternal(    "void setRGB(uint16_t,CRGB)", (void *)_setRGB);
+  addExternal(    "void setRGBPal(uint16_t,uint8_t,uint8_t)", (void *)_setRGBPal);
+  addExternal( "uint8_t width", &layerV->size.x);
+  addExternal( "uint8_t height", &layerV->size.y);
+  addExternal( "uint8_t depth", &layerV->size.z);
+  addExternal(    "bool on", &on);
 
   for (asm_external el: external_links) {
       ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
@@ -202,10 +204,8 @@ void LiveScriptNode::addLayout() {
 }
 
 LiveScriptNode::~LiveScriptNode() {
-    if (animation != nullptr) { //in case not defined
-        ESP_LOGD(TAG, "%s", animation);
-        scriptRuntime.kill(animation);
-    }
+    ESP_LOGD(TAG, "%s", animation);
+    scriptRuntime.kill(animation);
 }
 
 // LiveScriptNode functions

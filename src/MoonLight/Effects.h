@@ -173,7 +173,7 @@ public:
         valueG = gamma8(cos8(valueG));
         valueB = gamma8(cos8(valueB));
 
-        layerV->setLight(pos, CRGB(valueR, valueG, valueB));
+        layerV->setRGB(pos, CRGB(valueR, valueG, valueB));
       }
     }
   }
@@ -231,12 +231,12 @@ public:
       }
 
       // shift the pixels one pixel up
-      layerV->setLight(0, color);
+      layerV->setRGB(0, color);
       for (uint8_t x = layerV->size.x - 1; x >= 0; x--) {
         if (x!=0) color = layerV->getLight<CRGB>(x-1);
         for (uint8_t y = 0; y < layerV->size.y; y++)
           for (uint8_t z = 0; z < layerV->size.z; z++)
-            layerV->setLight({x,y,z}, color);
+            layerV->setRGB({x,y,z}, color);
       }
     }
   }
@@ -345,11 +345,11 @@ public:
 
         ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
 
-        layerV->setLight(intToCoord3D(pos.x, layerV->size.y - 1 - pos.y, 0), ledColor);
+        layerV->setRGB(intToCoord3D(pos.x, layerV->size.y - 1 - pos.y, 0), ledColor);
       }
 
       if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
-        layerV->setLight(intToCoord3D(pos.x, layerV->size.y - previousBarHeight[pos.x], 0), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
+        layerV->setRGB(intToCoord3D(pos.x, layerV->size.y - previousBarHeight[pos.x], 0), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
 
       if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
 
@@ -604,7 +604,7 @@ class RandomEffect: public Node {
 
   void loop() override {
       layerV->fadeToBlackBy(70);
-      layerV->setLight(random16(layerV->nrOfLights), CRGB(255, random8(), 0));
+      layerV->setRGB(random16(layerV->nrOfLights), CRGB(255, random8(), 0));
   }
 };
 
@@ -637,7 +637,7 @@ class RipplesEffect: public Node {
         float d = distance(layerV->size.x/2.0f, layerV->size.z/2.0f, 0.0f, (float)pos.x, (float)pos.z, 0.0f) / 9.899495f * layerV->size.y;
         pos.y = floor(layerV->size.y/2.0f * (1 + sinf(d/ripple_interval + time_interval))); //between 0 and layerV->size.y
 
-        layerV->setLight(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
+        layerV->setRGB(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
       }
     }
   }
@@ -699,7 +699,7 @@ class SinusEffect: public Node {
         // Map the sine wave value to a color hue
         uint8_t hue = wave + hueOffset;
         // Set the LED color using the calculated hue
-        layerV->setLight(i, (CRGB)CHSV(hue, 255, brightness));
+        layerV->setRGB(i, (CRGB)CHSV(hue, 255, brightness));
     }
 
     // Increment the phase to animate the wave
@@ -740,7 +740,7 @@ class SphereMoveEffect: public Node {
                 float d = distance(pos.x, pos.y, pos.z, origin.x, origin.y, origin.z);
 
                 if (d>diameter && d<diameter + 1.0) {
-                  layerV->setLight(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
+                  layerV->setRGB(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
                 }
             }
         }
@@ -772,7 +772,7 @@ public:
   }
 
   void loop() override {
-    layerV->fadeToBlackBy(fade);
+    layerV->fadeToBlackBy(fade); //should only fade rgb ...
 
     CRGB color = CHSV( millis()/50, 255, 255);
 
@@ -794,10 +794,10 @@ public:
       //connect saw and square
       if (abs(prevPos - pos) > layerV->size.x / 2) {
         for (uint8_t x=0; x<layerV->size.x; x++)
-          layerV->setLight({x, y, 0}, color);
+          layerV->setRGB({x, y, 0}, color);
       }
 
-      layerV->setLight({pos, y, 0}, color); //= CRGB(255, random8(), 0);
+      layerV->setRGB({pos, y, 0}, color); //= CRGB(255, random8(), 0);
       prevPos = pos;
     }
   }

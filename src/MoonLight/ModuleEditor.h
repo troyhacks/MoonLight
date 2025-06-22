@@ -228,18 +228,17 @@ public:
                         ESP_LOGD(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], layerP.layerV[0]->nodes.size());
                     }
 
-                    if (oldNode->hasModifier) {
-                        ESP_LOGD(TAG, "Modifier %s deleted -> remap layout", updatedItem.oldValue.c_str());
-                        layerP.layerV[0]->requestMapVirtual = true;
-                    }
                     if (oldNode->hasLayout) {
                         ESP_LOGD(TAG, "Layout %s deleted -> remap layout", updatedItem.oldValue.c_str());
                         layerP.layerV[0]->requestMapPhysical = true;
+                    }
+
+                    if (oldNode->hasModifier || oldNode->hasLayout) {
+                        ESP_LOGD(TAG, "Modifier %s deleted -> remap layout", updatedItem.oldValue.c_str());
                         layerP.layerV[0]->requestMapVirtual = true;
                     }
 
-                    // delay(100); //let loopTask finish the current loop before removing the node
-                    // layerP.removeNode(oldNode); //remove the node from the layer, which will also remove the controls
+                    layerP.removeNode(oldNode);
                 }
                     
                 #if FT_ENABLED(FT_LIVESCRIPT)
@@ -264,13 +263,12 @@ public:
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
                         ESP_LOGD(TAG, "  nodeclass m:%d l:%d", nodeClass->hasModifier, nodeClass->hasLayout);
-                        if (nodeClass->hasModifier) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
-                            ESP_LOGD(TAG, "Modifier on/off -> remap layout %s", nodeState["nodeName"].as<String>().c_str());
-                            layerP.layerV[0]->requestMapVirtual = true;
-                        }
                         if (nodeClass->hasLayout) {
                             ESP_LOGD(TAG, "Layout on/off -> remap layout %s (on:%d)", nodeState["nodeName"].as<String>().c_str(), nodeClass->on);
                             layerP.layerV[0]->requestMapPhysical = true;
+                        }
+                        if (nodeClass->hasModifier || nodeClass->hasLayout) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
+                            ESP_LOGD(TAG, "Modifier on/off -> remap layout %s", nodeState["nodeName"].as<String>().c_str());
                             layerP.layerV[0]->requestMapVirtual = true;
                         }
                     }

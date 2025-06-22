@@ -155,7 +155,7 @@ void VirtualLayer::fadeToBlackMin() {
     //     for (int x=0; x<size.x; x++) {
     //       CRGB color = getLight({x,y,0});
     //       color.nscale8(255-fadeBy);
-    //       setLight({x,y,0}, color);
+    //       setRGB({x,y,0}, color);
     //     }
     //   }
     // } else 
@@ -166,7 +166,7 @@ void VirtualLayer::fadeToBlackMin() {
         for (uint16_t index = 0; index < nrOfLights; index++) {
           CRGB color = getLight<CRGB>(index);
           color.nscale8(255-fadeBy);
-          setLight(index, color);
+          setRGB(index, color);
         }
       }
     } else { //multichannel lights
@@ -186,7 +186,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
   // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
-  //       setLight({x,y,0}, color);
+  //       setRGB({x,y,0}, color);
   //     }
   //   }
   // } else 
@@ -194,7 +194,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
     fastled_fill_solid(layerP->lights.leds, layerP->lights.header.nrOfLights, color);
   } else {
     for (uint16_t index = 0; index < nrOfLights; index++)
-      setLight(index, color);
+      setRGB(index, color);
   }
 }
 
@@ -206,7 +206,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   //   hsv.sat = 240;
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
-  //       setLight({x,y,0}, hsv);
+  //       setRGB({x,y,0}, hsv);
   //       hsv.hue += deltahue;
   //     }
   //   }
@@ -220,7 +220,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
     hsv.sat = 240;
 
     for (uint16_t index = 0; index < nrOfLights; index++) {
-      setLight(index, hsv);
+      setRGB(index, hsv);
       hsv.hue += deltahue;
     }
   }

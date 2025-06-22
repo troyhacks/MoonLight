@@ -98,8 +98,7 @@ public:
 
         JsonDocument newData; //to only send updatedData
         JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
-        LiveScriptNode node;
-        node.getScriptsJson(scripts);
+        LiveScriptNode::getScriptsJson(scripts);
 
         //only if changed
         if (_state.data["scripts"] != newData["scripts"]) {
