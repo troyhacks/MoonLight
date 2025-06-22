@@ -47,6 +47,14 @@ Emoji coding:
 
 ### Effect 🔥 Nodes
 
+## PanTilt script
+
+See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
+
+Sends a beatsin to Pan and Tilt which can be sent to Moving Heads
+Controls: BPM, Middle Pan and Tilt, Range and invert
+Usage: Add this effect if moving heads are configured. RGB effects can be added seperately e.g. wave to light up the moving heads in wave patterns
+
 ### Layout 🚥 Nodes
 
 ### Modifier 💎 Nodes

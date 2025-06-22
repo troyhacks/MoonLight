@@ -83,246 +83,82 @@ class VirtualLayer {
     return position.x + position.y*size.x + position.z * size.x * size.y;
   }
 
-  void fadeToBlackBy(const uint8_t fadeBy);
-  void fadeToBlackMin();
-
   void setRGB(const uint16_t indexV, CRGB color) {
     setLight(indexV, color.raw, layerP->lights.header.offsetRGB, sizeof(color));
   }
   void setRGB(Coord3D pos, CRGB color) { setRGB(XYZUnprojected(pos), color); }
 
   void setWhite(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetWhite != -1)
+    if (layerP->lights.header.offsetWhite != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetWhite, sizeof(value));
   }
   void setWhite(Coord3D pos, const uint8_t value) { setWhite(XYZUnprojected(pos), value); }
 
   void setBrightness(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetBrightness != -1)
+    if (layerP->lights.header.offsetBrightness != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness, sizeof(value));
   }
   void setBrightness(Coord3D pos, const uint8_t value) { setBrightness(XYZUnprojected(pos), value); }
 
   void setPan(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetPan != -1)
+    if (layerP->lights.header.offsetPan != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetPan, sizeof(value));
   }
   void setPan(Coord3D pos, const uint8_t value) { setPan(XYZUnprojected(pos), value); }
 
   void setTilt(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetTilt != -1)
+    if (layerP->lights.header.offsetTilt != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetTilt, sizeof(value));
   }
   void setTilt(Coord3D pos, const uint8_t value) { setTilt(XYZUnprojected(pos), value); }
 
   void setZoom(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetZoom != -1)
+    if (layerP->lights.header.offsetZoom != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetZoom, sizeof(value));
   }
   void setZoom(Coord3D pos, const uint8_t value) { setZoom(XYZUnprojected(pos), value); }
 
   void setRotate(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetRotate != -1)
+    if (layerP->lights.header.offsetRotate != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetRotate, sizeof(value));
   }
   void setRotate(Coord3D pos, const uint8_t value) { setRotate(XYZUnprojected(pos), value); }
 
   void setGobo(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetGobo != -1)
+    if (layerP->lights.header.offsetGobo != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetGobo, sizeof(value));
   }
   void setGobo(Coord3D pos, const uint8_t value) { setGobo(XYZUnprojected(pos), value); }
 
   void setRGB1(const uint16_t indexV, CRGB color) {
-    if (layerP->lights.header.offsetRGB1 != -1)
+    if (layerP->lights.header.offsetRGB1 != UINT8_MAX)
       setLight(indexV, color.raw, layerP->lights.header.offsetRGB1, sizeof(color));
   }
   void setRGB1(Coord3D pos, CRGB color) { setRGB1(XYZUnprojected(pos), color); }
 
   void setRGB2(const uint16_t indexV, CRGB color) {
-    if (layerP->lights.header.offsetRGB2 != -1)
+    if (layerP->lights.header.offsetRGB2 != UINT8_MAX)
       setLight(indexV, color.raw, layerP->lights.header.offsetRGB2, sizeof(color));
   }
   void setRGB2(Coord3D pos, CRGB color) { setRGB2(XYZUnprojected(pos), color); }
 
-  void setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length) {
-    if (indexV < mappingTableSizeUsed) {
-      // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
-      switch (mappingTable[indexV].mapType) {
-        case m_color:{
-          //only room for storing colors
-          if (length == 3) {
-            mappingTable[indexV].rgb14 = ((min(channels[0] + 3, 255) >> 3) << 9) + 
-                                        ((min(channels[1] + 3, 255) >> 3) << 4) + 
-                                        (min(channels[2] + 7, 255) >> 4);
-          }
-          break;
-        }
-        case m_oneLight: {
-          uint16_t indexP = mappingTable[indexV].indexP;
-          //temp fix for cube202020 (some curtains are bgr)
-          // if (indexP > 2800) {
-          //   fix->ledsP[indexP].r = color.b;
-          //   fix->ledsP[indexP].g = color.g;
-          //   fix->ledsP[indexP].b = color.r;
-          // }
-          // else
-          // Serial.printf(" (%d %d,%d,%d %d %d %d)", indexP, channels[0], channels[1], channels[2], layerP->lights.header.channelsPerLight, start, length);
-          memcpy(&layerP->lights.channels[indexP*layerP->lights.header.channelsPerLight + offset], channels, length);
-          // memcpy(&layerP->lights.channels[indexP*3], channels, 3);
-    
-          // &layerP->lights.channels[indexP*sizeof(T)] = valueAsBytes;
-          break; }
-        case m_moreLights:
-          if (mappingTable[indexV].indexes < mappingTableIndexes.size())
-            for (uint16_t indexP: mappingTableIndexes[mappingTable[indexV].indexes]) {
-              // if (indexP > 2800) {
-              //   fix->ledsP[indexP].r = color.b;
-              //   fix->ledsP[indexP].g = color.g;
-              //   fix->ledsP[indexP].b = color.r;
-              // } else
-              memcpy(&layerP->lights.channels[indexP*layerP->lights.header.channelsPerLight + offset], channels, length);
-            }
-          else
-            ESP_LOGW(TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
-          break;
-        default: ;
-      }
-    }
-    else if (indexV * layerP->lights.header.channelsPerLight + offset + length < MAX_CHANNELS) {//no mapping
-      memcpy(&layerP->lights.channels[indexV*layerP->lights.header.channelsPerLight + offset], channels, length);
-    }
-      // layerP->lights.dmxChannels[indexV] = (byte*)&color;
-    // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-    //   ESP_LOGW(TAG, " dev setLight %d >= %d", indexV, MAX_LEDS);
-  }
+  void setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length);
 
-    uint8_t * getLight(const uint16_t indexV) const {
-    if (indexV < mappingTableSizeUsed) {
-      switch (mappingTable[indexV].mapType) {
-        case m_oneLight: {
-          return &layerP->lights.channels[mappingTable[indexV].indexP * layerP->lights.header.channelsPerLight];
-          break; }
-        case m_moreLights: {
-          return &layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * layerP->lights.header.channelsPerLight]; //any will do as they are all the same
-          break; }
-        default: // m_color:
-          // if (layerP->lights.header.channelsPerLight == 3) {
-          //   return CRGB((mappingTable[indexV].rgb14 >> 9) << 3, 
-          //               (mappingTable[indexV].rgb14 >> 4) << 3, 
-          //                mappingTable[indexV].rgb14       << 4);
-          // }
-          // else
-            return nullptr; //not implemented yet
-          break;
-      }
-    }
-    else if (indexV * layerP->lights.header.channelsPerLight < MAX_CHANNELS) { //no mapping
-      return &layerP->lights.channels[indexV * layerP->lights.header.channelsPerLight];
-    } else {
-      // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-      // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
-      return nullptr;
-    }
+  CRGB getRGB(const uint16_t indexV) {
+    return getLight(indexV, layerP->lights.header.offsetRGB);
   }
+  CRGB getRGB(Coord3D pos) { return getRGB(XYZUnprojected(pos)); }
 
-  template <typename T>
-  void setLight(const uint16_t indexV, const T& value) {  // Serial.printf(" %d: %d,%d,%d", indexV, color.r, color.g, color.b);
-    if (indexV < mappingTableSizeUsed) {
-      // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
-      switch (mappingTable[indexV].mapType) {
-        case m_color:{
-          //only room for storing colors
-          if (std::is_same<T, CRGB>::value) {
-            const byte* valueAsBytes = reinterpret_cast<const byte*>(&value);
-            mappingTable[indexV].rgb14 = ((min(valueAsBytes[0] + 3, 255) >> 3) << 9) + 
-                                        ((min(valueAsBytes[1] + 3, 255) >> 3) << 4) + 
-                                        (min(valueAsBytes[2] + 7, 255) >> 4);
-          }
-          break;
-        }
-        case m_oneLight: {
-          uint16_t indexP = mappingTable[indexV].indexP;
-          //temp fix for cube202020 (some curtains are bgr)
-          // if (indexP > 2800) {
-          //   fix->ledsP[indexP].r = color.b;
-          //   fix->ledsP[indexP].g = color.g;
-          //   fix->ledsP[indexP].b = color.r;
-          // }
-          // else
-          memcpy(&layerP->lights.channels[indexP*sizeof(T)], &value, sizeof(T));
-    
-          // &layerP->lights.channels[indexP*sizeof(T)] = valueAsBytes;
-          break; }
-        case m_moreLights:
-          if (mappingTable[indexV].indexes < mappingTableIndexes.size())
-            for (uint16_t indexP: mappingTableIndexes[mappingTable[indexV].indexes]) {
-              // if (indexP > 2800) {
-              //   fix->ledsP[indexP].r = color.b;
-              //   fix->ledsP[indexP].g = color.g;
-              //   fix->ledsP[indexP].b = color.r;
-              // } else
-              memcpy(&layerP->lights.channels[indexP*sizeof(T)], &value, sizeof(T));
-            }
-          else
-            ESP_LOGW(TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
-          break;
-        default: ;
-      }
-    }
-    else if (indexV * sizeof(T) < MAX_CHANNELS) {//no mapping
-      memcpy(&layerP->lights.channels[indexV*sizeof(T)], &value, sizeof(T));
-    }
-      // layerP->lights.dmxChannels[indexV] = (byte*)&color;
-    // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-    //   ESP_LOGW(TAG, " dev setLight %d >= %d", indexV, MAX_LEDS);
-  }
-
-  template <typename T>
-  void setLight(const Coord3D &position, const T& value) {setLight(XYZUnprojected(position), value);}
-
-  template <typename T>
-  T getLight(const uint16_t indexV) const {
-    if (indexV < mappingTableSizeUsed) {
-      switch (mappingTable[indexV].mapType) {
-        case m_oneLight: {
-          T* b = (T*)&layerP->lights.channels[mappingTable[indexV].indexP * sizeof(T)];
-          return *b; 
-          break; }
-        case m_moreLights: {
-          T* b = (T*)&layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * sizeof(T)]; //any will do as they are all the same
-          return *b;
-          break; }
-        default: // m_color:
-          return T();
-          // if (std::is_same<T, CRGB>::value) {
-          //   const byte* valueAsBytes = reinterpret_cast<const byte*>(&value);
-          //   mappingTable[indexV].rgb14 = ((min(valueAsBytes[0] + 3, 255) >> 3) << 9) + 
-          //                             ((min(valueAsBytes[1] + 3, 255) >> 3) << 4) + 
-          //                               (min(valueAsBytes[2] + 7, 255) >> 4);
-          // }
-          // return CRGB((mappingTable[indexV].rgb14 >> 9) << 3, 
-          //             (mappingTable[indexV].rgb14 >> 4) << 3, 
-          //              mappingTable[indexV].rgb14       << 4);
-          break;
-      }
-    }
-    else if (indexV * sizeof(T) < MAX_CHANNELS) { //no mapping
-      T* b = (T*)&layerP->lights.channels[indexV * sizeof(T)];
-      return *b;
-    } else {
-      // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-      // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
-      return T();
-    }
-  }
-  template <typename T>
-  T getLight(const Coord3D &position) const {return getLight<T>(XYZUnprojected(position));}
+  CRGB getLight(const uint16_t indexV, uint8_t offset) const;
 
   //to be called in loop, if more then one effect
   // void setLightsToBlend(); //uses leds
+
+  void fadeToBlackBy(const uint8_t fadeBy);
+  void fadeToBlackMin();
+
+  //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
+  void resetLights();
 
   void fill_solid(const CRGB& color);
   void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
@@ -353,7 +189,7 @@ class VirtualLayer {
 
     // single pixel (line length == 0)
     if (dx+dy == 0) {
-      setLight({x0, y0, 0}, color);
+      setRGB({x0, y0, 0}, color);
       return;
     }
 
@@ -379,10 +215,10 @@ class VirtualLayer {
         if (steep) std::swap(x,y);  // temporarily swap if steep
         // pixel coverage is determined by fractional part of y co-ordinate
         // WLEDMM added out-of-bounds check: "unsigned(x) < cols" catches negative numbers _and_ too large values
-        setLight({x, y, 0}, blend(color, getLight<CRGB>({x, y, 0}), keep));
+        setRGB({x, y, 0}, blend(color, getRGB({x, y, 0}), keep));
         uint8_t xx = x+uint8_t(steep);
         uint8_t yy = y+uint8_t(!steep);
-        setLight({xx, yy, 0}, blend(color, getLight<CRGB>({xx, yy, 0}), seep));
+        setRGB({xx, yy, 0}, blend(color, getRGB({xx, yy, 0}), seep));
       
         intersectY += gradient;
         if (steep) std::swap(x,y);  // restore if steep
@@ -392,7 +228,7 @@ class VirtualLayer {
       int err = (dx>dy ? dx : -dy)/2;   // error direction
       for (;;) {
         // if (x0 >= cols || y0 >= rows) break; // WLEDMM we hit the edge - should never happen
-        setLight({x0, y0, 0}, color);
+        setRGB({x0, y0, 0}, color);
         if (x0==x1 && y0==y1) break;
         int e2 = err;
         if (e2 >-dx) { err -= dy; x0 += sx; }
@@ -426,7 +262,7 @@ class VirtualLayer {
     //to do implement soft
 
     //Bresenham
-    setLight({x1, y1, z1}, color);
+    setRGB({x1, y1, z1}, color);
     int dx = abs(x2 - x1);
     int dy = abs(y2 - y1);
     int dz = abs(z2 - z1);
@@ -462,7 +298,7 @@ class VirtualLayer {
         }
         p1 += 2 * dy;
         p2 += 2 * dz;
-        setLight({x1, y1, z1}, color);
+        setRGB({x1, y1, z1}, color);
       }
   
       // Driving axis is Y-axis"
@@ -482,7 +318,7 @@ class VirtualLayer {
         }
         p1 += 2 * dx;
         p2 += 2 * dz;
-        setLight({x1, y1, z1}, color);
+        setRGB({x1, y1, z1}, color);
       }
   
       // Driving axis is Z-axis"
@@ -502,7 +338,7 @@ class VirtualLayer {
         }
         p1 += 2 * dy;
         p2 += 2 * dx;
-        setLight({x1, y1, z1}, color);
+        setRGB({x1, y1, z1}, color);
       }
     }
   }

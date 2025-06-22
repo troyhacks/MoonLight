@@ -232,11 +232,11 @@ public:
 
       // shift the pixels one pixel up
       layerV->setRGB(0, color);
-      for (uint8_t x = layerV->size.x - 1; x >= 0; x--) {
-        if (x!=0) color = layerV->getLight<CRGB>(x-1);
+      for (int x = layerV->size.x - 1; x >= 0; x--) { //int as we count down!!!
+        if (x!=0) color = layerV->getRGB(x-1);
         for (uint8_t y = 0; y < layerV->size.y; y++)
           for (uint8_t z = 0; z < layerV->size.z; z++)
-            layerV->setRGB({x,y,z}, color);
+            layerV->setRGB(intToCoord3D(x,y,z), color);
       }
     }
   }
@@ -380,14 +380,14 @@ public:
 
     for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
       int colorNr = (frameNr / layerV->size.y) % 3;
-      layerV->setLight<CRGB>(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
+      layerV->setRGB(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
     }
 
     pos = {0,0,0};
     pos.y = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.y ); //instead of call%height
     for (pos.x = 0; pos.x <  layerV->size.x; pos.x++) {
       int colorNr = (frameNr / layerV->size.x) % 3;
-      layerV->setLight<CRGB>(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
+      layerV->setRGB(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
     }
     (frameNr)++;
   }
@@ -478,8 +478,6 @@ class MovingHeadLayoutAndEffect: public Node {
   void loop() override {
 
     for (uint8_t i=0; i<layerV->size.x; i++) {
-
-      layerV->fadeToBlackBy(255); //set all channels to 0
 
       if (audioReactive) {
         uint8_t nrOfLights = layerV->size.x * 3;

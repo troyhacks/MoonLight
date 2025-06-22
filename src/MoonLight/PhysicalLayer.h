@@ -42,15 +42,15 @@ struct LightsHeader {
   uint8_t brightness; //6 brightness set by light control
   uint8_t channelsPerLight = 3; //7 RGB default
   uint8_t offsetRGB = 0; //RGB default
-  uint8_t offsetWhite = -1;
-  uint8_t offsetBrightness = -1;
-  uint8_t offsetPan = -1;
-  uint8_t offsetTilt = -1;
-  uint8_t offsetZoom = -1;
-  uint8_t offsetRotate = -1;
-  uint8_t offsetGobo = -1;
-  uint8_t offsetRGB1 = -1;
-  uint8_t offsetRGB2 = -1;
+  uint8_t offsetWhite = UINT8_MAX;
+  uint8_t offsetBrightness = UINT8_MAX;
+  uint8_t offsetPan = UINT8_MAX;
+  uint8_t offsetTilt = UINT8_MAX;
+  uint8_t offsetZoom = UINT8_MAX;
+  uint8_t offsetRotate = UINT8_MAX;
+  uint8_t offsetGobo = UINT8_MAX;
+  uint8_t offsetRGB1 = UINT8_MAX;
+  uint8_t offsetRGB2 = UINT8_MAX;
   //18 bytes until here
   // uint8_t ledFactor = 1; //factor to multiply the positions with 
   // uint8_t ledSize = 4; //mm size of each light, used in monitor ...
@@ -62,31 +62,17 @@ struct LightsHeader {
   void resetOffsets() {
     channelsPerLight = 3; //RGB default
     offsetRGB = 0;
-    offsetWhite = -1;
-    offsetBrightness = -1;
-    offsetPan = -1;
-    offsetTilt = -1;
-    offsetZoom = -1;
-    offsetRotate = -1;
-    offsetGobo = -1;
-    offsetRGB1 = -1;
-    offsetRGB2 = -1;
+    offsetWhite = UINT8_MAX;
+    offsetBrightness = UINT8_MAX;
+    offsetPan = UINT8_MAX;
+    offsetTilt = UINT8_MAX;
+    offsetZoom = UINT8_MAX;
+    offsetRotate = UINT8_MAX;
+    offsetGobo = UINT8_MAX;
+    offsetRGB1 = UINT8_MAX;
+    offsetRGB2 = UINT8_MAX;
   }
 
-  // void setRGB(uint8_t *light, const CRGB &color) {
-  //   light[offsetRGB] = color.red;
-  //   light[offsetRGB + 1] = color.green;
-  //   light[offsetRGB + 2] = color.blue;
-  // }
-  // void setWhite(uint8_t *light, const uint8_t white) {if (offsetWhite != -1) light[offsetWhite] = white;}
-  // void setBrightness(uint8_t *light, const uint8_t brightness) {if (offsetBrightness != -1) light[offsetBrightness] = brightness;}
-  // void setPan(uint8_t *light, const uint8_t pan) {if (offsetPan != -1) light[offsetPan] = pan;}
-  // void setTilt(uint8_t *light, const uint8_t tilt) {if (offsetTilt != -1)light[offsetTilt] = tilt;}
-  // void setZoom(uint8_t *light, const uint8_t zoom) {if (offsetZoom != -1)light[offsetZoom] = zoom;}
-  // void setRotate(uint8_t *light, const uint8_t rotate) {if (offsetRotate != -1)light[offsetRotate] = rotate;}
-  // void setGobo(uint8_t *light, const uint8_t gobo) {if (offsetGobo != -1)light[offsetGobo] = gobo;}
-  // void setRGB1(uint8_t *light, const CRGB &color) {if (offsetRGB1) {light[offsetRGB1] = color.red;light[offsetRGB1 + 1] = color.green;light[offsetRGB1 + 2] = color.blue;}}
-  // void setRGB2(uint8_t *light, const CRGB &color) {if (offsetRGB2) {light[offsetRGB2] = color.red;light[offsetRGB2 + 1] = color.green;light[offsetRGB2 + 2] = color.blue;}}
 }; // fill with dummies to make size 24, be aware of padding so do not change order of vars
 
 // Helper function to generate a triangle wave similar to beat16

@@ -73,6 +73,8 @@ static void _modifyLayout() {gNode->modifyLayout();}
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
 static void _setRGB(uint16_t indexV, CRGB color) {gNode->layerV->setRGB(indexV, color);}
 static void _setRGBPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setRGB(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
+static void _setPan(uint16_t indexV, uint8_t value) {gNode->layerV->setPan(indexV, value);}
+static void _setTilt(uint16_t indexV, uint8_t value) {gNode->layerV->setTilt(indexV, value);}
 
 static float _time(float j) {
     float myVal = millis();
@@ -150,6 +152,7 @@ void LiveScriptNode::setup() {
   addExternal( "uint8_t cos8(uint8_t)", (void *)cos8);
   addExternal(   "float atan2(float,float)", (void*)(float (*)(float,float))atan2);
   addExternal( "uint8_t inoise8(uint16_t,uint16_t,uint16_t)", (void *)(uint8_t (*)(uint16_t,uint16_t,uint16_t))inoise8);
+  addExternal( "uint8_t beatsin8(uint16_t,uint8_t,uint8_t,uint32_t,uint8_t)", (void *)beatsin8);
   addExternal(   "float hypot(float,float)", (void*)(float (*)(float,float))hypot);
   addExternal(   "float time(float)", (void *)_time);
   addExternal( "uint8_t triangle8(uint8_t)", (void *)triangle8);
@@ -175,6 +178,8 @@ void LiveScriptNode::setup() {
   addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);
   addExternal(    "void setRGB(uint16_t,CRGB)", (void *)_setRGB);
   addExternal(    "void setRGBPal(uint16_t,uint8_t,uint8_t)", (void *)_setRGBPal);
+  addExternal(    "void setPan(uint16_t,uint8_t)", (void *)_setPan);
+  addExternal(    "void setTilt(uint16_t,uint8_t)", (void *)_setTilt);
   addExternal( "uint8_t width", &layerV->size.x);
   addExternal( "uint8_t height", &layerV->size.y);
   addExternal( "uint8_t depth", &layerV->size.z);
