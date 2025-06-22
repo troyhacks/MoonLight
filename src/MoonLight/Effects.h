@@ -21,16 +21,18 @@ class SolidEffect: public Node {
   uint8_t red;
   uint8_t green;
   uint8_t blue;
+  uint8_t brightness;
 
   void setup() override {
     addControl(&red, "red", "range", 182);
     addControl(&green, "green", "range", 15);
     addControl(&blue, "blue", "range", 98);
+    addControl(&brightness, "brightness", "range", 255);
 
   }
 
   void loop() override {
-      layerV->fill_solid(CRGB(red, green, blue));
+      layerV->fill_solid(CRGB(red * brightness/255, green * brightness/255, blue * brightness/255));
   }
 };
 

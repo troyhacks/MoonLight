@@ -194,7 +194,6 @@ void LiveScriptNode::setup() {
 
   compileAndRun();
 
-    //   Node::setup(); //call Node::setup to handle requestMapLayout: no need to run as 
 }
 
 void LiveScriptNode::loop() {
@@ -279,10 +278,12 @@ void LiveScriptNode::execute() {
     }
     ESP_LOGD(TAG, "%s", animation);
 
-    //similar to the requestMapLayout in layout.setup.
     if (hasLayout) {
-        layerV->mapLayout(); //which calls also livescript addLayout
+        layerV->requestMapPhysical = true;
+        layerV->requestMapVirtual = true;
     }
+
+    // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
 
     if (hasLoop) {
         // setup : create controls

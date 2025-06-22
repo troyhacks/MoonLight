@@ -163,10 +163,13 @@ class VirtualLayer {
   void fill_solid(const CRGB& color);
   void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
 
+  //mapLayout calls addLayoutPre, addLayout for each node and addLayoutPost and expects pass to be set (1 or 2)
   void mapLayout();
   void addLayoutPre();
-  void addLight(Coord3D position);
   void addLayoutPost();
+  
+  //addLight is called by addLayout for each light in the layout
+  void addLight(Coord3D position);
 
   void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) {
 

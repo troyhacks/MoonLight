@@ -51,7 +51,7 @@ Emoji coding:
 
 #### PanTilt script
 
-* Sends a beatsin to Pan and Tilt which can be sent to Moving Heads
+* Sends a beatsin to Pan and Tilt which can be sent to Moving Heads (add a Moving head layout node to configure the MHs)
 * Controls: BPM, Middle Pan and Tilt, Range and invert
 * Usage: Add this effect if moving heads are configured. RGB effects can be added seperately e.g. wave to light up the moving heads in wave patterns
 * See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
@@ -62,6 +62,13 @@ Emoji coding:
 
 ### Modifier 💎 Nodes
 🚧
+
+### Supporting ☸️ Nodes
+🚧
+
+#### AudioSync ☸️ ♫
+
+* listens to audio sent over the local network by WLED-AC or WLED-MM and allows sound reactive effects (♫) to use audio data (volume and bands (FFT))
 
 ## Archive
 

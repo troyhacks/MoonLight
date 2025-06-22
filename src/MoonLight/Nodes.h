@@ -115,10 +115,12 @@ public:
   //layout
   virtual void addLayout() {} //the definition of the layout, called by mapLayout()
 
+  //convenience functions to add a light
   void addLight(Coord3D position) {
     layerV->layerP->addLight(position);
   }
 
+  //convenience functions to add a pin
   void addPin(uint8_t pinNr) {
     layerV->layerP->addPin(pinNr);
   }
