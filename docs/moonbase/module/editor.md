@@ -48,6 +48,13 @@ Emoji coding:
 
 ### Effect 🔥 Nodes
 🚧
+Precompiled effects can be found in [effects](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Effects.h)
+
+#### Solid 🔥💡
+
+* Sends a solid RGB to all lights
+* Controls: Red, Green, Blue, Brightness
+* Usage: Can be used as background to other effects, order it before other effects
 
 #### PanTilt script
 
