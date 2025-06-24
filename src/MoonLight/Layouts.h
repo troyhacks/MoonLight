@@ -103,6 +103,64 @@ class PanelLayout: public Node {
 
 };
 
+class SingleLineLayout: public Node {
+  public:
+
+  static const char * name() {return "Single Line 🚥";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  uint8_t width;
+  uint8_t yposition;
+  uint8_t pin;
+
+  void setup() override {
+    hasLayout = true;
+    Node::setup();
+    
+    addControl(&width, "width", "range", 1, 1, 255);
+    addControl(&yposition, "Y position", "number", 0, 0, 255); 
+    addControl(&pin, "pin", "number", 16, 1, 48);
+  }
+
+  void addLayout() override {
+    for (uint8_t x = 0; x<width; x++) {
+      addLight(intToCoord3D(x, yposition, 0));
+    }
+    addPin(pin);
+  }
+
+};
+
+class SingleRowLayout: public Node {
+  public:
+
+  static const char * name() {return "Single Row 🚥";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  uint8_t height;
+  uint8_t xposition;
+  uint8_t pin;
+
+  void setup() override {
+    hasLayout = true;
+    Node::setup();
+    
+    addControl(&height, "height", "range", 1, 1, 255);
+    addControl(&xposition, "X position", "number", 0, 0, 255); 
+    addControl(&pin, "pin", "number", 16, 1, 48);
+  }
+
+  void addLayout() override {
+    for (uint8_t y = 0; y<height; y++) {
+      addLight(intToCoord3D(xposition, y, 0));
+    }
+    addPin(pin);
+  }
+
+};
+
 class RingsLayout: public Node {
   public:
 
