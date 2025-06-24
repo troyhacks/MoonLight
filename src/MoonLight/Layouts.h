@@ -110,22 +110,34 @@ class SingleLineLayout: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
+  uint8_t start_x;
   uint8_t width;
   uint8_t yposition;
   uint8_t pin;
+  bool inverted_order;
 
   void setup() override {
     hasLayout = true;
     Node::setup();
     
+    
+    addControl(&start_x, "starting X", "range", 0, 0, 255);
     addControl(&width, "width", "range", 1, 1, 255);
     addControl(&yposition, "Y position", "number", 0, 0, 255); 
+    addControl(&inverted_order, "inverted order", "checkbox", false);
     addControl(&pin, "pin", "number", 16, 1, 48);
   }
 
   void addLayout() override {
-    for (uint8_t x = 0; x<width; x++) {
-      addLight(intToCoord3D(x, yposition, 0));
+    if (inverted_order){
+      for (uint8_t x = start_x+width-1; x>=start_x; x--) {
+        addLight(intToCoord3D(x, yposition, 0));
+      }
+    }
+    else {
+      for (uint8_t x = start_x; x<start_x+width; x++) {
+        addLight(intToCoord3D(x, yposition, 0));
+      }
     }
     addPin(pin);
   }
