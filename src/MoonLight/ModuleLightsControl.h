@@ -40,6 +40,31 @@ public:
         Module::begin();
 
         ESP_LOGD(TAG, "L:%d(%d) LH:%d N:%d PL:%d(%d) VL:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer));
+
+        setPresetsFromFolder(); //set the right values during boot
+        
+        //update presets if files changed in presets folder
+        _filesService->addUpdateHandler([&](const String &originId)
+        { 
+            ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
+            //read the file state (read all files and folders on FS and collect changes)
+            _filesService->read([&](FilesState &filesState) {
+                // loop over all changed files (normally only one)
+                bool presetChanged = false;
+                for (auto updatedItem : filesState.updatedItems) {
+                    //if file is the current live script, recompile it (to do: multiple live effects)
+                    ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                    if (strstr(updatedItem.c_str(), "/config/.editor")) {
+                        ESP_LOGD(TAG, " preset.json updated -> call update %s", updatedItem.c_str());
+                        presetChanged = true;
+                    }
+                }
+                if (presetChanged) {
+                    ESP_LOGD(TAG, "setPresetsFromFolder");
+                    setPresetsFromFolder(); // update the presets from the folder
+                }
+            });
+        });
     }
 
     //define the data model
@@ -65,6 +90,10 @@ public:
         values.add("HeatColors");
         values.add("RandomColors");
         property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "pad";  property["width"] = 8; property["height"] = 8; property["size"] = 18;
+        property["default"].to<JsonObject>(); // clear the preset array before adding new presets
+        property["default"]["active"] = 1;
+        property["default"]["list"].to<JsonArray>();
+
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
 
         #if FT_ENABLED(FT_MONITOR)
@@ -105,7 +134,16 @@ public:
             // layerP.palette = LavaColors_p;
         } else if (updatedItem.name == "preset") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            //copy the file to the hidden folder...
+            //copy /config/animations.json to the hidden folder /config/.animations/preset[x].json
+            if (!updatedItem.value["active"].isNull()) {
+                Char<32> presetFile;
+                presetFile.format("/config/.editor/preset%02d.json", updatedItem.value["active"].as<int>());
+
+                copyFile("/config/editor.json", presetFile.c_str());
+
+                setPresetsFromFolder(); //update presets in UI
+            }
+
         } else 
             ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
@@ -135,6 +173,28 @@ public:
         #endif
     }
 
+    //update _state.data["preset"]["list"] and send update to endpoints
+    void setPresetsFromFolder() {
+        //loop over all files in the presets folder and add them to the preset array
+        File rootFolder = ESPFS.open("/config/.editor/");
+        _state.data["preset"]["list"].to<JsonArray>(); // clear the active preset array before adding new presets
+        bool changed = false;
+        walkThroughFiles(rootFolder, [&](File folder, File file) {
+            int seq = -1;
+            if (sscanf(file.name(), "preset%02d.json", &seq) == 1) {
+                // seq now contains the 2-digit number, e.g., 34
+                ESP_LOGD(TAG, "Preset %d found", seq);
+                _state.data["preset"]["list"].add(seq); // add the preset to the preset array
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            update([&](ModuleState &state) {
+                return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+            }, "server");
+        }
+    }
 
 }; // class ModuleLightsControl
 

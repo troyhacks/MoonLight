@@ -24,8 +24,6 @@
 #undef TAG
 #define TAG "🌙"
 
-void walkThroughFiles(File folder, std::function<void(File, File)> fun);
-
 class FilesState
 {
 public:

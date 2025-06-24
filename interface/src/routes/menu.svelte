@@ -176,12 +176,6 @@
 							page.data.features.download_firmware) &&
 						(!page.data.features.security || $user.admin)
 				},
-				{
-					title: 'Demo App',
-					icon: Control,
-					href: '/demo',
-					feature: true
-				},
 			]
 		}
 	] as menuItem[]);

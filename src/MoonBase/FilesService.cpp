@@ -13,23 +13,7 @@
 
 #include "FilesService.h"
 
-#include <ESPFS.h>
-
-void walkThroughFiles(File folder, std::function<void(File, File)> fun) {
-	folder.rewindDirectory();
-	while (true)
-	{
-		File file = folder.openNextFile();
-        if (!file) break;
-
-        fun(folder, file);
-        
-        if (file.isDirectory()) {
-            walkThroughFiles(file, fun);
-        }
-        file.close();
-    }
-}
+#include "Utilities.h"
 
 //recursively fill a fileArray with all files and folders on the FS
 void addFolder(File folder, JsonArray fileArray)
@@ -75,19 +59,6 @@ void FilesState::read(FilesState &state, JsonObject &root)
     folder.close();
     // print->printJson("FilesState::read", root);
     ESP_LOGI(TAG, "");
-}
-
-//utility function
-void extractPath(const char *filepath, char *path) {
-    const char *lastSlash = strrchr(filepath, '/');
-    if (lastSlash != NULL) {
-        size_t pathLength = lastSlash - filepath;
-        strncpy(path, filepath, pathLength);
-        path[pathLength] = '\0';
-    } else {
-        // No directory separator found, the entire filepath is the filename
-        strcpy(path, "");
-    }
 }
 
 StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)

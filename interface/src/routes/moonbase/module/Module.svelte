@@ -121,12 +121,12 @@
 	function updateRecursive(oldData:any, newData: any) {
 		//loop over properties
 		for (let key in newData) {
-			if (typeof newData[key] != 'object') {
-				if (newData[key] != oldData[key]) {
-					// console.log("updateRecursive", key, newData[key], oldData[key]);
-					oldData[key] = newData[key]; //trigger reactiveness
-				}
-			} else {
+			// if (typeof newData[key] != 'object') {
+			// 	if (newData[key] != oldData[key]) {
+			// 		// console.log("updateRecursive", key, newData[key], oldData[key]);
+			// 		oldData[key] = newData[key]; //trigger reactiveness
+			// 	}
+			// } else {
 				if (Array.isArray(newData[key])) {
 					//loop over array
 					if (!oldData[key]) oldData[key] = []; //create an empty array
@@ -141,8 +141,14 @@
 						} else
 							updateRecursive(oldData[key][i], newData[key][i]);
 					}
+				} else {
+					if (newData[key] != oldData[key]) {
+						// console.log("updateRecursive", key, newData[key], oldData[key]);
+						oldData[key] = newData[key]; //trigger reactiveness
+					}
+
 				}
-			}
+			// }
 		}
 	}
 

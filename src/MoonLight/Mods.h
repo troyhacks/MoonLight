@@ -40,7 +40,7 @@ class AudioSyncMod: public Node {
     if (!init) {
       sync.begin();
       init = true;
-      ESP_LOGW(TAG, "AudioSync: Initialized");
+      ESP_LOGD(TAG, "AudioSync: Initialized");
     }
     if (sync.read()) {
       memcpy(audio.bands, sync.fftResult, NUM_GEQ_CHANNELS);

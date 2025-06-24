@@ -63,6 +63,20 @@
         }
     }
 
+    let hoverTimeout: any = null;
+    let popupCell: number | null = null;
+
+    function handleMouseEnter(rowIndex: number, colIndex: number, cell: number) {
+        hoverTimeout = setTimeout(() => {
+            popupCell = cell;
+        }, 1000); // 1 second
+    }
+
+    function handleMouseLeave() {
+        clearTimeout(hoverTimeout);
+        popupCell = null;
+    }
+
 </script>
 
 <label class="label cursor-pointer" for={property.name}>
@@ -191,17 +205,23 @@
             <div class="flex flex-row space-x-2">
                 {#each row as cell, colIndex}
                     <button
-                        class="btn btn-square btn-primary w-{property.size} h-{property.size} text-xl rounded-lg"
+                        class="btn btn-square w-{property.size} h-{property.size} text-xl rounded-lg {
+                            value.active == cell?`btn-error`:Array.isArray(value.list) && value.list.includes(cell) ? `btn-success` : 'btn-primary'}"
                         type="button"
                         draggable="true"
                         on:dragstart={(event) => handleDragStart(event, rowIndex, colIndex)}
                         on:dragover|preventDefault
                         on:drop={(event) => handleDrop(event, rowIndex, colIndex)}
-                        on:click={(event:any) => {console.log(rowIndex, colIndex, cell); value = cell; onChange(event)}}
-                        on:mouseenter={(event:any) => {if (property.hover) {console.log("mousenter", rowIndex, colIndex, cell); value = cell; onChange(event)}}}
-                        on:mouseleave={(event:any) => {if (false) {console.log("mouseleave", rowIndex, colIndex, cell); value = cell; onChange(event)}}}
+                        on:click={(event:any) => {console.log(rowIndex, colIndex, cell); value.list.push(cell); value.active = cell; onChange(event)}}
+                        on:mouseenter={(event:any) => {console.log("mousenter", rowIndex, colIndex, cell); if (property.hover) {value.active = cell; onChange(event)} else handleMouseEnter(rowIndex, colIndex, cell)}}
+                        on:mouseleave={handleMouseLeave}
                     >
                         {cell}
+                        {#if popupCell === cell}
+                            <div class="absolute z-50 bg-base-200 p-2 rounded shadow-lg mt-2">
+                                Popup for {cell}
+                            </div>
+                        {/if}
                     </button>
                 {/each}
             </div>

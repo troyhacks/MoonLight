@@ -13,6 +13,7 @@
 
 #include <Arduino.h>
 #include "ArduinoJson.h"
+#include <ESPFS.h>
 
 struct Coord3D {
     uint8_t x;
@@ -227,6 +228,12 @@ struct CharHeap: public Char<1> {
   
 };
 
-inline float distance(float x1, float y1, float z1, float x2, float y2, float z2) {
-  return sqrtf((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2));
-}
+float distance(float x1, float y1, float z1, float x2, float y2, float z2);
+
+//file functions
+
+void extractPath(const char *filepath, char *path);
+
+void walkThroughFiles(File folder, std::function<void(File, File)> fun);
+
+bool copyFile(const char* srcPath, const char* dstPath) ;

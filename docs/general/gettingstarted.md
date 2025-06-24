@@ -51,7 +51,7 @@
    <img width="400" alt="Screenshot 2025-06-07 at 21 01 02" src="https://github.com/user-attachments/assets/5d4d581f-5586-43c0-a5ea-02930effc3d8" />
 
 * **That's it**. You can now change effect nodes, or add nodes. For audio add the AudioSync node. More how to's will be added. At the moment:
-    * Check the help pages on this documentation site
+    * Check the help pages on this documentation site, especially the [editor page](https://moonmodules.org/MoonLight/moonbase/module/editor/)
     * press the ? in MoonLight to go directly to the relevant page
    More how to's will be added. At the moment:
     * Live scripts: [how to run a live script](https://github.com/MoonModules/MoonLight/blob/main/docs/moonbase/module/liveScripts.md#how-to-run-a-live-script)
