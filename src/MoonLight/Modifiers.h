@@ -13,6 +13,46 @@
 
 //alphabetically from here
 
+//Takes the x dimension from the layout (1D effect) and turn it into a circle in 2D or a sphere in 3D.
+class CircleModifier: public Node {
+  public:
+
+  static const char * name() {return "Circle 💎💡";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  void setup() override {
+    hasModifier = true;
+  }
+
+  Coord3D originalSize;
+
+  void modifyLayout() override {
+    originalSize = layerV->size;
+
+    modifyLight(layerV->size); //modify the virtual size as x, 0, 0
+
+    // change the size to be one bigger in each dimension
+    layerV->size.x++;
+    layerV->size.y++;
+    layerV->size.z++;
+  }
+
+  void modifyLight(Coord3D &position) override {
+    //calculate the distance from the center
+    int dx = position.x - originalSize.x / 2;
+    int dy = position.y - originalSize.y / 2;
+    int dz = position.z - originalSize.z / 2; 
+
+    // Calculate the distance from the center
+    float distance = sqrt(dx * dx + dy * dy + dz * dz);
+
+    position.x = distance;
+    position.y = 0;
+    position.z = 0;
+  }
+};
+
 class MirrorModifier: public Node {
   public:
 

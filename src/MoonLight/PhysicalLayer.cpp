@@ -176,6 +176,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, SingleLineLayout::name())) node = new SingleLineLayout();
         else if (equal(name, SingleRowLayout::name())) node = new SingleRowLayout();
 
+        else if (equal(name, CircleModifier::name())) node = new CircleModifier();
         else if (equal(name, MirrorModifier::name())) node = new MirrorModifier();
         else if (equal(name, MultiplyModifier::name())) node = new MultiplyModifier();
         else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();

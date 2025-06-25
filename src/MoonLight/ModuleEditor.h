@@ -136,6 +136,7 @@ public:
             values.add(MirrorModifier::name());
             values.add(MultiplyModifier::name());
             values.add(PinwheelModifier::name());
+            values.add(CircleModifier::name());
             values.add(AudioSyncMod::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
