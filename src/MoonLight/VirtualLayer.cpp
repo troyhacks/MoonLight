@@ -332,7 +332,7 @@ void VirtualLayer::addLayoutPre() {
   //modifiers
   for (Node *node: nodes) {
     if (node->hasModifier && node->on)
-      node->modifyLayout();
+      node->modifySize();
   }
 }
 
@@ -341,7 +341,7 @@ void VirtualLayer::addLight(Coord3D position) {
   //modifiers
   for (Node *node: nodes) {
     if (node->hasModifier && node->on)
-      node->modifyLight(position);
+      node->modifyPosition(position);
   }
 
   uint16_t indexV = XYZUnModified(position);

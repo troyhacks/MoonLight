@@ -27,10 +27,10 @@ class CircleModifier: public Node {
 
   Coord3D originalSize;
 
-  void modifyLayout() override {
+  void modifySize() override {
     originalSize = layerV->size;
 
-    modifyLight(layerV->size); //modify the virtual size as x, 0, 0
+    modifyPosition(layerV->size); //modify the virtual size as x, 0, 0
 
     // change the size to be one bigger in each dimension
     layerV->size.x++;
@@ -38,7 +38,7 @@ class CircleModifier: public Node {
     layerV->size.z++;
   }
 
-  void modifyLight(Coord3D &position) override {
+  void modifyPosition(Coord3D &position) override {
     //calculate the distance from the center
     int dx = position.x - originalSize.x / 2;
     int dy = position.y - originalSize.y / 2;
@@ -73,7 +73,7 @@ class MirrorModifier: public Node {
 
   Coord3D originalSize;
   
-  void modifyLayout() override {
+  void modifySize() override {
     if (mirrorX) layerV->size.x = (layerV->size.x + 1) / 2;
     if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
     if (mirrorZ) layerV->size.z = (layerV->size.z + 1) / 2;
@@ -81,7 +81,7 @@ class MirrorModifier: public Node {
     ESP_LOGD(TAG, "mirror %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
-  void modifyLight(Coord3D &position) override {
+  void modifyPosition(Coord3D &position) override {
     if (mirrorX && position.x >= originalSize.x) position.x = originalSize.x * 2 - 1 - position.x;
     if (mirrorY && position.y >= originalSize.y) position.y = originalSize.y * 2 - 1 - position.y;
     if (mirrorZ && position.z >= originalSize.z) position.z = originalSize.z * 2 - 1 - position.z;
@@ -103,13 +103,13 @@ class MultiplyModifier: public Node {
     hasModifier = true;
   }
 
-  void modifyLayout() override {
+  void modifySize() override {
     layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
     originalSize = layerV->size;
     ESP_LOGD(TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
-  void modifyLight(Coord3D &position) override {
+  void modifyPosition(Coord3D &position) override {
     if (mirror) {
       Coord3D mirrors = position / originalSize; // Place the light in the right quadrant
       position = position % originalSize;
@@ -143,7 +143,7 @@ class PinwheelModifier: public Node {
     addControl(&zTwist, "zTwist", "range", 0);
   }
   
-  void modifyLayout() override {
+  void modifySize() override {
     // if (leds.projectionDimension > _1D && leds.effectDimension > _1D) {
       layerV->size.y = sqrt(sq(max<uint8_t>(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
                             sq(max<uint8_t>(layerV->size.y - layerV->middle.y, layerV->middle.y))) + 1; // Adjust y before x
@@ -158,7 +158,7 @@ class PinwheelModifier: public Node {
     ESP_LOGD(TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
-  void modifyLight(Coord3D &position) override {
+  void modifyPosition(Coord3D &position) override {
     // Coord3D mapped;
     // factors of 360
     const int FACTORS[24] = {360, 180, 120, 90, 72, 60, 45, 40, 36, 30, 24, 20, 18, 15, 12, 10, 9, 8, 6, 5, 4, 3, 2};
@@ -240,7 +240,7 @@ class RotateNodifier: public Node {
 
   }
 
-  void modifyLayout() override {
+  void modifySize() override {
 
     if (expand) {
       uint8_t size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
@@ -254,7 +254,7 @@ class RotateNodifier: public Node {
     data.midY = layerV->size.y / 2;
   }
 
-  void modifyLight(Coord3D &position) override {
+  void modifyPosition(Coord3D &position) override {
 
     if (expand) {
       int size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));

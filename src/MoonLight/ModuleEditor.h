@@ -288,8 +288,8 @@ public:
                         nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
                         // if Modfier control changed, run the layout
                         // find nodes which implement the Modifier interface
-                        // find nodes which implement modifyLayout and modifyLight
-                        // if this nodes implements modifyLayout and modifyLight then run lights lyayout map
+                        // find nodes which implement modifySize and modifyPosition
+                        // if this nodes implements modifySize and modifyPosition then run lights lyayout map
 
                         // ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
                         if (nodeClass->on && nodeClass->hasModifier) {
