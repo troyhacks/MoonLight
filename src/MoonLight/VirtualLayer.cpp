@@ -128,7 +128,7 @@ uint16_t VirtualLayer::XYZ(Coord3D &position) {
       node->modifyXYZ(position); //modifies the position
   }
 
-  return XYZUnprojected(position);
+  return XYZUnModified(position);
 }
 
 // void VirtualLayer::setLightsToBlend() {
@@ -344,7 +344,7 @@ void VirtualLayer::addLight(Coord3D position) {
       node->modifyLight(position);
   }
 
-  uint16_t indexV = XYZUnprojected(position);
+  uint16_t indexV = XYZUnModified(position);
   if (indexV >= nrOfLights) {
     mappingTable.resize(indexV + 1); //make sure the index fits
     nrOfLights = indexV + 1;

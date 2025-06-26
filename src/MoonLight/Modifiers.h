@@ -190,4 +190,139 @@ class PinwheelModifier: public Node {
   }
 };
 
+// RotateNodifier rotates the light position around the center of the layout.
+// It can flip the x and y coordinates, reverse the rotation direction, and alternate the rotation
+// direction every full rotation. It also supports shear transformations to create a more dynamic effect.
+// by WildCats08
+class RotateNodifier: public Node {
+  public:
+
+  static const char * name() {return "Rotate 💎💫";}
+  static const char * tags() {return "";}
+
+  struct RotateData { // 16 bytes
+    union {
+      struct {
+        bool flip : 1;
+        bool reverse : 1;
+        bool alternate : 1;
+      };
+      uint8_t flags;
+    };
+    uint8_t  midX;
+    uint8_t  midY;
+    uint16_t angle;
+    int16_t  shearX;
+    int16_t  shearY;
+    unsigned long lastUpdate; // last millis() update
+  };
+
+  public:
+
+  RotateData data;
+
+  uint8_t direction;
+  uint8_t rotateSpeed;
+  bool expand;
+
+  void setup() override {
+
+    hasModifier = true;
+
+    JsonObject property = addControl(&direction, "direction", "select", 0);
+    JsonArray values = property["values"].to<JsonArray>();
+    values.add("Clockwise");
+    values.add("Counter-Clockwise");
+    values.add("Alternate");
+
+    addControl(&rotateSpeed, "rotateSpeed", "range", 128); 
+    addControl(&expand, "expand", "checkbox", false);
+
+  }
+
+  void modifyLayout() override {
+
+    if (expand) {
+      uint8_t size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
+      size = sqrt(size * size * 2) + 1;
+      Coord3D offset = {(size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0};
+
+      layerV->size = Coord3D{size, size, 1};
+    }
+
+    data.midX = layerV->size.x / 2;
+    data.midY = layerV->size.y / 2;
+  }
+
+  void modifyLight(Coord3D &position) override {
+
+    if (expand) {
+      int size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
+      size = sqrt(size * size * 2) + 1;
+      Coord3D offset = {(size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0};
+
+      position.x += offset.x;
+      position.y += offset.y;
+      position.z += offset.z;
+    }
+  }
+
+  void modifyXYZ(Coord3D &position) override {
+
+    constexpr int Fixed_Scale = 1 << 10;
+
+    if ((millis() - data.lastUpdate > 1000 / (rotateSpeed + 1)) && rotateSpeed) { // Only update if the angle has changed
+      data.lastUpdate = millis();
+
+      if (direction == 0) data.reverse = false;
+      if (direction == 1) data.reverse = true;
+      if (direction == 2) data.alternate = true; else data.alternate = false;
+
+      // Increment the angle
+      data.angle = data.reverse ? (data.angle <= 0 ? 359 : data.angle - 1) : (data.angle >= 359 ? 0 : data.angle + 1);
+      
+      if (data.alternate && (data.angle == 0)) data.reverse = !data.reverse;
+
+      data.flip = (data.angle > 90 && data.angle < 270);
+
+      int newAngle = data.angle; // Flip newAngle if needed. Don't change angle in data
+      if (data.flip) {newAngle += 180; newAngle %= 360;}
+
+      // Calculate shearX and shearY
+      float angleRadians = radians(newAngle);
+      data.shearX = -tan(angleRadians / 2) * Fixed_Scale;
+      data.shearY =  sin(angleRadians)     * Fixed_Scale;
+    }
+
+    int maxX = layerV->size.x;
+    int maxY = layerV->size.y;
+
+    if (data.flip) {
+      // Reverse x and y values
+      position.x = maxX - position.x;
+      position.y = maxY - position.y;
+    }
+
+    // Translate position to origin
+    int dx = position.x - data.midX;
+    int dy = position.y - data.midY;
+
+    // Apply the 3 shear transformations
+    int x1 = dx + data.shearX * dy / Fixed_Scale;
+    int y1 = dy + data.shearY * x1 / Fixed_Scale;
+    int x2 = x1 + data.shearX * y1 / Fixed_Scale;
+
+    // Translate position back and assign
+    position.x = x2 + data.midX;
+    position.y = y1 + data.midY;
+    position.z = 0;
+
+    // Clamp the position to the bounds
+    if      (position.x < 0)     position.x = 0;
+    else if (position.x >= maxX) position.x = maxX - 1;
+    if      (position.y < 0)     position.y = 0;
+    else if (position.y >= maxY) position.y = maxY - 1;
+  }
+}; //RotateNodifier
+
 #endif

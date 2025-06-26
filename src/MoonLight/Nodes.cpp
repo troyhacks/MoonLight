@@ -67,7 +67,7 @@ static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layerV->layerP->addLight({x, y, z});}
 
 static void _modifyLayout() {gNode->modifyLayout();}
-// static void _modifyLight() {gNode->modifyLight();} //need &position parameter
+static void _modifyLight(Coord3D &position) {gNode->modifyLight(position);} //need &position parameter
 // static void _modifyXYZ() {gNode->modifyXYZ();}//need &position parameter
 
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
@@ -162,7 +162,7 @@ void LiveScriptNode::setup() {
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
   addExternal(    "void addLight(uint8_t,uint8_t,uint8_t)", (void *)_addLight);
   addExternal(    "void modifyLayout()", (void *)_modifyLayout);
-//   addExternal(    "void modifyLight(uint16_t,uint16_t,uint16_t)", (void *)_modifyLight);
+//   addExternal(    "void modifyLight(Coord3D &position)", (void *)_modifyLight);
 //   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
 
 

@@ -130,10 +130,12 @@ public:
             values.add(PanelLayout::name());
             values.add(RingsLayout::name());
 
+            values.add(CircleModifier::name());
             values.add(MirrorModifier::name());
             values.add(MultiplyModifier::name());
             values.add(PinwheelModifier::name());
-            values.add(CircleModifier::name());
+            values.add(RotateNodifier::name());
+
             values.add(AudioSyncMod::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
