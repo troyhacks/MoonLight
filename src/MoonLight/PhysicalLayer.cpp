@@ -180,6 +180,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, MirrorModifier::name())) node = new MirrorModifier();
         else if (equal(name, MultiplyModifier::name())) node = new MultiplyModifier();
         else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
+        else if (equal(name, RotateNodifier::name())) node = new RotateNodifier();
         
         else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
         #if FT_LIVESCRIPT

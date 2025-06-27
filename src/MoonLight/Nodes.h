@@ -31,7 +31,7 @@ public:
   JsonArray controls;
 
   bool hasLayout = false; //run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2) 
-  bool hasModifier = false; //modifier new Node, on/off, control changed: run layout.requestMapLayout. addLayoutPre: modifyLayout, addLight: modifyLight (todo XYZ: modifyXYZ)
+  bool hasModifier = false; //modifier new Node, on/off, control changed: run layout.requestMapLayout. addLayoutPre: modifySize, addLight: modifyPosition XYZ: modifyXYZ
 
   virtual bool isLiveScriptNode() const { return false; }
 
@@ -126,8 +126,8 @@ public:
   }
 
   //modifier
-  virtual void modifyLayout() {}
-  virtual void modifyLight(Coord3D &position) {} //not const as position is changed
+  virtual void modifySize() {}
+  virtual void modifyPosition(Coord3D &position) {} //not const as position is changed
   virtual void modifyXYZ(Coord3D &position) {}
 
   virtual ~Node() {

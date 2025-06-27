@@ -171,6 +171,10 @@
                             <div>
                                 <div class="font-bold">{getTimeAgo(data[property.name][index][propertyN.name], currentTime)}</div>
                             </div>
+                        {:else if propertyN.type == "coord3D"}
+                            <div>
+                                <div class="font-bold">({data[property.name][index][propertyN.name].x}, {data[property.name][index][propertyN.name].y}, {data[property.name][index][propertyN.name].z})</div>
+                            </div>
                         {:else if propertyN.type != "array" && propertyN.type != "controls" && propertyN.type != "password"}
                             <div>
                                 <div class="font-bold">{data[property.name][index][propertyN.name]}</div>

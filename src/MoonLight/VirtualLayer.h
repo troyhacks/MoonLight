@@ -79,75 +79,75 @@ class VirtualLayer {
 
   uint16_t XYZ(Coord3D &position);
   
-  uint16_t XYZUnprojected(const Coord3D &position) const {
+  uint16_t XYZUnModified(const Coord3D &position) const {
     return position.x + position.y*size.x + position.z * size.x * size.y;
   }
 
   void setRGB(const uint16_t indexV, CRGB color) {
     setLight(indexV, color.raw, layerP->lights.header.offsetRGB, sizeof(color));
   }
-  void setRGB(Coord3D pos, CRGB color) { setRGB(XYZUnprojected(pos), color); }
+  void setRGB(Coord3D pos, CRGB color) { setRGB(XYZ(pos), color); }
 
   void setWhite(const uint16_t indexV, const uint8_t value) {
     if (layerP->lights.header.offsetWhite != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetWhite, sizeof(value));
   }
-  void setWhite(Coord3D pos, const uint8_t value) { setWhite(XYZUnprojected(pos), value); }
+  void setWhite(Coord3D pos, const uint8_t value) { setWhite(XYZ(pos), value); }
 
   void setBrightness(const uint16_t indexV, const uint8_t value) {
     if (layerP->lights.header.offsetBrightness != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness, sizeof(value));
   }
-  void setBrightness(Coord3D pos, const uint8_t value) { setBrightness(XYZUnprojected(pos), value); }
+  void setBrightness(Coord3D pos, const uint8_t value) { setBrightness(XYZ(pos), value); }
 
   void setPan(const uint16_t indexV, const uint8_t value) {
     if (layerP->lights.header.offsetPan != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetPan, sizeof(value));
   }
-  void setPan(Coord3D pos, const uint8_t value) { setPan(XYZUnprojected(pos), value); }
+  void setPan(Coord3D pos, const uint8_t value) { setPan(XYZ(pos), value); }
 
   void setTilt(const uint16_t indexV, const uint8_t value) {
     if (layerP->lights.header.offsetTilt != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetTilt, sizeof(value));
   }
-  void setTilt(Coord3D pos, const uint8_t value) { setTilt(XYZUnprojected(pos), value); }
+  void setTilt(Coord3D pos, const uint8_t value) { setTilt(XYZ(pos), value); }
 
   void setZoom(const uint16_t indexV, const uint8_t value) {
     if (layerP->lights.header.offsetZoom != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetZoom, sizeof(value));
   }
-  void setZoom(Coord3D pos, const uint8_t value) { setZoom(XYZUnprojected(pos), value); }
+  void setZoom(Coord3D pos, const uint8_t value) { setZoom(XYZ(pos), value); }
 
   void setRotate(const uint16_t indexV, const uint8_t value) {
     if (layerP->lights.header.offsetRotate != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetRotate, sizeof(value));
   }
-  void setRotate(Coord3D pos, const uint8_t value) { setRotate(XYZUnprojected(pos), value); }
+  void setRotate(Coord3D pos, const uint8_t value) { setRotate(XYZ(pos), value); }
 
   void setGobo(const uint16_t indexV, const uint8_t value) {
     if (layerP->lights.header.offsetGobo != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetGobo, sizeof(value));
   }
-  void setGobo(Coord3D pos, const uint8_t value) { setGobo(XYZUnprojected(pos), value); }
+  void setGobo(Coord3D pos, const uint8_t value) { setGobo(XYZ(pos), value); }
 
   void setRGB1(const uint16_t indexV, CRGB color) {
     if (layerP->lights.header.offsetRGB1 != UINT8_MAX)
       setLight(indexV, color.raw, layerP->lights.header.offsetRGB1, sizeof(color));
   }
-  void setRGB1(Coord3D pos, CRGB color) { setRGB1(XYZUnprojected(pos), color); }
+  void setRGB1(Coord3D pos, CRGB color) { setRGB1(XYZ(pos), color); }
 
   void setRGB2(const uint16_t indexV, CRGB color) {
     if (layerP->lights.header.offsetRGB2 != UINT8_MAX)
       setLight(indexV, color.raw, layerP->lights.header.offsetRGB2, sizeof(color));
   }
-  void setRGB2(Coord3D pos, CRGB color) { setRGB2(XYZUnprojected(pos), color); }
+  void setRGB2(Coord3D pos, CRGB color) { setRGB2(XYZ(pos), color); }
 
   void setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length);
 
   CRGB getRGB(const uint16_t indexV) {
     return getLight(indexV, layerP->lights.header.offsetRGB);
   }
-  CRGB getRGB(Coord3D pos) { return getRGB(XYZUnprojected(pos)); }
+  CRGB getRGB(Coord3D pos) { return getRGB(XYZ(pos)); }
 
   CRGB getLight(const uint16_t indexV, uint8_t offset) const;
 

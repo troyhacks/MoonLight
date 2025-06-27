@@ -162,8 +162,8 @@
 {:else if property.type == "number"}
     <input 
         type="number"
-        min={property.min} 
-        max={property.max}
+        min={property.min?property.min:0}
+        max={property.max?property.max:255}
         class="input input-bordered invalid:border-error invalid:border-2"
         bind:value={value}
         on:change={onChange}
@@ -173,8 +173,8 @@
     <input 
         type={property.type}
         class="input input-bordered invalid:border-error invalid:border-2"
-        minlength={property.min}
-        maxlength={property.max}
+        minlength={property.min?property.min:0}
+        maxlength={property.max?property.max:255}
         bind:value={value}
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
@@ -185,8 +185,8 @@
     <input 
         type={property.type}
         class="input input-bordered invalid:border-error invalid:border-2"
-        minlength={property.min}
-        maxlength={property.max}
+        minlength=3
+        maxlength=15
         bind:value={value}
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
@@ -199,6 +199,31 @@
     <button class="btn btn-primary" type="button" on:click={(event:any) => {if (value==null) value = 1; else value++; onChange(event)}}
     >{property.name}</button
     >
+{:else if property.type == "coord3D"}
+    <input 
+        type=number
+        class="input input-bordered invalid:border-error invalid:border-2"
+        min=0
+        max=255
+        bind:value={value.x}
+        on:change={onChange}
+    />
+    <input 
+        type=number
+        class="input input-bordered invalid:border-error invalid:border-2"
+        min=0
+        max=255
+        bind:value={value.y}
+        on:change={onChange}
+    />
+    <input 
+        type=number
+        class="input input-bordered invalid:border-error invalid:border-2"
+        min=0
+        max=255
+        bind:value={value.z}
+        on:change={onChange}
+    />
 {:else if property.type == "pad"}
     <div class="flex flex-col space-y-2">
         {#each property.rows as row, rowIndex}

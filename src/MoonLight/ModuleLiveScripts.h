@@ -107,6 +107,8 @@ public:
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
             // JsonObject newDataObject = newData.as<JsonObject>();
             // _socket->emitEvent("editor", newDataObject);
+
+            // requestUIUpdate ...
             update([&](ModuleState &state) {
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
             }, "server");

@@ -29,6 +29,7 @@ class ModuleEditor : public Module
 public:
 
     PsychicHttpServer *_server;
+    bool requestUIUpdate = false;
 
     ModuleEditor(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
@@ -67,10 +68,8 @@ public:
 
                                     //wait until setup has been executed?
 
-                                    //update state to UI
-                                    update([&](ModuleState &state) {
-                                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                                    }, "server");
+                                    requestUIUpdate = true;
+
                                 }
 
                                 ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());
@@ -133,10 +132,12 @@ public:
             values.add(SingleLineLayout::name());
             values.add(SingleRowLayout::name());
 
+            values.add(CircleModifier::name());
             values.add(MirrorModifier::name());
             values.add(MultiplyModifier::name());
             values.add(PinwheelModifier::name());
-            values.add(CircleModifier::name());
+            values.add(RotateNodifier::name());
+
             values.add(AudioSyncMod::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
@@ -198,10 +199,7 @@ public:
 
                         //wait until setup has been executed?
 
-                        //update state to UI
-                        update([&](ModuleState &state) {
-                            return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                        }, "server");
+                        requestUIUpdate = true;
 
                         ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
 
@@ -289,8 +287,8 @@ public:
                         nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
                         // if Modfier control changed, run the layout
                         // find nodes which implement the Modifier interface
-                        // find nodes which implement modifyLayout and modifyLight
-                        // if this nodes implements modifyLayout and modifyLight then run lights lyayout map
+                        // find nodes which implement modifySize and modifyPosition
+                        // if this nodes implements modifySize and modifyPosition then run lights lyayout map
 
                         // ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
                         if (nodeClass->on && nodeClass->hasModifier) {
@@ -311,6 +309,16 @@ public:
     void loop() {
         if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
             layerP.loop(); //run all the effects of all virtual layers (currently only one)
+
+        if (requestUIUpdate) {
+            requestUIUpdate = false; //reset the flag
+            ESP_LOGD(TAG, "requestUIUpdate");
+
+            // update state to UI
+            update([&](ModuleState &state) {
+                return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+            }, "server");
+        }
 
         //show connected clients on the led display
         // for (int i = 0; i < _socket->getConnectedClients(); i++) {

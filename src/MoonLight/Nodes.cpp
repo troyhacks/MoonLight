@@ -66,8 +66,8 @@ static void _addControl(void * ptr, char *name, char* type, int defaul, int min 
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layerV->layerP->addLight({x, y, z});}
 
-static void _modifyLayout() {gNode->modifyLayout();}
-// static void _modifyLight() {gNode->modifyLight();} //need &position parameter
+static void _modifySize() {gNode->modifySize();}
+static void _modifyPosition(Coord3D &position) {gNode->modifyPosition(position);} //need &position parameter
 // static void _modifyXYZ() {gNode->modifyXYZ();}//need &position parameter
 
 void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
@@ -161,8 +161,8 @@ void LiveScriptNode::setup() {
   addExternal(    "void addControl(void*,char*,char*,int, int, int)", (void *)_addControl);
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
   addExternal(    "void addLight(uint8_t,uint8_t,uint8_t)", (void *)_addLight);
-  addExternal(    "void modifyLayout()", (void *)_modifyLayout);
-//   addExternal(    "void modifyLight(uint16_t,uint16_t,uint16_t)", (void *)_modifyLight);
+  addExternal(    "void modifySize()", (void *)_modifySize);
+//   addExternal(    "void modifyPosition(Coord3D &position)", (void *)_modifyPosition);
 //   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
 
 
@@ -232,7 +232,7 @@ void LiveScriptNode::compileAndRun() {
           if (scScript.find("setup()") != std::string::npos) hasSetup = true;
           if (scScript.find("loop()") != std::string::npos) hasLoop = true;
           if (scScript.find("addLayout()") != std::string::npos) hasLayout = true;
-          if (scScript.find("modifyLight(") != std::string::npos) hasModifier = true;
+          if (scScript.find("modifyPosition(") != std::string::npos) hasModifier = true;
         //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
           //add main function

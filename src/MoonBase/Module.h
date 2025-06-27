@@ -45,6 +45,8 @@ struct UpdatedItem {
     }
 };
 
+typedef std::function<void(JsonObject data)> ReadHook;
+
 class ModuleState
 {
 public:
@@ -58,6 +60,9 @@ public:
 
     static void read(ModuleState &state, JsonObject &root);
     static StateUpdateResult update(JsonObject &root, ModuleState &state);
+
+    ReadHook readHook = nullptr; //called when the UI requests the state, can be used to update the state before sending it to the UI
+
 };
 
 class Module : public StatefulService<ModuleState>

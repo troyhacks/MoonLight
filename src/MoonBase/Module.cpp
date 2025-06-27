@@ -55,6 +55,9 @@ void ModuleState::read(ModuleState &state, JsonObject &root)
     TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
     ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
 
+    if (state.readHook)
+        state.readHook(state.data.as<JsonObject>());
+
     root.set(state.data.as<JsonObject>()); //copy
 }
 
@@ -258,7 +261,7 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
 }
 
 void Module::onUpdate(UpdatedItem &updatedItem) {
-    ESP_LOGW(TAG, "not implemented %s = %s", updatedItem.name, updatedItem.value.as<String>().c_str());
+    // ESP_LOGW(TAG, "not implemented %s = %s", updatedItem.name, updatedItem.value.as<String>().c_str());
 }
 
 
