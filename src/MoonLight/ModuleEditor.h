@@ -29,6 +29,7 @@ class ModuleEditor : public Module
 public:
 
     PsychicHttpServer *_server;
+    bool requestUIUpdate = false;
 
     ModuleEditor(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
@@ -67,10 +68,8 @@ public:
 
                                     //wait until setup has been executed?
 
-                                    //update state to UI
-                                    update([&](ModuleState &state) {
-                                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                                    }, "server");
+                                    requestUIUpdate = true;
+
                                 }
 
                                 ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());
@@ -197,10 +196,7 @@ public:
 
                         //wait until setup has been executed?
 
-                        //update state to UI
-                        update([&](ModuleState &state) {
-                            return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                        }, "server");
+                        requestUIUpdate = true;
 
                         ESP_LOGD(TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
 
@@ -310,6 +306,16 @@ public:
     void loop() {
         if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
             layerP.loop(); //run all the effects of all virtual layers (currently only one)
+
+        if (requestUIUpdate) {
+            requestUIUpdate = false; //reset the flag
+            ESP_LOGD(TAG, "requestUIUpdate");
+
+            // update state to UI
+            update([&](ModuleState &state) {
+                return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+            }, "server");
+        }
 
         //show connected clients on the led display
         // for (int i = 0; i < _socket->getConnectedClients(); i++) {

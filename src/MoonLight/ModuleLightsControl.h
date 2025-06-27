@@ -190,6 +190,7 @@ public:
         });
 
         if (changed) {
+            // requestUIUpdate ...
             update([&](ModuleState &state) {
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
             }, "server");

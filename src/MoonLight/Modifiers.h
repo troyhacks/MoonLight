@@ -245,7 +245,7 @@ class RotateNodifier: public Node {
     if (expand) {
       uint8_t size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
       size = sqrt(size * size * 2) + 1;
-      Coord3D offset = {(size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0};
+      Coord3D offset = intToCoord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
 
       layerV->size = Coord3D{size, size, 1};
     }
@@ -259,7 +259,7 @@ class RotateNodifier: public Node {
     if (expand) {
       int size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
       size = sqrt(size * size * 2) + 1;
-      Coord3D offset = {(size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0};
+      Coord3D offset = intToCoord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
 
       position.x += offset.x;
       position.y += offset.y;

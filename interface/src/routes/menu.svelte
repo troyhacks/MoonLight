@@ -84,6 +84,12 @@
 					href: '/moonbase/module?module=ChannelView',
 					feature: page.data.features.moonlight,
 				},
+				{
+					title: 'Info',
+					icon: CPU,
+					href: '/moonbase/module?module=MoonLightInfo',
+					feature: page.data.features.moonbase,
+				},
 			]
 		},
 		{
