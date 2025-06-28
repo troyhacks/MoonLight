@@ -60,15 +60,15 @@ class MirrorModifier: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  bool mirrorX;
-  bool mirrorY;
-  bool mirrorZ;
+  bool mirrorX = true;
+  bool mirrorY = false;
+  bool mirrorZ = false;
   
   void setup() override {
     hasModifier = true;
-    addControl(&mirrorX, "mirrorX", "checkbox", true);
-    addControl(&mirrorY, "mirrorY", "checkbox", false);
-    addControl(&mirrorZ, "mirrorZ", "checkbox", false);
+    addControl(mirrorX, "mirrorX", "checkbox");
+    addControl(mirrorY, "mirrorY", "checkbox");
+    addControl(mirrorZ, "mirrorZ", "checkbox");
   }
 
   Coord3D originalSize;
@@ -128,19 +128,19 @@ class PinwheelModifier: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint8_t petals;
-  uint8_t swirlVal;
-  bool    reverse;
-  uint8_t symmetry;
-  uint8_t zTwist;
+  uint8_t petals = 60;
+  uint8_t swirlVal = 30;
+  bool    reverse = false;
+  uint8_t symmetry = 1;
+  uint8_t zTwist = 0;
 
   void setup() override {
     hasModifier = true;
-    addControl(&petals, "petals", "range", 60);
-    addControl(&swirlVal, "swirlVal", "range", 30);
-    addControl(&reverse, "reverse", "checkbox", false);
-    addControl(&symmetry, "symmetry", "range", 1);
-    addControl(&zTwist, "zTwist", "range", 0);
+    addControl(petals, "petals", "range");
+    addControl(swirlVal, "swirlVal", "range");
+    addControl(reverse, "reverse", "checkbox");
+    addControl(symmetry, "symmetry", "range");
+    addControl(zTwist, "zTwist", "range");
   }
   
   void modifySize() override {
@@ -221,22 +221,22 @@ class RotateNodifier: public Node {
 
   RotateData data;
 
-  uint8_t direction;
-  uint8_t rotateSpeed;
-  bool expand;
+  uint8_t direction = 0;
+  uint8_t rotateSpeed = 128;
+  bool expand = false;
 
   void setup() override {
 
     hasModifier = true;
 
-    JsonObject property = addControl(&direction, "direction", "select", 0);
+    JsonObject property = addControl(direction, "direction", "select");
     JsonArray values = property["values"].to<JsonArray>();
     values.add("Clockwise");
     values.add("Counter-Clockwise");
     values.add("Alternate");
 
-    addControl(&rotateSpeed, "rotateSpeed", "range", 128); 
-    addControl(&expand, "expand", "checkbox", false);
+    addControl(rotateSpeed, "rotateSpeed", "range"); 
+    addControl(expand, "expand", "checkbox");
 
   }
 

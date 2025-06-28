@@ -18,16 +18,16 @@ class SolidEffect: public Node {
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  uint8_t brightness;
+  uint8_t red = 182;
+  uint8_t green = 15;
+  uint8_t blue = 98;
+  uint8_t brightness = 255;
 
   void setup() override {
-    addControl(&red, "red", "range", 182);
-    addControl(&green, "green", "range", 15);
-    addControl(&blue, "blue", "range", 98);
-    addControl(&brightness, "brightness", "range", 255);
+    addControl(red, "red", "range");
+    addControl(green, "green", "range");
+    addControl(blue, "blue", "range");
+    addControl(brightness, "brightness", "range");
 
   }
 
@@ -94,12 +94,12 @@ class BouncingBallsEffect: public Node {
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t grav;
-  uint8_t numBalls;
+  uint8_t grav = 128;
+  uint8_t numBalls = 8;
 
   void setup() override {
-    addControl(&grav, "grav", "range", 128);
-    addControl(&numBalls, "numBalls", "range", 8, 1, maxNumBalls);
+    addControl(grav, "grav", "range");
+    addControl(numBalls, "numBalls", "range", 1, maxNumBalls);
   }
 
   //binding of loop persistent values (pointers)
@@ -170,12 +170,12 @@ public:
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint8_t speed;
-  uint8_t scale; 
+  uint8_t speed = 4;
+  uint8_t scale = 4; 
 
   void setup() override {
-    addControl(&speed, "speed", "range", 4, 0, 8);
-    addControl(&scale, "scale", "range", 4, 0, 8);
+    addControl(speed, "speed", "range", 0, 8);
+    addControl(scale, "scale", "range", 0, 8);
   }
 
   void loop() override {
@@ -228,18 +228,18 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t speed;
-  uint8_t fx;
-  uint8_t lowBin;
-  uint8_t highBin;
-  uint8_t sensitivity10;
+  uint8_t speed = 255;
+  uint8_t fx = 128;
+  uint8_t lowBin = 18;
+  uint8_t highBin = 48;
+  uint8_t sensitivity10 = 30;
 
   void setup() override {
-    addControl(&speed, "speed", "range", 255);
-    addControl(&fx, "soundFX", "range", 128);
-    addControl(&lowBin, "lowBin", "range", 18);
-    addControl(&highBin, "highBin", "range", 48);
-    addControl(&sensitivity10, "sensitivity", "range", 30, 10, 100);
+    addControl(speed, "speed", "range");
+    addControl(fx, "soundFX", "range");
+    addControl(lowBin, "lowBin", "range");
+    addControl(highBin, "highBin", "range");
+    addControl(sensitivity10, "sensitivity", "range", 10, 100);
   }
 
   uint8_t aux0;
@@ -291,10 +291,10 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t fadeOut;
-  uint8_t ripple;
-  bool colorBars;
-  bool smoothBars;
+  uint8_t fadeOut = 255;
+  uint8_t ripple = 128;
+  bool colorBars = false;
+  bool smoothBars = true;
 
   uint16_t *previousBarHeight; //array
   unsigned long step;
@@ -302,10 +302,10 @@ public:
   void setup() override {
     Node::setup();
 
-    addControl(&fadeOut, "fadeOut", "range", 255);
-    addControl(&ripple, "ripple", "range", 128);
-    addControl(&colorBars, "colorBars", "checkbox", false);
-    addControl(&smoothBars, "smoothBars", "checkbox", true);
+    addControl(fadeOut, "fadeOut", "range");
+    addControl(ripple, "ripple", "range");
+    addControl(colorBars, "colorBars", "checkbox");
+    addControl(smoothBars, "smoothBars", "checkbox");
 
     previousBarHeight = (uint16_t*)malloc(layerV->size.x * sizeof(uint16_t));
     if (!previousBarHeight) {
@@ -406,10 +406,10 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t bpm;
+  uint8_t bpm = 120;
 
   void setup() override {
-    addControl(&bpm, "bpm", "range", 120);
+    addControl(bpm, "bpm", "range");
   }
 
   void loop() override {
@@ -442,14 +442,14 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t xFrequency;
-  uint8_t fadeRate;
-  uint8_t speed;
+  uint8_t xFrequency = 64;
+  uint8_t fadeRate = 128;
+  uint8_t speed = 128;
 
   void setup() override {
-    addControl(&xFrequency, "xFrequency", "range", 64);
-    addControl(&fadeRate, "fadeRate", "range", 128);
-    addControl(&speed, "speed", "range", 128);
+    addControl(xFrequency, "xFrequency", "range");
+    addControl(fadeRate, "fadeRate", "range");
+    addControl(speed, "speed", "range");
   }
 
   void loop() override {
@@ -472,33 +472,33 @@ class MovingHeadLayoutAndEffect: public Node {
 
   static const char * name() {return "MovingHead 🚥🔥♫💫";}
 
-  uint8_t bpm;
-  uint8_t pan;
-  uint8_t tilt;
-  uint8_t zoom;
-  uint8_t range;
-  bool autoMove;
-  bool audioReactive;
-  bool invert;
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 20;
+  uint8_t range = 20;;
+  bool autoMove = false;
+  bool audioReactive = false;
+  bool invert = false;
 
-  uint8_t width;
-  uint8_t pin;
+  uint8_t width = 4;
+  uint8_t pin = 16;
 
   void setup() override {
-    addControl(&bpm, "bpm", "range", 30);
-    addControl(&pan, "pan", "range", 175);
-    addControl(&tilt, "tilt", "range", 90);
-    addControl(&zoom, "zoom", "range", 20);
-    addControl(&autoMove, "autoMove", "checkbox", false);
-    addControl(&range, "range", "range", 20);
-    addControl(&audioReactive, "audioReactive", "checkbox", false);
-    addControl(&invert, "invert", "checkbox", false);
+    addControl(bpm, "bpm", "range");
+    addControl(pan, "pan", "range");
+    addControl(tilt, "tilt", "range");
+    addControl(zoom, "zoom", "range");
+    addControl(autoMove, "autoMove", "checkbox");
+    addControl(range, "range", "range");
+    addControl(audioReactive, "audioReactive", "checkbox");
+    addControl(invert, "invert", "checkbox");
 
     hasLayout = true;
     Node::setup();
     
-    addControl(&width, "width", "range", 4, 1, 32); //default 4 moving heads
-    addControl(&pin, "pin", "number", 16, 1, 48);
+    addControl(width, "width", "range", 1, 32); //default 4 moving heads
+    addControl(pin, "pin", "pin", 1, 48);
 
     layerV->layerP->lights.header.channelsPerLight = 24;
     layerV->layerP->lights.header.offsetPan = 0;
@@ -567,22 +567,22 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t oscillatorOffset;
-  uint8_t numLines;
-  uint8_t fadeRate;
-  uint8_t minLength;
-  bool color_chaos;
-  bool soft;
-  bool phase_chaos;
+  uint8_t oscillatorOffset = 6 *  160/255;
+  uint8_t numLines = 255;
+  uint8_t fadeRate = 40;
+  uint8_t minLength = 0;
+  bool color_chaos = false;
+  bool soft = true;
+  bool phase_chaos = false;
   
   void setup() override {
-    addControl(&oscillatorOffset, "oscillatorOffset", "range", 6 *  160/255, 0, 16);
-    addControl(&numLines, "numLines", "range", 255, 2, 255);
-    addControl(&fadeRate, "fadeRate", "range", 40, 0, 128);
-    addControl(&minLength, "minLength", "range", 0);
-    addControl(&color_chaos, "color_chaos", "checkbox", false);
-    addControl(&soft, "soft", "checkbox", true);
-    addControl(&phase_chaos, "phase_chaos", "checkbox", false);
+    addControl(oscillatorOffset, "oscillatorOffset", "range", 0, 16);
+    addControl(numLines, "numLines", "range", 2, 255);
+    addControl(fadeRate, "fadeRate", "range", 0, 128);
+    addControl(minLength, "minLength", "range");
+    addControl(color_chaos, "color_chaos", "checkbox");
+    addControl(soft, "soft", "checkbox");
+    addControl(phase_chaos, "phase_chaos", "checkbox");
   }
 
   uint16_t aux0Hue;
@@ -655,12 +655,12 @@ class RipplesEffect: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
   
-  uint8_t speed;
-  uint8_t interval;
+  uint8_t speed = 50;
+  uint8_t interval = 128;
 
   void setup() override {
-    addControl(&speed, "speed", "range", 50);
-    addControl(&interval, "interval", "range", 128);
+    addControl(speed, "speed", "range");
+    addControl(interval, "interval", "range");
   }
 
   void loop() override {
@@ -688,18 +688,18 @@ class RGBWParEffect: public Node {
 
   static const char * name() {return "RGBWPar 🔥";}
 
-  uint8_t bpm;
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  uint8_t white;
+  uint8_t bpm = 30;
+  uint8_t red = 30;
+  uint8_t green = 30;
+  uint8_t blue = 30;
+  uint8_t white = 0;
 
   void setup() override {
-    addControl(&bpm, "bpm", "range", 30);
-    addControl(&red, "red", "range", 30); //control["color"] = "Red"; ...
-    addControl(&green, "green", "range", 30);
-    addControl(&blue, "blue", "range", 30);
-    addControl(&white, "white", "range", 0);
+    addControl(bpm, "bpm", "range");
+    addControl(red, "red", "range"); //control["color"] = "Red"; ...
+    addControl(green, "green", "range");
+    addControl(blue, "blue", "range");
+    addControl(white, "white", "range");
   }
 
   void loop() override {
@@ -720,10 +720,10 @@ class SinusEffect: public Node {
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t speed;
+  uint8_t speed = 5;
 
   void setup() override {
-    addControl(&speed, "speed", "range", 5);
+    addControl(speed, "speed", "range");
   }
 
   void loop() override {
@@ -754,10 +754,10 @@ class SphereMoveEffect: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint8_t speed;
+  uint8_t speed = 50;
   
   void setup() override {
-    addControl(&speed, "speed", "range", 50, 0, 99);
+    addControl(speed, "speed", "range", 0, 99);
   }
 
   void loop() override {
@@ -795,20 +795,19 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t bpm;
-  uint8_t fade;
-  uint8_t type;
+  uint8_t bpm = 60;
+  uint8_t fade = 20;
+  uint8_t type = 0;
 
   void setup() override {
-    addControl(&bpm, "bpm", "range", 60);
-    addControl(&fade, "fade", "range", 20);
-    JsonObject property = addControl(&type, "type", "select", 0); 
+    addControl(bpm, "bpm", "range");
+    addControl(fade, "fade", "range");
+    JsonObject property = addControl(type, "type", "select"); 
     JsonArray values = property["values"].to<JsonArray>();
     values.add("Saw");
     values.add("Triangle");
     values.add("Sinus");
     values.add("Square");
-    // values.add("Time");
   }
 
   void loop() override {

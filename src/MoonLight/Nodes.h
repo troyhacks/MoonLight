@@ -54,58 +54,88 @@ public:
   };
 
   //effect, layout and modifier
-  template <class ControlType, class PointerType>
-  JsonObject addControl(PointerType pointer2, const char *name, const char *type, ControlType defaul, int min = 0, int max = 255) {
-    uint32_t pointer = (uint32_t)pointer2;
 
+  template <class ControlType>
+  JsonObject addControl(ControlType &variable, const char *name, const char *type, int min = 0, int max = UINT8_MAX) {
+    uint32_t pointer = (uint32_t)&variable;
+
+    bool newControl = false; //flag to check if control is new or already exists
     // if control already exists only update it's pointer
-    for (JsonObject control : controls) {
-      if (control["name"] == name) {
-        ESP_LOGD(TAG, "update control %s %s %d", name, type, defaul);
-        control["p"] = pointer;
-        return control;
+    JsonObject control;
+    for (JsonObject control1 : controls) {
+      if (control1["name"] == name) {
+        ESP_LOGD(TAG, "update control %s t:%s d:%d p:%p ps:%d", name, type, variable, pointer, sizeof(ControlType));
+        control1["p"] = pointer;
+        control = control1; //set control to the found one
+        break;
       }
     }
-    JsonObject control = controls.add<JsonObject>(); 
-    control["name"] = name;
-    control["type"] = type;
-    control["default"] = defaul;
-    control["p"] = pointer;
-    if (min != INT_MIN) control["min"] = min;
-    if (max != INT_MAX) control["max"] = max;
 
-    if (pointer) {
-      //setValue
-      if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
-        uint8_t *valuePointer = (uint8_t *)pointer;
-        *valuePointer = defaul;
+    if (control.isNull()) { //if control not found, create a new one
+      control = controls.add<JsonObject>();
+      control["name"] = name;
+      control["type"] = type;
+      control["default"] = variable;
+      control["p"] = pointer;
+      if (min != 0) control["min"] = min;
+      if (max != UINT8_MAX) control["max"] = max;
+      newControl = true; //set flag to true, as control is new
+    }
+
+    ESP_LOGD(TAG, "%s t:%s d:%d p:%p ps:%d", name, type, variable, pointer, sizeof(ControlType));
+    //setValue
+    if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
+      if (sizeof(ControlType) != 1) {
+        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+      } else if (newControl) {
+        uint8_t * valuePointer = (uint8_t *)pointer;
+        *valuePointer = variable;
         control["value"] = *valuePointer;
       }
-      else if (control["type"] == "selectFile") {
+    }
+    else if (control["type"] == "selectFile") {
+      if (sizeof(ControlType) != 4) {
+        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+      } else if (newControl) {
         char *valuePointer = (char *)pointer;
-        *valuePointer = defaul;
+        *valuePointer = variable;
         control["value"] = valuePointer;
       }
-      else if (control["type"] == "number") {
-        uint16_t *valuePointer = (uint16_t *)pointer;
-        *valuePointer = defaul;
-        control["value"] = *valuePointer;
-      }
-      else if (control["type"] == "checkbox") {
-        bool *valuePointer = (bool *)pointer;
-        *valuePointer = defaul;
-        control["value"] = *valuePointer;
-      }
-      // else if (control["type"] == "coord3D") {
-      //   Coord3D *valuePointer = (Coord3D *)pointer;
-        // control["value"] = *valuePointer;
-      // }
-      else
-        ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
     }
+    else if (control["type"] == "number") {
+      if (sizeof(ControlType) != 2) {
+        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+      } else if (newControl) {
+        uint16_t *valuePointer = (uint16_t *)pointer;
+        *valuePointer = variable;
+        control["value"] = *valuePointer;
+      }
+    }
+    else if (control["type"] == "checkbox") {
+      if (sizeof(ControlType) != 1) {
+        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+      } else if (newControl) {
+        bool *valuePointer = (bool *)pointer;
+        control["value"] = variable;
+        *valuePointer = control["value"];
+      }
+      // *valuePointer = variable;
+      // control["value"] = *valuePointer;
+    }
+    else if (control["type"] == "coord3D") {
+      if (sizeof(ControlType) != sizeof(Coord3D)) {
+        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+      } else if (newControl) {
+        Coord3D *valuePointer = (Coord3D *)pointer;
+        control["value"] = variable;
+        *valuePointer = control["value"];
+      }
+    }
+    else
+      ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
 
     return control;
-  };
+  }
 
   virtual void updateControl(JsonObject control); // see Nodes.cpp for implementation
 

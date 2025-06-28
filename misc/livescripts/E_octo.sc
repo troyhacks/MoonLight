@@ -7,13 +7,13 @@ uint8_t rMapRadius[NUM_LEDS];
 uint8_t rMapAngle[NUM_LEDS];
 uint32_t t = 0; //=speed
 
-uint8_t speed;
-uint8_t branches;
+uint8_t speed = 128;
+uint8_t branches = 4;
 
 void setup()
 {
-  addControl(&speed, "speed", "range", 128, 1, 255);
-  addControl(&branches, "branches", "range", 4, 1, 8);
+  addControl(&speed, "speed", "range", 1, 255);
+  addControl(&branches, "branches", "range", 1, 8);
 
   C_X = width / 2;
   C_Y = height / 2;

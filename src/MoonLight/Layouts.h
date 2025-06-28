@@ -20,21 +20,21 @@ class HumanSizedCubeLayout: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint8_t width;
-  uint8_t height;
-  uint8_t depth;
+  uint8_t width = 10;
+  uint8_t height = 10;
+  uint8_t depth = 10;
   // bool snake;
-  uint8_t pin;
+  uint8_t pin = 16;
 
   void setup() override {
     hasLayout = true;
     Node::setup();
     
-    addControl(&width, "width", "range", 10, 1, 20);
-    addControl(&height, "height", "range", 10, 1, 20);
-    addControl(&depth, "depth", "range", 10, 1, 20);
-    // addControl(&snake, "snake", "checkbox", true);
-    addControl(&pin, "pin", "number", 16, 1, 48);
+    addControl(width, "width", "range", 1, 20);
+    addControl(height, "height", "range", 1, 20);
+    addControl(depth, "depth", "range", 1, 20);
+    // addControl(snake, "snake", "checkbox");
+    addControl(pin, "pin", "pin", 1, 48);
   }
 
   void addLayout() override {
@@ -72,21 +72,21 @@ class PanelLayout: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint8_t width;
-  uint8_t height;
-  uint8_t depth;
-  bool snake;
-  uint8_t pin;
+  uint8_t width = 16;
+  uint8_t height = 16;
+  uint8_t depth = 1;
+  bool snake = true;
+  uint8_t pin = 16;
 
   void setup() override {
     hasLayout = true;
     Node::setup();
     
-    addControl(&width, "width", "range", 16, 1, 32);
-    addControl(&height, "height", "range", 16, 1, 32);
-    addControl(&depth, "depth", "range", 1, 1, 32);
-    addControl(&snake, "snake", "checkbox", true);
-    addControl(&pin, "pin", "number", 16, 1, 48);
+    addControl(width, "width", "range", 1, 32);
+    addControl(height, "height", "range", 1, 32);
+    addControl(depth, "depth", "range", 1, 32);
+    addControl(snake, "snake", "checkbox");
+    addControl(pin, "pin", "pin", 1, 48);
   }
 
   void addLayout() override {
@@ -191,7 +191,7 @@ class RingsLayout: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint8_t pin;
+  uint8_t pin = 16;
 
   uint8_t width = 16;
   uint8_t height = 16;
@@ -200,11 +200,10 @@ class RingsLayout: public Node {
     hasLayout = true;
     Node::setup();
 
-    addControl(&pin, "pin", "number", 16, 1, 48);
+    addControl(pin, "pin", "pin", 1, 48);
   }
 
   void add(int leds, int radius) {
-    width = 16; height = 16; //declaration of default values above doesn't seem to work...strange...
 
     for (int i = 0; i<leds; i++) {
       uint8_t x = width / 2.0;
