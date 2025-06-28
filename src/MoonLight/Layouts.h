@@ -110,27 +110,27 @@ class SingleLineLayout: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint8_t start_x;
-  uint8_t width;
-  uint8_t yposition;
-  uint8_t pin;
-  bool reversed_order;
+  uint8_t start_x = 0;
+  uint8_t width = 1;
+  uint16_t yposition = 0;
+  uint8_t pin = 16;
+  bool reversed_order = false;
 
   void setup() override {
     hasLayout = true;
     Node::setup();
     
     
-    addControl(&start_x, "starting X", "range", 0, 0, 255);
-    addControl(&width, "width", "range", 1, 1, 255);
-    addControl(&yposition, "Y position", "number", 0, 0, 255); 
-    addControl(&reversed_order, "reversed order", "checkbox", false);
-    addControl(&pin, "pin", "number", 16, 1, 48);
+    addControl(start_x, "starting X", "range", 0, 255);
+    addControl(width, "width", "range", 1, 255);
+    addControl(yposition, "Y position", "number", 0, 255); 
+    addControl(reversed_order, "reversed order", "checkbox");
+    addControl(pin, "pin", "pin", 1, 48);
   }
 
   void addLayout() override {
     if (reversed_order){
-      for (uint8_t x = start_x+width-1; x>=start_x; x--) {
+      for (int x = start_x+width-1; x>=start_x; x--) {
         addLight(intToCoord3D(x, yposition, 0));
       }
     }
@@ -151,26 +151,26 @@ class SingleRowLayout: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint8_t start_y;
-  uint8_t height;
-  uint8_t xposition;
-  uint8_t pin;
-  bool reversed_order;
+  uint8_t start_y = 0;
+  uint8_t height = 1;
+  uint16_t xposition = 0;
+  uint8_t pin = 16;
+  bool reversed_order = false;
 
   void setup() override {
     hasLayout = true;
     Node::setup();
     
-    addControl(&start_y, "starting Y", "range", 0, 0, 255);
-    addControl(&height, "height", "range", 1, 1, 255);
-    addControl(&xposition, "X position", "number", 0, 0, 255); 
-    addControl(&reversed_order, "reversed order", "checkbox", false);
-    addControl(&pin, "pin", "number", 16, 1, 48);
+    addControl(start_y, "starting Y", "range", 0, 255);
+    addControl(height, "height", "range", 1, 255);
+    addControl(xposition, "X position", "number", 0, 255); 
+    addControl(reversed_order, "reversed order", "checkbox");
+    addControl(pin, "pin", "pin", 1, 48);
   }
 
   void addLayout() override {
     if (reversed_order){
-      for (uint8_t y = start_y+height-1; y>=start_y; y--) {
+      for (int y = start_y+height-1; y>=start_y; y--) {
         addLight(intToCoord3D(xposition, y, 0));
       }
     }

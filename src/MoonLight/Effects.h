@@ -43,22 +43,22 @@ class FixedRectangleEffect: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint8_t red;
-  uint8_t green;
-  uint8_t blue;
-  uint8_t width;
-  uint8_t x;
-  uint8_t height;
-  uint8_t y;
+  uint8_t red = 255;
+  uint8_t green = 255;
+  uint8_t blue = 255;
+  uint8_t width = 1;
+  uint8_t x = 0;
+  uint8_t height = 1;
+  uint8_t y = 1;
 
   void setup() override {
-    addControl(&red, "red", "range", 50);
-    addControl(&green, "green", "range", 50);
-    addControl(&blue, "blue", "range", 50);
-    addControl(&x, "X position", "range", 0);
-    addControl(&y, "Y position", "range", 0);
-    addControl(&width, "Rectangle width", "range", 1);
-    addControl(&height, "Rectangle height", "range", 1);
+    addControl(red, "red", "range", 50);
+    addControl(green, "green", "range", 50);
+    addControl(blue, "blue", "range", 50);
+    addControl(x, "X position", "range", 0);
+    addControl(y, "Y position", "range", 0);
+    addControl(width, "Rectangle width", "range", 1);
+    addControl(height, "Rectangle height", "range", 1);
 
   }
 
