@@ -15,6 +15,9 @@
 #include "ArduinoJson.h"
 #include <ESPFS.h>
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x) //e.g. for pio.ini settings (see ML_CHIPSET)
+
 struct Coord3D {
     uint8_t x;
     uint8_t y;
@@ -50,6 +53,14 @@ struct Coord3D {
         return Coord3D{uint8_t(x % rhs.x), uint8_t(y % rhs.y), uint8_t(z % rhs.z)};
     }
 
+    //assignments
+    // Coord3D operator=(const Coord3D rhs) {
+    //     // ppf("Coord3D assign %d,%d,%d\n", rhs.x, rhs.y, rhs.z);
+    //     x = rhs.x;
+    //     y = rhs.y;
+    //     z = rhs.z;
+    //     return *this;
+    // }
     Coord3D operator+=(const Coord3D rhs) {
         x += rhs.x;
         y += rhs.y;
@@ -62,6 +73,30 @@ struct Coord3D {
     }
 
 };
+
+//https://arduinojson.org/news/2021/05/04/version-6-18-0/
+namespace ArduinoJson {
+  template <>
+  struct Converter<Coord3D> {
+    static bool toJson(const Coord3D& src, JsonVariant dst) {
+      // JsonObject obj = dst.to<JsonObject>();
+      dst["x"] = src.x;
+      dst["y"] = src.y;
+      dst["z"] = src.z;
+      // ppf("Coord3D toJson %d,%d,%d -> %s\n", src.x, src.y, src.z, dst.as<String>().c_str());
+      return true;
+    }
+
+    static Coord3D fromJson(JsonVariantConst src) {
+      // ppf("Coord3D fromJson %s\n", src.as<String>().c_str());
+      return Coord3D{src["x"], src["y"], src["z"]};
+    }
+
+    static bool checkJson(JsonVariantConst src) {
+      return src["x"].is<uint16_t>() && src["y"].is<uint16_t>() && src["z"].is<uint16_t>();
+    }
+  };
+}
 
 static Coord3D intToCoord3D(int x, int y, int z) {
   return {uint8_t(x), uint8_t(y), uint8_t(z)};

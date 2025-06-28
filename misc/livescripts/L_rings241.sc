@@ -1,10 +1,10 @@
 #define width 16
 #define height 16
 
-uint8_t pin;
+uint8_t pin = 16;
 
 void setup() {
-  addControl(&pin, "pin", "number", 16, 1, 48);
+  addControl(&pin, "pin", "pin", 1, 48);
 }
 
 void add(int leds, int radius) {

@@ -17,8 +17,8 @@
 void Node::updateControl(JsonObject control) {
     ESP_LOGD(TAG, "updateControl %s", control["name"].as<String>().c_str());
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
-        ESP_LOGD(TAG, "%s = %s t:%s p:%s", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), control["p"].as<String>().c_str());
         int pointer = control["p"];
+        ESP_LOGD(TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
         if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
@@ -36,12 +36,12 @@ void Node::updateControl(JsonObject control) {
         }
         else if (control["type"] == "checkbox") {
             bool *valuePointer = (bool *)pointer;
-            *valuePointer = control["value"];
+            *valuePointer = control["value"].as<bool>();
         }
-        // else if (control["type"] == "coord3D") {
-        //   Coord3D *valuePointer = (Coord3D *)pointer;
-        //   *valuePointer = value;
-        // }
+        else if (control["type"] == "coord3D") {
+          Coord3D *valuePointer = (Coord3D *)pointer;
+          *valuePointer = control["value"].as<Coord3D>();
+        }
         else
             ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
         }
@@ -62,7 +62,7 @@ void Node::updateControl(JsonObject control) {
 
 Node *gNode = nullptr;
 
-static void _addControl(void * ptr, char *name, char* type, int defaul, int min = 0, int max = 255) {ESP_LOGD(TAG, "%p %s %s %d (%d-%d)", ptr,  name, type, defaul, min, max);gNode->addControl(ptr, name, type, defaul, min, max);}
+static void _addControl(uint8_t *var, char *name, char* type, uint8_t min = 0, uint8_t max = UINT8_MAX) {ESP_LOGD(TAG, "%s %s %d (%d-%d)", name, type, var, min, max);gNode->addControl(*var, name, type, min, max);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layerV->layerP->addLight({x, y, z});}
 
@@ -158,7 +158,7 @@ void LiveScriptNode::setup() {
   addExternal( "uint8_t triangle8(uint8_t)", (void *)triangle8);
 
   //MoonLight functions
-  addExternal(    "void addControl(void*,char*,char*,int, int, int)", (void *)_addControl);
+  addExternal(    "void addControl(void*,char*,char*,uint8_t,uint8_t)", (void *)_addControl);
   addExternal(    "void addPin(uint8_t)", (void *)_addPin);
   addExternal(    "void addLight(uint8_t,uint8_t,uint8_t)", (void *)_addLight);
   addExternal(    "void modifySize()", (void *)_modifySize);

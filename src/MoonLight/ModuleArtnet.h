@@ -49,8 +49,8 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "outputs"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "start"; property["type"] = "number"; property["default"] = 0; property["min"] = 3; property["max"] = 32; 
-            property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 1024;
+            property = details.add<JsonObject>(); property["name"] = "start"; property["type"] = "number"; property["default"] = 0; property["min"] = 0; property["max"] = 32;
+            property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "number"; property["default"] = 1024; property["min"] = 0; property["max"] = 65536;
         }
 
         // {"hostName":"MoonBase","connectionMode":"Priority","savedNetworks":[],"invoices":[{"number":1000,"name":"ewowi","date":"2025-03-21", "lines":[{"service":"con", "price":124}]}]}

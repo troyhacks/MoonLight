@@ -1,9 +1,9 @@
-uint8_t speed;
-uint8_t scale;
+uint8_t speed = 128;
+uint8_t scale = 128;
 
 void setup() {
-  addControl(&speed, "speed", "range", 128, 1, 255);
-  addControl(&scale, "scale", "range", 128, 1, 255);
+  addControl(&speed, "speed", "range", 1, 255);
+  addControl(&scale, "scale", "range", 1, 255);
 }
 
 void loop() {

@@ -1,11 +1,11 @@
-uint8_t width;
-uint8_t height;
-uint8_t pin;
+uint8_t width = 16;
+uint8_t height = 16;
+uint8_t pin = 16;
 
 void setup() {
-  addControl(&width, "width", "range", 16, 1, 32);
-  addControl(&height, "height", "range", 16, 1, 32);
-  addControl(&pin, "pin", "number", 16, 1, 48);
+  addControl(&width, "width", "range", 1, 32);
+  addControl(&height, "height", "range", 1, 32);
+  addControl(&pin, "pin", "pin", 1, 48);
 }
 
 void addLayout() {

@@ -53,9 +53,9 @@ public:
             property = details.add<JsonObject>(); property["name"] = "isRunning"; property["type"] = "checkbox"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "isHalted"; property["type"] = "checkbox"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "exeExist"; property["type"] = "checkbox"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "handle"; property["type"] = "number"; property["ro"] = true; property["max"] = 65536;
+            property = details.add<JsonObject>(); property["name"] = "binary_size"; property["type"] = "number"; property["ro"] = true; property["max"] = 65536;
+            property = details.add<JsonObject>(); property["name"] = "data_size"; property["type"] = "number"; property["ro"] = true; property["max"] = 65536;
             property = details.add<JsonObject>(); property["name"] = "error"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "stop"; property["type"] = "button";
             property = details.add<JsonObject>(); property["name"] = "start"; property["type"] = "button";
