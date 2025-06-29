@@ -32,7 +32,10 @@ public:
         // JsonArray details; // if a property is an array, this is the details of the array
         // JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "channel"; property["type"] = "pad"; property["width"] = 12; property["height"] = 64; property["hover"] = true; property["size"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "channel"; property["type"] = "pad"; property["width"] = 12; property["height"] = 64; property["hoverToServer"] = true; property["size"] = 10;
+        property["default"]["select"] = 0;
+        property["default"]["action"] = "";
+        property["default"]["list"].to<JsonArray>();
     }
 
     void onUpdate(UpdatedItem &updatedItem) override
@@ -40,7 +43,14 @@ public:
         if (updatedItem.name == "channel") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             //copy the file to the hidden folder...
-            layerP.lights.header.brightness;
+            if (!updatedItem.value["action"].isNull()) {
+                uint16_t select = updatedItem.value["select"];
+                if (updatedItem.value["action"] == "mouseenter") {
+                    layerP.lights.channels[select] = 255;
+                } else if (updatedItem.value["action"] == "mouseleave") {
+                    layerP.lights.channels[select] = 0;
+                }
+            }
         } else
             ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }

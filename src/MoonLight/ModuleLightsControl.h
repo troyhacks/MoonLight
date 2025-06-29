@@ -91,7 +91,6 @@ public:
         values.add("RandomColors");
         property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "pad";  property["width"] = 8; property["height"] = 8; property["size"] = 18;
         property["default"].to<JsonObject>(); // clear the preset array before adding new presets
-        property["default"]["active"] = 1;
         property["default"]["list"].to<JsonArray>();
 
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
@@ -133,17 +132,33 @@ public:
             }
             // layerP.palette = LavaColors_p;
         } else if (updatedItem.name == "preset") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             //copy /config/animations.json to the hidden folder /config/.animations/preset[x].json
-            if (!updatedItem.value["active"].isNull()) {
+            if (!updatedItem.value["action"].isNull()) {
+                uint16_t select = updatedItem.value["select"];
                 Char<32> presetFile;
-                presetFile.format("/config/.editor/preset%02d.json", updatedItem.value["active"].as<int>());
+                presetFile.format("/config/.editor/preset%02d.json", select);
+                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
-                copyFile("/config/editor.json", presetFile.c_str());
+                if (updatedItem.value["action"] == "click") {
+                    updatedItem.value["selected"] = select; //store the selected preset
+                    if (arrayContainsValue(updatedItem.value["list"], select)) {
+                        copyFile(presetFile.c_str(), "/config/editor.json");
 
-                setPresetsFromFolder(); //update presets in UI
+                        //trigger notification of update of editor.json
+                        _filesService->update([&](FilesState &state) {
+                            state.updatedItems.push_back("/config/editor.json");
+                            return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+                        }, "server");
+
+                    } else {
+                        copyFile("/config/editor.json", presetFile.c_str());
+                        setPresetsFromFolder(); //update presets in UI
+                    }
+                } else if (updatedItem.value["action"] == "dblclick") {
+                    ESPFS.remove(presetFile.c_str());
+                    setPresetsFromFolder(); //update presets in UI
+                }
             }
-
         } else 
             ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }

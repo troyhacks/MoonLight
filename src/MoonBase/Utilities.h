@@ -93,14 +93,16 @@ namespace ArduinoJson {
     }
 
     static bool checkJson(JsonVariantConst src) {
-      return src["x"].is<uint16_t>() && src["y"].is<uint16_t>() && src["z"].is<uint16_t>();
+      return src["x"].is<uint8_t>() && src["y"].is<uint8_t>() && src["z"].is<uint8_t>();
     }
   };
 }
 
-static Coord3D intToCoord3D(int x, int y, int z) {
+inline Coord3D intToCoord3D(int x, int y, int z) {
   return {uint8_t(x), uint8_t(y), uint8_t(z)};
 }
+
+bool arrayContainsValue(JsonArray array, int value);
 
 //convenience function to compare two char strings
 static bool equal(const char *a, const char *b) {

@@ -164,6 +164,8 @@ esp_err_t PsychicStaticFileHandler::handleRequest(PsychicRequest *request)
     {
       PsychicFileResponse response(request, _fs, _filename);
 
+      _file.close(); //🌙 https://github.com/theelims/ESP32-sveltekit/pull/77 seems to be lost
+
       if (_last_modified.length())
         response.addHeader("Last-Modified", _last_modified.c_str());
       if (_cache_control.length()) {
