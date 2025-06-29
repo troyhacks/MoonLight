@@ -84,6 +84,9 @@ public:
 protected:
     EventSocket *_socket;
     FilesService *_filesService;
+    void readFromFS() {
+         _fsPersistence.readFromFS(); //overwrites the default settings in state
+    }
 
 private:
     HttpEndpoint<ModuleState> _httpEndpoint;

@@ -52,10 +52,11 @@ public:
                     // loop over all changed files (normally only one)
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current live script, recompile it (to do: multiple live effects)
-                        // ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                        // if (equal(updatedItem.c_str(), "/config/editor.json")) {
-                        //     ESP_LOGD(TAG, " editor.json updated -> call update %s", updatedItem.c_str());
-                        // }
+                        ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                        if (equal(updatedItem.c_str(), "/config/editor.json")) {
+                            ESP_LOGD(TAG, " editor.json updated -> call update %s", updatedItem.c_str());
+                            readFromFS(); //repopulates the state, processing file changes
+                        }
                         uint8_t index = 0;
                         for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
                             String nodeName = nodeState["nodeName"];
@@ -69,7 +70,6 @@ public:
                                     //wait until setup has been executed?
 
                                     requestUIUpdate = true;
-
                                 }
 
                                 ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());

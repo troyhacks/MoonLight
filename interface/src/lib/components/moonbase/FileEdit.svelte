@@ -80,7 +80,7 @@
 				editableFile.contents = typeof contents === 'string' ? contents : '';			
 
 				showEditor = false; await tick(); showEditor = true; //Trigger reactivity (folderList = [...folderList]; is not doing it)
-				console.log("uploadFileWithText", editableFile.contents)
+				console.log("uploadFileWithText", file, editableFile.contents)
 			};
             reader.readAsText(file);
 			changed = true;
