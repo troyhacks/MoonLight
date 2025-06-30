@@ -165,9 +165,11 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, RandomEffect::name())) node = new RandomEffect();
         else if (equal(name, RipplesEffect::name())) node = new RipplesEffect();
         else if (equal(name, RGBWParEffect::name())) node = new RGBWParEffect();
-        else if (equal(name, WaveEffect::name())) node = new WaveEffect();
         else if (equal(name, SinusEffect::name())) node = new SinusEffect();
         else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
+        else if (equal(name, TroyMovingHeadEffect::name())) node = new TroyMovingHeadEffect();
+        else if (equal(name, TroyMovingHead32Effect::name())) node = new TroyMovingHead32Effect();
+        else if (equal(name, WaveEffect::name())) node = new WaveEffect();
 
         else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
         else if (equal(name, PanelLayout::name())) node = new PanelLayout();

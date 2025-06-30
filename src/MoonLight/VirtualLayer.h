@@ -142,6 +142,13 @@ class VirtualLayer {
   }
   void setRGB2(Coord3D pos, CRGB color) { setRGB2(XYZ(pos), color); }
 
+  void setBrightness2(const uint16_t indexV, const uint8_t value) {
+    if (layerP->lights.header.offsetBrightness2 != UINT8_MAX)
+      setLight(indexV, &value, layerP->lights.header.offsetBrightness2, sizeof(value));
+  }
+  void setBrightness2(Coord3D pos, const uint8_t value) { setBrightness2(XYZ(pos), value); }
+
+
   void setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length);
 
   CRGB getRGB(const uint16_t indexV) {
