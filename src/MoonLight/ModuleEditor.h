@@ -123,6 +123,8 @@ public:
             values.add(RGBWParEffect::name());
             values.add(SinusEffect::name());
             values.add(SphereMoveEffect::name());
+            values.add(TroyMovingHeadEffect::name());
+            values.add(TroyMovingHead32Effect::name());
             values.add(WaveEffect::name());
 
             values.add(HumanSizedCubeLayout::name());
