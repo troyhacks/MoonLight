@@ -753,20 +753,21 @@ class TroyMovingHeadEffect: public Node {
 
   static const char * name() {return "Troy's Moving Heads 15 CH 🔥♫💫🐺";}
 
-  uint8_t bpm;
-  uint8_t pan;
-  uint8_t tilt;
-  uint8_t zoom;
-  uint8_t range;
-  uint8_t colorwheel;
-  uint8_t light_number;
-  uint8_t colorwheelbrightness; // 0-255, 0 = off, 255 = full brightness
+  //set default values here
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 20;
+  uint8_t range = 20;
+  uint8_t colorwheel = 0;
+  uint16_t light_number = 0;
+  uint8_t colorwheelbrightness = 255; // 0-255, 0 = off, 255 = full brightness
   time_t cooldown = millis();
   uint16_t start_channel = 0; //start channel for this effect, used to set the DMX map
   
-  bool autoMove;
-  bool audioReactive;
-  bool invert;
+  bool autoMove = false;
+  bool audioReactive = false;
+  bool invert = false;
   int closestColorIndex = -1;
 
   std::vector<CRGB> colorwheelpalette = {
@@ -781,26 +782,27 @@ class TroyMovingHeadEffect: public Node {
   };
 
   void setup() override {
-    addControl(&start_channel, "start_channel", "range", 0, 0, 512); // DMX start channel for this effect
-    addControl(&light_number, "light_number", "range", 0, 0, 512);
-    addControl(&bpm, "bpm", "range", 30);
-    addControl(&pan, "pan", "range", 175);
-    addControl(&tilt, "tilt", "range", 90);
-    addControl(&zoom, "zoom", "range", 20);
-    addControl(&colorwheel, "colorwheel", "range", 0, 0, 7); // 0-7 for 8 colors in the colorwheel
-    addControl(&colorwheelbrightness, "colorwheelbrightness", "range", 255); // 0-7 for 8 colors in the colorwheel
-    addControl(&autoMove, "autoMove", "checkbox", false);
-    addControl(&range, "range", "range", 20);
-    addControl(&audioReactive, "audioReactive", "checkbox", false);
-    addControl(&invert, "invert", "checkbox", false);
+    addControl(start_channel, "start_channel", "number", 0, 512); // DMX start channel for this effect
+    addControl(light_number, "light_number", "number", 0, 512); // changed type to number as range (currently only supports 0..255)
+    addControl(bpm, "bpm", "range", 30);
+    addControl(pan, "pan", "range", 175);
+    addControl(tilt, "tilt", "range", 90);
+    addControl(zoom, "zoom", "range", 20);
+    addControl(colorwheel, "colorwheel", "range", 0, 7); // 0-7 for 8 colors in the colorwheel
+    addControl(colorwheelbrightness, "colorwheelbrightness", "range"); // 0-7 for 8 colors in the colorwheel
+    addControl(autoMove, "autoMove", "checkbox");
+    addControl(range, "range", "range");
+    addControl(audioReactive, "audioReactive", "checkbox");
+    addControl(invert, "invert", "checkbox");
+    hasLayout = true; //so the system knows to rebuild the mapping if needed
     layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
     layerV->layerP->lights.header.offsetRGB = start_channel+10; //set offset for RGB lights in DMX map
     layerV->layerP->lights.header.offsetPan = start_channel+0;
     layerV->layerP->lights.header.offsetTilt = start_channel+1;
     layerV->layerP->lights.header.offsetZoom = start_channel+7;
     layerV->layerP->lights.header.offsetBrightness = start_channel+8; //set offset for brightness
-    layerV->layerP->lights.header.offsetColorWheel = start_channel+5; //set offset for color wheel in DMX map
-    layerV->layerP->lights.header.offsetColorWheelBrightness = start_channel+3; //set offset for color wheel brightness in DMX map
+    layerV->layerP->lights.header.offsetGobo = start_channel+5; //set offset for color wheel in DMX map
+    layerV->layerP->lights.header.offsetBrightness2 = start_channel+3; //set offset for color wheel brightness in DMX map
   }
 
   // Function to compute Euclidean distance between two colors
@@ -826,38 +828,34 @@ class TroyMovingHeadEffect: public Node {
 
   void loop() override {
 
-    uint8_t light[15]; //layerV->layerP->lights.header.channelsPerLight is not accepted by setLight (yet)
-    memset(light, 0, sizeof(light)); //set light to 0
-    
     if (audioReactive) {
       // layerV->layerP->lights.header.offsetRGB = 10;
-      layerV->layerP->lights.header.setRGB(light, CRGB(audio.bands[15],audio.bands[7],audio.bands[0]));
+      layerV->setRGB(light_number, CRGB(audio.bands[15],audio.bands[7],audio.bands[0]));
       if (audio.bands[2] > 200 && cooldown + 3000 < millis()) { //cooldown for 3 seconds
         cooldown = millis();
         colorwheel = random8(8)*5; //random colorwheel index and convert to 0-35 range
       } 
-      layerV->layerP->lights.header.setColorWheel(light, colorwheel);
-      layerV->layerP->lights.header.setColorWheelBrightness(light, (audio.bands[0]>200)?audio.bands[0]:0); // Use the first band for brightness
-      layerV->layerP->lights.header.setZoom(light, (audio.bands[0]>200)?0:128);
+      layerV->setGobo(light_number, colorwheel);
+      layerV->setBrightness2(light_number, (audio.bands[0]>200)?audio.bands[0]:0); // Use the first band for brightness
+      layerV->setZoom(light_number, (audio.bands[0]>200)?0:128);
       uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, audio.bands[0]/2);
       uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, audio.bands[0]/2);
       if (invert) {
         mypan = 255 - mypan; // invert pan
         mytilt = 255 - mytilt; // invert tilt
       }
-      layerV->layerP->lights.header.setPan(light, mypan); 
-      layerV->layerP->lights.header.setTilt(light, mytilt);
-      layerV->layerP->lights.header.setBrightness(light, (audio.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
+      layerV->setPan(light_number, mypan); 
+      layerV->setTilt(light_number, mytilt);
+      layerV->setBrightness(light_number, (audio.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
     } else {
       // layerV->layerP->lights.header.offsetRGB = 10;
-      layerV->layerP->lights.header.setRGB(light, CHSV( beatsin8(10), 255, 255));
-      layerV->layerP->lights.header.setColorWheel(light,colorwheel);
-      layerV->layerP->lights.header.setColorWheelBrightness(light, colorwheelbrightness); // layerV->layerP->lights.header.brightness);
-      layerV->layerP->lights.header.setPan(light, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert)?128:0): pan); //if automove, pan the light over a range
-      layerV->layerP->lights.header.setTilt(light, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert)?128:0): tilt);
-      layerV->layerP->lights.header.setBrightness(light, layerV->layerP->lights.header.brightness);
+      layerV->setRGB(light_number, CHSV( beatsin8(10), 255, 255));
+      layerV->setGobo(light_number,colorwheel);
+      layerV->setBrightness2(light_number, colorwheelbrightness); // layerV->layerP->lights.header.brightness);
+      layerV->setPan(light_number, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert)?128:0): pan); //if automove, pan the light over a range
+      layerV->setTilt(light_number, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert)?128:0): tilt);
+      layerV->setBrightness(light_number, layerV->layerP->lights.header.brightness);
     }
-    layerV->setLight({light_number,0,0}, light);
   }
 };
 
@@ -866,32 +864,34 @@ class TroyMovingHead32Effect: public Node {
 
   static const char * name() {return "Troy's Moving Heads 32 CH 🔥♫💫🐺";}
 
-  uint8_t bpm;
-  uint8_t pan;
-  uint8_t tilt;
-  uint8_t zoom;
-  uint8_t range;
-  uint8_t cutin;
-  uint8_t light_number;
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 20;
+  uint8_t range = 20;
+  uint8_t cutin = 200;
+  uint16_t light_number;
   time_t cooldown = millis();
   uint16_t start_channel = 0; //start channel for this effect, used to set the DMX map
   
-  bool autoMove;
-  bool audioReactive;
-  bool invert;
+  bool autoMove = false;
+  bool audioReactive = false;
+  bool invert = false;
 
   void setup() override {
-    addControl(&start_channel, "start_channel", "range", 0, 0, 512); // DMX start channel for this effect
-    addControl(&light_number, "light_number", "range", 0, 0, 512); // DMX start channel for this effect
-    addControl(&bpm, "bpm", "range", 30);
-    addControl(&pan, "pan", "range", 175);
-    addControl(&tilt, "tilt", "range", 90);
-    addControl(&zoom, "zoom", "range", 20);
-    addControl(&cutin, "cutin", "range", 200);
-    addControl(&autoMove, "autoMove", "checkbox", false);
-    addControl(&range, "range", "range", 20);
-    addControl(&audioReactive, "audioReactive", "checkbox", false);
-    addControl(&invert, "invert", "checkbox", false);
+    addControl(start_channel, "start_channel", "number", 0, 512); // DMX start channel for this effect
+    addControl(light_number, "light_number", "number", 0, 512); // DMX start channel for this effect
+    addControl(bpm, "bpm", "range");
+    addControl(pan, "pan", "range");
+    addControl(tilt, "tilt", "range");
+    addControl(zoom, "zoom", "range");
+    addControl(cutin, "cutin", "range");
+    addControl(autoMove, "autoMove", "checkbox");
+    addControl(range, "range", "range");
+    addControl(audioReactive, "audioReactive", "checkbox");
+    addControl(invert, "invert", "checkbox");
+
+    hasLayout = true;
     layerV->layerP->lights.header.channelsPerLight = 32;
     layerV->layerP->lights.header.offsetRGB = start_channel+9;
     layerV->layerP->lights.header.offsetPan = start_channel+0;
@@ -921,26 +921,23 @@ class TroyMovingHead32Effect: public Node {
 
   void loop() override {
 
-    uint8_t light[32]; 
-    memset(light, 0, sizeof(light)); //set light to 0
-    
     if (audioReactive) {
       layerV->layerP->lights.header.offsetRGB = start_channel+9;
-      layerV->layerP->lights.header.setRGB(light, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]));
+      layerV->setRGB(light_number, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]));
       layerV->layerP->lights.header.offsetRGB += 4;
-      layerV->layerP->lights.header.setRGB(light, CRGB(audio.bands[15],audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]>cutin?audio.bands[0]:0));
+      layerV->setRGB(light_number, CRGB(audio.bands[15],audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]>cutin?audio.bands[0]:0));
       layerV->layerP->lights.header.offsetRGB += 4;
-      layerV->layerP->lights.header.setRGB(light, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7],audio.bands[0]>cutin?audio.bands[0]:0));
+      layerV->setRGB(light_number, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7],audio.bands[0]>cutin?audio.bands[0]:0));
       layerV->layerP->lights.header.offsetRGB += 7;
-      layerV->layerP->lights.header.setRGB(light, CRGB(audio.bands[15]>cutin?map(audio.bands[15],cutin-1,255,0,255):0,audio.bands[7]>cutin?map(audio.bands[7],cutin-1,255,0,255):0,audio.bands[0]>cutin?map(audio.bands[0],cutin-1,255,0,255):0));
+      layerV->setRGB(light_number, CRGB(audio.bands[15]>cutin?map(audio.bands[15],cutin-1,255,0,255):0,audio.bands[7]>cutin?map(audio.bands[7],cutin-1,255,0,255):0,audio.bands[0]>cutin?map(audio.bands[0],cutin-1,255,0,255):0));
       if (audio.bands[0] > cutin) {
-        layerV->layerP->lights.header.setZoom(light, 255);
+        layerV->setZoom(light_number, 255);
         cooldown = millis();
       } else if (cooldown + 5000 < millis()) {
-        layerV->layerP->lights.header.setZoom(light, 0);
+        layerV->setZoom(light_number, 0);
         cooldown = millis();
       }
-      // layerV->layerP->lights.header.setZoom(light, (audio.bands[0]>cutin)?255:0);
+      // layerV->setZoom(light_number, (audio.bands[0]>cutin)?255:0);
       uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, audio.bands[0]/2);
       uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, audio.bands[0]/2);
       if (invert) {
@@ -948,20 +945,19 @@ class TroyMovingHead32Effect: public Node {
         mytilt = 255 - mytilt; // invert tilt
       }
       if (audio.bands[0]+audio.bands[7]+audio.bands[15] > 1) {
-        layerV->layerP->lights.header.setPan(light, mypan); 
-        layerV->layerP->lights.header.setTilt(light, mytilt);
-        layerV->layerP->lights.header.setBrightness(light, 255);
+        layerV->setPan(light_number, mypan); 
+        layerV->setTilt(light_number, mytilt);
+        layerV->setBrightness(light_number, 255);
       } else {
-        layerV->layerP->lights.header.setBrightness(light, 0);
+        layerV->setBrightness(light_number, 0);
       }
     } else {
       // layerV->layerP->lights.header.offsetRGB = 10;
-      layerV->layerP->lights.header.setRGB(light, CHSV( beatsin8(10), 255, 255));
-      layerV->layerP->lights.header.setPan(light, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert)?128:0): pan); //if automove, pan the light over a range
-      layerV->layerP->lights.header.setTilt(light, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert)?128:0): tilt);
-      layerV->layerP->lights.header.setBrightness(light, layerV->layerP->lights.header.brightness);
+      layerV->setRGB(light_number, CHSV( beatsin8(10), 255, 255));
+      layerV->setPan(light_number, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert)?128:0): pan); //if automove, pan the light over a range
+      layerV->setTilt(light_number, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert)?128:0): tilt);
+      layerV->setBrightness(light_number, layerV->layerP->lights.header.brightness);
     }
-    layerV->setLight({light_number,0,0}, light);
   }
 };
 

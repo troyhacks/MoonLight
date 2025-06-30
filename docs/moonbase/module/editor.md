@@ -9,7 +9,7 @@ Each task is defined as a node. A node can be precompiled in the firmware or def
 
 Ultimately the nodes will be displayed in a graphical interface where nodes are connected by 'noodles' to define dependencies between nodes. For the time being nodes will be shown in a list.
 
-Typically a node will define a layout (🚥), or an effect (🔥), or a modifier (💎) or a supporting process (☸️) but can also combine these tasks (experimental at the moment). To avoid duplication it's in most cases recommended to keep them seperated so an effect can run on multiple layouts and a modifier can modify any effect. 
+Typically a node will define a layout (🚥), or an effect (🔥), or a modifier (💎) or a supporting process (☸️) but can also combine these tasks (experimental at the moment). To avoid duplication it's in most cases recommended to keep them separated so an effect can run on multiple layouts and a modifier can modify any effect. 
 
 * **Layout** 🚥: a layout defines what lights are connected to MoonLight. It defines the coordinates of all lights (addLight) and assigns lights to the GPIO pins of the ESP32 (addPin) and how many channels each light has (normal LEDs 3: Red, Green and Blue). 
     * The **coordinates** of each light are defined in a 3D coordinate space where each coordinate range between 1 and 255. Currently a strip until 255 leds is supported, a panel until 128x96 LEDS and a cube max 20x20x20. 
@@ -60,7 +60,7 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 
 * Sends a beatsin to Pan and Tilt which can be sent to Moving Heads (add a Moving head layout node to configure the MHs)
 * Controls: BPM, Middle Pan and Tilt, Range and invert
-* Usage: Add this effect if moving heads are configured. RGB effects can be added seperately e.g. wave to light up the moving heads in wave patterns
+* Usage: Add this effect if moving heads are configured. RGB effects can be added separately e.g. wave to light up the moving heads in wave patterns
 * See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
 * Run script see [How to run a live script](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/#how-to-run-a-live-script)
 
