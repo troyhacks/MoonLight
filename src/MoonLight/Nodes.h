@@ -163,7 +163,7 @@ public:
   virtual ~Node() {
     //delete any allocated memory
 
-    ESP_LOGD(TAG, "Node destructor %d %d", hasLayout, hasModifier);
+    ESP_LOGD(TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
 
   }
 

@@ -39,11 +39,11 @@ struct LightsHeader {
   uint8_t isPositions = 0; //0is the lights.positions array filled with positions
   Coord3D size = {16,16,1}; //1 max position of light, counted by addLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint16_t nrOfLights = 256; //4 nr of physical lights, counted by addLight
-  uint8_t brightness; //6 brightness set by light control
+  uint8_t brightness; //6 brightness set by light control (sent to LEDs driver normally)
   uint8_t channelsPerLight = 3; //7 RGB default
   uint8_t offsetRGB = 0; //RGB default
   uint8_t offsetWhite = UINT8_MAX;
-  uint8_t offsetBrightness = UINT8_MAX;
+  uint8_t offsetBrightness = UINT8_MAX; //in case the light has a separate brightness channel
   uint8_t offsetPan = UINT8_MAX;
   uint8_t offsetTilt = UINT8_MAX;
   uint8_t offsetZoom = UINT8_MAX;
@@ -51,10 +51,12 @@ struct LightsHeader {
   uint8_t offsetGobo = UINT8_MAX;
   uint8_t offsetRGB1 = UINT8_MAX;
   uint8_t offsetRGB2 = UINT8_MAX;
-  //18 bytes until here
+  uint8_t offsetRGB3 = UINT8_MAX;
+  uint8_t offsetBrightness2 = UINT8_MAX;
+  //19 bytes until here
   // uint8_t ledFactor = 1; //factor to multiply the positions with 
   // uint8_t ledSize = 4; //mm size of each light, used in monitor ...
-  uint8_t dummy[6];
+  uint8_t dummy[4];
   //24 bytes total
 
   //support for more channels, like white, pan, tilt etc.
@@ -71,6 +73,8 @@ struct LightsHeader {
     offsetGobo = UINT8_MAX;
     offsetRGB1 = UINT8_MAX;
     offsetRGB2 = UINT8_MAX;
+    offsetRGB3 = UINT8_MAX;
+    offsetBrightness2 = UINT8_MAX;
   }
 
 }; // fill with dummies to make size 24, be aware of padding so do not change order of vars

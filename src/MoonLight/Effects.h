@@ -76,7 +76,7 @@ class FixedRectangleEffect: public Node {
   }
 };
 
-//alphabetically from here
+//alphabetically from here, MHs at the end
 
 //BouncingBalls inspired by WLED
 #define maxNumBalls 16
@@ -467,84 +467,6 @@ public:
   }
 };
 
-class MovingHeadLayoutAndEffect: public Node {
-  public:
-
-  static const char * name() {return "MovingHead 🚥🔥♫💫";}
-
-  uint8_t bpm = 30;
-  uint8_t pan = 175;
-  uint8_t tilt = 90;
-  uint8_t zoom = 20;
-  uint8_t range = 20;;
-  bool autoMove = false;
-  bool audioReactive = false;
-  bool invert = false;
-
-  uint8_t width = 4;
-  uint8_t pin = 16;
-
-  void setup() override {
-    addControl(bpm, "bpm", "range");
-    addControl(pan, "pan", "range");
-    addControl(tilt, "tilt", "range");
-    addControl(zoom, "zoom", "range");
-    addControl(autoMove, "autoMove", "checkbox");
-    addControl(range, "range", "range");
-    addControl(audioReactive, "audioReactive", "checkbox");
-    addControl(invert, "invert", "checkbox");
-
-    hasLayout = true;
-    Node::setup();
-    
-    addControl(width, "width", "range", 1, 32); //default 4 moving heads
-    addControl(pin, "pin", "pin", 1, 48);
-
-    layerV->layerP->lights.header.channelsPerLight = 24;
-    layerV->layerP->lights.header.offsetPan = 0;
-    layerV->layerP->lights.header.offsetTilt = 1;
-    layerV->layerP->lights.header.offsetBrightness = 3;
-    layerV->layerP->lights.header.offsetRGB = 4;
-    layerV->layerP->lights.header.offsetRGB1 = 8;
-    layerV->layerP->lights.header.offsetRGB2 = 12;
-    layerV->layerP->lights.header.offsetZoom = 17;
-  }
-
-  void addLayout() override {
-    for (uint8_t x = 0; x<width; x++) {
-      addLight({x, 0, 0});
-    }
-    addPin(pin); //needed to slow down the dmx stream ... wip
-  }
-
-  void loop() override {
-
-    for (uint8_t i=0; i<layerV->size.x; i++) {
-
-      if (audioReactive) {
-        uint8_t nrOfLights = layerV->size.x * 3;
-        uint8_t  delta = 256 / nrOfLights;
-
-        //set the 3 led groups for each moving head light
-        layerV->setRGB({i,0,0}, CHSV( (i) * delta, 255, audio.bands[(i * 3) % 16]));
-        layerV->setRGB1({i,0,0}, CHSV( (i + 3) * delta, 255, audio.bands[(i * 3 + 1) % 16]));
-        layerV->setRGB2({i,0,0}, CHSV( (i + 6) * delta, 255, audio.bands[(i * 3 + 2) % 16]));
-      } else {
-        if (i == beatsin8(bpm, 0, layerV->size.x - 1)) { //sinelon over moving heads
-          layerV->setRGB({i,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
-          layerV->setRGB1({i,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
-          layerV->setRGB2({i,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
-        }
-      }
-
-      layerV->setPan({i,0,0}, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && i%2==0)?128:0): pan); //if automove, pan the light over a range
-      layerV->setTilt({i,0,0}, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && i%2==0)?128:0): tilt);
-      layerV->setZoom({i,0,0}, zoom);
-      layerV->setBrightness({i,0,0}, layerV->layerP->lights.header.brightness);
-    }
-  }
-};
-
 class RainbowEffect: public Node {
 public:
 
@@ -838,6 +760,247 @@ public:
 
       layerV->setRGB({pos, y, 0}, color); //= CRGB(255, random8(), 0);
       prevPos = pos;
+    }
+  }
+};
+
+class MHTroy15Effect: public Node {
+  public:
+
+  static const char * name() {return "MHTroy15 🔥♫💫🐺";}
+
+  //set default values here
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 20;
+  uint8_t range = 20;
+  uint8_t colorwheel = 0;
+  uint8_t colorwheelbrightness = 255; // 0-255, 0 = off, 255 = full brightness
+  time_t cooldown = millis();
+  
+  bool autoMove = false;
+  bool audioReactive = false;
+  bool invert = false;
+  int closestColorIndex = -1;
+
+  std::vector<CRGB> colorwheelpalette = {
+      CRGB(255, 255, 255), // White
+      CRGB(255, 0, 0),     // Red
+      CRGB(0, 255, 0),     // Green
+      CRGB(0, 0, 255),     // Blue
+      CRGB(255, 255, 0),   // Yellow
+      CRGB(0, 255, 255),   // Cyan
+      CRGB(255, 165, 0),   // Orange
+      CRGB(128, 0, 128)    // Purple
+  };
+
+  void setup() override {
+    addControl(bpm, "bpm", "range");
+    addControl(pan, "pan", "range");
+    addControl(tilt, "tilt", "range");
+    addControl(zoom, "zoom", "range");
+    addControl(colorwheel, "colorwheel", "range", 0, 7); // 0-7 for 8 colors in the colorwheel
+    addControl(colorwheelbrightness, "colorwheelbrightness", "range"); // 0-7 for 8 colors in the colorwheel
+    addControl(autoMove, "autoMove", "checkbox");
+    addControl(range, "range", "range");
+    addControl(audioReactive, "audioReactive", "checkbox");
+    addControl(invert, "invert", "checkbox");
+  }
+
+  // Function to compute Euclidean distance between two colors
+  double colorDistance(const CRGB& c1, const CRGB& c2) {
+      return std::sqrt(std::pow(c1.r - c2.r, 2) + std::pow(c1.g - c2.g, 2) + std::pow(c1.b - c2.b, 2));
+  }
+
+  // Function to find the index of the closest color
+  int findClosestColorWheelIndex(const CRGB& inputColor, const std::vector<CRGB>& palette) {
+      int closestIndex = 0;
+      double minDistance = colorDistance(inputColor, palette[0]);
+
+      for (size_t i = 1; i < palette.size(); ++i) {
+          double distance = colorDistance(inputColor, palette[i]);
+          if (distance < minDistance) {
+              minDistance = distance;
+              closestIndex = static_cast<int>(i);
+          }
+      }
+
+      return closestIndex;
+  }
+
+  void loop() override {
+
+    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+      if (audioReactive) {
+        // layerV->layerP->lights.header.offsetRGB = 10;
+        layerV->setRGB(x, CRGB(audio.bands[15],audio.bands[7],audio.bands[0]));
+        if (audio.bands[2] > 200 && cooldown + 3000 < millis()) { //cooldown for 3 seconds
+          cooldown = millis();
+          colorwheel = random8(8)*5; //random colorwheel index and convert to 0-35 range
+        } 
+        layerV->setGobo(x, colorwheel);
+        layerV->setBrightness2(x, (audio.bands[0]>200)?audio.bands[0]:0); // Use the first band for brightness
+        layerV->setZoom(x, (audio.bands[0]>200)?0:128);
+        uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, audio.bands[0]/2);
+        uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, audio.bands[0]/2);
+        if (invert && x%2==0) {
+          mypan = 255 - mypan; // invert pan
+          mytilt = 255 - mytilt; // invert tilt
+        }
+        layerV->setPan(x, mypan); 
+        layerV->setTilt(x, mytilt);
+        layerV->setBrightness(x, (audio.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
+      } else {
+        // layerV->layerP->lights.header.offsetRGB = 10;
+        layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
+        layerV->setGobo(x,colorwheel);
+        layerV->setBrightness2(x, colorwheelbrightness); // layerV->layerP->lights.header.brightness);
+        layerV->setPan(x, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
+        layerV->setTilt(x, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
+        layerV->setBrightness(x, layerV->layerP->lights.header.brightness);
+      }
+    }
+  }
+};
+
+class MHTroy32Effect: public Node {
+  public:
+
+  static const char * name() {return "MHTroy32 🔥♫💫🐺";}
+
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 20;
+  uint8_t range = 20;
+  uint8_t cutin = 200;
+  time_t cooldown = millis();
+  
+  bool autoMove = false;
+  bool audioReactive = false;
+  bool invert = false;
+
+  void setup() override {
+    addControl(bpm, "bpm", "range");
+    addControl(pan, "pan", "range");
+    addControl(tilt, "tilt", "range");
+    addControl(zoom, "zoom", "range");
+    addControl(cutin, "cutin", "range");
+    addControl(autoMove, "autoMove", "checkbox");
+    addControl(range, "range", "range");
+    addControl(audioReactive, "audioReactive", "checkbox");
+    addControl(invert, "invert", "checkbox");
+  }
+
+  // Function to compute Euclidean distance between two colors
+  double colorDistance(const CRGB& c1, const CRGB& c2) {
+      return std::sqrt(std::pow(c1.r - c2.r, 2) + std::pow(c1.g - c2.g, 2) + std::pow(c1.b - c2.b, 2));
+  }
+
+  // Function to find the index of the closest color
+  int findClosestColorWheelIndex(const CRGB& inputColor, const std::vector<CRGB>& palette) {
+      int closestIndex = 0;
+      double minDistance = colorDistance(inputColor, palette[0]);
+      for (size_t i = 1; i < palette.size(); ++i) {
+          double distance = colorDistance(inputColor, palette[i]);
+          if (distance < minDistance) {
+              minDistance = distance;
+              closestIndex = static_cast<int>(i);
+          }
+      }
+      return closestIndex;
+  }
+
+  void loop() override {
+
+    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+      if (audioReactive) {
+        layerV->setRGB(x, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]));
+        layerV->setRGB1(x, CRGB(audio.bands[15],audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]>cutin?audio.bands[0]:0));
+        layerV->setRGB2(x, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7],audio.bands[0]>cutin?audio.bands[0]:0));
+        layerV->setRGB3(x, CRGB(audio.bands[15]>cutin?map(audio.bands[15],cutin-1,255,0,255):0,audio.bands[7]>cutin?map(audio.bands[7],cutin-1,255,0,255):0,audio.bands[0]>cutin?map(audio.bands[0],cutin-1,255,0,255):0));
+        if (audio.bands[0] > cutin) {
+          layerV->setZoom(x, 255);
+          cooldown = millis();
+        } else if (cooldown + 5000 < millis()) {
+          layerV->setZoom(x, 0);
+          cooldown = millis();
+        }
+        // layerV->setZoom(x, (audio.bands[0]>cutin)?255:0);
+        uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, audio.bands[0]/2);
+        uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, audio.bands[0]/2);
+        if (invert && x%2==0) {
+          mypan = 255 - mypan; // invert pan
+          mytilt = 255 - mytilt; // invert tilt
+        }
+        if (audio.bands[0]+audio.bands[7]+audio.bands[15] > 1) {
+          layerV->setPan(x, mypan); 
+          layerV->setTilt(x, mytilt);
+          layerV->setBrightness(x, 255);
+        } else {
+          layerV->setBrightness(x, 0);
+        }
+      } else {
+        // layerV->layerP->lights.header.offsetRGB = 10;
+        layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
+        layerV->setPan(x, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
+        layerV->setTilt(x, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
+        layerV->setBrightness(x, layerV->layerP->lights.header.brightness);
+      }
+    }
+  }
+};
+
+class MHWowiEffect: public Node {
+  public:
+
+  static const char * name() {return "MHWowi 🔥♫💫";}
+
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 20;
+  uint8_t range = 20;;
+  bool autoMove = false;
+  bool audioReactive = false;
+  bool invert = false;
+
+  void setup() override {
+    addControl(bpm, "bpm", "range");
+    addControl(pan, "pan", "range");
+    addControl(tilt, "tilt", "range");
+    addControl(zoom, "zoom", "range");
+    addControl(autoMove, "autoMove", "checkbox");
+    addControl(range, "range", "range");
+    addControl(audioReactive, "audioReactive", "checkbox");
+    addControl(invert, "invert", "checkbox");
+  }
+
+  void loop() override {
+
+    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+
+      if (audioReactive) {
+        uint8_t nrOfLights = layerV->size.x * 3;
+        uint8_t  delta = 256 / nrOfLights;
+
+        //set the 3 led groups for each moving head light
+        layerV->setRGB({x,0,0}, CHSV( (x) * delta, 255, audio.bands[(x * 3) % 16]));
+        layerV->setRGB1({x,0,0}, CHSV( (x + 3) * delta, 255, audio.bands[(x * 3 + 1) % 16]));
+        layerV->setRGB2({x,0,0}, CHSV( (x + 6) * delta, 255, audio.bands[(x * 3 + 2) % 16]));
+      } else {
+        if (x == beatsin8(bpm, 0, layerV->size.x - 1)) { //sinelon over moving heads
+          layerV->setRGB({x,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
+          layerV->setRGB1({x,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
+          layerV->setRGB2({x,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute
+        }
+      }
+
+      layerV->setPan({x,0,0}, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
+      layerV->setTilt({x,0,0}, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
+      layerV->setZoom({x,0,0}, zoom);
+      layerV->setBrightness({x,0,0}, layerV->layerP->lights.header.brightness);
     }
   }
 };

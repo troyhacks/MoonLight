@@ -159,22 +159,27 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, GEQEffect::name())) node = new GEQEffect();
         else if (equal(name, LinesEffect::name())) node = new LinesEffect();
         else if (equal(name, LissajousEffect::name())) node = new LissajousEffect();
-        else if (equal(name, MovingHeadLayoutAndEffect::name())) node = new MovingHeadLayoutAndEffect();
         else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
         else if (equal(name, RainbowEffect::name())) node = new RainbowEffect();
         else if (equal(name, RandomEffect::name())) node = new RandomEffect();
         else if (equal(name, RipplesEffect::name())) node = new RipplesEffect();
         else if (equal(name, RGBWParEffect::name())) node = new RGBWParEffect();
-        else if (equal(name, WaveEffect::name())) node = new WaveEffect();
         else if (equal(name, SinusEffect::name())) node = new SinusEffect();
         else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
         else if (equal(name, FixedRectangleEffect::name())) node = new FixedRectangleEffect();
+        else if (equal(name, WaveEffect::name())) node = new WaveEffect();
+        else if (equal(name, MHTroy15Effect::name())) node = new MHTroy15Effect();
+        else if (equal(name, MHTroy32Effect::name())) node = new MHTroy32Effect();
+        else if (equal(name, MHWowiEffect::name())) node = new MHWowiEffect();
 
         else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
         else if (equal(name, PanelLayout::name())) node = new PanelLayout();
         else if (equal(name, RingsLayout::name())) node = new RingsLayout();
         else if (equal(name, SingleLineLayout::name())) node = new SingleLineLayout();
         else if (equal(name, SingleRowLayout::name())) node = new SingleRowLayout();
+        else if (equal(name, MHTroy15Layout::name())) node = new MHTroy15Layout();
+        else if (equal(name, MHTroy32Layout::name())) node = new MHTroy32Layout();
+        else if (equal(name, MHWowi24Layout::name())) node = new MHWowi24Layout();
 
         else if (equal(name, CircleModifier::name())) node = new CircleModifier();
         else if (equal(name, MirrorModifier::name())) node = new MirrorModifier();

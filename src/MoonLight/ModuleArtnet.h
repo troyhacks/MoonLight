@@ -74,8 +74,8 @@ public:
                 hardware_outputs_universe_start[updatedItem.index[0]] = updatedItem.value.as<uint8_t>();
             }
             if (updatedItem.name == "size") { //onStart
-                ESP_LOGD(TAG, "Size[%d] = %d", updatedItem.index[0], updatedItem.value.as<uint8_t>());
-                hardware_outputs[updatedItem.index[0]] = updatedItem.value.as<uint8_t>();
+                ESP_LOGD(TAG, "Size[%d] = %d", updatedItem.index[0], updatedItem.value.as<uint16_t>());
+                hardware_outputs[updatedItem.index[0]] = updatedItem.value.as<uint16_t>();
             }
         }
         else

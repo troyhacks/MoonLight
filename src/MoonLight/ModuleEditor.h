@@ -115,7 +115,6 @@ public:
             values.add(GEQEffect::name());
             values.add(LinesEffect::name());
             values.add(LissajousEffect::name());
-            values.add(MovingHeadLayoutAndEffect::name());
             values.add(PaintBrushEffect::name());
             values.add(RainbowEffect::name());
             values.add(RandomEffect::name());
@@ -125,12 +124,18 @@ public:
             values.add(SphereMoveEffect::name());
             values.add(WaveEffect::name());
             values.add(FixedRectangleEffect::name());
+            values.add(MHTroy15Effect::name());
+            values.add(MHTroy32Effect::name());
+            values.add(MHWowiEffect::name());
 
             values.add(HumanSizedCubeLayout::name());
             values.add(PanelLayout::name());
             values.add(RingsLayout::name());
             values.add(SingleLineLayout::name());
             values.add(SingleRowLayout::name());
+            values.add(MHTroy15Layout::name());
+            values.add(MHTroy32Layout::name());
+            values.add(MHWowi24Layout::name());
 
             values.add(CircleModifier::name());
             values.add(MirrorModifier::name());
