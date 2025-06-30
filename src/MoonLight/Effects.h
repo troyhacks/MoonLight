@@ -784,10 +784,10 @@ class TroyMovingHeadEffect: public Node {
   void setup() override {
     addControl(start_channel, "start_channel", "number", 0, 512); // DMX start channel for this effect
     addControl(light_number, "light_number", "number", 0, 512); // changed type to number as range (currently only supports 0..255)
-    addControl(bpm, "bpm", "range", 30);
-    addControl(pan, "pan", "range", 175);
-    addControl(tilt, "tilt", "range", 90);
-    addControl(zoom, "zoom", "range", 20);
+    addControl(bpm, "bpm", "range");
+    addControl(pan, "pan", "range");
+    addControl(tilt, "tilt", "range");
+    addControl(zoom, "zoom", "range");
     addControl(colorwheel, "colorwheel", "range", 0, 7); // 0-7 for 8 colors in the colorwheel
     addControl(colorwheelbrightness, "colorwheelbrightness", "range"); // 0-7 for 8 colors in the colorwheel
     addControl(autoMove, "autoMove", "checkbox");
