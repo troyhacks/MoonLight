@@ -51,11 +51,12 @@ struct LightsHeader {
   uint8_t offsetGobo = UINT8_MAX;
   uint8_t offsetRGB1 = UINT8_MAX;
   uint8_t offsetRGB2 = UINT8_MAX;
+  uint8_t offsetRGB3 = UINT8_MAX;
   uint8_t offsetBrightness2 = UINT8_MAX;
   //19 bytes until here
   // uint8_t ledFactor = 1; //factor to multiply the positions with 
   // uint8_t ledSize = 4; //mm size of each light, used in monitor ...
-  uint8_t dummy[5];
+  uint8_t dummy[4];
   //24 bytes total
 
   //support for more channels, like white, pan, tilt etc.
@@ -72,6 +73,7 @@ struct LightsHeader {
     offsetGobo = UINT8_MAX;
     offsetRGB1 = UINT8_MAX;
     offsetRGB2 = UINT8_MAX;
+    offsetRGB3 = UINT8_MAX;
     offsetBrightness2 = UINT8_MAX;
   }
 
