@@ -27,18 +27,6 @@
     //make getTimeAgo reactive
     export let currentTime = Date.now();
 
-    //create the pad buttons
-    if (property.type == "pad") {
-        property.rows = [];
-        for (let y = 0; y < property.height; y++) {
-            let columns = [];
-            for (let x = 0; x < property.width; x++) {
-                columns.push(x + y * 8 + (property.start?property.start:0)); //default first button is 0
-            }
-            property.rows.push(columns);
-        }
-    }
-
     let dragSource: { row: number, col: number } | null = null;
 
     function handleDragStart(event: DragEvent, row: number, col: number) {
@@ -56,7 +44,6 @@
             dragSource = null;
         }
     }
-
     
     let hoverTimeout: any = null;
     let fileContent: any;
@@ -242,71 +229,73 @@
     />
 {:else if property.type == "pad"}
     <div class="flex flex-col space-y-2">
-        {#each property.rows as row, rowIndex}
+        {#each Array(Math.ceil((value.count||64) / (property.width||8))) as _, y}
             <div class="flex flex-row space-x-2">
-                {#each row as cell, colIndex}
-                    <button
-                        class="btn btn-square w-{property.size} h-{property.size} text-xl rounded-lg {
-                            value.selected == cell?`btn-error`:Array.isArray(value.list) && value.list.includes(cell) ? `btn-success` : 'btn-primary'}"
-                        type="button"
-                        draggable="true"
-                        on:dragstart={(event) => handleDragStart(event, rowIndex, colIndex)}
-                        on:dragover|preventDefault
-                        on:drop={(event) => handleDrop(event, rowIndex, colIndex)}
-                        on:click={(event:any) => {
-                            preventClick = false;
-                            clickTimeout = setTimeout(() => {
-                                if (!preventClick) {
-                                    console.log("click", rowIndex, colIndex, cell);
-                                    value.select = cell;
-                                    value.selected = cell;
-                                    value.action = "click";
-                                    onChange(event);
-                                }
-                            }, 250); // 250ms is a typical double-click threshold
-                        }}
-                        on:dblclick={(event:any) => {
-                            console.log("delete", rowIndex, colIndex, cell);
-                            preventClick = true;
-                            clearTimeout(clickTimeout);
-                            value.select = cell;
-                            value.action = "dblclick";
-                            onChange(event)
-                        }}
-                        on:mouseenter={(event:any) => {
-                            // console.log("mousenter", rowIndex, colIndex, cell, value);
-                            if (property.hoverToServer) {
-                                value.select = cell;
-                                value.action = "mouseenter";
+                {#each Array(property.width) as _, x}
+                    {#if ((x + y * property.width) < value.count)}
+                        <button
+                            class="btn btn-square w-{property.size} h-{property.size} text-xl rounded-lg {
+                                value.selected == x + y * property.width?`btn-error`:Array.isArray(value.list) && value.list.includes(x + y * property.width) ? `btn-success` : 'btn-primary'}"
+                            type="button"
+                            draggable="true"
+                            on:dragstart={(event) => handleDragStart(event, y, x)}
+                            on:dragover|preventDefault
+                            on:drop={(event) => handleDrop(event, y, x)}
+                            on:click={(event:any) => {
+                                preventClick = false;
+                                clickTimeout = setTimeout(() => {
+                                    if (!preventClick) {
+                                        value.select = x + y * property.width;
+                                        console.log("click", y, x, value.select);
+                                        value.selected = value.select;
+                                        value.action = "click";
+                                        onChange(event);
+                                    }
+                                }, 250); // 250ms is a typical double-click threshold
+                            }}
+                            on:dblclick={(event:any) => {
+                                preventClick = true;
+                                clearTimeout(clickTimeout);
+                                value.select = x + y * property.width;
+                                console.log("delete", y, x, value.select);
+                                value.action = "dblclick";
                                 onChange(event)
-                            } else
-                                handleMouseEnter(cell, event, value.list.includes(cell))
-                        }}
-                        on:mouseleave={(event:any) => {
-                            // console.log("mouseleave", rowIndex, colIndex, cell, value);
-                            if (property.hoverToServer) {
-                                value.select = cell;
-                                value.action = "mouseleave";
-                                onChange(event)
-                            } else
-                                handleMouseLeave()
-                        }}
-                    >
-                        {cell}
-                        {#if popupCell === cell}
-                            <div class="fixed z-50 bg-base-200 p-6 rounded shadow-lg mt-2 min-h-0 text-left inline-block min-w-0"
-                                style="left: {popupX}px; top: {popupY}px;"
-                            >
-                                <!-- Popup for {cell} -->
-                                {#if fileContent && fileContent.nodes}
-                                    {#each fileContent.nodes as node}
-                                        {console.log("node.nodeName", node.nodeName)}
-                                        <p>{node.nodeName} {node.on?"on":"off"}</p>
-                                    {/each}
-                                {/if}
-                            </div>
-                        {/if}
-                    </button>
+                            }}
+                            on:mouseenter={(event:any) => {
+                                // console.log("mousenter", rowIndex, colIndex, cell, value);
+                                if (property.hoverToServer) {
+                                    value.select = x + y * property.width;
+                                    value.action = "mouseenter";
+                                    onChange(event)
+                                } else
+                                    handleMouseEnter(x + y * property.width, event, value.list.includes(x + y * property.width))
+                            }}
+                            on:mouseleave={(event:any) => {
+                                // console.log("mouseleave", rowIndex, colIndex, cell, value);
+                                if (property.hoverToServer) {
+                                    value.select = x + y * property.width;
+                                    value.action = "mouseleave";
+                                    onChange(event)
+                                } else
+                                    handleMouseLeave()
+                            }}
+                        >
+                            {x + y * property.width}
+                            {#if popupCell === x + y * property.width}
+                                <div class="fixed z-50 bg-base-200 p-6 rounded shadow-lg mt-2 min-h-0 text-left inline-block min-w-0"
+                                    style="left: {popupX}px; top: {popupY}px;"
+                                >
+                                    <!-- Popup for {cell} -->
+                                    {#if fileContent && fileContent.nodes}
+                                        {#each fileContent.nodes as node}
+                                            {console.log("node.nodeName", node.nodeName)}
+                                            <p>{node.nodeName} {node.on?"on":"off"}</p>
+                                        {/each}
+                                    {/if}
+                                </div>
+                            {/if}
+                        </button>
+                    {/if}
                 {/each}
             </div>
         {/each}

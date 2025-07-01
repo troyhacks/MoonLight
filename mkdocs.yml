@@ -4,6 +4,9 @@ nav:
   - Home: index.md
   - General:
       - general/gettingstarted.md
+      - general/installation.md
+      - general/development.md
+      - general/hardware.md
       - general/customizingsveltekit.md
       - general/pull-requests.md
   - "MoonLight":
@@ -12,12 +15,12 @@ nav:
       - moonbase/module/editor.md
       - moonbase/module/liveScripts.md
       - moonbase/module/artnet.md
-      - moonbase/module/channelView.md
+      - moonbase/module/ChannelView.md
+      - moonbase/module/MoonLightInfo.md
   - "MoonBase":
       - moonbase/modules.md
       - moonbase/files.md
       - moonbase/module/instances.md
-      - moonbase/module/demo.md
   - "Connections":
       - connections/mqtt.md
       - connections/ntp.md

@@ -15,7 +15,7 @@
 #include <ESP32SvelteKit.h> //for safeModeMB
 
 void Node::updateControl(JsonObject control) {
-    ESP_LOGD(TAG, "updateControl %s", control["name"].as<String>().c_str());
+    // ESP_LOGD(TAG, "updateControl %s", control["name"].as<String>().c_str());
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
         int pointer = control["p"];
         ESP_LOGD(TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
@@ -24,7 +24,7 @@ void Node::updateControl(JsonObject control) {
         if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
             uint8_t *valuePointer = (uint8_t *)pointer;
             *valuePointer = control["value"];
-            ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+            // ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
         }
         else if (control["type"] == "selectFile") {
             char *valuePointer = (char *)pointer;

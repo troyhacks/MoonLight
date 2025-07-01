@@ -7,7 +7,8 @@
 Shows each channel within the light array. e.g. for a LED strip or panel each light is 3 (or 4 in case of RGBW) channels. For multichannel lights like Moving heads.
 If you hover over a channel, that channel will output a value - by this you can reverse engineer positions of existing lights, e.g. when you output to an unknown DMX setup.
 
-This is WIP - currenly only the buttons are shown.
+* View: select between physical layer and virtual layer(s)
+* Group: group all channels in a light as one button. Pressing the button sets all the channels to max
 
 ## Technical
 
@@ -15,7 +16,7 @@ This is WIP - currenly only the buttons are shown.
 
 ### Server
 
-[ModuleChannelView.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModelChannelView.h)
+[ModuleChannelView.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleChannelView.h)
 
 ### UI
 
