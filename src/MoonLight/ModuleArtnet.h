@@ -151,7 +151,8 @@ void loop20ms() {
                 // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
                 
                 //to do: only correct light channels !!!
-                for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB] = (packet_buffer[i+j+layerP.lights.header.offsetRGB] * bri) >> 8;
+                if (layerP.lights.header.offsetBrightness == UINT8_MAX)
+                    for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB] = (packet_buffer[i+j+layerP.lights.header.offsetRGB] * bri) >> 8;
                 //if no brightness control and other colors, apply bri
                 if (layerP.lights.header.offsetRGB1 != UINT8_MAX && layerP.lights.header.offsetBrightness == UINT8_MAX)
                     for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB1] = (packet_buffer[i+j+layerP.lights.header.offsetRGB1] * bri) >> 8;

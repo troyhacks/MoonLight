@@ -1,4 +1,4 @@
-# MoonLight General
+# General
 
 ## Functional
 

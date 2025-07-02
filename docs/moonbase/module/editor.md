@@ -31,51 +31,9 @@ Typically a node will define a layout (🚥), or an effect (🔥), or a modifier
 * **Modifier** 💎: a modifier is an effect on an effect. It can change the size of the virtual layer, it can map the pixels other then 1:1 (e.g. mirror, multiply them or a 1D line can become a 2D circle) and it can change each light set in an effect during a loop (e.g. rotate the effect)
     * Multiple modifiers are allowed, e.g. to first rotate then mirror (or first mirror then rotate). The UI allows for reordering nodes.
 
-## Nodes
 
-Emoji coding:
+See [Nodes](https://moonmodules.org/MoonLight/moonlight/nodes/) page for documentation on existing nodes
 
-* 🔥 Effect
-* 🚥 Layout
-* 💎 Modifier
-* ☸️ Supporting node
-* 🎨 Using palette
-* 💡 WLED origin
-* 💫 MoonLight origin
-* ♫ Audio reactive FFT based
-* ♪ Audio reactive volume based
-* 🧊 3D
-
-### Effect 🔥 Nodes
-🚧
-Precompiled effects can be found in [effects](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Effects.h)
-
-#### Solid 🔥💡
-
-* Sends a solid RGB to all lights
-* Controls: Red, Green, Blue, Brightness
-* Usage: Can be used as background to other effects, order it before other effects
-
-#### PanTilt script
-
-* Sends a beatsin to Pan and Tilt which can be sent to Moving Heads (add a Moving head layout node to configure the MHs)
-* Controls: BPM, Middle Pan and Tilt, Range and invert
-* Usage: Add this effect if moving heads are configured. RGB effects can be added separately e.g. wave to light up the moving heads in wave patterns
-* See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
-* Run script see [How to run a live script](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/#how-to-run-a-live-script)
-
-### Layout 🚥 Nodes
-🚧
-
-### Modifier 💎 Nodes
-🚧
-
-### Supporting ☸️ Nodes
-🚧
-
-#### AudioSync ☸️ ♫
-
-* listens to audio sent over the local network by WLED-AC or WLED-MM and allows sound reactive effects (♫) to use audio data (volume and bands (FFT))
 
 ## Archive
 
