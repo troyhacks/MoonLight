@@ -259,16 +259,6 @@ void VirtualLayer::fadeToBlackMin() {
   }
 }
 
-void VirtualLayer::resetLights() {
-  uint8_t channels[64];
-  memset(channels, 0, sizeof(channels));
-  for (uint16_t index = 0; index < nrOfLights; index++) {
-    setLight(index, channels, 0, MIN(layerP->lights.header.channelsPerLight, 64));
-  }
-  if (layerP->lights.header.channelsPerLight > 64) 
-    ESP_LOGW(TAG, "channelsPerLight %d > 64 !", layerP->lights.header.channelsPerLight );
-}
-
 void VirtualLayer::fill_solid(const CRGB& color) {
   // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y

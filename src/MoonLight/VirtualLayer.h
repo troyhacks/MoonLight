@@ -170,9 +170,6 @@ class VirtualLayer {
   void fadeToBlackBy(const uint8_t fadeBy);
   void fadeToBlackMin();
 
-  //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
-  void resetLights();
-
   void fill_solid(const CRGB& color);
   void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
 

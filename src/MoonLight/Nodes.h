@@ -47,7 +47,6 @@ public:
   virtual void setup() {
     if (hasLayout) {
       layerV->layerP->lights.header.resetOffsets(); //reset offsets to default
-      layerV->resetLights(); //all channels to 0
       layerV->requestMapPhysical = true;
       layerV->requestMapVirtual = true;
     }
