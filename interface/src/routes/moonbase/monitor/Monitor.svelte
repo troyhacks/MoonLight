@@ -121,5 +121,6 @@
 	 <div>
 		<canvas bind:this={el} width="720" height="360"></canvas>
 	</div>
+	</div>
 
 </SettingsCard>
