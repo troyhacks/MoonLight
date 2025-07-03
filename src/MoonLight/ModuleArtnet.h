@@ -78,8 +78,8 @@ public:
                 hardware_outputs[updatedItem.index[0]] = updatedItem.value.as<uint16_t>();
             }
         }
-        else
-            ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        // else
+        //     ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
 void loop20ms() {
@@ -151,9 +151,17 @@ void loop20ms() {
                 // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
                 
                 //to do: only correct light channels !!!
-                packet_buffer[i+layerP.lights.header.offsetRGB] = (packet_buffer[i+layerP.lights.header.offsetRGB] * bri) >> 8;
-                packet_buffer[i+1+layerP.lights.header.offsetRGB] = (packet_buffer[i+1+layerP.lights.header.offsetRGB] * bri) >> 8;
-                packet_buffer[i+2+layerP.lights.header.offsetRGB] = (packet_buffer[i+2+layerP.lights.header.offsetRGB] * bri) >> 8; 
+                if (layerP.lights.header.offsetBrightness == UINT8_MAX)
+                    for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB] = (packet_buffer[i+j+layerP.lights.header.offsetRGB] * bri) >> 8;
+                //if no brightness control and other colors, apply bri
+                if (layerP.lights.header.offsetRGB1 != UINT8_MAX && layerP.lights.header.offsetBrightness == UINT8_MAX)
+                    for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB1] = (packet_buffer[i+j+layerP.lights.header.offsetRGB1] * bri) >> 8;
+                if (layerP.lights.header.offsetRGB2 != UINT8_MAX && layerP.lights.header.offsetBrightness == UINT8_MAX)
+                    for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB2] = (packet_buffer[i+j+layerP.lights.header.offsetRGB2] * bri) >> 8;
+                if (layerP.lights.header.offsetRGB3 != UINT8_MAX && layerP.lights.header.offsetBrightness == UINT8_MAX)
+                    for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB3] = (packet_buffer[i+j+layerP.lights.header.offsetRGB3] * bri) >> 8;
+                if (layerP.lights.header.offsetWhite != UINT8_MAX && layerP.lights.header.offsetBrightness == UINT8_MAX)
+                    packet_buffer[i+layerP.lights.header.offsetWhite] = (packet_buffer[i+layerP.lights.header.offsetWhite] * bri) >> 8;
             }
 
             bufferOffset += packetSize;

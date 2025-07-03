@@ -133,6 +133,9 @@ public:
             values.add(RingsLayout::name());
             values.add(SingleLineLayout::name());
             values.add(SingleRowLayout::name());
+
+            //custom
+            values.add(SE16Layout::name());
             values.add(MHTroy15Layout::name());
             values.add(MHTroy32Layout::name());
             values.add(MHWowi24Layout::name());

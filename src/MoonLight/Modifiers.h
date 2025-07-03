@@ -133,6 +133,7 @@ class PinwheelModifier: public Node {
   bool    reverse = false;
   uint8_t symmetry = 1;
   uint8_t zTwist = 0;
+  float petalWidth = 6.0;
 
   void setup() override {
     hasModifier = true;
@@ -155,13 +156,19 @@ class PinwheelModifier: public Node {
     //   layerV->size.y = 1;
     //   layerV->size.z = 1;
     // }
+    if (petals < 1) petals = 1; // Ensure at least one petal
+    const int FACTORS[23] = {360, 180, 120, 90, 72, 60, 45, 40, 36, 30, 24, 20, 18, 15, 12, 10, 9, 8, 6, 5, 4, 3, 2}; // Factors of 360
+    int factor;
+    if (symmetry > 23) factor = 2; // Default to 2 if symmetry is greater than 23
+    else if (symmetry > 0) factor = FACTORS[symmetry - 1]; // Convert symmetry to a factor of 360
+    else factor = 360; // Default to 360 if symmetry is <= 0
+    petalWidth = factor / float(petals);
+
     ESP_LOGD(TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
     // Coord3D mapped;
-    // factors of 360
-    const int FACTORS[24] = {360, 180, 120, 90, 72, 60, 45, 40, 36, 30, 24, 20, 18, 15, 12, 10, 9, 8, 6, 5, 4, 3, 2};
     // UI Variables
          
     const int dx = position.x - layerV->middle.x;
@@ -172,7 +179,6 @@ class PinwheelModifier: public Node {
     if (swirlVal < 0) angle = 360 - angle; // Reverse Swirl
 
     int value = angle + swirlFactor + (zTwist * position.z);
-    float petalWidth = symmetry / float(petals);
     value /= petalWidth;
     value %= petals;
 

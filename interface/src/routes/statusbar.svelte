@@ -39,7 +39,7 @@
 </script>
 
 <div class="navbar bg-base-300 sticky top-0 z-10 h-12 min-h-fit drop-shadow-lg lg:h-16">
-	<div class="flex-1">
+	<div class="flex-1 flex items-center justify-left">
 		<!-- Page Hamburger Icon here -->
 		<label for="main-menu" class="btn btn-ghost btn-circle btn-sm drawer-button lg:hidden"
 			><Hamburger class="h-6 w-auto" /></label
@@ -57,13 +57,13 @@
 	</div>
 	<div class="flex-none">
 		{#if $telemetry.rssi.disconnected}
-			<WiFiOff class="h-7 w-7" />
+			<WiFiOff class="inline-block h-7 w-7" />
 		{:else}
 			<RssiIndicator
 				showDBm={false}
 				rssi_dbm={$telemetry.rssi.rssi}
 				ssid={$telemetry.rssi.ssid}
-				class="h-7 w-7"
+				class="inline-block h-7 w-7"
 			/>
 		{/if}
 	</div>
@@ -73,7 +73,7 @@
 			<BatteryIndicator
 				charging={$telemetry.battery.charging}
 				soc={$telemetry.battery.soc}
-				class="h-7 w-7"
+				class="inline-block h-7 w-7"
 			/>
 		</div>
 	{/if}

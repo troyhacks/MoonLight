@@ -89,9 +89,10 @@ public:
         values.add("PartyColors");
         values.add("HeatColors");
         values.add("RandomColors");
-        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "pad";  property["width"] = 8; property["height"] = 8; property["size"] = 18;
+        property = root.add<JsonObject>(); property["name"] = "preset"; property["type"] = "pad";  property["width"] = 8; property["size"] = 18;
         property["default"].to<JsonObject>(); // clear the preset array before adding new presets
         property["default"]["list"].to<JsonArray>();
+        property["default"]["count"] = 64;
 
         property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
 

@@ -23,6 +23,7 @@ PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "constructor");
 
         lights.header.resetOffsets(); //reset the offsets to default
+        memset(lights.channels, 0, MAX_CHANNELS); // set all the channels to 0
 
         // initLightsToBlend();
 
@@ -53,6 +54,8 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.size = {0,0,0};
             lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects
+            //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
+            memset(lights.channels, 0, MAX_CHANNELS); // set all the channels to 0
             //dealloc pins
             sortedPins.clear(); //clear the added pins for the next pass
         } else if (pass == 2) {
@@ -177,6 +180,9 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, RingsLayout::name())) node = new RingsLayout();
         else if (equal(name, SingleLineLayout::name())) node = new SingleLineLayout();
         else if (equal(name, SingleRowLayout::name())) node = new SingleRowLayout();
+
+        //custom
+        else if (equal(name, SE16Layout::name())) node = new SE16Layout();
         else if (equal(name, MHTroy15Layout::name())) node = new MHTroy15Layout();
         else if (equal(name, MHTroy32Layout::name())) node = new MHTroy32Layout();
         else if (equal(name, MHWowi24Layout::name())) node = new MHWowi24Layout();

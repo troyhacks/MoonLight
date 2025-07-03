@@ -184,7 +184,7 @@
 				}}>
 			</MultiInput>
 			<label class="label" for="name">
-				<span class="label-text-alt text-error {formErrors.name ? '' : 'hidden'}"
+				<span class="text-error {formErrors.name ? '' : 'hidden'}"
 					>Name must be between 3 and 32 characters long</span
 				>
 			</label>
@@ -207,7 +207,7 @@
 				</MultiInput>
 			</div>
 		{/if}
-		<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
+		<div class="flex flex-wrap justify-end gap-2">
 			<button
 				class="btn btn-primary"
 				onclick={() => {

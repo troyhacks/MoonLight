@@ -1,13 +1,18 @@
 # Channel View
 
-<img width="250" alt="image" src="https://github.com/user-attachments/assets/436790f3-b392-43cb-882d-eefd3a2f438c" />
+<img width="250" alt="image" src="https://github.com/user-attachments/assets/dff9c74d-a93b-425c-9bd4-7ca74c0d9520" />
 
 ## Functional
 
 Shows each channel within the light array. e.g. for a LED strip or panel each light is 3 (or 4 in case of RGBW) channels. For multichannel lights like Moving heads.
 If you hover over a channel, that channel will output a value - by this you can reverse engineer positions of existing lights, e.g. when you output to an unknown DMX setup.
 
-This is WIP - currenly only the buttons are shown.
+* View: select between physical layer and virtual layer(s)
+* Group: group all channels in a light as one button. Pressing the button sets all the channels to max
+
+Choosing the virtual layer and hovering over the channels is a good way to test effect modifiers
+
+hint: do not run effects when using the channel view as they will also fill the channels with data (set them to off in the editor)
 
 ## Technical
 
@@ -15,7 +20,7 @@ This is WIP - currenly only the buttons are shown.
 
 ### Server
 
-[ModuleChannelView.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModelChannelView.h)
+[ModuleChannelView.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleChannelView.h)
 
 ### UI
 
