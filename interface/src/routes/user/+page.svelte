@@ -155,12 +155,12 @@
 	>
 		<SettingsCard collapsible={false}>
 			{#snippet icon()}
-						<Users  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
-					{/snippet}
+				<Users class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
+			{/snippet}
 			{#snippet title()}
-						<span >Manage Users</span>
+				<span>Manage Users</span>
 						<div class="absolute right-20"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div> <!-- 🌙 link to docs -->
-					{/snippet}
+			{/snippet}
 			{#await getSecuritySettings()}
 				<Spinner />
 			{:then nothing}
@@ -216,15 +216,13 @@
 
 				<span class="pb-2 text-xl font-medium">Security Settings</span>
 				<div class="alert alert-warning shadow-lg">
-					<Warning class="h-6 w-6 flex-shrink-0" />
+					<Warning class="h-6 w-6 shrink-0" />
 					<span
 						>The JWT secret is used to sign authentication tokens. If you modify the JWT Secret, all
 						users will be signed out.</span
 					>
 				</div>
-				<label class="label" for="secret">
-					<span class="label-text text-md">JWT Secret</span>
-				</label>
+				<label class="label" for="secret">JWT Secret</label>
 				<InputPassword bind:value={securitySettings.jwt_secret} id="secret" />
 				<div class="mt-6 flex justify-end">
 					<button class="btn btn-primary" onclick={() => postSecuritySettings(securitySettings)}

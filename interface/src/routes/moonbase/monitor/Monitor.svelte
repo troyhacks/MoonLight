@@ -40,7 +40,8 @@
 		let channelsPerLight:number = header[7];
 		let offsetRGB:number = header[8];
 		
-		if (!(isPositions==10)) { //(type == ct_Leds) {
+		if (!(isPositions==10)) { 
+			//(type == ct_Leds) {
 			if (!done) {
 				requestLayout(); //ask for positions
 				console.log("Monitor.handleMonitor", data);
@@ -56,7 +57,8 @@
 				colors.push(r, g, b, a);
 			}
 			updateScene(vertices, colors);
-		} else { //layout Change
+		} else { 
+			//layout Change
 			// console.log(lights)
 			handleLayout(header, data);
 		}
@@ -118,7 +120,6 @@
 	{/snippet}
 
 	<div class="w-full overflow-x-auto">
-	 <div>
 		<canvas bind:this={el} width="720" height="360"></canvas>
 	</div>
 

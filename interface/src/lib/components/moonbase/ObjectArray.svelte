@@ -189,7 +189,7 @@
                         {/if}
                     {/each}
                     {#if !page.data.features.security || $user.admin}
-                        <div class="flex-grow"></div>
+                        <div class="grow"></div>
                         <div class="space-x-0 px-0 mx-0">
                             <button
                                 class="btn btn-ghost btn-sm"
