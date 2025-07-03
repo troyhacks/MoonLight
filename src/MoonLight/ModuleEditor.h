@@ -130,6 +130,9 @@ public:
             values.add(HumanSizedCubeLayout::name());
             values.add(PanelLayout::name());
             values.add(RingsLayout::name());
+
+            //custom
+            values.add(SE16Layout::name());
             values.add(MHTroy15Layout::name());
             values.add(MHTroy32Layout::name());
             values.add(MHWowi24Layout::name());

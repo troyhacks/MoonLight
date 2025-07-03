@@ -177,6 +177,9 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
         else if (equal(name, PanelLayout::name())) node = new PanelLayout();
         else if (equal(name, RingsLayout::name())) node = new RingsLayout();
+
+        //custom
+        else if (equal(name, SE16Layout::name())) node = new SE16Layout();
         else if (equal(name, MHTroy15Layout::name())) node = new MHTroy15Layout();
         else if (equal(name, MHTroy32Layout::name())) node = new MHTroy32Layout();
         else if (equal(name, MHWowi24Layout::name())) node = new MHWowi24Layout();
