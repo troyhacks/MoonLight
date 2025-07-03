@@ -76,7 +76,8 @@
 		return filesState;
 	}
 
-	async function postFilesState(data: any) { //export needed to call from other components
+	async function postFilesState(data: any) { 
+		//export needed to call from other components
 		try {
 			const response = await fetch('/rest/filesState', {
 				method: 'POST',
@@ -156,17 +157,20 @@
 		editableFile = folderList[index];
 		path = editableFile.path
 
-		if (breadCrumbs.length > 0 && editableFile.name === breadCrumbs[breadCrumbs.length-1]) { //if parent folder
+		if (breadCrumbs.length > 0 && editableFile.name === breadCrumbs[breadCrumbs.length-1]) { 
+			//if parent folder
 			breadCrumbs.pop(); //remove last folder
 			folderListFromBreadCrumbs();
 
 			setCookie('breadCrumbs', JSON.stringify(breadCrumbs), 7);
 			showEditor = false;
 			console.log("handleEdit parent", folderList, breadCrumbs)
-		} else if (editableFile.isFile) { //if file
+		} else if (editableFile.isFile) { 
+			//if file
 			console.log("handleEdit file", editableFile, path)
 			showEditor = false; await tick(); showEditor = true; //Trigger reactivity
-		} else { //if folder, go to folder
+		} else { 
+			//if folder, go to folder
 			breadCrumbs.push(editableFile.name);
 			setCookie('breadCrumbs', JSON.stringify(breadCrumbs), 7);
 			// folderList = [folderList[index], ...editableFile.files];

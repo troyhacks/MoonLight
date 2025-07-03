@@ -95,7 +95,7 @@
 
 	const handleClose = () => {
 		notifications.error('Connection to device lost', 5000);
-		telemetry.setRSSI({ rssi: 0, ssid: '' });
+		telemetry.setRSSI({ rssi: 0, ssid: '', safeMode: false });
 	};
 
 	const handleError = (data: any) => console.error(data);

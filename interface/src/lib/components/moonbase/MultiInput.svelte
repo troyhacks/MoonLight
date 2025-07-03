@@ -68,7 +68,8 @@
             popupX = event.clientX + 16;
             popupY = event.clientY + 16;
 
-        }, 1000); // 2 seconds
+        }, 1000); 
+        // 2 seconds
     }
 
     function handleMouseLeave() {
@@ -82,9 +83,11 @@
     let preventClick = false;
 </script>
 
+<div>
+
 <label class="label cursor-pointer" for={property.name}>
-    <!-- <span class="label-text text-md">{initCap(property.name)}</span> -->
-    <span class="mr-4">{initCap(property.name)}</span>
+    <!-- <span class="text-md">{initCap(property.name)}</span> -->
+    <span class="mr-4">{initCap(property.name)}</span>  
 </label>
 
 {#if property.ro && false}
@@ -102,7 +105,7 @@
     <select 
         bind:value={value}
         on:change={onChange}
-        class="select select-bordered">
+        class="select">
         <slot></slot>
         {#each property.values as value, index}
             <option value={property.type == "selectFile"?value:index}>
@@ -131,7 +134,7 @@
             min={property.min?property.min:0} 
             max={property.max?property.max:255}
             step={step}
-            class={"range " + (disabled == false ? (property.color=="Red"?"range-error":(property.color=="Green"?"range-success":"range-primary")) : "range-secondary")}
+            class={"w-full range " + (disabled == false ? (property.color=="Red"?"range-error":(property.color=="Green"?"range-success":"range-primary")) : "range-secondary")}
             {disabled}
             title={property.default}
             bind:value={value}
@@ -143,7 +146,7 @@
                 min={property.min?property.min:0} 
                 max={property.max?property.max:255}
                 step={step}
-                class="input input-bordered"
+                class="input"
                 style="height: 2rem; width: 5rem"
                 {disabled}
                 bind:value={value}
@@ -153,7 +156,7 @@
 </div>
 {:else if property.type == "textarea"}
     <textarea rows="10" cols="61"
-        class="textarea textarea-bordered"
+        class="w-full textarea"
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     >{value}</textarea>
@@ -165,9 +168,10 @@
 {:else if property.type == "number"}
     <input 
         type="number"
+        style="width: {String(property.max || 255).length * 2}ch"
         min={property.min?property.min:0}
         max={property.max?property.max:255}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class='input invalid:border-error invalid:border-2'
         bind:value={value}
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
@@ -175,7 +179,7 @@
 {:else if property.type == "text"}
     <input 
         type={property.type}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class="input invalid:border-error invalid:border-2"
         minlength={property.min?property.min:0}
         maxlength={property.max?property.max:255}
         bind:value={value}
@@ -187,7 +191,7 @@
 {:else if property.type == "ip"}
     <input 
         type={property.type}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class="input invalid:border-error invalid:border-2"
         minlength=3
         maxlength=15
         bind:value={value}
@@ -205,7 +209,8 @@
 {:else if property.type == "coord3D"}
     <input 
         type=number
-        class="input input-bordered invalid:border-error invalid:border-2"
+        style="width: {String(property.max || 255).length * 2}ch"
+        class="input invalid:border-error invalid:border-2"
         min=0
         max=255
         bind:value={value.x}
@@ -213,7 +218,8 @@
     />
     <input 
         type=number
-        class="input input-bordered invalid:border-error invalid:border-2"
+        style="width: {String(property.max || 255).length * 2}ch"
+        class="input invalid:border-error invalid:border-2"
         min=0
         max=255
         bind:value={value.y}
@@ -221,7 +227,8 @@
     />
     <input 
         type=number
-        class="input input-bordered invalid:border-error invalid:border-2"
+        style="width: {String(property.max || 255).length * 2}ch"
+        class="input invalid:border-error invalid:border-2"
         min=0
         max=255
         bind:value={value.z}
@@ -229,6 +236,7 @@
     />
 {:else if property.type == "pad"}
     <div class="flex flex-col space-y-2">
+        <p>count {value.count}</p>
         {#each Array(Math.ceil((value.count||64) / (property.width||8))) as _, y}
             <div class="flex flex-row space-x-2">
                 {#each Array(property.width) as _, x}
@@ -251,7 +259,8 @@
                                         value.action = "click";
                                         onChange(event);
                                     }
-                                }, 250); // 250ms is a typical double-click threshold
+                                }, 250); 
+                                // 250ms is a typical double-click threshold
                             }}
                             on:dblclick={(event:any) => {
                                 preventClick = true;
@@ -307,9 +316,11 @@ Adjust space-x-2 and space-y-2 for spacing. -->
 {:else}
     <input 
         type={property.type}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class="input invalid:border-error invalid:border-2"
         bind:value={value}
         on:change={onChange}
     />
 {/if}
 {/if}
+
+</div>
