@@ -154,15 +154,30 @@ class VirtualLayer {
   }
   void setBrightness2(Coord3D pos, const uint8_t value) { setBrightness2(XYZ(pos), value); }
 
-
   void setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length);
 
   CRGB getRGB(const uint16_t indexV) {
-    return getLight(indexV, layerP->lights.header.offsetRGB);
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB);
   }
   CRGB getRGB(Coord3D pos) { return getRGB(XYZ(pos)); }
 
-  CRGB getLight(const uint16_t indexV, uint8_t offset) const;
+  uint8_t getWhite(const uint16_t indexV) {
+    return getLight<uint8_t>(indexV, layerP->lights.header.offsetWhite);
+  }
+  uint8_t getWhite(Coord3D pos) { return getWhite(XYZ(pos)); }
+
+  CRGB getRGB1(const uint16_t indexV) {
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB1);
+  }
+  CRGB getRGB1(Coord3D pos) { return getRGB1(XYZ(pos)); }
+
+  CRGB getRGB2(const uint16_t indexV) {
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB2);
+  }
+  CRGB getRGB2(Coord3D pos) { return getRGB2(XYZ(pos)); }
+
+  template <typename T>
+  T getLight(const uint16_t indexV, uint8_t offset) const;
 
   //to be called in loop, if more then one effect
   // void setLightsToBlend(); //uses leds

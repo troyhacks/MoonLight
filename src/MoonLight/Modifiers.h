@@ -11,7 +11,7 @@
 
 #if FT_MOONLIGHT
 
-//alphabetically from here
+//alphabetically from here, Custom Nodes at the end
 
 //Takes the x dimension from the layout (1D effect) and turn it into a circle in 2D or a sphere in 3D.
 class CircleModifier: public Node {

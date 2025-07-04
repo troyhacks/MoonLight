@@ -44,13 +44,7 @@ public:
   }
 
   //effect and layout
-  virtual void setup() {
-    if (hasLayout) {
-      layerV->layerP->lights.header.resetOffsets(); //reset offsets to default
-      layerV->requestMapPhysical = true;
-      layerV->requestMapVirtual = true;
-    }
-  };
+  virtual void setup() {};
 
   //effect, layout and modifier
 

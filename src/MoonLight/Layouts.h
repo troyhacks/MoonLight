@@ -11,7 +11,7 @@
 
 #if FT_MOONLIGHT
 
-//alphabetically from here, MHs at the end
+//alphabetically from here, Custom Nodes at the end
 
 class HumanSizedCubeLayout: public Node {
   public:
@@ -28,7 +28,6 @@ class HumanSizedCubeLayout: public Node {
 
   void setup() override {
     hasLayout = true;
-    Node::setup();
     
     addControl(width, "width", "range", 1, 20);
     addControl(height, "height", "range", 1, 20);
@@ -80,7 +79,6 @@ class PanelLayout: public Node {
 
   void setup() override {
     hasLayout = true;
-    Node::setup();
     
     addControl(width, "width", "range", 1, 32);
     addControl(height, "height", "range", 1, 32);
@@ -117,7 +115,6 @@ class RingsLayout: public Node {
   
   void setup() override {
     hasLayout = true;
-    Node::setup();
 
     addControl(pin, "pin", "pin", 1, 48);
   }
@@ -165,7 +162,6 @@ class SE16Layout: public Node {
 
   void setup() override {
     hasLayout = true;
-    Node::setup();
     
     addControl(height, "height", "range", 1, 255);
   }
@@ -207,42 +203,6 @@ class SE16Layout: public Node {
   }
 };
 
-class MHWowi24Layout: public Node {
-  public:
-
-  static const char * name() {return "MHWowi24 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
-
-  uint8_t width = 4;
-  uint8_t pin = 16;
-
-  void setup() override {
-    hasLayout = true;
-    Node::setup();
-    
-    addControl(width, "width", "range", 1, 32);
-    addControl(pin, "pin", "pin", 1, 48);
-
-  }
-
-  void addLayout() override {
-    layerV->layerP->lights.header.channelsPerLight = 24;
-    layerV->layerP->lights.header.offsetPan = 0;
-    layerV->layerP->lights.header.offsetTilt = 1;
-    layerV->layerP->lights.header.offsetBrightness = 3;
-    layerV->layerP->lights.header.offsetRGB = 4;
-    layerV->layerP->lights.header.offsetRGB1 = 8;
-    layerV->layerP->lights.header.offsetRGB2 = 12;
-    layerV->layerP->lights.header.offsetZoom = 17;
-    
-    for (uint8_t x = 0; x<width; x++) {
-      addLight({x, 0, 0});
-    }
-    addPin(pin); //needed to slow down the dmx stream ... wip
-  }
-};
-
 class MHTroy15Layout: public Node {
   public:
 
@@ -254,14 +214,13 @@ class MHTroy15Layout: public Node {
   uint8_t pin = 16;
 
   void setup() override {
-    hasLayout = true;
-    Node::setup();
-    
+    hasLayout = true; //so the system knows to rebuild the mapping if needed
+
     addControl(width, "width", "range", 1, 32);
     addControl(pin, "pin", "pin", 1, 48);
+  }
 
-    hasLayout = true; //so the system knows to rebuild the mapping if needed
-    Node::setup();
+  void addLayout() override {
     layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
     layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
     layerV->layerP->lights.header.offsetPan = 0;
@@ -270,9 +229,7 @@ class MHTroy15Layout: public Node {
     layerV->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
     layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
     layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map
-  }
 
-  void addLayout() override {
     for (uint8_t x = 0; x<width; x++) {
       addLight({x, 0, 0});
     }
@@ -292,10 +249,12 @@ class MHTroy32Layout: public Node {
 
   void setup() override {
     hasLayout = true;
-    Node::setup();
     
     addControl(width, "width", "range", 1, 32);
     addControl(pin, "pin", "pin", 1, 48);
+  }
+
+  void addLayout() override {
 
     layerV->layerP->lights.header.channelsPerLight = 32;
     layerV->layerP->lights.header.offsetRGB = 9;
@@ -306,9 +265,41 @@ class MHTroy32Layout: public Node {
     layerV->layerP->lights.header.offsetTilt = 2;
     layerV->layerP->lights.header.offsetZoom = 5;
     layerV->layerP->lights.header.offsetBrightness = 6;
+
+    for (uint8_t x = 0; x<width; x++) {
+      addLight({x, 0, 0});
+    }
+    addPin(pin); //needed to slow down the dmx stream ... wip
+  }
+};
+
+class MHWowi24Layout: public Node {
+  public:
+
+  static const char * name() {return "MHWowi24 🚥";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  uint8_t width = 4;
+  uint8_t pin = 16;
+
+  void setup() override {
+    hasLayout = true;
+    
+    addControl(width, "width", "range", 1, 32);
+    addControl(pin, "pin", "pin", 1, 48);
   }
 
   void addLayout() override {
+    layerV->layerP->lights.header.channelsPerLight = 24;
+    layerV->layerP->lights.header.offsetPan = 0;
+    layerV->layerP->lights.header.offsetTilt = 1;
+    layerV->layerP->lights.header.offsetBrightness = 3;
+    layerV->layerP->lights.header.offsetRGB = 4;
+    layerV->layerP->lights.header.offsetRGB1 = 8;
+    layerV->layerP->lights.header.offsetRGB2 = 12;
+    layerV->layerP->lights.header.offsetZoom = 17;
+
     for (uint8_t x = 0; x<width; x++) {
       addLight({x, 0, 0});
     }

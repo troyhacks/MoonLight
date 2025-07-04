@@ -36,7 +36,7 @@ class SolidEffect: public Node {
   }
 };
 
-//alphabetically from here, MHs at the end
+//alphabetically from here, Custom Nodes at the end
 
 //BouncingBalls inspired by WLED
 #define maxNumBalls 16
@@ -739,9 +739,9 @@ class MHTroy15Effect: public Node {
   uint8_t colorwheelbrightness = 255; // 0-255, 0 = off, 255 = full brightness
   time_t cooldown = millis();
   
-  bool autoMove = false;
-  bool audioReactive = false;
-  bool invert = false;
+  bool autoMove = true;
+  bool audioReactive = true;
+  bool invert = true;
   int closestColorIndex = -1;
 
   std::vector<CRGB> colorwheelpalette = {
@@ -793,7 +793,6 @@ class MHTroy15Effect: public Node {
 
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
-        // layerV->layerP->lights.header.offsetRGB = 10;
         layerV->setRGB(x, CRGB(audio.bands[15],audio.bands[7],audio.bands[0]));
         if (audio.bands[2] > 200 && cooldown + 3000 < millis()) { //cooldown for 3 seconds
           cooldown = millis();
@@ -812,13 +811,12 @@ class MHTroy15Effect: public Node {
         layerV->setTilt(x, mytilt);
         layerV->setBrightness(x, (audio.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
       } else {
-        // layerV->layerP->lights.header.offsetRGB = 10;
         layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
         layerV->setGobo(x,colorwheel);
         layerV->setBrightness2(x, colorwheelbrightness); // layerV->layerP->lights.header.brightness);
         layerV->setPan(x, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
         layerV->setTilt(x, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
-        layerV->setBrightness(x, layerV->layerP->lights.header.brightness);
+        // layerV->setBrightness(x, layerV->layerP->lights.header.brightness); // done automatically
       }
     }
   }
@@ -837,9 +835,9 @@ class MHTroy32Effect: public Node {
   uint8_t cutin = 200;
   time_t cooldown = millis();
   
-  bool autoMove = false;
-  bool audioReactive = false;
-  bool invert = false;
+  bool autoMove = true;
+  bool audioReactive = true;
+  bool invert = true;
 
   void setup() override {
     addControl(bpm, "bpm", "range");
@@ -879,7 +877,7 @@ class MHTroy32Effect: public Node {
         layerV->setRGB(x, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]));
         layerV->setRGB1(x, CRGB(audio.bands[15],audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]>cutin?audio.bands[0]:0));
         layerV->setRGB2(x, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7],audio.bands[0]>cutin?audio.bands[0]:0));
-        layerV->setRGB3(x, CRGB(audio.bands[15]>cutin?map(audio.bands[15],cutin-1,255,0,255):0,audio.bands[7]>cutin?map(audio.bands[7],cutin-1,255,0,255):0,audio.bands[0]>cutin?map(audio.bands[0],cutin-1,255,0,255):0));
+        layerV->setRGB3(x, CRGB(audio.bands[15]>cutin?::map(audio.bands[15],cutin-1,255,0,255):0,audio.bands[7]>cutin?::map(audio.bands[7],cutin-1,255,0,255):0,audio.bands[0]>cutin?::map(audio.bands[0],cutin-1,255,0,255):0));
         if (audio.bands[0] > cutin) {
           layerV->setZoom(x, 255);
           cooldown = millis();
@@ -902,11 +900,10 @@ class MHTroy32Effect: public Node {
           layerV->setBrightness(x, 0);
         }
       } else {
-        // layerV->layerP->lights.header.offsetRGB = 10;
         layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
         layerV->setPan(x, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
         layerV->setTilt(x, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
-        layerV->setBrightness(x, layerV->layerP->lights.header.brightness);
+        // layerV->setBrightness(x, layerV->layerP->lights.header.brightness); // done automatically
       }
     }
   }
@@ -922,9 +919,9 @@ class MHWowiEffect: public Node {
   uint8_t tilt = 90;
   uint8_t zoom = 20;
   uint8_t range = 20;;
-  bool autoMove = false;
-  bool audioReactive = false;
-  bool invert = false;
+  bool autoMove = true;
+  bool audioReactive = true;
+  bool invert = true;
 
   void setup() override {
     addControl(bpm, "bpm", "range");
@@ -938,6 +935,8 @@ class MHWowiEffect: public Node {
   }
 
   void loop() override {
+
+    layerV->fadeToBlackBy(50);
 
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
 
@@ -960,7 +959,7 @@ class MHWowiEffect: public Node {
       layerV->setPan({x,0,0}, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
       layerV->setTilt({x,0,0}, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
       layerV->setZoom({x,0,0}, zoom);
-      layerV->setBrightness({x,0,0}, layerV->layerP->lights.header.brightness);
+      // layerV->setBrightness({x,0,0}, layerV->layerP->lights.header.brightness); // done automatically
     }
   }
 };
