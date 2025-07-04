@@ -22,7 +22,6 @@
 PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "constructor");
 
-        lights.header.resetOffsets(); //reset the offsets to default
         memset(lights.channels, 0, MAX_CHANNELS); // set all the channels to 0
 
         // initLightsToBlend();

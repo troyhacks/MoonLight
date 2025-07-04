@@ -134,7 +134,8 @@ public:
             // layerP.palette = LavaColors_p;
         } else if (updatedItem.name == "preset") {
             //copy /config/animations.json to the hidden folder /config/.animations/preset[x].json
-            if (!updatedItem.value["action"].isNull()) {
+            //do not set preset at boot...
+            if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
                 uint16_t select = updatedItem.value["select"];
                 Char<32> presetFile;
                 presetFile.format("/config/.editor/preset%02d.json", select);

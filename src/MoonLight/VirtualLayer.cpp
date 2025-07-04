@@ -54,6 +54,14 @@ void VirtualLayer::setup() {
 void VirtualLayer::loop() {
   fadeToBlackMin();
 
+  //set brightness default to global brightness
+  if ( layerP->lights.header.offsetBrightness != UINT8_MAX) {
+    for (int i = 0; i < nrOfLights; i++) {
+      setBrightness(i, layerP->lights.header.brightness);
+      setBrightness2(i, layerP->lights.header.brightness);
+    }
+  }
+
   for (Node *node: nodes) {
     if (node->on)
       node->loop();
@@ -195,35 +203,38 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
   //   ESP_LOGW(TAG, " dev setLight %d >= %d", indexV, MAX_LEDS);
 }
 
-CRGB VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
+template <typename T>
+T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
   if (indexV < mappingTableSizeUsed) {
     switch (mappingTable[indexV].mapType) {
       case m_oneLight: {
-        CRGB *color = (CRGB*)&layerP->lights.channels[mappingTable[indexV].indexP * layerP->lights.header.channelsPerLight + offset];
-        return *color; //return the color as CRGB
+        T *result = (T*)&layerP->lights.channels[mappingTable[indexV].indexP * layerP->lights.header.channelsPerLight + offset];
+        return *result; //return the color as CRGB
         break; }
       case m_moreLights: {
-        CRGB *color = (CRGB*)&layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * layerP->lights.header.channelsPerLight + offset]; //any will do as they are all the same
-        return *color; //return the color as CRGB
+        T *result = (T*)&layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * layerP->lights.header.channelsPerLight + offset]; //any will do as they are all the same
+        return *result; //return the color as CRGB
         break; }
       default: // m_color:
         if (layerP->lights.header.channelsPerLight == 3) {
-          return CRGB((mappingTable[indexV].rgb14 >> 9) << 3, 
-                      (mappingTable[indexV].rgb14 >> 4) << 3, 
-                        mappingTable[indexV].rgb14       << 4);
+          T result;
+          ((uint8_t*)&result)[0] = (mappingTable[indexV].rgb14 >> 9) << 3;
+          ((uint8_t*)&result)[1] = (mappingTable[indexV].rgb14 >> 4) << 3;
+          ((uint8_t*)&result)[2] = (mappingTable[indexV].rgb14)      << 4;
+          return result;
         }
         else
-          return CRGB::Black; //not implemented yet
+          return T(); //not implemented yet
         break;
     }
   }
   else if (indexV * layerP->lights.header.channelsPerLight + offset + 3 < MAX_CHANNELS) { //no mapping
-    CRGB *color = (CRGB*)&layerP->lights.channels[indexV * layerP->lights.header.channelsPerLight + offset];
-    return *color; //return the color as CRGB
+    T *result = (T*)&layerP->lights.channels[indexV * layerP->lights.header.channelsPerLight + offset];
+    return *result; //return the color as CRGB
   } else {
     // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
     // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
-    return CRGB::Black;
+    return T();
   }
 }
 
@@ -252,6 +263,21 @@ void VirtualLayer::fadeToBlackMin() {
         CRGB color = getRGB(index); //direct access to the channels
         color.nscale8(255-fadeBy);
         setRGB(index, color);
+        if (layerP->lights.header.offsetWhite != UINT8_MAX) {
+          uint8_t white = getWhite(index); //direct access to the channels
+          white = (white * fadeBy) >> 8;
+          setWhite(index, white);
+        }
+        if (layerP->lights.header.offsetRGB1 != UINT8_MAX) {
+          CRGB color = getRGB1(index); //direct access to the channels
+          color.nscale8(255-fadeBy);
+          setRGB1(index, color);
+        }
+        if (layerP->lights.header.offsetRGB2 != UINT8_MAX) {
+          CRGB color = getRGB2(index); //direct access to the channels
+          color.nscale8(255-fadeBy);
+          setRGB2(index, color);
+        }
       }
     }
     //reset fade
@@ -307,6 +333,7 @@ void VirtualLayer::mapLayout() {
   layerP->addLayoutPre();
   for (Node *node: nodes) {
     if (node->on && node->hasLayout)
+      layerP->lights.header.resetOffsets();
       node->addLayout();
   }
   layerP->addLayoutPost();
