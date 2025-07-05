@@ -210,11 +210,7 @@ public:
 
                         //make sure "p" is also updated
 
-                        //if node is a modifier, run the layout definition
-                        if (nodeClass->hasModifier) {
-                            ESP_LOGD(TAG, "Modifier created -> remap layout %s", nodeState["nodeName"].as<String>().c_str());
-                            layerP.layerV[0]->requestMapVirtual = true;
-                        }
+                        nodeClass->requestMappings();
                     }
                     else
                         ESP_LOGW(TAG, "Nodeclass %d not found", updatedItem.value.as<String>().c_str());
@@ -235,15 +231,7 @@ public:
                         ESP_LOGD(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], layerP.layerV[0]->nodes.size());
                     }
 
-                    if (oldNode->hasLayout) {
-                        ESP_LOGD(TAG, "Layout %s deleted -> remap layout", updatedItem.oldValue.c_str());
-                        layerP.layerV[0]->requestMapPhysical = true;
-                    }
-
-                    if (oldNode->hasModifier || oldNode->hasLayout) {
-                        ESP_LOGD(TAG, "Modifier %s deleted -> remap layout", updatedItem.oldValue.c_str());
-                        layerP.layerV[0]->requestMapVirtual = true;
-                    }
+                    oldNode->requestMappings();
 
                     layerP.removeNode(oldNode);
                 }
@@ -269,15 +257,9 @@ public:
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
-                        ESP_LOGD(TAG, "  nodeclass m:%d l:%d", nodeClass->hasModifier, nodeClass->hasLayout);
-                        if (nodeClass->hasLayout) {
-                            ESP_LOGD(TAG, "Layout on/off -> remap layout %s (on:%d)", nodeState["nodeName"].as<String>().c_str(), nodeClass->on);
-                            layerP.layerV[0]->requestMapPhysical = true;
-                        }
-                        if (nodeClass->hasModifier || nodeClass->hasLayout) { //nodeClass->on && //if class has modifier, run the layout (if on) - which uses all the modifiers ...
-                            ESP_LOGD(TAG, "Modifier on/off -> remap layout %s", nodeState["nodeName"].as<String>().c_str());
-                            layerP.layerV[0]->requestMapVirtual = true;
-                        }
+                        ESP_LOGD(TAG, "  nodeclass on:%d m:%d l:%d", nodeClass->on, nodeClass->hasModifier, nodeClass->hasLayout);
+
+                        nodeClass->requestMappings();
                     }
                     else
                         ESP_LOGW(TAG, "Nodeclass %d not found", nodeState["nodeName"].as<String>().c_str());
@@ -290,16 +272,8 @@ public:
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
-                        // if Modfier control changed, run the layout
-                        // find nodes which implement the Modifier interface
-                        // find nodes which implement modifySize and modifyPosition
-                        // if this nodes implements modifySize and modifyPosition then run lights lyayout map
 
-                        // ESP_LOGD(TAG, "nodeClass type %s", nodeClass->scriptType);
-                        if (nodeClass->on && nodeClass->hasModifier) {
-                            ESP_LOGD(TAG, "Modifier control changed -> remap layout %s (on:%d)", nodeState["nodeName"].as<String>().c_str(), nodeClass->on);
-                            layerP.layerV[0]->requestMapVirtual = true;
-                        }
+                        nodeClass->requestMappings();
                     }
                     else ESP_LOGW(TAG, "nodeClass not found %s", nodeState["nodeName"].as<String>().c_str());
                 }

@@ -46,13 +46,6 @@ void Node::updateControl(JsonObject control) {
                 ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
         }
     }
-
-    //if changed run map
-    if (hasLayout) {
-      ESP_LOGD(TAG, "layout control changed -> remap layout %s", name());
-      layerV->requestMapPhysical = true;
-      layerV->requestMapVirtual = true;
-    }
 };
 
 #if FT_LIVESCRIPT
@@ -278,12 +271,7 @@ void LiveScriptNode::execute() {
     }
     ESP_LOGD(TAG, "%s", animation);
 
-    if (hasLayout) {
-        layerV->requestMapPhysical = true;
-        layerV->requestMapVirtual = true;
-    }
-
-    // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
+    requestMappings(); // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
 
     if (hasLoop) {
         // setup : create controls

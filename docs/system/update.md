@@ -9,6 +9,8 @@ If there is a new release, the app will notify it's availability.
 
 Select one of the releases to install. In general it is advised to install the most recent version.
 
+Firmware can also be uploaded manually. Select choose file, Press Upload if asked for Are you sure you want to overwrite the existing firmware with a new one?. Wait until the connection gets lost and is re-established. Then the new firmare is installed.
+
 ## Technical
 
 ### Server

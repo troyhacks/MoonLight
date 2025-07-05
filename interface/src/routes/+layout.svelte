@@ -147,7 +147,7 @@
 			<Statusbar />
 
 			<!-- 🌙 Show Monitor (only if moon screen) -->
-			{#if (page.data.features.monitor || page.url.pathname.includes("moon"))}
+			{#if (page.data.features.monitor && page.url.pathname.includes("moon"))}
 				<br>
 				<Monitor />
 			{/if}

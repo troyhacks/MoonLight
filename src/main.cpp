@@ -84,17 +84,17 @@ void setup()
     // 🌙
     #if FT_ENABLED(FT_MOONBASE)
         filesService.begin();
-        moduleInstances.begin();
+            moduleInstances.begin();
 
-        #if FT_ENABLED(FT_MOONLIGHT)
-            moduleLightsControl.begin();
-            moduleEditor.begin();
-            #if FT_ENABLED(FT_LIVESCRIPT)
-                moduleLiveScripts.begin();
-            #endif
-            moduleArtnet.begin();
-            moduleChannelView.begin();
-            moduleMoonLightInfo.begin();
+            #if FT_ENABLED(FT_MOONLIGHT)
+                moduleLightsControl.begin();
+                moduleEditor.begin();
+                #if FT_ENABLED(FT_LIVESCRIPT)
+                    moduleLiveScripts.begin();
+                #endif
+                moduleArtnet.begin();
+                moduleChannelView.begin();
+                moduleMoonLightInfo.begin();
         #endif
     #endif
 

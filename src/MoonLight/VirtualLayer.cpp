@@ -86,20 +86,6 @@ void VirtualLayer::loop() {
   }    
 };
 
-void VirtualLayer::resetMapping() {
-
-  for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
-    mappingTableIndex.clear();
-  }
-  mappingTableIndexesSizeUsed = 0; //do not clear mappingTableIndexes, reuse it
-
-  for (size_t i = 0; i < mappingTable.size(); i++) { //this cannot be removed ...
-    mappingTable[i] = PhysMap();
-  }
-  mappingTableSizeUsed = 0;
-
-}
-
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
   // ESP_LOGD(TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
   switch (physMap.mapType) {
@@ -337,16 +323,27 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
 void VirtualLayer::mapLayout() {
   layerP->addLayoutPre();
   for (Node *node: nodes) {
-    if (node->on && node->hasLayout)
+    if (node->on && node->hasLayout) {
       layerP->lights.header.resetOffsets();
       node->addLayout();
+    }
   }
   layerP->addLayoutPost();
 }
 
 void VirtualLayer::addLayoutPre() {
 
-  resetMapping();
+  // resetMapping
+
+  for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
+    mappingTableIndex.clear();
+  }
+  mappingTableIndexesSizeUsed = 0; //do not clear mappingTableIndexes, reuse it
+
+  for (size_t i = 0; i < mappingTable.size(); i++) { //this cannot be removed ...
+    mappingTable[i] = PhysMap();
+  }
+  mappingTableSizeUsed = 0;
 
   nrOfLights = 0;
   size = layerP->lights.header.size; //start with the physical size

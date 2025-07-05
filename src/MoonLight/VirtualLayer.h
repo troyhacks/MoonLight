@@ -74,7 +74,6 @@ class VirtualLayer {
   void setup();
   void loop();
 
-  void resetMapping();
   void addIndexP(PhysMap &physMap, uint16_t indexP);
 
   uint16_t XYZ(Coord3D &position);
