@@ -236,7 +236,6 @@
     />
 {:else if property.type == "pad"}
     <div class="flex flex-col space-y-2">
-        <p>count {value.count}</p>
         {#each Array(Math.ceil((value.count||64) / (property.width||8))) as _, y}
             <div class="flex flex-row space-x-2">
                 {#each Array(property.width) as _, x}

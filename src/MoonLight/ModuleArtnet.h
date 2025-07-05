@@ -94,6 +94,8 @@ void loop20ms() {
 
     if(!controllerIP) return;
 
+    if (layerP.lights.header.isPositions != 0) return; //don't update if positions are sent
+
     // if(!eff->newFrame) return;
 
     uint8_t bri = layerP.lights.header.brightness;

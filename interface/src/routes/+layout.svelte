@@ -146,8 +146,8 @@
 			<!-- Status bar content here -->
 			<Statusbar />
 
-			<!-- 🌙 Show Monitor Don't show if captive portal -->
-			{#if (!window.location.href.includes("192.168.4.1") && page.data.features.monitor)}
+			<!-- 🌙 Show Monitor (only if moon screen) -->
+			{#if (page.data.features.monitor || page.url.pathname.includes("moon"))}
 				<br>
 				<Monitor />
 			{/if}
