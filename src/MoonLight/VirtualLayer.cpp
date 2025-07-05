@@ -57,8 +57,8 @@ void VirtualLayer::loop() {
   //set brightness default to global brightness
   if ( layerP->lights.header.offsetBrightness != UINT8_MAX) {
     for (int i = 0; i < nrOfLights; i++) {
-      setBrightness(i, layerP->lights.header.brightness);
-      setBrightness2(i, layerP->lights.header.brightness);
+      setBrightness(i, 255); //will be corrected with globalbrighness
+      setBrightness2(i, 255); //will be corrected with globalbrighness
     }
   }
 
@@ -277,6 +277,11 @@ void VirtualLayer::fadeToBlackMin() {
           CRGB color = getRGB2(index); //direct access to the channels
           color.nscale8(255-fadeBy);
           setRGB2(index, color);
+        }
+        if (layerP->lights.header.offsetRGB3 != UINT8_MAX) {
+          CRGB color = getRGB3(index); //direct access to the channels
+          color.nscale8(255-fadeBy);
+          setRGB3(index, color);
         }
       }
     }
