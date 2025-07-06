@@ -116,9 +116,7 @@ class SingleLineLayout: public Node {
 
   void setup() override {
     hasLayout = true;
-    Node::setup();
-    
-    
+
     addControl(start_x, "starting X", "range", 0, 255);
     addControl(width, "width", "range", 1, 255);
     addControl(yposition, "Y position", "number", 0, 255); 
@@ -129,12 +127,12 @@ class SingleLineLayout: public Node {
   void addLayout() override {
     if (reversed_order){
       for (int x = start_x+width-1; x>=start_x; x--) {
-        addLight(intToCoord3D(x, yposition, 0));
+        addLight({x, yposition, 0});
       }
     }
     else {
       for (uint8_t x = start_x; x<start_x+width; x++) {
-        addLight(intToCoord3D(x, yposition, 0));
+        addLight({x, yposition, 0});
       }
     }
     addPin(pin);
@@ -157,7 +155,6 @@ class SingleRowLayout: public Node {
 
   void setup() override {
     hasLayout = true;
-    Node::setup();
     
     addControl(start_y, "starting Y", "range", 0, 255);
     addControl(height, "height", "range", 1, 255);
@@ -169,12 +166,12 @@ class SingleRowLayout: public Node {
   void addLayout() override {
     if (reversed_order){
       for (int y = start_y+height-1; y>=start_y; y--) {
-        addLight(intToCoord3D(xposition, y, 0));
+        addLight({xposition, y, 0});
       }
     }
     else {
       for (uint8_t y = start_y; y<start_y+height; y++) {
-        addLight(intToCoord3D(xposition, y, 0));
+        addLight({xposition, y, 0});
       }
     }
     addPin(pin);
