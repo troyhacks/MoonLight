@@ -13,8 +13,6 @@
  **/
 
 #include <ESP32SvelteKit.h>
-#include <LightMqttSettingsService.h>
-#include <LightStateService.h>
 #include <PsychicHttpServer.h>
 
 // 🌙
@@ -52,13 +50,6 @@
 PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 160, default is 120
-
-LightMqttSettingsService lightMqttSettingsService = LightMqttSettingsService(&server,
-                                                                             &esp32sveltekit);
-
-LightStateService lightStateService = LightStateService(&server,
-                                                        &esp32sveltekit,
-                                                        &lightMqttSettingsService);
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
@@ -99,7 +90,7 @@ void setup()
     // 🌙
     #if FT_ENABLED(FT_MOONBASE)
         filesService.begin();
-        moduleInstances.begin();
+            moduleInstances.begin();
 
         #if FT_ENABLED(FT_MOONLIGHT)
             moduleLightsControl.begin();
@@ -115,11 +106,6 @@ void setup()
             #endif
         #endif
     #endif
-
-    // load the initial light settings
-    lightStateService.begin();
-    // start the light service
-    lightMqttSettingsService.begin();
 
     // String shortString = "Hello world";
     // String longString = "Hello world, this is a long string that is longer than 32 characters";

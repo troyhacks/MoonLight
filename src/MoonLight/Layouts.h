@@ -239,25 +239,28 @@ class SE16Layout: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
+  bool mirroredPins = false;
+  bool swapRowCol = false;
   uint8_t height = 10;
 
   void setup() override {
     hasLayout = true;
     
+    addControl(mirroredPins, "mirroredPins", "checkbox");
+    addControl(swapRowCol, "swapRowCol", "checkbox");
     addControl(height, "height", "range", 1, 255);
   }
 
   void addStrip( uint8_t xposition, uint8_t start_y,  uint8_t stop_y, uint8_t pin) {
-    if (start_y > stop_y){
-      for (int y = start_y; y>=stop_y; y--) {
+
+    bool increasing = (start_y < stop_y);
+    for (int y = start_y; increasing ? (y <= stop_y) : (y >= stop_y); y += increasing?1:-1) {
+      if (swapRowCol)
         addLight(intToCoord3D(xposition, y, 0));
-      }
+      else
+        addLight(intToCoord3D(y, xposition, 0));
     }
-    else {
-      for (uint8_t y = start_y; y<=stop_y; y++) {
-        addLight(intToCoord3D(xposition, y, 0));
-      }
-    }
+
     addPin(pin);
   }
 
@@ -273,14 +276,25 @@ class SE16Layout: public Node {
     // 10-02
     // 03-01
 
-    addStrip(7, height, 2*height-1, 47); addStrip(7, height-1, 0, 48);
-    addStrip(6, height, 2*height-1, 21); addStrip(6, height-1, 0, 38);
-    addStrip(5, height, 2*height-1, 14); addStrip(5, height-1, 0, 39);
-    addStrip(4, height, 2*height-1, 13); addStrip(4, height-1, 0, 40);
-    addStrip(3, height, 2*height-1, 12); addStrip(3, height-1, 0, 41);
-    addStrip(2, height, 2*height-1, 11); addStrip(2, height-1, 0, 42);
-    addStrip(1, height, 2*height-1, 10); addStrip(1, height-1, 0, 2);
-    addStrip(0, height, 2*height-1, 3);  addStrip(0, height-1, 0, 1);
+    if (mirroredPins) {
+      addStrip(7, height, 2*height-1, 47); addStrip(7, height-1, 0, 48);
+      addStrip(6, height, 2*height-1, 21); addStrip(6, height-1, 0, 38);
+      addStrip(5, height, 2*height-1, 14); addStrip(5, height-1, 0, 39);
+      addStrip(4, height, 2*height-1, 13); addStrip(4, height-1, 0, 40);
+      addStrip(3, height, 2*height-1, 12); addStrip(3, height-1, 0, 41);
+      addStrip(2, height, 2*height-1, 11); addStrip(2, height-1, 0, 42);
+      addStrip(1, height, 2*height-1, 10); addStrip(1, height-1, 0, 2);
+      addStrip(0, height, 2*height-1, 3);  addStrip(0, height-1, 0, 1);
+    } else {
+      addStrip(14, 0, height-1, 47); addStrip(15, 0, height-1, 48);
+      addStrip(12, 0, height-1, 21); addStrip(13, 0, height-1, 38);
+      addStrip(10, 0, height-1, 14); addStrip(11, 0, height-1, 39);
+      addStrip(8, 0, height-1, 13); addStrip(9, 0, height-1, 40);
+      addStrip(6, 0, height-1, 12); addStrip(7, 0, height-1, 41);
+      addStrip(4, 0, height-1, 11); addStrip(5, 0, height-1, 42);
+      addStrip(2, 0, height-1, 10); addStrip(3, 0, height-1, 2);
+      addStrip(0, 0, height-1, 3);  addStrip(1, 0, height-1, 1);
+    }
   }
 };
 

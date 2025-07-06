@@ -196,6 +196,77 @@ class PinwheelModifier: public Node {
   }
 };
 
+//Idea and first implementation (WLEDMM ARtNet) by @Troy
+class RippleYZModifier: public Node {
+  public:
+
+  static const char * name() {return "RippleYZ 💎💡💫";}
+  static const char * tags() {return "";}
+
+  bool shrink = true;
+  bool towardsY = true;
+  bool towardsZ = false;
+
+  void setup() override {
+
+    hasModifier = true;
+
+    addControl(shrink, "shrink", "checkbox");
+    addControl(towardsY, "towardsY", "checkbox");
+    addControl(towardsZ, "towardsZ", "checkbox");
+  }
+
+  void modifySize() override {
+    // modifyPosition(layerV->size);
+    // change the size to be one bigger in each dimension
+    // layerV->size.x++;
+    // layerV->size.y++;
+    // layerV->size.z++;
+    if (shrink) {
+      if (towardsY)
+        layerV->size.y = 1;
+      if (towardsZ)
+        layerV->size.z = 1;
+    }
+  }
+
+  void modifyPosition(Coord3D &position) override {
+    if (shrink) {
+      if (towardsY)
+        position.y = 0;
+      if (towardsZ)
+        position.z = 0;
+    }
+  }
+
+  void loop() override {
+
+    //1D->2D: each X is rippled through the y-axis
+    if (towardsY) {
+      // if (leds.effectDimension == _1D && leds.projectionDimension > _1D) {
+        for (int y=layerV->size.y-1; y>=1; y--) {
+          for (int x=0; x<layerV->size.x; x++) {
+            layerV->setRGB(intToCoord3D(x, y, 0), layerV->getRGB(intToCoord3D(x,y-1,0)));
+          }
+        }
+      // }
+    }
+
+    //2D->3D: each XY plane is rippled through the z-axis
+    if (towardsZ) { //not relevant for 2D fixtures
+      // if (leds.effectDimension < _3D && leds.projectionDimension == _3D) {
+        for (int z=layerV->size.z-1; z>=1; z--) {
+          for (int y=0; y<layerV->size.y; y++) {
+            for (int x=0; x<layerV->size.x; x++) {
+              layerV->setRGB(intToCoord3D(x, y, z), layerV->getRGB(intToCoord3D(x,y,z-1)));
+            }
+          }
+        }
+      // }
+    }
+  }
+}; //RippleYZ
+
 // RotateNodifier rotates the light position around the center of the layout.
 // It can flip the x and y coordinates, reverse the rotation direction, and alternate the rotation
 // direction every full rotation. It also supports shear transformations to create a more dynamic effect.

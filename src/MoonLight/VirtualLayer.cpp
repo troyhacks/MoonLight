@@ -57,8 +57,8 @@ void VirtualLayer::loop() {
   //set brightness default to global brightness
   if ( layerP->lights.header.offsetBrightness != UINT8_MAX) {
     for (int i = 0; i < nrOfLights; i++) {
-      setBrightness(i, layerP->lights.header.brightness);
-      setBrightness2(i, layerP->lights.header.brightness);
+      setBrightness(i, 255); //will be corrected with globalbrighness
+      setBrightness2(i, 255); //will be corrected with globalbrighness
     }
   }
 
@@ -85,20 +85,6 @@ void VirtualLayer::loop() {
     requestMapVirtual = false;
   }    
 };
-
-void VirtualLayer::resetMapping() {
-
-  for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
-    mappingTableIndex.clear();
-  }
-  mappingTableIndexesSizeUsed = 0; //do not clear mappingTableIndexes, reuse it
-
-  for (size_t i = 0; i < mappingTable.size(); i++) { //this cannot be removed ...
-    mappingTable[i] = PhysMap();
-  }
-  mappingTableSizeUsed = 0;
-
-}
 
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
   // ESP_LOGD(TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
@@ -278,6 +264,11 @@ void VirtualLayer::fadeToBlackMin() {
           color.nscale8(255-fadeBy);
           setRGB2(index, color);
         }
+        if (layerP->lights.header.offsetRGB3 != UINT8_MAX) {
+          CRGB color = getRGB3(index); //direct access to the channels
+          color.nscale8(255-fadeBy);
+          setRGB3(index, color);
+        }
       }
     }
     //reset fade
@@ -332,16 +323,27 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
 void VirtualLayer::mapLayout() {
   layerP->addLayoutPre();
   for (Node *node: nodes) {
-    if (node->on && node->hasLayout)
+    if (node->on && node->hasLayout) {
       layerP->lights.header.resetOffsets();
       node->addLayout();
+    }
   }
   layerP->addLayoutPost();
 }
 
 void VirtualLayer::addLayoutPre() {
 
-  resetMapping();
+  // resetMapping
+
+  for (std::vector<uint16_t> mappingTableIndex: mappingTableIndexes) {
+    mappingTableIndex.clear();
+  }
+  mappingTableIndexesSizeUsed = 0; //do not clear mappingTableIndexes, reuse it
+
+  for (size_t i = 0; i < mappingTable.size(); i++) { //this cannot be removed ...
+    mappingTable[i] = PhysMap();
+  }
+  mappingTableSizeUsed = 0;
 
   nrOfLights = 0;
   size = layerP->lights.header.size; //start with the physical size

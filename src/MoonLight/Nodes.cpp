@@ -46,13 +46,6 @@ void Node::updateControl(JsonObject control) {
                 ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
         }
     }
-
-    //if changed run map
-    if (hasLayout) {
-      ESP_LOGD(TAG, "layout control changed -> remap layout %s", name());
-      layerV->requestMapPhysical = true;
-      layerV->requestMapVirtual = true;
-    }
 };
 
 #if FT_LIVESCRIPT
@@ -75,13 +68,6 @@ static void _setRGB(uint16_t indexV, CRGB color) {gNode->layerV->setRGB(indexV, 
 static void _setRGBPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setRGB(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
 static void _setPan(uint16_t indexV, uint8_t value) {gNode->layerV->setPan(indexV, value);}
 static void _setTilt(uint16_t indexV, uint8_t value) {gNode->layerV->setTilt(indexV, value);}
-
-static float _time(float j) {
-    float myVal = millis();
-    myVal = myVal / 65535 / j;           // PixelBlaze uses 1000/65535 = .015259. 
-    myVal = fmod(myVal, 1.0);               // ewowi: with 0.015 as input, you get fmod(millis/1000,1.0), which has a period of 1 second, sounds right
-    return myVal;
-}
 
 volatile xSemaphoreHandle WaitAnimationSync = xSemaphoreCreateBinary();
 
@@ -154,7 +140,7 @@ void LiveScriptNode::setup() {
   addExternal( "uint8_t inoise8(uint16_t,uint16_t,uint16_t)", (void *)(uint8_t (*)(uint16_t,uint16_t,uint16_t))inoise8);
   addExternal( "uint8_t beatsin8(uint16_t,uint8_t,uint8_t,uint32_t,uint8_t)", (void *)beatsin8);
   addExternal(   "float hypot(float,float)", (void*)(float (*)(float,float))hypot);
-  addExternal(   "float time(float)", (void *)_time);
+  addExternal(   "float beat8(uint8_t,uint32_t)", (void *)beat8); //saw wave
   addExternal( "uint8_t triangle8(uint8_t)", (void *)triangle8);
 
   //MoonLight functions
@@ -185,9 +171,10 @@ void LiveScriptNode::setup() {
   addExternal( "uint8_t depth", &layerV->size.z);
   addExternal(    "bool on", &on);
 
-  for (asm_external el: external_links) {
-      ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
-  }
+//   for (asm_external el: external_links) {
+//       ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
+//   }
+
 
   runningPrograms.setPrekill(layerV->layerP->ledsDriver.preKill, layerV->layerP->ledsDriver.postKill); //for clockless driver...
   runningPrograms.setFunctionToSync(sync);
@@ -203,6 +190,7 @@ void LiveScriptNode::loop() {
 
 void LiveScriptNode::addLayout() {
     if (hasLayout) {
+        ESP_LOGD(TAG, "%s", animation);
         scriptRuntime.execute(animation, "addLayout"); 
     }
 }
@@ -278,12 +266,7 @@ void LiveScriptNode::execute() {
     }
     ESP_LOGD(TAG, "%s", animation);
 
-    if (hasLayout) {
-        layerV->requestMapPhysical = true;
-        layerV->requestMapVirtual = true;
-    }
-
-    // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
+    requestMappings(); // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
 
     if (hasLoop) {
         // setup : create controls

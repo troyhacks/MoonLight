@@ -132,6 +132,17 @@ public:
 
   virtual void updateControl(JsonObject control); // see Nodes.cpp for implementation
 
+  void requestMappings() {
+    if (hasModifier || hasLayout) {
+        ESP_LOGD(TAG, "hasLayout or Modifier -> requestMapVirtual %s", name());
+        layerV->requestMapVirtual = true;
+    }
+    if (hasLayout) {
+        ESP_LOGD(TAG, "hasLayout -> requestMapPhysical %s", name());
+        layerV->requestMapPhysical = true;
+    }
+  }
+
   //effect, layout and modifier (?)
   virtual void loop() {}
 

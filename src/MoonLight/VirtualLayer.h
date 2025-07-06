@@ -74,7 +74,6 @@ class VirtualLayer {
   void setup();
   void loop();
 
-  void resetMapping();
   void addIndexP(PhysMap &physMap, uint16_t indexP);
 
   uint16_t XYZ(Coord3D &position);
@@ -94,7 +93,8 @@ class VirtualLayer {
   }
   void setWhite(Coord3D pos, const uint8_t value) { setWhite(XYZ(pos), value); }
 
-  void setBrightness(const uint16_t indexV, const uint8_t value) {
+  void setBrightness(const uint16_t indexV, uint8_t value) {
+    value = (value * layerP->lights.header.brightness) >>8; // 255
     if (layerP->lights.header.offsetBrightness != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness, sizeof(value));
   }
@@ -148,7 +148,8 @@ class VirtualLayer {
   }
   void setRGB3(Coord3D pos, CRGB color) { setRGB3(XYZ(pos), color); }
 
-  void setBrightness2(const uint16_t indexV, const uint8_t value) {
+  void setBrightness2(const uint16_t indexV, uint8_t value) {
+    value = (value * layerP->lights.header.brightness) >>8; //255
     if (layerP->lights.header.offsetBrightness2 != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness2, sizeof(value));
   }
@@ -175,6 +176,11 @@ class VirtualLayer {
     return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB2);
   }
   CRGB getRGB2(Coord3D pos) { return getRGB2(XYZ(pos)); }
+
+  CRGB getRGB3(const uint16_t indexV) {
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB3);
+  }
+  CRGB getRGB3(Coord3D pos) { return getRGB3(XYZ(pos)); }
 
   template <typename T>
   T getLight(const uint16_t indexV, uint8_t offset) const;

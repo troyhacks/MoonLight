@@ -67,9 +67,9 @@ public:
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
             }, "server");
         } else if (updatedItem.name == "channel") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             //copy the file to the hidden folder...
-            if (!updatedItem.value["action"].isNull()) {
+            if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
+                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 uint16_t select = updatedItem.value["select"];
                 uint8_t value = updatedItem.value["action"] == "mouseenter"?255:0;
                 if (view == 0) {
