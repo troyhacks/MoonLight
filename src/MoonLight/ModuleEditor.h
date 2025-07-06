@@ -140,6 +140,7 @@ public:
             values.add(CircleModifier::name());
             values.add(MirrorModifier::name());
             values.add(MultiplyModifier::name());
+            values.add(RippleYZModifier::name());
             values.add(PinwheelModifier::name());
             values.add(RotateNodifier::name());
 

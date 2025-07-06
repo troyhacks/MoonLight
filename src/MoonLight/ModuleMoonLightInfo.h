@@ -34,7 +34,8 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536;
         property = root.add<JsonObject>(); property["name"] = "channelsPerLight"; property["type"] = "number"; property["max"] = 65536;
-        property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 20;
+        property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 32;
+        property = root.add<JsonObject>(); property["name"] = "FastLED"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
         property = root.add<JsonObject>(); property["name"] = "layers"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -58,6 +59,8 @@ public:
             data["nrOfLights"] = layerP.lights.header.nrOfLights;
             data["channelsPerLight"] = layerP.lights.header.channelsPerLight;
             data["chipset"] = TOSTRING(ML_CHIPSET);
+            const char* fastledVersion = TOSTRING(FASTLED_VERSION);// "." TOSTRING(FASTLED_VERSION_MINOR) "." TOSTRING(FASTLED_VERSION_PATCH);
+            data["FastLED"] = fastledVersion;
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;
             data["size"]["z"] = layerP.lights.header.size.z;
