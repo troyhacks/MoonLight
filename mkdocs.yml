@@ -15,7 +15,6 @@ nav:
       - moonbase/module/editor.md
       - moonlight/nodes.md
       - moonbase/module/liveScripts.md
-      - moonbase/module/artnet.md
       - moonbase/module/ChannelView.md
       - moonbase/module/MoonLightInfo.md
   - "MoonBase":

@@ -73,12 +73,6 @@
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Artnet',
-					icon: BulbIcon,
-					href: '/moonbase/module?module=artnet',
-					feature: page.data.features.moonlight,
-				},
-				{
 					title: 'Channel View',
 					icon: BulbIcon,
 					href: '/moonbase/module?module=ChannelView',

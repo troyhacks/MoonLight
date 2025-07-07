@@ -27,7 +27,6 @@
         #if FT_ENABLED(FT_LIVESCRIPT)
             #include "MoonLight/ModuleLiveScripts.h"
         #endif
-        #include "MoonLight/ModuleArtnet.h"
         #include "MoonLight/ModuleChannelView.h"
         #include "MoonLight/ModuleMoonLightInfo.h"
     #endif
@@ -60,7 +59,6 @@ ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 1
         #if FT_ENABLED(FT_LIVESCRIPT)
             ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &filesService);
         #endif
-        ModuleArtnet moduleArtnet = ModuleArtnet(&server, &esp32sveltekit, &filesService);
         ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit, &filesService);
         ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit, &filesService);
     #endif
@@ -92,7 +90,6 @@ void setup()
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     moduleLiveScripts.begin();
                 #endif
-                moduleArtnet.begin();
                 moduleChannelView.begin();
                 moduleMoonLightInfo.begin();
         #endif
@@ -132,14 +129,13 @@ void loop()
         #endif
 
         //20ms loop
-        static unsigned long lastTime20ms = 0;
-        if (millis() - lastTime20ms > 20)
-        {
-            lastTime20ms = millis();
-            #if FT_ENABLED(FT_MOONLIGHT)
-                moduleArtnet.loop20ms();
-            #endif
-        }
+        // static unsigned long lastTime20ms = 0;
+        // if (millis() - lastTime20ms > 20)
+        // {
+        //     lastTime20ms = millis();
+        //     #if FT_ENABLED(FT_MOONLIGHT)
+        //     #endif
+        // }
 
         //50ms loop
         static unsigned long lastTime50ms = 0;

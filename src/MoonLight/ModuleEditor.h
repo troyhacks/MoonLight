@@ -144,6 +144,7 @@ public:
             values.add(PinwheelModifier::name());
             values.add(RotateNodifier::name());
 
+            values.add(ArtNetMod::name());
             values.add(AudioSyncMod::name());
             values.add(FastLEDDriverMod::name());
             values.add(HUB75DriverMod::name());

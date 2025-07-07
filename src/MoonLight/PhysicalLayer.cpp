@@ -190,6 +190,7 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
         else if (equal(name, RotateNodifier::name())) node = new RotateNodifier();
         
+        else if (equal(name, ArtNetMod::name())) node = new ArtNetMod();
         else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
         else if (equal(name, FastLEDDriverMod::name())) node = new FastLEDDriverMod();
         else if (equal(name, HUB75DriverMod::name())) node = new HUB75DriverMod();

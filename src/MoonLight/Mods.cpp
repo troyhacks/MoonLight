@@ -13,6 +13,104 @@
 
 #include "Mods.h"
 
+#include <AsyncUDP.h>
+#define ARTNET_DEFAULT_PORT 6454
+
+void  ArtNetMod::loop() {
+  controllerIP[0] = WiFi.localIP()[0];
+  controllerIP[1] = WiFi.localIP()[1];
+  controllerIP[2] = WiFi.localIP()[2];
+  controllerIP[3] = controllerIP3;
+
+  if(!controllerIP) return;
+  
+  LightsHeader *header = &layerV->layerP->lights.header;
+  if (header->isPositions != 0) return; //don't update if positions are sent
+
+  while (millis() - lastMillis < 1000 / throttleSpeed) {
+    delay(1); // delay 1ms
+  }
+  lastMillis = millis();
+
+  // calculate the number of UDP packets we need to send
+
+  uint8_t packet_buffer[ART_NET_HEADER_SIZE + 6 + 512];
+  memcpy(packet_buffer, ART_NET_HEADER, 12); // copy in the Art-Net header.
+
+  AsyncUDP artnetudp;// AsyncUDP so we can just blast packets.
+
+  uint_fast16_t bufferOffset = 0;
+  uint_fast16_t hardware_output_universe = 0;
+  
+  sequenceNumber++;
+
+  if (sequenceNumber == 0) sequenceNumber = 1; // just in case, as 0 is considered "Sequence not in use"
+  if (sequenceNumber > 255) sequenceNumber = 1;
+  
+  for (uint_fast16_t hardware_output = 0; hardware_output < hardware_outputs.size(); hardware_output++) { //loop over all outputs
+      
+      if (bufferOffset > header->nrOfLights * header->channelsPerLight) {
+          // This stop is reached if we don't have enough pixels for the defined Art-Net output.
+          return; // stop when we hit end of LEDs
+      }
+
+      hardware_output_universe = hardware_outputs_universe_start[hardware_output];
+
+      uint_fast16_t channels_remaining = hardware_outputs[hardware_output] * header->channelsPerLight;
+
+      while (channels_remaining > 0) {
+          const uint_fast16_t ARTNET_CHANNELS_PER_PACKET = 510; // 512/4=128 RGBW LEDs, 510/3=170 RGB LEDs
+
+          uint_fast16_t packetSize = ARTNET_CHANNELS_PER_PACKET;
+
+          if (channels_remaining < ARTNET_CHANNELS_PER_PACKET) {
+              packetSize = channels_remaining;
+              channels_remaining = 0;
+          } else {
+              channels_remaining -= packetSize;
+          }
+
+          // set the parts of the Art-Net packet header that change:
+          packet_buffer[12] = sequenceNumber;
+          packet_buffer[14] = hardware_output_universe;
+          packet_buffer[16] = packetSize >> 8;
+          packet_buffer[17] = packetSize;
+
+          // bulk copy the buffer range to the packet buffer after the header 
+          memcpy(packet_buffer+18, (&layerV->layerP->lights.channels[0])+bufferOffset, packetSize); //start from the first byte of ledsP[0]
+
+          //no brightness scaling for the time being
+          for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) {
+              // set brightness all at once - seems slightly faster than scale8()?
+              // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
+              
+              //if no brightness control and other colors, apply bri
+              if (header->offsetBrightness == UINT8_MAX)
+                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB] = (packet_buffer[i+j+header->offsetRGB] * header->brightness) >> 8;
+              if (header->offsetRGB1 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB1] = (packet_buffer[i+j+header->offsetRGB1] * header->brightness) >> 8;
+              if (header->offsetRGB2 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB2] = (packet_buffer[i+j+header->offsetRGB2] * header->brightness) >> 8;
+              if (header->offsetRGB3 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB3] = (packet_buffer[i+j+header->offsetRGB3] * header->brightness) >> 8;
+              if (header->offsetWhite != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                  packet_buffer[i+header->offsetWhite] = (packet_buffer[i+header->offsetWhite] * header->brightness) >> 8;
+
+              //todo: correct values using RGB correction: header->red/green/blue. Need to know the color order first ...
+          }
+
+          bufferOffset += packetSize;
+          
+          if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, ARTNET_DEFAULT_PORT)) {
+              Serial.print("🐛");
+              return; // borked
+          }
+
+          hardware_output_universe++;
+      }
+  }
+}
+
 // Expand to , COLOR_ORDER if defined
 #if defined(ML_COLOR_ORDER)
   #define COLOR_ORDER_ARG , ML_COLOR_ORDER
@@ -26,7 +124,6 @@
 #else
   #define RGBW_CALL
 #endif
-
 
   void  FastLEDDriverMod::setup() {
     hasLayout = true; //so addLayout is called if needed
@@ -254,8 +351,10 @@
 
   void  FastLEDDriverMod::loop() {
     if (FastLED.count()) {
-      if (FastLED.getBrightness() != layerV->layerP->lights.header.brightness)
+      if (FastLED.getBrightness() != layerV->layerP->lights.header.brightness) {
+        ESP_LOGD(TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
         FastLED.setBrightness(layerV->layerP->lights.header.brightness);
+      }
 
       if (maxPowerSaved != maxPower) {
         FastLED.setMaxPowerInMilliWatts(1000 * maxPower); // 5v, 2000mA, to protect usb while developing
@@ -267,8 +366,10 @@
       CLEDController *pCur = CLEDController::head();
       while( pCur) {
           // ++x;
-          if (pCur->getCorrection() != correction)
+          if (pCur->getCorrection() != correction) {
+            ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
             pCur->setCorrection(correction);
+          }
           // pCur->size();
           pCur = pCur->next();
       }
@@ -369,17 +470,24 @@
 
     if (layerV->layerP->lights.header.isPositions == 0) {
 
-  #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
-      if (driverP._brightness != layerV->layerP->lights.header.brightness)
-        driverP.setBrightness(layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8);
+      #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+        if (driverP._brightness != layerV->layerP->lights.header.brightness) {
+          ESP_LOGD(TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
+          driverP.setBrightness(layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8);
+        }
 
-      #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
-        if (driverP.ledsbuff != nullptr)
-          driverP.show();
-      #else
-        if (driverP.total_leds > 0)
-          driverP.showPixels(WAIT);
-      #endif
+        if (driverP._gammar != layerV->layerP->lights.header.red/255.0 || driverP._gammag != layerV->layerP->lights.header.green/255.0 || driverP._gammab != layerV->layerP->lights.header.blue/255.0) {
+          ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
+          driverP.setGamma(layerV->layerP->lights.header.red/255.0, layerV->layerP->lights.header.green/255.0, layerV->layerP->lights.header.blue/255.0);
+        }
+
+        #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
+          if (driverP.ledsbuff != nullptr)
+            driverP.show();
+        #else
+          if (driverP.total_leds > 0)
+            driverP.showPixels(WAIT);
+        #endif
       #endif
     }
   }

@@ -17,7 +17,7 @@ Controls:
     * Will move to driver node later ...
 * Monitor On: sends LED output the monitor in the UI.
 
-A MoonLight instance can expose itself as an Artnet device (DMX mode) where above controls will be the channels to control by Artnet controllers (it can be an Artnet DMX receiver but also an ArtNet LEDs receiver, and it can be an ArtNet sender - See ArtNet Module) - WIP (only ArtNet sender is currently implemented)
+A MoonLight instance can expose itself as an ArtNet device (DMX mode) where above controls will be the channels to control by ArtNet controllers (it can be an ArtNet DMX receiver but also an ArtNet LEDs receiver, and it can be an ArtNet sender - See ArtNet Module) - WIP (only ArtNet sender is currently implemented)
 
 ## Technical
 
