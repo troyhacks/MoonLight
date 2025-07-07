@@ -154,11 +154,11 @@ void LiveScriptNode::setup() {
 
   //MoonLight physical and virtual driver vars
   //  but keep enabled to avoid compile errors when used in non virtual context
-  addExternal( "uint8_t colorOrder", &layerV->layerP->ledsDriver.colorOrder);
-  addExternal( "uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
-  addExternal( "uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
-  addExternal( "uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
-  addExternal( "uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
+//   addExternal( "uint8_t colorOrder", &layerV->layerP->ledsDriver.colorOrder);
+//   addExternal( "uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
+//   addExternal( "uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
+//   addExternal( "uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
+//   addExternal( "uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
   addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);
@@ -176,7 +176,7 @@ void LiveScriptNode::setup() {
 //   }
 
 
-  runningPrograms.setPrekill(layerV->layerP->ledsDriver.preKill, layerV->layerP->ledsDriver.postKill); //for clockless driver...
+//   runningPrograms.setPrekill(layerV->layerP->ledsDriver.preKill, layerV->layerP->ledsDriver.postKill); //for clockless driver...
   runningPrograms.setFunctionToSync(sync);
 
   compileAndRun();

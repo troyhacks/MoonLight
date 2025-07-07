@@ -129,7 +129,6 @@ void loop()
         // 💫
         #if FT_ENABLED(FT_MOONLIGHT)
             moduleEditor.loop();
-            moduleLightsControl.loop();
         #endif
 
         //20ms loop

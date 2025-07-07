@@ -145,6 +145,10 @@ public:
             values.add(RotateNodifier::name());
 
             values.add(AudioSyncMod::name());
+            values.add(FastLEDDriverMod::name());
+            values.add(HUB75DriverMod::name());
+            values.add(PhysicalDriverMod::name());
+            values.add(VirtualDriverMod::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
@@ -258,7 +262,7 @@ public:
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
-                        ESP_LOGD(TAG, "  nodeclass on:%d m:%d l:%d", nodeClass->on, nodeClass->hasModifier, nodeClass->hasLayout);
+                        ESP_LOGD(TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasLayout, nodeClass->hasModifier);
 
                         nodeClass->requestMappings();
                     }

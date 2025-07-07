@@ -78,7 +78,7 @@ PhysicalLayer::PhysicalLayer() {
                 //send the positions to the UI _socket_emit
                 //reset the index and continue...
             } else
-                lights.positions[lights.header.nrOfLights] = {position.x, position.y, position.z};
+                lights.positions[lights.header.nrOfLights] = Coord3D(position.x, position.y, position.z);
             
             lights.header.size = lights.header.size.maximum(position);
         } else {
@@ -135,7 +135,7 @@ PhysicalLayer::PhysicalLayer() {
                 //sort the vector by the starLed
                 std::sort(sortedPins.begin(), sortedPins.end(), [](const SortedPin &a, const SortedPin &b) {return a.startLed < b.startLed;});
 
-                ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
+                // ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
 
             } //pins defined
         } else if (pass == 2) {
@@ -186,10 +186,15 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, CircleModifier::name())) node = new CircleModifier();
         else if (equal(name, MirrorModifier::name())) node = new MirrorModifier();
         else if (equal(name, MultiplyModifier::name())) node = new MultiplyModifier();
+        else if (equal(name, RippleYZModifier::name())) node = new RippleYZModifier();
         else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
         else if (equal(name, RotateNodifier::name())) node = new RotateNodifier();
         
         else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
+        else if (equal(name, FastLEDDriverMod::name())) node = new FastLEDDriverMod();
+        else if (equal(name, HUB75DriverMod::name())) node = new HUB75DriverMod();
+        else if (equal(name, PhysicalDriverMod::name())) node = new PhysicalDriverMod();
+        else if (equal(name, VirtualDriverMod::name())) node = new VirtualDriverMod();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = new LiveScriptNode();

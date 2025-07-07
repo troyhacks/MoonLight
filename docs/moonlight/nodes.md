@@ -33,6 +33,13 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 
 ## Layout 🚥 Nodes
 🚧
+### SE16 🚥
+
+Layout(s) for Stephan Electronics 16-Pin ESP32-S3 board, using the pins used on the board
+
+* ledsPerPin: the number of LEDs connected to one pin
+* pinsAreColumns: are the leds on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the leds are a column (height is 1 (or 2) x ledsPerPin)
+* mirroredPins: If set it is assumed that LEDs are connected with increasing positions on 8 pins on one side of the board and decreasing positions on the 8 pins of the other side of the board. The resulting size will have a width of 8 and the height (or width) will be 2 * ledsPerPin. If not set, the width will be 16 and the height (or width) = ledsPerPin
 
 ## Modifier 💎 Nodes
 🚧
@@ -47,6 +54,16 @@ Projects 1D/2D effects onto 2D/3D fixtures in a pinwheel pattern.
 * **Petals** option to adjust the number of petals.
 * **Ztwist** option for 3D fixtures to twist the pattern along the z-axis.
 * The virtual layer width is the number of petals. The height is the distance from center to corner
+
+### RippleYZ 💎💡💫
+
+Takes lights of an effect and copies them to other lights. E.g. 1D effect will be rippled to 2D, 2D effect will be rippled to 3D
+
+* shrink: shrinks the original size to towardsY and Z
+* towardsY: copies X into Y
+* towardsZ: copies XY into Z
+
+Note: some effects already do this theirselves e.g. FreqMatrix runs on 1D but copies to 2D and 3D if size allows.
 
 ## Supporting ☸️ Nodes
 🚧

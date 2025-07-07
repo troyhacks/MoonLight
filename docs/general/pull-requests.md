@@ -54,7 +54,7 @@ Below lists are ordered in terms of likelyhood to be accepted:
     * CPU load (and main.cpp)
     * comment response.addHeader("Cache-Control", "public, immutable, max-age=31536000");
 * interface/source/routes/+layout.svelte
-    * Don't show if captive portal: {#if (!window.location.href.includes("192.168.4.1") && $page.data.features.monitor)}
+    * Show monitor only on moon functions (so captive portal on small screen looks fine): #if (page.data.features.monitor && page.url.pathname.includes("moon"))
 * main.cpp: esp_log_set_vprintf(my_vprintf); WIP
 * ci pio
 * run in loopTask to avoid stack size crashes in httpd

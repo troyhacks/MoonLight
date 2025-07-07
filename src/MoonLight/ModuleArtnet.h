@@ -163,6 +163,8 @@ void loop20ms() {
                     for (int j=0; j < 3; j++) packet_buffer[i+j+layerP.lights.header.offsetRGB3] = (packet_buffer[i+j+layerP.lights.header.offsetRGB3] * bri) >> 8;
                 if (layerP.lights.header.offsetWhite != UINT8_MAX && layerP.lights.header.offsetBrightness == UINT8_MAX)
                     packet_buffer[i+layerP.lights.header.offsetWhite] = (packet_buffer[i+layerP.lights.header.offsetWhite] * bri) >> 8;
+
+                //todo: correct values using RGB correction: layerP.lights.header.red/green/blue. Need to know the color order first ...
             }
 
             bufferOffset += packetSize;

@@ -39,7 +39,7 @@ public:
     void begin() {
         Module::begin();
 
-        ESP_LOGD(TAG, "L:%d(%d) LH:%d N:%d PL:%d(%d) VL:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer));
+        ESP_LOGD(TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
         setPresetsFromFolder(); //set the right values during boot
         
@@ -94,8 +94,6 @@ public:
         property["default"]["list"].to<JsonArray>();
         property["default"]["count"] = 64;
 
-        property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
-
         #if FT_ENABLED(FT_MONITOR)
             property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
         #endif
@@ -105,13 +103,18 @@ public:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (updatedItem.name == "red" || updatedItem.name == "green" || updatedItem.name == "blue") {
+        if (updatedItem.name == "red") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            layerP.ledsDriver.setColorCorrection(_state.data["red"], _state.data["green"], _state.data["blue"]);
+            layerP.lights.header.red = _state.data["red"];
+        } else if (updatedItem.name == "green") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            layerP.lights.header.green = _state.data["green"];
+        } else if (updatedItem.name == "blue") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            layerP.lights.header.blue = _state.data["blue"];
         } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
-            layerP.ledsDriver.setBrightness(layerP.lights.header.brightness);
         } else if (updatedItem.name == "palette") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             // String value = _state.data["palette"];//updatedItem.oldValue;
@@ -163,12 +166,6 @@ public:
             }
         } else 
             ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    }
-
-    //ledsDriver.show
-    void loop() {
-        if (layerP.lights.header.isPositions == 0 && _state.data["driverOn"])
-            layerP.ledsDriver.show();
     }
 
     void loop50ms() {

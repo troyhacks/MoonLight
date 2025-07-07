@@ -238,7 +238,7 @@ public:
         if (x!=0) color = layerV->getRGB(x-1);
         for (uint8_t y = 0; y < layerV->size.y; y++)
           for (uint8_t z = 0; z < layerV->size.z; z++)
-            layerV->setRGB(intToCoord3D(x,y,z), color);
+            layerV->setRGB(Coord3D(x,y,z), color);
       }
     }
   }
@@ -347,11 +347,11 @@ public:
 
         ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
 
-        layerV->setRGB(intToCoord3D(pos.x, layerV->size.y - 1 - pos.y, 0), ledColor);
+        layerV->setRGB(Coord3D(pos.x, layerV->size.y - 1 - pos.y, 0), ledColor);
       }
 
       if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
-        layerV->setRGB(intToCoord3D(pos.x, layerV->size.y - previousBarHeight[pos.x], 0), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
+        layerV->setRGB(Coord3D(pos.x, layerV->size.y - previousBarHeight[pos.x], 0), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
 
       if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
 

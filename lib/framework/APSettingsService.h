@@ -24,6 +24,7 @@
 #include <DNSServer.h>
 #include <IPAddress.h>
 
+//🌙 redundant as all set in factory_settings.ini
 #ifndef FACTORY_AP_PROVISION_MODE
 #define FACTORY_AP_PROVISION_MODE AP_MODE_DISCONNECTED
 #endif

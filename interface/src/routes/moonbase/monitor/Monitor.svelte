@@ -37,8 +37,8 @@
 
 		let isPositions:number = header[0];
 		let nrOfLights = header[4] + 256 * header[5];
-		let channelsPerLight:number = header[7];
-		let offsetRGB:number = header[8];
+		let channelsPerLight:number = header[10];
+		let offsetRGB:number = header[11];
 		
 		if (!(isPositions==10)) { 
 			//(type == ct_Leds) {
@@ -71,14 +71,14 @@
 		createScene(el);
 
 		let ledFactor: number = 1;//header[1];
-		let ledSize: number = header[23];
+		// let ledSize: number = header[23];
 		width = header[1];
 		height = header[2];
 		depth = header[3];
 
 		let nrOfLights = header[4] + 256 * header[5];
 
-		console.log("Monitor.handleLayout", ledFactor, ledSize, nrOfLights, width, height, depth);
+		console.log("Monitor.handleLayout", ledFactor, nrOfLights, width, height, depth);
 
 		for (let index = 0; index < nrOfLights * 3; index +=3) {
 			// console.log(data[index], data[index+1], data[index+2]);

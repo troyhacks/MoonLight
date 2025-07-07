@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#pragma once
+
 #if FT_MOONLIGHT
 
 #include <WLED-sync.h> // https://github.com/netmindz/WLED-sync
@@ -24,6 +26,9 @@ static struct Audio {
   float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
   float majorPeak; // FFT: strongest (peak) frequency
 } audio;
+
+
+#include "Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
 
 class AudioSyncMod: public Node {
   public:
@@ -55,5 +60,64 @@ class AudioSyncMod: public Node {
 
 static AudioSyncMod *audioNode;
 
+
+class FastLEDDriverMod: public Node {
+  public:
+
+  static const char * name() {return "FastLEDDriver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  uint16_t maxPowerSaved = 0;
+  uint16_t maxPower = 10;
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
+
+class HUB75DriverMod: public Node {
+  public:
+
+  static const char * name() {return "HUB75Driver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
+
+class PhysicalDriverMod: public Node {
+  public:
+
+  static const char * name() {return "PhysicalDriver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  uint8_t setMaxPowerBrightnessFactor = 90; //tbd: implement driver.setMaxPowerInMilliWatts
+  bool initDone = false;
+  uint8_t colorOrder;
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
+
+class VirtualDriverMod: public Node {
+  public:
+
+  static const char * name() {return "VirtualDriver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
 
 #endif
