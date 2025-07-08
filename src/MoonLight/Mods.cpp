@@ -27,9 +27,12 @@ void  ArtNetMod::loop() {
   LightsHeader *header = &layerV->layerP->lights.header;
   if (header->isPositions != 0) return; //don't update if positions are sent
 
-  while (millis() - lastMillis < 1000 / throttleSpeed) {
-    delay(1); // delay 1ms
-  }
+  //wait until the throttle FPS is reached
+  unsigned long wait = 1000 / throttleSpeed + lastMillis - millis();
+  if (wait > 0 && wait < 1000 / throttleSpeed)
+    delay(wait); // delay in ms
+  else
+    ESP_LOGW(TAG, "wait %d", wait);
   lastMillis = millis();
 
   // calculate the number of UDP packets we need to send
@@ -47,67 +50,68 @@ void  ArtNetMod::loop() {
   if (sequenceNumber == 0) sequenceNumber = 1; // just in case, as 0 is considered "Sequence not in use"
   if (sequenceNumber > 255) sequenceNumber = 1;
   
-  for (uint_fast16_t hardware_output = 0; hardware_output < hardware_outputs.size(); hardware_output++) { //loop over all outputs
+  for (uint_fast16_t hardware_output = 0; hardware_output < nrOfOutputs; hardware_output++) { //loop over all outputs
       
-      if (bufferOffset > header->nrOfLights * header->channelsPerLight) {
-          // This stop is reached if we don't have enough pixels for the defined Art-Net output.
-          return; // stop when we hit end of LEDs
-      }
+    if (bufferOffset > header->nrOfLights * header->channelsPerLight) {
+        // This stop is reached if we don't have enough pixels for the defined Art-Net output.
+        Serial.print("🥒");
+        return; // stop when we hit end of LEDs
+    }
 
-      hardware_output_universe = hardware_outputs_universe_start[hardware_output];
+    hardware_output_universe = hardware_output * universesPerOutput;
 
-      uint_fast16_t channels_remaining = hardware_outputs[hardware_output] * header->channelsPerLight;
+    uint_fast16_t channels_remaining = channelsPerOutput;
 
-      while (channels_remaining > 0) {
-          const uint_fast16_t ARTNET_CHANNELS_PER_PACKET = 510; // 512/4=128 RGBW LEDs, 510/3=170 RGB LEDs
+    while (channels_remaining > 0) { //loop per universe
+        const uint_fast16_t ARTNET_CHANNELS_PER_PACKET = 510; // 512/4=128 RGBW LEDs, 510/3=170 RGB LEDs
 
-          uint_fast16_t packetSize = ARTNET_CHANNELS_PER_PACKET;
+        uint_fast16_t packetSize = ARTNET_CHANNELS_PER_PACKET;
 
-          if (channels_remaining < ARTNET_CHANNELS_PER_PACKET) {
-              packetSize = channels_remaining;
-              channels_remaining = 0;
-          } else {
-              channels_remaining -= packetSize;
-          }
+        if (channels_remaining < ARTNET_CHANNELS_PER_PACKET) {
+            packetSize = channels_remaining;
+            channels_remaining = 0;
+        } else {
+            channels_remaining -= packetSize;
+        }
 
-          // set the parts of the Art-Net packet header that change:
-          packet_buffer[12] = sequenceNumber;
-          packet_buffer[14] = hardware_output_universe;
-          packet_buffer[16] = packetSize >> 8;
-          packet_buffer[17] = packetSize;
+        // set the parts of the Art-Net packet header that change:
+        packet_buffer[12] = sequenceNumber;
+        packet_buffer[14] = hardware_output_universe;
+        packet_buffer[16] = packetSize >> 8;
+        packet_buffer[17] = packetSize;
 
-          // bulk copy the buffer range to the packet buffer after the header 
-          memcpy(packet_buffer+18, (&layerV->layerP->lights.channels[0])+bufferOffset, packetSize); //start from the first byte of ledsP[0]
+        // bulk copy the buffer range to the packet buffer after the header 
+        memcpy(packet_buffer+18, (&layerV->layerP->lights.channels[0])+bufferOffset, packetSize); //start from the first byte of ledsP[0]
 
-          //no brightness scaling for the time being
-          for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) {
-              // set brightness all at once - seems slightly faster than scale8()?
-              // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
-              
-              //if no brightness control and other colors, apply bri
-              if (header->offsetBrightness == UINT8_MAX)
-                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB] = (packet_buffer[i+j+header->offsetRGB] * header->brightness) >> 8;
-              if (header->offsetRGB1 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
-                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB1] = (packet_buffer[i+j+header->offsetRGB1] * header->brightness) >> 8;
-              if (header->offsetRGB2 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
-                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB2] = (packet_buffer[i+j+header->offsetRGB2] * header->brightness) >> 8;
-              if (header->offsetRGB3 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
-                  for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB3] = (packet_buffer[i+j+header->offsetRGB3] * header->brightness) >> 8;
-              if (header->offsetWhite != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
-                  packet_buffer[i+header->offsetWhite] = (packet_buffer[i+header->offsetWhite] * header->brightness) >> 8;
+        //no brightness scaling for the time being
+        for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) {
+            // set brightness all at once - seems slightly faster than scale8()?
+            // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
+            
+            //if no brightness control and other colors, apply bri
+            if (header->offsetBrightness == UINT8_MAX)
+                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB] = (packet_buffer[i+j+header->offsetRGB] * header->brightness) >> 8;
+            if (header->offsetRGB1 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB1] = (packet_buffer[i+j+header->offsetRGB1] * header->brightness) >> 8;
+            if (header->offsetRGB2 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB2] = (packet_buffer[i+j+header->offsetRGB2] * header->brightness) >> 8;
+            if (header->offsetRGB3 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB3] = (packet_buffer[i+j+header->offsetRGB3] * header->brightness) >> 8;
+            if (header->offsetWhite != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+                packet_buffer[i+header->offsetWhite] = (packet_buffer[i+header->offsetWhite] * header->brightness) >> 8;
 
-              //todo: correct values using RGB correction: header->red/green/blue. Need to know the color order first ...
-          }
+            //todo: correct values using RGB correction: header->red/green/blue. Need to know the color order first ...
+        }
 
-          bufferOffset += packetSize;
-          
-          if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, ARTNET_DEFAULT_PORT)) {
-              Serial.print("🐛");
-              return; // borked
-          }
+        bufferOffset += packetSize;
+        
+        if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, ARTNET_DEFAULT_PORT)) {
+            Serial.print("🐛");
+            return; // borked
+        }
 
-          hardware_output_universe++;
-      }
+        hardware_output_universe++;
+    }
   }
 }
 

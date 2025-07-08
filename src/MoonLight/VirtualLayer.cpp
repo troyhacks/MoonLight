@@ -324,7 +324,6 @@ void VirtualLayer::mapLayout() {
   layerP->addLayoutPre();
   for (Node *node: nodes) {
     if (node->on && node->hasLayout) {
-      layerP->lights.header.resetOffsets();
       node->addLayout();
     }
   }

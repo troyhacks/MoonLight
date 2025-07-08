@@ -690,6 +690,7 @@ public:
     values.add("Triangle");
     values.add("Sinus");
     values.add("Square");
+    values.add("Sin3"); //with @pathightree
   }
 
   void loop() override {
@@ -702,18 +703,20 @@ public:
     for (uint8_t y = 0; y<layerV->size.y; y++) {
       uint8_t pos = 0;
 
+      uint8_t b8 = beat8(bpm, y*100);
+      uint8_t bs8 = beatsin8( bpm, 0, 255, y * 100);
       //delay over y-axis..timebase ...
       switch (type) {
-        case 0: pos = ::map(beat8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
-        case 1: pos = ::map(triangle8(bpm, y*100), 0, UINT8_MAX, 0, layerV->size.x-1 ); break;
-        case 2: pos = beatsin8( bpm, 0, layerV->size.x-1, y * 100 ); break;
-        case 3: pos = beat8(bpm, y*100) > 128? 0 : layerV->size.x-1; break;
-        // case 3: pos = ::map(_time(bpm), 0, UINT16_MAX, 0, layerV->size.x-1 ); break;
+        case 0: pos = b8 * layerV->size.x / 256; break;
+        case 1: pos = triangle8(bpm, y*100) * layerV->size.x / 256; break;
+        case 2: pos = bs8 * layerV->size.x / 256; break;
+        case 3: pos = b8 > 128? 0 : layerV->size.x-1; break;
+        case 4: pos = (bs8 + beatsin8( bpm*0.65, 0, 255, y * 200) + beatsin8( bpm*1.43, 0, 255, y * 300)) * layerV->size.x / 256 / 3; break;
         default: pos = 0;
       }
 
       //connect saw and square
-      if (abs(prevPos - pos) > layerV->size.x / 2) {
+      if ((type == 0 || type == 3) && abs(prevPos - pos) > layerV->size.x / 2) {
         for (uint8_t x=0; x<layerV->size.x; x++)
           layerV->setRGB({x, y, 0}, color);
       }
