@@ -27,13 +27,15 @@ class ModuleLightsControl : public Module
 public:
 
     PsychicHttpServer *_server;
+    FileManager *_fileManager;
 
     ModuleLightsControl(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
-        FilesService *filesService
-    ) : Module("lightsControl", server, sveltekit, filesService) {
+        FileManager *fileManager
+    ) : Module("lightsControl", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
+        _fileManager = fileManager;
     }
 
     void begin() {
@@ -44,11 +46,11 @@ public:
         setPresetsFromFolder(); //set the right values during boot
         
         //update presets if files changed in presets folder
-        _filesService->addUpdateHandler([&](const String &originId)
+        _fileManager->addUpdateHandler([&](const String &originId)
         { 
-            ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
+            ESP_LOGD(TAG, "FileManager::updateHandler %s", originId.c_str());
             //read the file state (read all files and folders on FS and collect changes)
-            _filesService->read([&](FilesState &filesState) {
+            _fileManager->read([&](FilesState &filesState) {
                 // loop over all changed files (normally only one)
                 bool presetChanged = false;
                 for (auto updatedItem : filesState.updatedItems) {
@@ -150,7 +152,7 @@ public:
                         copyFile(presetFile.c_str(), "/config/editor.json");
 
                         //trigger notification of update of editor.json
-                        _filesService->update([&](FilesState &state) {
+                        _fileManager->update([&](FilesState &state) {
                             state.updatedItems.push_back("/config/editor.json");
                             return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                         }, "server");

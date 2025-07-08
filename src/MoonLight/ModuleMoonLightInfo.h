@@ -20,9 +20,8 @@ class ModuleMoonLightInfo : public Module
 public:
 
     ModuleMoonLightInfo(PsychicHttpServer *server,
-            ESP32SvelteKit *sveltekit,
-            FilesService *filesService
-        ) : Module("MoonLightInfo", server, sveltekit, filesService) {
+            ESP32SvelteKit *sveltekit
+        ) : Module("MoonLightInfo", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 

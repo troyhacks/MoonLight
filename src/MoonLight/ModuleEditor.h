@@ -29,14 +29,16 @@ class ModuleEditor : public Module
 public:
 
     PsychicHttpServer *_server;
+    FileManager *_fileManager;
     bool requestUIUpdate = false;
 
     ModuleEditor(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
-        FilesService *filesService
-    ) : Module("editor", server, sveltekit, filesService) {
+        FileManager *fileManager
+    ) : Module("editor", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
+        _fileManager = fileManager;
     }
 
     void begin() {
@@ -44,11 +46,11 @@ public:
 
         #if FT_ENABLED(FT_LIVESCRIPT)
             //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
-            _filesService->addUpdateHandler([&](const String &originId)
+            _fileManager->addUpdateHandler([&](const String &originId)
             { 
-                ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
+                ESP_LOGD(TAG, "FileManager::updateHandler %s", originId.c_str());
                 //read the file state (read all files and folders on FS and collect changes)
-                _filesService->read([&](FilesState &filesState) {
+                _fileManager->read([&](FilesState &filesState) {
                     // loop over all changed files (normally only one)
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current live script, recompile it (to do: multiple live effects)

@@ -196,7 +196,7 @@ class PinwheelModifier: public Node {
   }
 };
 
-//Idea and first implementation (WLEDMM ARtNet) by @Troy
+//Idea and first implementation (WLEDMM Art-Net) by @Troy
 class RippleYZModifier: public Node {
   public:
 

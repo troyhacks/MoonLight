@@ -20,7 +20,7 @@ nav:
   - "MoonBase":
       - moonbase/general.md
       - moonbase/modules.md
-      - moonbase/files.md
+      - moonbase/FileManager.md
       - moonbase/module/instances.md
   - "Connections":
       - connections/mqtt.md

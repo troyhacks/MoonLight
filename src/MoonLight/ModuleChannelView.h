@@ -20,9 +20,8 @@ class ModuleChannelView : public Module
 public:
 
     ModuleChannelView(PsychicHttpServer *server,
-            ESP32SvelteKit *sveltekit,
-            FilesService *filesService
-        ) : Module("ChannelView", server, sveltekit, filesService) {
+            ESP32SvelteKit *sveltekit
+        ) : Module("ChannelView", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 

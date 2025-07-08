@@ -1,6 +1,6 @@
 /**
     @title     MoonBase
-    @file      FilesService.cpp
+    @file      FileManager.cpp
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/system/files/
@@ -11,7 +11,7 @@
 
 #if FT_MOONBASE == 1
 
-#include "FilesService.h"
+#include "FileManager.h"
 
 #include "Utilities.h"
 
@@ -137,24 +137,24 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
     return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
 }
 
-FilesService::FilesService(PsychicHttpServer *server,
+FileManager::FileManager(PsychicHttpServer *server,
                                      ESP32SvelteKit *sveltekit) : _httpEndpoint(FilesState::read,
                                                                                                          FilesState::update,
                                                                                                          this,
                                                                                                          server,
-                                                                                                         "/rest/filesState",
+                                                                                                         "/rest/FileManager",
                                                                                                          sveltekit->getSecurityManager(),
                                                                                                          AuthenticationPredicates::IS_AUTHENTICATED),
                                                                                            _eventEndpoint(FilesState::read,
                                                                                                           FilesState::update,
                                                                                                           this,
                                                                                                           sveltekit->getSocket(),
-                                                                                                          "files"),
+                                                                                                          "FileManager"),
                                                                                            _webSocketServer(FilesState::read,
                                                                                                             FilesState::update,
                                                                                                             this,
                                                                                                             server,
-                                                                                                            "/ws/filesState",
+                                                                                                            "/ws/FileManager",
                                                                                                             sveltekit->getSecurityManager(),
                                                                                                             AuthenticationPredicates::IS_AUTHENTICATED),
                                                                                             _socket(sveltekit->getSocket()),
@@ -167,17 +167,17 @@ FilesService::FilesService(PsychicHttpServer *server,
                      false);
 }
 
-void FilesService::begin()
+void FileManager::begin()
 {
     _httpEndpoint.begin();
     _eventEndpoint.begin();
     onConfigUpdated();
 
     //setup the file server
-    _server->serveStatic("/rest/file", ESPFS, "/");
+    _server->serveStatic("/rest/FileManager", ESPFS, "/");
 }
 
-void FilesService::onConfigUpdated()
+void FileManager::onConfigUpdated()
 {
     ESP_LOGI(TAG, "");
 }

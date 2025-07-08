@@ -17,7 +17,7 @@
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
-    #include "MoonBase/FilesService.h"
+    #include "MoonBase/FileManager.h"
     #include "MoonBase/ModuleInstances.h"
 
     // 💫
@@ -49,18 +49,18 @@ ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 1
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
-    FilesService filesService = FilesService(&server, &esp32sveltekit);
-    ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit, &filesService);
+    FileManager fileManager = FileManager(&server, &esp32sveltekit);
+    ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit);
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
-        ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &filesService);
-        ModuleEditor moduleEditor = ModuleEditor(&server, &esp32sveltekit, &filesService);
+        ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
+        ModuleEditor moduleEditor = ModuleEditor(&server, &esp32sveltekit, &fileManager);
         #if FT_ENABLED(FT_LIVESCRIPT)
-            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &filesService);
+            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit);
         #endif
-        ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit, &filesService);
-        ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit, &filesService);
+        ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit);
+        ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
     #endif
 #endif
     
@@ -81,7 +81,7 @@ void setup()
 
     // 🌙
     #if FT_ENABLED(FT_MOONBASE)
-        filesService.begin();
+        fileManager.begin();
             moduleInstances.begin();
 
             #if FT_ENABLED(FT_MOONLIGHT)

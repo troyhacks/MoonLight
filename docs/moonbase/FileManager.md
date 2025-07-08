@@ -25,7 +25,7 @@ Using component FileEdit, see [Components](https://moonmodules.org/MoonLight/com
 
 ### Server
 
-[FilesService.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonBase/FilesService.h) and [FilesService.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/MoonBase/FilesService.cpp)
+[FileManager.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonBase/FileManager.h) and [FileManager.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/MoonBase/FileManager.cpp)
 
 ### UI
 

@@ -94,7 +94,7 @@
 				{
 					title: 'File Manager',
 					icon: FilesIcon,
-					href: '/moonbase/files',
+					href: '/moonbase/filemanager',
 					feature: page.data.features.moonbase,
 				},
 				{

@@ -31,8 +31,8 @@ public:
 
 ModuleDemo(PsychicHttpServer *server
       , ESP32SvelteKit *sveltekit
-      , FilesService *filesService
-    ) : Module("demo", server, sveltekit, filesService) {
+      , FileManager *fileManager
+    ) : Module("demo", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
     }
 }
@@ -111,7 +111,7 @@ void setupDefinition(JsonArray root) override{
 * Add the module in [main.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/main.cpp)
 
 ```cpp
-ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &filesService);
+ModuleDemo moduleDemo = ModuleDemo(&server, &esp32sveltekit, &fileManager);
 ...
 moduleDemo.begin();
 ...

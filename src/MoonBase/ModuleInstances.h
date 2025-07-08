@@ -32,9 +32,8 @@ public:
     bool instanceUDPConnected = false;
 
     ModuleInstances(PsychicHttpServer *server,
-            ESP32SvelteKit *sveltekit,
-            FilesService *filesService
-        ) : Module("instances", server, sveltekit, filesService) {
+            ESP32SvelteKit *sveltekit
+        ) : Module("instances", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 

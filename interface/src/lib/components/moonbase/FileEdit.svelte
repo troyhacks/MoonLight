@@ -46,7 +46,7 @@
 
     async function postFilesState(data: any) { //export needed to call from other components
 		try {
-			const response = await fetch('/rest/filesState', {
+			const response = await fetch('/rest/FileManager', {
 				method: 'POST',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',

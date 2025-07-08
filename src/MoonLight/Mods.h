@@ -33,7 +33,7 @@ static struct Audio {
 class ArtNetMod: public Node {
   public:
 
-  static const char * name() {return "ArtNet ☸️";}
+  static const char * name() {return "Art-Net ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
@@ -48,7 +48,7 @@ class ArtNetMod: public Node {
   const size_t ART_NET_HEADER_SIZE = 12;
   const uint8_t ART_NET_HEADER[12] = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
 
-  IPAddress controllerIP; //tbd: controllerIP also configurable from fixtures and artnet instead of pin output
+  IPAddress controllerIP; //tbd: controllerIP also configurable from fixtures and Art-Net instead of pin output
   std::vector<uint16_t> hardware_outputs = {1024,1024,1024,1024,1024,1024,1024,1024};
   std::vector<uint16_t> hardware_outputs_universe_start = { 0,7,14,21,28,35,42,49 }; //7*170 = 1190 leds => last universe not completely used
   size_t sequenceNumber = 0;
