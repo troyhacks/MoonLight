@@ -30,22 +30,22 @@ static struct Audio {
 
 #include "Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
 
-class ArtNetMod: public Node {
+class ArtNetDriverMod: public Node {
   public:
 
-  static const char * name() {return "Art-Net ☸️";}
+  static const char * name() {return "Art-Net Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
   uint16_t controllerIP3 = 11;
-  uint16_t throttleSpeed = 50; //default 50ms
+  uint16_t FPSLimiter = 50; //default 50ms
   uint16_t nrOfOutputs = 2; //8 on Art-Net LED Controller
   uint16_t channelsPerOutput = 512; //3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
   uint16_t universesPerOutput = 1; //7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
 
   void setup() {
     addControl(controllerIP3, "controllerIP", "number");
-    addControl(throttleSpeed, "throttleSpeed", "number");
+    addControl(FPSLimiter, "FPSLimiter", "number");
     addControl(nrOfOutputs, "nrOfOutputs", "number");
     addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
     addControl(universesPerOutput, "universesPerOutput", "number");
@@ -96,7 +96,7 @@ static AudioSyncMod *audioNode;
 class FastLEDDriverMod: public Node {
   public:
 
-  static const char * name() {return "FastLEDDriver ☸️";}
+  static const char * name() {return "FastLED Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
@@ -112,7 +112,7 @@ class FastLEDDriverMod: public Node {
 class HUB75DriverMod: public Node {
   public:
 
-  static const char * name() {return "HUB75Driver ☸️";}
+  static const char * name() {return "HUB75 Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
@@ -125,13 +125,13 @@ class HUB75DriverMod: public Node {
 class PhysicalDriverMod: public Node {
   public:
 
-  static const char * name() {return "PhysicalDriver ☸️";}
+  static const char * name() {return "Physical Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
   uint8_t setMaxPowerBrightnessFactor = 90; //tbd: implement driver.setMaxPowerInMilliWatts
   bool initDone = false;
-  uint8_t colorOrder;
+  uint8_t colorOrder = 3;
 
   void setup() override;
   void loop() override;
@@ -142,7 +142,7 @@ class PhysicalDriverMod: public Node {
 class VirtualDriverMod: public Node {
   public:
 
-  static const char * name() {return "VirtualDriver ☸️";}
+  static const char * name() {return "Virtual Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 

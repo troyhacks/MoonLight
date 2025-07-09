@@ -174,7 +174,7 @@ void FileManager::begin()
     onConfigUpdated();
 
     //setup the file server
-    _server->serveStatic("/rest/FileManager", ESPFS, "/");
+    _server->serveStatic("/rest/file", ESPFS, "/");
 }
 
 void FileManager::onConfigUpdated()

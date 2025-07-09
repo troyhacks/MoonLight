@@ -176,6 +176,7 @@ PhysicalLayer::PhysicalLayer() {
 
         else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
         else if (equal(name, PanelLayout::name())) node = new PanelLayout();
+        else if (equal(name, PanelsLayout::name())) node = new PanelsLayout();
         else if (equal(name, RingsLayout::name())) node = new RingsLayout();
 
         //custom
@@ -191,12 +192,12 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
         else if (equal(name, RotateNodifier::name())) node = new RotateNodifier();
         
-        else if (equal(name, ArtNetMod::name())) node = new ArtNetMod();
-        else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
+        else if (equal(name, ArtNetDriverMod::name())) node = new ArtNetDriverMod();
         else if (equal(name, FastLEDDriverMod::name())) node = new FastLEDDriverMod();
         else if (equal(name, HUB75DriverMod::name())) node = new HUB75DriverMod();
         else if (equal(name, PhysicalDriverMod::name())) node = new PhysicalDriverMod();
         else if (equal(name, VirtualDriverMod::name())) node = new VirtualDriverMod();
+        else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = new LiveScriptNode();

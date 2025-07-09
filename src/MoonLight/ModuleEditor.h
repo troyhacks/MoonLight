@@ -131,6 +131,7 @@ public:
 
             values.add(HumanSizedCubeLayout::name());
             values.add(PanelLayout::name());
+            values.add(PanelsLayout::name());
             values.add(RingsLayout::name());
 
             //custom
@@ -146,12 +147,12 @@ public:
             values.add(PinwheelModifier::name());
             values.add(RotateNodifier::name());
 
-            values.add(ArtNetMod::name());
-            values.add(AudioSyncMod::name());
+            values.add(ArtNetDriverMod::name());
             values.add(FastLEDDriverMod::name());
             values.add(HUB75DriverMod::name());
             values.add(PhysicalDriverMod::name());
             values.add(VirtualDriverMod::name());
+            values.add(AudioSyncMod::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
             walkThroughFiles(rootFolder, [&](File folder, File file) {
