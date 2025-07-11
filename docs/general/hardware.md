@@ -1,4 +1,4 @@
-# MoonLight hardware
+# MoonLight Hardware
 
 ## MoonLight specific
 
@@ -15,3 +15,6 @@
   
    <img width="350" src="https://github.com/user-attachments/assets/1623a751-5f4b-463b-a6f3-a642c2bc52bf"/>
    
+## Adding a new board
+
+See [Adding a Board Definition](https://moonmodules.org/MoonLight/general/adding-a-board-definition)
