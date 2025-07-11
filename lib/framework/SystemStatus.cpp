@@ -33,7 +33,7 @@
 #elif CONFIG_IDF_TARGET_ESP32C6
 #include "esp32c6/rom/rtc.h"
 #define ESP_PLATFORM "ESP32-C6";
-#elif CONFIG_IDF_TARGET_ESP32P4
+#elif CONFIG_IDF_TARGET_ESP32P4 // 🌙
 #include "esp32p4/rom/rtc.h"
 #define ESP_PLATFORM "ESP32-P4";
 #else

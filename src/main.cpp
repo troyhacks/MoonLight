@@ -115,7 +115,7 @@ void setup()
     // ESP_LOGD(TAG, "averageChar size: %d", sizeof(averageChar));
     // ESP_LOGD(TAG, "UpdatedItem size: %d = %d + %d + %d ...", sizeof(UpdatedItem), sizeof(JsonString), sizeof(JsonVariant), sizeof(String));
 
-    // pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module
+    // pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!!
 }
 
 void loop()

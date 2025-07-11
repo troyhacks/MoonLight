@@ -4,3 +4,4 @@ otadata,    data, ota,     0xe000,   0x2000
 app0,       app,  ota_0,   0x010000, 0x300000
 spiffs,     data, spiffs,  0x310000, 0x0D0000
 coredump,   data, coredump,,64K
+#ESP32_4MB no OTA!!
