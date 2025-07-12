@@ -243,7 +243,7 @@ void VirtualLayer::fadeToBlackMin() {
     //   }
     // } else 
     if (layerP->lights.header.channelsPerLight == 3 && layerP->layerV.size() == 1) { //CRGB lights
-      fastled_fadeToBlackBy(layerP->lights.leds, layerP->lights.header.nrOfLights, fadeBy);
+      fastled_fadeToBlackBy((CRGB *)layerP->lights.channels, layerP->lights.header.nrOfLights, fadeBy);
     } else { //multichannel lights
       for (uint16_t index = 0; index < nrOfLights; index++) {
         CRGB color = getRGB(index); //direct access to the channels
@@ -285,7 +285,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
   //   }
   // } else 
   if (layerP->lights.header.channelsPerLight == 3 && layerP->layerV.size() == 1) { //faster, else manual 
-    fastled_fill_solid(layerP->lights.leds, layerP->lights.header.nrOfLights, color);
+    fastled_fill_solid((CRGB *)layerP->lights.channels, layerP->lights.header.nrOfLights, color);
   } else {
     for (uint16_t index = 0; index < nrOfLights; index++)
       setRGB(index, color);
@@ -306,7 +306,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   //   }
   // } else 
   if (layerP->lights.header.channelsPerLight == 3 && layerP->layerV.size() == 1) { //faster, else manual 
-    fastled_fill_rainbow(layerP->lights.leds, layerP->lights.header.nrOfLights, initialhue, deltahue);
+    fastled_fill_rainbow((CRGB *)layerP->lights.channels, layerP->lights.header.nrOfLights, initialhue, deltahue);
   } else {
     CHSV hsv;
     hsv.hue = initialhue;

@@ -161,7 +161,7 @@ void LiveScriptNode::setup() {
 //   addExternal( "uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
-  addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);
+  addExternal(   "CRGB* leds", (void *)(CRGB *)layerV->layerP->lights.channels);
   addExternal(    "void setRGB(uint16_t,CRGB)", (void *)_setRGB);
   addExternal(    "void setRGBPal(uint16_t,uint8_t,uint8_t)", (void *)_setRGBPal);
   addExternal(    "void setPan(uint16_t,uint8_t)", (void *)_setPan);

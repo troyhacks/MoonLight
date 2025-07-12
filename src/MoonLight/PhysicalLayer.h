@@ -91,11 +91,7 @@ inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
 
 struct Lights {
   LightsHeader header;
-  union {
-    CRGB leds[MAX_LEDS];
-    uint8_t channels[MAX_CHANNELS];
-    Coord3DTrivial positions[MAX_CHANNELS / sizeof(Coord3DTrivial)]; //for layout / pass == 1, send positions to monitor / preview
-  };
+  uint8_t channels[MAX_CHANNELS]; //pka leds
   // std::vector<size_t> universes; //tells at which byte the universe starts
 };
 

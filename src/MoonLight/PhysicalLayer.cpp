@@ -78,9 +78,11 @@ PhysicalLayer::PhysicalLayer() {
             if (lights.header.nrOfLights >= MAX_CHANNELS / sizeof(Coord3D)) {
                 //send the positions to the UI _socket_emit
                 //reset the index and continue...
-            } else
-                lights.positions[lights.header.nrOfLights] = Coord3D(position.x, position.y, position.z);
-            
+            } else {
+                Coord3D * positions = (Coord3D *)lights.channels;
+                positions[lights.header.nrOfLights] = Coord3D(position.x, position.y, position.z);
+            }
+             
             lights.header.size = lights.header.size.maximum(position);
         } else {
             for (VirtualLayer * layer: layerV) {
@@ -124,7 +126,7 @@ PhysicalLayer::PhysicalLayer() {
     void PhysicalLayer::addLayoutPost() {
         if (pass == 1) {
             lights.header.size += Coord3D{1,1,1};
-            ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.leds));
+            ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.channels));
             //send the positions to the UI _socket_emit
             lights.header.isPositions = 10; //filled with positions, set back to ct_Leds in ModuleEditor
 

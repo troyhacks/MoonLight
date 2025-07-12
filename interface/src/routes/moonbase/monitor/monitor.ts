@@ -9,7 +9,7 @@ let gl: WebGLRenderingContext;
 let program: WebGLProgram;
 let positionBuffer: WebGLBuffer;
 
-export const vertices: number[] = [];
+export let vertices: number[] = [];
 export let colors: number[] = [];
 
 let colorBuffer: WebGLBuffer; // Buffer for color data
@@ -21,6 +21,8 @@ export function createScene(el: HTMLCanvasElement) {
           console.error("WebGL not supported");
           return;
       }
+
+      clearVertices();
 
       // Set up shaders
       const vertexShaderSource = `
@@ -102,6 +104,10 @@ const createProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fra
 
 export function clearColors() {
   colors = [];
+}
+
+export function clearVertices() {
+  vertices = [];
 }
 
 export const updateScene = (vertices: number[], colors: number[]) => {

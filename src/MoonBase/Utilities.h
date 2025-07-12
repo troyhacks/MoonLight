@@ -18,25 +18,11 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x) //e.g. for pio.ini settings (see ML_CHIPSET)
 
-//to use in lights.positions union
-struct Coord3DTrivial {
+struct Coord3D {
+
     uint8_t x;
     uint8_t y;
     uint8_t z;
-    // union {
-    //   struct {
-    //     uint8_t x;
-    //     uint8_t y;
-    //     uint8_t z;
-    //   };
-    //   struct {
-    //     uint8_t y8;
-    //     uint8_t x16;
-    //   };
-    // }; // 2 bytes  
-};
-
-struct Coord3D : public Coord3DTrivial {
 
     // Coord3D() : x(0), y(0), z(0) {} // Default constructor
 
