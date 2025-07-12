@@ -36,6 +36,7 @@ public:
         property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "FastLED"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "FastLEDI2S"; property["type"] = "text"; property["max"] = 32;
+        property = root.add<JsonObject>(); property["name"] = "colorOrder"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
         property = root.add<JsonObject>(); property["name"] = "layers"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -66,6 +67,7 @@ public:
             #else
                 data["FastLEDI2S"] = "No";
             #endif
+            data["colorOrder"] = TOSTRING(ML_COLOR_ORDER);
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;
             data["size"]["z"] = layerP.lights.header.size.z;
