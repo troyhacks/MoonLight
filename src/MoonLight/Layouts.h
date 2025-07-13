@@ -71,25 +71,25 @@ class PanelLayout: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint8_t width = 16;
-  uint8_t height = 16;
-  uint8_t depth = 1;
+  uint16_t width = 16;
+  uint16_t height = 16;
+  uint16_t depth = 1;
   bool snake = true;
   uint8_t pin = 16;
 
   void setup() override {
     hasLayout = true;
     
-    addControl(width, "width", "range", 1, 32);
-    addControl(height, "height", "range", 1, 32);
-    addControl(depth, "depth", "range", 1, 32);
+    addControl(width, "width", "number", 1, 2047);
+    addControl(height, "height", "number", 1, 255);
+    addControl(depth, "depth", "number", 1, 31);
     addControl(snake, "snake", "checkbox");
     addControl(pin, "pin", "pin", 1, 48);
   }
 
   void addLayout() override {
     
-    for (uint8_t x = 0; x<width; x++) {
+    for (uint16_t x = 0; x<width; x++) {
       for (uint8_t y = 0; y<height; y++) {
         for (uint8_t z = 0; z<depth; z++) {
           addLight(Coord3D(x, (x%2 || !snake)?y:height-1-y, z));
@@ -206,24 +206,24 @@ class SE16Layout: public Node {
 
   bool mirroredPins = false;
   bool pinsAreColumns = false;
-  uint8_t ledsPerPin = 10;
+  uint16_t ledsPerPin = 10;
 
   void setup() override {
     hasLayout = true;
     
     addControl(mirroredPins, "mirroredPins", "checkbox");
     addControl(pinsAreColumns, "pinsAreColumns", "checkbox");
-    addControl(ledsPerPin, "ledsPerPin", "range", 1, 255);
+    addControl(ledsPerPin, "ledsPerPin", "number", 1, 2047);
   }
 
-  void addStrip( uint8_t xposition, uint8_t start_y,  uint8_t stop_y, uint8_t pin) {
+  void addStrip( uint16_t xposition, uint16_t start_y,  uint16_t stop_y, uint8_t pin) {
 
     bool increasing = start_y < stop_y;
     for (int y = start_y; increasing ? (y <= stop_y) : (y >= stop_y); y += increasing?1:-1) {
       if (pinsAreColumns)
-        addLight(Coord3D(xposition, y, 0));
+        addLight(Coord3D(xposition, y, 0)); //limpkin
       else
-        addLight(Coord3D(y, xposition, 0));
+        addLight(Coord3D(y, xposition, 0)); //ewowi
     }
 
     addPin(pin);
@@ -241,7 +241,7 @@ class SE16Layout: public Node {
     // 10-02
     // 03-01
 
-    if (mirroredPins) {
+    if (mirroredPins) { //limpkin
       addStrip(7, ledsPerPin, 2*ledsPerPin-1, 47); addStrip(7, ledsPerPin-1, 0, 48);
       addStrip(6, ledsPerPin, 2*ledsPerPin-1, 21); addStrip(6, ledsPerPin-1, 0, 38);
       addStrip(5, ledsPerPin, 2*ledsPerPin-1, 14); addStrip(5, ledsPerPin-1, 0, 39);
@@ -250,7 +250,7 @@ class SE16Layout: public Node {
       addStrip(2, ledsPerPin, 2*ledsPerPin-1, 11); addStrip(2, ledsPerPin-1, 0, 42);
       addStrip(1, ledsPerPin, 2*ledsPerPin-1, 10); addStrip(1, ledsPerPin-1, 0, 2);
       addStrip(0, ledsPerPin, 2*ledsPerPin-1, 3);  addStrip(0, ledsPerPin-1, 0, 1);
-    } else {
+    } else { //ewowi
       addStrip(14, 0, ledsPerPin-1, 47); addStrip(15, 0, ledsPerPin-1, 48);
       addStrip(12, 0, ledsPerPin-1, 21); addStrip(13, 0, ledsPerPin-1, 38);
       addStrip(10, 0, ledsPerPin-1, 14); addStrip(11, 0, ledsPerPin-1, 39);

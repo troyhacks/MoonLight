@@ -465,11 +465,11 @@ void  ArtNetDriverMod::loop() {
 
           if (nb_pins > 0) {
             #if CONFIG_IDF_TARGET_ESP32S3 | CONFIG_IDF_TARGET_ESP32S2
-              driverP.initled((uint8_t*) leds, pins, nb_pins, lengths[0]); //s3 doesn't support lengths so we pick the first
+              driverP.initled((uint8_t*)  layerV->layerP->lights.channels, pins, nb_pins, lengths[0]); //s3 doesn't support lengths so we pick the first
               // colorOrder ??
               //void initled( uint8_t * leds, int * pins, int numstrip, int NUM_LED_PER_STRIP)
             #else
-              driverP.initled((uint8_t*) leds, pins, lengths, nb_pins, (colorarrangment)colorOrder);
+              driverP.initled((uint8_t*) layerV->layerP->lights.channels, pins, lengths, nb_pins, (colorarrangment)colorOrder);
               #if ML_LIVE_MAPPING
                 driver.setMapLed(&mapLed);
               #endif

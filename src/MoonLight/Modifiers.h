@@ -320,7 +320,7 @@ class RotateNodifier: public Node {
   void modifySize() override {
 
     if (expand) {
-      uint8_t size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
+      uint8_t size = MAX(layerV->size.x, MAX(layerV->size.y, layerV->size.z));
       size = sqrt(size * size * 2) + 1;
       Coord3D offset = Coord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
 
@@ -334,7 +334,7 @@ class RotateNodifier: public Node {
   void modifyPosition(Coord3D &position) override {
 
     if (expand) {
-      int size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
+      int size = MAX(layerV->size.x, MAX(layerV->size.y, layerV->size.z));
       size = sqrt(size * size * 2) + 1;
       Coord3D offset = Coord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
 

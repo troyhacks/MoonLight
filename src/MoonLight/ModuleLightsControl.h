@@ -179,7 +179,7 @@ public:
                 
                 if (layerP.lights.header.isPositions == 10) { //send to UI
                     if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * sizeof(Coord3D), MAX_CHANNELS));
+                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS));
                     layerP.lights.header.isPositions = 0;
                 } else if (layerP.lights.header.isPositions == 0) {//send to UI
                     if (_socket->getConnectedClients() && _state.data["monitorOn"])

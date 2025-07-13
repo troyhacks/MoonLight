@@ -20,7 +20,7 @@
 
 struct Coord3D {
 
-    uint8_t x;
+    uint16_t x;
     uint8_t y;
     uint8_t z;
 
@@ -31,7 +31,9 @@ struct Coord3D {
         this->y = 0;
         this->z = 0;
     }
-    Coord3D (uint8_t x, uint8_t y, uint8_t z) {
+    
+    //x max 2^11 -> 2047, y max 2^8 -> 255, z max 2^5 -> 31
+    Coord3D (uint16_t x, uint8_t y, uint8_t z) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -94,7 +96,7 @@ namespace ArduinoJson {
     }
 
     static bool checkJson(JsonVariantConst src) {
-      return src["x"].is<uint8_t>() && src["y"].is<uint8_t>() && src["z"].is<uint8_t>();
+      return src["x"].is<uint16_t>() && src["y"].is<uint8_t>() && src["z"].is<uint8_t>();
     }
   };
 }

@@ -66,6 +66,13 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
 
+    void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) {
+        uint32_t packed = ((position.x & 0x7FF) << 13) | ((position.y & 0xFF) << 5) | (position.z & 0x1F);
+        buf[0] = (packed >> 16) & 0xFF;
+        buf[1] = (packed >> 8) & 0xFF;
+        buf[2] = packed & 0xFF;
+    }
+
     void PhysicalLayer::addLight(Coord3D position) {
 
         if (safeModeMB && lights.header.nrOfLights > 1023) {
@@ -75,12 +82,8 @@ PhysicalLayer::PhysicalLayer() {
 
         if (pass == 1) {
             // ESP_LOGD(TAG, "%d,%d,%d", position.x, position.y, position.z);
-            if (lights.header.nrOfLights >= MAX_CHANNELS / sizeof(Coord3D)) {
-                //send the positions to the UI _socket_emit
-                //reset the index and continue...
-            } else {
-                Coord3D * positions = (Coord3D *)lights.channels;
-                positions[lights.header.nrOfLights] = Coord3D(position.x, position.y, position.z);
+            if (lights.header.nrOfLights < MAX_CHANNELS / 3) {
+                packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights*3], position);
             }
              
             lights.header.size = lights.header.size.maximum(position);

@@ -35,10 +35,10 @@
         const header = lights.slice(0, headerLength);
         const data = lights.slice(headerLength);
 
-		let isPositions:number = header[0];
+		let isPositions:number = header[6];
 		let nrOfLights = header[4] + 256 * header[5];
-		let channelsPerLight:number = header[10];
-		let offsetRGB:number = header[11];
+		let channelsPerLight:number = header[11];
+		let offsetRGB:number = header[12];
 		
 		if (!(isPositions==10)) { 
 			//(type == ct_Leds) {
@@ -64,36 +64,44 @@
 		}
 	};
 
+	function unpackCoord3DInto3Bytes(xin: number, yin: number, zin:number) {
+		// Combine 3 bytes into a 24-bit number
+		const packed = (xin << 16) | (yin << 8) | zin;
+
+		const x = (packed >> 13) & 0x7FF; // 11 bits
+		const y = (packed >> 5) & 0xFF;   // 8 bits
+		const z = packed & 0x1F;          // 5 bits
+
+		return { x, y, z };
+	}
+
 	const handleLayout = (header: Uint8Array, positions: Uint8Array) => {
 		console.log("Monitor.handleLayout positions", header, positions);
 
 		//rebuild scene
 		createScene(el);
 
-		let ledFactor: number = 1;//header[1];
+		// let ledFactor: number = 1;//header[1];
 		// let ledSize: number = header[23];
-		width = header[1];
+		width = header[0] + 256 * header[1]; //max 2047
 		height = header[2];
 		depth = header[3];
 
 		let nrOfLights = header[4] + 256 * header[5];
 
-		console.log("Monitor.handleLayout", ledFactor, nrOfLights, width, height, depth);
+		console.log("Monitor.handleLayout", nrOfLights, width, height, depth);
 
 		for (let index = 0; index < nrOfLights * 3; index +=3) {
 			// console.log(data[index], data[index+1], data[index+2]);
-			//this is weird... where is the first position?
-			let x = positions[index] / ledFactor;
-			let y = positions[index+1] / ledFactor;
-			let z = positions[index+2] / ledFactor;
+			let position = unpackCoord3DInto3Bytes(positions[index], positions[index+1], positions[index+2])
 
 			//set to -1,1 coordinate system of webGL
 			//width -1 etc as 0,0 should be top left, not bottom right
-			x = width==1?0:(((x) / (width - 1)) * 2.0 - 1.0);
-			y = height==1?0:(((height-1-y) / (height - 1)) * 2.0 - 1.0);
-			z = depth==1?0:(((depth-1-z) / (depth - 1)) * 2.0 - 1.0);
+			position.x = width==1?0:(((position.x) / (width - 1)) * 2.0 - 1.0);
+			position.y = height==1?0:(((height-1-position.y) / (height - 1)) * 2.0 - 1.0);
+			position.z = depth==1?0:(((depth-1-position.z) / (depth - 1)) * 2.0 - 1.0);
 
-			vertices.push(x, y, z);
+			vertices.push(position.x, position.y, position.z);
 		}
 	}
 
