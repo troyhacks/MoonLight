@@ -2,13 +2,10 @@ site_name: MoonLight
 
 nav:
   - Home: index.md
-  - General:
-      - general/gettingstarted.md
-      - general/installation.md
-      - general/development.md
-      - general/hardware.md
-      - general/customizingsveltekit.md
-      - general/pull-requests.md
+  - "Getting Started":
+      - gettingstarted/general.md
+      - gettingstarted/installation.md
+      - gettingstarted/hardware.md
   - "MoonLight":
       - moonlight/general.md
       - moonbase/module/lightsControl.md
@@ -19,7 +16,6 @@ nav:
       - moonbase/module/MoonLightInfo.md
   - "MoonBase":
       - moonbase/general.md
-      - moonbase/modules.md
       - moonbase/FileManager.md
       - moonbase/module/instances.md
   - "Connections":
@@ -32,6 +28,13 @@ nav:
       - system/status.md
       - system/metrics.md
       - system/update.md
+  - "Develop": 
+      - develop/general.md
+      - develop/customizingsveltekit.md
+      - develop/pull-requests.md
+      - develop/documentation.md
+      - develop/modules.md
+      - develop/nodes.md
   - "ESP32 SvelteKit": 
       - esp32sveltekit.md
   - "Build Tools":

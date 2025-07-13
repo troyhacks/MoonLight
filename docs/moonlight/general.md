@@ -1,6 +1,4 @@
-# General
-
-## Functional
+# MoonLight
 
 🚧
 
@@ -15,9 +13,3 @@
     * Execute a live script
 
     This list is dynamic and will change over time if crash reasons change.
-
-## Technical
-
-### Server
-
-### UI

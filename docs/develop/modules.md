@@ -2,8 +2,6 @@
 
 <img width="829" alt="image" src="https://github.com/user-attachments/assets/3384f3ba-b5e6-4993-9a8b-80c25878e176" />
 
-## Functional
-
 A module is a generic building block to create server and UI functionality which can be activated through the menu.
 
 MoonBase-Modules are inspired by WLED usermods, further developed in StarBase and now in MoonLight (using the ESP32-Sveltekit infrastructure)
@@ -11,8 +9,6 @@ MoonBase-Modules are inspired by WLED usermods, further developed in StarBase an
 See [Demo](module/demo.md), [Instances](module/instances.md) and [Editor](module/editor.md) for examples
 
 Press the ? on any module to go to the documentation.
-
-## Technical
 
 With Moonbase Modules it is possible to create new module entirely from one c++ class by only defining a json document describing the data structure and a function catching all the changes in the data. Http endpont and websockets are created automatically. There is no need to create any UI code, it is entirely driven by the json document.
 

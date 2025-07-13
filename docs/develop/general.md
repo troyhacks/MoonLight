@@ -1,5 +1,8 @@
 # MoonLight Development
 
+* [Start developing for MoonLight](https://moonmodules.org/MoonLight/general/development/)
+    * [ESP32 Sveltekit](https://moonmodules.org/MoonLight/https://moonmodules.org/MoonLight/esp32sveltekit/)
+
 ## Developing
 
 * Read the [ESP32 Sveltekit docs](https://moonmodules.org/MoonLight/esp32sveltekit/)
@@ -72,8 +75,8 @@
 ## Adding functionality
 
 ### UI
-
 🚧
+
 * nodejs
 * /interface folder
 * npm install and npm run dev
@@ -98,3 +101,28 @@ There are 3 files to consider when making a board definition.
 	variants/BOARD_NAME.ini
 
 🚧
+
+### Technical notes
+
+#### Live Scripts
+
+* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
+    * To do: kill running scripts, e.g. when changing effects
+
+#### File Manager
+
+## Technical
+
+* filesState: all files on FS
+* folderList: all files in a folder
+* editableFile: current file
+* getState / postFilesState: get filesState and post changes to files (update, delete, new)
+* addFile / addFolder: create new items
+* breadcrumbs(String): folder path as string array and as string, also stored as cookie
+* folderListFromBreadCrumbs: create folderList of current folder
+* handleEdit: when edit button pressed: navigate back and forward through folders, edit current file
+* confirmDelete: when delete button pressed
+* socket files / handleFileState (->folderListFromBreadCrumbs)
+
+Using component FileEdit, see [Components](https://moonmodules.org/MoonLight/components/#fileedit)
+

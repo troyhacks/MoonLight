@@ -1,6 +1,4 @@
-# General
-
-## Functional
+# MoonBase
 
 🚧
 
@@ -8,8 +6,3 @@
 * [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)
 * [Instances](https://moonmodules.org/MoonLight/moonbase/module/instances/)
 
-## Technical
-
-### Server
-
-### UI
