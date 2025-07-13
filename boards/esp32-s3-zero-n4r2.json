@@ -22,7 +22,7 @@
   },
   
   "arduino": {
-    "partitions": "boards/ESP32_4MB.csv"
+    "partitions": "boards/ESP32_4MB_NO_OTA.csv"
   },
 
   "connectivity": ["wifi", "bluetooth"],

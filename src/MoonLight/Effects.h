@@ -691,6 +691,7 @@ public:
     values.add("Sinus");
     values.add("Square");
     values.add("Sin3"); //with @pathightree
+    values.add("Noise");
   }
 
   void loop() override {
@@ -712,6 +713,7 @@ public:
         case 2: pos = bs8 * layerV->size.x / 256; break;
         case 3: pos = b8 > 128? 0 : layerV->size.x-1; break;
         case 4: pos = (bs8 + beatsin8( bpm*0.65, 0, 255, y * 200) + beatsin8( bpm*1.43, 0, 255, y * 300)) * layerV->size.x / 256 / 3; break;
+        case 5: pos = inoise8(millis()*bpm/256 + y*1000) * layerV->size.x / 256; break; //bpm not really bpm, more speed
         default: pos = 0;
       }
 

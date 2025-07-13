@@ -85,31 +85,32 @@ String verbosePrintResetReason(int reason)
     case ESP_RST_SDIO:
         return ("Reset over SDIO");
         break;
-#ifdef ESP_RST_USB
+// 🌙 looks like this exists in all the boards we use, and ifdef ESP_RST_USB is not returning true for some reason ...
+// #ifdef ESP_RST_USB
     case ESP_RST_USB:
         return ("Reset by USB peripheral");
         break;
-#endif
-#ifdef ESP_RST_JSVK_TAG
-    case ESP_RST_JSVK_TAG:
+// #endif
+// #ifdef ESP_RST_JSVK_TAG
+    case ESP_RST_JTAG:
         return ("Reset by JSVK_TAG");
         break;
-#endif
-#ifdef ESP_RST_EFUSE
+// #endif
+// #ifdef ESP_RST_EFUSE
     case ESP_RST_EFUSE:
         return ("Reset due to efuse error");
         break;
-#endif
-#ifdef ESP_RST_PWR_GLITCH
+// #endif
+// #ifdef ESP_RST_PWR_GLITCH
     case ESP_RST_PWR_GLITCH:
         return ("Reset due to power glitch detected");
         break;
-#endif
-#ifdef ESP_RST_CPU_LOCKUP
+// #endif
+// #ifdef ESP_RST_CPU_LOCKUP
     case ESP_RST_CPU_LOCKUP:
         return ("Reset due to CPU lock up (double exception)");
         break;
-#endif
+// #endif
     default:
         char buffer[50];
         snprintf(buffer, sizeof(buffer), "Unknown reset reason (%d)", reason);

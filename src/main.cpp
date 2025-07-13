@@ -150,6 +150,10 @@ void setup()
         &moonTaskHandle,       // task handle
         1                      // core (0 or 1)
     );
+
+    // #if CONFIG_IDF_TARGET_ESP32
+    //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
+    // #endif
 }
 
 void loop()
