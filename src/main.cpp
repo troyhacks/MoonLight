@@ -37,12 +37,6 @@
 #undef TAG
 #define TAG "🌙"
 
-// 💫 
-#if FT_ENABLED(FT_LIVESCRIPT)
-    SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB, otherwise 8K, to allow multiple scripts loaded at boot
-    //to do: needed as during boot scripts are run in looptask, later in httpd. Move scripts to same task...
-#endif
-
 PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 160, default is 120
@@ -64,21 +58,7 @@ ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 1
     #endif
 #endif
     
-void setup()
-{
-    // start serial and filesystem
-    Serial.begin(SERIAL_BAUD_RATE);
-
-    // delay(5000); // 🌙 to capture all the serial output
-
-    // 🌙 safeMode
-    if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW) { //see verbosePrintResetReason
-        safeModeMB = true;
-    }
-
-    // start ESP32-SvelteKit
-    esp32sveltekit.begin();
-
+void moonTask(void* pvParameters) {
     // 🌙
     #if FT_ENABLED(FT_MOONBASE)
         fileManager.begin();
@@ -95,89 +75,85 @@ void setup()
         #endif
     #endif
 
-    // String shortString = "Hello world";
-    // String longString = "Hello world, this is a long string that is longer than 32 characters";
-    // Char<32> averageChar; averageChar = "Hello world";
+    for (;;) {
+        esp32sveltekit.lps++; // 🌙
 
-    // String microString = "Hi";
-    // ESP_LOGD(TAG, "microString: %s", microString.c_str());
-    // ESP_LOGD(TAG, "microString length: %d", microString.length());
-    // ESP_LOGD(TAG, "microString size: %d", sizeof(microString));
+        #if FT_ENABLED(FT_MOONBASE)
 
-    // ESP_LOGD(TAG, "shortString: %s", shortString.c_str());
-    // ESP_LOGD(TAG, "longString: %s", longString.c_str());
-    // ESP_LOGD(TAG, "averageChar: %s", averageChar.c_str());
-    // ESP_LOGD(TAG, "shortString length: %d", shortString.length());
-    // ESP_LOGD(TAG, "longString length: %d", longString.length());
-    // ESP_LOGD(TAG, "averageChar length: %d", averageChar.length());
-    // ESP_LOGD(TAG, "shortString size: %d", sizeof(shortString));
-    // ESP_LOGD(TAG, "longString size: %d", sizeof(longString));
-    // ESP_LOGD(TAG, "averageChar size: %d", sizeof(averageChar));
-    // ESP_LOGD(TAG, "UpdatedItem size: %d = %d + %d + %d ...", sizeof(UpdatedItem), sizeof(JsonString), sizeof(JsonVariant), sizeof(String));
+            #if FT_ENABLED(FT_MOONLIGHT)
+                moduleEditor.loop();
+            #endif
 
-    // #if CONFIG_IDF_TARGET_ESP32
-    //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
-    // #endif
+            static unsigned long lastTime50ms = 0;
+            if (millis() - lastTime50ms > 50)
+            {
+                lastTime50ms = millis();
+                #if FT_ENABLED(FT_MOONLIGHT)
+                    moduleLightsControl.loop50ms();
+                #endif
+                
+                static unsigned long lastTime1s = 0;
+                if (millis() - lastTime1s > 1000)
+                {
+                    lastTime1s = millis();
+                    moduleInstances.loop1s();
+                    #if FT_ENABLED(FT_MOONLIGHT)
+                        #if FT_ENABLED(FT_LIVESCRIPT)
+                            moduleLiveScripts.loop1s();
+                        #endif
+                    #endif
+
+                    static unsigned long lastTime10s = 0;
+                    if (millis() - lastTime10s > 10000)
+                    {
+                        lastTime10s = millis();
+                        moduleInstances.loop10s();
+                    }
+                }
+            }
+
+            while (!runInLoopTask.empty()) {
+                runInLoopTask.front()();
+                runInLoopTask.erase(runInLoopTask.begin());
+            }
+
+        #endif
+
+        vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
+    }
+}
+
+TaskHandle_t moonTaskHandle = NULL;
+
+void setup()
+{
+    // start serial and filesystem
+    Serial.begin(SERIAL_BAUD_RATE);
+
+    // delay(5000); // 🌙 to capture all the serial output
+
+    // 🌙 safeMode
+    if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW) { //see verbosePrintResetReason
+        safeModeMB = true;
+    }
+
+    // start ESP32-SvelteKit
+    esp32sveltekit.begin();
+
+    // 🌙
+    xTaskCreatePinnedToCore(
+        moonTask,              // task function
+        "moonTask",            // name
+        16 * 1024,             // stack size in words
+        NULL,                  // parameter
+        8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep)
+        &moonTaskHandle,       // task handle
+        1                      // core (0 or 1)
+    );
 }
 
 void loop()
 {
-    esp32sveltekit.lps++; // 🌙
-
-    // 🌙
-    #if FT_ENABLED(FT_MOONBASE)
-
-        // 💫
-        #if FT_ENABLED(FT_MOONLIGHT)
-            moduleEditor.loop();
-        #endif
-
-        //20ms loop
-        // static unsigned long lastTime20ms = 0;
-        // if (millis() - lastTime20ms > 20)
-        // {
-        //     lastTime20ms = millis();
-        //     #if FT_ENABLED(FT_MOONLIGHT)
-        //     #endif
-        // }
-
-        //50ms loop
-        static unsigned long lastTime50ms = 0;
-        if (millis() - lastTime50ms > 50)
-        {
-            lastTime50ms = millis();
-            #if FT_ENABLED(FT_MOONLIGHT)
-                moduleLightsControl.loop50ms();
-            #endif
-            
-            //1s loop
-            static unsigned long lastTime1s = 0;
-            if (millis() - lastTime1s > 1000)
-            {
-                lastTime1s = millis();
-                moduleInstances.loop1s();
-                #if FT_ENABLED(FT_MOONLIGHT)
-                    #if FT_ENABLED(FT_LIVESCRIPT)
-                        moduleLiveScripts.loop1s();
-                    #endif
-                #endif
-
-                //10s loop
-                static unsigned long lastTime10s = 0;
-                if (millis() - lastTime10s > 10000)
-                {
-                    lastTime10s = millis();
-                    moduleInstances.loop10s();
-                }
-            }
-        }
-
-        // 🌙
-        while (!runInLoopTask.empty()) {
-            // ESP_LOGD(TAG, "Running queued function");
-            runInLoopTask.front()(); // calls the first function
-            runInLoopTask.erase(runInLoopTask.begin());
-        }
-
-    #endif
+    // Delete Arduino loop task, as it is not needed in this example
+    vTaskDelete(NULL);
 }
