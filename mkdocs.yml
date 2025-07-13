@@ -3,11 +3,11 @@ site_name: MoonLight
 nav:
   - Home: index.md
   - "Getting Started":
-      - gettingstarted/general.md
+      - gettingstarted/overview.md
       - gettingstarted/installation.md
       - gettingstarted/hardware.md
   - "MoonLight":
-      - moonlight/general.md
+      - moonlight/overview.md
       - moonbase/module/lightsControl.md
       - moonbase/module/editor.md
       - moonlight/nodes.md
@@ -15,7 +15,7 @@ nav:
       - moonbase/module/ChannelView.md
       - moonbase/module/MoonLightInfo.md
   - "MoonBase":
-      - moonbase/general.md
+      - moonbase/overview.md
       - moonbase/FileManager.md
       - moonbase/module/instances.md
   - "Connections":
@@ -29,7 +29,7 @@ nav:
       - system/metrics.md
       - system/update.md
   - "Develop": 
-      - develop/general.md
+      - develop/overview.md
       - develop/customizingsveltekit.md
       - develop/pull-requests.md
       - develop/documentation.md
