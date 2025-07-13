@@ -15,13 +15,12 @@ nav:
       - moonbase/module/editor.md
       - moonlight/nodes.md
       - moonbase/module/liveScripts.md
-      - moonbase/module/artnet.md
       - moonbase/module/ChannelView.md
       - moonbase/module/MoonLightInfo.md
   - "MoonBase":
       - moonbase/general.md
       - moonbase/modules.md
-      - moonbase/files.md
+      - moonbase/FileManager.md
       - moonbase/module/instances.md
   - "Connections":
       - connections/mqtt.md

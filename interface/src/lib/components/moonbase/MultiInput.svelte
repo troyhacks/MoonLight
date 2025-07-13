@@ -55,7 +55,7 @@
         hoverTimeout = setTimeout(async () => {
             if (!property.hoverToServer && savedPreset) {
                 //open the file with cell
-                const response = await fetch(`/rest/file/config/.editor/preset${cell.toString().padStart(2, '0')}.json`);
+                const response = await fetch(`/rest/file/.config/.editor/preset${cell.toString().padStart(2, '0')}.json`);
                 if (response.ok) {
                     fileContent = await response.json();
                     console.log(fileContent);
@@ -212,7 +212,7 @@
         style="width: {String(property.max || 255).length * 2}ch"
         class="input invalid:border-error invalid:border-2"
         min=0
-        max=255
+        max=2047
         bind:value={value.x}
         on:change={onChange}
     />
@@ -230,7 +230,7 @@
         style="width: {String(property.max || 255).length * 2}ch"
         class="input invalid:border-error invalid:border-2"
         min=0
-        max=255
+        max=31
         bind:value={value.z}
         on:change={onChange}
     />

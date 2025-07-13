@@ -19,38 +19,41 @@
 #define TOSTRING(x) STRINGIFY(x) //e.g. for pio.ini settings (see ML_CHIPSET)
 
 struct Coord3D {
-    uint8_t x;
+
+    uint16_t x;
     uint8_t y;
     uint8_t z;
 
     // Coord3D() : x(0), y(0), z(0) {} // Default constructor
 
-    // Coord3D (uint8_t x, uint8_t y, uint8_t z) {
-    //     this->x = x;
-    //     this->y = y;
-    //     this->z = z;
-    // }
-    // Coord3D (int x, int y, int z) {
-    //     this->x = x;
-    //     this->y = y;
-    //     this->z = z;
-    // }
+    Coord3D () {
+        this->x = 0;
+        this->y = 0;
+        this->z = 0;
+    }
+    
+    //x max 2^11 -> 2047, y max 2^8 -> 255, z max 2^5 -> 31
+    Coord3D (uint16_t x, uint8_t y, uint8_t z) {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    }
+
     //Minus / delta (abs)
     Coord3D operator-(const Coord3D rhs) const {
-        return Coord3D{uint8_t(x - rhs.x), uint8_t(y - rhs.y), uint8_t(z - rhs.z)};
-        // return intToCoord3D(x - rhs.x, y - rhs.y, z - rhs.z);
+        return Coord3D(x - rhs.x, y - rhs.y, z - rhs.z);
     }
     Coord3D operator+(const Coord3D rhs) const {
-        return Coord3D{uint8_t(x + rhs.x), uint8_t(y + rhs.y), uint8_t(z + rhs.z)};
+        return Coord3D(x + rhs.x, y + rhs.y, z + rhs.z);
     }
     Coord3D operator*(const Coord3D rhs) const {
-        return Coord3D{uint8_t(x * rhs.x), uint8_t(y * rhs.y), uint8_t(z * rhs.z)};
+        return Coord3D(x * rhs.x, y * rhs.y, z * rhs.z);
     }
     Coord3D operator/(const Coord3D rhs) const {
-        return Coord3D{uint8_t(x / rhs.x), uint8_t(y / rhs.y), uint8_t(z / rhs.z)};
+        return Coord3D(x / rhs.x, y / rhs.y, z / rhs.z);
     }
     Coord3D operator%(const Coord3D rhs) const {
-        return Coord3D{uint8_t(x % rhs.x), uint8_t(y % rhs.y), uint8_t(z % rhs.z)};
+        return Coord3D(x % rhs.x, y % rhs.y, z % rhs.z);
     }
 
     //assignments
@@ -69,7 +72,7 @@ struct Coord3D {
       }
     
     Coord3D maximum(const Coord3D rhs) const {
-        return Coord3D{max(x, rhs.x), max(y, rhs.y), max(z, rhs.z)};
+        return Coord3D(max(x, rhs.x), max(y, rhs.y), max(z, rhs.z));
     }
 
 };
@@ -93,13 +96,9 @@ namespace ArduinoJson {
     }
 
     static bool checkJson(JsonVariantConst src) {
-      return src["x"].is<uint8_t>() && src["y"].is<uint8_t>() && src["z"].is<uint8_t>();
+      return src["x"].is<uint16_t>() && src["y"].is<uint8_t>() && src["z"].is<uint8_t>();
     }
   };
-}
-
-inline Coord3D intToCoord3D(int x, int y, int z) {
-  return {uint8_t(x), uint8_t(y), uint8_t(z)};
 }
 
 bool arrayContainsValue(JsonArray array, int value);

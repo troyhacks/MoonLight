@@ -29,19 +29,20 @@
 
 // #include "VirtualLayer.h"
 
-#include "LedsDriver.h"
-
 class VirtualLayer; //Forward as PhysicalLayer refers back to VirtualLayer
 class Node; //Forward as PhysicalLayer refers back to Node
 class Modifier; //Forward as PhysicalLayer refers back to Modifier
 
 struct LightsHeader {
-  uint8_t isPositions = 0; //0is the lights.positions array filled with positions
-  Coord3D size = {16,16,1}; //1 max position of light, counted by addLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
+  Coord3D size = Coord3D(16,16,1); //0 max position of light, counted by addLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint16_t nrOfLights = 256; //4 nr of physical lights, counted by addLight
-  uint8_t brightness; //6 brightness set by light control (sent to LEDs driver normally)
-  uint8_t channelsPerLight = 3; //7 RGB default
-  uint8_t offsetRGB = 0; //RGB default
+  uint8_t isPositions = 0; //6 is the lights.positions array filled with positions
+  uint8_t brightness; //7 brightness set by light control (sent to LEDs driver normally)
+  uint8_t red; //8 brightness set by light control (sent to LEDs driver normally)
+  uint8_t green; //9 brightness set by light control (sent to LEDs driver normally)
+  uint8_t blue; //10 brightness set by light control (sent to LEDs driver normally)
+  uint8_t channelsPerLight = 3; //11 RGB default
+  uint8_t offsetRGB = 0; //12 RGB default
   uint8_t offsetWhite = UINT8_MAX;
   uint8_t offsetBrightness = UINT8_MAX; //in case the light has a separate brightness channel
   uint8_t offsetPan = UINT8_MAX;
@@ -56,8 +57,7 @@ struct LightsHeader {
   //19 bytes until here
   // uint8_t ledFactor = 1; //factor to multiply the positions with 
   // uint8_t ledSize = 4; //mm size of each light, used in monitor ...
-  uint8_t dummy[4];
-  //24 bytes total
+  //24 bytes total !!! so full ATM
 
   //support for more channels, like white, pan, tilt etc.
 
@@ -90,12 +90,14 @@ inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
 
 struct Lights {
   LightsHeader header;
-  union {
-    CRGB leds[MAX_LEDS];
-    uint8_t channels[MAX_CHANNELS];
-    Coord3D positions[MAX_CHANNELS / sizeof(Coord3D)]; //for layout / pass == 1, send positions to monitor / preview
-  };
+  uint8_t channels[MAX_CHANNELS]; //pka leds
   // std::vector<size_t> universes; //tells at which byte the universe starts
+};
+
+struct SortedPin {
+  uint16_t startLed;
+  uint16_t nrOfLights;
+  uint8_t pin;
 };
 
 //contains the Lights structure/definition and implements layout functions (add*, modify*)
@@ -124,7 +126,6 @@ class PhysicalLayer {
     void addLayoutPost();
     
     std::vector<SortedPin> sortedPins;
-    LedsDriver ledsDriver; 
 
     // an effect is using a virtual layer: tell the effect in which layer to run...
 

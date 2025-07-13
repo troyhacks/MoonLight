@@ -94,7 +94,7 @@ class VirtualLayer {
   void setWhite(Coord3D pos, const uint8_t value) { setWhite(XYZ(pos), value); }
 
   void setBrightness(const uint16_t indexV, uint8_t value) {
-    value = (value * layerP->lights.header.brightness) >>8; // 255
+    value = (value * layerP->lights.header.brightness) / 255;
     if (layerP->lights.header.offsetBrightness != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness, sizeof(value));
   }
@@ -149,7 +149,7 @@ class VirtualLayer {
   void setRGB3(Coord3D pos, CRGB color) { setRGB3(XYZ(pos), color); }
 
   void setBrightness2(const uint16_t indexV, uint8_t value) {
-    value = (value * layerP->lights.header.brightness) >>8; //255
+    value = (value * layerP->lights.header.brightness) / 255;
     if (layerP->lights.header.offsetBrightness2 != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness2, sizeof(value));
   }

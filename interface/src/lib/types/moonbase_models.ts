@@ -8,4 +8,5 @@ export type FilesState = {
 	files: FilesState[];
 	fs_total: number;
 	fs_used: number;
+	showHidden: boolean
 };

@@ -20,9 +20,8 @@ class ModuleMoonLightInfo : public Module
 public:
 
     ModuleMoonLightInfo(PsychicHttpServer *server,
-            ESP32SvelteKit *sveltekit,
-            FilesService *filesService
-        ) : Module("MoonLightInfo", server, sveltekit, filesService) {
+            ESP32SvelteKit *sveltekit
+        ) : Module("MoonLightInfo", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 
@@ -36,6 +35,8 @@ public:
         property = root.add<JsonObject>(); property["name"] = "channelsPerLight"; property["type"] = "number"; property["max"] = 65536;
         property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "FastLED"; property["type"] = "text"; property["max"] = 32;
+        property = root.add<JsonObject>(); property["name"] = "FastLEDI2S"; property["type"] = "text"; property["max"] = 32;
+        property = root.add<JsonObject>(); property["name"] = "colorOrder"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
         property = root.add<JsonObject>(); property["name"] = "layers"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -61,6 +62,12 @@ public:
             data["chipset"] = TOSTRING(ML_CHIPSET);
             const char* fastledVersion = TOSTRING(FASTLED_VERSION);// "." TOSTRING(FASTLED_VERSION_MINOR) "." TOSTRING(FASTLED_VERSION_PATCH);
             data["FastLED"] = fastledVersion;
+            #if FASTLED_USES_ESP32S3_I2S
+                data["FastLEDI2S"] = "Yes";
+            #else
+                data["FastLEDI2S"] = "No";
+            #endif
+            data["colorOrder"] = TOSTRING(ML_COLOR_ORDER);
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;
             data["size"]["z"] = layerP.lights.header.size.z;

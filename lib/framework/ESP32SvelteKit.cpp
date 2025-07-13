@@ -118,9 +118,9 @@ void ESP32SvelteKit::begin()
         } });
 #endif
 
-    // Serve static resources from /config/ if set by platformio.ini
+    // Serve static resources from /.config/ if set by platformio.ini
 #if SERVE_CONFIG_FILES
-    _server->serveStatic("/config/", ESPFS, "/config/");
+    _server->serveStatic("/.config/", ESPFS, "/.config/"); // 🌙 use /.config (hidden folder)
 #endif
 
 #if defined(ENABLE_CORS)

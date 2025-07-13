@@ -34,7 +34,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
   
    <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
 
-* **Step 9**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). A new install will take some time to show up (up to a minute or sometimes 2). On some browsers, e.g. Safari, MoonLight pops up showing Connection to device lost repeatedly (bug). In that case, close this browser window and open MoonLight in a brower using 192.168.4.1 as URL. You will see this screen, select WiFi Station.
+* **Step 9**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). A new install will take some time to show up (up to a minute or sometimes 2). On some browsers, e.g. Safari, MoonLight pops up showing Connection to device lost repeatedly (bug). In that case, close this browser window and open MoonLight in a browser using 4.3.2.1 as URL. You will see this screen, select WiFi Station.
   
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
 
@@ -46,7 +46,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
 
-* **Step 12**: Go to your WiFi settings and connect to your local WiFi network and enter the IP address of your MoonLight board in a browser and go to **MoonLight Editor**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. After setting the right pin the strip or panel should show lights.
+* **Step 12**: Go to your WiFi settings and connect to your local WiFi network and enter the IP address of your MoonLight board in a browser and go to **MoonLight Editor**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. Add a driver node, FastLED driver is best to start with. Finally add an effect node. The monitor and a connected strip to the configured pin(s) should now show the effect.
 
    <img width="400" alt="Screenshot 2025-06-07 at 21 01 02" src="https://github.com/user-attachments/assets/5d4d581f-5586-43c0-a5ea-02930effc3d8" />
 

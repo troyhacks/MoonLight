@@ -50,6 +50,7 @@ PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
 
         if (pass == 1) {
+            lights.header.resetOffsets();
             lights.header.size = {0,0,0};
             lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects
@@ -65,6 +66,13 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
 
+    void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) {
+        uint32_t packed = ((position.x & 0x7FF) << 13) | ((position.y & 0xFF) << 5) | (position.z & 0x1F);
+        buf[0] = (packed >> 16) & 0xFF;
+        buf[1] = (packed >> 8) & 0xFF;
+        buf[2] = packed & 0xFF;
+    }
+
     void PhysicalLayer::addLight(Coord3D position) {
 
         if (safeModeMB && lights.header.nrOfLights > 1023) {
@@ -74,12 +82,10 @@ PhysicalLayer::PhysicalLayer() {
 
         if (pass == 1) {
             // ESP_LOGD(TAG, "%d,%d,%d", position.x, position.y, position.z);
-            if (lights.header.nrOfLights >= MAX_CHANNELS / sizeof(Coord3D)) {
-                //send the positions to the UI _socket_emit
-                //reset the index and continue...
-            } else
-                lights.positions[lights.header.nrOfLights] = {position.x, position.y, position.z};
-            
+            if (lights.header.nrOfLights < MAX_CHANNELS / 3) {
+                packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights*3], position);
+            }
+             
             lights.header.size = lights.header.size.maximum(position);
         } else {
             for (VirtualLayer * layer: layerV) {
@@ -123,7 +129,7 @@ PhysicalLayer::PhysicalLayer() {
     void PhysicalLayer::addLayoutPost() {
         if (pass == 1) {
             lights.header.size += Coord3D{1,1,1};
-            ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.leds));
+            ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.channels));
             //send the positions to the UI _socket_emit
             lights.header.isPositions = 10; //filled with positions, set back to ct_Leds in ModuleEditor
 
@@ -135,7 +141,7 @@ PhysicalLayer::PhysicalLayer() {
                 //sort the vector by the starLed
                 std::sort(sortedPins.begin(), sortedPins.end(), [](const SortedPin &a, const SortedPin &b) {return a.startLed < b.startLed;});
 
-                ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
+                // ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
 
             } //pins defined
         } else if (pass == 2) {
@@ -176,6 +182,7 @@ PhysicalLayer::PhysicalLayer() {
 
         else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
         else if (equal(name, PanelLayout::name())) node = new PanelLayout();
+        else if (equal(name, PanelsLayout::name())) node = new PanelsLayout();
         else if (equal(name, RingsLayout::name())) node = new RingsLayout();
         else if (equal(name, SingleLineLayout::name())) node = new SingleLineLayout();
         else if (equal(name, SingleRowLayout::name())) node = new SingleRowLayout();
@@ -189,9 +196,15 @@ PhysicalLayer::PhysicalLayer() {
         else if (equal(name, CircleModifier::name())) node = new CircleModifier();
         else if (equal(name, MirrorModifier::name())) node = new MirrorModifier();
         else if (equal(name, MultiplyModifier::name())) node = new MultiplyModifier();
+        else if (equal(name, RippleYZModifier::name())) node = new RippleYZModifier();
         else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
         else if (equal(name, RotateNodifier::name())) node = new RotateNodifier();
         
+        else if (equal(name, ArtNetDriverMod::name())) node = new ArtNetDriverMod();
+        else if (equal(name, FastLEDDriverMod::name())) node = new FastLEDDriverMod();
+        else if (equal(name, HUB75DriverMod::name())) node = new HUB75DriverMod();
+        else if (equal(name, PhysicalDriverMod::name())) node = new PhysicalDriverMod();
+        else if (equal(name, VirtualDriverMod::name())) node = new VirtualDriverMod();
         else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
         #if FT_LIVESCRIPT
             else {

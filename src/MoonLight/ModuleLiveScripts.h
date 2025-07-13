@@ -29,9 +29,8 @@ public:
     PsychicHttpServer *_server;
 
     ModuleLiveScripts(PsychicHttpServer *server,
-        ESP32SvelteKit *sveltekit,
-        FilesService *filesService
-    ) : Module("liveScripts", server, sveltekit, filesService) {
+        ESP32SvelteKit *sveltekit
+    ) : Module("liveScripts", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
     }

@@ -25,8 +25,6 @@
 #include <FSPersistence.h>
 #include <ESP32SvelteKit.h>
 
-#include "FilesService.h"
-
 #include "Utilities.h"
 
 //sizeof was 160 chars -> 80 -> 68
@@ -71,8 +69,7 @@ public:
     String _moduleName = "";
 
     Module(String moduleName, PsychicHttpServer *server,
-                      ESP32SvelteKit *sveltekit,
-                      FilesService *filesService
+                      ESP32SvelteKit *sveltekit
                     );
 
     void begin();
@@ -83,7 +80,6 @@ public:
 
 protected:
     EventSocket *_socket;
-    FilesService *_filesService;
     void readFromFS() {
          _fsPersistence.readFromFS(); //overwrites the default settings in state
     }

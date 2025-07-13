@@ -24,6 +24,7 @@
 #include <DNSServer.h>
 #include <IPAddress.h>
 
+//🌙 redundant as all set in factory_settings.ini
 #ifndef FACTORY_AP_PROVISION_MODE
 #define FACTORY_AP_PROVISION_MODE AP_MODE_DISCONNECTED
 #endif
@@ -60,7 +61,7 @@
 #define FACTORY_AP_MAX_CLIENTS 4
 #endif
 
-#define AP_SETTINGS_FILE "/config/apSettings.json"
+#define AP_SETTINGS_FILE "/.config/apSettings.json" // 🌙 use /.config (hidden folder)
 #define AP_SETTINGS_SERVICE_PATH "/rest/apSettings"
 
 #define AP_MODE_ALWAYS 0

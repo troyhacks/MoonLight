@@ -9,6 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
+#pragma once
+
 #if FT_MOONLIGHT
 
 #include <WLED-sync.h> // https://github.com/netmindz/WLED-sync
@@ -24,6 +26,41 @@ static struct Audio {
   float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
   float majorPeak; // FFT: strongest (peak) frequency
 } audio;
+
+
+#include "Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
+
+class ArtNetDriverMod: public Node {
+  public:
+
+  static const char * name() {return "Art-Net Driver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  uint16_t controllerIP3 = 11;
+  uint16_t FPSLimiter = 50; //default 50ms
+  uint16_t nrOfOutputs = 2; //8 on Art-Net LED Controller
+  uint16_t channelsPerOutput = 512; //3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
+  uint16_t universesPerOutput = 1; //7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
+
+  void setup() {
+    addControl(controllerIP3, "controllerIP", "number");
+    addControl(FPSLimiter, "FPSLimiter", "number");
+    addControl(nrOfOutputs, "nrOfOutputs", "number");
+    addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
+    addControl(universesPerOutput, "universesPerOutput", "number");
+  }
+
+  const size_t ART_NET_HEADER_SIZE = 12;
+  const uint8_t ART_NET_HEADER[12] = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
+
+  IPAddress controllerIP; //tbd: controllerIP also configurable from fixtures and Art-Net instead of pin output
+  size_t sequenceNumber = 0;
+
+  unsigned long lastMillis = millis();
+
+  void loop() override;
+};
 
 class AudioSyncMod: public Node {
   public:
@@ -55,5 +92,64 @@ class AudioSyncMod: public Node {
 
 static AudioSyncMod *audioNode;
 
+
+class FastLEDDriverMod: public Node {
+  public:
+
+  static const char * name() {return "FastLED Driver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  uint16_t maxPowerSaved = 0;
+  uint16_t maxPower = 10;
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
+
+class HUB75DriverMod: public Node {
+  public:
+
+  static const char * name() {return "HUB75 Driver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
+
+class PhysicalDriverMod: public Node {
+  public:
+
+  static const char * name() {return "Physical Driver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  uint8_t setMaxPowerBrightnessFactor = 90; //tbd: implement driver.setMaxPowerInMilliWatts
+  bool initDone = false;
+  uint8_t colorOrder = 3;
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
+
+class VirtualDriverMod: public Node {
+  public:
+
+  static const char * name() {return "Virtual Driver ☸️";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  void setup() override;
+  void loop() override;
+
+  void addLayout() override;
+};
 
 #endif

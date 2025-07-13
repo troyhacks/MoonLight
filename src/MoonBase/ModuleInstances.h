@@ -32,9 +32,8 @@ public:
     bool instanceUDPConnected = false;
 
     ModuleInstances(PsychicHttpServer *server,
-            ESP32SvelteKit *sveltekit,
-            FilesService *filesService
-        ) : Module("instances", server, sveltekit, filesService) {
+            ESP32SvelteKit *sveltekit
+        ) : Module("instances", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 
@@ -78,7 +77,7 @@ public:
     void loop10s() {
         if (!instanceUDPConnected) {
             instanceUDPConnected = instanceUDP.begin(instanceUDPPort);
-            ESP_LOGD(TAG, "instanceUDPConnected %d", instanceUDPConnected);
+            ESP_LOGD(TAG, "instanceUDPConnected %d i:%d p:%d", instanceUDPConnected, instanceUDP.remoteIP()[3], instanceUDPPort);
         }
 
         if (!instanceUDPConnected) return;

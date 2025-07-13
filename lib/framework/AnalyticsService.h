@@ -25,7 +25,7 @@
 class AnalyticsService
 {
 public:
-    uint16_t lps = 0;
+    uint16_t lps = 0; // 🌙
 
     AnalyticsService(EventSocket *socket) : _socket(socket) {};
 
@@ -51,7 +51,7 @@ public:
             doc["fs_used"] = ESPFS.usedBytes();
             doc["fs_total"] = ESPFS.totalBytes();
             doc["core_temp"] = temperatureRead();
-            doc["lps"] = lps;
+            doc["lps"] = lps; // 🌙
             if (psramFound()) {
                 doc["free_psram"] = ESP.getFreePsram();
                 doc["used_psram"] = ESP.getPsramSize() - ESP.getFreePsram();

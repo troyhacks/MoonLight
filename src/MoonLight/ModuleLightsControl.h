@@ -27,34 +27,36 @@ class ModuleLightsControl : public Module
 public:
 
     PsychicHttpServer *_server;
+    FileManager *_fileManager;
 
     ModuleLightsControl(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
-        FilesService *filesService
-    ) : Module("lightsControl", server, sveltekit, filesService) {
+        FileManager *fileManager
+    ) : Module("lightsControl", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
+        _fileManager = fileManager;
     }
 
     void begin() {
         Module::begin();
 
-        ESP_LOGD(TAG, "L:%d(%d) LH:%d N:%d PL:%d(%d) VL:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer));
+        ESP_LOGD(TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
         setPresetsFromFolder(); //set the right values during boot
         
         //update presets if files changed in presets folder
-        _filesService->addUpdateHandler([&](const String &originId)
+        _fileManager->addUpdateHandler([&](const String &originId)
         { 
-            ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
+            ESP_LOGD(TAG, "FileManager::updateHandler %s", originId.c_str());
             //read the file state (read all files and folders on FS and collect changes)
-            _filesService->read([&](FilesState &filesState) {
+            _fileManager->read([&](FilesState &filesState) {
                 // loop over all changed files (normally only one)
                 bool presetChanged = false;
                 for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current live script, recompile it (to do: multiple live effects)
                     ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                    if (strstr(updatedItem.c_str(), "/config/.editor")) {
+                    if (strstr(updatedItem.c_str(), "/.config/.editor")) {
                         ESP_LOGD(TAG, " preset.json updated -> call update %s", updatedItem.c_str());
                         presetChanged = true;
                     }
@@ -94,8 +96,6 @@ public:
         property["default"]["list"].to<JsonArray>();
         property["default"]["count"] = 64;
 
-        property = root.add<JsonObject>(); property["name"] = "driverOn"; property["type"] = "checkbox"; property["default"] = true;
-
         #if FT_ENABLED(FT_MONITOR)
             property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
         #endif
@@ -105,13 +105,18 @@ public:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        if (updatedItem.name == "red" || updatedItem.name == "green" || updatedItem.name == "blue") {
+        if (updatedItem.name == "red") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            layerP.ledsDriver.setColorCorrection(_state.data["red"], _state.data["green"], _state.data["blue"]);
+            layerP.lights.header.red = _state.data["red"];
+        } else if (updatedItem.name == "green") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            layerP.lights.header.green = _state.data["green"];
+        } else if (updatedItem.name == "blue") {
+            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            layerP.lights.header.blue = _state.data["blue"];
         } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
-            layerP.ledsDriver.setBrightness(layerP.lights.header.brightness);
         } else if (updatedItem.name == "palette") {
             ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             // String value = _state.data["palette"];//updatedItem.oldValue;
@@ -133,27 +138,27 @@ public:
             }
             // layerP.palette = LavaColors_p;
         } else if (updatedItem.name == "preset") {
-            //copy /config/animations.json to the hidden folder /config/.animations/preset[x].json
+            //copy /.config/editor.json to the hidden folder /.config/.editor/preset[x].json
             //do not set preset at boot...
             if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
                 uint16_t select = updatedItem.value["select"];
                 Char<32> presetFile;
-                presetFile.format("/config/.editor/preset%02d.json", select);
+                presetFile.format("/.config/.editor/preset%02d.json", select);
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
                 if (updatedItem.value["action"] == "click") {
                     updatedItem.value["selected"] = select; //store the selected preset
                     if (arrayContainsValue(updatedItem.value["list"], select)) {
-                        copyFile(presetFile.c_str(), "/config/editor.json");
+                        copyFile(presetFile.c_str(), "/.config/editor.json");
 
                         //trigger notification of update of editor.json
-                        _filesService->update([&](FilesState &state) {
-                            state.updatedItems.push_back("/config/editor.json");
+                        _fileManager->update([&](FilesState &state) {
+                            state.updatedItems.push_back("/.config/editor.json");
                             return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                         }, "server");
 
                     } else {
-                        copyFile("/config/editor.json", presetFile.c_str());
+                        copyFile("/.config/editor.json", presetFile.c_str());
                         setPresetsFromFolder(); //update presets in UI
                     }
                 } else if (updatedItem.value["action"] == "dblclick") {
@@ -165,12 +170,6 @@ public:
             ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
-    //ledsDriver.show
-    void loop() {
-        if (layerP.lights.header.isPositions == 0 && _state.data["driverOn"])
-            layerP.ledsDriver.show();
-    }
-
     void loop50ms() {
         #if FT_ENABLED(FT_MONITOR)
 
@@ -180,7 +179,7 @@ public:
                 
                 if (layerP.lights.header.isPositions == 10) { //send to UI
                     if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * sizeof(Coord3D), MAX_CHANNELS));
+                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS));
                     layerP.lights.header.isPositions = 0;
                 } else if (layerP.lights.header.isPositions == 0) {//send to UI
                     if (_socket->getConnectedClients() && _state.data["monitorOn"])
@@ -193,7 +192,7 @@ public:
     //update _state.data["preset"]["list"] and send update to endpoints
     void setPresetsFromFolder() {
         //loop over all files in the presets folder and add them to the preset array
-        File rootFolder = ESPFS.open("/config/.editor/");
+        File rootFolder = ESPFS.open("/.config/.editor/");
         _state.data["preset"]["list"].to<JsonArray>(); // clear the active preset array before adding new presets
         bool changed = false;
         walkThroughFiles(rootFolder, [&](File folder, File file) {

@@ -1,6 +1,6 @@
 /**
     @title     MoonBase
-    @file      FilesService.h
+    @file      FileManager.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/system/files/
@@ -9,8 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
 **/
 
-#ifndef FilesService_h
-#define FilesService_h
+#ifndef FileManager_h
+#define FileManager_h
 
 #if FT_MOONBASE == 1
 
@@ -28,6 +28,7 @@ class FilesState
 {
 public:
     std::vector<String> updatedItems;
+    bool showHidden = false;
 
     static void read(FilesState &settings, JsonObject &root);
 
@@ -35,10 +36,10 @@ public:
 
 };
 
-class FilesService : public StatefulService<FilesState>
+class FileManager : public StatefulService<FilesState>
 {
 public:
-    FilesService(PsychicHttpServer *server,
+    FileManager(PsychicHttpServer *server,
                       ESP32SvelteKit *sveltekit);
 
     void begin();

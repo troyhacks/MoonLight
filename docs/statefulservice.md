@@ -207,7 +207,7 @@ The code below demonstrates how to extend the LightStateService class to provide
 class LightStateService : public StatefulService<LightState> {
  public:
   LightStateService(ESP32SvelteKit *sveltekit) :
-      _fsPersistence(LightState::read, LightState::update, this, sveltekit->getFS(), "/config/lightState.json") {
+      _fsPersistence(LightState::read, LightState::update, this, sveltekit->getFS(), "/.config/lightState.json") { // 🌙 use /.config (hidden folder)
   }
 
  private:

@@ -196,7 +196,7 @@ class PinwheelModifier: public Node {
   }
 };
 
-//Idea and first implementation (WLEDMM ARtNet) by @Troy
+//Idea and first implementation (WLEDMM Art-Net) by @Troy
 class RippleYZModifier: public Node {
   public:
 
@@ -246,7 +246,7 @@ class RippleYZModifier: public Node {
       // if (leds.effectDimension == _1D && leds.projectionDimension > _1D) {
         for (int y=layerV->size.y-1; y>=1; y--) {
           for (int x=0; x<layerV->size.x; x++) {
-            layerV->setRGB(intToCoord3D(x, y, 0), layerV->getRGB(intToCoord3D(x,y-1,0)));
+            layerV->setRGB(Coord3D(x, y, 0), layerV->getRGB(Coord3D(x,y-1,0)));
           }
         }
       // }
@@ -258,7 +258,7 @@ class RippleYZModifier: public Node {
         for (int z=layerV->size.z-1; z>=1; z--) {
           for (int y=0; y<layerV->size.y; y++) {
             for (int x=0; x<layerV->size.x; x++) {
-              layerV->setRGB(intToCoord3D(x, y, z), layerV->getRGB(intToCoord3D(x,y,z-1)));
+              layerV->setRGB(Coord3D(x, y, z), layerV->getRGB(Coord3D(x,y,z-1)));
             }
           }
         }
@@ -320,9 +320,9 @@ class RotateNodifier: public Node {
   void modifySize() override {
 
     if (expand) {
-      uint8_t size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
+      uint8_t size = MAX(layerV->size.x, MAX(layerV->size.y, layerV->size.z));
       size = sqrt(size * size * 2) + 1;
-      Coord3D offset = intToCoord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
+      Coord3D offset = Coord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
 
       layerV->size = Coord3D{size, size, 1};
     }
@@ -334,9 +334,9 @@ class RotateNodifier: public Node {
   void modifyPosition(Coord3D &position) override {
 
     if (expand) {
-      int size = max(layerV->size.x, max(layerV->size.y, layerV->size.z));
+      int size = MAX(layerV->size.x, MAX(layerV->size.y, layerV->size.z));
       size = sqrt(size * size * 2) + 1;
-      Coord3D offset = intToCoord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
+      Coord3D offset = Coord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
 
       position.x += offset.x;
       position.y += offset.y;

@@ -1,6 +1,6 @@
 /**
     @title     MoonBase
-    @file      FilesService.cpp
+    @file      FileManager.cpp
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/system/files/
@@ -11,12 +11,12 @@
 
 #if FT_MOONBASE == 1
 
-#include "FilesService.h"
+#include "FileManager.h"
 
 #include "Utilities.h"
 
 //recursively fill a fileArray with all files and folders on the FS
-void addFolder(File folder, JsonArray fileArray)
+void addFolder(File folder, bool showHidden, JsonArray fileArray)
 {
 	folder.rewindDirectory();
 	while (true)
@@ -28,21 +28,23 @@ void addFolder(File folder, JsonArray fileArray)
 		}
 		else
 		{
-            JsonObject fileObject = fileArray.add<JsonObject>();
-            fileObject["name"] = (char *)file.name(); //enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
-            fileObject["path"] = (char *)file.path(); //enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
-            fileObject["isFile"] = !file.isDirectory();
-            // ESP_LOGI(TAG, "file %s (%d)", file.path(), file.size());
-			if (file.isDirectory())
-			{
-				addFolder(file, fileObject["files"].to<JsonArray>());
-			}
-			else
-			{
-                fileObject["size"] = file.size();
-                fileObject["time"] = file.getLastWrite();
-			}
-            // serializeJson(fileObject, Serial);
+            if (showHidden || file.name()[0] != '.') {
+                JsonObject fileObject = fileArray.add<JsonObject>();
+                fileObject["name"] = (char *)file.name(); //enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
+                fileObject["path"] = (char *)file.path(); //enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
+                fileObject["isFile"] = !file.isDirectory();
+                // ESP_LOGI(TAG, "file %s (%d)", file.path(), file.size());
+                if (file.isDirectory())
+                {
+                    addFolder(file, showHidden, fileObject["files"].to<JsonArray>());
+                }
+                else
+                {
+                    fileObject["size"] = file.size();
+                    fileObject["time"] = file.getLastWrite();
+                }
+                // serializeJson(fileObject, Serial);
+            }
             file.close();
 		}
 	}
@@ -54,8 +56,9 @@ void FilesState::read(FilesState &state, JsonObject &root)
     //crashes for some reason: ???
     root["fs_total"] = ESPFS.totalBytes();
     root["fs_used"] = ESPFS.usedBytes();
+    root["showHidden"] = state.showHidden;
     File folder = ESPFS.open("/");
-    addFolder(folder, root["files"].to<JsonArray>());
+    addFolder(folder, state.showHidden, root["files"].to<JsonArray>());
     folder.close();
     // print->printJson("FilesState::read", root);
     ESP_LOGI(TAG, "");
@@ -63,6 +66,14 @@ void FilesState::read(FilesState &state, JsonObject &root)
 
 StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
 {
+    bool changed = false;
+
+    if (root["showHidden"] != state.showHidden) {
+        state.showHidden = root["showHidden"];
+        ESP_LOGD(TAG, "showHidden %d", state.showHidden);
+        changed = true;
+    }
+
     state.updatedItems.clear();
 
     JsonArray deletes = root["deletes"].as<JsonArray>();
@@ -131,30 +142,32 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
         }
     }
 
-    if (state.updatedItems.size())
+    changed |= state.updatedItems.size();
+
+    if (changed && state.updatedItems.size())
         ESP_LOGD(TAG, "first item %s", state.updatedItems.front().c_str());
 
-    return state.updatedItems.size()?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+    return changed?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
 }
 
-FilesService::FilesService(PsychicHttpServer *server,
+FileManager::FileManager(PsychicHttpServer *server,
                                      ESP32SvelteKit *sveltekit) : _httpEndpoint(FilesState::read,
                                                                                                          FilesState::update,
                                                                                                          this,
                                                                                                          server,
-                                                                                                         "/rest/filesState",
+                                                                                                         "/rest/FileManager",
                                                                                                          sveltekit->getSecurityManager(),
                                                                                                          AuthenticationPredicates::IS_AUTHENTICATED),
                                                                                            _eventEndpoint(FilesState::read,
                                                                                                           FilesState::update,
                                                                                                           this,
                                                                                                           sveltekit->getSocket(),
-                                                                                                          "files"),
+                                                                                                          "FileManager"),
                                                                                            _webSocketServer(FilesState::read,
                                                                                                             FilesState::update,
                                                                                                             this,
                                                                                                             server,
-                                                                                                            "/ws/filesState",
+                                                                                                            "/ws/FileManager",
                                                                                                             sveltekit->getSecurityManager(),
                                                                                                             AuthenticationPredicates::IS_AUTHENTICATED),
                                                                                             _socket(sveltekit->getSocket()),
@@ -167,7 +180,7 @@ FilesService::FilesService(PsychicHttpServer *server,
                      false);
 }
 
-void FilesService::begin()
+void FileManager::begin()
 {
     _httpEndpoint.begin();
     _eventEndpoint.begin();
@@ -177,7 +190,7 @@ void FilesService::begin()
     _server->serveStatic("/rest/file", ESPFS, "/");
 }
 
-void FilesService::onConfigUpdated()
+void FileManager::onConfigUpdated()
 {
     ESP_LOGI(TAG, "");
 }

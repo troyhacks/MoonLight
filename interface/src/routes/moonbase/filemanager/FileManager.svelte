@@ -1,9 +1,9 @@
 <!--
    @title     MoonBase
-   @file      Files.svelte
+   @file      FileManager.svelte
    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
    @Authors   https://github.com/MoonModules/MoonLight/commits/main
-   @Doc       https://moonmodules.org/MoonLight/system/files/
+   @Doc       https://moonmodules.org/MoonLight/moonbase/FileManager/
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
@@ -32,6 +32,7 @@
 	import { tick } from 'svelte';
 	import FileEdit from '$lib/components/moonbase/FileEdit.svelte';
 	import Help from '~icons/tabler/help';
+	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 
 	let filesState: any = $state({});;
 	let folderList: FilesState[] = $state([]); //all files in a folder
@@ -45,6 +46,7 @@
 		files: [],
 		fs_total: 0,
 		fs_used: 0,
+		showHidden: false,
 	});
 	let breadCrumbs:string[] = $state([]);
 
@@ -60,7 +62,7 @@
 
 	async function getState() {
 		try {
-			const response = await fetch('/rest/filesState', {
+			const response = await fetch('/rest/FileManager', {
 				method: 'GET',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
@@ -79,7 +81,7 @@
 	async function postFilesState(data: any) { 
 		//export needed to call from other components
 		try {
-			const response = await fetch('/rest/filesState', {
+			const response = await fetch('/rest/FileManager', {
 				method: 'POST',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
@@ -112,6 +114,7 @@
 			files: [],
 			fs_total: 0,
 			fs_used: 0,
+			showHidden: false,
 		};
 	}
 	function addFolder() {
@@ -128,6 +131,7 @@
 			files: [],
 			fs_total: 0,
 			fs_used: 0,
+			showHidden: false,
 		};
 	}
 
@@ -218,11 +222,11 @@
 	};
 
 	onMount(() => {
-		socket.on('files', handleFilesState);
+		socket.on('FileManager', handleFilesState);
 		// getState(); //done in settingscard
 	});
 
-	onDestroy(() => socket.off('files', handleFilesState));
+	onDestroy(() => socket.off('FileManager', handleFilesState));
 
 	//uitility function...
 	function setCookie(name: string, value: string, days: number) {
@@ -390,6 +394,11 @@
 						</div>
 					</div>
 				</div>
+				<MultiInput property={{name:"showHidden", type:"checkbox"}} bind:value={filesState.showHidden}
+					onChange={() => {
+						postFilesState({"showHidden":filesState.showHidden});
+					}}>
+				</MultiInput>
 			{/await}
 		</div>
 	{/if}

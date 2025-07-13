@@ -40,13 +40,14 @@
 		files: [],
 		fs_total: 0,
 		fs_used: 0,
+		showHidden: false,
 	});
 
 	let changed: boolean = $state(false);
 
     async function postFilesState(data: any) { //export needed to call from other components
 		try {
-			const response = await fetch('/rest/filesState', {
+			const response = await fetch('/rest/FileManager', {
 				method: 'POST',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
@@ -171,7 +172,7 @@
 </script>
 
 {#if path[0] === '/'}
-	<Collapsible open={showEditor} class="shadow-lg">
+	<Collapsible open={showEditor} class="shadow-lg" icon={null} opened={() => {}} closed={() => {}}>
 		{#snippet title()}
 			<span>{newItem ? 'Add ' + (isFile?"file":"folder") : 'Edit ' + editableFile.name}</span>
 		{/snippet}

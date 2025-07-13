@@ -41,7 +41,7 @@
 #define FACTORY_GUEST_PASSWORD "guest"
 #endif
 
-#define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
+#define SECURITY_SETTINGS_FILE "/.config/securitySettings.json" // 🌙 use /.config (hidden folder)
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
 #define GENERATE_TOKEN_PATH "/rest/generateToken"

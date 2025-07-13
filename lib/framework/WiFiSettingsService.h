@@ -43,7 +43,7 @@
 #define FACTORY_WIFI_RSSI_THRESHOLD -80
 #endif
 
-#define WIFI_SETTINGS_FILE "/config/wifiSettings.json"
+#define WIFI_SETTINGS_FILE "/.config/wifiSettings.json" // 🌙 use /.config (hidden folder)
 #define WIFI_SETTINGS_SERVICE_PATH "/rest/wifiSettings"
 
 #define WIFI_RECONNECTION_DELAY 1000 * 30

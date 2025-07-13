@@ -167,8 +167,7 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
 }
 
 Module::Module(String moduleName, PsychicHttpServer *server,
-    ESP32SvelteKit *sveltekit,
-    FilesService *filesService
+    ESP32SvelteKit *sveltekit
   ): _httpEndpoint(ModuleState::read,
                       ModuleState::update,
                       this,
@@ -193,15 +192,12 @@ Module::Module(String moduleName, PsychicHttpServer *server,
                   ModuleState::update,
                   this,
                   sveltekit->getFS(),
-                  String("/config/" + moduleName + ".json").c_str())
+                  String("/.config/" + moduleName + ".json").c_str())
 {
     _moduleName = moduleName;
 
     ESP_LOGD(TAG, "constructor %s", moduleName.c_str());
     _server = server;
-
-    // configure settings service update handler to update state
-    _filesService = filesService;
 
     _state.onUpdate = [&](UpdatedItem &updatedItem) {
         onUpdate(updatedItem); // Ensure updatedItem is of type UpdatedItem&

@@ -17,7 +17,7 @@
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
-    #include "MoonBase/FilesService.h"
+    #include "MoonBase/FileManager.h"
     #include "MoonBase/ModuleInstances.h"
 
     // 💫
@@ -27,7 +27,6 @@
         #if FT_ENABLED(FT_LIVESCRIPT)
             #include "MoonLight/ModuleLiveScripts.h"
         #endif
-        #include "MoonLight/ModuleArtnet.h"
         #include "MoonLight/ModuleChannelView.h"
         #include "MoonLight/ModuleMoonLightInfo.h"
         #ifdef STEPHANELEC_LED_DRIVER_V1
@@ -41,37 +40,97 @@
 #undef TAG
 #define TAG "🌙"
 
-// 💫 
-#if FT_ENABLED(FT_LIVESCRIPT)
-    SET_LOOP_TASK_STACK_SIZE(16 * 1024); // 16KB, otherwise 8K, to allow multiple scripts loaded at boot
-    //to do: needed as during boot scripts are run in looptask, later in httpd. Move scripts to same task...
-#endif
-
 PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 160, default is 120
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
-    FilesService filesService = FilesService(&server, &esp32sveltekit);
-    ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit, &filesService);
+    FileManager fileManager = FileManager(&server, &esp32sveltekit);
+    ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit);
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
-        ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &filesService);
-        ModuleEditor moduleEditor = ModuleEditor(&server, &esp32sveltekit, &filesService);
+        ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
+        ModuleEditor moduleEditor = ModuleEditor(&server, &esp32sveltekit, &fileManager);
         #if FT_ENABLED(FT_LIVESCRIPT)
-            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &filesService);
+            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit);
         #endif
-        ModuleArtnet moduleArtnet = ModuleArtnet(&server, &esp32sveltekit, &filesService);
-        ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit, &filesService);
-        ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit, &filesService);
+        ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit);
+        ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
         #ifdef STEPHANELEC_LED_DRIVER_V1
-            ModuleStephanElecDriverInfo moduleStephanElecDriverInfo = ModuleStephanElecDriverInfo(&server, &esp32sveltekit, &filesService);
+            ModuleStephanElecDriverInfo moduleStephanElecDriverInfo = ModuleStephanElecDriverInfo(&server, &esp32sveltekit);
         #endif
     #endif
 #endif
     
+void moonTask(void* pvParameters) {
+    // 🌙
+    #if FT_ENABLED(FT_MOONBASE)
+        fileManager.begin();
+            moduleInstances.begin();
+
+            #if FT_ENABLED(FT_MOONLIGHT)
+                moduleLightsControl.begin();
+                moduleEditor.begin();
+                #if FT_ENABLED(FT_LIVESCRIPT)
+                    moduleLiveScripts.begin();
+                #endif
+                moduleChannelView.begin();
+                moduleMoonLightInfo.begin();
+        #endif
+    #endif
+
+    for (;;) {
+        esp32sveltekit.lps++; // 🌙
+
+        #if FT_ENABLED(FT_MOONBASE)
+
+            #if FT_ENABLED(FT_MOONLIGHT)
+                moduleEditor.loop();
+            #endif
+
+            static unsigned long lastTime50ms = 0;
+            if (millis() - lastTime50ms > 50)
+            {
+                lastTime50ms = millis();
+                #if FT_ENABLED(FT_MOONLIGHT)
+                    moduleLightsControl.loop50ms();
+                #endif
+                
+                static unsigned long lastTime1s = 0;
+                if (millis() - lastTime1s > 1000)
+                {
+                    lastTime1s = millis();
+                    moduleInstances.loop1s();
+                    #if FT_ENABLED(FT_MOONLIGHT)
+                        #if FT_ENABLED(FT_LIVESCRIPT)
+                            moduleLiveScripts.loop1s();
+                        #endif
+                    #endif
+
+                    static unsigned long lastTime10s = 0;
+                    if (millis() - lastTime10s > 10000)
+                    {
+                        lastTime10s = millis();
+                        moduleInstances.loop10s();
+                    }
+                }
+            }
+
+            while (!runInLoopTask.empty()) {
+                runInLoopTask.front()();
+                runInLoopTask.erase(runInLoopTask.begin());
+            }
+
+        #endif
+
+        vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
+    }
+}
+
+TaskHandle_t moonTaskHandle = NULL;
+
 void setup()
 {
     // start serial and filesystem
@@ -88,106 +147,19 @@ void setup()
     esp32sveltekit.begin();
 
     // 🌙
-    #if FT_ENABLED(FT_MOONBASE)
-        filesService.begin();
-            moduleInstances.begin();
-
-        #if FT_ENABLED(FT_MOONLIGHT)
-            moduleLightsControl.begin();
-            moduleEditor.begin();
-            #if FT_ENABLED(FT_LIVESCRIPT)
-                moduleLiveScripts.begin();
-            #endif
-            moduleArtnet.begin();
-            moduleChannelView.begin();
-            moduleMoonLightInfo.begin();
-            #ifdef STEPHANELEC_LED_DRIVER_V1
-                moduleStephanElecDriverInfo.begin();
-            #endif
-        #endif
-    #endif
-
-    // String shortString = "Hello world";
-    // String longString = "Hello world, this is a long string that is longer than 32 characters";
-    // Char<32> averageChar; averageChar = "Hello world";
-
-    // String microString = "Hi";
-    // ESP_LOGD(TAG, "microString: %s", microString.c_str());
-    // ESP_LOGD(TAG, "microString length: %d", microString.length());
-    // ESP_LOGD(TAG, "microString size: %d", sizeof(microString));
-
-    // ESP_LOGD(TAG, "shortString: %s", shortString.c_str());
-    // ESP_LOGD(TAG, "longString: %s", longString.c_str());
-    // ESP_LOGD(TAG, "averageChar: %s", averageChar.c_str());
-    // ESP_LOGD(TAG, "shortString length: %d", shortString.length());
-    // ESP_LOGD(TAG, "longString length: %d", longString.length());
-    // ESP_LOGD(TAG, "averageChar length: %d", averageChar.length());
-    // ESP_LOGD(TAG, "shortString size: %d", sizeof(shortString));
-    // ESP_LOGD(TAG, "longString size: %d", sizeof(longString));
-    // ESP_LOGD(TAG, "averageChar size: %d", sizeof(averageChar));
-    // ESP_LOGD(TAG, "UpdatedItem size: %d = %d + %d + %d ...", sizeof(UpdatedItem), sizeof(JsonString), sizeof(JsonVariant), sizeof(String));
+    xTaskCreatePinnedToCore(
+        moonTask,              // task function
+        "moonTask",            // name
+        16 * 1024,             // stack size in words
+        NULL,                  // parameter
+        8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep)
+        &moonTaskHandle,       // task handle
+        1                      // core (0 or 1)
+    );
 }
 
 void loop()
 {
-    esp32sveltekit.lps++; // 🌙
-
-    // 🌙
-    #if FT_ENABLED(FT_MOONBASE)
-
-        // 💫
-        #if FT_ENABLED(FT_MOONLIGHT)
-            moduleEditor.loop();
-            moduleLightsControl.loop();
-        #endif
-
-        //20ms loop
-        static unsigned long lastTime20ms = 0;
-        if (millis() - lastTime20ms > 20)
-        {
-            lastTime20ms = millis();
-            #if FT_ENABLED(FT_MOONLIGHT)
-                moduleArtnet.loop20ms();
-            #endif
-        }
-
-        //50ms loop
-        static unsigned long lastTime50ms = 0;
-        if (millis() - lastTime50ms > 50)
-        {
-            lastTime50ms = millis();
-            #if FT_ENABLED(FT_MOONLIGHT)
-                moduleLightsControl.loop50ms();
-            #endif
-            
-            //1s loop
-            static unsigned long lastTime1s = 0;
-            if (millis() - lastTime1s > 1000)
-            {
-                lastTime1s = millis();
-                moduleInstances.loop1s();
-                #if FT_ENABLED(FT_MOONLIGHT)
-                    #if FT_ENABLED(FT_LIVESCRIPT)
-                        moduleLiveScripts.loop1s();
-                    #endif
-                #endif
-
-                //10s loop
-                static unsigned long lastTime10s = 0;
-                if (millis() - lastTime10s > 10000)
-                {
-                    lastTime10s = millis();
-                    moduleInstances.loop10s();
-                }
-            }
-        }
-
-        // 🌙
-        while (!runInLoopTask.empty()) {
-            // ESP_LOGD(TAG, "Running queued function");
-            runInLoopTask.front()(); // calls the first function
-            runInLoopTask.erase(runInLoopTask.begin());
-        }
-
-    #endif
+    // Delete Arduino loop task, as it is not needed in this example
+    vTaskDelete(NULL);
 }

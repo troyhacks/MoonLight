@@ -29,14 +29,16 @@ class ModuleEditor : public Module
 public:
 
     PsychicHttpServer *_server;
+    FileManager *_fileManager;
     bool requestUIUpdate = false;
 
     ModuleEditor(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
-        FilesService *filesService
-    ) : Module("editor", server, sveltekit, filesService) {
+        FileManager *fileManager
+    ) : Module("editor", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
+        _fileManager = fileManager;
     }
 
     void begin() {
@@ -44,16 +46,16 @@ public:
 
         #if FT_ENABLED(FT_LIVESCRIPT)
             //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
-            _filesService->addUpdateHandler([&](const String &originId)
+            _fileManager->addUpdateHandler([&](const String &originId)
             { 
-                ESP_LOGD(TAG, "FilesService::updateHandler %s", originId.c_str());
+                ESP_LOGD(TAG, "FileManager::updateHandler %s", originId.c_str());
                 //read the file state (read all files and folders on FS and collect changes)
-                _filesService->read([&](FilesState &filesState) {
+                _fileManager->read([&](FilesState &filesState) {
                     // loop over all changed files (normally only one)
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current live script, recompile it (to do: multiple live effects)
                         ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                        if (equal(updatedItem.c_str(), "/config/editor.json")) {
+                        if (equal(updatedItem.c_str(), "/.config/editor.json")) {
                             ESP_LOGD(TAG, " editor.json updated -> call update %s", updatedItem.c_str());
                             readFromFS(); //repopulates the state, processing file changes
                         }
@@ -130,6 +132,7 @@ public:
 
             values.add(HumanSizedCubeLayout::name());
             values.add(PanelLayout::name());
+            values.add(PanelsLayout::name());
             values.add(RingsLayout::name());
             values.add(SingleLineLayout::name());
             values.add(SingleRowLayout::name());
@@ -147,6 +150,11 @@ public:
             values.add(PinwheelModifier::name());
             values.add(RotateNodifier::name());
 
+            values.add(ArtNetDriverMod::name());
+            values.add(FastLEDDriverMod::name());
+            values.add(HUB75DriverMod::name());
+            values.add(PhysicalDriverMod::name());
+            values.add(VirtualDriverMod::name());
             values.add(AudioSyncMod::name());
             //find all the .sc files on FS
             File rootFolder = ESPFS.open("/");
@@ -261,7 +269,7 @@ public:
                     Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
-                        ESP_LOGD(TAG, "  nodeclass on:%d m:%d l:%d", nodeClass->on, nodeClass->hasModifier, nodeClass->hasLayout);
+                        ESP_LOGD(TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasLayout, nodeClass->hasModifier);
 
                         nodeClass->requestMappings();
                     }
