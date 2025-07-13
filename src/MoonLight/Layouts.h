@@ -101,7 +101,6 @@ class PanelLayout: public Node {
 
 };
 
-<<<<<<< HEAD
 class SingleLineLayout: public Node {
   public:
 

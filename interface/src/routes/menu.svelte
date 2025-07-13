@@ -85,12 +85,6 @@
 					href: '/moonbase/module?module=MoonLightInfo',
 					feature: page.data.features.moonbase,
 				},
-				{
-					title: 'Board Info',
-					icon: CPU,
-					href: '/moonbase/module?module=BoardInfo',
-					feature: page.data.features.moonbase,
-				},
 			]
 		},
 		{
