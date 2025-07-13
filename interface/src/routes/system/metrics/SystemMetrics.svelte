@@ -12,6 +12,7 @@
 
 	Chart.register(...registerables);
 
+	// 🌙
 	let lpsChartElement: HTMLCanvasElement = $state();
 	let lpsChart: Chart;
 
@@ -28,6 +29,7 @@
 	let temperatureChart: Chart;
 
 	onMount(() => {
+		// 🌙
 		lpsChart = new Chart(lpsChartElement, {
 			type: 'line',
 			data: {
@@ -367,6 +369,7 @@
 	});
 
 	function updateData() {
+		// 🌙
 		lpsChart.data.labels = $analytics.uptime;
 		lpsChart.data.datasets[0].data = $analytics.lps;
 		lpsChart.update('none');
@@ -437,7 +440,7 @@
 			class="flex w-full flex-col space-y-1 h-60"
 			transition:slide|local={{ duration: 300, easing: cubicOut }}
 		>
-			<canvas bind:this={lpsChartElement}></canvas>
+			<canvas bind:this={lpsChartElement}></canvas> <!-- 🌙 -->
 		</div>
 	</div>
 	<div class="w-full overflow-x-auto">

@@ -40,6 +40,7 @@
 		files: [],
 		fs_total: 0,
 		fs_used: 0,
+		showHidden: false,
 	});
 
 	let changed: boolean = $state(false);
@@ -171,7 +172,7 @@
 </script>
 
 {#if path[0] === '/'}
-	<Collapsible open={showEditor} class="shadow-lg">
+	<Collapsible open={showEditor} class="shadow-lg" icon={null} opened={() => {}} closed={() => {}}>
 		{#snippet title()}
 			<span>{newItem ? 'Add ' + (isFile?"file":"folder") : 'Edit ' + editableFile.name}</span>
 		{/snippet}

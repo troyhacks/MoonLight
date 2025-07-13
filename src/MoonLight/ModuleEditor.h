@@ -55,7 +55,7 @@ public:
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current live script, recompile it (to do: multiple live effects)
                         ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                        if (equal(updatedItem.c_str(), "/config/editor.json")) {
+                        if (equal(updatedItem.c_str(), "/.config/editor.json")) {
                             ESP_LOGD(TAG, " editor.json updated -> call update %s", updatedItem.c_str());
                             readFromFS(); //repopulates the state, processing file changes
                         }

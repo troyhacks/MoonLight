@@ -28,6 +28,7 @@ class FilesState
 {
 public:
     std::vector<String> updatedItems;
+    bool showHidden = false;
 
     static void read(FilesState &settings, JsonObject &root);
 

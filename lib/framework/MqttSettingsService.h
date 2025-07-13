@@ -62,7 +62,7 @@
 #define FACTORY_MQTT_MAX_TOPIC_LENGTH 128
 #endif
 
-#define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
+#define MQTT_SETTINGS_FILE "/.config/mqttSettings.json" // 🌙 use /.config (hidden folder)
 #define MQTT_SETTINGS_SERVICE_PATH "/rest/mqttSettings"
 
 #define MQTT_RECONNECTION_DELAY 5000

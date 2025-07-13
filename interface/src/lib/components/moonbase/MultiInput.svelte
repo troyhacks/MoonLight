@@ -55,7 +55,7 @@
         hoverTimeout = setTimeout(async () => {
             if (!property.hoverToServer && savedPreset) {
                 //open the file with cell
-                const response = await fetch(`/rest/file/config/.editor/preset${cell.toString().padStart(2, '0')}.json`);
+                const response = await fetch(`/rest/file/.config/.editor/preset${cell.toString().padStart(2, '0')}.json`);
                 if (response.ok) {
                     fileContent = await response.json();
                     console.log(fileContent);

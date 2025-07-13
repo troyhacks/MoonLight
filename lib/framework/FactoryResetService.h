@@ -22,7 +22,7 @@
 #include <RestartService.h>
 #include <FS.h>
 
-#define FS_CONFIG_DIRECTORY "/config"
+#define FS_CONFIG_DIRECTORY "/.config" // 🌙 use /.config (hidden folder)
 #define FACTORY_RESET_SERVICE_PATH "/rest/factoryReset"
 
 class FactoryResetService

@@ -190,7 +190,7 @@
 					<div>
 						<div class="font-bold">Performance</div>
 						<div class="text-sm opacity-75">
-							{systemInformation.lps} loops/s
+							{systemInformation.lps} loops/s  <!-- 🌙 -->
 						</div>
 					</div>
 				</div>

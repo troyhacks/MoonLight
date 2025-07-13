@@ -42,7 +42,7 @@
 #define FACTORY_NTP_SERVER "time.google.com"
 #endif
 
-#define NTP_SETTINGS_FILE "/config/ntpSettings.json"
+#define NTP_SETTINGS_FILE "/.config/ntpSettings.json" // 🌙 use /.config (hidden folder)
 #define NTP_SETTINGS_SERVICE_PATH "/rest/ntpSettings"
 
 #define TIME_PATH "/rest/time"

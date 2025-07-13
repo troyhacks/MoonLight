@@ -32,6 +32,7 @@
 	import { tick } from 'svelte';
 	import FileEdit from '$lib/components/moonbase/FileEdit.svelte';
 	import Help from '~icons/tabler/help';
+	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 
 	let filesState: any = $state({});;
 	let folderList: FilesState[] = $state([]); //all files in a folder
@@ -45,6 +46,7 @@
 		files: [],
 		fs_total: 0,
 		fs_used: 0,
+		showHidden: false,
 	});
 	let breadCrumbs:string[] = $state([]);
 
@@ -112,6 +114,7 @@
 			files: [],
 			fs_total: 0,
 			fs_used: 0,
+			showHidden: false,
 		};
 	}
 	function addFolder() {
@@ -128,6 +131,7 @@
 			files: [],
 			fs_total: 0,
 			fs_used: 0,
+			showHidden: false,
 		};
 	}
 
@@ -390,6 +394,11 @@
 						</div>
 					</div>
 				</div>
+				<MultiInput property={{name:"showHidden", type:"checkbox"}} bind:value={filesState.showHidden}
+					onChange={() => {
+						postFilesState({"showHidden":filesState.showHidden});
+					}}>
+				</MultiInput>
 			{/await}
 		</div>
 	{/if}

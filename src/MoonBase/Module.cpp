@@ -192,7 +192,7 @@ Module::Module(String moduleName, PsychicHttpServer *server,
                   ModuleState::update,
                   this,
                   sveltekit->getFS(),
-                  String("/config/" + moduleName + ".json").c_str())
+                  String("/.config/" + moduleName + ".json").c_str())
 {
     _moduleName = moduleName;
 
