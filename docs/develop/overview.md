@@ -1,7 +1,7 @@
 # Develop Overview
 
 * [Start developing for MoonLight](https://moonmodules.org/MoonLight/develop/overview/)
-    * [ESP32 Sveltekit](https://moonmodules.org/MoonLight/https://moonmodules.org/MoonLight/esp32sveltekit/)
+    * [ESP32 Sveltekit](https://moonmodules.org/MoonLight/esp32sveltekit/)
 
 ## Developing
 

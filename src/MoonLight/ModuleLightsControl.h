@@ -3,7 +3,7 @@
     @file      ModuleLightsControl.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/modules/module/lightsControl/
+    @Doc       https://moonmodules.org/MoonLight/moonbase/module/lightsControl/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
@@ -56,7 +56,7 @@ public:
                 for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current live script, recompile it (to do: multiple live effects)
                     ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                    if (strstr(updatedItem.c_str(), "/.config/.editor")) {
+                    if (strstr(updatedItem.c_str(), "/.config/editor")) {
                         ESP_LOGD(TAG, " preset.json updated -> call update %s", updatedItem.c_str());
                         presetChanged = true;
                     }
@@ -138,12 +138,12 @@ public:
             }
             // layerP.palette = LavaColors_p;
         } else if (updatedItem.name == "preset") {
-            //copy /.config/editor.json to the hidden folder /.config/.editor/preset[x].json
+            //copy /.config/editor.json to the hidden folder /.config/editor/preset[x].json
             //do not set preset at boot...
             if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
                 uint16_t select = updatedItem.value["select"];
                 Char<32> presetFile;
-                presetFile.format("/.config/.editor/preset%02d.json", select);
+                presetFile.format("/.config/editor/preset%02d.json", select);
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
                 if (updatedItem.value["action"] == "click") {
@@ -192,7 +192,7 @@ public:
     //update _state.data["preset"]["list"] and send update to endpoints
     void setPresetsFromFolder() {
         //loop over all files in the presets folder and add them to the preset array
-        File rootFolder = ESPFS.open("/.config/.editor/");
+        File rootFolder = ESPFS.open("/.config/editor/");
         _state.data["preset"]["list"].to<JsonArray>(); // clear the active preset array before adding new presets
         bool changed = false;
         walkThroughFiles(rootFolder, [&](File folder, File file) {

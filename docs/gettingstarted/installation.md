@@ -6,7 +6,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 * **Step 2**: Connect an ESP32(-S3) via USB
 
-* **Step 3**: Click this link to go to the web installer: [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/general/installer/index.html). The Web Installer works on Google Chrome or Microsoft Edge or similar browsers. Safari does not support installing things on ESP devices. Driver software might be needed to have the webinstaller recognise the board. The installer detects the board automatically. If you try to install and no boards are detected, a screen will popup inviting you to install the driver. Press Connect. You should see the ESP32 board (if not sure disconnect and connect and see which serial port is used):
+* **Step 3**: Click this link to go to the web installer: [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/docs/gettingstarted/installer/index.html). The Web Installer works on Google Chrome or Microsoft Edge or similar browsers. Safari does not support installing things on ESP devices. Driver software might be needed to have the webinstaller recognise the board. The installer detects the board automatically. If you try to install and no boards are detected, a screen will popup inviting you to install the driver. Press Connect. You should see the ESP32 board (if not sure disconnect and connect and see which serial port is used):
 
    <img width="350" alt="Screenshot 2025-06-07 at 20 54 17" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
 

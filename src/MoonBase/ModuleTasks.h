@@ -3,7 +3,7 @@
     @file      ModuleTasks.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/modules/module/demo/
+    @Doc       https://moonmodules.org/MoonLight/moonbase/module/tasks/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
@@ -62,8 +62,8 @@ public:
         // Get all tasks' info
         taskCount = uxTaskGetSystemState(taskStatusArray, MAX_TASKS, &totalRunTime);
 
-        printf("Found %d tasks\n", taskCount);
-        printf("Name\t\tState\tPrio\tStack\tRun Time\tCPU %%\tCore\n");
+        // printf("Found %d tasks\n", taskCount);
+        // printf("Name\t\tState\tPrio\tStack\tRun Time\tCPU %%\tCore\n");
 
         _state.data["tasks"].to<JsonArray>(); //empty
 
@@ -94,13 +94,13 @@ public:
             task["runtime"] = ts->ulRunTimeCounter;
             task["core"] = ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID;
 
-            printf("%-12s %-10s %4u\t%5u\t%10lu\t%s\t%d\n",
-                ts->pcTaskName,
-                state,
-                ts->uxCurrentPriority,
-                ts->usStackHighWaterMark,
-                ts->ulRunTimeCounter,
-                cpu_percent.c_str(), ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID);
+            // printf("%-12s %-10s %4u\t%5u\t%10lu\t%s\t%d\n",
+            //     ts->pcTaskName,
+            //     state,
+            //     ts->uxCurrentPriority,
+            //     ts->usStackHighWaterMark,
+            //     ts->ulRunTimeCounter,
+            //     cpu_percent.c_str(), ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID);
         }
 
         TaskHandle_t current0 = xTaskGetCurrentTaskHandleForCore(0);
