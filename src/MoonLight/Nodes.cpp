@@ -3,7 +3,7 @@
     @file      Nodes.cpp
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/general/utilities/
+    @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
@@ -206,7 +206,7 @@ void LiveScriptNode::compileAndRun() {
   //send UI spinner
 
   //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-  // runInLoopTask.push_back([&, animation, type, error] {
+  // runInOtherTask.push_back([&, animation, type, error] {
       ESP_LOGD(TAG, "%s", animation);
       File file = ESPFS.open(animation);
       if (file) {

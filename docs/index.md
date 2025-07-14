@@ -23,7 +23,7 @@ MoonLight is a [MoonModules.org](https://moonmodules.org) project. MoonModules i
 
 * Latest release can be found [here](https://github.com/MoonModules/MoonLight/releases). Release v0.5.6 is a developer release and works towards MoonLight 0.6.0 which is aimed at end users and is expected in September 2025. Containing presets controller pad, user friendly installer, physical and virtual driver for large displays, WLED audio sync and more.
 * Progress can be tracked in the [Kanban board](https://github.com/users/MoonModules/projects/2/)
-* Get started [here](https://moonmodules.org/MoonLight/general/gettingstarted/)
+* Get started [here](https://moonmodules.org/MoonLight/gettingstarted/overview/)
 * Follow us on [Discord/MoonLight](https://discord.gg/TC8NSUSCdV) or [Reddit](https://reddit.com/r/moonmodules).
 * See [Star-Mod-Base-Light-Moon-Svelte-Live](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live) how MoonLight evolved from StarMod, StarBase, StarLight, MoonBase. 
 * Documentation see [MoonLightDocs](https://moonmodules.org/MoonLight/).

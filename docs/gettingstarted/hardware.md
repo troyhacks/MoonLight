@@ -17,4 +17,4 @@
    
 ## Adding a new board
 
-See [Adding a Board Definition](https://moonmodules.org/MoonLight/general/adding-a-board-definition)
+See [Adding a Board Definition](https://moonmodules.org/MoonLight/develop/overview/#adding-a-board-definition)

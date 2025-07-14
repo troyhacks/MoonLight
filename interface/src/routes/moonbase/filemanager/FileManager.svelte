@@ -186,7 +186,7 @@
 		}
 	}
 
-	function confirmDelete(index: number) {
+	function confirmDelete(index: number) { 
 		modals.open(ConfirmDialog, {
 			title: 'Delete item',
 			message: 'Are you sure you want to delete ' + folderList[index].name + '?',

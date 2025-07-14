@@ -1,12 +1,12 @@
 # Develop Overview
 
-* [Start developing for MoonLight](https://moonmodules.org/MoonLight/general/development/)
+* [Start developing for MoonLight](https://moonmodules.org/MoonLight/develop/overview/)
     * [ESP32 Sveltekit](https://moonmodules.org/MoonLight/https://moonmodules.org/MoonLight/esp32sveltekit/)
 
 ## Developing
 
 * Read the [ESP32 Sveltekit docs](https://moonmodules.org/MoonLight/esp32sveltekit/)
-* Read [Customizing Sveltekit](https://moonmodules.org/MoonLight/general/customizingsveltekit/)
+* Read [Customizing Sveltekit](https://moonmodules.org/MoonLight/develop/customizingsveltekit/)
 * Instead of cloning the repo directly from MoonLight as described above, create a fork first so you have your own environment to make changes to. See also Pull Requests below.
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
 * Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.

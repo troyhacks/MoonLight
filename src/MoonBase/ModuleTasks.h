@@ -1,0 +1,120 @@
+/**
+    @title     MoonBase
+    @file      ModuleTasks.h
+    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
+    @Authors   https://github.com/MoonModules/MoonLight/commits/main
+    @Doc       https://moonmodules.org/MoonLight/modules/module/demo/
+    @Copyright © 2025 Github MoonLight Commit Authors
+    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+**/
+
+#ifndef ModuleTasks_h
+#define ModuleTasks_h
+
+#if FT_MOONBASE == 1
+
+#include "Module.h"
+
+class ModuleTasks : public Module
+{
+public:
+
+    ModuleTasks(PsychicHttpServer *server,
+            ESP32SvelteKit *sveltekit
+        ) : Module("tasks", server, sveltekit) {
+            ESP_LOGD(TAG, "constructor");
+    }
+
+    void setupDefinition(JsonArray root) override{
+        ESP_LOGD(TAG, "");
+        JsonObject property; // state.data has one or more properties
+        JsonArray details; // if a property is an array, this is the details of the array
+        JsonArray values; // if a property is a select, this is the values of the select
+
+        property = root.add<JsonObject>(); property["name"] = "core0"; property["type"] = "text";
+        property = root.add<JsonObject>(); property["name"] = "core1"; property["type"] = "text";
+
+        property = root.add<JsonObject>(); property["name"] = "tasks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        {
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "state"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "cpu"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "prio"; property["type"] = "number"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "stack"; property["type"] = "number"; property["ro"] = true; property["max"] = 65538;
+            property = details.add<JsonObject>(); property["name"] = "runtime"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "core"; property["type"] = "number"; property["ro"] = true;
+        }
+    }
+
+    void onUpdate(UpdatedItem &updatedItem) override
+    {
+        ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    }
+
+    void loop10s() {
+        #define MAX_TASKS 20
+
+        TaskStatus_t taskStatusArray[MAX_TASKS];
+        UBaseType_t taskCount;
+        uint32_t totalRunTime;
+
+        // Get all tasks' info
+        taskCount = uxTaskGetSystemState(taskStatusArray, MAX_TASKS, &totalRunTime);
+
+        printf("Found %d tasks\n", taskCount);
+        printf("Name\t\tState\tPrio\tStack\tRun Time\tCPU %%\tCore\n");
+
+        _state.data["tasks"].to<JsonArray>(); //empty
+
+        for (UBaseType_t i = 0; i < taskCount; i++) {
+
+            JsonObject task = _state.data["tasks"].as<JsonArray>().add<JsonObject>();
+
+            TaskStatus_t *ts = &taskStatusArray[i];
+
+            const char *state;
+            switch (ts->eCurrentState) {
+                case eRunning:   state = "Running"; break;
+                case eReady:     state = "Ready"; break;
+                case eBlocked:   state = "Blocked"; break;
+                case eSuspended: state = "Suspended"; break;
+                case eDeleted:   state = "Deleted"; break;
+                default:         state = "Unknown"; break;
+            }
+
+            Char<32> cpu_percent;
+            cpu_percent.format("%5.2f%%", totalRunTime ? (100.0f * ts->ulRunTimeCounter) / totalRunTime : 0.0f);
+
+            task["name"] = ts->pcTaskName;
+            task["state"] = state;
+            task["cpu"] = cpu_percent.c_str();
+            task["prio"] = ts->uxCurrentPriority;
+            task["stack"] = ts->usStackHighWaterMark;
+            task["runtime"] = ts->ulRunTimeCounter;
+            task["core"] = ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID;
+
+            printf("%-12s %-10s %4u\t%5u\t%10lu\t%s\t%d\n",
+                ts->pcTaskName,
+                state,
+                ts->uxCurrentPriority,
+                ts->usStackHighWaterMark,
+                ts->ulRunTimeCounter,
+                cpu_percent.c_str(), ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID);
+        }
+
+        TaskHandle_t current0 = xTaskGetCurrentTaskHandleForCore(0);
+        TaskHandle_t current1 = xTaskGetCurrentTaskHandleForCore(1);
+
+       _state.data["core0"] = pcTaskGetName(current0);
+       _state.data["core1"] = pcTaskGetName(current1);
+
+        JsonObject tasksData = _state.data.as<JsonObject>();
+        _socket->emitEvent("tasks", tasksData);
+
+    }
+
+};
+
+#endif
+#endif

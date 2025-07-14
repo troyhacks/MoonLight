@@ -3,7 +3,7 @@
     @file      Mods.cpp
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/general/utilities/
+    @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
@@ -402,6 +402,8 @@ void  ArtNetDriverMod::loop() {
   }
 
   #if HP_PHYSICAL_DRIVER || HP_PHYSICAL_DRIVER_S3
+    #define NUMSTRIPS 16 //can this be changed e.g. when we have 20 pins?
+    #define NUM_LEDS_PER_STRIP 256 //could this be removed from driver lib as makes not so much sense
     #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
       #include "I2SClockLessLedDriveresp32s3.h"
       static I2SClocklessLedDriveresp32S3 driverP; //    sizeof(driver) = 1080K !

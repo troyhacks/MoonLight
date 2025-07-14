@@ -11,7 +11,7 @@
 	import Router from '~icons/tabler/router';
 	import AP from '~icons/tabler/access-point';
 	import Remote from '~icons/tabler/network';
-	import Control from '~icons/tabler/adjustments';
+	// import Control from '~icons/tabler/adjustments';
 	import Avatar from '~icons/tabler/user-circle';
 	import Logout from '~icons/tabler/logout';
 	import Copyright from '~icons/tabler/copyright';
@@ -102,6 +102,12 @@
 					title: 'Instances',
 					icon: CPU,
 					href: '/moonbase/module?module=instances',
+					feature: page.data.features.moonbase,
+				},
+				{
+					title: 'Tasks',
+					icon: CPU,
+					href: '/moonbase/module?module=tasks',
 					feature: page.data.features.moonbase,
 				},
 			]

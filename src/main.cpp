@@ -19,6 +19,7 @@
 #if FT_ENABLED(FT_MOONBASE)
     #include "MoonBase/FileManager.h"
     #include "MoonBase/ModuleInstances.h"
+    #include "MoonBase/ModuleTasks.h"
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
@@ -45,6 +46,7 @@ ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 1
 #if FT_ENABLED(FT_MOONBASE)
     FileManager fileManager = FileManager(&server, &esp32sveltekit);
     ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit);
+    ModuleTasks moduleTasks = ModuleTasks(&server, &esp32sveltekit);
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
@@ -63,6 +65,7 @@ void moonTask(void* pvParameters) {
     #if FT_ENABLED(FT_MOONBASE)
         fileManager.begin();
             moduleInstances.begin();
+            moduleTasks.begin();
 
             #if FT_ENABLED(FT_MOONLIGHT)
                 moduleLightsControl.begin();
@@ -108,13 +111,14 @@ void moonTask(void* pvParameters) {
                     {
                         lastTime10s = millis();
                         moduleInstances.loop10s();
+                        moduleTasks.loop10s();
                     }
                 }
             }
 
-            while (!runInLoopTask.empty()) {
-                runInLoopTask.front()();
-                runInLoopTask.erase(runInLoopTask.begin());
+            while (!runInOtherTask.empty()) {
+                runInOtherTask.front()();
+                runInOtherTask.erase(runInOtherTask.begin());
             }
 
         #endif
