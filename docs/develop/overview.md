@@ -98,7 +98,7 @@ There are 3 files to consider when making a board definition.
 
 	boards/BOARD_NAME.csv
 	boards/BOARD_NAME.JSON
-	variants/BOARD_NAME.ini
+	firmware/BOARD_TYPE_NAME.ini (e.g. esp32dev, esp32-s3), contains different boards
 
 ### Technical notes
 

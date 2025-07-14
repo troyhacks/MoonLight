@@ -24,6 +24,7 @@ For more information [QuinLed](https://quinled.info)
 * [QuinLed](https://quinled.info)
 * Serg74
 * Wadi
+* Atom
 * Stephan Electronics
 
 ## For latest DMX support 
