@@ -100,8 +100,6 @@ There are 3 files to consider when making a board definition.
 	boards/BOARD_NAME.JSON
 	variants/BOARD_NAME.ini
 
-🚧
-
 ### Technical notes
 
 #### Live Scripts

@@ -1,8 +1,6 @@
 # Getting Started Overview
 
-
-🚧
-
+* [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/)
 * [Install MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/)
 * [Run MoonLight](https://moonmodules.org/MoonLight/moonlight/overview/)
     * [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
