@@ -61,6 +61,14 @@
       "parts": [
         { "path": "./MoonLight_olimex-esp32-p4_0-5-6-1_webflash.bin", "offset": 0 }
       ]
+    },
+    {
+      "chipFamily": "ESP32",
+      "name": "esp32dev (default fallback)",
+      "image": "images/esp32dev.jpg",
+      "parts": [
+        { "path": "./MoonLight_esp32dev_0-5-6-1_webflash.bin", "offset": 0 }
+      ]
     }
   ]
 }
