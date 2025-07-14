@@ -52,3 +52,5 @@ It should now be visible 🐉
 	[https://localhost:8000](https://localhost:8000)
 
 	[https://127.0.0.1:8000/](https://127.0.0.1:8000/)
+
+3. Ensure mkdocs serve is running and reboot the service.
