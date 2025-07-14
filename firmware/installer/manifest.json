@@ -69,6 +69,14 @@
       "parts": [
         { "path": "./MoonLight_olimex-esp32-p4_0-5-6-1_webflash.bin", "offset": 0 }
       ]
+    },
+    {
+      "chipFamily": "ESP32",
+      "name": "Choose Manually",
+      "image": "images/choose-manually.jpg",
+      "parts": [
+        { "path": "./MoonLight_generic_fallback_webflash.bin", "offset": 0 }
+      ]
     }
   ]
 }
