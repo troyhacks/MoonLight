@@ -123,7 +123,7 @@ void moonTask(void* pvParameters) {
 
         #endif
 
-        vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
+        // vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
     }
 }
 
@@ -148,9 +148,9 @@ void setup()
     xTaskCreatePinnedToCore(
         moonTask,              // task function
         "moonTask",            // name
-        16 * 1024,             // stack size in words
+        16 * 1024,             // stack size in words (without livescripts we can do with 12...)
         NULL,                  // parameter
-        8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep)
+        12,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep)
         &moonTaskHandle,       // task handle
         1                      // core (0 or 1)
     );
