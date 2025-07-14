@@ -370,6 +370,7 @@ void  ArtNetDriverMod::loop() {
       }
 
       if (maxPowerSaved != maxPower) {
+        ESP_LOGD(TAG, "setMaxPowerInMilliWatts %d", maxPower);
         FastLED.setMaxPowerInMilliWatts(1000 * maxPower); // 5v, 2000mA, to protect usb while developing
         maxPowerSaved = maxPower;
       }
@@ -380,7 +381,7 @@ void  ArtNetDriverMod::loop() {
       while( pCur) {
           // ++x;
           if (pCur->getCorrection() != correction) {
-            ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
+            ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (#:%d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, pCur->size());
             pCur->setCorrection(correction);
           }
           // pCur->size();
@@ -435,6 +436,10 @@ void  ArtNetDriverMod::loop() {
     if (layerV->layerP->pass == 1) { //physical
       initDone = true;
       ESP_LOGD(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+      if (safeModeMB) {
+          ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
+          return;
+      }
 
     #if HP_PHYSICAL_DRIVER || HP_PHYSICAL_DRIVER_S3
         #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
@@ -497,9 +502,9 @@ void  ArtNetDriverMod::loop() {
             driverP.setBrightness(layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8);
           }
 
-          if (driverP._gammar != layerV->layerP->lights.header.red/255.0 || driverP._gammag != layerV->layerP->lights.header.green/255.0 || driverP._gammab != layerV->layerP->lights.header.blue/255.0) {
-            ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
-            driverP.setGamma(layerV->layerP->lights.header.red/255.0, layerV->layerP->lights.header.green/255.0, layerV->layerP->lights.header.blue/255.0);
+          if (driverP._gammar * 255 != layerV->layerP->lights.header.red || driverP._gammag * 255 != layerV->layerP->lights.header.green || driverP._gammab * 255 != layerV->layerP->lights.header.blue) {
+            ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (%f %f %f)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, driverP._gammar*255, driverP._gammag*255, driverP._gammab*255);
+            driverP.setGamma(layerV->layerP->lights.header.red/255.0, layerV->layerP->lights.header.blue/255.0, layerV->layerP->lights.header.green/255.0); //RBG !!!
           }
 
           #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2

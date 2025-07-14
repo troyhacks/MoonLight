@@ -101,7 +101,7 @@ The node supports this setup:
 
 Todo: 
 * Add controls for other hardware_outputs
-* MoonLight can also act as a receiving Art-Net controller 
+* MoonLight can also act as a receiving Art-Net controller, sending dmx commands (not implemented yet)
 
 ### AudioSync ☸️ ♫
 
