@@ -32,8 +32,10 @@ public:
         JsonArray details; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "core0"; property["type"] = "text";
-        property = root.add<JsonObject>(); property["name"] = "core1"; property["type"] = "text";
+        #ifndef CONFIG_IDF_TARGET_ESP32C3
+            property = root.add<JsonObject>(); property["name"] = "core0"; property["type"] = "text";
+            property = root.add<JsonObject>(); property["name"] = "core1"; property["type"] = "text";
+        #endif
 
         property = root.add<JsonObject>(); property["name"] = "tasks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -103,11 +105,13 @@ public:
             //     cpu_percent.c_str(), ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID);
         }
 
-        TaskHandle_t current0 = xTaskGetCurrentTaskHandleForCore(0);
-        TaskHandle_t current1 = xTaskGetCurrentTaskHandleForCore(1);
+        #ifndef CONFIG_IDF_TARGET_ESP32C3
+            TaskHandle_t current0 = xTaskGetCurrentTaskHandleForCore(0);
+            TaskHandle_t current1 = xTaskGetCurrentTaskHandleForCore(1);
 
-       _state.data["core0"] = pcTaskGetName(current0);
-       _state.data["core1"] = pcTaskGetName(current1);
+            _state.data["core0"] = pcTaskGetName(current0);
+            _state.data["core1"] = pcTaskGetName(current1);
+        #endif
 
         JsonObject tasksData = _state.data.as<JsonObject>();
         _socket->emitEvent("tasks", tasksData);
