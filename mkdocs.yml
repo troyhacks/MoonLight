@@ -133,7 +133,7 @@ plugins:
       separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
 
 copyright: |
-  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/MoonModules"  target="_blank" rel="noopener">MoonModules</a> -
-  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/ewowi"  target="_blank" rel="noopener">ewowi</a> -
-  Copyright &copy; 2024 by <a href="https://github.com/theelims"  target="_blank" rel="noopener">elims</a> -
+  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/MoonModules" target="_blank" rel="noopener">MoonModules</a> -
+  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/ewowi" target="_blank" rel="noopener">ewowi</a> -
+  Copyright &copy; 2024 by <a href="https://github.com/theelims" target="_blank" rel="noopener">elims</a> -
   <a href="#__consent">Change cookie settings</a>

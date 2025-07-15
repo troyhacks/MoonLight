@@ -17,7 +17,11 @@
 #define TAG "💫"
 
 #ifndef MAX_LEDS
-  #define MAX_LEDS 8192 //physical leds 
+  #if BOARD_HAS_PSRAM
+    #define MAX_LEDS 12288 //physical leds 
+  #else
+    #define MAX_LEDS 4096 //physical leds 
+  #endif
 #endif
 
 #define MAX_CHANNELS MAX_LEDS*3 //physical channels

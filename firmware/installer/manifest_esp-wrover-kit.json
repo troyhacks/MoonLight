@@ -11,7 +11,7 @@
       "name": "esp-wrover-kit",
       "image": "./images/esp-wrover-kit.jpg",
       "parts": [
-        { "path": "./MoonLight_esp-wrover-kit_0-5-6-1_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp-wrover-kit_0-5-7_webflash.bin", "offset": 0 }
       ]
     }
   ]

@@ -34,7 +34,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
   
    <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
 
-* **Step 9**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). A new install will take some time to show up (up to a minute or sometimes 2). On some browsers, e.g. Safari, MoonLight pops up showing Connection to device lost repeatedly (bug). In that case, close this browser window and open MoonLight in a browser using 4.3.2.1 as URL. You will see this screen, select WiFi Station.
+* **Step 9**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). A new install will take some time to show up (up to a minute or sometimes 2). You will see this screen, select WiFi Station.
   
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
 

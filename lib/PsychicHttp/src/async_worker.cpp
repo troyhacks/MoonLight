@@ -84,6 +84,7 @@ void async_req_worker_task(void *p)
                 ESP_LOGE(PH_TAG, "failed to complete async req");
             }
         }
+        vTaskDelay(1); //🌙 to be sure...
     }
 
     ESP_LOGW(PH_TAG, "worker stopped");

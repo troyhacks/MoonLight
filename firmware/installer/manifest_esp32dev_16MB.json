@@ -11,7 +11,7 @@
       "name": "esp32dev_16MB",
       "image": "./images/esp32dev.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32dev_16MB_0-5-6-1_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32dev_16MB_0-5-7_webflash.bin", "offset": 0 }
       ]
     }
   ]

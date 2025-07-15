@@ -40,7 +40,7 @@
 
 PsychicHttpServer server;
 
-ESP32SvelteKit esp32sveltekit(&server, 160); //increase number of endpoints to 160, default is 120
+ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)

@@ -601,7 +601,7 @@ By enabling `FT_DOWNLOAD_FIRMWARE=1` in [features.ini](https://github.com/theeli
 ```ini
     -D BUILD_TARGET="$PIOENV"
     -D APP_NAME=\"ESP32-Sveltekit\" ; Must only contain characters from [a-zA-Z0-9-_] as this is converted into a filename
-    -D APP_VERSION=\"0.5.6.1\" ; semver compatible version string
+    -D APP_VERSION=\"0.5.7\" ; semver compatible version string
 ```
 
 A build script copies the firmware binary files for all build environment to `build/firmware`. It renames them into `{APP_NAME}_{$PIOENV}_{APP_VERSION}.bin`. It also creates a MD5 checksum file for verification during the OTA process. These files can be used as attachment on the GitHub release pages.
