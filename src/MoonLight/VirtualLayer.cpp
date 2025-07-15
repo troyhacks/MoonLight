@@ -186,7 +186,7 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
     // layerP->lights.dmxChannels[indexV] = (byte*)&color;
   // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
   // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-  //   ESP_LOGW(TAG, " dev setLight %d >= %d", indexV, MAX_LEDS);
+  //   ESP_LOGW(TAG, " dev setLight %d >= %d", indexV, MAX_CHANNELS);
 }
 
 template <typename T>
@@ -219,7 +219,7 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
     return *result; //return the color as CRGB
   } else {
     // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_LEDS);
+    // ESP_LOGD(TAG, " dev gPC %d >= %d", indexV, MAX_CHANNELS);
     return T();
   }
 }

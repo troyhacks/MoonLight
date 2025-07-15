@@ -16,15 +16,14 @@
 #undef TAG
 #define TAG "💫"
 
-#ifndef MAX_LEDS
+#ifndef MAX_CHANNELS
   #if BOARD_HAS_PSRAM
-    #define MAX_LEDS 12288 //physical leds 
-  #else
-    #define MAX_LEDS 4096 //physical leds 
+      #define MAX_CHANNELS 12288*3 //physical channel, matching 12288 RGB LEDs
+    #else
+      #define MAX_CHANNELS 4096*3 //physical channels, matching 4096 RGB LEDs
   #endif
 #endif
 
-#define MAX_CHANNELS MAX_LEDS*3 //physical channels
 
 #include <Arduino.h>
 #include <vector>

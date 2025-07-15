@@ -31,14 +31,13 @@ public:
         JsonArray details; // if a property is an array, this is the details of the array
         // JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "appDate"; property["type"] = "text"; property["max"] = 20; //move to System...
         property = root.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536;
         property = root.add<JsonObject>(); property["name"] = "channelsPerLight"; property["type"] = "number"; property["max"] = 65536;
         property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "FastLED"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "FastLEDI2S"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "colorOrder"; property["type"] = "text"; property["max"] = 32;
-        property = root.add<JsonObject>(); property["name"] = "maxLedsChannels"; property["type"] = "number"; property["max"] = 65538;
+        property = root.add<JsonObject>(); property["name"] = "maxChannels"; property["type"] = "number"; property["max"] = 65538;
         property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
         property = root.add<JsonObject>(); property["name"] = "layers"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
@@ -59,7 +58,6 @@ public:
         _state.readHook = [&](JsonObject data) {
             ESP_LOGD(TAG, "readHook");
             //this should be updated each time the UI queries for it ... (now only at boot)
-            data["chipset"] = TOSTRING(APP_DATE);
             data["nrOfLights"] = layerP.lights.header.nrOfLights;
             data["channelsPerLight"] = layerP.lights.header.channelsPerLight;
             data["chipset"] = TOSTRING(ML_CHIPSET);
@@ -71,9 +69,7 @@ public:
                 data["FastLEDI2S"] = "No";
             #endif
             data["colorOrder"] = TOSTRING(ML_COLOR_ORDER);
-            Char<32> maxLedsChannels;
-            maxLedsChannels.format("%d/%d", MAX_LEDS, MAX_CHANNELS);
-            data["maxLedsChannels"] = maxLedsChannels.c_str();
+            data["maxChannels"] = MAX_CHANNELS;
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;
             data["size"]["z"] = layerP.lights.header.size.z;

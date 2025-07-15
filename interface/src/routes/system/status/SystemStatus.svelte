@@ -334,6 +334,19 @@
 					</div>
 				</div>
 
+				<!-- 🌙 -->
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<CPP class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">Firmware Target</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.firmware_target}
+						</div>
+					</div>
+				</div>
+
 				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
 						<CPP class="text-primary-content h-auto w-full scale-75" />
@@ -346,14 +359,15 @@
 					</div>
 				</div>
 
+				<!-- 🌙 -->
 				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
-						<CPU class="text-primary-content h-auto w-full scale-75" />
+						<CPP class="text-primary-content h-auto w-full scale-75" />
 					</div>
 					<div>
-						<div class="font-bold">Chip</div>
+						<div class="font-bold">Firmware Date</div>
 						<div class="text-sm opacity-75">
-							{systemInformation.cpu_type} Rev {systemInformation.cpu_rev}
+							{systemInformation.firmware_date}
 						</div>
 					</div>
 				</div>
@@ -366,6 +380,18 @@
 						<div class="font-bold">SDK Version</div>
 						<div class="text-sm opacity-75">
 							ESP-IDF {systemInformation.sdk_version} / Arduino {systemInformation.arduino_version}
+						</div>
+					</div>
+				</div>
+
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<CPU class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">Chip</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.cpu_type} Rev {systemInformation.cpu_rev}
 						</div>
 					</div>
 				</div>
