@@ -92,7 +92,7 @@ There are 3 levels to add functionality:
 
 ### Adding a Board Definition
 
-Before starting, ensure you have the datasheet of your particular chip and board confirmed available. Many modules have near-identical markings that can hide varying hardware.
+Before starting, ensure you have the datasheet of your particular chip and board confirmed and available. Many modules have near-identical markings that can hide varying hardware.
 
 There are 3 files to consider when making a board definition.
 
