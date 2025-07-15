@@ -279,5 +279,6 @@ void ESP32SvelteKit::_loop()
 #endif
         }
         vTaskDelayUntil(&xLastWakeTime, ESP32SVELTEKIT_LOOP_INTERVAL / portTICK_PERIOD_MS);
+        vTaskDelay(1); //🌙 just to be sure 
     }
 }
