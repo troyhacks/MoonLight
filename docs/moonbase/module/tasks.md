@@ -1,6 +1,6 @@
 # Tasks module
 
-<img width="522" alt="image" src="https://github.com/user-attachments/assets/68cbbef1-bcd7-4333-a4d9-904d3e08b243" />
+<img width="522" src="https://github.com/user-attachments/assets/3934eec3-9382-45e1-9462-3968f4e86b4c" />
 
 Shows system tasks info.
 
@@ -9,9 +9,9 @@ Shows system tasks info.
 
 * Per task:
     * name: task name
-    * state: running, blocking, ...
+    * state: Ready, Running, Blocked, Suspended
     * cpu: percentage of CPU time (per core) used
     * prio: task priority
     * stack: stack left
     * runtime: amount of cpu cycles consumed
-    * core: allocated core, not necessarily used core
+    * core: allocated core, not necessarily used core (see above)
