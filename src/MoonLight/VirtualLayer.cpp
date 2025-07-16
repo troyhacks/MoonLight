@@ -28,7 +28,7 @@ void fastled_fill_rainbow(struct CRGB * targetArray, int numToFill, uint8_t init
 
 VirtualLayer::~VirtualLayer() {
   ESP_LOGD(TAG, "destructor");
-  fadeToBlackBy(255); //clear the leds
+  fadeToBlackBy(255); //clear the LEDs
 
   for (Node *node: nodes) {
     // node->destructor();

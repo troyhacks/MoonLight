@@ -4,9 +4,9 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 * **Step 1**: Get an **ESP32 or ESP32-S3** (preferred, support large setups and Live Scripts). Boards we use are [ESP32](https://s.click.aliexpress.com/e/_EyrmQyw) or [ESP32-S3](https://s.click.aliexpress.com/e/_DBAtJ2H), but most of the ESP32 and ESP32-S3 boards will work. Get a **WS2812 LED-strip** or a [LED-panel](https://s.click.aliexpress.com/e/_EGx8Hhu) (preferred to see 2D effects). Connect the strip or panel to the board on a suitable pin (e.g. Pin 2 or 16).
 
-* **Step 2**: Connect an ESP32(-S3) via USB
+* **Step 2**: Connect an ESP32 via USB
 
-* **Step 3**: Click this link to go to the web installer: [ESP Web Installer for MoonLight v0.5.6](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). The Web Installer works on Google Chrome or Microsoft Edge or similar browsers, not on Safari. Select your board, or if not listed, press others.
+* **Step 3**: Go to the web installer: [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). The Web Installer works on Google Chrome or Microsoft Edge or similar browsers, not on Safari. Select your board, or if not listed, press others.
 
    <img width="350" alt="Screenshot 2025-06-07 at 20 54 17" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
 
@@ -34,7 +34,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
   
    <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
 
-* **Step 9**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). A new install will take some time to show up (up to a minute or sometimes 2). You will see this screen, select WiFi Station.
+* **Step 9**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). You will see this screen, select WiFi Station.
   
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
 
@@ -42,7 +42,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 34" src="https://github.com/user-attachments/assets/38f6cb86-e44c-478e-9910-1b0614c99292" />
 
-* **Step 11**: Press **Add Network** and apply settings. After connecting to your local WiFi network you will see this screen showing the new IP address of your MoonLight board. If you don't know the IP address of your board anymore you can go to step 3 and 4 and step 7 and check the IP address in the Serial logging. Advanced tip: Use [ESP32Instances](https://github.com/ewowi/ESP32Instances) to discover the ESP32 nodes on your network (using nodeJS and html)
+* **Step 11**: Press **Add Network** and apply settings. After connecting to your normal WiFi network you will see this screen showing the new IP address of your MoonLight board. You need the IP address to connect to tge board. If you don't know the IP address of your board anymore you can go to step 3 and 4 and step 7 and check the IP address in the Serial logging. Advanced tip: Use [ESP32Instances](https://github.com/ewowi/ESP32Instances) to discover the ESP32 nodes on your network (using nodeJS and html)
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
 
@@ -50,11 +50,6 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="400" src="https://github.com/user-attachments/assets/17fe6f38-375b-4d96-923b-607897e7d4db" />
 
-* **That's it**. You can now change effect nodes, or add nodes. For audio add the AudioSync node. More how to's will be added. At the moment:
-    * Check the help pages on this documentation site, especially the [editor page](https://moonmodules.org/MoonLight/moonbase/module/editor/)
+* **That's it**. You can now change effect nodes, or add nodes. For audio add the AudioSync node. Next steps
+    * Go to [MoonLigh Overview](https://moonmodules.org/MoonLight/moonlight/overview/)
     * press the ? in MoonLight to go directly to the relevant page
-   More how to's will be added. At the moment:
-    * Live scripts: [how to run a live script](https://github.com/MoonModules/MoonLight/blob/main/docs/moonbase/module/liveScripts.md#how-to-run-a-live-script)
-
-* Made using [esp-web-tools](https://esphome.github.io/esp-web-tools/)
-* See also [ESP-Web-Tools-Tutorial](https://github.com/witnessmenow/ESP-Web-Tools-Tutorial/blob/main/README.md)

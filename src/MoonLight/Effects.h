@@ -949,7 +949,7 @@ class MHWowiEffect: public Node {
         uint8_t nrOfLights = layerV->size.x * 3;
         uint8_t  delta = 256 / nrOfLights;
 
-        //set the 3 led groups for each moving head light
+        //set the 3 LED groups for each moving head light
         layerV->setRGB({x,0,0}, CHSV( (x) * delta, 255, audio.bands[(x * 3) % 16]));
         layerV->setRGB1({x,0,0}, CHSV( (x + 3) * delta, 255, audio.bands[(x * 3 + 1) % 16]));
         layerV->setRGB2({x,0,0}, CHSV( (x + 6) * delta, 255, audio.bands[(x * 3 + 2) % 16]));

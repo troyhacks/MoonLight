@@ -174,7 +174,7 @@ public:
         #if FT_ENABLED(FT_MONITOR)
 
             static int monitorMillis = 0;
-            if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 leds per second -> 1 second for 12000 leds
+            if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 LEDs per second -> 1 second for 12000 LEDs
                 monitorMillis = millis();
                 
                 if (layerP.lights.header.isPositions == 10) { //send to UI

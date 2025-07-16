@@ -4,9 +4,9 @@ To get started the minimal you need is an esp32-board connected via USB to your 
 
 ## Minimal hardware
 
-* [ESP32-S3 N16R8](https://s.click.aliexpress.com/e/_DBAtJ2H)
-* [256 led panel](https://s.click.aliexpress.com/e/_EIKoYrg)
-* [Expansion board 44pin](https://s.click.aliexpress.com/e/_EJhmlIE)
+* One of the boards show in [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). [ESP32-S3 N16R8](https://s.click.aliexpress.com/e/_DBAtJ2H) recommended. Optional [Expansion board 44pin](https://s.click.aliexpress.com/e/_EJhmlIE)
+* Any WS2812 LED strip or panel. [256 LED panel](https://s.click.aliexpress.com/e/_EIKoYrg) recommended.
+* Connect the board with USB to your computer, connect the LED strip or panel
 
 Above is the minimum requirement to have lights burning.
 

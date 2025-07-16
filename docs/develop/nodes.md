@@ -15,7 +15,7 @@ MoonLight specific
 
 * Node types: it is recommended that a node is one of the 4 types as described above. However each node could perform functionality of all types. To recognize what a node does the emojis 🚥, 🔥, 💎 and ☸️ are used in the name. The variables hasLayout and hasModifier indicate the specific functionality the node supports. They control when a physical to virtual mapping is recalculated
     * **hasLayout**: a layout node specify the amount of position of lights controlled. E.g. a panel of 16x16 or a cube of 20x20x20. If hasLayout is defined you should implement addLayout calling addLight(position) and addPin() for all the lights. 
-      * addPin() is needed if a LED driver is used to send the output to led strips.
+      * addPin() is needed if a LED driver is used to send the output to LED strips.
     * **hasModifier**: a modifier node which manipulates virtual size and positions and lights using one or more of the functions modifySize, modifyPosition and modifyXYZ.
     * if the loop() function contains setXXX functions is used it is an **effect** node. It will contain for-loops iterating over each virtual ! light defined by layout and modifier nodes. The iteration will be on the x-axis for 1D effects, but also on the y- and z-axis for 2D and 3D effects. setRGB is the default function setting the RGB values of the light. If a light has more 'channels' (e.g. Moving heads) they also can be set. 
 * Moving heads
@@ -38,18 +38,18 @@ MoonLight specific
     
     * I'm therefore wondering if esplive only supports xtensa ASM and not RISCV? we're actually not supposed to enable esplivescript on anything else than the s3. For the moment it’s esp32 , esp32 s2 esp32s3. I am revamping the compiler for it to be more compact and less memory hungry. Once that is done I will work on creating risc assembly language so it can be used with the esp32 C family and also I want to do arm for the pi pico.
     * Technically live scripts works on normal esp32, but MoonLight with live scripts is 103% flash size. I didn’t look into other partitioning (preferably keeping Ota working): note use esp32 16MB!!
-    * why do some animations allow me to specifiy the led strip pin but not others?
-    * is there a wiki page I can read for me to understand pin mapping and led strip physical format?  there are layout nodes 🚥 (defining how the lights layed out in a matrix, cube etc. There you can define pins) effect nodes 🔥 (obviously) and modifier nodes 💎(modify an effect)
+    * why do some animations allow me to specifiy the LED strip pin but not others?
+    * is there a wiki page I can read for me to understand pin mapping and LED strip physical format?  there are layout nodes 🚥 (defining how the lights layed out in a matrix, cube etc. There you can define pins) effect nodes 🔥 (obviously) and modifier nodes 💎(modify an effect)
     * how does the lights control module interact with the animations module?
     * what does "snake" mean for a moving head configuration?
     * how do i specify which solid color i want? Added!
     * getting a few "Software reset due to exception/panic" depending on the effects i set 😄 but that might be my PSU
     * how I can specify the color order.... I see the define I want in fastled.h, i'm guessing it's passed somehow to the template through maybe the ML_CHIPSET define? oh.... it seems to require a modification of void LedsDriver::init
-    sorry for the spam.... it also looks to me that even with the ML_CHIPSET=SK6812 define there's no support for RGBW as on a small led strip, setting a solid color of red for example, i see green & white - blue - red - green & white - blue - red (eg: it's forgetting to send 4x 8b per led)
+    sorry for the spam.... it also looks to me that even with the ML_CHIPSET=SK6812 define there's no support for RGBW as on a small LED strip, setting a solid color of red for example, i see green & white - blue - red - green & white - blue - red (eg: it's forgetting to send 4x 8b per LED)
     * is the monitor only available with the s3? I enabled "Monitor On" in the control tab oh that's interesting, the platform booted full white (when configured in solid animation) but went back to what was supposed to be when I started moving the control sliders. should be working on all platforms
     * not sure if this has been flagged, but when changing a selected node type, the parameters of the previous node will stay displayed and when switching node types, I did manage to get LEDs frozen (impossible to get them ot update again)
     it takes a platform reboot, and changing the movinghead number of LEDs in my case. it looks like some refresh isn't happening. even the platform reboot trick sometimes isn't happening... looking at the console output i'm seeing that my actions on the user interface aren't registered
-    * how complex would it be to map several led strips on several IOs to a virtual 2d matrix? I'm currently looking at the code, more particularly void mapLayout() and it seems the layout is reset every time that function is called, so it is not possible to increase the display size
+    * how complex would it be to map several LED strips on several IOs to a virtual 2d matrix? I'm currently looking at the code, more particularly void mapLayout() and it seems the layout is reset every time that function is called, so it is not possible to increase the display size
     * [single line and row layouts](https://github.com/MoonModules/MoonLight/pull/19)
     * personally i'd make 2 different menus in the esp32 GUI.. a layout is more something you set and forget about as it is tied to a physical install
     * one layout to define all the lights is definitely a blocker for me (and I imagine more people) as physical installs have their own constraints. let me know what you think. I will add that possibility , I see ‘some’ usage, but I don’t understand why it is a blocker as in general the whole setup is a number of lights which you know in advance so then it is most clear to define that in one go ?
@@ -64,7 +64,7 @@ MoonLight specific
             * on: (de)activates the node
             * constructor: sets the corresponding layer
             * setup: if layout sets channelsPerLight and request map
-        * Nodes manipulate the leds / channels array and the virtual to physical layer mappings.
+        * Nodes manipulate the LEDs / channels array and the virtual to physical layer mappings.
         * specify which functions (layout, effect, modifier): One node in general implements one, but can also implement all three (e.g. Moving Head...  wip...)
             * layout
             * effect

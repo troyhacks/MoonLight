@@ -4,10 +4,14 @@
 
 Shows system tasks info.
 
-* task["name"] = ts->pcTaskName;
-* task["state"] = state;
-* task["cpu"] = cpu_percent.c_str();
-* task["prio"] = ts->uxCurrentPriority;
-* task["stack"] = ts->usStackHighWaterMark;
-* task["runtime"] = ts->ulRunTimeCounter;
-* task["core"] = ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID;
+* Core 0: which task is currently running on core 0
+* Core 1: which task is currently running on core 1
+
+* Per task:
+    * name: task name
+    * state: running, blocking, ...
+    * cpu: percentage of CPU time (per core) used
+    * prio: task priority
+    * stack: stack left
+    * runtime: amount of cpu cycles consumed
+    * core: allocated core, not necessarily used core

@@ -34,10 +34,10 @@ MoonLight uses the following repositories:
 * [hoeken/PsychicHttp](https://github.com/hoeken/PsychicHttp): PsychicHttp is a webserver library for ESP32 + Arduino framework which uses the ESP-IDF HTTP Server library under the hood.
 * [theelims/PsychicMqttClient](https://github.com/theelims/PsychicMqttClient): Fully featured async MQTT 3.1.1 client for ESP32 with support for SSL/TLS and MQTT over WS. Uses the ESP-IDF MQTT client library under the hood and adds a powerful but easy to use API on top of it. Supports MQTT over TCP, SSL with mbedtls, MQTT over Websocket and MQTT over Websocket Secure.
 * [bblanchon/ArduinoJson](https://github.com/bblanchon/ArduinoJson): ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
-* [FastLED/FastLED](https://github.com/FastLED/FastLED): FastLED is a robust and massively parallel-led driver. Due to it's incredibly small compile size, high end devices can drive upto ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering means you can respond to user input while the leds render.
+* [FastLED/FastLED](https://github.com/FastLED/FastLED): FastLED is a robust and massively parallel-led driver. Due to it's incredibly small compile size, high end devices can drive upto ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering means you can respond to user input while the LEDs render.
 * [hpwit/ESPLiveScript](https://github.com/hpwit/ESPLiveScript): execute programs on the esp32 without having to load the code via any IDE (Arduino, VSCode)
-* [hpwit/I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver): This library is a new take on driving ws2812 leds with I2S on an esp32. It allows to drive up to 16 LED strips in parallel
-* [/hpwit/I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver): This library is a new take on driving ws2812 leds with I2S on an esp32. It allows to drive up to 120 LED strips !!! in parallel
+* [hpwit/I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver): This library is a new take on driving ws2812 LEDs with I2S on an esp32. It allows to drive up to 16 LED strips in parallel
+* [/hpwit/I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver): This library is a new take on driving ws2812 LEDs with I2S on an esp32. It allows to drive up to 120 LED strips !!! in parallel
 * [netmindz/WLED-sync](https://github.com/netmindz/WLED-sync): Library to create WLED compatible projects that sync their audio
 
 <img src="https://github.com/user-attachments/assets/c655d610-53eb-4dd3-8e9e-0cfa23b97bb4"/>
@@ -53,4 +53,4 @@ https://github.com/sponsors/ewowi
 
 ## Disclaimer
 
-Using this software is the users responsibility as it is not bug free. Therefore contributors of this repo are not reliable for anything including but not limited to spontaneous combustion of the entire led strip, the house and the inevitable heat death of the universe
+Using this software is the users responsibility as it is not bug free. Therefore contributors of this repo are not reliable for anything including but not limited to spontaneous combustion of the entire LED strip, the house and the inevitable heat death of the universe

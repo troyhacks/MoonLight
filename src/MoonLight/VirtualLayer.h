@@ -57,7 +57,7 @@ class VirtualLayer {
   uint16_t mappingTableSizeUsed = 0; 
   uint16_t mappingTableIndexesSizeUsed = 0; 
 
-  PhysicalLayer *layerP; //physical leds the virtual leds are mapped to
+  PhysicalLayer *layerP; //physical LEDs the virtual LEDs are mapped to
   std::vector<Node *> nodes;
 
   uint8_t fadeMin;
@@ -186,7 +186,7 @@ class VirtualLayer {
   T getLight(const uint16_t indexV, uint8_t offset) const;
 
   //to be called in loop, if more then one effect
-  // void setLightsToBlend(); //uses leds
+  // void setLightsToBlend(); //uses LEDs
 
   void fadeToBlackBy(const uint8_t fadeBy);
   void fadeToBlackMin();

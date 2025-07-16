@@ -308,7 +308,7 @@ public:
             }, "server");
         }
 
-        //show connected clients on the led display
+        //show connected clients on the LED display
         // for (int i = 0; i < _socket->getConnectedClients(); i++) {
         //     // ESP_LOGD(TAG, "socket %d", i);
         //     layerP.lights.leds[i] = CRGB(0, 0, 128);

@@ -38,7 +38,7 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 Layout(s) for Stephan Electronics 16-Pin ESP32-S3 board, using the pins used on the board
 
 * ledsPerPin: the number of LEDs connected to one pin
-* pinsAreColumns: are the leds on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the leds are a column (height is 1 (or 2) x ledsPerPin)
+* pinsAreColumns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)
 * mirroredPins: If set it is assumed that LEDs are connected with increasing positions on 8 pins on one side of the board and decreasing positions on the 8 pins of the other side of the board. The resulting size will have a width of 8 and the height (or width) will be 2 * ledsPerPin. If not set, the width will be 16 and the height (or width) = ledsPerPin
 
 ## Modifier 💎 Nodes
@@ -73,7 +73,7 @@ Note: some effects already do this theirselves e.g. FreqMatrix runs on 1D but co
 sends LED output to ESP32 gpio pins.
 
 * Switch off to see the effect framerate in System Status/Metrics
-* Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 leds, 24 bits is 130 fps theoretically - 120 practically)
+* Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 LEDs, 24 bits is 130 fps theoretically - 120 practically)
 * Will move to driver node later ...
 
 ### Physical driver ☸️
@@ -96,7 +96,7 @@ Example of compatible controllers can be found [here](https://moonmodules.org/ha
 The node supports this setup:
 ```cpp
     std::vector<uint16_t> hardware_outputs = {1024,1024,1024,1024,1024,1024,1024,1024};
-    std::vector<uint16_t> hardware_outputs_universe_start = { 0,7,14,21,28,35,42,49 }; //7*170 = 1190 leds => last universe not completely used
+    std::vector<uint16_t> hardware_outputs_universe_start = { 0,7,14,21,28,35,42,49 }; //7*170 = 1190 LEDs => last universe not completely used
 ```
 
 Todo: 
