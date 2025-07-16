@@ -21,10 +21,10 @@ For more information [QuinLed](https://quinled.info)
 
 ## Premade boards
 
-* [QuinLed](https://quinled.info)
-* Serg74
-* Wadi
-* Atom
+* [QuinLed LED controllers](https://quinled.info/addressable-digital-leds/)
+* [Serg74 shields](https://www.tindie.com/products/serg74/esp32-wroom-usb-c-d1-mini32-form-factor-board/)
+* [Wladi](https://www.myhome-control.de/)
+* [Athom](https://www.athom.tech/wled) / [Gledopto](https://www.gledopto.eu/Gledopto-WLED-LED-Controller-for-Digital-Light-Strips) / [M5Stack](https://shop.m5stack.com/collections/m5-controllers) / ...
 * Stephan Electronics
 
 ## For latest DMX support 
