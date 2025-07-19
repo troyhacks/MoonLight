@@ -6,7 +6,7 @@
    @Doc       https://moonmodules.org/MoonLight/components/#fileedit
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 
    known issues
    - showEditor does collapse in Files module, but not in Editor and Module
