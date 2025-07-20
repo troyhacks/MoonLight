@@ -404,11 +404,11 @@ void  ArtNetDriverMod::loop() {
 
   #if HP_PHYSICAL_DRIVER || HP_PHYSICAL_DRIVER_S3
     #define NUMSTRIPS 16 //can this be changed e.g. when we have 20 pins?
-    #define NUM_LEDS_PER_STRIP 256 //could this be removed from driver lib as makes not so much sense
     #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
       #include "ESP32-LedsDriver.h"
       static PhysicalDriverESP32S3 ledsDriver; //    sizeof(driver) = 1080K !
     #elif CONFIG_IDF_TARGET_ESP32
+      #define NUM_LEDS_PER_STRIP 256 //could this be removed from driver lib as makes not so much sense
       #include "I2SClocklessLedDriver.h"
       static I2SClocklessLedDriver driverP;
     #endif
@@ -475,7 +475,7 @@ void  ArtNetDriverMod::loop() {
               PinConfig pinConfig[NUMSTRIPS];
               for (size_t pin = 0; pin < nb_pins; pin++) {
                 pinConfig[pin].gpio = pins[pin];
-                pinConfig[pin].nrOfLeds = NUM_LEDS_PER_STRIP;
+                pinConfig[pin].nrOfLeds = lengths[pin];
               }
 
               uint8_t channelsPerLed = 3;
