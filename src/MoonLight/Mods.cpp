@@ -478,7 +478,20 @@ void  ArtNetDriverMod::loop() {
                 pinConfig[pin].nrOfLeds = NUM_LEDS_PER_STRIP;
               }
 
-              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, nb_pins, 4, 1, 0, 2); //102 is GRB
+              uint8_t channelsPerLed = 3;
+              uint8_t offsetRed = UINT8_MAX;
+              uint8_t offsetGreen = UINT8_MAX;
+              uint8_t offsetBlue = UINT8_MAX;
+              uint8_t offsetWhite = UINT8_MAX;
+              if (colorOrder == 0) { channelsPerLed = 4; offsetRed = 1; offsetGreen = 0; offsetBlue = 2; offsetWhite = 3; } //GRBW
+              else if (colorOrder == 1) { channelsPerLed = 3; offsetRed = 0; offsetGreen = 1; offsetBlue = 2; } //RGB
+              else if (colorOrder == 2) { channelsPerLed = 3; offsetRed = 0; offsetGreen = 2; offsetBlue = 1; } //RBG
+              else if (colorOrder == 3) { channelsPerLed = 3; offsetRed = 1; offsetGreen = 0; offsetBlue = 2; } //GRB
+              else if (colorOrder == 4) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 0; offsetBlue = 1; } //GBR
+              else if (colorOrder == 5) { channelsPerLed = 3; offsetRed = 1; offsetGreen = 2; offsetBlue = 0; } //BRG
+              else if (colorOrder == 6) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 1; offsetBlue = 0; } //BGR
+
+              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, nb_pins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
               ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
             #else
               driverP.initled((uint8_t*) layerV->layerP->lights.channels, pins, lengths, nb_pins, (colorarrangment)colorOrder);
@@ -501,7 +514,7 @@ void  ArtNetDriverMod::loop() {
     if (layerV->layerP->lights.header.isPositions == 0) {
 
       #if HP_PHYSICAL_DRIVER || HP_PHYSICAL_DRIVER_S3
-        #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+        #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
           if (ledsDriver.getBrightness() != layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8) {
             ESP_LOGD(TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
             ledsDriver.setBrightness(layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8);
@@ -512,16 +525,24 @@ void  ArtNetDriverMod::loop() {
           ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
           if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
             ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (%f %f %f)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
-            ledsDriver.setColorCorrection(layerV->layerP->lights.header.red/255.0, layerV->layerP->lights.header.blue/255.0, layerV->layerP->lights.header.green/255.0); //RBG !!!
+            ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
           }
 
-          #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
-            if (ledsDriver.led_io_handle != nullptr)
-              ledsDriver.show();
-          #else
-            if (driverP.total_leds > 0)
-              driverP.showPixels(WAIT);
-          #endif
+          if (ledsDriver.led_io_handle != nullptr)
+            ledsDriver.show();
+        #elif CONFIG_IDF_TARGET_ESP32
+          if (driverP._brightness != layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8) {
+            ESP_LOGD(TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
+            driverP.setBrightness(layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8);
+          }
+
+          if (driverP._gammar * 255 != layerV->layerP->lights.header.red || driverP._gammag * 255 != layerV->layerP->lights.header.green || driverP._gammab * 255 != layerV->layerP->lights.header.blue) {
+            ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (%f %f %f)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, driverP._gammar*255, driverP._gammag*255, driverP._gammab*255);
+            driverP.setGamma(layerV->layerP->lights.header.red/255.0, layerV->layerP->lights.header.blue/255.0, layerV->layerP->lights.header.green/255.0); //RBG !!!
+          }
+
+          if (driverP.total_leds > 0)
+            driverP.showPixels(WAIT);
         #endif
       #endif
     }
