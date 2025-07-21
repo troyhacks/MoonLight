@@ -127,12 +127,12 @@ class SingleLineLayout: public Node {
   void addLayout() override {
     if (reversed_order){
       for (int x = start_x+width-1; x>=start_x; x--) {
-        addLight({x, yposition, 0});
+        addLight(Coord3D(x, yposition, 0));
       }
     }
     else {
       for (uint8_t x = start_x; x<start_x+width; x++) {
-        addLight({x, yposition, 0});
+        addLight(Coord3D(x, yposition, 0));
       }
     }
     addPin(pin);
@@ -166,12 +166,12 @@ class SingleRowLayout: public Node {
   void addLayout() override {
     if (reversed_order){
       for (int y = start_y+height-1; y>=start_y; y--) {
-        addLight({xposition, y, 0});
+        addLight(Coord3D(xposition, y, 0));
       }
     }
     else {
       for (uint8_t y = start_y; y<start_y+height; y++) {
-        addLight({xposition, y, 0});
+        addLight(Coord3D(xposition, y, 0));
       }
     }
     addPin(pin);
