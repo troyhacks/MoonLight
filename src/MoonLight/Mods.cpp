@@ -403,14 +403,12 @@ void  ArtNetDriverMod::loop() {
   }
 
   #if HP_PHYSICAL_DRIVER || HP_PHYSICAL_DRIVER_S3
-    #define NUMSTRIPS 16 //can this be changed e.g. when we have 20 pins?
+  #include "ESP32-LedsDriver.h"
+  #define MAX_PINS 20 // this is also defined in ESP32-LedsDriver.h...
     #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
-      #include "ESP32-LedsDriver.h"
       static PhysicalDriverESP32S3 ledsDriver; //    sizeof(driver) = 1080K !
     #elif CONFIG_IDF_TARGET_ESP32
-      #define NUM_LEDS_PER_STRIP 256 //could this be removed from driver lib as makes not so much sense
-      #include "I2SClocklessLedDriver.h"
-      static I2SClocklessLedDriver driverP;
+      static PhysicalDriverESP32D0 ledsDriver; //    sizeof(driver) = 1080K !
     #endif
   #endif
 
@@ -443,38 +441,26 @@ void  ArtNetDriverMod::loop() {
 
     #if HP_PHYSICAL_DRIVER
         #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
-          int pins[NUMSTRIPS]; //max 16 pins
-          int lengths[NUMSTRIPS];
-          int nb_pins=0;
+          int numPins = 0;
+          PinConfig pinConfig[MAX_PINS];
+
 
           for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
             ESP_LOGD(TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
-            if (nb_pins < NUMSTRIPS) {
-              pins[nb_pins] = sortedPin.pin;
-              lengths[nb_pins] = sortedPin.nrOfLights;
-              nb_pins++;
+            if (numPins < MAX_PINS) {
+              pinConfig[numPins].gpio = sortedPin.pin;
+              pinConfig[numPins].nrOfLeds =  sortedPin.nrOfLights;
+              numPins++;
             }
           }
 
-          //fill the rest of the pins with the pins already used
-          //preferably NUMSTRIPS is a variable...
-          if (nb_pins > 0) {
-            for (uint8_t i = nb_pins; i < NUMSTRIPS; i++) {
-              pins[i] = pins[i%nb_pins];
-              lengths[i] = 0;
-            }
-          }
           ESP_LOGD(TAG, "pins[");
-          for (int i=0; i<nb_pins; i++) {
-            ESP_LOGD(TAG, ", %d", pins[i]);
+          for (int i=0; i<numPins; i++) {
+            ESP_LOGD(TAG, ", %d", pinConfig[i].gpio);
           }
           ESP_LOGD(TAG, "]\n");
 
-          if (nb_pins > 0) {
-            for (size_t pin = 0; pin < nb_pins; pin++) {
-              pinConfig[pin].gpio = pins[pin];
-              pinConfig[pin].nrOfLeds = lengths[pin];
-            }
+          if (numPins > 0) {
 
             uint8_t channelsPerLed = 3;
             uint8_t offsetRed = UINT8_MAX;
@@ -490,11 +476,11 @@ void  ArtNetDriverMod::loop() {
             else if (colorOrder == 6) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 1; offsetBlue = 0; } //BGR
             #if CONFIG_IDF_TARGET_ESP32S3 | CONFIG_IDF_TARGET_ESP32S2
 
-              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, nb_pins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
+              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
               ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
             #else
-              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, nb_pins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
-              // driverP.initled((uint8_t*) layerV->layerP->lights.channels, pins, lengths, nb_pins, (colorarrangment)colorOrder);
+              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
+              // driverP.initled((uint8_t*) layerV->layerP->lights.channels, pins, lengths, numPins, (colorarrangment)colorOrder);
               #if ML_LIVE_MAPPING
                 driver.setMapLed(&mapLed);
               #endif
