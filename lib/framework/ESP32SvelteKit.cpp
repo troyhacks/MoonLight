@@ -16,6 +16,7 @@
 
 std::vector<std::function<void()>> runInOtherTask; // 🌙 see .h
 bool safeModeMB = false; // 🌙 see .h
+bool restartNeeded = false; // 🌙 see .h
 
 ESP32SvelteKit::ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEndpoints) : _server(server),
                                                                                           _numberEndpoints(numberEndpoints),

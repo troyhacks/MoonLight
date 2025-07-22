@@ -210,7 +210,7 @@ public:
 
                     Node *nodeClass = layerP.addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);
 
-                    if(nodeClass != nullptr) {
+                    if (nodeClass != nullptr) {
                         nodeClass->on = nodeState["on"];
                         newNode = true;
 
@@ -226,6 +226,11 @@ public:
                     }
                     else
                         ESP_LOGW(TAG, "Nodeclass %d not found", updatedItem.value.as<String>().c_str());
+
+                    if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
+                        ESP_LOGW(TAG, "Restart needed");
+                        restartNeeded = true;
+                    }
                 }
 
                 //if a node existed and no new node in place, remove 

@@ -102,6 +102,7 @@ export type RSSI = {
 	rssi: number;
 	ssid: string;
 	safeMode: boolean; // 🌙 safeMode Indicates if the system is in safe mode
+	restartNeeded: boolean; // 🌙 restartNeeded Indicates if the system needs to be restarted
 };
 
 export type Battery = {
