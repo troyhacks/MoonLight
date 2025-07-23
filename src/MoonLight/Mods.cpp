@@ -474,21 +474,11 @@ void  ArtNetDriverMod::loop() {
             else if (colorOrder == 4) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 0; offsetBlue = 1; } //GBR
             else if (colorOrder == 5) { channelsPerLed = 3; offsetRed = 1; offsetGreen = 2; offsetBlue = 0; } //BRG
             else if (colorOrder == 6) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 1; offsetBlue = 0; } //BGR
-            #if CONFIG_IDF_TARGET_ESP32S3 | CONFIG_IDF_TARGET_ESP32S2
-
-              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
-              ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
-            #else
-              ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
-              // driverP.initled((uint8_t*) layerV->layerP->lights.channels, pins, lengths, numPins, (colorarrangment)colorOrder);
-              #if ML_LIVE_MAPPING
-                driver.setMapLed(&mapLed);
-              #endif
-              //void initled(uint8_t *leds, int *Pinsq, int *sizes, int num_strips, colorarrangment cArr)
-              // driverP.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
-              ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
+            ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
+            ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
+            #if ML_LIVE_MAPPING
+              driver.setMapLed(&mapLed);
             #endif
-          //   Variable("Fixture", "brightness").triggerEvent(onChange, UINT8_MAX, true); //set brightness (init is true so bri value not send via udp)
           }
         #endif
       #endif

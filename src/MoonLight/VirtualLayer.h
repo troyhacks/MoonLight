@@ -83,7 +83,17 @@ class VirtualLayer {
   }
 
   void setRGB(const uint16_t indexV, CRGB color) {
-    setLight(indexV, color.raw, layerP->lights.header.offsetRGB, sizeof(color));
+    if (layerP->lights.header.offsetWhite != UINT8_MAX && layerP->lights.header.offsetWhite == layerP->lights.header.offsetRGB + 3) { //RGBW adjacent
+      uint8_t rgbw[4];
+      uint8_t white = min(color.r, color.g, color.b); //calc white channel
+      rgbw[0] = color.red - white; //subtract from other channels
+      rgbw[1] = color.green - white;
+      rgbw[2] = color.blue - white;
+      rgbw[3] = white;
+      setLight(indexV, rgbw, layerP->lights.header.offsetRGB, sizeof(rgbw));
+    }
+    else 
+      setLight(indexV, color.raw, layerP->lights.header.offsetRGB, sizeof(color));
   }
   void setRGB(Coord3D pos, CRGB color) { setRGB(XYZ(pos), color); }
 
