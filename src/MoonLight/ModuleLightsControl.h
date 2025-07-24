@@ -20,7 +20,7 @@
 #include "FastLED.h"
 #include "../MoonBase/Module.h"
 
-#include "ModuleEditor.h"
+#include "ModuleVirtual.h"
 
 class ModuleLightsControl : public Module
 {
@@ -56,7 +56,7 @@ public:
                 for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current live script, recompile it (to do: multiple live effects)
                     ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                    if (strstr(updatedItem.c_str(), "/.config/editor")) {
+                    if (strstr(updatedItem.c_str(), "/.config/presets")) {
                         ESP_LOGD(TAG, " preset.json updated -> call update %s", updatedItem.c_str());
                         presetChanged = true;
                     }
@@ -99,7 +99,6 @@ public:
         #if FT_ENABLED(FT_MONITOR)
             property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
         #endif
-
     }
 
     //implement business logic
@@ -138,27 +137,27 @@ public:
             }
             // layerP.palette = LavaColors_p;
         } else if (updatedItem.name == "preset") {
-            //copy /.config/editor.json to the hidden folder /.config/editor/preset[x].json
+            //copy /.config/virtual.json to the hidden folder /.config/presets/preset[x].json
             //do not set preset at boot...
             if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
                 uint16_t select = updatedItem.value["select"];
                 Char<32> presetFile;
-                presetFile.format("/.config/editor/preset%02d.json", select);
+                presetFile.format("/.config/presets/preset%02d.json", select);
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
                 if (updatedItem.value["action"] == "click") {
                     updatedItem.value["selected"] = select; //store the selected preset
                     if (arrayContainsValue(updatedItem.value["list"], select)) {
-                        copyFile(presetFile.c_str(), "/.config/editor.json");
+                        copyFile(presetFile.c_str(), "/.config/virtual.json");
 
-                        //trigger notification of update of editor.json
+                        //trigger notification of update of virtual.json
                         _fileManager->update([&](FilesState &state) {
-                            state.updatedItems.push_back("/.config/editor.json");
+                            state.updatedItems.push_back("/.config/virtual.json");
                             return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                         }, "server");
 
                     } else {
-                        copyFile("/.config/editor.json", presetFile.c_str());
+                        copyFile("/.config/virtual.json", presetFile.c_str());
                         setPresetsFromFolder(); //update presets in UI
                     }
                 } else if (updatedItem.value["action"] == "dblclick") {
@@ -192,7 +191,7 @@ public:
     //update _state.data["preset"]["list"] and send update to endpoints
     void setPresetsFromFolder() {
         //loop over all files in the presets folder and add them to the preset array
-        File rootFolder = ESPFS.open("/.config/editor/");
+        File rootFolder = ESPFS.open("/.config/presets/");
         _state.data["preset"]["list"].to<JsonArray>(); // clear the active preset array before adding new presets
         bool changed = false;
         walkThroughFiles(rootFolder, [&](File folder, File file) {

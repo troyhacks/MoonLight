@@ -62,9 +62,15 @@
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Editor',
+					title: 'Virtual Layers',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=editor',
+					href: '/moonbase/module?module=virtual',
+					feature: page.data.features.moonlight,
+				},
+				{
+					title: 'Physical Layer',
+					icon: BulbIcon,
+					href: '/moonbase/module?module=physical',
 					feature: page.data.features.moonlight,
 				},
 				{

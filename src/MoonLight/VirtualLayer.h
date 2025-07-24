@@ -62,9 +62,6 @@ class VirtualLayer {
 
   uint8_t fadeMin;
 
-  uint8_t requestMapPhysical = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
-  uint8_t requestMapVirtual = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
-
   VirtualLayer() {
     ESP_LOGD(TAG, "constructor");
   }
@@ -85,11 +82,10 @@ class VirtualLayer {
   void setRGB(const uint16_t indexV, CRGB color) {
     if (layerP->lights.header.offsetWhite != UINT8_MAX && layerP->lights.header.offsetWhite == layerP->lights.header.offsetRGB + 3) { //RGBW adjacent
       uint8_t rgbw[4];
-      uint8_t white = MIN(MIN(color.r, color.g), color.b); //calc white channel
-      rgbw[0] = color.red - white; //subtract from other channels
-      rgbw[1] = color.green - white;
-      rgbw[2] = color.blue - white;
-      rgbw[3] = white;
+      rgbw[3] = MIN(MIN(color.r, color.g), color.b) / 2; //calc white channel, only do half of the minimum as not to turn off one of RGB completely (to be tweaked)
+      rgbw[0] = color.red - rgbw[3]; //subtract from other channels
+      rgbw[1] = color.green - rgbw[3];
+      rgbw[2] = color.blue - rgbw[3];
       setLight(indexV, rgbw, layerP->lights.header.offsetRGB, sizeof(rgbw));
     }
     else 
@@ -204,8 +200,6 @@ class VirtualLayer {
   void fill_solid(const CRGB& color);
   void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
 
-  //mapLayout calls addLayoutPre, addLayout for each node and addLayoutPost and expects pass to be set (1 or 2)
-  void mapLayout();
   void addLayoutPre();
   void addLayoutPost();
   

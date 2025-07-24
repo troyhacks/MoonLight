@@ -46,7 +46,11 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
 
-* **Step 12**: Go to your WiFi settings and connect to your local WiFi network and enter the IP address of your MoonLight board in a browser and go to **MoonLight Editor**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. Add a driver node, FastLED driver is best to start with. Finally add an effect node. The monitor and a connected strip to the configured pin(s) should now show the effect.
+* **Step 12**: Go to your WiFi settings and connect to your local WiFi network and enter the IP address of your MoonLight board in a browser 
+
+* **Step 13**: Go to **MoonLight Physical layer**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. Add a driver node, FastLED driver is best to start with. 
+
+* **Step 14**: Go to **MoonLight Virtual layers**. Add an effect node. The monitor and a connected strip to the configured pin(s) should now show the effect.
 
    <img width="400" src="https://github.com/user-attachments/assets/17fe6f38-375b-4d96-923b-607897e7d4db" />
 

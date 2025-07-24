@@ -1,7 +1,8 @@
 # MoonLight Overview
 
 * [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
-* [Editor](https://moonmodules.org/MoonLight/moonbase/module/editor/)
+* [Virtual layers](https://moonmodules.org/MoonLight/moonbase/module/virtual/)
+* [Physical layer](https://moonmodules.org/MoonLight/moonbase/module/physical/)
 * [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/)
 * [Channel View](https://moonmodules.org/MoonLight/moonbase/module/ChannelView/)
 * [MoonLight info](https://moonmodules.org/MoonLight/moonbase/module/MoonLightInfo/)

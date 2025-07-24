@@ -458,7 +458,6 @@ void  ArtNetDriverMod::loop() {
           for (int i=0; i<numPins; i++) {
             ESP_LOGD(TAG, ", %d", pinConfig[i].gpio);
           }
-          ESP_LOGD(TAG, "]\n");
 
           if (numPins > 0) {
 
@@ -474,6 +473,7 @@ void  ArtNetDriverMod::loop() {
             else if (colorOrder == 4) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 0; offsetBlue = 1; } //GBR
             else if (colorOrder == 5) { channelsPerLed = 3; offsetRed = 1; offsetGreen = 2; offsetBlue = 0; } //BRG
             else if (colorOrder == 6) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 1; offsetBlue = 0; } //BGR
+            ESP_LOGD(TAG, "p:%p bf:%d", &ledsDriver, setMaxPowerBrightnessFactor);
             ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
             ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
             #if ML_LIVE_MAPPING

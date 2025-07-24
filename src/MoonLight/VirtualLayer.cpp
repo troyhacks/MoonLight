@@ -67,23 +67,6 @@ void VirtualLayer::loop() {
       node->loop();
   }
 
-  if (requestMapPhysical) {
-    ESP_LOGD(TAG, "mapLayout physical requested");
-    
-    layerP->pass = 1;
-    mapLayout();
-
-    requestMapPhysical = false;
-  }
-
-  if (requestMapVirtual) {
-    ESP_LOGD(TAG, "mapLayout virtual requested");
-
-    layerP->pass = 2;
-    mapLayout();
-    
-    requestMapVirtual = false;
-  }    
 };
 
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
@@ -320,16 +303,6 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   }
 }
 
-void VirtualLayer::mapLayout() {
-  layerP->addLayoutPre();
-  for (Node *node: nodes) {
-    if (node->on && node->hasLayout) {
-      node->addLayout();
-    }
-  }
-  layerP->addLayoutPost();
-}
-
 void VirtualLayer::addLayoutPre() {
 
   // resetMapping
@@ -405,7 +378,7 @@ void VirtualLayer::addLayoutPost() {
 
     #if FT_LIVESCRIPT
         Node *VirtualLayer::findLiveScriptNode(const char *animation) {
-            for (Node *node : nodes) {
+            for (Node *node: nodes) {
                 if (node && node->isLiveScriptNode()) {
                     LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
                     if (equal(liveScriptNode->animation, animation)) {

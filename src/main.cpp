@@ -24,15 +24,13 @@
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         #include "MoonLight/ModuleLightsControl.h"
-        #include "MoonLight/ModuleEditor.h"
+        #include "MoonLight/ModuleVirtual.h"
+        #include "MoonLight/ModulePhysical.h"
         #if FT_ENABLED(FT_LIVESCRIPT)
             #include "MoonLight/ModuleLiveScripts.h"
         #endif
         #include "MoonLight/ModuleChannelView.h"
         #include "MoonLight/ModuleMoonLightInfo.h"
-        #ifdef STEPHANELEC_LED_DRIVER_V1
-            #include "MoonLight/ModuleStephanElecDriverInfo.h"
-        #endif
     #endif
 #endif
 
@@ -54,15 +52,13 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
-        ModuleEditor moduleEditor = ModuleEditor(&server, &esp32sveltekit, &fileManager);
+        ModuleVirtual moduleVirtual = ModuleVirtual(&server, &esp32sveltekit, &fileManager);
+        ModulePhysical modulePhysical = ModulePhysical(&server, &esp32sveltekit);
         #if FT_ENABLED(FT_LIVESCRIPT)
-            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit);
+            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleVirtual);
         #endif
         ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit);
         ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
-        #ifdef STEPHANELEC_LED_DRIVER_V1
-            ModuleStephanElecDriverInfo moduleStephanElecDriverInfo = ModuleStephanElecDriverInfo(&server, &esp32sveltekit);
-        #endif
     #endif
 #endif
     
@@ -75,7 +71,8 @@ void moonTask(void* pvParameters) {
 
             #if FT_ENABLED(FT_MOONLIGHT)
                 moduleLightsControl.begin();
-                moduleEditor.begin();
+                moduleVirtual.begin();
+                modulePhysical.begin();
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     moduleLiveScripts.begin();
                 #endif
@@ -90,7 +87,8 @@ void moonTask(void* pvParameters) {
         #if FT_ENABLED(FT_MOONBASE)
 
             #if FT_ENABLED(FT_MOONLIGHT)
-                moduleEditor.loop();
+                moduleVirtual.loop();
+                modulePhysical.loop();
             #endif
 
             static unsigned long lastTime50ms = 0;

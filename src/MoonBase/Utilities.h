@@ -272,4 +272,4 @@ void extractPath(const char *filepath, char *path);
 
 void walkThroughFiles(File folder, std::function<void(File, File)> fun);
 
-bool copyFile(const char* srcPath, const char* dstPath) ;
+bool copyFile(const char* srcPath, const char* dstPath);
