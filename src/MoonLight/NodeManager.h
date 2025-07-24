@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      ModuleEditor.h
+    @file      NodeManager.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonbase/module/editor/
@@ -9,94 +9,42 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-#ifndef ModuleEditor_h
-#define ModuleEditor_h
+#ifndef NodeManager_h
+#define NodeManager_h
 
 #if FT_MOONLIGHT
 
 #undef TAG
 #define TAG "💫"
 
-#include "FastLED.h"
 #include "../MoonBase/Module.h"
 
 #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
 PhysicalLayer layerP; //global declaration of the physical layer
 
-class ModuleEditor : public Module
-{
-public:
-
-    PsychicHttpServer *_server;
-    FileManager *_fileManager;
+class NodeManager : public Module {
+public: 
     bool requestUIUpdate = false;
 
-    ModuleEditor(PsychicHttpServer *server,
-        ESP32SvelteKit *sveltekit,
-        FileManager *fileManager
-    ) : Module("editor", server, sveltekit) {
+protected:
+    PsychicHttpServer *_server;
+
+    NodeManager(String moduleName,
+        PsychicHttpServer *server,
+        ESP32SvelteKit *sveltekit
+    ) : Module(moduleName, server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
-        _fileManager = fileManager;
     }
 
     void begin() {
         Module::begin();
-
-        #if FT_ENABLED(FT_LIVESCRIPT)
-            //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
-            _fileManager->addUpdateHandler([&](const String &originId)
-            { 
-                ESP_LOGD(TAG, "FileManager::updateHandler %s", originId.c_str());
-                //read the file state (read all files and folders on FS and collect changes)
-                _fileManager->read([&](FilesState &filesState) {
-                    // loop over all changed files (normally only one)
-                    for (auto updatedItem : filesState.updatedItems) {
-                        //if file is the current live script, recompile it (to do: multiple live effects)
-                        ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                        if (equal(updatedItem.c_str(), "/.config/editor.json")) {
-                            ESP_LOGD(TAG, " editor.json updated -> call update %s", updatedItem.c_str());
-                            readFromFS(); //repopulates the state, processing file changes
-                        }
-                        uint8_t index = 0;
-                        for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-                            String nodeName = nodeState["nodeName"];
-
-                            if (updatedItem == nodeName) {
-                                ESP_LOGD(TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["nodeName"]);
-                                if (liveScriptNode) {
-                                    liveScriptNode->compileAndRun();
-
-                                    //wait until setup has been executed?
-
-                                    requestUIUpdate = true;
-                                }
-
-                                ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());
-                            }
-                            index++;
-                        }
-                    }
-                });
-            });
-        #endif
-
-        #if FT_ENABLED(FT_MONITOR)
-            _socket->registerEvent("monitor");
-            _server->on("/rest/monitorLayout", HTTP_GET, [&](PsychicRequest *request) {
-                ESP_LOGD(TAG, "rest monitor triggered");
-
-                //trigger pass 1 mapping of layout
-                layerP.pass = 1; //(requestMapPhysical=1 physical rerun)
-                layerP.layerV[0]->mapLayout();
-
-                PsychicJsonResponse response = PsychicJsonResponse(request, false);
-                return response.send();
-            });
-        #endif
     }
+
+    virtual void addNodes(JsonArray values) {}
+
+    virtual Node* addNode(const uint8_t index, const char * name, const JsonArray controls) {return nullptr;}
 
     //define the data model
     void setupDefinition(JsonArray root) override {
@@ -107,61 +55,10 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "nodeName"; property["type"] = "selectFile"; property["default"] = RandomEffect::name(); values = property["values"].to<JsonArray>();
+            property = details.add<JsonObject>(); property["name"] = "nodeName"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); //property["default"] = RandomEffect::name(); 
 
-            values.add(SolidEffect::name());
-            //alphabetically from here
-            values.add(BouncingBallsEffect::name());
-            values.add(DistortionWavesEffect::name());
-            values.add(FreqMatrixEffect::name());
-            values.add(GEQEffect::name());
-            values.add(LinesEffect::name());
-            values.add(LissajousEffect::name());
-            values.add(PaintBrushEffect::name());
-            values.add(RainbowEffect::name());
-            values.add(RandomEffect::name());
-            values.add(RipplesEffect::name());
-            values.add(RGBWParEffect::name());
-            values.add(SinusEffect::name());
-            values.add(SphereMoveEffect::name());
-            values.add(WaveEffect::name());
-            values.add(MHTroy15Effect::name());
-            values.add(MHTroy32Effect::name());
-            values.add(MHWowiEffect::name());
+            addNodes(values);
 
-            values.add(HumanSizedCubeLayout::name());
-            values.add(PanelLayout::name());
-            values.add(PanelsLayout::name());
-            values.add(RingsLayout::name());
-
-            //custom
-            values.add(SE16Layout::name());
-            values.add(MHTroy15Layout::name());
-            values.add(MHTroy32Layout::name());
-            values.add(MHWowi24Layout::name());
-
-            values.add(CircleModifier::name());
-            values.add(MirrorModifier::name());
-            values.add(MultiplyModifier::name());
-            values.add(RippleYZModifier::name());
-            values.add(PinwheelModifier::name());
-            values.add(RotateNodifier::name());
-
-            values.add(ArtNetDriverMod::name());
-            values.add(FastLEDDriverMod::name());
-            values.add(HUB75DriverMod::name());
-            values.add(PhysicalDriverMod::name());
-            values.add(VirtualDriverMod::name());
-            values.add(AudioSyncMod::name());
-            //find all the .sc files on FS
-            File rootFolder = ESPFS.open("/");
-            walkThroughFiles(rootFolder, [&](File folder, File file) {
-                if (strstr(file.name(), ".sc")) {
-                    // ESP_LOGD(TAG, "found file %s", file.path());
-                    values.add((char *)file.path());
-                }
-            });
-            rootFolder.close();
             property = details.add<JsonObject>(); property["name"] = "on"; property["type"] = "checkbox"; property["default"] = true;
             property = details.add<JsonObject>(); property["name"] = "controls"; property["type"] = "controls"; details = property["n"].to<JsonArray>();
             {
@@ -205,9 +102,9 @@ public:
                         nodeState["controls"].to<JsonArray>(); //clear the controls
                     }
 
-                    Node *nodeClass = layerP.addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);
+                    Node *nodeClass = addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);
 
-                    if(nodeClass != nullptr) {
+                    if (nodeClass != nullptr) {
                         nodeClass->on = nodeState["on"];
                         newNode = true;
 
@@ -223,6 +120,11 @@ public:
                     }
                     else
                         ESP_LOGW(TAG, "Nodeclass %d not found", updatedItem.value.as<String>().c_str());
+
+                    if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
+                        ESP_LOGW(TAG, "Restart needed");
+                        restartNeeded = true;
+                    }
                 }
 
                 //if a node existed and no new node in place, remove 
@@ -293,11 +195,7 @@ public:
         // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
-    //run effects
     void loop() {
-        if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
-            layerP.loop(); //run all the effects of all virtual layers (currently only one)
-
         if (requestUIUpdate) {
             requestUIUpdate = false; //reset the flag
             ESP_LOGD(TAG, "requestUIUpdate");
@@ -307,15 +205,8 @@ public:
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
             }, "server");
         }
-
-        //show connected clients on the LED display
-        // for (int i = 0; i < _socket->getConnectedClients(); i++) {
-        //     // ESP_LOGD(TAG, "socket %d", i);
-        //     layerP.lights.leds[i] = CRGB(0, 0, 128);
-        // }
     }
-  
-}; // class ModuleEditor
+};
 
 #endif
 #endif

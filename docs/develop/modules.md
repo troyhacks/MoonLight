@@ -6,7 +6,7 @@ A module is a generic building block to create server and UI functionality which
 
 MoonBase-Modules are inspired by WLED usermods, further developed in StarBase and now in MoonLight (using the ESP32-Sveltekit infrastructure)
 
-See [Demo](module/demo.md), [Instances](module/instances.md) and [Editor](module/editor.md) for examples
+See [Lights Control](module/lightsControl.md) or [Instances](module/instances.md) for examples
 
 Press the ? on any module to go to the documentation.
 
@@ -63,7 +63,7 @@ void setupDefinition(JsonArray root) override{
 
 * Implement function **onUpdate** to define what happens if data changes
     * struct UpdatedItem defines the update (parent property (including index in case of multiple records), name of property and value)
-    * This runs in the httpd / webserver task. To run it in another task (application task) use runInOtherTask - see [ModuleEditor](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleEditor.h)
+    * This runs in the httpd / webserver task. To run it in another task (application task) use runInOtherTask - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
 
 ```cpp
     void onUpdate(UpdatedItem &updatedItem) override

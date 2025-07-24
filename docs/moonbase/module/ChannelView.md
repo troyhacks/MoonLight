@@ -10,4 +10,4 @@ If you hover over a channel, that channel will output a value - by this you can 
 
 Choosing the virtual layer and hovering over the channels is a good way to test effect modifiers
 
-hint: do not run effects when using the channel view as they will also fill the channels with data (set them to off in the editor)
+hint: do not run effects when using the channel view as they will also fill the channels with data (set them to off in the Virtual Layers module)

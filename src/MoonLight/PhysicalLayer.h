@@ -82,15 +82,6 @@ struct LightsHeader {
 
 }; // fill with dummies to make size 24, be aware of padding so do not change order of vars
 
-// Helper function to generate a triangle wave similar to beat16
-inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
-    uint8_t beat = beat8(bpm, timebase);
-    if (beat < 128)
-        return beat * 2; // rising edge
-    else
-        return (255 - ((beat - 128) * 2)); // falling edge
-}
-
 struct Lights {
   LightsHeader header;
   uint8_t channels[MAX_CHANNELS]; //pka leds
@@ -117,10 +108,18 @@ class PhysicalLayer {
 
     CRGBPalette16 palette = PartyColors_p;
 
+    uint8_t requestMapPhysical = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
+    uint8_t requestMapVirtual = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
+
+    std::vector<Node *> nodes;
+
     PhysicalLayer();
 
     void setup();
     void loop();
+
+    //mapLayout calls addLayoutPre, addLayout for each node and addLayoutPost and expects pass to be set (1 or 2)
+    void mapLayout();
 
     uint8_t pass = 0; //'class global' so addLight/Pin functions know which pass it is in
     void addLayoutPre();
@@ -132,8 +131,6 @@ class PhysicalLayer {
 
     // an effect is using a virtual layer: tell the effect in which layer to run...
 
-    //run one loop of an effect
-    Node *addNode(const uint8_t index, const char * name, const JsonArray controls);
     void removeNode(Node * node);
 
     // to be called in setup, if more then one effect

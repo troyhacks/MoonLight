@@ -129,7 +129,7 @@ class PhysicalDriverMod: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint8_t setMaxPowerBrightnessFactor = 90; //tbd: implement driver.setMaxPowerInMilliWatts
+  uint16_t setMaxPowerBrightnessFactor = 90; //tbd: implement driver.setMaxPowerInMilliWatts
   bool initDone = false;
   uint8_t colorOrder = 3;
 

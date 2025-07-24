@@ -9,7 +9,7 @@
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 
    known issues
-   - showEditor does collapse in Files module, but not in Editor and Module
+   - showEditor does collapse in Files module, but not in Virtual and Physical Module
 -->
 
 <script lang="ts">

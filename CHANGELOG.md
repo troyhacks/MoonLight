@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
 - Expands menu on selected subitem [#77](https://github.com/theelims/ESP32-sveltekit/pull/77)
 - Refactor System Status and Metrics, added PSRAM [#79](https://github.com/theelims/ESP32-sveltekit/pull/79)
 - Add /rest/coreDump endpoint [#87](https://github.com/theelims/ESP32-sveltekit/pull/87)
+- Rate limiting for MQTT publish messages. Can be configured as factory setting or at runtime. `0` will disable the rate limiting.
 - Added build flag `-D TELEPLOT_TASKS` to plot task heap high water mark with teleplot. You can include this in your tasks as well:
 
 ```cpp
@@ -48,11 +49,11 @@ All notable changes to this project will be documented in this file.
 - Changed platform to [PIO Arduino](https://github.com/pioarduino/platform-espressif32) using Arduino 3 Core. Also upgrades ESP-IDF to v5.
 - ESPD_LOGx: replace first argument with TAG and define TAG as 🐼 [#85](https://github.com/theelims/ESP32-sveltekit/pull/85)
 - Replace rtc_get_reset_reason(0) with esp_reset_reason() [#86](https://github.com/theelims/ESP32-sveltekit/pull/86)
+- Default build_interface.py script to npm, if no lock file is found.
 
 ### Fixed
 
 - Ensure thread safety for client subscriptions [#58](https://github.com/theelims/ESP32-sveltekit/pull/58)
-- Isolate non-returning functions in new tasks [#62](https://github.com/theelims/ESP32-sveltekit/pull/62)
 - Deferred websocket event connection to after user validation & login [#72](https://github.com/theelims/ESP32-sveltekit/pull/72)
 - Wrong return type battery service
 - Wrong return types in various getService functions.
@@ -60,6 +61,10 @@ All notable changes to this project will be documented in this file.
 - Fixed bug in WiFiSettingsService preventing discovery of networks other than the first
 - Fixed mixup pull up and pull down when configuring wake up pin in SleepService.cpp
 - Wifi: Multiple edits bug resolved [#79](https://github.com/theelims/ESP32-sveltekit/pull/79)
+
+### Removed
+
+- Removed async workers in PsychicHttp, as these were not used, but caused linker errors.
 
 ### Migration Guide
 

@@ -55,6 +55,12 @@
 			🛡️
 		{/if}
 	</div>
+	<!-- 🌙 restart -->
+	<div class="indicator flex-none">
+		{#if $telemetry.rssi.restartNeeded}
+			🔄
+		{/if}
+	</div>
 	<div class="flex-none">
 		{#if $telemetry.rssi.disconnected}
 			<WiFiOff class="inline-block h-7 w-7" />

@@ -1,3 +1,10 @@
+Copy changes to ESP32-LedDrivers
+================================
+
+cp .pio/libdeps/esp32dev/ESP32-LedsDriver/src/* /Users/ewoudwijma/Developer/GitHub/ewowi/ESP32-LedsDriver/src
+cp .pio/libdeps/esp32-s3-devkitc-1-n16r8v/ESP32-LedsDriver/src/* /Users/ewoudwijma/Developer/GitHub/ewowi/ESP32-LedsDriver/src
+
+
 Release steps 
 - update dates in files
 - check all lib_deps on right version

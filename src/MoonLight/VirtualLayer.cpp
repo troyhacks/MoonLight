@@ -67,23 +67,6 @@ void VirtualLayer::loop() {
       node->loop();
   }
 
-  if (requestMapPhysical) {
-    ESP_LOGD(TAG, "mapLayout physical requested");
-    
-    layerP->pass = 1;
-    mapLayout();
-
-    requestMapPhysical = false;
-  }
-
-  if (requestMapVirtual) {
-    ESP_LOGD(TAG, "mapLayout virtual requested");
-
-    layerP->pass = 2;
-    mapLayout();
-    
-    requestMapVirtual = false;
-  }    
 };
 
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
@@ -142,7 +125,7 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
     switch (mappingTable[indexV].mapType) {
       case m_color:{
         //only room for storing colors
-        if (length == 3) {
+        if (length <= 4) { //also for RGBW, but store only RGB ... WIP
           mappingTable[indexV].rgb14 = ((min(channels[0] + 3, 255) >> 3) << 9) + 
                                       ((min(channels[1] + 3, 255) >> 3) << 4) + 
                                       (min(channels[2] + 7, 255) >> 4);
@@ -202,7 +185,7 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
         return *result; //return the color as CRGB
         break; }
       default: // m_color:
-        if (layerP->lights.header.channelsPerLight == 3) {
+        if (layerP->lights.header.channelsPerLight <= 4) { //also for RGBW but retrieve only RGB ... WIP
           T result;
           ((uint8_t*)&result)[0] = (mappingTable[indexV].rgb14 >> 9) << 3;
           ((uint8_t*)&result)[1] = (mappingTable[indexV].rgb14 >> 4) << 3;
@@ -320,16 +303,6 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   }
 }
 
-void VirtualLayer::mapLayout() {
-  layerP->addLayoutPre();
-  for (Node *node: nodes) {
-    if (node->on && node->hasLayout) {
-      node->addLayout();
-    }
-  }
-  layerP->addLayoutPost();
-}
-
 void VirtualLayer::addLayoutPre() {
 
   // resetMapping
@@ -405,7 +378,7 @@ void VirtualLayer::addLayoutPost() {
 
     #if FT_LIVESCRIPT
         Node *VirtualLayer::findLiveScriptNode(const char *animation) {
-            for (Node *node : nodes) {
+            for (Node *node: nodes) {
                 if (node && node->isLiveScriptNode()) {
                     LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
                     if (equal(liveScriptNode->animation, animation)) {

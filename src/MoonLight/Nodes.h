@@ -135,11 +135,11 @@ public:
   void requestMappings() {
     if (hasModifier || hasLayout) {
         ESP_LOGD(TAG, "hasLayout or Modifier -> requestMapVirtual %s", name());
-        layerV->requestMapVirtual = true;
+        layerV->layerP->requestMapVirtual = true;
     }
     if (hasLayout) {
         ESP_LOGD(TAG, "hasLayout -> requestMapPhysical %s", name());
-        layerV->requestMapPhysical = true;
+        layerV->layerP->requestMapPhysical = true;
     }
   }
 
@@ -172,7 +172,6 @@ public:
   }
 
 };
-  
 
 #if FT_LIVESCRIPT
 class LiveScriptNode: public Node {
@@ -209,6 +208,15 @@ class LiveScriptNode: public Node {
 };
 
 #endif
+
+// Helper function to generate a triangle wave similar to beat16
+inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
+    uint8_t beat = beat8(bpm, timebase);
+    if (beat < 128)
+        return beat * 2; // rising edge
+    else
+        return (255 - ((beat - 128) * 2)); // falling edge
+}
 
 #include "Mods.h"
 

@@ -6,7 +6,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -24,7 +24,8 @@
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         #include "MoonLight/ModuleLightsControl.h"
-        #include "MoonLight/ModuleEditor.h"
+        #include "MoonLight/ModuleVirtual.h"
+        #include "MoonLight/ModulePhysical.h"
         #if FT_ENABLED(FT_LIVESCRIPT)
             #include "MoonLight/ModuleLiveScripts.h"
         #endif
@@ -51,9 +52,10 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
-        ModuleEditor moduleEditor = ModuleEditor(&server, &esp32sveltekit, &fileManager);
+        ModuleVirtual moduleVirtual = ModuleVirtual(&server, &esp32sveltekit, &fileManager);
+        ModulePhysical modulePhysical = ModulePhysical(&server, &esp32sveltekit);
         #if FT_ENABLED(FT_LIVESCRIPT)
-            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit);
+            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleVirtual);
         #endif
         ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit);
         ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
@@ -69,7 +71,8 @@ void moonTask(void* pvParameters) {
 
             #if FT_ENABLED(FT_MOONLIGHT)
                 moduleLightsControl.begin();
-                moduleEditor.begin();
+                moduleVirtual.begin();
+                modulePhysical.begin();
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     moduleLiveScripts.begin();
                 #endif
@@ -84,7 +87,8 @@ void moonTask(void* pvParameters) {
         #if FT_ENABLED(FT_MOONBASE)
 
             #if FT_ENABLED(FT_MOONLIGHT)
-                moduleEditor.loop();
+                moduleVirtual.loop();
+                modulePhysical.loop();
             #endif
 
             static unsigned long lastTime50ms = 0;
@@ -137,7 +141,8 @@ void setup()
     // delay(5000); // 🌙 to capture all the serial output
 
     // 🌙 safeMode
-    if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW) { //see verbosePrintResetReason
+    if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) { //see verbosePrintResetReason
+        //ESP_RST_USB is after usb flashing! since esp-idf5
         safeModeMB = true;
     }
 

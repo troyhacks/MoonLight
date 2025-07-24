@@ -9,7 +9,8 @@ nav:
   - "MoonLight":
       - moonlight/overview.md
       - moonbase/module/lightsControl.md
-      - moonbase/module/editor.md
+      - moonbase/module/virtual.md
+      - moonbase/module/physical.md
       - moonlight/nodes.md
       - moonbase/module/liveScripts.md
       - moonbase/module/ChannelView.md

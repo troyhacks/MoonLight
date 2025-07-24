@@ -20,23 +20,62 @@
 
 #include "../MoonBase/Module.h"
 
-#include "ModuleEditor.h"
+#include "ModuleVirtual.h"
 
 class ModuleLiveScripts : public Module
 {
 public:
 
     PsychicHttpServer *_server;
+    FileManager *_fileManager;
+    ModuleVirtual *_moduleVirtual;
 
     ModuleLiveScripts(PsychicHttpServer *server,
-        ESP32SvelteKit *sveltekit
+        ESP32SvelteKit *sveltekit,
+        FileManager *fileManager,
+        ModuleVirtual *moduleVirtual
     ) : Module("liveScripts", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
+        _fileManager = fileManager;
+        _moduleVirtual = moduleVirtual;
     }
 
     void begin() {
         Module::begin();
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
+            _fileManager->addUpdateHandler([&](const String &originId)
+            { 
+                ESP_LOGD(TAG, "FileManager::updateHandler %s", originId.c_str());
+                //read the file state (read all files and folders on FS and collect changes)
+                _fileManager->read([&](FilesState &filesState) {
+                    // loop over all changed files (normally only one)
+                    for (auto updatedItem : filesState.updatedItems) {
+                        //if file is the current live script, recompile it (to do: multiple live effects)
+                        uint8_t index = 0;
+                        for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
+                            String nodeName = nodeState["nodeName"];
+
+                            if (updatedItem == nodeName) {
+                                ESP_LOGD(TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["nodeName"]);
+                                if (liveScriptNode) {
+                                    liveScriptNode->compileAndRun();
+
+                                    //wait until setup has been executed?
+
+                                    _moduleVirtual->requestUIUpdate = true; //update the virtual layers UI
+                                }
+
+                                ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());
+                            }
+                            index++;
+                        }
+                    }
+                });
+            });
+        #endif
     }
 
     //define the data model
