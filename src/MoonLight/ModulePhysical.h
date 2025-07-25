@@ -59,6 +59,7 @@ public:
         values.add(PanelLayout::name());
         values.add(PanelsLayout::name());
         values.add(RingsLayout::name());
+        values.add(WheelLayout::name());
         values.add(SingleLineLayout::name());
         values.add(SingleRowLayout::name());
 
@@ -85,6 +86,7 @@ public:
         else if (equal(name, PanelLayout::name())) node = new PanelLayout();
         else if (equal(name, PanelsLayout::name())) node = new PanelsLayout();
         else if (equal(name, RingsLayout::name())) node = new RingsLayout();
+        else if (equal(name, WheelLayout::name())) node = new WheelLayout();
         else if (equal(name, SingleLineLayout::name())) node = new SingleLineLayout();
         else if (equal(name, SingleRowLayout::name())) node = new SingleRowLayout();
 

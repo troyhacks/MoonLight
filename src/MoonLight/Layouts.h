@@ -271,6 +271,44 @@ class RingsLayout: public Node {
   }
 };
 
+class WheelLayout: public Node {
+  public:
+
+  static const char * name() {return "Wheel 🚥";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  uint8_t pin = 16;
+
+  uint8_t nrOfSpokes = 12;
+  uint8_t ledsPerSpoke = 16;
+  
+  void setup() override {
+    hasLayout = true;
+
+    addControl(nrOfSpokes, "nrOfSpokes", "range", 1, 48);
+    addControl(ledsPerSpoke, "ledsPerSpoke", "range", 1, 255);
+    addControl(pin, "pin", "pin", 1, 48);
+  }
+
+  void addLayout() override {
+    // uint16_t size = ledsPerSpoke * 2;
+    Coord3D middle;
+    middle.x = ledsPerSpoke;
+    middle.y = ledsPerSpoke;
+    middle.z = 0; // size >> 1; this is for later 🔥
+    for (int i=0; i<nrOfSpokes; i++) {
+      float radians = i*360/nrOfSpokes * DEG_TO_RAD;
+      for (int j=0; j<ledsPerSpoke; j++) {
+        float radius = j + 1;
+        float x = radius * sinf(radians);
+        float y = radius * cosf(radians);
+        addLight(Coord3D(x + middle.x, y + middle.y, middle.z));
+      }
+    }
+  }
+};
+
 //custom layouts
 
 //SE16 board
