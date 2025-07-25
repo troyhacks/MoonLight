@@ -30,6 +30,8 @@ public:
 protected:
     PsychicHttpServer *_server;
 
+    std::vector<Node *> *nodes;
+
     NodeManager(String moduleName,
         PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit
@@ -84,7 +86,7 @@ protected:
 
             if (updatedItem.name == "nodeName") { //onName
 
-                Node *oldNode = updatedItem.index[0] < layerP.layerV[0]->nodes.size()?layerP.layerV[0]->nodes[updatedItem.index[0]]:nullptr; //find the node in the nodes list
+                Node *oldNode = updatedItem.index[0] < nodes->size() ? (*nodes)[updatedItem.index[0]] : nullptr; //find the node in the nodes list
                 bool newNode = false;
 
                 // remove or add Nodes (incl controls)
@@ -132,14 +134,14 @@ protected:
                     ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     if (!newNode) {
                         //remove oldNode from the nodes list 
-                        for (uint8_t i = 0; i < layerP.layerV[0]->nodes.size(); i++) {
-                            if (layerP.layerV[0]->nodes[i] == oldNode) {
+                        for (uint8_t i = 0; i < nodes->size(); i++) {
+                            if ((*nodes)[i] == oldNode) {
                                 ESP_LOGD(TAG, "remove node %d", i);
-                                layerP.layerV[0]->nodes.erase(layerP.layerV[0]->nodes.begin() + i);
+                                nodes->erase(nodes->begin() + i);
                                 break;
                             }
                         }
-                        ESP_LOGD(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], layerP.layerV[0]->nodes.size());
+                        ESP_LOGD(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], nodes->size());
                     }
 
                     oldNode->requestMappings();
@@ -163,9 +165,9 @@ protected:
             }
 
             if (updatedItem.name == "on") {
-                if (updatedItem.index[0] < layerP.layerV[0]->nodes.size()) {
-                    ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.as<String>().c_str(), layerP.layerV[0]->nodes.size());
-                    Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
+                if (updatedItem.index[0] < nodes->size()) {
+                    ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.as<String>().c_str(), nodes->size());
+                    Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
                         ESP_LOGD(TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasLayout, nodeClass->hasModifier);
@@ -179,8 +181,8 @@ protected:
 
             if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
                 ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                if (updatedItem.index[0] < layerP.layerV[0]->nodes.size()) {
-                    Node *nodeClass = layerP.layerV[0]->nodes[updatedItem.index[0]];
+                if (updatedItem.index[0] < nodes->size()) {
+                    Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
 

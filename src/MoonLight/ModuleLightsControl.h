@@ -176,7 +176,7 @@ public:
             if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 LEDs per second -> 1 second for 12000 LEDs
                 monitorMillis = millis();
                 
-                if (layerP.lights.header.isPositions == 10) { //send to UI
+                if (layerP.lights.header.isPositions == 2) { //send to UI
                     if (_socket->getConnectedClients() && _state.data["monitorOn"])
                         _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS));
                     layerP.lights.header.isPositions = 0;

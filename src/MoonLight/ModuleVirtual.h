@@ -38,7 +38,9 @@ public:
     }
 
     void begin() {
-        Module::begin();
+        NodeManager::begin();
+
+        nodes = &(layerP.layerV[0]->nodes);
 
         // if (false)
         //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager

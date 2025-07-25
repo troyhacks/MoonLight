@@ -40,7 +40,7 @@
 		let channelsPerLight:number = header[11];
 		let offsetRGB:number = header[12];
 		
-		if (!(isPositions==10)) { 
+		if (!(isPositions==2)) { 
 			//(type == ct_Leds) {
 			if (!done) {
 				requestLayout(); //ask for positions

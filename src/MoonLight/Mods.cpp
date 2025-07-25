@@ -89,6 +89,8 @@ void  ArtNetDriverMod::loop() {
         for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) {
             // set brightness all at once - seems slightly faster than scale8()?
             // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
+
+            //see secondPixel in ESP32-LedDriver!
             
             //if no brightness control and other colors, apply bri
             if (header->offsetBrightness == UINT8_MAX)

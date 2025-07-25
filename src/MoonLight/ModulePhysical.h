@@ -34,7 +34,9 @@ public:
     }
 
     void begin() {
-        Module::begin();
+        NodeManager::begin();
+
+        nodes = &layerP.nodes;
 
         // #if FT_ENABLED(FT_MONITOR)
         //     _socket->registerEvent("monitor");
