@@ -30,7 +30,23 @@ static struct Audio {
 
 #include "Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
 
-class ArtNetDriverMod: public Node {
+class DriverNode: public Node {
+  uint8_t colorOrderSaved = UINT8_MAX;
+  uint8_t colorOrder = 3;
+  uint16_t maxPowerSaved = UINT8_MAX;
+  uint16_t maxPower = 10;
+  uint8_t correctedBrightness = UINT8_MAX;
+
+  public:
+
+  void setup() override;
+
+  void loop() override;
+
+  void reOrderAndDimRGB(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel);
+};
+
+class ArtNetDriverMod: public DriverNode {
   public:
 
   static const char * name() {return "Art-Net Driver ☸️";}
@@ -43,13 +59,7 @@ class ArtNetDriverMod: public Node {
   uint16_t channelsPerOutput = 512; //3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
   uint16_t universesPerOutput = 1; //7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
 
-  void setup() {
-    addControl(controllerIP3, "controllerIP", "number");
-    addControl(FPSLimiter, "FPSLimiter", "number");
-    addControl(nrOfOutputs, "nrOfOutputs", "number");
-    addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
-    addControl(universesPerOutput, "universesPerOutput", "number");
-  }
+  void setup() override;
 
   const size_t ART_NET_HEADER_SIZE = 12;
   const uint8_t ART_NET_HEADER[12] = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
@@ -122,16 +132,12 @@ class HUB75DriverMod: public Node {
   void addLayout() override;
 };
 
-class PhysicalDriverMod: public Node {
+class PhysicalDriverMod: public DriverNode {
   public:
 
   static const char * name() {return "Physical Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
-
-  uint16_t setMaxPowerBrightnessFactor = 90; //tbd: implement driver.setMaxPowerInMilliWatts
-  bool initDone = false;
-  uint8_t colorOrder = 3;
 
   void setup() override;
   void loop() override;
@@ -139,7 +145,7 @@ class PhysicalDriverMod: public Node {
   void addLayout() override;
 };
 
-class VirtualDriverMod: public Node {
+class VirtualDriverMod: public DriverNode {
   public:
 
   static const char * name() {return "Virtual Driver ☸️";}

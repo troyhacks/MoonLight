@@ -134,11 +134,11 @@ public:
 
   void requestMappings() {
     if (hasModifier || hasLayout) {
-        ESP_LOGD(TAG, "hasLayout or Modifier -> requestMapVirtual %s", name());
+        ESP_LOGD(TAG, "hasLayout or Modifier -> requestMapVirtual");
         layerV->layerP->requestMapVirtual = true;
     }
     if (hasLayout) {
-        ESP_LOGD(TAG, "hasLayout -> requestMapPhysical %s", name());
+        ESP_LOGD(TAG, "hasLayout -> requestMapPhysical");
         layerV->layerP->requestMapPhysical = true;
     }
   }

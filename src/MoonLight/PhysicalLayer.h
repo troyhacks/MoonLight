@@ -39,11 +39,17 @@ class Modifier; //Forward as PhysicalLayer refers back to Modifier
 struct LightsHeader {
   Coord3D size = Coord3D(16,16,1); //0 max position of light, counted by addLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint16_t nrOfLights = 256; //4 nr of physical lights, counted by addLight
-  uint8_t isPositions = 0; //6 is the lights.positions array filled with positions
+  struct {                 //condensed rgb
+    uint8_t isPositions: 2 = 0;
+    uint8_t offsetRed:2 = 1; //GRB is default
+    uint8_t offsetGreen:2 = 0;
+    uint8_t offsetBlue:2 = 2;
+  }; //8 bits
+  // uint8_t isPositions = 0; //6 is the lights.positions array filled with positions
   uint8_t brightness; //7 brightness set by light control (sent to LEDs driver normally)
-  uint8_t red; //8 brightness set by light control (sent to LEDs driver normally)
-  uint8_t green; //9 brightness set by light control (sent to LEDs driver normally)
-  uint8_t blue; //10 brightness set by light control (sent to LEDs driver normally)
+  uint8_t red = 255; //8 brightness set by light control (sent to LEDs driver normally)
+  uint8_t green = 255; //9 brightness set by light control (sent to LEDs driver normally)
+  uint8_t blue = 255; //10 brightness set by light control (sent to LEDs driver normally)
   uint8_t channelsPerLight = 3; //11 RGB default
   uint8_t offsetRGB = 0; //12 RGB default
   uint8_t offsetWhite = UINT8_MAX;
@@ -67,6 +73,9 @@ struct LightsHeader {
   void resetOffsets() {
     channelsPerLight = 3; //RGB default
     offsetRGB = 0;
+    offsetRed = 1;
+    offsetGreen = 0;
+    offsetBlue = 2;
     offsetWhite = UINT8_MAX;
     offsetBrightness = UINT8_MAX;
     offsetPan = UINT8_MAX;

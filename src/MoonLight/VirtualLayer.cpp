@@ -72,7 +72,7 @@ void VirtualLayer::loop() {
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
   // ESP_LOGD(TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
   switch (physMap.mapType) {
-    case m_color:
+    case m_zeroLights:
     // case m_rgbColor:
       physMap.indexP = indexP;
       physMap.mapType = m_oneLight;
@@ -123,7 +123,7 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
   if (indexV < mappingTableSizeUsed) {
     // ESP_LOGD(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
     switch (mappingTable[indexV].mapType) {
-      case m_color:{
+      case m_zeroLights:{
         //only room for storing colors
         if (length <= 4) { //also for RGBW, but store only RGB ... WIP
           mappingTable[indexV].rgb14 = ((min(channels[0] + 3, 255) >> 3) << 9) + 
@@ -134,27 +134,11 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
       }
       case m_oneLight: {
         uint16_t indexP = mappingTable[indexV].indexP;
-        //temp fix for cube202020 (some curtains are bgr)
-        // if (indexP > 2800) {
-        //   fix->ledsP[indexP].r = color.b;
-        //   fix->ledsP[indexP].g = color.g;
-        //   fix->ledsP[indexP].b = color.r;
-        // }
-        // else
-        // Serial.printf(" (%d %d,%d,%d %d %d %d)", indexP, channels[0], channels[1], channels[2], layerP->lights.header.channelsPerLight, start, length);
         memcpy(&layerP->lights.channels[indexP*layerP->lights.header.channelsPerLight + offset], channels, length);
-        // memcpy(&layerP->lights.channels[indexP*3], channels, 3);
-  
-        // &layerP->lights.channels[indexP*sizeof(T)] = valueAsBytes;
         break; }
       case m_moreLights:
         if (mappingTable[indexV].indexes < mappingTableIndexes.size())
           for (uint16_t indexP: mappingTableIndexes[mappingTable[indexV].indexes]) {
-            // if (indexP > 2800) {
-            //   fix->ledsP[indexP].r = color.b;
-            //   fix->ledsP[indexP].g = color.g;
-            //   fix->ledsP[indexP].b = color.r;
-            // } else
             memcpy(&layerP->lights.channels[indexP*layerP->lights.header.channelsPerLight + offset], channels, length);
           }
         else
@@ -166,10 +150,6 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
   else if (indexV * layerP->lights.header.channelsPerLight + offset + length < MAX_CHANNELS) {//no mapping
     memcpy(&layerP->lights.channels[indexV*layerP->lights.header.channelsPerLight + offset], channels, length);
   }
-    // layerP->lights.dmxChannels[indexV] = (byte*)&color;
-  // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-  // else //if (indexV != UINT16_MAX) //assuming UINT16_MAX is set explicitly (e.g. in XYZ)
-  //   ESP_LOGW(TAG, " dev setLight %d >= %d", indexV, MAX_CHANNELS);
 }
 
 template <typename T>
@@ -184,7 +164,7 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
         T *result = (T*)&layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * layerP->lights.header.channelsPerLight + offset]; //any will do as they are all the same
         return *result; //return the color as CRGB
         break; }
-      default: // m_color:
+      default: // m_zeroLights:
         if (layerP->lights.header.channelsPerLight <= 4) { //also for RGBW but retrieve only RGB ... WIP
           T result;
           ((uint8_t*)&result)[0] = (mappingTable[indexV].rgb14 >> 9) << 3;
@@ -346,24 +326,24 @@ void VirtualLayer::addLight(Coord3D position) {
 
 void VirtualLayer::addLayoutPost() {
   // prepare logging:
-  uint16_t nrOfPhysical = 0;
-  uint16_t nrOfPhysicalM = 0;
-  uint16_t nrOfColor = 0;
+  uint16_t nrOfOneLight = 0;
+  uint16_t nrOfMoreLights = 0;
+  uint16_t nrOfZeroLights = 0;
   for (size_t i = 0; i< nrOfLights; i++) {
     PhysMap &map = mappingTable[i];
     switch (map.mapType) {
-      case m_color:
-        nrOfColor++;
+      case m_zeroLights:
+        nrOfZeroLights++;
         break;
       case m_oneLight:
         // ESP_LOGD(TAG,"%d mapping =1: #ledsP : %d", i, map.indexP);
-        nrOfPhysical++;
+        nrOfOneLight++;
         break;
       case m_moreLights:
         // Char<32> str;
         for (uint16_t indexP: mappingTableIndexes[map.indexes]) {
           // str += indexP;
-          nrOfPhysicalM++;
+          nrOfMoreLights++;
         }
         // ESP_LOGD(TAG, "%d mapping >1: #ledsP : %s", i, str.c_str());
         break;
@@ -372,7 +352,7 @@ void VirtualLayer::addLayoutPost() {
     //   ESP_LOGD(TAG, "%d no mapping\n", x);
   }
 
-  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 0:%d + 1:%d + m:%d (p:%d)", size.x, size.y, size.z, nrOfLights, nrOfColor, nrOfPhysical, mappingTableIndexesSizeUsed, nrOfPhysicalM);
+  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 1:0:%d + 1:1:%d + mti:%d (1:m:%d)", size.x, size.y, size.z, nrOfLights, nrOfZeroLights, nrOfOneLight, mappingTableIndexesSizeUsed, nrOfMoreLights);
 
 }
 

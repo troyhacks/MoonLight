@@ -35,7 +35,12 @@
         const header = lights.slice(0, headerLength);
         const data = lights.slice(headerLength);
 
-		let isPositions:number = header[6];
+		// let isPositions:number = header[6]; 
+		const isPositions   = (header[6] >> 0) & 0x3; // bits 0-1
+		const offsetRed     = (header[6] >> 2) & 0x3; // bits 2-3
+		const offsetGreen   = (header[6] >> 4) & 0x3; // bits 4-5
+		const offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7
+
 		let nrOfLights = header[4] + 256 * header[5];
 		let channelsPerLight:number = header[11];
 		let offsetRGB:number = header[12];

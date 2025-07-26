@@ -87,7 +87,6 @@ PhysicalLayer::PhysicalLayer() {
         ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
 
         if (pass == 1) {
-            lights.header.resetOffsets();
             lights.header.size = {0,0,0};
             lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects

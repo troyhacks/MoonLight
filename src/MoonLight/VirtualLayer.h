@@ -20,7 +20,7 @@
 #include "PhysicalLayer.h"
 
 enum mapType {
-    m_color,
+    m_zeroLights,
     m_oneLight,
     m_moreLights,
     m_count //keep as last entry
@@ -38,7 +38,7 @@ struct PhysMap {
     
     PhysMap() {
       // ESP_LOGD(TAG, "Constructor");
-      mapType = m_color; // the default until indexP is added
+      mapType = m_zeroLights; // the default until indexP is added
       rgb14 = 0;
     }
   };

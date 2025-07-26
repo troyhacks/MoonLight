@@ -15,8 +15,8 @@ Shows info about the physical and virtual layer
 * **Layers**: The virtual layers defined (currently only 1)
     * **NrOfLights and size**: virtual layer can differ from the physical layer (.e.g when mirroring it is only half)
     * **Mapping table#**: nr of entries in the mapping table, is the same is nr of virtual pixels
-    * **Color#**: the number of lights which are not mapped to a physical pixel (color is stored in the mapping table)
-    * **Phys#**: The number of lights which have a 1:1 mapping between physical and virtual (if no modifier all is phys)
+    * **nrOfZeroLights**: the number of lights which are not mapped to a physical pixel (color is stored in the mapping table)
+    * **nrOfOneLight**: The number of lights which have a 1:1 mapping between physical and virtual (if no modifier all is phys)
     * **Mapping table indexes**: The number of physical lights which are in a 1:many mapping
-    * **Phys M**: the number of virtual lights which are in a 1:many mapping
+    * **nrOfMoreLights**: the number of virtual lights which are in a 1:many mapping
     * **Nodes#**: The number of nodes assigned to a virtual layer (currently all)

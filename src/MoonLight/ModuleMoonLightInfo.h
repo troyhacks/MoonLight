@@ -44,10 +44,10 @@ public:
             property = details.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536;
             property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
             property = details.add<JsonObject>(); property["name"] = "mappingTable#"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "color#"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "phys#"; property["type"] = "number"; property["max"] = 65536;
+            property = details.add<JsonObject>(); property["name"] = "nrOfZeroLights"; property["type"] = "number"; property["max"] = 65536;
+            property = details.add<JsonObject>(); property["name"] = "nrOfOneLight"; property["type"] = "number"; property["max"] = 65536;
             property = details.add<JsonObject>(); property["name"] = "mappingTableIndexes#"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "physM#"; property["type"] = "number"; property["max"] = 65536;
+            property = details.add<JsonObject>(); property["name"] = "nrOfMoreLights"; property["type"] = "number"; property["max"] = 65536;
             property = details.add<JsonObject>(); property["name"] = "nodes#"; property["type"] = "number"; property["max"] = 65536;
         }
     }
@@ -75,21 +75,21 @@ public:
             data["size"]["z"] = layerP.lights.header.size.z;
             uint8_t index = 0;
             for (VirtualLayer *layerV : layerP.layerV) {
-                uint16_t nrOfPhysical = 0;
-                uint16_t nrOfPhysicalM = 0;
-                uint16_t nrOfColor = 0;
+                uint16_t nrOfZeroLights = 0;
+                uint16_t nrOfOneLight = 0;
+                uint16_t nrOfMoreLights = 0;
                 for (size_t i = 0; i < layerV->mappingTableSizeUsed; i++) {
                     PhysMap &map = layerV->mappingTable[i];
                     switch (map.mapType) {
-                    case m_color:
-                        nrOfColor++;
+                    case m_zeroLights:
+                        nrOfZeroLights++;
                         break;
                     case m_oneLight:
-                        nrOfPhysical++;
+                        nrOfOneLight++;
                         break;
                     case m_moreLights:
                         for (uint16_t indexP: layerV->mappingTableIndexes[map.indexes]) {
-                            nrOfPhysicalM++;
+                            nrOfMoreLights++;
                         }
                         break;
                     }
@@ -100,10 +100,10 @@ public:
                 data["layers"][index]["size"]["y"] = layerV->size.y;
                 data["layers"][index]["size"]["z"] = layerV->size.z;
                 data["layers"][index]["mappingTable#"] = layerV->mappingTable.size();
-                data["layers"][index]["color#"] = nrOfColor;
-                data["layers"][index]["phys#"] = nrOfPhysical;
+                data["layers"][index]["nrOfZeroLights"] = nrOfZeroLights;
+                data["layers"][index]["nrOfOneLight"] = nrOfOneLight;
                 data["layers"][index]["mappingTableIndexes#"] = layerV->mappingTableIndexesSizeUsed;
-                data["layers"][index]["physM#"] = nrOfPhysicalM;
+                data["layers"][index]["nrOfMoreLights"] = nrOfMoreLights;
                 data["layers"][index]["nodes#"] = layerV->nodes.size();
                 index++;
             }

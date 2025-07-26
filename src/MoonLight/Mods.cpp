@@ -15,10 +15,116 @@
 
 #include <ESP32SvelteKit.h>
 
+#if HP_PHYSICAL_DRIVER
+  #include "ESP32-LedsDriver.h"
+  #define MAX_PINS 20 // this is also defined in ESP32-LedsDriver.h...
+  #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
+    static PhysicalDriverESP32S3 ledsDriver; //    sizeof(driver) = 1080K !
+  #elif CONFIG_IDF_TARGET_ESP32
+    static PhysicalDriverESP32D0 ledsDriver; //    sizeof(driver) = 1080K !
+  #endif
+#endif
+
 #include <AsyncUDP.h>
 #define ARTNET_DEFAULT_PORT 6454
 
-void  ArtNetDriverMod::loop() {
+void DriverNode::setup() {
+  addControl(maxPower, "maxPower", "number", 0, 100);
+  JsonObject property = addControl(colorOrder, "colorOrder", "select"); 
+  JsonArray values = property["values"].to<JsonArray>();
+  values.add("GRBW");
+  values.add("RGB");
+  values.add("RBG");
+  values.add("GRB");
+  values.add("GBR");
+  values.add("BRG");
+  values.add("BGR");
+}
+
+void DriverNode::loop() {
+
+  LightsHeader *header = &layerV->layerP->lights.header;
+
+  //use ledsDriver LUT for super efficient leds dimming 🔥 (used by reOrderAndDimRGB)
+
+  uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
+
+  if (maxPowerSaved != maxPower) {
+    //Use FastLED for setMaxPowerInMilliWatts stuff
+    correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    ESP_LOGD(TAG, "setMaxPowerInMilliWatts %d (b:%d -> cb:%d)", maxPower, brightness, correctedBrightness);
+    maxPowerSaved = maxPower;
+  }
+
+  if (ledsDriver.getBrightness() != correctedBrightness) {
+    correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    ESP_LOGD(TAG, "setBrightness %d (cb:%d)", brightness, correctedBrightness);
+    ledsDriver.setBrightness(correctedBrightness);
+  }
+
+  CRGB correction;
+  uint8_t white;
+  ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
+  if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
+    ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
+    ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
+  }
+
+  if (colorOrder != colorOrderSaved) {
+    uint8_t oldChannelsPerLight = header->channelsPerLight;
+
+    header->resetOffsets(); //after this addLayout is called of different layout nodes which might set additional offsets (WIP)
+
+    if (colorOrder == 0) { header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3;} //GRBW
+    else if (colorOrder == 1) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //RGB
+    else if (colorOrder == 2) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //RBG
+    else if (colorOrder == 3) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //GRB
+    else if (colorOrder == 4) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //GBR
+    else if (colorOrder == 5) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BRG
+    else if (colorOrder == 6) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BGR
+
+    ESP_LOGD(TAG, "setColorOrder %d (cPL:%d, o:%d,%d,%d,%d)", colorOrder, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
+
+    ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+
+    // if (oldChannelsPerLight != header->channelsPerLight) {
+    //   restartNeeded = true; //in case 
+    // }
+
+    colorOrderSaved = colorOrder;
+  }
+}
+
+void DriverNode::reOrderAndDimRGB(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel) {
+  LightsHeader *header = &layerV->layerP->lights.header;
+  // uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255;
+
+  //use ledsDriver.__rbg_map[0]; for super fast brightness and gamma correction! see secondPixel in ESP32-LedDriver!
+  //apply the LUT to the RGB channels !
+
+  packetRGBChannel[header->offsetRed] = ledsDriver.__red_map[lightsRGBChannel[0]];
+  packetRGBChannel[header->offsetGreen] = ledsDriver.__green_map[lightsRGBChannel[1]];
+  packetRGBChannel[header->offsetBlue] = ledsDriver.__blue_map[lightsRGBChannel[2]];
+}
+
+void ArtNetDriverMod::setup() {
+
+  DriverNode::setup();
+
+  addControl(controllerIP3, "controllerIP", "number");
+  addControl(FPSLimiter, "FPSLimiter", "number");
+  addControl(nrOfOutputs, "nrOfOutputs", "number");
+  addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
+  addControl(universesPerOutput, "universesPerOutput", "number");
+}
+
+void ArtNetDriverMod::loop() {
+
+  DriverNode::loop();
+
+  LightsHeader *header = &layerV->layerP->lights.header;
+
+  //continue with Art-Net code
   controllerIP[0] = WiFi.localIP()[0];
   controllerIP[1] = WiFi.localIP()[1];
   controllerIP[2] = WiFi.localIP()[2];
@@ -26,15 +132,14 @@ void  ArtNetDriverMod::loop() {
 
   if(!controllerIP) return;
   
-  LightsHeader *header = &layerV->layerP->lights.header;
   if (header->isPositions != 0) return; //don't update if positions are sent
 
   //wait until the throttle FPS is reached
   unsigned long wait = 1000 / FPSLimiter + lastMillis - millis();
   if (wait > 0 && wait < 1000 / FPSLimiter)
     delay(wait); // delay in ms
-  else
-    ESP_LOGW(TAG, "wait %d", wait);
+  // else
+  //   ESP_LOGW(TAG, "wait %d", wait);
   lastMillis = millis();
 
   // calculate the number of UDP packets we need to send
@@ -79,42 +184,50 @@ void  ArtNetDriverMod::loop() {
         // set the parts of the Art-Net packet header that change:
         packet_buffer[12] = sequenceNumber;
         packet_buffer[14] = hardware_output_universe;
-        packet_buffer[16] = packetSize >> 8;
-        packet_buffer[17] = packetSize;
+        packet_buffer[16] = packetSize >> 8; //uint16_t over 2 bytes
+        packet_buffer[17] = packetSize;//uint16_t over 2 bytes
 
         // bulk copy the buffer range to the packet buffer after the header 
         memcpy(packet_buffer+18, (&layerV->layerP->lights.channels[0])+bufferOffset, packetSize); //start from the first byte of ledsP[0]
 
         //no brightness scaling for the time being
-        for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) {
+        for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) { //fill the packet with lights (all channels of the light)
             // set brightness all at once - seems slightly faster than scale8()?
             // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
 
-            //see secondPixel in ESP32-LedDriver!
+            // uint8_t *firstPacketBufferChannel = &packet_buffer[i];
+            // uint8_t *firstLightsChannel = &layerV->layerP->lights.channels[bufferOffset];
             
-            //if no brightness control and other colors, apply bri
-            if (header->offsetBrightness == UINT8_MAX)
-                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB] = (packet_buffer[i+j+header->offsetRGB] * header->brightness) >> 8;
-            if (header->offsetRGB1 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
-                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB1] = (packet_buffer[i+j+header->offsetRGB1] * header->brightness) >> 8;
-            if (header->offsetRGB2 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
-                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB2] = (packet_buffer[i+j+header->offsetRGB2] * header->brightness) >> 8;
-            if (header->offsetRGB3 != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
-                for (int j=0; j < 3; j++) packet_buffer[i+j+header->offsetRGB3] = (packet_buffer[i+j+header->offsetRGB3] * header->brightness) >> 8;
-            if (header->offsetWhite != UINT8_MAX && header->offsetBrightness == UINT8_MAX)
+            //reorder RGB and apply brightness and gamma correction
+
+            //use ledsDriver LUT for super efficient leds dimming 🔥 (used by reOrderAndDimRGB)
+
+            reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB], &layerV->layerP->lights.channels[bufferOffset + header->offsetRGB]);
+            //   firstPacketBufferChannel[header->offsetRGB + header->offsetRed] = (firstLightsChannel[header->offsetRGB] * brightness * header->red) >> 16;
+            //   firstPacketBufferChannel[header->offsetRGB + header->offsetGreen] = (firstLightsChannel[header->offsetRGB+1] * brightness * header->green) >> 16;
+            //   firstPacketBufferChannel[header->offsetRGB + header->offsetBlue] = (firstLightsChannel[header->offsetRGB+2] * brightness * header->blue) >> 16;
+
+            if (header->offsetRGB1 != UINT8_MAX )
+              reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB1], &layerV->layerP->lights.channels[bufferOffset + header->offsetRGB1]);
+            if (header->offsetRGB2 != UINT8_MAX )
+              reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB2], &layerV->layerP->lights.channels[bufferOffset + header->offsetRGB2]);
+            if (header->offsetRGB3 != UINT8_MAX )
+              reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB3], &layerV->layerP->lights.channels[bufferOffset + header->offsetRGB3]);
+
+            if (header->offsetWhite != UINT8_MAX && header->offsetBrightness == UINT8_MAX && header->brightness != 255)
                 packet_buffer[i+header->offsetWhite] = (packet_buffer[i+header->offsetWhite] * header->brightness) >> 8;
 
             //todo: correct values using RGB correction: header->red/green/blue. Need to know the color order first ...
         }
 
-        bufferOffset += packetSize;
+        bufferOffset += packetSize; //multiple of channelsPerLight
         
         if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, ARTNET_DEFAULT_PORT)) {
             Serial.print("🐛");
             return; // borked
         }
 
-        hardware_output_universe++;
+        hardware_output_universe++; //each packet is one universe
     }
   }
 }
@@ -404,37 +517,17 @@ void  ArtNetDriverMod::loop() {
   void HUB75DriverMod::loop() {
   }
 
-  #if HP_PHYSICAL_DRIVER || HP_PHYSICAL_DRIVER_S3
-  #include "ESP32-LedsDriver.h"
-  #define MAX_PINS 20 // this is also defined in ESP32-LedsDriver.h...
-    #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
-      static PhysicalDriverESP32S3 ledsDriver; //    sizeof(driver) = 1080K !
-    #elif CONFIG_IDF_TARGET_ESP32
-      static PhysicalDriverESP32D0 ledsDriver; //    sizeof(driver) = 1080K !
-    #endif
-  #endif
-
   void  PhysicalDriverMod::setup() {
 
     hasLayout = true; //so addLayout is called if needed
 
-    addControl(setMaxPowerBrightnessFactor, "maxPower", "number");
-    JsonObject property = addControl(colorOrder, "colorOrder", "select"); 
-    JsonArray values = property["values"].to<JsonArray>();
-    values.add("GRBW");
-    values.add("RGB");
-    values.add("RBG");
-    values.add("GRB");
-    values.add("GBR");
-    values.add("BRG");
-    values.add("BGR");
+    DriverNode::setup();
   }
 
   void PhysicalDriverMod::addLayout() {
-    if (initDone || layerV->layerP->sortedPins.size() == 0) return;
+    if (ledsDriver.initLedsDone || layerV->layerP->sortedPins.size() == 0) return;
 
     if (layerV->layerP->pass == 1) { //physical
-      initDone = true;
       ESP_LOGD(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
       if (safeModeMB) {
           ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
@@ -463,21 +556,8 @@ void  ArtNetDriverMod::loop() {
 
           if (numPins > 0) {
 
-            uint8_t channelsPerLed = 3;
-            uint8_t offsetRed = UINT8_MAX;
-            uint8_t offsetGreen = UINT8_MAX;
-            uint8_t offsetBlue = UINT8_MAX;
-            uint8_t offsetWhite = UINT8_MAX;
-            if (colorOrder == 0) { channelsPerLed = 4; offsetRed = 1; offsetGreen = 0; offsetBlue = 2; offsetWhite = 3; } //GRBW
-            else if (colorOrder == 1) { channelsPerLed = 3; offsetRed = 0; offsetGreen = 1; offsetBlue = 2; } //RGB
-            else if (colorOrder == 2) { channelsPerLed = 3; offsetRed = 0; offsetGreen = 2; offsetBlue = 1; } //RBG
-            else if (colorOrder == 3) { channelsPerLed = 3; offsetRed = 1; offsetGreen = 0; offsetBlue = 2; } //GRB
-            else if (colorOrder == 4) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 0; offsetBlue = 1; } //GBR
-            else if (colorOrder == 5) { channelsPerLed = 3; offsetRed = 1; offsetGreen = 2; offsetBlue = 0; } //BRG
-            else if (colorOrder == 6) { channelsPerLed = 3; offsetRed = 2; offsetGreen = 1; offsetBlue = 0; } //BGR
-            ESP_LOGD(TAG, "p:%p bf:%d", &ledsDriver, setMaxPowerBrightnessFactor);
-            ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, channelsPerLed, offsetRed, offsetGreen, offsetBlue, offsetWhite); //102 is GRB
-            ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
+            ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, layerV->layerP->lights.header.channelsPerLight, layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite); //102 is GRB
+
             #if ML_LIVE_MAPPING
               driver.setMapLed(&mapLed);
             #endif
@@ -488,39 +568,26 @@ void  ArtNetDriverMod::loop() {
   }
 
   void PhysicalDriverMod::loop() {
-    if (!initDone) return;
+    #if HP_PHYSICAL_DRIVER
+      if (!ledsDriver.initLedsDone) return;
 
-    if (layerV->layerP->lights.header.isPositions == 0) {
+      if (layerV->layerP->lights.header.isPositions == 0) {
 
-      #if HP_PHYSICAL_DRIVER
-        if (ledsDriver.getBrightness() != layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8) {
-          ESP_LOGD(TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
-          ledsDriver.setBrightness(layerV->layerP->lights.header.brightness * setMaxPowerBrightnessFactor >> 8);
-        }
+          DriverNode::loop();
 
-        CRGB correction;
-        uint8_t white;
-        ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
-        if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
-          ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
-          ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
-        }
-
-        if (ledsDriver.initLedsDone)
           ledsDriver.show();
-      #endif
-    }
+      }
+    #endif
   }
-
-  // #include "I2SClocklessVirtualLedDriver.h"
-  // static I2SClocklessVirtualLedDriver driverV;
 
   void VirtualDriverMod::setup() {
     hasLayout = true; //so addLayout is called if needed
+    DriverNode::setup();
   }
   void VirtualDriverMod::addLayout() {
   }
   void VirtualDriverMod::loop() {
+    DriverNode::loop();
   }
 
 #endif
