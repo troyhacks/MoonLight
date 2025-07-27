@@ -3,6 +3,15 @@
 * [Start developing for MoonLight](https://moonmodules.org/MoonLight/develop/overview/)
     * [ESP32 Sveltekit](https://moonmodules.org/MoonLight/esp32sveltekit/)
 
+## Where you can help
+
+* Improve the web installer
+* Improve the UI (Svelte 5, DaisyUI 5, TailWind 4)
+* Tune FastLED, add FastLED 2D effects
+* CI automation (Generate daily builds in Github and use by installer)
+
+Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg/4rSTthvKHe)
+
 ## Developing
 
 * Read the [ESP32 Sveltekit docs](https://moonmodules.org/MoonLight/esp32sveltekit/)

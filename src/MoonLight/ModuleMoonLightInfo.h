@@ -39,6 +39,8 @@ public:
         property = root.add<JsonObject>(); property["name"] = "colorOrder"; property["type"] = "text"; property["max"] = 32;
         property = root.add<JsonObject>(); property["name"] = "maxChannels"; property["type"] = "number"; property["max"] = 65538;
         property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
+        property = root.add<JsonObject>(); property["name"] = "nodes#"; property["type"] = "number"; property["max"] = 65536;
+
         property = root.add<JsonObject>(); property["name"] = "layers"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536;
@@ -73,6 +75,7 @@ public:
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;
             data["size"]["z"] = layerP.lights.header.size.z;
+            data["nodes#"] = layerP.nodes.size();
             uint8_t index = 0;
             for (VirtualLayer *layerV : layerP.layerV) {
                 uint16_t nrOfZeroLights = 0;

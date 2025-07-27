@@ -65,9 +65,6 @@ public:
 
         //custom
         values.add(SE16Layout::name());
-        values.add(MHTroy15Layout::name());
-        values.add(MHTroy32Layout::name());
-        values.add(MHWowi24Layout::name());
 
         values.add(ArtNetDriverMod::name());
         values.add(FastLEDDriverMod::name());
@@ -92,9 +89,6 @@ public:
 
         //custom
         else if (equal(name, SE16Layout::name())) node = new SE16Layout();
-        else if (equal(name, MHTroy15Layout::name())) node = new MHTroy15Layout();
-        else if (equal(name, MHTroy32Layout::name())) node = new MHTroy32Layout();
-        else if (equal(name, MHWowi24Layout::name())) node = new MHWowi24Layout();
 
         else if (equal(name, ArtNetDriverMod::name())) node = new ArtNetDriverMod();
         else if (equal(name, FastLEDDriverMod::name())) node = new FastLEDDriverMod();

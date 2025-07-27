@@ -39,8 +39,8 @@ void Node::updateControl(JsonObject control) {
                 *valuePointer = control["value"].as<bool>();
             }
             else if (control["type"] == "coord3D") {
-            Coord3D *valuePointer = (Coord3D *)pointer;
-            *valuePointer = control["value"].as<Coord3D>();
+                Coord3D *valuePointer = (Coord3D *)pointer;
+                *valuePointer = control["value"].as<Coord3D>();
             }
             else
                 ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());

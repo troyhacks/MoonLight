@@ -29,8 +29,10 @@
 #define ARTNET_DEFAULT_PORT 6454
 
 void DriverNode::setup() {
+  hasLayout = true; //so addLayout is called if needed
+
   addControl(maxPower, "maxPower", "number", 0, 100);
-  JsonObject property = addControl(colorOrder, "colorOrder", "select"); 
+  JsonObject property = addControl(lightPreset, "lightPreset", "select"); 
   JsonArray values = property["values"].to<JsonArray>();
   values.add("GRBW");
   values.add("RGB");
@@ -39,6 +41,10 @@ void DriverNode::setup() {
   values.add("GBR");
   values.add("BRG");
   values.add("BGR");
+  values.add("GRBW6");
+  values.add("TroyMH15");
+  values.add("TroyMH32");
+  values.add("WowiMH24");
 }
 
 void DriverNode::loop() {
@@ -49,17 +55,13 @@ void DriverNode::loop() {
 
   uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
 
-  if (maxPowerSaved != maxPower) {
+  if (brightness != brightnessSaved || maxPowerSaved != maxPower) {
     //Use FastLED for setMaxPowerInMilliWatts stuff
-    correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
-    ESP_LOGD(TAG, "setMaxPowerInMilliWatts %d (b:%d -> cb:%d)", maxPower, brightness, correctedBrightness);
-    maxPowerSaved = maxPower;
-  }
-
-  if (ledsDriver.getBrightness() != correctedBrightness) {
-    correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
-    ESP_LOGD(TAG, "setBrightness %d (cb:%d)", brightness, correctedBrightness);
+    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    ESP_LOGD(TAG, "setBrightmess b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
     ledsDriver.setBrightness(correctedBrightness);
+    brightnessSaved = brightness;
+    maxPowerSaved = maxPower;
   }
 
   CRGB correction;
@@ -70,28 +72,69 @@ void DriverNode::loop() {
     ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
   }
 
-  if (colorOrder != colorOrderSaved) {
+}
+
+void DriverNode::updateControl(JsonObject control) {
+  Node::updateControl(control);
+
+  LightsHeader *header = &layerV->layerP->lights.header;
+
+  if (control["name"] == "lightPreset") {
     uint8_t oldChannelsPerLight = header->channelsPerLight;
 
     header->resetOffsets(); //after this addLayout is called of different layout nodes which might set additional offsets (WIP)
 
-    if (colorOrder == 0) { header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3;} //GRBW
-    else if (colorOrder == 1) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //RGB
-    else if (colorOrder == 2) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //RBG
-    else if (colorOrder == 3) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //GRB
-    else if (colorOrder == 4) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //GBR
-    else if (colorOrder == 5) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BRG
-    else if (colorOrder == 6) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BGR
+    if (lightPreset == 0) { header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3;} //GRBW
+    else if (lightPreset == 1) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //RGB
+    else if (lightPreset == 2) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //RBG
+    else if (lightPreset == 3) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //GRB
+    else if (lightPreset == 4) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //GBR
+    else if (lightPreset == 5) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BRG
+    else if (lightPreset == 6) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BGR
+    else if (lightPreset == 7) { header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3;} //GRBW6
+    else if (lightPreset == 8) { //troy32
+      layerV->layerP->lights.header.channelsPerLight = 32;
+      layerV->layerP->lights.header.offsetRGB = 9;
+      layerV->layerP->lights.header.offsetRGB1 = 13;
+      layerV->layerP->lights.header.offsetRGB2 = 17;
+      layerV->layerP->lights.header.offsetRGB3 = 24;
+      layerV->layerP->lights.header.offsetPan = 0;
+      layerV->layerP->lights.header.offsetTilt = 2;
+      layerV->layerP->lights.header.offsetZoom = 5;
+      layerV->layerP->lights.header.offsetBrightness = 6;
+    }
+    else if (lightPreset == 9) { //troyMH15
+      layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
+      layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
+      layerV->layerP->lights.header.offsetPan = 0;
+      layerV->layerP->lights.header.offsetTilt = 1;
+      layerV->layerP->lights.header.offsetZoom = 7;
+      layerV->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
+      layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
+      layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
+    }
+    else if (lightPreset == 10) { //wowiMH24
+      layerV->layerP->lights.header.channelsPerLight = 24;
+      layerV->layerP->lights.header.offsetPan = 0;
+      layerV->layerP->lights.header.offsetTilt = 1;
+      layerV->layerP->lights.header.offsetBrightness = 3;
+      layerV->layerP->lights.header.offsetRGB = 4;
+      layerV->layerP->lights.header.offsetRGB1 = 8;
+      layerV->layerP->lights.header.offsetRGB2 = 12;
+      layerV->layerP->lights.header.offsetZoom = 17;
+    }
 
-    ESP_LOGD(TAG, "setColorOrder %d (cPL:%d, o:%d,%d,%d,%d)", colorOrder, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
+    ESP_LOGD(TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
 
-    ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+    if (ledsDriver.initLedsDone) {
+      
+      ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
 
-    // if (oldChannelsPerLight != header->channelsPerLight) {
-    //   restartNeeded = true; //in case 
-    // }
+      if (oldChannelsPerLight != header->channelsPerLight)
+        restartNeeded = true; //in case 
+    }
 
-    colorOrderSaved = colorOrder;
+    lightPresetSaved = true;
   }
 }
 
@@ -525,7 +568,7 @@ void ArtNetDriverMod::loop() {
   }
 
   void PhysicalDriverMod::addLayout() {
-    if (ledsDriver.initLedsDone || layerV->layerP->sortedPins.size() == 0) return;
+    if (!lightPresetSaved || ledsDriver.initLedsDone || layerV->layerP->sortedPins.size() == 0) return;
 
     if (layerV->layerP->pass == 1) { //physical
       ESP_LOGD(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());

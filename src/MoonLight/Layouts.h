@@ -366,7 +366,7 @@ class SE16Layout: public Node {
       addStrip(1, ledsPerPin, 2*ledsPerPin-1, 10); addStrip(1, ledsPerPin-1, 0, 2);
       addStrip(0, ledsPerPin, 2*ledsPerPin-1, 3);  addStrip(0, ledsPerPin-1, 0, 1);
     } else { //ewowi
-      addStrip(14, 0, ledsPerPin-1, 47); addStrip(15, 0, ledsPerPin-1, 48);
+      addStrip(14, 0, ledsPerPin-1, 16); addStrip(15, 0, ledsPerPin-1, 48);
       addStrip(12, 0, ledsPerPin-1, 21); addStrip(13, 0, ledsPerPin-1, 38);
       addStrip(10, 0, ledsPerPin-1, 14); addStrip(11, 0, ledsPerPin-1, 39);
       addStrip(8, 0, ledsPerPin-1, 13); addStrip(9, 0, ledsPerPin-1, 40);
@@ -375,110 +375,6 @@ class SE16Layout: public Node {
       addStrip(2, 0, ledsPerPin-1, 10); addStrip(3, 0, ledsPerPin-1, 2);
       addStrip(0, 0, ledsPerPin-1, 3);  addStrip(1, 0, ledsPerPin-1, 1);
     }
-  }
-};
-
-class MHTroy15Layout: public Node {
-  public:
-
-  static const char * name() {return "MHTroy15 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
-
-  uint8_t width = 2;
-  uint8_t pin = 16;
-
-  void setup() override {
-    hasLayout = true; //so the system knows to rebuild the mapping if needed
-
-    addControl(width, "width", "range", 1, 32);
-    addControl(pin, "pin", "pin", 1, 48);
-  }
-
-  void addLayout() override {
-    layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
-    layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
-    layerV->layerP->lights.header.offsetPan = 0;
-    layerV->layerP->lights.header.offsetTilt = 1;
-    layerV->layerP->lights.header.offsetZoom = 7;
-    layerV->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
-    layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
-    layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map
-
-    for (uint8_t x = 0; x<width; x++) {
-      addLight({x, 0, 0});
-    }
-    addPin(pin); //needed to slow down the dmx stream ... wip
-  }
-};
-
-class MHTroy32Layout: public Node {
-  public:
-
-  static const char * name() {return "MHTroy32 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
-
-  uint8_t width = 2;
-  uint8_t pin = 16;
-
-  void setup() override {
-    hasLayout = true;
-    
-    addControl(width, "width", "range", 1, 32);
-    addControl(pin, "pin", "pin", 1, 48);
-  }
-
-  void addLayout() override {
-
-    layerV->layerP->lights.header.channelsPerLight = 32;
-    layerV->layerP->lights.header.offsetRGB = 9;
-    layerV->layerP->lights.header.offsetRGB1 = 13;
-    layerV->layerP->lights.header.offsetRGB2 = 17;
-    layerV->layerP->lights.header.offsetRGB3 = 24;
-    layerV->layerP->lights.header.offsetPan = 0;
-    layerV->layerP->lights.header.offsetTilt = 2;
-    layerV->layerP->lights.header.offsetZoom = 5;
-    layerV->layerP->lights.header.offsetBrightness = 6;
-
-    for (uint8_t x = 0; x<width; x++) {
-      addLight({x, 0, 0});
-    }
-    addPin(pin); //needed to slow down the dmx stream ... wip
-  }
-};
-
-class MHWowi24Layout: public Node {
-  public:
-
-  static const char * name() {return "MHWowi24 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
-
-  uint8_t width = 4;
-  uint8_t pin = 16;
-
-  void setup() override {
-    hasLayout = true;
-    
-    addControl(width, "width", "range", 1, 32);
-    addControl(pin, "pin", "pin", 1, 48);
-  }
-
-  void addLayout() override {
-    layerV->layerP->lights.header.channelsPerLight = 24;
-    layerV->layerP->lights.header.offsetPan = 0;
-    layerV->layerP->lights.header.offsetTilt = 1;
-    layerV->layerP->lights.header.offsetBrightness = 3;
-    layerV->layerP->lights.header.offsetRGB = 4;
-    layerV->layerP->lights.header.offsetRGB1 = 8;
-    layerV->layerP->lights.header.offsetRGB2 = 12;
-    layerV->layerP->lights.header.offsetZoom = 17;
-
-    for (uint8_t x = 0; x<width; x++) {
-      addLight({x, 0, 0});
-    }
-    addPin(pin); //needed to slow down the dmx stream ... wip
   }
 };
 

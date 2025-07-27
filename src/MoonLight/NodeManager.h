@@ -94,11 +94,11 @@ protected:
 
                     //if old node exists then remove it's controls
                     if (updatedItem.oldValue != "null") {
-                        ESP_LOGD(TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                        ESP_LOGD(TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                         nodeState.remove("controls"); //remove the controls from the nodeState
                     }
 
-                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                    ESP_LOGD(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
     
                     if (nodeState["controls"].isNull()) { //if controls are not set, create empty array
                         nodeState["controls"].to<JsonArray>(); //clear the controls
@@ -131,7 +131,7 @@ protected:
 
                 //if a node existed and no new node in place, remove 
                 if (updatedItem.oldValue != "null" && oldNode) {
-                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    ESP_LOGD(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     if (!newNode) {
                         //remove oldNode from the nodes list 
                         for (uint8_t i = 0; i < nodes->size(); i++) {
@@ -151,7 +151,7 @@ protected:
                     
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     // if (updatedItem.oldValue.length()) {
-                    //     ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name, updatedItem.oldValue.c_str());
+                    //     ESP_LOGD(TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
                     //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]);
                     //     if (liveScriptNode) liveScriptNode->kill(); 
                     //     else ESP_LOGW(TAG, "liveScriptNode not found %s", node["nodeName"].as<String>().c_str());
@@ -166,7 +166,7 @@ protected:
 
             if (updatedItem.name == "on") {
                 if (updatedItem.index[0] < nodes->size()) {
-                    ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name, updatedItem.value.as<String>().c_str(), nodes->size());
+                    ESP_LOGD(TAG, "on %s %s (%d)", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
@@ -180,7 +180,7 @@ protected:
             }
 
             if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
-                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 if (updatedItem.index[0] < nodes->size()) {
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
@@ -194,7 +194,7 @@ protected:
             // end Nodes
         }
         // else
-        // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop() {

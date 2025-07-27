@@ -31,11 +31,14 @@ static struct Audio {
 #include "Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
 
 class DriverNode: public Node {
-  uint8_t colorOrderSaved = UINT8_MAX;
-  uint8_t colorOrder = 3;
+  uint8_t lightPreset = 3;
   uint16_t maxPowerSaved = UINT8_MAX;
   uint16_t maxPower = 10;
-  uint8_t correctedBrightness = UINT8_MAX;
+  uint8_t brightnessSaved = UINT8_MAX;
+  
+  protected:
+  
+  bool lightPresetSaved = false; //initLeds can only start if this has been saved
 
   public:
 
@@ -44,6 +47,8 @@ class DriverNode: public Node {
   void loop() override;
 
   void reOrderAndDimRGB(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel);
+
+  void updateControl(JsonObject control) override;
 };
 
 class ArtNetDriverMod: public DriverNode {
