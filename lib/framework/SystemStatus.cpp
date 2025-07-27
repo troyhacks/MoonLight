@@ -14,8 +14,6 @@
 
 #include <SystemStatus.h>
 
-#include <ESP32SvelteKit.h> // 🌙 safeMode
-
 #include <esp32-hal.h>
 
 #if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
@@ -170,7 +168,6 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
     root["core_temp"] = temperatureRead();
     root["cpu_reset_reason"] = verbosePrintResetReason(esp_reset_reason());
     root["uptime"] = millis() / 1000;
-    root["safeMode"] = safeModeMB; // 🌙 safeMode
 
     return response.send();
 }

@@ -36,6 +36,31 @@
 		});
 	}
 
+	// 🌙 for safeMode and restartNeeded
+	async function postRestart() {
+		const response = await fetch('/rest/restart', {
+			method: 'POST',
+			headers: {
+				Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic'
+			}
+		});
+	}
+
+	function confirmRestart() {
+		modals.open(ConfirmDialog, {
+			title: 'Confirm Restart',
+			message: 'Are you sure you want to restart the device?',
+			labels: {
+				cancel: { label: 'Abort', icon: Cancel },
+				confirm: { label: 'Restart', icon: Power }
+			},
+			onConfirm: () => {
+				modals.close();
+				postRestart();
+			}
+		});
+	}
+
 </script>
 
 <div class="navbar bg-base-300 sticky top-0 z-10 h-12 min-h-fit drop-shadow-lg lg:h-16">
@@ -50,17 +75,21 @@
 		<UpdateIndicator />
 	</div>
 	<!-- 🌙 safeMode -->
-	<div class="indicator flex-none">
-		{#if $telemetry.rssi.safeMode}
-			🛡️
-		{/if}
-	</div>
-	<!-- 🌙 restart -->
-	<div class="indicator flex-none">
-		{#if $telemetry.rssi.restartNeeded}
-			🔄
-		{/if}
-	</div>
+	{#if $telemetry.rssi.safeMode}
+		<div class="flex-none">
+			<button class="btn btn-square btn-ghost h-9 w-10" onclick={confirmRestart}>
+				🛡️
+			</button>
+		</div>
+	{/if}
+	<!-- 🌙 restartNeeded -->
+	{#if $telemetry.rssi.restartNeeded}
+		<div class="flex-none">
+			<button class="btn btn-square btn-ghost h-9 w-10" onclick={confirmRestart}>
+				🔄
+			</button>
+		</div>
+	{/if}
 	<div class="flex-none">
 		{#if $telemetry.rssi.disconnected}
 			<WiFiOff class="inline-block h-7 w-7" />

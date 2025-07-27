@@ -113,8 +113,8 @@ public:
         values.add(SphereMoveEffect::name());
         values.add(WaveEffect::name());
         values.add(FixedRectangleEffect::name());
-        values.add(MHTroy15Effect::name());
-        values.add(MHTroy32Effect::name());
+        values.add(MHTroy1Effect::name());
+        values.add(MHTroy2Effect::name());
         values.add(MHWowiEffect::name());
 
         values.add(CircleModifier::name());
@@ -154,8 +154,8 @@ public:
         else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
         else if (equal(name, FixedRectangleEffect::name())) node = new FixedRectangleEffect();
         else if (equal(name, WaveEffect::name())) node = new WaveEffect();
-        else if (equal(name, MHTroy15Effect::name())) node = new MHTroy15Effect();
-        else if (equal(name, MHTroy32Effect::name())) node = new MHTroy32Effect();
+        else if (equal(name, MHTroy1Effect::name())) node = new MHTroy1Effect();
+        else if (equal(name, MHTroy2Effect::name())) node = new MHTroy2Effect();
         else if (equal(name, MHWowiEffect::name())) node = new MHWowiEffect();
 
         else if (equal(name, CircleModifier::name())) node = new CircleModifier();

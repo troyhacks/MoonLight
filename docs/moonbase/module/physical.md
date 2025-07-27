@@ -1,5 +1,7 @@
 # Physical layer module
 
+🆕 (in release v0.5.7 Virtual and physical layers modules are still in one module called editor)
+
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
 The Physical layer module allows you to define a **layout** (e.g. a panel 16x16), to drive LEDs (e.g. FastLED driver) and to run **supporting processes** (e.g. audiosync to run sound reactive effects and Art-Net to send light channels to an Art-Net controller).
@@ -23,4 +25,61 @@ Typically a node will define a modifier (💎) or a supporting process (☸️) 
         * The virtual driver is another beast and with the help of shift registers allows for driving 48 panels of 256 LEDs each at 100 FPS!.
     * MoonLight will use the layout definition to generate a **mapping** of a virtual coordinate space to a physical coordinate space. Most simple example is a panel which has a snake layout. The mapping will create a virtual layer where the snake layout is hidden.
 
-See [Nodes](https://moonmodules.org/MoonLight/moonlight/nodes/) page for documentation on existing nodes
+## Emoji coding:
+
+* 🚥 Layout
+* ☸️ Supporting node
+* ♫ Audio reactive FFT based
+* ♪ Audio reactive volume based
+
+## Layout 🚥 Nodes
+🚧
+### SE16 🚥
+
+Layout(s) for Stephan Electronics 16-Pin ESP32-S3 board, using the pins used on the board
+
+* ledsPerPin: the number of LEDs connected to one pin
+* pinsAreColumns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)
+* mirroredPins: If set it is assumed that LEDs are connected with increasing positions on 8 pins on one side of the board and decreasing positions on the 8 pins of the other side of the board. The resulting size will have a width of 8 and the height (or width) will be 2 * ledsPerPin. If not set, the width will be 16 and the height (or width) = ledsPerPin
+
+## Supporting ☸️ Nodes
+🚧
+
+### FastLED Driver ☸️
+
+sends LED output to ESP32 gpio pins.
+
+* Switch off to see the effect framerate in System Status/Metrics
+* Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 LEDs, 24 bits is 130 fps theoretically - 120 practically)
+* Will move to driver node later ...
+
+### Physical driver ☸️
+
+Implemented but not tested
+
+### Virtual driver ☸️
+
+Not implemented yet
+
+### Art-Net ☸️
+
+This node sends the content of the Lights array in Art-Net compatible packages to an Art-Net controller specified by the IP address provided.
+
+* Controller IP: The last segment of the IP address within your local network, of the the hardware Art-Net controller.
+* FPS Limiter: set the max frames per second Art-Net packages are send out (also all the other nodes will run at this speed).
+
+Example of compatible controllers can be found [here](https://moonmodules.org/hardware/). Both Art-Net LED controllers and Art-Net DMX controllers can be used as output.
+
+The node supports this setup:
+```cpp
+    std::vector<uint16_t> hardware_outputs = {1024,1024,1024,1024,1024,1024,1024,1024};
+    std::vector<uint16_t> hardware_outputs_universe_start = { 0,7,14,21,28,35,42,49 }; //7*170 = 1190 LEDs => last universe not completely used
+```
+
+Todo: 
+* Add controls for other hardware_outputs
+* MoonLight can also act as a receiving Art-Net controller, sending dmx commands (not implemented yet)
+
+### AudioSync ☸️ ♫
+
+* listens to audio sent over the local network by WLED-AC or WLED-MM and allows sound reactive effects (♫) to use audio data (volume and bands (FFT))

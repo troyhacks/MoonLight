@@ -55,13 +55,12 @@ void DriverNode::loop() {
 
   uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
 
-  if (brightness != brightnessSaved || maxPowerSaved != maxPower) {
+  if (brightness != brightnessSaved) {
     //Use FastLED for setMaxPowerInMilliWatts stuff
     uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
     ESP_LOGD(TAG, "setBrightmess b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
     ledsDriver.setBrightness(correctedBrightness);
     brightnessSaved = brightness;
-    maxPowerSaved = maxPower;
   }
 
   CRGB correction;
@@ -79,7 +78,13 @@ void DriverNode::updateControl(JsonObject control) {
 
   LightsHeader *header = &layerV->layerP->lights.header;
 
-  if (control["name"] == "lightPreset") {
+  if (control["name"] == "maxPower") {
+    uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
+    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    ESP_LOGD(TAG, "setBrightmess b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
+    ledsDriver.setBrightness(correctedBrightness);
+  }
+  else if (control["name"] == "lightPreset") {
     uint8_t oldChannelsPerLight = header->channelsPerLight;
 
     header->resetOffsets(); //after this addLayout is called of different layout nodes which might set additional offsets (WIP)
@@ -527,12 +532,6 @@ void ArtNetDriverMod::loop() {
         FastLED.setBrightness(layerV->layerP->lights.header.brightness);
       }
 
-      if (maxPowerSaved != maxPower) {
-        ESP_LOGD(TAG, "setMaxPowerInMilliWatts %d", maxPower);
-        FastLED.setMaxPowerInMilliWatts(1000 * maxPower); // 5v, 2000mA, to protect usb while developing
-        maxPowerSaved = maxPower;
-      }
-
       //FastLED Led Controllers
       CRGB correction = CRGB(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
       CLEDController *pCur = CLEDController::head();
@@ -550,7 +549,14 @@ void ArtNetDriverMod::loop() {
     }
   }
 
+  void FastLEDDriverMod::updateControl(JsonObject control) {
+    Node::updateControl(control);
 
+    if (control["name"] == "maxPower") {
+        ESP_LOGD(TAG, "setMaxPowerInMilliWatts %d", maxPower);
+        FastLED.setMaxPowerInMilliWatts(1000 * maxPower); // 5v, 2000mA, to protect usb while developing
+    }
+  }
 
   void HUB75DriverMod::setup() {
     hasLayout = true; //so addLayout is called if needed

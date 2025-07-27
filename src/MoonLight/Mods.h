@@ -32,7 +32,6 @@ static struct Audio {
 
 class DriverNode: public Node {
   uint8_t lightPreset = 3;
-  uint16_t maxPowerSaved = UINT8_MAX;
   uint16_t maxPower = 10;
   uint8_t brightnessSaved = UINT8_MAX;
   
@@ -115,13 +114,15 @@ class FastLEDDriverMod: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint16_t maxPowerSaved = 0;
   uint16_t maxPower = 10;
 
   void setup() override;
   void loop() override;
 
   void addLayout() override;
+
+  void updateControl(JsonObject control) override;
+
 };
 
 class HUB75DriverMod: public Node {

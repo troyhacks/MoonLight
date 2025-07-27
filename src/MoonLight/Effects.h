@@ -769,10 +769,10 @@ public:
   }
 };
 
-class MHTroy15Effect: public Node {
+class MHTroy1Effect: public Node {
   public:
 
-  static const char * name() {return "MHTroy15 🔥♫💫🐺";}
+  static const char * name() {return "MHTroy1 🔥♫💫🐺";}
 
   //set default values here
   uint8_t bpm = 30;
@@ -867,10 +867,10 @@ class MHTroy15Effect: public Node {
   }
 };
 
-class MHTroy32Effect: public Node {
+class MHTroy2Effect: public Node {
   public:
 
-  static const char * name() {return "MHTroy32 🔥♫💫🐺";}
+  static const char * name() {return "MHTroy2 🔥♫💫🐺";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
