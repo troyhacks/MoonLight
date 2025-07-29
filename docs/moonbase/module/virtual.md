@@ -39,6 +39,14 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 * Controls: Red, Green, Blue, Brightness
 * Usage: Can be used as background to other effects, order it before other effects
 
+### Scrolling text 🔥 🆕
+
+* WIP: Currently shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended). Later custom texts will be possible
+* Controls:
+    * Speed: scrolling speed if the text is wider then the display width
+    * Font: Different font sizes
+    * Preset: one of the following: Auto, IP, FPS, Time, Uptime, Status 🛜, Server size 🛜, Socket size 🛜"
+
 ### PanTilt script
 
 * Sends a beatsin to Pan and Tilt which can be sent to Moving Heads (add a Moving head layout node to configure the MHs)

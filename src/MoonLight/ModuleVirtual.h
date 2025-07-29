@@ -109,6 +109,7 @@ public:
         values.add(RandomEffect::name());
         values.add(RipplesEffect::name());
         values.add(RGBWParEffect::name());
+        values.add(ScrollingTextEffect::name());
         values.add(SinusEffect::name());
         values.add(SphereMoveEffect::name());
         values.add(WaveEffect::name());
@@ -150,6 +151,7 @@ public:
         else if (equal(name, RandomEffect::name())) node = new RandomEffect();
         else if (equal(name, RipplesEffect::name())) node = new RipplesEffect();
         else if (equal(name, RGBWParEffect::name())) node = new RGBWParEffect();
+        else if (equal(name, ScrollingTextEffect::name())) node = new ScrollingTextEffect();
         else if (equal(name, SinusEffect::name())) node = new SinusEffect();
         else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
         else if (equal(name, FixedRectangleEffect::name())) node = new FixedRectangleEffect();

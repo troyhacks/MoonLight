@@ -194,7 +194,7 @@ class VirtualLayer {
   //to be called in loop, if more then one effect
   // void setLightsToBlend(); //uses LEDs
 
-  void fadeToBlackBy(const uint8_t fadeBy);
+  void fadeToBlackBy(const uint8_t fadeBy = 255);
   void fadeToBlackMin();
 
   void fill_solid(const CRGB& color);
@@ -206,180 +206,20 @@ class VirtualLayer {
   //addLight is called by addLayout for each light in the layout
   void addLight(Coord3D position);
 
-  void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) {
-
-    // WLEDMM shorten line according to depth
-    if (depth < UINT8_MAX) {
-      if (depth == 0) return;         // nothing to paint
-      if (depth<2) {x1 = x0; y1=y0; } // single pixel
-      else {                          // shorten line
-        x0 *=2; y0 *=2; // we do everything "*2" for better rounding
-        int dx1 = ((int(2*x1) - int(x0)) * int(depth)) / 255;  // X distance, scaled down by depth 
-        int dy1 = ((int(2*y1) - int(y0)) * int(depth)) / 255;  // Y distance, scaled down by depth
-        x1 = (x0 + dx1 +1) / 2;
-        y1 = (y0 + dy1 +1) / 2;
-        x0 /=2; y0 /=2;
-      }
-    }
-
-    const int16_t dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
-    const int16_t dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
-
-    // single pixel (line length == 0)
-    if (dx+dy == 0) {
-      setRGB({x0, y0, 0}, color);
-      return;
-    }
-
-    if (soft) {
-      // Xiaolin Wu’s algorithm
-      const bool steep = dy > dx;
-      if (steep) {
-        // we need to go along longest dimension
-        std::swap(x0,y0);
-        std::swap(x1,y1);
-      }
-      if (x0 > x1) {
-        // we need to go in increasing fashion
-        std::swap(x0,x1);
-        std::swap(y0,y1);
-      }
-      float gradient = x1-x0 == 0 ? 1.0f : float(y1-y0) / float(x1-x0);
-      float intersectY = y0;
-      for (uint8_t x = x0; x <= x1; x++) {
-        unsigned keep = float(0xFFFF) * (intersectY-int(intersectY)); // how much color to keep
-        unsigned seep = 0xFFFF - keep; // how much background to keep
-        uint8_t y = uint8_t(intersectY);
-        if (steep) std::swap(x,y);  // temporarily swap if steep
-        // pixel coverage is determined by fractional part of y co-ordinate
-        // WLEDMM added out-of-bounds check: "unsigned(x) < cols" catches negative numbers _and_ too large values
-        setRGB({x, y, 0}, blend(color, getRGB({x, y, 0}), keep));
-        uint8_t xx = x+uint8_t(steep);
-        uint8_t yy = y+uint8_t(!steep);
-        setRGB({xx, yy, 0}, blend(color, getRGB({xx, yy, 0}), seep));
-      
-        intersectY += gradient;
-        if (steep) std::swap(x,y);  // restore if steep
-      }
-    } else {
-      // Bresenham's algorithm
-      int err = (dx>dy ? dx : -dy)/2;   // error direction
-      for (;;) {
-        // if (x0 >= cols || y0 >= rows) break; // WLEDMM we hit the edge - should never happen
-        setRGB({x0, y0, 0}, color);
-        if (x0==x1 && y0==y1) break;
-        int e2 = err;
-        if (e2 >-dx) { err -= dy; x0 += sx; }
-        if (e2 < dy) { err += dx; y0 += sy; }
-      }
-    }
-  }
+  void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX);
 
   void drawLine3D(Coord3D a, Coord3D b, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) {
     drawLine3D(a.x, a.y, a.z, b.x, b.y, b.z, color, soft, depth);
   }
   //to do: merge with drawLine to support 2D and 3D
-  void drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX)
-  {
-        // WLEDMM shorten line according to depth
-    if (depth < UINT8_MAX) {
-      if (depth == 0) return;         // nothing to paint
-      if (depth<2) {x2 = x1; y2=y1; z2=z1;} // single pixel
-      else {                          // shorten line
-        x1 *=2; y1 *=2; z1 *=2; // we do everything "*2" for better rounding
-        int dx1 = ((int(2*x2) - int(x1)) * int(depth)) / 255;  // X distance, scaled down by depth 
-        int dy1 = ((int(2*y2) - int(y1)) * int(depth)) / 255;  // Y distance, scaled down by depth
-        int dz1 = ((int(2*z2) - int(z1)) * int(depth)) / 255;  // Y distance, scaled down by depth
-        x1 = (x1 + dx1 +1) / 2;
-        y1 = (y1 + dy1 +1) / 2;
-        z1 = (z1 + dz1 +1) / 2;
-        x1 /=2; y1 /=2; z1 /=2;
-      }
-    }
+  void drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX);
 
-    //to do implement soft
+  void drawCircle(int cx, int cy, uint8_t radius, CRGB col, bool soft);
 
-    //Bresenham
-    setRGB({x1, y1, z1}, color);
-    int dx = abs(x2 - x1);
-    int dy = abs(y2 - y1);
-    int dz = abs(z2 - z1);
-    int xs;
-    int ys;
-    int zs;
-    if (x2 > x1)
-      xs = 1;
-    else
-      xs = -1;
-    if (y2 > y1)
-      ys = 1;
-    else
-      ys = -1;
-    if (z2 > z1)
-      zs = 1;
-    else
-      zs = -1;
-  
-    // Driving axis is X-axis"
-    if (dx >= dy && dx >= dz) {
-      int p1 = 2 * dy - dx;
-      int p2 = 2 * dz - dx;
-      while (x1 != x2) {
-        x1 += xs;
-        if (p1 >= 0) {
-          y1 += ys;
-          p1 -= 2 * dx;
-        }
-        if (p2 >= 0) {
-          z1 += zs;
-          p2 -= 2 * dx;
-        }
-        p1 += 2 * dy;
-        p2 += 2 * dz;
-        setRGB({x1, y1, z1}, color);
-      }
-  
-      // Driving axis is Y-axis"
-    }
-    else if (dy >= dx && dy >= dz) {
-      int p1 = 2 * dx - dy;
-      int p2 = 2 * dz - dy;
-      while (y1 != y2) {
-        y1 += ys;
-        if (p1 >= 0) {
-          x1 += xs;
-          p1 -= 2 * dy;
-        }
-        if (p2 >= 0) {
-          z1 += zs;
-          p2 -= 2 * dy;
-        }
-        p1 += 2 * dx;
-        p2 += 2 * dz;
-        setRGB({x1, y1, z1}, color);
-      }
-  
-      // Driving axis is Z-axis"
-    }
-    else {
-      int p1 = 2 * dy - dz;
-      int p2 = 2 * dx - dz;
-      while (z1 != z2) {
-        z1 += zs;
-        if (p1 >= 0) {
-          y1 += ys;
-          p1 -= 2 * dz;
-        }
-        if (p2 >= 0) {
-          x1 += xs;
-          p2 -= 2 * dz;
-        }
-        p1 += 2 * dy;
-        p2 += 2 * dx;
-        setRGB({x1, y1, z1}, color);
-      }
-    }
-  }
+  //shift is used by drawText indicating which letter it is drawing
+  void drawCharacter(unsigned char chr, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0, uint16_t shiftChr = 0);
+
+  void drawText(const char * text, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0);
 
   Node *findLiveScriptNode(const char *animation);
 

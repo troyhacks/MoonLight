@@ -221,6 +221,8 @@ public:
   }
 }; // DistortionWaves
 
+#define MAX_FREQUENCY   11025          // sample frequency / 2 (as per Nyquist criterion)
+
 class FreqMatrixEffect: public Node {
 public:
 
@@ -251,22 +253,22 @@ public:
 
       // Pixel brightness (value) based on volume * sensitivity * intensity
       // uint_fast8_t sensitivity10 = ::map(sensitivity, 0, 31, 10, 100); // reduced resolution slider // WLEDMM sensitivity * 10, to avoid losing precision
-      int pixVal = audio.volume * (float)fx * (float)sensitivity10 / 2560.0f; // WLEDMM 2560 due to sensitivity * 10
+      int pixVal = sharedData.volume * (float)fx * (float)sensitivity10 / 2560.0f; // WLEDMM 2560 due to sensitivity * 10
       if (pixVal > 255) pixVal = 255;  // make a brightness from the last avg
 
       CRGB color = CRGB::Black;
 
-      if (audio.majorPeak > MAX_FREQUENCY) audio.majorPeak = 1;
+      if (sharedData.majorPeak > MAX_FREQUENCY) sharedData.majorPeak = 1;
       // MajorPeak holds the freq. value which is most abundant in the last sample.
       // With our sampling rate of 10240Hz we have a usable freq range from roughtly 80Hz to 10240/2 Hz
       // we will treat everything with less than 65Hz as 0
 
-      if ((audio.majorPeak > 80.0f) && (audio.volume > 0.25f)) { // WLEDMM
+      if ((sharedData.majorPeak > 80.0f) && (sharedData.volume > 0.25f)) { // WLEDMM
         // Pixel color (hue) based on major frequency
         int upperLimit = 80 + 42 * highBin;
         int lowerLimit = 80 + 3 * lowBin;
-        //uint8_t i =  lowerLimit!=upperLimit ? ::map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // (original formula) may under/overflow - so we enforce uint8_t
-        int freqMapped =  lowerLimit!=upperLimit ? ::map(audio.majorPeak, lowerLimit, upperLimit, 0, 255) : audio.majorPeak;  // WLEDMM preserve overflows
+        //uint8_t i =  lowerLimit!=upperLimit ? ::map(sharedData.majorPeak, lowerLimit, upperLimit, 0, 255) : sharedData.majorPeak;  // (original formula) may under/overflow - so we enforce uint8_t
+        int freqMapped =  lowerLimit!=upperLimit ? ::map(sharedData.majorPeak, lowerLimit, upperLimit, 0, 255) : sharedData.majorPeak;  // WLEDMM preserve overflows
         uint8_t i = abs(freqMapped) & 0xFF;  // WLEDMM we embrace overflow ;-) by "modulo 256"
 
         color = CHSV(i, 240, (uint8_t)pixVal); // implicit conversion to RGB supplied by FastLED
@@ -358,7 +360,7 @@ public:
       uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):band; // always use full range. comment out this line to get the previous behaviour.
       // frBand = constrain(frBand, 0, 15); //WLEDMM can never be out of bounds (I think...)
       uint16_t colorIndex = frBand * 17; //WLEDMM 0.255
-      uint16_t bandHeight = audio.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
+      uint16_t bandHeight = sharedData.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
 
       // WLEDMM begin - smooth out bars
       if ((pos.x > 0) && (pos.x < (layerV->size.x-1)) && (smoothBars)) {
@@ -366,7 +368,7 @@ public:
         uint8_t nextband = (remaining < 1)? band +1: band;
         nextband = constrain(nextband, 0, NUM_GEQ_CHANNELS-1);  // just to be sure
         frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(nextband, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):nextband; // always use full range. comment out this line to get the previous behaviour.
-        uint16_t nextBandHeight = audio.bands[frBand];
+        uint16_t nextBandHeight = sharedData.bands[frBand];
         // smooth Band height
         bandHeight = (7*bandHeight + 3*lastBandHeight + 3*nextBandHeight) / 12;   // yeees, its 12 not 13 (10% amplification)
         bandHeight = constrain(bandHeight, 0, 255);   // remove potential over/underflows
@@ -525,22 +527,22 @@ public:
     for (size_t i = 0; i < numLines; i++) {
       uint8_t bin = ::map(i,0,numLines,0,15);
       
-      uint8_t x1 = beatsin8(oscillatorOffset*1 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
-      uint8_t x2 = beatsin8(oscillatorOffset*2 + audio.bands[0]/16, 0, (cols-1), audio.bands[bin], aux1Chaos);
-      uint8_t y1 = beatsin8(oscillatorOffset*3 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
-      uint8_t y2 = beatsin8(oscillatorOffset*4 + audio.bands[0]/16, 0, (rows-1), audio.bands[bin], aux1Chaos);
+      uint8_t x1 = beatsin8(oscillatorOffset*1 + sharedData.bands[0]/16, 0, (cols-1), sharedData.bands[bin], aux1Chaos);
+      uint8_t x2 = beatsin8(oscillatorOffset*2 + sharedData.bands[0]/16, 0, (cols-1), sharedData.bands[bin], aux1Chaos);
+      uint8_t y1 = beatsin8(oscillatorOffset*3 + sharedData.bands[0]/16, 0, (rows-1), sharedData.bands[bin], aux1Chaos);
+      uint8_t y2 = beatsin8(oscillatorOffset*4 + sharedData.bands[0]/16, 0, (rows-1), sharedData.bands[bin], aux1Chaos);
       uint8_t z1;
       uint8_t z2;
       int length;
       if (depth > 1) {
-        z1 = beatsin8(oscillatorOffset*5 + audio.bands[0]/16, 0, (depth-1), audio.bands[bin], aux1Chaos);
-        z2 = beatsin8(oscillatorOffset*6 + audio.bands[0]/16, 0, (depth-1), audio.bands[bin], aux1Chaos);
+        z1 = beatsin8(oscillatorOffset*5 + sharedData.bands[0]/16, 0, (depth-1), sharedData.bands[bin], aux1Chaos);
+        z2 = beatsin8(oscillatorOffset*6 + sharedData.bands[0]/16, 0, (depth-1), sharedData.bands[bin], aux1Chaos);
 
         length = sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1) + (z2-z1) * (z2-z1));
       } else 
         length = sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1));
 
-      length = map8(audio.bands[bin],0,length);
+      length = map8(sharedData.bands[bin],0,length);
 
       if (length > max(1, (int)minLength)) {
         CRGB color;
@@ -633,7 +635,65 @@ class RGBWParEffect: public Node {
     layerV->setWhite({pos,0,0}, white);
   }
 };
-  
+
+class ScrollingTextEffect: public Node {
+public:
+  static const char * name() {return "ScrollingText 🔥";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "";}
+
+  Char<32> text = Char<32>("MoonLight");
+  uint8_t speed = 128;
+  uint8_t font = 0;
+  uint8_t preset = 0;
+
+  void setup() override {
+    // addControl(text, "text", "text");
+    addControl(speed, "speed", "range");
+    JsonObject property;
+    JsonArray values;
+    property = addControl(font, "font", "select");
+    values = property["values"].to<JsonArray>();
+    values.add("4x6");
+    values.add("5x8");
+    values.add("5x12");
+    values.add("6x8");
+    values.add("7x9");
+    property = addControl(preset, "preset", "select");
+    values = property["values"].to<JsonArray>();
+    values.add("Auto");
+    values.add("IP");
+    values.add("FPS");
+    values.add("Time");
+    values.add("Up");
+    values.add("Status 🛜");
+    values.add("Server size 🛜");
+    values.add("Socket size 🛜");
+  }
+
+  void loop() override {
+
+    uint8_t choice = preset ? preset : (millis()/1000 % 6)+1;
+    
+    switch (choice) {
+      case 1: text.format("%d", WiFi.localIP()[3]); break;
+      case 2: text.format("%d", sharedData.fps); layerV->setRGB(Coord3D(0,0), CRGB::Blue); break;
+      case 3: text.formatTime(time(nullptr), "%H%M"); break;
+      case 4: text.format("%d", millis()/60000); break;
+      case 5: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP0":sharedData.connectionStatus==2?"AP1":sharedData.connectionStatus==3?"Sta0":sharedData.connectionStatus==4?"Sta1":"mqqt"); break;
+      case 6: text.format("%d", sharedData.clientListSize); break;
+      case 7: text.format("%d", sharedData.connectedClients); break;
+    }
+    layerV->setRGB(Coord3D(choice-1, 0), CRGB::Blue); 
+
+    // if (text && strnlen(text.c_str(), 2) > 0) {
+      layerV->fadeToBlackBy();
+      layerV->drawText(text.c_str(), 0, 1, font, CRGB::Red, - (millis()/25*speed/256)); //instead of call
+    // }
+
+  }
+}; //ScrollingText
+
 //AI generated
 class SinusEffect: public Node {
   public:
@@ -838,23 +898,23 @@ class MHTroy1Effect: public Node {
 
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
-        layerV->setRGB(x, CRGB(audio.bands[15],audio.bands[7],audio.bands[0]));
-        if (audio.bands[2] > 200 && cooldown + 3000 < millis()) { //cooldown for 3 seconds
+        layerV->setRGB(x, CRGB(sharedData.bands[15],sharedData.bands[7],sharedData.bands[0]));
+        if (sharedData.bands[2] > 200 && cooldown + 3000 < millis()) { //cooldown for 3 seconds
           cooldown = millis();
           colorwheel = random8(8)*5; //random colorwheel index and convert to 0-35 range
         } 
         layerV->setGobo(x, colorwheel);
-        layerV->setBrightness2(x, (audio.bands[0]>200)?audio.bands[0]:0); // Use the first band for brightness
-        layerV->setZoom(x, (audio.bands[0]>200)?0:128);
-        uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, audio.bands[0]/2);
-        uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, audio.bands[0]/2);
+        layerV->setBrightness2(x, (sharedData.bands[0]>200)?sharedData.bands[0]:0); // Use the first band for brightness
+        layerV->setZoom(x, (sharedData.bands[0]>200)?0:128);
+        uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, sharedData.bands[0]/2);
+        uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, sharedData.bands[0]/2);
         if (invert && x%2==0) {
           mypan = 255 - mypan; // invert pan
           mytilt = 255 - mytilt; // invert tilt
         }
         layerV->setPan(x, mypan); 
         layerV->setTilt(x, mytilt);
-        layerV->setBrightness(x, (audio.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
+        layerV->setBrightness(x, (sharedData.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
       } else {
         layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
         layerV->setGobo(x,colorwheel);
@@ -919,25 +979,25 @@ class MHTroy2Effect: public Node {
 
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
-        layerV->setRGB(x, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]));
-        layerV->setRGB1(x, CRGB(audio.bands[15],audio.bands[7]>cutin?audio.bands[7]:0,audio.bands[0]>cutin?audio.bands[0]:0));
-        layerV->setRGB2(x, CRGB(audio.bands[15]>cutin?audio.bands[15]:0,audio.bands[7],audio.bands[0]>cutin?audio.bands[0]:0));
-        layerV->setRGB3(x, CRGB(audio.bands[15]>cutin?::map(audio.bands[15],cutin-1,255,0,255):0,audio.bands[7]>cutin?::map(audio.bands[7],cutin-1,255,0,255):0,audio.bands[0]>cutin?::map(audio.bands[0],cutin-1,255,0,255):0));
-        if (audio.bands[0] > cutin) {
+        layerV->setRGB(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]));
+        layerV->setRGB1(x, CRGB(sharedData.bands[15],sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]>cutin?sharedData.bands[0]:0));
+        layerV->setRGB2(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7],sharedData.bands[0]>cutin?sharedData.bands[0]:0));
+        layerV->setRGB3(x, CRGB(sharedData.bands[15]>cutin?::map(sharedData.bands[15],cutin-1,255,0,255):0,sharedData.bands[7]>cutin?::map(sharedData.bands[7],cutin-1,255,0,255):0,sharedData.bands[0]>cutin?::map(sharedData.bands[0],cutin-1,255,0,255):0));
+        if (sharedData.bands[0] > cutin) {
           layerV->setZoom(x, 255);
           cooldown = millis();
         } else if (cooldown + 5000 < millis()) {
           layerV->setZoom(x, 0);
           cooldown = millis();
         }
-        // layerV->setZoom(x, (audio.bands[0]>cutin)?255:0);
-        uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, audio.bands[0]/2);
-        uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, audio.bands[0]/2);
+        // layerV->setZoom(x, (sharedData.bands[0]>cutin)?255:0);
+        uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, sharedData.bands[0]/2);
+        uint8_t mytilt = beatsin8(bpm, tilt-range, tilt+range, 0, sharedData.bands[0]/2);
         if (invert && x%2==0) {
           mypan = 255 - mypan; // invert pan
           mytilt = 255 - mytilt; // invert tilt
         }
-        if (audio.bands[0]+audio.bands[7]+audio.bands[15] > 1) {
+        if (sharedData.bands[0]+sharedData.bands[7]+sharedData.bands[15] > 1) {
           layerV->setPan(x, mypan); 
           layerV->setTilt(x, mytilt);
           layerV->setBrightness(x, 255);
@@ -990,9 +1050,9 @@ class MHWowiEffect: public Node {
         uint8_t  delta = 256 / nrOfLights;
 
         //set the 3 LED groups for each moving head light
-        layerV->setRGB({x,0,0}, CHSV( (x) * delta, 255, audio.bands[(x * 3) % 16]));
-        layerV->setRGB1({x,0,0}, CHSV( (x + 3) * delta, 255, audio.bands[(x * 3 + 1) % 16]));
-        layerV->setRGB2({x,0,0}, CHSV( (x + 6) * delta, 255, audio.bands[(x * 3 + 2) % 16]));
+        layerV->setRGB({x,0,0}, CHSV( (x) * delta, 255, sharedData.bands[(x * 3) % 16]));
+        layerV->setRGB1({x,0,0}, CHSV( (x + 3) * delta, 255, sharedData.bands[(x * 3 + 1) % 16]));
+        layerV->setRGB2({x,0,0}, CHSV( (x + 6) * delta, 255, sharedData.bands[(x * 3 + 2) % 16]));
       } else {
         if (x == beatsin8(bpm, 0, layerV->size.x - 1)) { //sinelon over moving heads
           layerV->setRGB({x,0,0}, CHSV( beatsin8(10), 255, 255)); //colorwheel 10 times per minute

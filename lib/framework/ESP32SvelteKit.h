@@ -187,6 +187,12 @@ public:
         return &_restartService;
     }
 
+    // 🌙 needed to get lps 
+    AnalyticsService *getAnalyticsService()
+    {
+        return &_analyticsService;
+    }
+
     void factoryReset()
     {
         _factoryResetService.factoryReset();

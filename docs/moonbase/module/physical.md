@@ -34,6 +34,27 @@ Typically a node will define a modifier (💎) or a supporting process (☸️) 
 
 ## Layout 🚥 Nodes
 🚧
+
+### PanelLayout 🚥 🆕
+
+* Defines a 2D panel with width and height
+* Controls:
+    * width and height
+    * orientation XY or YX: Vertical or horizontal
+    * X++ and Y++: X++: starts at Top or bottom, Y++: starts left or right
+    * snake: is the first axis in snake / serpentine layout?
+    * pin: to do add more pins
+
+### CubeLayout 🚥 🆕
+
+* Panel layout + depth
+* Controls:
+    * width and height and depth
+    * orientation XYZ or YXZ, XZY or YZX, ZXY or ZYX: Vertical or horizontal or depth
+    * X++ and Y++ and Z++: Z++ starts front or back
+    * snake X, Y, Z: multidimensional snaking, good luck 😜
+    * pin: to do add more pins
+
 ### SE16 🚥
 
 Layout(s) for Stephan Electronics 16-Pin ESP32-S3 board, using the pins used on the board

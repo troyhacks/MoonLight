@@ -356,20 +356,300 @@ void VirtualLayer::addLayoutPost() {
 
 }
 
-    #if FT_LIVESCRIPT
-        Node *VirtualLayer::findLiveScriptNode(const char *animation) {
-            for (Node *node: nodes) {
-                if (node && node->isLiveScriptNode()) {
-                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
-                    if (equal(liveScriptNode->animation, animation)) {
-                        ESP_LOGD(TAG, "found %s", animation);
-                        return liveScriptNode;
-                    }
+#if FT_LIVESCRIPT
+    Node *VirtualLayer::findLiveScriptNode(const char *animation) {
+        for (Node *node: nodes) {
+            if (node && node->isLiveScriptNode()) {
+                LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
+                if (equal(liveScriptNode->animation, animation)) {
+                    ESP_LOGD(TAG, "found %s", animation);
+                    return liveScriptNode;
                 }
             }
-            return nullptr;
         }
-    #endif
-  
+        return nullptr;
+    }
+#endif
+
+void VirtualLayer::drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft, uint8_t depth) {
+
+  // WLEDMM shorten line according to depth
+  if (depth < UINT8_MAX) {
+    if (depth == 0) return;         // nothing to paint
+    if (depth<2) {x1 = x0; y1=y0; } // single pixel
+    else {                          // shorten line
+      x0 *=2; y0 *=2; // we do everything "*2" for better rounding
+      int dx1 = ((int(2*x1) - int(x0)) * int(depth)) / 255;  // X distance, scaled down by depth 
+      int dy1 = ((int(2*y1) - int(y0)) * int(depth)) / 255;  // Y distance, scaled down by depth
+      x1 = (x0 + dx1 +1) / 2;
+      y1 = (y0 + dy1 +1) / 2;
+      x0 /=2; y0 /=2;
+    }
+  }
+
+  const int16_t dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
+  const int16_t dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
+
+  // single pixel (line length == 0)
+  if (dx+dy == 0) {
+    setRGB({x0, y0, 0}, color);
+    return;
+  }
+
+  if (soft) {
+    // Xiaolin Wu’s algorithm
+    const bool steep = dy > dx;
+    if (steep) {
+      // we need to go along longest dimension
+      std::swap(x0,y0);
+      std::swap(x1,y1);
+    }
+    if (x0 > x1) {
+      // we need to go in increasing fashion
+      std::swap(x0,x1);
+      std::swap(y0,y1);
+    }
+    float gradient = x1-x0 == 0 ? 1.0f : float(y1-y0) / float(x1-x0);
+    float intersectY = y0;
+    for (uint8_t x = x0; x <= x1; x++) {
+      unsigned keep = float(0xFFFF) * (intersectY-int(intersectY)); // how much color to keep
+      unsigned seep = 0xFFFF - keep; // how much background to keep
+      uint8_t y = uint8_t(intersectY);
+      if (steep) std::swap(x,y);  // temporarily swap if steep
+      // pixel coverage is determined by fractional part of y co-ordinate
+      // WLEDMM added out-of-bounds check: "unsigned(x) < cols" catches negative numbers _and_ too large values
+      setRGB({x, y, 0}, blend(color, getRGB({x, y, 0}), keep));
+      uint8_t xx = x+uint8_t(steep);
+      uint8_t yy = y+uint8_t(!steep);
+      setRGB({xx, yy, 0}, blend(color, getRGB({xx, yy, 0}), seep));
+    
+      intersectY += gradient;
+      if (steep) std::swap(x,y);  // restore if steep
+    }
+  } else {
+    // Bresenham's algorithm
+    int err = (dx>dy ? dx : -dy)/2;   // error direction
+    for (;;) {
+      // if (x0 >= cols || y0 >= rows) break; // WLEDMM we hit the edge - should never happen
+      setRGB({x0, y0, 0}, color);
+      if (x0==x1 && y0==y1) break;
+      int e2 = err;
+      if (e2 >-dx) { err -= dy; x0 += sx; }
+      if (e2 < dy) { err += dx; y0 += sy; }
+    }
+  }
+}
+
+//to do: merge with drawLine to support 2D and 3D
+void VirtualLayer::drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, CRGB color, bool soft, uint8_t depth)
+{
+      // WLEDMM shorten line according to depth
+  if (depth < UINT8_MAX) {
+    if (depth == 0) return;         // nothing to paint
+    if (depth<2) {x2 = x1; y2=y1; z2=z1;} // single pixel
+    else {                          // shorten line
+      x1 *=2; y1 *=2; z1 *=2; // we do everything "*2" for better rounding
+      int dx1 = ((int(2*x2) - int(x1)) * int(depth)) / 255;  // X distance, scaled down by depth 
+      int dy1 = ((int(2*y2) - int(y1)) * int(depth)) / 255;  // Y distance, scaled down by depth
+      int dz1 = ((int(2*z2) - int(z1)) * int(depth)) / 255;  // Y distance, scaled down by depth
+      x1 = (x1 + dx1 +1) / 2;
+      y1 = (y1 + dy1 +1) / 2;
+      z1 = (z1 + dz1 +1) / 2;
+      x1 /=2; y1 /=2; z1 /=2;
+    }
+  }
+
+  //to do implement soft
+
+  //Bresenham
+  setRGB({x1, y1, z1}, color);
+  int dx = abs(x2 - x1);
+  int dy = abs(y2 - y1);
+  int dz = abs(z2 - z1);
+  int xs;
+  int ys;
+  int zs;
+  if (x2 > x1)
+    xs = 1;
+  else
+    xs = -1;
+  if (y2 > y1)
+    ys = 1;
+  else
+    ys = -1;
+  if (z2 > z1)
+    zs = 1;
+  else
+    zs = -1;
+
+  // Driving axis is X-axis"
+  if (dx >= dy && dx >= dz) {
+    int p1 = 2 * dy - dx;
+    int p2 = 2 * dz - dx;
+    while (x1 != x2) {
+      x1 += xs;
+      if (p1 >= 0) {
+        y1 += ys;
+        p1 -= 2 * dx;
+      }
+      if (p2 >= 0) {
+        z1 += zs;
+        p2 -= 2 * dx;
+      }
+      p1 += 2 * dy;
+      p2 += 2 * dz;
+      setRGB({x1, y1, z1}, color);
+    }
+
+    // Driving axis is Y-axis"
+  }
+  else if (dy >= dx && dy >= dz) {
+    int p1 = 2 * dx - dy;
+    int p2 = 2 * dz - dy;
+    while (y1 != y2) {
+      y1 += ys;
+      if (p1 >= 0) {
+        x1 += xs;
+        p1 -= 2 * dy;
+      }
+      if (p2 >= 0) {
+        z1 += zs;
+        p2 -= 2 * dy;
+      }
+      p1 += 2 * dx;
+      p2 += 2 * dz;
+      setRGB({x1, y1, z1}, color);
+    }
+
+    // Driving axis is Z-axis"
+  }
+  else {
+    int p1 = 2 * dy - dz;
+    int p2 = 2 * dx - dz;
+    while (z1 != z2) {
+      z1 += zs;
+      if (p1 >= 0) {
+        y1 += ys;
+        p1 -= 2 * dz;
+      }
+      if (p2 >= 0) {
+        x1 += xs;
+        p2 -= 2 * dz;
+      }
+      p1 += 2 * dy;
+      p2 += 2 * dx;
+      setRGB({x1, y1, z1}, color);
+    }
+  }
+}
+
+void VirtualLayer::drawCircle(int cx, int cy, uint8_t radius, CRGB col, bool soft) {
+  if (radius == 0) return;
+  if (soft) {
+    // Xiaolin Wu’s algorithm
+    int rsq = radius*radius;
+    int x = 0;
+    int y = radius;
+    unsigned oldFade = 0;
+    while (x < y) {
+      float yf = sqrtf(float(rsq - x*x)); // needs to be floating point
+      unsigned fade = float(0xFFFF) * (ceilf(yf) - yf); // how much color to keep
+      if (oldFade > fade) y--;
+      oldFade = fade;
+      setRGB(Coord3D(cx+x, cy+y, 0), blend(col, getRGB(Coord3D(cx+x, cy+y, 0)), fade));
+      setRGB(Coord3D(cx-x, cy+y), blend(col, getRGB(Coord3D(cx-x, cy+y)), fade));
+      setRGB(Coord3D(cx+x, cy-y), blend(col, getRGB(Coord3D(cx+x, cy-y)), fade));
+      setRGB(Coord3D(cx-x, cy-y), blend(col, getRGB(Coord3D(cx-x, cy-y)), fade));
+      setRGB(Coord3D(cx+y, cy+x), blend(col, getRGB(Coord3D(cx+y, cy+x)), fade));
+      setRGB(Coord3D(cx-y, cy+x), blend(col, getRGB(Coord3D(cx-y, cy+x)), fade));
+      setRGB(Coord3D(cx+y, cy-x), blend(col, getRGB(Coord3D(cx+y, cy-x)), fade));
+      setRGB(Coord3D(cx-y, cy-x), blend(col, getRGB(Coord3D(cx-y, cy-x)), fade));
+      setRGB(Coord3D(cx+x, cy+y-1), blend(getRGB(Coord3D(cx+x, cy+y-1)), col, fade));
+      setRGB(Coord3D(cx-x, cy+y-1), blend(getRGB(Coord3D(cx-x, cy+y-1)), col, fade));
+      setRGB(Coord3D(cx+x, cy-y+1), blend(getRGB(Coord3D(cx+x, cy-y+1)), col, fade));
+      setRGB(Coord3D(cx-x, cy-y+1), blend(getRGB(Coord3D(cx-x, cy-y+1)), col, fade));
+      setRGB(Coord3D(cx+y-1, cy+x), blend(getRGB(Coord3D(cx+y-1, cy+x)), col, fade));
+      setRGB(Coord3D(cx-y+1, cy+x), blend(getRGB(Coord3D(cx-y+1, cy+x)), col, fade));
+      setRGB(Coord3D(cx+y-1, cy-x), blend(getRGB(Coord3D(cx+y-1, cy-x)), col, fade));
+      setRGB(Coord3D(cx-y+1, cy-x), blend(getRGB(Coord3D(cx-y+1, cy-x)), col, fade));
+      x++;
+    }
+  } else {
+    // Bresenham’s Algorithm
+    int d = 3 - (2*radius);
+    int y = radius, x = 0;
+    while (y >= x) {
+      setRGB(Coord3D(cx+x, cy+y), col);
+      setRGB(Coord3D(cx-x, cy+y), col);
+      setRGB(Coord3D(cx+x, cy-y), col);
+      setRGB(Coord3D(cx-x, cy-y), col);
+      setRGB(Coord3D(cx+y, cy+x), col);
+      setRGB(Coord3D(cx-y, cy+x), col);
+      setRGB(Coord3D(cx+y, cy-x), col);
+      setRGB(Coord3D(cx-y, cy-x), col);
+      x++;
+      if (d > 0) {
+        y--;
+        d += 4 * (x - y) + 10;
+      } else {
+        d += 4 * x + 6;
+      }
+    }
+  }
+}
+
+#include "../misc/font/console_font_4x6.h"
+#include "../misc/font/console_font_5x8.h"
+#include "../misc/font/console_font_5x12.h"
+#include "../misc/font/console_font_6x8.h"
+#include "../misc/font/console_font_7x9.h"
+
+//shift is used by drawText indicating which letter it is drawing
+void VirtualLayer::drawCharacter(unsigned char chr, int x, int y, uint8_t font, CRGB col, uint16_t shiftPixel, uint16_t shiftChr) {
+    if (chr < 32 || chr > 126) return; // only ASCII 32-126 supported
+    chr -= 32; // align with font table entries
+
+    Coord3D fontSize;
+    switch (font%5) {
+      case 0: fontSize.x = 4; fontSize.y = 6; break;
+      case 1: fontSize.x = 5; fontSize.y = 8; break;
+      case 2: fontSize.x = 5; fontSize.y = 12; break;
+      case 3: fontSize.x = 6; fontSize.y = 8; break;
+      case 4: fontSize.x = 7; fontSize.y = 9; break;
+    }
+
+    Coord3D chrPixel;
+    for (chrPixel.y = 0; chrPixel.y<fontSize.y; chrPixel.y++) { // character height
+      Coord3D pixel;
+      pixel.z = 0;
+      pixel.y = y + chrPixel.y;
+      if (pixel.y >= 0 && pixel.y < size.y) {
+        byte bits = 0;
+        switch (font%5) {
+          case 0: bits = pgm_read_byte_near(&console_font_4x6[(chr * fontSize.y) + chrPixel.y]); break;
+          case 1: bits = pgm_read_byte_near(&console_font_5x8[(chr * fontSize.y) + chrPixel.y]); break;
+          case 2: bits = pgm_read_byte_near(&console_font_5x12[(chr * fontSize.y) + chrPixel.y]); break;
+          case 3: bits = pgm_read_byte_near(&console_font_6x8[(chr * fontSize.y) + chrPixel.y]); break;
+          case 4: bits = pgm_read_byte_near(&console_font_7x9[(chr * fontSize.y) + chrPixel.y]); break;
+        }
+
+        for (chrPixel.x = 0; chrPixel.x<fontSize.x; chrPixel.x++) {
+          //x adjusted by: chr in text, scroll value, font column
+          pixel.x = (x + shiftChr * fontSize.x + shiftPixel + (fontSize.x-1) - chrPixel.x)%size.x;
+          if ((pixel.x >= 0 && pixel.x < size.x) && ((bits>>(chrPixel.x+(8-fontSize.x))) & 0x01)) { // bit set & drawing on-screen
+            setRGB(pixel, col);
+          }
+        }
+      }
+    }
+}
+
+void VirtualLayer::drawText(const char * text, int x, int y, uint8_t font, CRGB col, uint16_t shiftPixel) {
+  const int numberOfChr = text?strnlen(text, 256):0; //max 256 charcters
+  for (int shiftChr = 0; shiftChr < numberOfChr; shiftChr++) {
+    drawCharacter(text[shiftChr], x, y, font, col, shiftPixel, shiftChr);
+  }
+}
+
 
 #endif //FT_MOONLIGHT

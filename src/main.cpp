@@ -110,6 +110,12 @@ void moonTask(void* pvParameters) {
                         #endif
                     #endif
 
+                    //set shared data (eg used in scrolling text effect)
+                    sharedData.fps = esp32sveltekit.getAnalyticsService()->lps;
+                    sharedData.connectionStatus = (uint8_t) esp32sveltekit.getConnectionStatus();
+                    sharedData.clientListSize = esp32sveltekit.getServer()->getClientList().size();
+                    sharedData.connectedClients = esp32sveltekit.getSocket()->getConnectedClients(); 
+
                     static unsigned long lastTime10s = 0;
                     if (millis() - lastTime10s > 10000)
                     {
