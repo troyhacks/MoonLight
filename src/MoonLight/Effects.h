@@ -673,7 +673,9 @@ public:
 
   void loop() override {
 
-    uint8_t choice = preset ? preset : (millis()/1000 % 6)+1;
+    layerV->fadeToBlackBy();
+
+    uint8_t choice = preset ? preset : (millis()/1000 % 8)+1;
     
     switch (choice) {
       case 1: text.format("%d", WiFi.localIP()[3]); break;
@@ -687,7 +689,6 @@ public:
     layerV->setRGB(Coord3D(choice-1, 0), CRGB::Blue); 
 
     // if (text && strnlen(text.c_str(), 2) > 0) {
-      layerV->fadeToBlackBy();
       layerV->drawText(text.c_str(), 0, 1, font, CRGB::Red, - (millis()/25*speed/256)); //instead of call
     // }
 
