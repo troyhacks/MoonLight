@@ -675,18 +675,28 @@ public:
 
     layerV->fadeToBlackBy();
 
-    uint8_t choice = preset ? preset : (millis()/1000 % 8)+1;
+    uint8_t choice = preset ? preset : (millis()/1000 % 7)+1;
     
     switch (choice) {
-      case 1: text.format("%d", WiFi.localIP()[3]); break;
-      case 2: text.format("%d", sharedData.fps); layerV->setRGB(Coord3D(0,0), CRGB::Blue); break;
+      case 1: text.format(".%d", WiFi.localIP()[3]); break;
+      case 2: text.format("%ds", sharedData.fps); layerV->setRGB(Coord3D(0,0), CRGB::Blue); break;
       case 3: text.formatTime(time(nullptr), "%H%M"); break;
-      case 4: text.format("%d", millis()/60000); break;
+      case 4: 
+        if (millis() < 60000)
+          text.format("%ds", millis()/1000); 
+        else if (millis() < 3600000)
+          text.format("%dm", millis()/60000); 
+        else
+          text.format("%dh", millis()/3600000); 
+        break;
       case 5: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP0":sharedData.connectionStatus==2?"AP1":sharedData.connectionStatus==3?"Sta0":sharedData.connectionStatus==4?"Sta1":"mqqt"); break;
-      case 6: text.format("%d", sharedData.clientListSize); break;
-      case 7: text.format("%d", sharedData.connectedClients); break;
+      case 6: text.format("%dC", sharedData.clientListSize); break;
+      case 7: text.format("%dCC", sharedData.connectedClients); break;
     }
     layerV->setRGB(Coord3D(choice-1, 0), CRGB::Blue); 
+
+    // EVERY_N_SECONDS(1)
+    //   Serial.printf(" %d:%s", choice-1, text.c_str());
 
     // if (text && strnlen(text.c_str(), 2) > 0) {
       layerV->drawText(text.c_str(), 0, 1, font, CRGB::Red, - (millis()/25*speed/256)); //instead of call

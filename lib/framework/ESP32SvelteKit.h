@@ -84,7 +84,8 @@ enum class ConnectionStatus
     STA_MQTT
 };
 
-extern std::vector<std::function<void()>> runInOtherTask; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
+extern std::vector<std::function<void()>> runInTask1; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
+extern std::vector<std::function<void()>> runInTask2; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
 extern bool safeModeMB; // 🌙 true when the ESP32 is in safe mode, false when it is not
 extern bool restartNeeded; // 🌙 
 

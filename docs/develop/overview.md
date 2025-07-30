@@ -7,6 +7,8 @@
 
 * Improve the web installer
 * Improve the UI (Svelte 5, DaisyUI 5, TailWind 4)
+  * Mutli row layout
+  * Set Dark / light theme or auto
 * Tune FastLED, add FastLED 2D effects
 * CI automation (Generate daily builds in Github and use by installer)
 

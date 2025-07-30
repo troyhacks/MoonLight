@@ -121,7 +121,7 @@ protected:
                         nodeClass->requestMappings();
                     }
                     else
-                        ESP_LOGW(TAG, "Nodeclass %d not found", updatedItem.value.as<String>().c_str());
+                        ESP_LOGW(TAG, "Nodeclass %s not found", updatedItem.value.as<String>().c_str());
 
                     if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
                         ESP_LOGW(TAG, "Restart needed");
@@ -175,7 +175,7 @@ protected:
                         nodeClass->requestMappings();
                     }
                     else
-                        ESP_LOGW(TAG, "Nodeclass %d not found", nodeState["nodeName"].as<String>().c_str());
+                        ESP_LOGW(TAG, "Nodeclass %s not found", nodeState["nodeName"].as<String>().c_str());
                 }
             }
 

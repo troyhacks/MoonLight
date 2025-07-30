@@ -38,6 +38,7 @@ public:
     }
 
     void begin() {
+        _state.onUpdateRunInTask = 1;
         NodeManager::begin();
 
         nodes = &(layerP.layerV[0]->nodes);
@@ -192,16 +193,9 @@ public:
 
     //run effects
     void loop() {
-        if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
-            layerP.loop(); //run all the effects of all virtual layers (currently only one)
 
         NodeManager::loop();
 
-        //show connected clients on the LED display
-        // for (int i = 0; i < _socket->getConnectedClients(); i++) {
-        //     // ESP_LOGD(TAG, "socket %d", i);
-        //     layerP.lights.leds[i] = CRGB(0, 0, 128);
-        // }
     }
   
 }; // class ModuleVirtual

@@ -50,6 +50,8 @@ class ModuleState
 public:
     JsonDocument data;
 
+    uint8_t onUpdateRunInTask = UINT8_MAX; //if set to UINT8_MAX, runInTask1 is not called, otherwise it is called with this value as index
+
     std::function<void(JsonArray root)> setupDefinition = nullptr;
 
     void setupData();

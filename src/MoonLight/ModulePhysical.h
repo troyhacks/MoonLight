@@ -34,6 +34,7 @@ public:
     }
 
     void begin() {
+        _state.onUpdateRunInTask = 2;
         NodeManager::begin();
 
         nodes = &layerP.nodes;
@@ -128,11 +129,6 @@ public:
 
         NodeManager::loop();
 
-        //show connected clients on the LED display
-        // for (int i = 0; i < _socket->getConnectedClients(); i++) {
-        //     // ESP_LOGD(TAG, "socket %d", i);
-        //     layerP.lights.leds[i] = CRGB(0, 0, 128);
-        // }
     }
   
 }; // class ModulePhysical

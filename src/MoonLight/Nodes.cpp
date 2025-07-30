@@ -76,7 +76,11 @@ void sync() {
     frameCounter++;
     delay(1); //feed the watchdog, otherwise watchdog will reset the ESP
     // Serial.print("s");
-    xSemaphoreTake(WaitAnimationSync, portMAX_DELAY);
+    // 🌙 adding semaphore wait too long logging
+    if (xSemaphoreTake(WaitAnimationSync, pdMS_TO_TICKS(100))==pdFALSE) {
+        ESP_LOGE(TAG, "WaitAnimationSync wait too long");
+        xSemaphoreTake(WaitAnimationSync, portMAX_DELAY);
+    }
 }
 
 void addExternal(string definition, void * ptr) {
@@ -206,7 +210,7 @@ void LiveScriptNode::compileAndRun() {
   //send UI spinner
 
   //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-  // runInOtherTask.push_back([&, animation, type, error] {
+  // runInTask1.push_back([&, animation, type, error] {
       ESP_LOGD(TAG, "%s", animation);
       File file = ESPFS.open(animation);
       if (file) {

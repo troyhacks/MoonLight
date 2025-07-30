@@ -169,25 +169,6 @@ public:
             ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
-    void loop50ms() {
-        #if FT_ENABLED(FT_MONITOR)
-
-            static int monitorMillis = 0;
-            if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) { //max 12000 LEDs per second -> 1 second for 12000 LEDs
-                monitorMillis = millis();
-                
-                if (layerP.lights.header.isPositions == 2) { //send to UI
-                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS));
-                    layerP.lights.header.isPositions = 0;
-                } else if (layerP.lights.header.isPositions == 0) {//send to UI
-                    if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                        _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
-                }
-            }
-        #endif
-    }
-
     //update _state.data["preset"]["list"] and send update to endpoints
     void setPresetsFromFolder() {
         //loop over all files in the presets folder and add them to the preset array

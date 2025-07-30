@@ -61,83 +61,69 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
         ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
     #endif
 #endif
-    
-void moonTask(void* pvParameters) {
-    // 🌙
-    #if FT_ENABLED(FT_MOONBASE)
-        fileManager.begin();
-            moduleInstances.begin();
-            moduleTasks.begin();
 
-            #if FT_ENABLED(FT_MOONLIGHT)
-                moduleLightsControl.begin();
-                moduleVirtual.begin();
-                modulePhysical.begin();
-                #if FT_ENABLED(FT_LIVESCRIPT)
-                    moduleLiveScripts.begin();
-                #endif
-                moduleChannelView.begin();
-                moduleMoonLightInfo.begin();
-        #endif
+volatile xSemaphoreHandle effectSemaphore = xSemaphoreCreateBinary();
+volatile xSemaphoreHandle driverSemaphore = xSemaphoreCreateBinary();
+
+void effectTask(void* pvParameters) {
+    // 🌙
+    #if FT_ENABLED(FT_MOONLIGHT)
     #endif
 
     for (;;) {
         esp32sveltekit.lps++; // 🌙
 
-        #if FT_ENABLED(FT_MOONBASE)
-
-            #if FT_ENABLED(FT_MOONLIGHT)
-                moduleVirtual.loop();
-                modulePhysical.loop();
-            #endif
-
-            static unsigned long lastTime50ms = 0;
-            if (millis() - lastTime50ms > 50)
-            {
-                lastTime50ms = millis();
-                #if FT_ENABLED(FT_MOONLIGHT)
-                    moduleLightsControl.loop50ms();
-                #endif
-                
-                static unsigned long lastTime1s = 0;
-                if (millis() - lastTime1s > 1000)
-                {
-                    lastTime1s = millis();
-                    moduleInstances.loop1s();
-                    #if FT_ENABLED(FT_MOONLIGHT)
-                        #if FT_ENABLED(FT_LIVESCRIPT)
-                            moduleLiveScripts.loop1s();
-                        #endif
-                    #endif
-
-                    //set shared data (eg used in scrolling text effect)
-                    sharedData.fps = esp32sveltekit.getAnalyticsService()->lps;
-                    sharedData.connectionStatus = (uint8_t) esp32sveltekit.getConnectionStatus();
-                    sharedData.clientListSize = esp32sveltekit.getServer()->getClientList().size();
-                    sharedData.connectedClients = esp32sveltekit.getSocket()->getConnectedClients(); 
-
-                    static unsigned long lastTime10s = 0;
-                    if (millis() - lastTime10s > 10000)
-                    {
-                        lastTime10s = millis();
-                        moduleInstances.loop10s();
-                        moduleTasks.loop10s();
-                    }
-                }
+        #if FT_ENABLED(FT_MOONLIGHT)
+            if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100))==pdFALSE) {
+                // ESP_LOGE(SVK_TAG, "effectSemaphore wait too long");
             }
-
-            while (!runInOtherTask.empty()) {
-                runInOtherTask.front()();
-                runInOtherTask.erase(runInOtherTask.begin());
+            if (layerP.lights.header.isPositions == 0) {//otherwise lights is used for positions etc.
+                layerP.loop(); //run all the effects of all virtual layers (currently only one)
             }
-
+            xSemaphoreGive(driverSemaphore);
         #endif
+            
+        while (!runInTask1.empty()) {
+            ESP_LOGD(TAG, "runInTask1 %d", runInTask1.size());
+            runInTask1.front()();
+            runInTask1.erase(runInTask1.begin());
+        }
 
         vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
     }
 }
 
-TaskHandle_t moonTaskHandle = NULL;
+void driverTask(void* pvParameters) {
+    // 🌙
+
+    // layerP.setup2();
+
+    for (;;) {
+
+        #if FT_ENABLED(FT_MOONLIGHT)
+            xSemaphoreTake(driverSemaphore, pdMS_TO_TICKS(100));
+
+            if (layerP.lights.header.isPositions == 0) {//otherwise lights is used for positions etc.
+                for (Node *node: layerP.nodes) {
+                    if (node->on)
+                        node->loop();
+                }
+            }
+            xSemaphoreGive(effectSemaphore);
+        #endif
+
+        while (!runInTask2.empty()) {
+            ESP_LOGD(TAG, "runInTask2 %d", runInTask2.size());
+            runInTask2.front()();
+            runInTask2.erase(runInTask2.begin());
+        }
+
+        vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
+    }
+}
+
+TaskHandle_t effectTaskHandle = NULL;
+TaskHandle_t driverTaskHandle = NULL;
 
 void setup()
 {
@@ -155,14 +141,92 @@ void setup()
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
 
+    // MoonBase
+    #if FT_ENABLED(FT_MOONBASE)
+        fileManager.begin();
+        moduleInstances.begin();
+        moduleTasks.begin();
+    #endif
+    
+    // MoonLight
+    #if FT_ENABLED(FT_MOONLIGHT)
+        moduleVirtual.begin();
+        modulePhysical.begin();
+        moduleLightsControl.begin();
+        moduleChannelView.begin();
+        moduleMoonLightInfo.begin();
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            moduleLiveScripts.begin();
+        #endif
+    #endif
+
+    esp32sveltekit.addLoopFunction([]() { 
+
+        moduleVirtual.loop();
+        modulePhysical.loop();
+
+        EVERY_N_SECONDS(1) {
+            //set shared data (eg used in scrolling text effect)
+            sharedData.fps = esp32sveltekit.getAnalyticsService()->lps;
+            sharedData.connectionStatus = (uint8_t) esp32sveltekit.getConnectionStatus();
+            sharedData.clientListSize = esp32sveltekit.getServer()->getClientList().size();
+            sharedData.connectedClients = esp32sveltekit.getSocket()->getConnectedClients(); 
+
+            moduleInstances.loop1s();
+
+            #if FT_ENABLED(FT_MOONLIGHT)
+                #if FT_ENABLED(FT_LIVESCRIPT)
+                    moduleLiveScripts.loop1s();
+                #endif
+            #endif
+
+            moduleTasks.loop1s(); 
+        }
+
+        EVERY_N_SECONDS(10) {
+            moduleInstances.loop10s();
+        }
+
+        #if FT_ENABLED(FT_MOONLIGHT) && FT_ENABLED(FT_MONITOR)
+
+            EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
+                EventSocket *_socket = esp32sveltekit.getSocket();
+
+                moduleLightsControl.read([&](ModuleState& _state) {
+                    if (layerP.lights.header.isPositions == 2) { //send to UI
+                        if (_socket->getConnectedClients() && _state.data["monitorOn"])
+                            _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS));
+                        layerP.lights.header.isPositions = 0;
+                    } else if (layerP.lights.header.isPositions == 0) {//send to UI
+                        if (_socket->getConnectedClients() && _state.data["monitorOn"])
+                            _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
+                    }
+                });
+            }
+
+        #endif
+    });
+
+    xSemaphoreGive(effectSemaphore);  //Allow effectTask to run first
+
     // 🌙
     xTaskCreateUniversal(
-        moonTask,              // task function
-        "moonTask",            // name
-        16 * 1024,             // stack size in words (without livescripts we can do with 12...)
+        effectTask,              // task function
+        "AppEffectTask",            // name
+        8 * 1024,             // stack size in words (without livescripts we can do with 12...)
         NULL,                  // parameter
         8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
-        &moonTaskHandle,       // task handle
+        &effectTaskHandle,       // task handle
+        1                      // core (0 or 1)
+    );
+
+    xTaskCreateUniversal(
+        driverTask,              // task function
+        "AppDriverTask",            // name
+        8 * 1024,             // stack size in words (without livescripts we can do with 12...)
+        NULL,                  // parameter
+        8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+        &driverTaskHandle,       // task handle
         1                      // core (0 or 1)
     );
 

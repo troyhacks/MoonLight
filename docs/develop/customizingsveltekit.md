@@ -12,7 +12,7 @@ This is a checklist, More info on most of the items can be found in the ESP32-Sv
 * factory_settings.ini
     * FACTORY_AP_SSID=\"{custom}-#{unique_id}\"
     * FACTORY_AP_PASSWORD=\"\" (recommendation)
-    * FACTORY_NTP_TIME_ZONE_LABEL=\"Europe/Amsterdam\"
+    * FACTORY_NTP_TIME_ZONE_LABEL=\"Europe/Berlin\"
 * package.json
     * name = "{custom}"
     * version: "0.5.6",

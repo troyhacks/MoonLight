@@ -14,7 +14,8 @@
 
 #include <ESP32SvelteKit.h>
 
-std::vector<std::function<void()>> runInOtherTask; // 🌙 see .h
+std::vector<std::function<void()>> runInTask1; // 🌙 see .h
+std::vector<std::function<void()>> runInTask2; // 🌙 see .h
 bool safeModeMB = false; // 🌙 see .h
 bool restartNeeded = false; // 🌙 see .h
 

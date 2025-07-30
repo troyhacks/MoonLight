@@ -41,7 +41,11 @@ void EventSocket::onWSOpen(PsychicWebSocketClient *client)
 
 void EventSocket::onWSClose(PsychicWebSocketClient *client)
 {
-    xSemaphoreTake(clientSubscriptionsMutex, portMAX_DELAY);
+    // 🌙 adding semaphore wait too long logging
+    if (xSemaphoreTake(clientSubscriptionsMutex, pdMS_TO_TICKS(100))==pdFALSE) {
+        ESP_LOGE(SVK_TAG, "clientSubscriptionsMutex wait too long");
+        xSemaphoreTake(clientSubscriptionsMutex, portMAX_DELAY);
+    }
     for (auto &event_subscriptions : client_subscriptions)
     {
         event_subscriptions.second.remove(client->socket());
@@ -143,7 +147,11 @@ void EventSocket::emitEvent(String event, char *output, size_t len, const char *
     }
 
     int originSubscriptionId = originId[0] ? atoi(originId) : -1;
-    xSemaphoreTake(clientSubscriptionsMutex, portMAX_DELAY);
+    // 🌙 adding semaphore wait too long logging
+    if (xSemaphoreTake(clientSubscriptionsMutex, pdMS_TO_TICKS(100))==pdFALSE) {
+        ESP_LOGE(SVK_TAG, "clientSubscriptionsMutex wait too long");
+        xSemaphoreTake(clientSubscriptionsMutex, portMAX_DELAY);
+    }
     auto &subscriptions = client_subscriptions[event];
     if (subscriptions.empty())
     {

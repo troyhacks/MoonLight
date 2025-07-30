@@ -35,22 +35,13 @@ PhysicalLayer::PhysicalLayer() {
         for (VirtualLayer * layer: layerV) {
             layer->setup();
         }
-
-        for (Node *node: nodes) {
-            node->setup();
-        }
     }
-
+    
     //run one loop of an effect
     void PhysicalLayer::loop() {
         //runs the loop of all effects / nodes in the layer
         for (VirtualLayer * layer: layerV) {
             if (layer) layer->loop(); //if (layer) needed when deleting rows ...
-        }
-
-        for (Node *node: nodes) {
-            if (node->on)
-                node->loop();
         }
 
         if (requestMapPhysical) {

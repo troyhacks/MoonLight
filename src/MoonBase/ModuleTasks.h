@@ -54,7 +54,7 @@ public:
         ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
-    void loop10s() {
+    void loop1s() {
         #define MAX_TASKS 20
 
         TaskStatus_t taskStatusArray[MAX_TASKS];
@@ -63,6 +63,11 @@ public:
 
         // Get all tasks' info
         taskCount = uxTaskGetSystemState(taskStatusArray, MAX_TASKS, &totalRunTime);
+
+        // Sort the taskStatusArray by task name
+        std::sort(taskStatusArray, taskStatusArray + taskCount, [](const TaskStatus_t& a, const TaskStatus_t& b) {
+            return strcmp(a.pcTaskName, b.pcTaskName) < 0;
+        });
 
         // printf("Found %d tasks\n", taskCount);
         // printf("Name\t\tState\tPrio\tStack\tRun Time\tCPU %%\tCore\n");
