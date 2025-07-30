@@ -36,7 +36,7 @@ public:
 
     void loop()
     {
-        if (!_socket->getConnectedClients()) return; 
+        if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
 
         if (millis() - lastMillis > ANALYTICS_INTERVAL)
         {

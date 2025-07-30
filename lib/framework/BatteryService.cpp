@@ -46,7 +46,7 @@ void BatteryService::begin()
 
 void BatteryService::batteryEvent()
 {
-    if (!_socket->getConnectedClients()) return; 
+    if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
 
     JsonDocument doc;
     doc["soc"] = _lastSOC;

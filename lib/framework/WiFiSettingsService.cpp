@@ -251,7 +251,7 @@ void WiFiSettingsService::configureNetwork(wifi_settings_t &network)
 
 void WiFiSettingsService::updateRSSI()
 {
-    if (!_socket->getConnectedClients()) return; 
+    if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
 
     JsonDocument doc;
     doc["rssi"] = WiFi.RSSI();

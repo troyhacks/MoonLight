@@ -60,7 +60,7 @@ private:
 
     void syncState(const String &originId, bool sync = false)
     {
-        if (!_socket->getConnectedClients()) return; 
+        if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
 
         JsonDocument jsonDocument;
         JsonObject root = jsonDocument.to<JsonObject>();

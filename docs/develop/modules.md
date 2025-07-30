@@ -87,7 +87,7 @@ void setupDefinition(JsonArray root) override{
 
 ```cpp
     void loop1s() {
-        if (!_socket->getConnectedClients()) return; 
+        if (!_socket->getConnectedClients()) return; // 🌙 No need for UI tasks
 
         JsonDocument newData; //to only send updatedData
         JsonArray scripts = newData["scripts"].to<JsonArray>(); //to: remove old array
