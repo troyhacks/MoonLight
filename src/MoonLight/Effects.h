@@ -667,8 +667,8 @@ public:
     values.add("Time");
     values.add("Up");
     values.add("Status 🛜");
-    values.add("Server size 🛜");
-    values.add("Socket size 🛜");
+    values.add("Clients 🛜");
+    values.add("Connected 🛜");
   }
 
   void loop() override {
@@ -679,7 +679,7 @@ public:
     
     switch (choice) {
       case 1: text.format(".%d", WiFi.localIP()[3]); break;
-      case 2: text.format("%ds", sharedData.fps); layerV->setRGB(Coord3D(0,0), CRGB::Blue); break;
+      case 2: text.format("%ds", sharedData.fps); break;
       case 3: text.formatTime(time(nullptr), "%H%M"); break;
       case 4: 
         if (millis() < 60000)

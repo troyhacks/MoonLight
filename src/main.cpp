@@ -67,8 +67,6 @@ volatile xSemaphoreHandle driverSemaphore = xSemaphoreCreateBinary();
 
 void effectTask(void* pvParameters) {
     // 🌙
-    #if FT_ENABLED(FT_MOONLIGHT)
-    #endif
 
     for (;;) {
         esp32sveltekit.lps++; // 🌙

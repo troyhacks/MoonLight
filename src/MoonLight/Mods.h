@@ -40,6 +40,13 @@ class DriverNode: public Node {
   
   bool lightPresetSaved = false; //initLeds can only start if this has been saved
 
+  #if HP_ALL_DRIVERS
+    CRGB savedColorCorrection;
+    uint16_t setMaxPowerBrightnessFactor = 90; //tbd: implement driver.setMaxPowerInMilliWatts
+    bool initDone = false;
+    uint8_t colorOrder = 3;
+  #endif
+
   public:
 
   void setup() override;

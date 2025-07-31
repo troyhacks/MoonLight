@@ -15,7 +15,12 @@
 
 #include <ESP32SvelteKit.h>
 
-#if HP_PHYSICAL_DRIVER
+#if HP_ALL_DRIVERS
+  #define NUMSTRIPS 16 //can this be changed e.g. when we have 20 pins?
+  #define NUM_LEDS_PER_STRIP 256 //could this be removed from driver lib as makes not so much sense
+  #include "I2SClocklessLedDriver.h"
+  static I2SClocklessLedDriver ledsDriver;
+#else //ESP32_LEDSDRIVER  
   #include "ESP32-LedsDriver.h"
   #define MAX_PINS 20 // this is also defined in ESP32-LedsDriver.h...
   #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
@@ -63,14 +68,22 @@ void DriverNode::loop() {
     brightnessSaved = brightness;
   }
 
-  CRGB correction;
-  uint8_t white;
-  ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
-  if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
-    ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
-    ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
-  }
-
+  #if HP_ALL_DRIVERS
+    if (savedColorCorrection.red != layerV->layerP->lights.header.red || savedColorCorrection.green != layerV->layerP->lights.header.green || savedColorCorrection.blue != layerV->layerP->lights.header.blue) {
+      ledsDriver.setGamma(layerV->layerP->lights.header.red/255, layerV->layerP->lights.header.green/255, layerV->layerP->lights.header.blue/255);
+      savedColorCorrection.red = layerV->layerP->lights.header.red;
+      savedColorCorrection.green = layerV->layerP->lights.header.green;
+      savedColorCorrection.blue = layerV->layerP->lights.header.blue;
+    }
+  #else //ESP32_LEDSDRIVER
+    CRGB correction;
+    uint8_t white;
+    ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
+    if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
+      ESP_LOGD(TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
+      ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
+    }
+  #endif
 }
 
 void DriverNode::updateControl(JsonObject control) {
@@ -131,13 +144,23 @@ void DriverNode::updateControl(JsonObject control) {
 
     ESP_LOGD(TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
 
-    if (ledsDriver.initLedsDone) {
-      
-      ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+    #if HP_ALL_DRIVERS
+      if (initDone) {
+        
+        // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
 
-      if (oldChannelsPerLight != header->channelsPerLight)
-        restartNeeded = true; //in case 
-    }
+        if (oldChannelsPerLight != header->channelsPerLight)
+          restartNeeded = true; //in case 
+      }
+    #else //ESP32_LEDSDRIVER
+      if (ledsDriver.initLedsDone) {
+        
+        ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+
+        if (oldChannelsPerLight != header->channelsPerLight)
+          restartNeeded = true; //in case 
+      }
+    #endif
 
     lightPresetSaved = true;
   }
@@ -574,16 +597,66 @@ void ArtNetDriverMod::loop() {
   }
 
   void PhysicalDriverMod::addLayout() {
-    if (!lightPresetSaved || ledsDriver.initLedsDone || layerV->layerP->sortedPins.size() == 0) return;
+    #if HP_ALL_DRIVERS
+      if (!lightPresetSaved || initDone || layerV->layerP->sortedPins.size() == 0) return;
 
-    if (layerV->layerP->pass == 1) { //physical
-      ESP_LOGD(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
-      if (safeModeMB) {
+      if (layerV->layerP->pass == 1) { //physical
+        initDone = true;
+        ESP_LOGD(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+        if (safeModeMB) {
+            ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
+            return;
+        }
+
+        int pins[NUMSTRIPS]; //max 16 pins
+        int lengths[NUMSTRIPS];
+        int nb_pins=0;
+
+        for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
+          ESP_LOGD(TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+          if (nb_pins < NUMSTRIPS) {
+            pins[nb_pins] = sortedPin.pin;
+            lengths[nb_pins] = sortedPin.nrOfLights;
+            nb_pins++;
+          }
+        }
+
+        //fill the rest of the pins with the pins already used
+        //preferably NUMSTRIPS is a variable...
+        if (nb_pins > 0) {
+          for (uint8_t i = nb_pins; i < NUMSTRIPS; i++) {
+            pins[i] = pins[i%nb_pins];
+            lengths[i] = 0;
+          }
+        }
+        ESP_LOGD(TAG, "pins[");
+        for (int i=0; i<nb_pins; i++) {
+          ESP_LOGD(TAG, ", %d", pins[i]);
+        }
+        ESP_LOGD(TAG, "]\n");
+
+        if (nb_pins > 0) {
+
+          ledsDriver.initled((uint8_t*) layerV->layerP->lights.channels, pins, lengths, nb_pins, (colorarrangment)colorOrder);
+          #if ML_LIVE_MAPPING
+            driver.setMapLed(&mapLed);
+          #endif
+          //void initled(uint8_t *leds, int *Pinsq, int *sizes, int num_strips, colorarrangment cArr)
+          ledsDriver.setBrightness(setMaxPowerBrightnessFactor / 256); //not brighter then the set limit (WIP)
+          //   Variable("Fixture", "brightness").triggerEvent(onChange, UINT8_MAX, true); //set brightness (init is true so bri value not send via udp)
+          initDone = true; //so loop is called
+        }
+      }
+    #else //ESP32_LEDSDRIVER
+      if (!lightPresetSaved || ledsDriver.initLedsDone || layerV->layerP->sortedPins.size() == 0) return;
+
+      if (layerV->layerP->pass == 1) { //physical
+        ESP_LOGD(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+        if (safeModeMB) {
           ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
           return;
-      }
+        }
 
-    #if HP_PHYSICAL_DRIVER
         #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
           int numPins = 0;
           PinConfig pinConfig[MAX_PINS];
@@ -612,12 +685,23 @@ void ArtNetDriverMod::loop() {
             #endif
           }
         #endif
-      #endif
-    }
+      }
+    #endif
   }
 
   void PhysicalDriverMod::loop() {
-    #if HP_PHYSICAL_DRIVER
+    #if HP_ALL_DRIVERS
+      if (!initDone) return;
+
+      if (layerV->layerP->lights.header.isPositions == 0) {
+
+        DriverNode::loop();
+
+        if (ledsDriver.total_leds > 0)
+          ledsDriver.showPixels(WAIT);
+        // #endif
+    }
+    #else //ESP32_LEDSDRIVER
       if (!ledsDriver.initLedsDone) return;
 
       if (layerV->layerP->lights.header.isPositions == 0) {

@@ -45,7 +45,7 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 * Controls:
     * Speed: scrolling speed if the text is wider then the display width
     * Font: Different font sizes
-    * Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Server size 🛜 (dC), Socket size 🛜 (dCC)
+    * Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC)
 
 ### PanTilt script
 
