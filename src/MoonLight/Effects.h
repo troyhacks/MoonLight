@@ -319,7 +319,7 @@ public:
   }
 
   ~GEQEffect() {
-    ESP_LOGI(TAG, "free previousBarHeight");
+    // ESP_LOGI(TAG, "free previousBarHeight");
     if (previousBarHeight) {
       free(previousBarHeight);
       previousBarHeight = nullptr;

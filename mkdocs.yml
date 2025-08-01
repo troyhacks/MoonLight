@@ -19,6 +19,7 @@ nav:
       - moonbase/filemanager.md
       - moonbase/module/instances.md
       - moonbase/module/tasks.md
+      - moonbase/module/pins.md
   - "Connections":
       - connections/mqtt.md
       - connections/ntp.md

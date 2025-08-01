@@ -15,11 +15,15 @@
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
 
+TaskHandle_t effectTaskHandle = NULL;
+TaskHandle_t driverTaskHandle = NULL;
+
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
     #include "MoonBase/FileManager.h"
     #include "MoonBase/ModuleInstances.h"
     #include "MoonBase/ModuleTasks.h"
+    #include "MoonBase/ModulePins.h"
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
@@ -48,6 +52,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
     FileManager fileManager = FileManager(&server, &esp32sveltekit);
     ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit);
     ModuleTasks moduleTasks = ModuleTasks(&server, &esp32sveltekit);
+    ModulePins modulePins = ModulePins(&server, &esp32sveltekit);
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
@@ -120,9 +125,6 @@ void driverTask(void* pvParameters) {
     }
 }
 
-TaskHandle_t effectTaskHandle = NULL;
-TaskHandle_t driverTaskHandle = NULL;
-
 void setup()
 {
     // start serial and filesystem
@@ -144,6 +146,7 @@ void setup()
         fileManager.begin();
         moduleInstances.begin();
         moduleTasks.begin();
+        modulePins.begin();
     #endif
     
     // MoonLight
@@ -179,6 +182,7 @@ void setup()
             #endif
 
             moduleTasks.loop1s(); 
+            modulePins.loop1s(); 
         }
 
         EVERY_N_SECONDS(10) {

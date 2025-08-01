@@ -142,7 +142,7 @@ void DriverNode::updateControl(JsonObject control) {
       layerV->layerP->lights.header.offsetZoom = 17;
     }
 
-    ESP_LOGD(TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
+    ESP_LOGI(TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
 
     #if HP_ALL_DRIVERS
       if (initDone) {
@@ -698,7 +698,7 @@ void ArtNetDriverMod::loop() {
         DriverNode::loop();
 
         if (ledsDriver.total_leds > 0)
-          ledsDriver.showPixels(WAIT);
+          ledsDriver.showPixels(NO_WAIT);
         // #endif
     }
     #else //ESP32_LEDSDRIVER

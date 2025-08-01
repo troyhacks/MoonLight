@@ -116,6 +116,12 @@
 					href: '/moonbase/module?module=tasks',
 					feature: page.data.features.moonbase,
 				},
+				{
+					title: 'Pins',
+					icon: CPU,
+					href: '/moonbase/module?module=pins',
+					feature: page.data.features.moonbase,
+				},
 			]
 		},
 		{
