@@ -31,7 +31,6 @@
 #endif
 
 #include <AsyncUDP.h>
-#define ARTNET_DEFAULT_PORT 6454
 
 void DriverNode::setup() {
   hasLayout = true; //so addLayout is called if needed
@@ -183,6 +182,7 @@ void ArtNetDriverMod::setup() {
   DriverNode::setup();
 
   addControl(controllerIP3, "controllerIP", "number");
+  addControl(port, "port", "number");
   addControl(FPSLimiter, "FPSLimiter", "number");
   addControl(nrOfOutputs, "nrOfOutputs", "number");
   addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
@@ -293,7 +293,7 @@ void ArtNetDriverMod::loop() {
 
         bufferOffset += packetSize; //multiple of channelsPerLight
         
-        if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, ARTNET_DEFAULT_PORT)) {
+        if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, port)) {
             Serial.print("🐛");
             return; // borked
         }

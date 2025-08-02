@@ -33,8 +33,8 @@ public:
         JsonArray values; // if a property is a select, this is the values of the select
 
         #ifndef CONFIG_IDF_TARGET_ESP32C3
-            property = root.add<JsonObject>(); property["name"] = "core0"; property["type"] = "text";
-            property = root.add<JsonObject>(); property["name"] = "core1"; property["type"] = "text";
+            property = root.add<JsonObject>(); property["name"] = "core0"; property["type"] = "text"; property["ro"] = true;
+            property = root.add<JsonObject>(); property["name"] = "core1"; property["type"] = "text"; property["ro"] = true;
         #endif
 
         property = root.add<JsonObject>(); property["name"] = "tasks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
@@ -121,8 +121,8 @@ public:
             _state.data["core1"] = pcTaskGetName(current1);
         #endif
 
-        JsonObject tasksData = _state.data.as<JsonObject>();
-        _socket->emitEvent("tasks", tasksData);
+        JsonObject data = _state.data.as<JsonObject>();
+        _socket->emitEvent("tasks", data);
 
     }
 

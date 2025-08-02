@@ -90,12 +90,14 @@
     <span class="mr-4">{initCap(property.name)}</span>  
 </label>
 
-{#if property.ro && false}
+{#if property.ro}
     {#if property.type == "ip"}
         <a 
             href="http://{value}"
             target ="_blank"
         >{value}</a>
+    {:else if property.type == "coord3D"}
+        <span>{value.x}, {value.y}, {value.z}</span> 
     {:else}
         <span>{value}</span> 
     {/if}

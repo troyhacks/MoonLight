@@ -31,26 +31,26 @@ public:
         JsonArray details; // if a property is an array, this is the details of the array
         // JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536;
-        property = root.add<JsonObject>(); property["name"] = "channelsPerLight"; property["type"] = "number"; property["max"] = 65536;
-        property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 32;
-        property = root.add<JsonObject>(); property["name"] = "FastLED"; property["type"] = "text"; property["max"] = 32;
-        property = root.add<JsonObject>(); property["name"] = "FastLEDI2S"; property["type"] = "text"; property["max"] = 32;
-        property = root.add<JsonObject>(); property["name"] = "colorOrder"; property["type"] = "text"; property["max"] = 32;
-        property = root.add<JsonObject>(); property["name"] = "maxChannels"; property["type"] = "number"; property["max"] = 65538;
-        property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
-        property = root.add<JsonObject>(); property["name"] = "nodes#"; property["type"] = "number"; property["max"] = 65536;
+        property = root.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "channelsPerLight"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "FastLED"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "FastLEDI2S"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "colorOrder"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "maxChannels"; property["type"] = "number"; property["max"] = 65538; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D"; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "nodes#"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
 
         property = root.add<JsonObject>(); property["name"] = "layers"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D";
-            property = details.add<JsonObject>(); property["name"] = "mappingTable#"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "nrOfZeroLights"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "nrOfOneLight"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "mappingTableIndexes#"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "nrOfMoreLights"; property["type"] = "number"; property["max"] = 65536;
-            property = details.add<JsonObject>(); property["name"] = "nodes#"; property["type"] = "number"; property["max"] = 65536;
+            property = details.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "mappingTable#"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "nrOfZeroLights"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "nrOfOneLight"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "mappingTableIndexes#"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "nrOfMoreLights"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "nodes#"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
         }
     }
 

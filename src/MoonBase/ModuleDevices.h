@@ -116,8 +116,8 @@ public:
             // ESP_LOGD(TAG, "data %s", buffer);
             if (!_socket->getConnectedClients()) return; 
 
-            JsonObject devicesData = _state.data.as<JsonObject>();
-            _socket->emitEvent("devices", devicesData);
+            JsonObject data = _state.data.as<JsonObject>();
+            _socket->emitEvent("devices", data);
         }
     }
 

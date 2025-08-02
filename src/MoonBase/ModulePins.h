@@ -3,7 +3,7 @@
     @file      ModulePins.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/moonbase/module/tasks/
+    @Doc       https://moonmodules.org/MoonLight/moonbase/module/pins/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
@@ -32,7 +32,7 @@ public:
         JsonArray details; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "tasks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "pins"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "GPIO"; property["type"] = "number"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "Valid"; property["type"] = "checkbox"; property["ro"] = true;
@@ -62,12 +62,12 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
 
     void loop1s() {
 
-        if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
+        if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI 
 
-        _state.data["tasks"].to<JsonArray>(); //empty
+        _state.data["pins"].to<JsonArray>(); //empty
 
         for (int gpio_num = 0; gpio_num < SOC_GPIO_PIN_COUNT; gpio_num++) {
-            JsonObject task = _state.data["tasks"].as<JsonArray>().add<JsonObject>();
+            JsonObject task = _state.data["pins"].as<JsonArray>().add<JsonObject>();
 
             // Check if GPIO is valid
             bool is_valid = GPIO_IS_VALID_GPIO(gpio_num);
@@ -102,8 +102,8 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
             task["PinInfo"] = "";
         }
 
-        JsonObject tasksData = _state.data.as<JsonObject>();
-        _socket->emitEvent("tasks", tasksData);
+        JsonObject data = _state.data.as<JsonObject>();
+        _socket->emitEvent("pins", data);
 
     }
 

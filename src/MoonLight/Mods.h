@@ -66,6 +66,7 @@ class ArtNetDriverMod: public DriverNode {
   static const char * tags() {return "";}
 
   uint16_t controllerIP3 = 11;
+  uint16_t port = 6454;
   uint16_t FPSLimiter = 50; //default 50ms
   uint16_t nrOfOutputs = 2; //8 on Art-Net LED Controller
   uint16_t channelsPerOutput = 512; //3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
