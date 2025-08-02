@@ -57,7 +57,7 @@ public:
     JsonObject control;
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
-        ESP_LOGD(TAG, "update control %s t:%s d:%d p:%p ps:%d", name, type, variable, pointer, sizeof(ControlType));
+        ESP_LOGD(TAG, "update control %s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
         control1["p"] = pointer;
         control = control1; //set control to the found one
         break;
@@ -75,7 +75,7 @@ public:
       newControl = true; //set flag to true, as control is new
     }
 
-    ESP_LOGD(TAG, "%s t:%s d:%d p:%p ps:%d", name, type, variable, pointer, sizeof(ControlType));
+    ESP_LOGD(TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
     //setValue
     if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
       if (sizeof(ControlType) != 1) {

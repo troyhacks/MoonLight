@@ -63,7 +63,7 @@ public:
 
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop1s() {
@@ -108,7 +108,7 @@ public:
                 device["ip"] = deviceUDP.remoteIP().toString();
                 device["name"] = buffer+6;
                 device["time"] = time(nullptr);
-                ESP_LOGD(TAG, "added %s %s", device["ip"].as<String>().c_str(), buffer+6);
+                ESP_LOGV(TAG, "added %s %s", device["ip"].as<String>().c_str(), buffer+6);
             }
 
             // char buffer[2048];
