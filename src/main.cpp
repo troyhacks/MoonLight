@@ -21,7 +21,7 @@ TaskHandle_t driverTaskHandle = NULL;
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
     #include "MoonBase/FileManager.h"
-    #include "MoonBase/ModuleInstances.h"
+    #include "MoonBase/ModuleDevices.h"
     #include "MoonBase/ModuleTasks.h"
     #include "MoonBase/ModulePins.h"
 
@@ -50,7 +50,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
     FileManager fileManager = FileManager(&server, &esp32sveltekit);
-    ModuleInstances moduleInstances = ModuleInstances(&server, &esp32sveltekit);
+    ModuleDevices moduleDevices = ModuleDevices(&server, &esp32sveltekit);
     ModuleTasks moduleTasks = ModuleTasks(&server, &esp32sveltekit);
     ModulePins modulePins = ModulePins(&server, &esp32sveltekit);
 
@@ -144,7 +144,7 @@ void setup()
     // MoonBase
     #if FT_ENABLED(FT_MOONBASE)
         fileManager.begin();
-        moduleInstances.begin();
+        moduleDevices.begin();
         moduleTasks.begin();
         modulePins.begin();
     #endif
@@ -173,7 +173,7 @@ void setup()
             sharedData.clientListSize = esp32sveltekit.getServer()->getClientList().size();
             sharedData.connectedClients = esp32sveltekit.getSocket()->getConnectedClients(); 
 
-            moduleInstances.loop1s();
+            moduleDevices.loop1s();
 
             #if FT_ENABLED(FT_MOONLIGHT)
                 #if FT_ENABLED(FT_LIVESCRIPT)
@@ -186,7 +186,7 @@ void setup()
         }
 
         EVERY_N_SECONDS(10) {
-            moduleInstances.loop10s();
+            moduleDevices.loop10s();
         }
 
         #if FT_ENABLED(FT_MOONLIGHT) && FT_ENABLED(FT_MONITOR)

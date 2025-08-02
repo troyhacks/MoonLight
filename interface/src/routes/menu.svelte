@@ -105,9 +105,9 @@
 					feature: page.data.features.moonbase,
 				},
 				{
-					title: 'Instances',
+					title: 'Devices',
 					icon: CPU,
-					href: '/moonbase/module?module=instances',
+					href: '/moonbase/module?module=devices',
 					feature: page.data.features.moonbase,
 				},
 				{

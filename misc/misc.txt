@@ -89,7 +89,7 @@ ls -tU
 remove sound
 for f in (I*.mov|sort -d) ; do ffmpeg -i $PWD/$f -c copy -an $PWD/$f.nosound.mov; done
 
-Update instances
+Update devices
 
 for i in 107 239 143 111 154 177 208 129 157
 do 

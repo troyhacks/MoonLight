@@ -13,7 +13,7 @@ MoonLight can be installed on ESP32 by means of a web installer or if you are a 
 
 MoonLight's core functionality is called MoonBase, Lighting specific functionality is called MoonLight. MoonLight is a stand alone product for end users controlling lights but Moonlight can also be used to create a custom IOT service by creating a github fork of MoonLight, rename it to the service, switching off the MoonLight feature and build your own functionality. This can be as simple as creating a smart plug or a timer or temperature sensor or as complex as for instance a greenhouse management system, using the ESP32 hardware interfaces (via GPIO ports) or it's network communication protocols.
 
-Examples of Moonbase functionality are monitor and manage a device, manage WiFi, Firmware updates, System Status and Restart. On top of that there is a file manager and an instance manager.
+Examples of Moonbase functionality are monitor and manage a device, manage WiFi, Firmware updates, System Status and Restart. On top of that there is a file manager and an device manager.
 
 MoonLight functionality is aimed at running effects on multiple lights. It's primarely focused on LED strips or LED panels but also DMX lights can be controlled via Art-Net. Depending on the type of ESP32 used and the amount of memory available, the number of LEDs can go up to 12288 at 120 FPS! Even more LEDs are possible, upon 65K at lower framerates. Also a large number of DMX lights can be controlled. MoonLight works with virtual and physical layers of lights and contains a node based model where nodes can be light layouts, effects and modifiers and run effects on a virtual layer and map the effect onto physical lights. 
 

@@ -1,16 +1,16 @@
 /**
     @title     MoonBase
-    @file      ModuleInstances.h
+    @file      ModuleDevices.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/moonbase/module/instances/
+    @Doc       https://moonmodules.org/MoonLight/moonbase/module/devices/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-#ifndef ModuleInstances_h
-#define ModuleInstances_h
+#ifndef ModuleDevices_h
+#define ModuleDevices_h
 
 #if FT_MOONBASE == 1
 
@@ -23,17 +23,17 @@ struct UDPMessage {
     Char<32> name;
 };
 
-class ModuleInstances : public Module
+class ModuleDevices : public Module
 {
 public:
 
-    WiFiUDP instanceUDP;
-    uint16_t instanceUDPPort = 65506;
-    bool instanceUDPConnected = false;
+    WiFiUDP deviceUDP;
+    uint16_t deviceUDPPort = 65506;
+    bool deviceUDPConnected = false;
 
-    ModuleInstances(PsychicHttpServer *server,
+    ModuleDevices(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
-        ) : Module("instances", server, sveltekit) {
+        ) : Module("devices", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 
@@ -43,17 +43,17 @@ public:
         JsonArray details; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
 
-        Char<32> instanceName;
-        instanceName = "MoonLight-";
+        Char<32> deviceName;
+        deviceName = "MoonLight-";
         uint8_t mac[6];
         esp_read_mac(mac, ESP_MAC_WIFI_STA);
         char macStr[5] = {0};
         sprintf(macStr, "%02x%02x", mac[4], mac[5]);
-        // instanceName += WiFi.macAddress().substring(12);//localIP().toString().c_str();
-        instanceName += macStr;
-        property = root.add<JsonObject>(); property["name"] = "instanceName"; property["type"] = "text"; property["default"] = instanceName.c_str();
+        // deviceName += WiFi.macAddress().substring(12);//localIP().toString().c_str();
+        deviceName += macStr;
+        property = root.add<JsonObject>(); property["name"] = "deviceName"; property["type"] = "text"; property["default"] = deviceName.c_str();
 
-        property = root.add<JsonObject>(); property["name"] = "instances"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+        property = root.add<JsonObject>(); property["name"] = "devices"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "ip"; property["type"] = "ip"; property["ro"] = true;
@@ -69,46 +69,46 @@ public:
     void loop1s() {
         if (!_socket->getConnectedClients()) return; 
 
-        if (!instanceUDPConnected) return;
+        if (!deviceUDPConnected) return;
 
         readUDP();
     }
 
     void loop10s() {
-        if (!instanceUDPConnected) {
-            instanceUDPConnected = instanceUDP.begin(instanceUDPPort);
-            ESP_LOGD(TAG, "instanceUDPConnected %d i:%d p:%d", instanceUDPConnected, instanceUDP.remoteIP()[3], instanceUDPPort);
+        if (!deviceUDPConnected) {
+            deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
+            ESP_LOGD(TAG, "deviceUDPConnected %d i:%d p:%d", deviceUDPConnected, deviceUDP.remoteIP()[3], deviceUDPPort);
         }
 
-        if (!instanceUDPConnected) return;
+        if (!deviceUDPConnected) return;
 
         writeUDP();
     }
 
     void readUDP() {
-        size_t packetSize = instanceUDP.parsePacket();
+        size_t packetSize = deviceUDP.parsePacket();
         if (packetSize > 0) {
             char buffer[packetSize];
-            instanceUDP.read(buffer, packetSize);
-            // ESP_LOGD(TAG, "UDP packet read from %d: %s (%d)", instanceUDP.remoteIP()[3], buffer+6, packetSize);
+            deviceUDP.read(buffer, packetSize);
+            // ESP_LOGD(TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer+6, packetSize);
 
             bool found = false;
 
             //use state.data or newData?
-            for (JsonObject instance: _state.data["instances"].as<JsonArray>()) {
-                if (instance["ip"] == instanceUDP.remoteIP().toString()) {
+            for (JsonObject device: _state.data["devices"].as<JsonArray>()) {
+                if (device["ip"] == deviceUDP.remoteIP().toString()) {
                     found = true;
-                    instance["name"] = buffer+6;
-                    instance["time"] = time(nullptr);
-                    // ESP_LOGD(TAG, "updated %s %s %lu", instance["ip"].as<String>().c_str(), instance["time"].as<String>().c_str(), time(nullptr));
+                    device["name"] = buffer+6;
+                    device["time"] = time(nullptr);
+                    // ESP_LOGD(TAG, "updated %s %s %lu", device["ip"].as<String>().c_str(), device["time"].as<String>().c_str(), time(nullptr));
                 }
             }
             if (!found) {
-                JsonObject instance = _state.data["instances"].as<JsonArray>().add<JsonObject>();
-                instance["ip"] = instanceUDP.remoteIP().toString();
-                instance["name"] = buffer+6;
-                instance["time"] = time(nullptr);
-                ESP_LOGD(TAG, "added %s %s", instance["ip"].as<String>().c_str(), buffer+6);
+                JsonObject device = _state.data["devices"].as<JsonArray>().add<JsonObject>();
+                device["ip"] = deviceUDP.remoteIP().toString();
+                device["name"] = buffer+6;
+                device["time"] = time(nullptr);
+                ESP_LOGD(TAG, "added %s %s", device["ip"].as<String>().c_str(), buffer+6);
             }
 
             // char buffer[2048];
@@ -116,18 +116,18 @@ public:
             // ESP_LOGD(TAG, "data %s", buffer);
             if (!_socket->getConnectedClients()) return; 
 
-            JsonObject instancesData = _state.data.as<JsonObject>();
-            _socket->emitEvent("instances", instancesData);
+            JsonObject devicesData = _state.data.as<JsonObject>();
+            _socket->emitEvent("devices", devicesData);
         }
     }
 
     void writeUDP() {
-        if (instanceUDP.beginPacket(IPAddress(255, 255, 255, 255), instanceUDPPort)) {
+        if (deviceUDP.beginPacket(IPAddress(255, 255, 255, 255), deviceUDPPort)) {
             
             UDPMessage message;
-            message.name = _state.data["instanceName"].as<String>().c_str();
-            instanceUDP.write((uint8_t *)&message, sizeof(message));
-            instanceUDP.endPacket();
+            message.name = _state.data["deviceName"].as<String>().c_str();
+            deviceUDP.write((uint8_t *)&message, sizeof(message));
+            deviceUDP.endPacket();
             // ESP_LOGD(TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
 
         }

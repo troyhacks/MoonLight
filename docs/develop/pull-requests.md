@@ -26,7 +26,7 @@ Below lists are ordered in terms of likelyhood to be accepted:
 ## Pending - WIP
 
 * [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)
-* [Instances](https://moonmodules.org/MoonLight/moonbase/module/instances/)
+* [Devices](https://moonmodules.org/MoonLight/moonbase/module/devices/)
 * [MoonBase-Modules](https://moonmodules.org/MoonLight/moonbase/modules/)
 
 ## Submitted

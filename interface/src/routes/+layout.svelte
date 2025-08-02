@@ -135,7 +135,7 @@
 </script>
 
 <svelte:head>
-	<title>{page.data.instances.instanceName}</title>
+	<title>{page.data.devices.deviceName}</title>
 </svelte:head>
 
 {#if page.data.features.security && $user.bearer_token === ''}

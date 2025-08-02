@@ -6,7 +6,7 @@ A module is a generic building block to create server and UI functionality which
 
 MoonBase-Modules are inspired by WLED usermods, further developed in StarBase and now in MoonLight (using the ESP32-Sveltekit infrastructure)
 
-See [Lights Control](module/lightsControl.md) or [Instances](module/instances.md) for examples
+See [Lights Control](module/lightsControl.md) or [Devices](module/devices.md) for examples
 
 Press the ? on any module to go to the documentation.
 

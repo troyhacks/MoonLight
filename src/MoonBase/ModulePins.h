@@ -62,6 +62,7 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
 
     void loop1s() {
 
+        if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
 
         _state.data["tasks"].to<JsonArray>(); //empty
 
@@ -98,7 +99,7 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
             task["RTC"] = is_rtc_gpio;
             task["Level"] = (level >= 0) ? (level ? "HIGH" : "LOW") : "N/A";
             task["DriveCap"] = (drive_result == ESP_OK) ? drive_cap_to_string(drive_cap) : "N/A";
-            // task["PinInfo"] = ;
+            task["PinInfo"] = "";
         }
 
         JsonObject tasksData = _state.data.as<JsonObject>();

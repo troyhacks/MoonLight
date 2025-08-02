@@ -55,6 +55,9 @@ public:
     }
 
     void loop1s() {
+
+        if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
+
         #define MAX_TASKS 20
 
         TaskStatus_t taskStatusArray[MAX_TASKS];

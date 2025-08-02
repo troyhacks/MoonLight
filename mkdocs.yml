@@ -17,7 +17,7 @@ nav:
   - "MoonBase":
       - moonbase/overview.md
       - moonbase/filemanager.md
-      - moonbase/module/instances.md
+      - moonbase/module/devices.md
       - moonbase/module/tasks.md
       - moonbase/module/pins.md
   - "Connections":

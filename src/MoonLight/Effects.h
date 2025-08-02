@@ -682,12 +682,23 @@ public:
       case 2: text.format("%ds", sharedData.fps); break;
       case 3: text.formatTime(time(nullptr), "%H%M"); break;
       case 4: 
-        if (millis() < 60000)
-          text.format("%ds", millis()/1000); 
-        else if (millis() < 3600000)
-          text.format("%dm", millis()/60000); 
-        else
-          text.format("%dh", millis()/3600000); 
+        #define MILLIS_PER_MINUTE (60*1000)
+        #define MILLIS_PER_HOUR (MILLIS_PER_MINUTE * 60)
+        #define MILLIS_PER_DAY (MILLIS_PER_HOUR * 24)
+        if (millis() < MILLIS_PER_MINUTE) //within 1 minute
+          text.format("%ds", millis()/1000); //seconds
+        else if (millis() < MILLIS_PER_MINUTE*10) //within 10 min
+          text.format("%dm%d", millis()/MILLIS_PER_MINUTE, (millis()/1000)%60); //minutes and seconds 
+        else if (millis() < MILLIS_PER_HOUR) //within 1 hour
+          text.format("%dm", millis()/MILLIS_PER_MINUTE);  //minutes
+        else if (millis() < MILLIS_PER_HOUR*10) //within 10 hours
+          text.format("%dh%d", millis()/MILLIS_PER_HOUR, (millis()/MILLIS_PER_MINUTE)%60); //hours and minutes
+        else if (millis() < MILLIS_PER_DAY) //within 1 day
+          text.format("%dh", millis()/MILLIS_PER_HOUR); //hours
+        else if (millis() < MILLIS_PER_DAY*10) //within 10 days
+          text.format("%dd%d", millis()/(MILLIS_PER_DAY), (millis()/MILLIS_PER_HOUR)%24); //days and hours
+        else // more than 10 days
+          text.format("%dh", millis()/(MILLIS_PER_DAY));  //days
         break;
       case 5: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP0":sharedData.connectionStatus==2?"AP1":sharedData.connectionStatus==3?"Sta0":sharedData.connectionStatus==4?"Sta1":"mqqt"); break;
       case 6: text.format("%dC", sharedData.clientListSize); break;

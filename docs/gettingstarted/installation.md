@@ -42,7 +42,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 34" src="https://github.com/user-attachments/assets/38f6cb86-e44c-478e-9910-1b0614c99292" />
 
-* **Step 11**: Press **Add Network** and apply settings. After connecting to your normal WiFi network you will see this screen showing the new IP address of your MoonLight board. You need the IP address to connect to tge board. If you don't know the IP address of your board anymore you can go to step 3 and 4 and step 7 and check the IP address in the Serial logging. Advanced tip: Use [ESP32Instances](https://github.com/ewowi/ESP32Instances) to discover the ESP32 nodes on your network (using nodeJS and html)
+* **Step 11**: Press **Add Network** and apply settings. After connecting to your normal WiFi network you will see this screen showing the new IP address of your MoonLight board. You need the IP address to connect to tge board. If you don't know the IP address of your board anymore you can go to step 3 and 4 and step 7 and check the IP address in the Serial logging. Advanced tip: Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
 
