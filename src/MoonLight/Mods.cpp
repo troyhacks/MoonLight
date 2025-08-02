@@ -698,7 +698,7 @@ void ArtNetDriverMod::loop() {
         DriverNode::loop();
 
         if (ledsDriver.total_leds > 0)
-          ledsDriver.showPixels(NO_WAIT);
+          ledsDriver.showPixels(WAIT);
         // #endif
     }
     #else //ESP32_LEDSDRIVER

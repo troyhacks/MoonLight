@@ -643,7 +643,7 @@ public:
   static const char * tags() {return "";}
 
   Char<32> text = Char<32>("MoonLight");
-  uint8_t speed = 128;
+  uint8_t speed = 0;
   uint8_t font = 0;
   uint8_t preset = 0;
 
