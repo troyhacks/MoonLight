@@ -2,7 +2,7 @@
 
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/953346f2-780d-4c61-8e73-7ba7bd228041" />
 
-MoonLight is based on nodes (see [Virtual layers](https://moonmodules.org/MoonLight/moonbase/module/virtual/) and [Physical layer](https://moonmodules.org/MoonLight/moonbase/module/physical/)) where each node can run precompiled layouts, effects or modifiers but alternatively, each node can also run a live script, uploaded on the esp32 file system (.sc files).
+MoonLight is based on nodes (see [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/) and [Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/)) where each node can run precompiled layouts, effects or modifiers but alternatively, each node can also run a live script, uploaded on the esp32 file system (.sc files).
 Currently this only works on esp32-S3 boards as normal esp32 boards do not have enough memory to flash MoonLight with the Live Scripts option.
 
 This module shows all running live scripts
@@ -20,7 +20,7 @@ This module shows all running live scripts
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/3b7eca3c-ae57-43f6-910e-3fc03f6fa380" />
 
-**Step 3**: Select [MoonLight / Virtual layers](https://moonmodules.org/MoonLight/moonbase/module/virtual/) or [MoonLight / Physical layer](https://moonmodules.org/MoonLight/moonbase/module/physical/) from the menu. Create a new effect node (🔥) by pressing the + button or update an existing effect node (🔥) by pressing the ✐-button. Open the drop down and scroll to the bottom where live script files are shown
+**Step 3**: Select [MoonLight / Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/) or [MoonLight / Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/) from the menu. Create a new effect node (🔥) by pressing the + button or update an existing effect node (🔥) by pressing the ✐-button. Open the drop down and scroll to the bottom where live script files are shown
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/60f99421-aa74-4aa7-805d-05125cc5f222" />
 

@@ -1,10 +1,10 @@
-# Virtual layers module
+# Effects module
 
-🆕 (in release v0.5.7 Virtual and physical layers modules are still in one module called editor)
+🆕 (in release v0.5.7 Effects and drivers modules are still combined in one module called editor)
 
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
-The Virtual layers module allows you to define the tasks to run an **effect** (e.g. bouncing balls), to **modify** the effect (e.g mirror).
+The Effects module allows you to define the tasks to run an **effect** (e.g. bouncing balls), to **modify** the effect (e.g mirror).
 Each task is defined as a node. A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager). A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
 
 Ultimately the nodes will be displayed in a graphical interface where nodes are connected by 'noodles' to define dependencies between nodes. For the time being nodes will be shown in a list.

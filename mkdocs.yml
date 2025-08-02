@@ -9,11 +9,11 @@ nav:
   - "MoonLight":
       - moonlight/overview.md
       - moonbase/module/lightsControl.md
-      - moonbase/module/virtual.md
-      - moonbase/module/physical.md
+      - moonbase/module/effects.md
+      - moonbase/module/drivers.md
+      - moonbase/module/channels.md
       - moonbase/module/liveScripts.md
-      - moonbase/module/ChannelView.md
-      - moonbase/module/MoonLightInfo.md
+      - moonbase/module/moonLightInfo.md
   - "MoonBase":
       - moonbase/overview.md
       - moonbase/filemanager.md

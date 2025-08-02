@@ -1,10 +1,10 @@
-# Physical layer module
+# Drivers module
 
 🆕 (in release v0.5.7 Virtual and physical layers modules are still in one module called editor)
 
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
-The Physical layer module allows you to define a **layout** (e.g. a panel 16x16), to drive LEDs (e.g. FastLED driver) and to run **supporting processes** (e.g. audiosync to run sound reactive effects and Art-Net to send light channels to an Art-Net controller).
+The Drivers module allows you to define a **layout** (e.g. a panel 16x16), to drive LEDs (e.g. FastLED driver) and to run **supporting processes** (e.g. audiosync to run sound reactive effects and Art-Net to send light channels to an Art-Net controller).
 
 Each task is defined as a node. A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager). A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
 

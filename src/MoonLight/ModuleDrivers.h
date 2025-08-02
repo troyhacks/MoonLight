@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      ModulePhysical.h
+    @file      ModuleDrivers.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonbase/module/editor/
@@ -9,8 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-#ifndef ModulePhysical_h
-#define ModulePhysical_h
+#ifndef ModuleDrivers_h
+#define ModuleDrivers_h
 
 #if FT_MOONLIGHT
 
@@ -23,13 +23,13 @@
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
-class ModulePhysical : public NodeManager
+class ModuleDrivers : public NodeManager
 {
 public:
 
-    ModulePhysical(PsychicHttpServer *server,
+    ModuleDrivers(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit
-    ) : NodeManager("physical", server, sveltekit) {
+    ) : NodeManager("drivers", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
     }
 
@@ -131,7 +131,7 @@ public:
 
     }
   
-}; // class ModulePhysical
+}; // class ModuleDrivers
 
 #endif
 #endif

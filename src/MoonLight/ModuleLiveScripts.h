@@ -20,7 +20,7 @@
 
 #include "../MoonBase/Module.h"
 
-#include "ModuleVirtual.h"
+#include "ModuleEffects.h"
 
 class ModuleLiveScripts : public Module
 {
@@ -28,17 +28,17 @@ public:
 
     PsychicHttpServer *_server;
     FileManager *_fileManager;
-    ModuleVirtual *_moduleVirtual;
+    ModuleEffects *_moduleEffects;
 
     ModuleLiveScripts(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
         FileManager *fileManager,
-        ModuleVirtual *moduleVirtual
+        ModuleEffects *moduleEffects
     ) : Module("liveScripts", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _server = server;
         _fileManager = fileManager;
-        _moduleVirtual = moduleVirtual;
+        _moduleEffects = moduleEffects;
     }
 
     void begin() {
@@ -65,7 +65,7 @@ public:
 
                                     //wait until setup has been executed?
 
-                                    _moduleVirtual->requestUIUpdate = true; //update the virtual layers UI
+                                    _moduleEffects->requestUIUpdate = true; //update the Effects UI
                                 }
 
                                 ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());

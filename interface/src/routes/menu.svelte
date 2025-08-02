@@ -62,15 +62,21 @@
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Virtual Layers',
+					title: 'Effects',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=virtual',
+					href: '/moonbase/module?module=effects',
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Physical Layer',
+					title: 'Drivers',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=physical',
+					href: '/moonbase/module?module=drivers',
+					feature: page.data.features.moonlight,
+				},
+				{
+					title: 'Channels',
+					icon: BulbIcon,
+					href: '/moonbase/module?module=channels',
 					feature: page.data.features.moonlight,
 				},
 				{
@@ -80,16 +86,10 @@
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Channel View',
-					icon: BulbIcon,
-					href: '/moonbase/module?module=ChannelView',
-					feature: page.data.features.moonlight,
-				},
-				{
 					title: 'Info',
 					icon: CPU,
-					href: '/moonbase/module?module=MoonLightInfo',
-					feature: page.data.features.moonbase,
+					href: '/moonbase/module?module=moonLightInfo',
+					feature: page.data.features.moonlight,
 				},
 			]
 		},
@@ -99,7 +99,7 @@
 			feature: page.data.features.moonbase,
 			submenu: [
 				{
-					title: 'File Manager',
+					title: 'Files',
 					icon: FilesIcon,
 					href: '/moonbase/filemanager',
 					feature: page.data.features.moonbase,

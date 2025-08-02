@@ -4,8 +4,8 @@
 * [Install MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/)
 * [Run MoonLight](https://moonmodules.org/MoonLight/moonlight/overview/)
     * [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
-    * [Virtual Layers](https://moonmodules.org/MoonLight/moonbase/module/virtual/)
-    * [Physical Layer](https://moonmodules.org/MoonLight/moonbase/module/physical/)
+    * [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/)
+    * [Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/)
 
 ## Sitemap
 

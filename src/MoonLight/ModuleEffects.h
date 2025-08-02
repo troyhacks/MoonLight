@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      ModuleVirtual.h
+    @file      ModuleEffects.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonbase/module/editor/
@@ -9,8 +9,8 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-#ifndef ModuleVirtual_h
-#define ModuleVirtual_h
+#ifndef ModuleEffects_h
+#define ModuleEffects_h
 
 #if FT_MOONLIGHT
 
@@ -23,16 +23,16 @@
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
-class ModuleVirtual : public NodeManager
+class ModuleEffects : public NodeManager
 {
 public:
 
     FileManager *_fileManager;
 
-    ModuleVirtual(PsychicHttpServer *server,
+    ModuleEffects(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
         FileManager *fileManager
-    ) : NodeManager("virtual", server, sveltekit) {
+    ) : NodeManager("effects", server, sveltekit) {
         ESP_LOGD(TAG, "constructor");
         _fileManager = fileManager;
     }
@@ -70,7 +70,7 @@ public:
 
                     //             //wait until setup has been executed?
 
-                    //             _moduleVirtual->requestUIUpdate = true; //update the virtual layers UI
+                    //             _moduleEffects->requestUIUpdate = true; //update the Effects UI
                     //         }
 
                     //         ESP_LOGD(TAG, "update due to new node %s done", nodeName.c_str());
@@ -198,7 +198,7 @@ public:
 
     }
   
-}; // class ModuleVirtual
+}; // class ModuleEffects
 
 #endif
 #endif

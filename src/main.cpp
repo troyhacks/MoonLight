@@ -28,12 +28,12 @@ TaskHandle_t driverTaskHandle = NULL;
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         #include "MoonLight/ModuleLightsControl.h"
-        #include "MoonLight/ModuleVirtual.h"
-        #include "MoonLight/ModulePhysical.h"
+        #include "MoonLight/ModuleEffects.h"
+        #include "MoonLight/ModuleDrivers.h"
         #if FT_ENABLED(FT_LIVESCRIPT)
             #include "MoonLight/ModuleLiveScripts.h"
         #endif
-        #include "MoonLight/ModuleChannelView.h"
+        #include "MoonLight/ModuleChannels.h"
         #include "MoonLight/ModuleMoonLightInfo.h"
     #endif
 #endif
@@ -57,12 +57,12 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
         ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
-        ModuleVirtual moduleVirtual = ModuleVirtual(&server, &esp32sveltekit, &fileManager);
-        ModulePhysical modulePhysical = ModulePhysical(&server, &esp32sveltekit);
+        ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);
+        ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit);
         #if FT_ENABLED(FT_LIVESCRIPT)
-            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleVirtual);
+            ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects);
         #endif
-        ModuleChannelView moduleChannelView = ModuleChannelView(&server, &esp32sveltekit);
+        ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
         ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
     #endif
 #endif
@@ -151,10 +151,10 @@ void setup()
     
     // MoonLight
     #if FT_ENABLED(FT_MOONLIGHT)
-        moduleVirtual.begin();
-        modulePhysical.begin();
+        moduleEffects.begin();
+        moduleDrivers.begin();
         moduleLightsControl.begin();
-        moduleChannelView.begin();
+        moduleChannels.begin();
         moduleMoonLightInfo.begin();
         #if FT_ENABLED(FT_LIVESCRIPT)
             moduleLiveScripts.begin();
@@ -163,8 +163,8 @@ void setup()
 
     esp32sveltekit.addLoopFunction([]() { 
 
-        moduleVirtual.loop();
-        modulePhysical.loop();
+        moduleEffects.loop();
+        moduleDrivers.loop();
 
         EVERY_N_SECONDS(1) {
             //set shared data (eg used in scrolling text effect)

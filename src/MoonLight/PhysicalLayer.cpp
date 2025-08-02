@@ -158,7 +158,7 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.size += Coord3D{1,1,1};
             ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.channels));
             //send the positions to the UI _socket_emit
-            lights.header.isPositions = 2; //filled with positions, set back to ct_Leds in ModuleVirtual
+            lights.header.isPositions = 2; //filled with positions, set back to ct_Leds in ModuleEffects
 
             // initLightsToBlend();
 

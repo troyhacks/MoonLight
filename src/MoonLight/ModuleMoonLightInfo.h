@@ -21,7 +21,7 @@ public:
 
     ModuleMoonLightInfo(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
-        ) : Module("MoonLightInfo", server, sveltekit) {
+        ) : Module("moonLightInfo", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 

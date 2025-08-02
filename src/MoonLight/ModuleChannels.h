@@ -1,27 +1,27 @@
 /**
     @title     MoonBase
-    @file      ModuleChannelView.h
+    @file      ModuleChannels.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/moonbase/module/ChannelView/
+    @Doc       https://moonmodules.org/MoonLight/moonbase/module/Channels/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-#ifndef ModuleChannelView_h
-#define ModuleChannelView_h
+#ifndef ModuleChannels_h
+#define ModuleChannels_h
 
 #if FT_MOONBASE == 1
 
 #include "../MoonBase/Module.h"
-class ModuleChannelView : public Module
+class ModuleChannels : public Module
 {
 public:
 
-    ModuleChannelView(PsychicHttpServer *server,
+    ModuleChannels(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
-        ) : Module("ChannelView", server, sveltekit) {
+        ) : Module("channels", server, sveltekit) {
             ESP_LOGD(TAG, "constructor");
     }
 
