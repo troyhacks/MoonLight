@@ -11,8 +11,7 @@ Note: These docs are updated also after a release has been published preparing f
 
 ## Menu
 
-<img width="344" height="1094" alt="image" src="https://github.com/user-attachments/assets/d4afcb36-2193-4232-b1e7-494fe2b525f9" />
-
+<img width="177" height="312" alt="Screenshot 2025-08-03 at 20 32 59" src="https://github.com/user-attachments/assets/9e515dc8-aabd-4f81-887a-91d282040aa7" />
 
 ## Status Bar
 
