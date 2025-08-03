@@ -15,16 +15,16 @@
 #include <ESP32SvelteKit.h> //for safeModeMB
 
 void Node::updateControl(JsonObject control) {
-    ESP_LOGD(TAG, "updateControl %s", control["name"].as<String>().c_str());
+    ESP_LOGV(TAG, "updateControl %s", control["name"].as<String>().c_str());
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
         int pointer = control["p"];
-        ESP_LOGD(TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
+        ESP_LOGV(TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
             if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
                 uint8_t *valuePointer = (uint8_t *)pointer;
                 *valuePointer = control["value"];
-                // ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                // ESP_LOGV(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
             }
             else if (control["type"] == "selectFile") {
                 char *valuePointer = (char *)pointer;
@@ -55,7 +55,7 @@ void Node::updateControl(JsonObject control) {
 
 Node *gNode = nullptr;
 
-static void _addControl(uint8_t *var, char *name, char* type, uint8_t min = 0, uint8_t max = UINT8_MAX) {ESP_LOGD(TAG, "%s %s %d (%d-%d)", name, type, var, min, max);gNode->addControl(*var, name, type, min, max);}
+static void _addControl(uint8_t *var, char *name, char* type, uint8_t min = 0, uint8_t max = UINT8_MAX) {ESP_LOGV(TAG, "%s %s %d (%d-%d)", name, type, var, min, max);gNode->addControl(*var, name, type, min, max);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layerV->layerP->addLight({x, y, z});}
 
@@ -119,7 +119,7 @@ Parser parser = Parser();
 
 void LiveScriptNode::setup() {
     
-  // ESP_LOGD(TAG, "animation %s", animation);
+  // ESP_LOGV(TAG, "animation %s", animation);
 
   if (animation[0] != '/') { //no sc script
       return;
@@ -176,7 +176,7 @@ void LiveScriptNode::setup() {
   addExternal(    "bool on", &on);
 
 //   for (asm_external el: external_links) {
-//       ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
+//       ESP_LOGV(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
 //   }
 
 
@@ -194,13 +194,13 @@ void LiveScriptNode::loop() {
 
 void LiveScriptNode::addLayout() {
     if (hasLayout) {
-        ESP_LOGD(TAG, "%s", animation);
+        ESP_LOGV(TAG, "%s", animation);
         scriptRuntime.execute(animation, "addLayout"); 
     }
 }
 
 LiveScriptNode::~LiveScriptNode() {
-    ESP_LOGD(TAG, "%s", animation);
+    ESP_LOGV(TAG, "%s", animation);
     scriptRuntime.kill(animation);
 }
 
@@ -211,7 +211,7 @@ void LiveScriptNode::compileAndRun() {
 
   //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
   // runInTask1.push_back([&, animation, type, error] {
-      ESP_LOGD(TAG, "%s", animation);
+      ESP_LOGV(TAG, "%s", animation);
       File file = ESPFS.open(animation);
       if (file) {
         Char<32> pre;
@@ -233,25 +233,25 @@ void LiveScriptNode::compileAndRun() {
           if (hasLoop) scScript += "while(true){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
           scScript += "}";
 
-          ESP_LOGD(TAG, "script \n%s", scScript.c_str());
+          ESP_LOGV(TAG, "script \n%s", scScript.c_str());
 
           TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
           ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
   
-          // ESP_LOGD(TAG, "parsing %s", scScript.c_str());
+          // ESP_LOGV(TAG, "parsing %s", scScript.c_str());
 
           Executable executable = parser.parseScript(&scScript); // note that this class will be deleted after the function call !!!
           executable.name = animation;
-          ESP_LOGD(TAG, "parsing %s done", animation);
+          ESP_LOGV(TAG, "parsing %s done", animation);
           scriptRuntime.addExe(executable); //if already exists, delete it first
-          ESP_LOGD(TAG, "addExe success %s", executable.exeExist?"true":"false");
+          ESP_LOGV(TAG, "addExe success %s", executable.exeExist?"true":"false");
 
           gNode = this; //todo: this is not working well with multiple scripts running!!!
 
           if (executable.exeExist) {
             execute();
           } else
-              ESP_LOGD(TAG, "error %s", executable.error.error_message.c_str());
+              ESP_LOGV(TAG, "error %s", executable.error.error_message.c_str());
 
           //send error to client ... not working yet
           // error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
@@ -268,7 +268,7 @@ void LiveScriptNode::execute() {
         ESP_LOGW(TAG, "Safe mode enabled, not executing script %s", animation);
         return;
     }
-    ESP_LOGD(TAG, "%s", animation);
+    ESP_LOGV(TAG, "%s", animation);
 
     requestMappings(); // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
 
@@ -277,28 +277,28 @@ void LiveScriptNode::execute() {
         // executable.execute("setup"); 
         // send controls to UI
         // executable.executeAsTask("main"); //background task (async - vs sync)
-        ESP_LOGD(TAG, "%s executeAsTask main", animation);
+        ESP_LOGV(TAG, "%s executeAsTask main", animation);
         scriptRuntime.executeAsTask(animation, "main"); //background task (async - vs sync)
         //assert failed: xEventGroupSync event_groups.c:228 (uxBitsToWaitFor != 0)
     } else {
-        ESP_LOGD(TAG, "%s execute main", animation);
+        ESP_LOGV(TAG, "%s execute main", animation);
         scriptRuntime.execute(animation, "main");
     }
-    ESP_LOGD(TAG, "%s execute started", animation);
+    ESP_LOGV(TAG, "%s execute started", animation);
 }
 
 void LiveScriptNode::kill() {
-    ESP_LOGD(TAG, "%s", animation);
+    ESP_LOGV(TAG, "%s", animation);
     scriptRuntime.kill(animation);
 }
 
 void LiveScriptNode::free() {
-    ESP_LOGD(TAG, "%s", animation);
+    ESP_LOGV(TAG, "%s", animation);
     scriptRuntime.free(animation);
 }
 
 void LiveScriptNode::killAndDelete() {
-    ESP_LOGD(TAG, "%s", animation);
+    ESP_LOGV(TAG, "%s", animation);
     scriptRuntime.kill(animation);
     // scriptRuntime.free(animation);
     scriptRuntime.deleteExe(animation);
@@ -320,7 +320,7 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
         object["free"] = 0;
         object["delete"] = 0;
         object["execute"] = 0;
-        // ESP_LOGD(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
+        // ESP_LOGV(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
     }
 }
 

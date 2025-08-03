@@ -87,7 +87,7 @@ void effectTask(void* pvParameters) {
         #endif
             
         while (!runInTask1.empty()) {
-            ESP_LOGD(TAG, "runInTask1 %d", runInTask1.size());
+            ESP_LOGV(TAG, "runInTask1 %d", runInTask1.size());
             runInTask1.front()();
             runInTask1.erase(runInTask1.begin());
         }
@@ -116,7 +116,7 @@ void driverTask(void* pvParameters) {
         #endif
 
         while (!runInTask2.empty()) {
-            ESP_LOGD(TAG, "runInTask2 %d", runInTask2.size());
+            ESP_LOGV(TAG, "runInTask2 %d", runInTask2.size());
             runInTask2.front()();
             runInTask2.erase(runInTask2.begin());
         }

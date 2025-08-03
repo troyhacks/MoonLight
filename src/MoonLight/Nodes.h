@@ -57,7 +57,7 @@ public:
     JsonObject control;
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
-        ESP_LOGD(TAG, "update control %s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+        ESP_LOGV(TAG, "update control %s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
         control1["p"] = pointer;
         control = control1; //set control to the found one
         break;
@@ -75,7 +75,7 @@ public:
       newControl = true; //set flag to true, as control is new
     }
 
-    ESP_LOGD(TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+    ESP_LOGV(TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
     //setValue
     if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
       if (sizeof(ControlType) != 1) {
@@ -134,11 +134,11 @@ public:
 
   void requestMappings() {
     if (hasModifier || hasLayout) {
-        ESP_LOGD(TAG, "hasLayout or Modifier -> requestMapVirtual");
+        ESP_LOGV(TAG, "hasLayout or Modifier -> requestMapVirtual");
         layerV->layerP->requestMapVirtual = true;
     }
     if (hasLayout) {
-        ESP_LOGD(TAG, "hasLayout -> requestMapPhysical");
+        ESP_LOGV(TAG, "hasLayout -> requestMapPhysical");
         layerV->layerP->requestMapPhysical = true;
     }
   }
@@ -167,7 +167,7 @@ public:
   virtual ~Node() {
     //delete any allocated memory
 
-    ESP_LOGD(TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
+    ESP_LOGV(TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
 
   }
 

@@ -33,7 +33,7 @@ public:
         ESP32SvelteKit *sveltekit,
         FileManager *fileManager
     ) : Module("lightsControl", server, sveltekit) {
-        ESP_LOGD(TAG, "constructor");
+        ESP_LOGV(TAG, "constructor");
         _server = server;
         _fileManager = fileManager;
     }
@@ -41,28 +41,28 @@ public:
     void begin() {
         Module::begin();
 
-        ESP_LOGD(TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
+        ESP_LOGV(TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
         setPresetsFromFolder(); //set the right values during boot
         
         //update presets if files changed in presets folder
         _fileManager->addUpdateHandler([&](const String &originId)
         { 
-            ESP_LOGD(TAG, "FileManager::updateHandler %s", originId.c_str());
+            ESP_LOGV(TAG, "FileManager::updateHandler %s", originId.c_str());
             //read the file state (read all files and folders on FS and collect changes)
             _fileManager->read([&](FilesState &filesState) {
                 // loop over all changed files (normally only one)
                 bool presetChanged = false;
                 for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current live script, recompile it (to do: multiple live effects)
-                    ESP_LOGD(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                    ESP_LOGV(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
                     if (strstr(updatedItem.c_str(), "/.config/presets")) {
-                        ESP_LOGD(TAG, " preset.json updated -> call update %s", updatedItem.c_str());
+                        ESP_LOGV(TAG, " preset.json updated -> call update %s", updatedItem.c_str());
                         presetChanged = true;
                     }
                 }
                 if (presetChanged) {
-                    ESP_LOGD(TAG, "setPresetsFromFolder");
+                    ESP_LOGV(TAG, "setPresetsFromFolder");
                     setPresetsFromFolder(); // update the presets from the folder
                 }
             });
@@ -71,7 +71,7 @@ public:
 
     //define the data model
     void setupDefinition(JsonArray root) override {
-        ESP_LOGD(TAG, "");
+        ESP_LOGV(TAG, "");
         JsonObject property; // state.data has one or more properties
         JsonArray details = root; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
@@ -105,19 +105,19 @@ public:
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "red") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.red = _state.data["red"];
         } else if (updatedItem.name == "green") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.green = _state.data["green"];
         } else if (updatedItem.name == "blue") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.blue = _state.data["blue"];
         } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
         } else if (updatedItem.name == "palette") {
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             // String value = _state.data["palette"];//updatedItem.oldValue;
             if (updatedItem.value == 0) layerP.palette = CloudColors_p;
             else if (updatedItem.value == 1) layerP.palette = LavaColors_p;
@@ -143,7 +143,7 @@ public:
                 uint16_t select = updatedItem.value["select"];
                 Char<32> presetFile;
                 presetFile.format("/.config/presets/preset%02d.json", select);
-                ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
                 if (updatedItem.value["action"] == "click") {
                     updatedItem.value["selected"] = select; //store the selected preset
@@ -166,7 +166,7 @@ public:
                 }
             }
         } else 
-            ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            ESP_LOGV(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //update _state.data["preset"]["list"] and send update to endpoints
@@ -179,7 +179,7 @@ public:
             int seq = -1;
             if (sscanf(file.name(), "preset%02d.json", &seq) == 1) {
                 // seq now contains the 2-digit number, e.g., 34
-                ESP_LOGD(TAG, "Preset %d found", seq);
+                ESP_LOGV(TAG, "Preset %d found", seq);
                 _state.data["preset"]["list"].add(seq); // add the preset to the preset array
                 changed = true;
             }

@@ -30,7 +30,7 @@ void ModuleState::setupData() {
 
     //only if no file ...
     if (data.size() == 0) {
-        ESP_LOGD(TAG, "size %d", data.size());
+        ESP_LOGV(TAG, "size %d", data.size());
         JsonDocument definition;
         if (setupDefinition) 
             setupDefinition(definition.to<JsonArray>());
@@ -89,15 +89,15 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 JsonArray stateArray = stateValue.as<JsonArray>();
                 JsonArray newArray = newValue.as<JsonArray>();
 
-                // ESP_LOGD(TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
+                // ESP_LOGV(TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
                 
                 for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) { //compare each item in the array
                     if (i >= stateArray.size()) { //newArray has added a row
-                        ESP_LOGD(TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        ESP_LOGV(TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
                         stateArray.add<JsonObject>(); //add new row
                         changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                     } else if (i >= newArray.size()) { //newArray has deleted a row
-                        ESP_LOGD(TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        ESP_LOGV(TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
                         // newArray.add<JsonObject>(); //add dummy row
                         changed = true; //compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                         //set all the values to null
@@ -105,7 +105,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                         updatedItem.parent[(uint8_t)(depth+1)] = key.c_str();
                         updatedItem.index[(uint8_t)(depth+1)] = i;
                         for (JsonPair property : stateArray[i].as<JsonObject>()) {
-                            // ESP_LOGD(TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
+                            // ESP_LOGV(TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
                             // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
                             updatedItem.name = property.key().c_str();
                             updatedItem.oldValue = property.value().as<String>();
@@ -128,25 +128,25 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                     
                     if (onUpdateRunInTask == 1) { //if set to 0, run in main loopTask
                         runInTask1.push_back([&, updatedItem, stateData]() mutable { //mutable as updatedItem is called by reference (&)
-                            ESP_LOGD(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+                            ESP_LOGV(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
                             if (onUpdate) onUpdate(updatedItem);
                             // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-                            // ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                            // ESP_LOGV(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
                         });
                     }
                     else if (onUpdateRunInTask == 2) { //if set to 0, run in main loopTask
                         runInTask2.push_back([&, updatedItem, stateData]() mutable { //mutable as updatedItem is called by reference (&)
-                            ESP_LOGD(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+                            ESP_LOGV(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
                             if (onUpdate) onUpdate(updatedItem);
                             // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-                            // ESP_LOGD(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                            // ESP_LOGV(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
                         });
                     }
                     else
                         if (onUpdate) onUpdate(updatedItem);
                 } 
                 // else {
-                //     ESP_LOGD(TAG, "do not update %s", key.c_str());
+                //     ESP_LOGV(TAG, "do not update %s", key.c_str());
                 // }
             }
         }
@@ -163,9 +163,9 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
 
         // char buffer[1024];
         // serializeJson(state.data, buffer, sizeof(buffer));
-        // ESP_LOGD(TAG, "state.doc %s", buffer);
+        // ESP_LOGV(TAG, "state.doc %s", buffer);
         // serializeJson(root, buffer, sizeof(buffer));
-        // ESP_LOGD(TAG, "root %s", buffer);
+        // ESP_LOGV(TAG, "root %s", buffer);
 
         //check which propertys have updated
         if (root != state.data) {
@@ -208,7 +208,7 @@ Module::Module(String moduleName, PsychicHttpServer *server,
 {
     _moduleName = moduleName;
 
-    ESP_LOGD(TAG, "constructor %s", moduleName.c_str());
+    ESP_LOGV(TAG, "constructor %s", moduleName.c_str());
     _server = server;
 
     _state.onUpdate = [&](UpdatedItem &updatedItem) {
@@ -222,7 +222,7 @@ Module::Module(String moduleName, PsychicHttpServer *server,
 
 void Module::begin()
 {
-    ESP_LOGD(TAG, "");
+    ESP_LOGV(TAG, "");
     _httpEndpoint.begin();
     _eventEndpoint.begin();
     _fsPersistence.readFromFS(); //overwrites the default settings in state
@@ -242,7 +242,7 @@ void Module::begin()
 
         // char buffer[2048];
         // serializeJson(root, buffer, sizeof(buffer));
-        // ESP_LOGD(TAG, "server->on %s moduleDef %s", request->url().c_str(), buffer);
+        // ESP_LOGV(TAG, "server->on %s moduleDef %s", request->url().c_str(), buffer);
     
         return response.send();
     });
@@ -252,7 +252,7 @@ void Module::begin()
 
 void Module::onConfigUpdated()
 {
-    ESP_LOGD(TAG, "onConfigUpdated");
+    ESP_LOGV(TAG, "onConfigUpdated");
     //if update, for all updated items, run onUpdate
     // for (UpdatedItem updatedItem : _state.updatedItems) {
     //     onUpdate(updatedItem);

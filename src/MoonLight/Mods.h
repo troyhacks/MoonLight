@@ -100,14 +100,14 @@ class AudioSyncMod: public Node {
     if (!init) {
       sync.begin();
       init = true;
-      ESP_LOGD(TAG, "AudioSync: Initialized");
+      ESP_LOGV(TAG, "AudioSync: Initialized");
     }
     if (sync.read()) {
       memcpy(sharedData.bands, sync.fftResult, NUM_GEQ_CHANNELS);
       sharedData.volume = sync.volumeSmth;
       sharedData.majorPeak = sync.FFT_MajorPeak;
       // if (audio.bands[0] > 0) {
-      //   ESP_LOGD(TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);
+      //   ESP_LOGV(TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);
       // }
     }
   }

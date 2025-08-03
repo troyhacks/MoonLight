@@ -78,7 +78,7 @@ class MirrorModifier: public Node {
     if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
     if (mirrorZ) layerV->size.z = (layerV->size.z + 1) / 2;
     originalSize = layerV->size;
-    ESP_LOGD(TAG, "mirror %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    ESP_LOGV(TAG, "mirror %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
@@ -106,7 +106,7 @@ class MultiplyModifier: public Node {
   void modifySize() override {
     layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
     originalSize = layerV->size;
-    ESP_LOGD(TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    ESP_LOGV(TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
@@ -164,7 +164,7 @@ class PinwheelModifier: public Node {
     else factor = 360; // Default to 360 if symmetry is <= 0
     petalWidth = factor / float(petals);
 
-    ESP_LOGD(TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    ESP_LOGV(TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {

@@ -30,7 +30,7 @@ public:
     ModuleDrivers(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit
     ) : NodeManager("drivers", server, sveltekit) {
-        ESP_LOGD(TAG, "constructor");
+        ESP_LOGV(TAG, "constructor");
     }
 
     void begin() {
@@ -42,7 +42,7 @@ public:
         // #if FT_ENABLED(FT_MONITOR)
         //     _socket->registerEvent("monitor");
         //     _server->on("/rest/monitorLayout", HTTP_GET, [&](PsychicRequest *request) {
-        //         ESP_LOGD(TAG, "rest monitor triggered");
+        //         ESP_LOGV(TAG, "rest monitor triggered");
 
         //         //trigger pass 1 mapping of layout
         //         layerP.pass = 1; //(requestMapPhysical=1 physical rerun)
@@ -117,7 +117,7 @@ public:
                 layerP.nodes[index] = node; //add the node to the layer
         }
 
-        ESP_LOGD(TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
+        ESP_LOGV(TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
 
         return node;
     }

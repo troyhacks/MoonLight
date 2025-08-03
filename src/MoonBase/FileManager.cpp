@@ -70,7 +70,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
 
     if (root["showHidden"] != state.showHidden) {
         state.showHidden = root["showHidden"];
-        ESP_LOGD(TAG, "showHidden %d", state.showHidden);
+        ESP_LOGV(TAG, "showHidden %d", state.showHidden);
         changed = true;
     }
 
@@ -145,7 +145,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
     changed |= state.updatedItems.size();
 
     if (changed && state.updatedItems.size())
-        ESP_LOGD(TAG, "first item %s", state.updatedItems.front().c_str());
+        ESP_LOGV(TAG, "first item %s", state.updatedItems.front().c_str());
 
     return changed?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
 }

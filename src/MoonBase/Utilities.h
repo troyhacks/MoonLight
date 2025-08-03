@@ -244,7 +244,7 @@ struct Char {
 // Char<32> test;
 // test = "one - two - three";
 // test.split(" - ", [](const char *token) {
-//     ESP_LOGD(TAG, "token: %s", token);
+//     ESP_LOGV(TAG, "token: %s", token);
 // });
 
 //not tested yet
