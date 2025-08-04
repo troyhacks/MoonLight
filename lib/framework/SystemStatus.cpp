@@ -142,6 +142,7 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
     root["firmware_version"] = APP_VERSION;
     root["firmware_date"] = APP_DATE; // 🌙
     root["firmware_target"] = BUILD_TARGET; // 🌙
+    root["platform_version"] = PLATFORM_VERSION; // 🌙
     root["max_alloc_heap"] = ESP.getMaxAllocHeap();
     if (psramFound())
     {

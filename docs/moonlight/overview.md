@@ -26,8 +26,10 @@ Note: These docs are updated also after a release has been published preparing f
 
 * **Restart needed**: 🆕 e.g. when drivers are changed, a restart might be needed, see 🔄 in the statusbar. Clicking on the icon allows you to restart (🆕)- 🚧
 
-🚧
-* **Save** and **Cancel**
-* **Wifi**
-* **Battery**
-* **Sleep mode**
+* **Save** and **Cancel** 🆕 Changes are only saved after pressing the save button 💾. To undo changes, press the cancel button 🚫.
+
+* **Wifi**: See ESP32-Sveltekit
+
+* **Battery**: See ESP32-Sveltekit
+
+* **Sleep mode**: See ESP32-Sveltekit

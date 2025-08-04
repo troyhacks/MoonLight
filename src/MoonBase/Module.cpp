@@ -170,8 +170,14 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
         //check which propertys have updated
         if (root != state.data) {
             UpdatedItem updatedItem;
+
+            bool isNew = state.data.isNull(); //device is starting
             
-            return state.compareRecursive("", state.data, root, updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
+            bool changed = state.compareRecursive("", state.data, root, updatedItem);
+
+            if (!isNew && changed) saveNeeded = true;
+
+            return (!isNew && changed)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
         } else
             return StateUpdateResult::UNCHANGED;
     } else
@@ -204,7 +210,7 @@ Module::Module(String moduleName, PsychicHttpServer *server,
                   ModuleState::update,
                   this,
                   sveltekit->getFS(),
-                  String("/.config/" + moduleName + ".json").c_str())
+                  String("/.config/" + moduleName + ".json").c_str(), true) //🌙 true: delayedWrites
 {
     _moduleName = moduleName;
 

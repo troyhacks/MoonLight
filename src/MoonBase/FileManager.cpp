@@ -171,7 +171,8 @@ FileManager::FileManager(PsychicHttpServer *server,
                                                                                                             sveltekit->getSecurityManager(),
                                                                                                             AuthenticationPredicates::IS_AUTHENTICATED),
                                                                                             _socket(sveltekit->getSocket()),
-                                                                                             _server(server)
+                                                                                             _server(server),
+                                                                                             _sveltekit(sveltekit)
 {
 
     // configure settings service update handler to update state
@@ -188,6 +189,30 @@ void FileManager::begin()
 
     //setup the file server
     _server->serveStatic("/rest/file", ESPFS, "/");
+
+    _server->on("/rest/saveConfig", HTTP_POST, _sveltekit->getSecurityManager()->wrapRequest( [this](PsychicRequest *request)
+    {
+        request->reply(200);
+
+        FSPersistence<int>::writeToFSDelayed('W'); //write all delayed writes to the FS
+
+        saveNeeded = false;
+
+        return ESP_OK;
+    }, AuthenticationPredicates::IS_AUTHENTICATED));
+    
+    _server->on("/rest/cancelConfig", HTTP_POST, _sveltekit->getSecurityManager()->wrapRequest( [this](PsychicRequest *request)
+    {
+        request->reply(200);
+        FSPersistence<int>::writeToFSDelayed('C'); //read back from FS
+        //update UI...
+
+        saveNeeded = false;
+
+        return ESP_OK;
+    }, AuthenticationPredicates::IS_AUTHENTICATED));
+
+
 }
 
 void FileManager::onConfigUpdated()

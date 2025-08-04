@@ -21,20 +21,20 @@
 		});
 	}
 
-	function confirmSleep() {
-		modals.open(ConfirmDialog, {
-			title: 'Confirm Power Down',
-			message: 'Are you sure you want to switch off the device?',
-			labels: {
-				cancel: { label: 'Abort', icon: Cancel },
-				confirm: { label: 'Switch Off', icon: Power }
-			},
-			onConfirm: () => {
-				modals.close();
-				postSleep();
-			}
-		});
-	}
+	// function confirmSleep() {
+	// 	modals.open(ConfirmDialog, {
+	// 		title: 'Confirm Power Down',
+	// 		message: 'Are you sure you want to switch off the device?',
+	// 		labels: {
+	// 			cancel: { label: 'Abort', icon: Cancel },
+	// 			confirm: { label: 'Switch Off', icon: Power }
+	// 		},
+	// 		onConfirm: () => {
+	// 			modals.close();
+	// 			postSleep();
+	// 		}
+	// 	});
+	// }
 
 	// 🌙 for safeMode and restartNeeded
 	async function postRestart() {
@@ -46,17 +46,38 @@
 		});
 	}
 
-	function confirmRestart() {
+	// 🌙 
+	async function postSaveConfig() {
+		const response = await fetch('/rest/saveConfig', {
+			method: 'POST',
+			headers: {
+				Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic'
+			}
+		});
+	}
+
+	// 🌙 
+	async function postCancelConfig() {
+		const response = await fetch('/rest/cancelConfig', {
+			method: 'POST',
+			headers: {
+				Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic'
+			}
+		});
+	}
+
+	// 🌙 generic function!
+	function confirmDialog(action: String, fun: any) {
 		modals.open(ConfirmDialog, {
-			title: 'Confirm Restart',
-			message: 'Are you sure you want to restart the device?',
+			title: 'Confirm ' + action,
+			message: 'Are you sure you want to ' + action + "?" ,
 			labels: {
 				cancel: { label: 'Abort', icon: Cancel },
-				confirm: { label: 'Restart', icon: Power }
+				confirm: { label: action, icon: Power }
 			},
 			onConfirm: () => {
 				modals.close();
-				postRestart();
+				fun();
 			}
 		});
 	}
@@ -77,7 +98,7 @@
 	<!-- 🌙 safeMode -->
 	{#if $telemetry.rssi.safeMode}
 		<div class="flex-none">
-			<button class="btn btn-square btn-ghost h-9 w-10" onclick={confirmRestart}>
+			<button class="btn btn-square btn-ghost h-9 w-10" onclick={() => {confirmDialog("Restart", postRestart)}}>
 				🛡️
 			</button>
 		</div>
@@ -85,8 +106,19 @@
 	<!-- 🌙 restartNeeded -->
 	{#if $telemetry.rssi.restartNeeded}
 		<div class="flex-none">
-			<button class="btn btn-square btn-ghost h-9 w-10" onclick={confirmRestart}>
+			<button class="btn btn-square btn-ghost h-9 w-10" onclick={() => {confirmDialog("Restart", postRestart)}}>
 				🔄
+			</button>
+		</div>
+	{/if}
+	<!-- 🌙 saveNeeded: save of cancel -->
+	{#if $telemetry.rssi.saveNeeded}
+		<div class="flex-none">
+			<button class="btn btn-square btn-ghost h-9 w-10" onclick={postSaveConfig}>
+				💾
+			</button>
+			<button class="btn btn-square btn-ghost h-9 w-10" onclick={postCancelConfig}>
+				🚫
 			</button>
 		</div>
 	{/if}
@@ -115,7 +147,7 @@
 
 	{#if page.data.features.sleep}
 		<div class="flex-none">
-			<button class="btn btn-square btn-ghost h-9 w-10" onclick={confirmSleep}>
+			<button class="btn btn-square btn-ghost h-9 w-10" onclick={() => {confirmDialog("Switch off", postSleep)}}>
 				<Power class="text-error h-9 w-9" />
 			</button>
 		</div>

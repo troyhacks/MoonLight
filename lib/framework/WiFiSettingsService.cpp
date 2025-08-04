@@ -258,6 +258,7 @@ void WiFiSettingsService::updateRSSI()
     doc["ssid"] = WiFi.isConnected() ? WiFi.SSID() : "disconnected";
     doc["safeMode"] = safeModeMB; // 🌙
     doc["restartNeeded"] = restartNeeded; // 🌙
+    doc["saveNeeded"] = saveNeeded; // 🌙
     JsonObject jsonObject = doc.as<JsonObject>();
     _socket->emitEvent(EVENT_RSSI, jsonObject);
 }

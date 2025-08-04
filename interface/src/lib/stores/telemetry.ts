@@ -9,7 +9,8 @@ let telemetry_data = {
 		ssid: '',
 		disconnected: true,
 		restartNeeded: false, // 🌙 restartNeeded Indicates if the system needs to be restarted
-		safeMode: false // 🌙 safeMode Indicates if the system is in safe mode
+		safeMode: false, // 🌙 safeMode Indicates if the system is in safe mode
+		saveNeeded: false // 🌙 saveNeeded Indicates that changes has been made which need to be saved (or canceled)
 	},
 	battery: {
 		soc: 100,
@@ -31,12 +32,12 @@ function createTelemetry() {
 			if (!isNaN(Number(data.rssi))) {
 				update((telemetry_data) => ({
 					...telemetry_data,
-					rssi: { rssi: Number(data.rssi), ssid: data.ssid, disconnected: false, safeMode: data.safeMode, restartNeeded: data.restartNeeded } // 🌙 safeMode and restartNeeded
+					rssi: { rssi: Number(data.rssi), ssid: data.ssid, disconnected: false, safeMode: data.safeMode, restartNeeded: data.restartNeeded, saveNeeded: data.saveNeeded } // 🌙 safeMode and restartNeeded
 				}));
 			} else {
 				update((telemetry_data) => ({
 					...telemetry_data,
-					rssi: { rssi: 0, ssid: data.ssid, disconnected: true, safeMode: data.safeMode, restartNeeded: data.restartNeeded } // 🌙 safeMode and restartNeeded
+					rssi: { rssi: 0, ssid: data.ssid, disconnected: true, safeMode: data.safeMode, restartNeeded: data.restartNeeded, saveNeeded: data.saveNeeded } // 🌙 safeMode and restartNeeded
 				}));
 			}
 		},

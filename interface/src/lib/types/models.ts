@@ -103,6 +103,7 @@ export type RSSI = {
 	ssid: string;
 	safeMode: boolean; // 🌙 safeMode Indicates if the system is in safe mode
 	restartNeeded: boolean; // 🌙 restartNeeded Indicates if the system needs to be restarted
+	saveNeeded: boolean // 🌙 saveNeeded Indicates that changes has been made which need to be saved (or canceled)
 };
 
 export type Battery = {
@@ -121,6 +122,7 @@ export type StaticSystemInformation = {
 	firmware_version: string;
 	firmware_target: string; // 🌙
 	firmware_date: string; // 🌙
+	platform_version: string; // 🌙
 	cpu_freq_mhz: number;
 	cpu_type: string;
 	cpu_rev: number;

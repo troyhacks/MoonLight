@@ -52,6 +52,7 @@ private:
     EventEndpoint<FilesState> _eventEndpoint;
     WebSocketServer<FilesState> _webSocketServer;
     PsychicHttpServer *_server;
+    ESP32SvelteKit *_sveltekit;
 
     void onConfigUpdated();
 };

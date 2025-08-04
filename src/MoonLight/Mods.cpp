@@ -16,8 +16,9 @@
 #include <ESP32SvelteKit.h>
 
 #if HP_ALL_DRIVERS
-  #define NUMSTRIPS 16 //can this be changed e.g. when we have 20 pins?
-  #define NUM_LEDS_PER_STRIP 256 //could this be removed from driver lib as makes not so much sense
+  #define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
+  // #define NUM_LEDS_PER_STRIP 256 not for non virtal... (only setting __delay when NO_WAIT)
+  #define __NB_DMA_BUFFER 30
   #include "I2SClocklessLedDriver.h"
   static I2SClocklessLedDriver ledsDriver;
 #else //ESP32_LEDSDRIVER  
@@ -333,7 +334,14 @@ void ArtNetDriverMod::loop() {
       // }
 
       ESP_LOGV(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+
+      uint8_t pinCount = 0;
       for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
+        pinCount++;
+        if (pinCount > 4) {//FastLED RMT supports max 4 pins!
+          ESP_LOGW(TAG, "Too many pins!");
+          break;
+        }
         ESP_LOGV(TAG, "sortpins s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
 
         uint16_t startLed = sortedPin.startLed;
