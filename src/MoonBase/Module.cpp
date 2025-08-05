@@ -52,9 +52,6 @@ void ModuleState::setupData() {
 
 void ModuleState::read(ModuleState &state, JsonObject &root)
 {
-    TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-    ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
-
     if (state.readHook)
         state.readHook(state.data.as<JsonObject>());
 
@@ -158,14 +155,6 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
 {
     
     if (root.size() != 0) { // in case of empty file
-        TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-        ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
-
-        // char buffer[1024];
-        // serializeJson(state.data, buffer, sizeof(buffer));
-        // ESP_LOGV(TAG, "state.doc %s", buffer);
-        // serializeJson(root, buffer, sizeof(buffer));
-        // ESP_LOGV(TAG, "root %s", buffer);
 
         //check which propertys have updated
         if (root != state.data) {

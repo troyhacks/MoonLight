@@ -42,6 +42,8 @@ public:
         }
         property = root.add<JsonObject>(); property["name"] = "group"; property["type"] = "checkbox"; property["default"] = true;
 
+        property = root.add<JsonObject>(); property["name"] = "universe"; property["type"] = "number"; property["default"] = 0;
+
         property = root.add<JsonObject>(); property["name"] = "channel"; property["type"] = "pad"; property["width"] = 12; property["hoverToServer"] = true; property["size"] = 10;
         property["default"]["select"] = 0;
         property["default"]["action"] = "";
@@ -65,6 +67,7 @@ public:
             update([&](ModuleState &state) {
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
             }, "server");
+        } else if (updatedItem.name == "universe") {
         } else if (updatedItem.name == "channel") {
             //copy the file to the hidden folder...
             if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {

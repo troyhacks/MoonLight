@@ -130,7 +130,9 @@
     />
 {:else if property.type == "range"}
     <div class="flex-row flex items-center space-x-2">
-        <!-- range colors: https://daisyui.com/components/range/ -->
+        <!-- range colors: https://daisyui.com/components/range/ 
+         on:input: direct response to server
+         -->
         <input 
             type="range"
             min={property.min?property.min:0} 
@@ -140,7 +142,7 @@
             {disabled}
             title={property.default}
             bind:value={value}
-            on:change={onChange}
+            on:input={onChange}
         />
         {#if hasNumber}
             <input 

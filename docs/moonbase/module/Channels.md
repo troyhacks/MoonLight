@@ -7,6 +7,7 @@ If you hover over a channel, that channel will output a value - by this you can 
 
 * View: select between physical layer and virtual layer(s)
 * Group: group all channels in a light as one button. Pressing the button sets all the channels to max
+* Universe: Change the range of channels to control - WIP!
 
 Choosing the virtual layer and hovering over the channels is a good way to test effect modifiers
 
