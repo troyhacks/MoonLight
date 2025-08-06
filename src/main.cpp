@@ -125,8 +125,28 @@ void driverTask(void* pvParameters) {
     }
 }
 
+// 🌙 Custom log output function - WIP
+static int custom_vprintf(const char* fmt, va_list args)
+{
+    // Example 1: Write to a custom UART or buffer
+    char buffer[256];
+    int len = vsnprintf(buffer, sizeof(buffer), fmt, args);
+
+    Serial.printf("🌙"); //to test it works - WIP to send logging to UI
+    
+    // Send to custom output (e.g., external UART, network, file, etc.)
+    // custom_uart_write(buffer, len);
+    
+    // For this example, we'll also write to stdout
+    return vprintf(fmt, args);
+}
+
 void setup()
 {
+    //🌙 use ESP_IDF_LOG
+    esp_log_set_vprintf(custom_vprintf);
+    esp_log_level_set("*", LOG_LOCAL_LEVEL); //use the platformio setting here
+
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
