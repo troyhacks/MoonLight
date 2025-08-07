@@ -22,50 +22,25 @@
 					'Content-Type': 'application/json'
 				}
 			});
+			console.log("requestLayout submitted");
 			const arrayBuffer = await response.json();
-			console.log("requestLayout", arrayBuffer);
+			console.log("requestLayout received", arrayBuffer);
 		// } catch (error) {
 		// 	console.error('Error:', error);
 		// }
 	}
 
-	const handleMonitor = (lights: Uint8Array) => {
+	const handleMonitor = (data: Uint8Array) => {
 
-        const headerLength = 24; // Define the length of the header
-        const header = lights.slice(0, headerLength);
-        const data = lights.slice(headerLength);
-
-		// let isPositions:number = header[6]; 
-		const isPositions   = (header[6] >> 0) & 0x3; // bits 0-1
-		const offsetRed     = (header[6] >> 2) & 0x3; // bits 2-3
-		const offsetGreen   = (header[6] >> 4) & 0x3; // bits 4-5
-		const offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7
-
-		let nrOfLights = header[4] + 256 * header[5];
-		let channelsPerLight:number = header[11];
-		let offsetRGB:number = header[12];
-		
-		if (!(isPositions==2)) { 
-			//(type == ct_Leds) {
-			if (!done) {
-				requestLayout(); //ask for positions
-				console.log("Monitor.handleMonitor", data);
-				done = true;
+		if (data.length == 24)
+			handleHeader(data)
+		else {
+			if (isPositions == 2) {
+				handlePositions(data)
+				isPositions = 0;
 			}
-			clearColors();
-			for (let index = 0; index < nrOfLights * channelsPerLight; index +=channelsPerLight) {
-				// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
-				const r = data[index + offsetRGB] / 255;
-				const g = data[index + 1 + offsetRGB] / 255;
-				const b = data[index + 2 + offsetRGB] / 255;
-				const a = 1.0; // Full opacity
-				colors.push(r, g, b, a);
-			}
-			updateScene(vertices, colors);
-		} else { 
-			//layout Change
-			// console.log(lights)
-			handleLayout(header, data);
+			else
+				handleChannels(data);
 		}
 	};
 
@@ -80,8 +55,25 @@
 		return { x, y, z };
 	}
 
-	const handleLayout = (header: Uint8Array, positions: Uint8Array) => {
-		console.log("Monitor.handleLayout positions", header, positions);
+	let nrOfLights:number;
+	let channelsPerLight:number;
+	let offsetRGB:number;
+	let isPositions: number = 0;
+
+	const handleHeader = (header: Uint8Array) => {
+		console.log("Monitor.handleHeader", header);
+
+		const headerLength = 24; // Define the length of the header
+
+		// let isPositions:number = header[6]; 
+		isPositions   = (header[6] >> 0) & 0x3; // bits 0-1
+		const offsetRed     = (header[6] >> 2) & 0x3; // bits 2-3
+		const offsetGreen   = (header[6] >> 4) & 0x3; // bits 4-5
+		const offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7
+
+		nrOfLights = header[4] + 256 * header[5];
+		channelsPerLight = header[11];
+		offsetRGB = header[12];
 
 		//rebuild scene
 		createScene(el);
@@ -92,12 +84,16 @@
 		height = header[2];
 		depth = header[3];
 
-		let nrOfLights = header[4] + 256 * header[5];
+		// let nrOfLights = header[4] + 256 * header[5];
 
-		console.log("Monitor.handleLayout", nrOfLights, width, height, depth);
+		console.log("Monitor.handleHeader", nrOfLights, width, height, depth);
+
+	}
+
+	const handlePositions = (positions: Uint8Array) => {
+		console.log("Monitor.handlePositions", positions);
 
 		for (let index = 0; index < nrOfLights * 3; index +=3) {
-			// console.log(data[index], data[index+1], data[index+2]);
 			let position = unpackCoord3DInto3Bytes(positions[index], positions[index+1], positions[index+2])
 
 			//set to -1,1 coordinate system of webGL
@@ -110,11 +106,29 @@
 		}
 	}
 
+	const handleChannels = (channels: Uint8Array) => {
+
+		if (!done) {
+			requestLayout(); //ask for positions
+			console.log("Monitor.handleChannels", channels);
+			done = true;
+		}
+		clearColors();
+		for (let index = 0; index < nrOfLights * channelsPerLight; index +=channelsPerLight) {
+			// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
+			const r = channels[index + offsetRGB] / 255;
+			const g = channels[index + 1 + offsetRGB] / 255;
+			const b = channels[index + 2 + offsetRGB] / 255;
+			const a = 1.0; // Full opacity
+			colors.push(r, g, b, a);
+		}
+
+		updateScene(vertices, colors);
+	};
 
 	onMount(() => {
 		console.log("onMount Monitor")
 		socket.on("monitor", handleMonitor);
-
 	});
 
 	onDestroy(() => {

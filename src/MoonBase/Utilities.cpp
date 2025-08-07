@@ -92,3 +92,14 @@ bool copyFile(const char* srcPath, const char* dstPath) {
     dst.close();
     return true;
 }
+
+bool isInPSRAM(void* ptr) {
+    uintptr_t addr = (uintptr_t)ptr;
+    #if CONFIG_IDF_TARGET_ESP32
+        return (addr >= 0x3F800000 && addr < 0x40000000);
+    #elif CONFIG_IDF_TARGET_ESP32S2
+        return (addr >= 0x3F500000 && addr < 0x3FF80000);
+    #elif CONFIG_IDF_TARGET_ESP32S3
+        return (addr >= 0x3C000000 && addr < 0x3E000000);
+    #endif
+}

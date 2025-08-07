@@ -38,20 +38,6 @@ public:
         NodeManager::begin();
 
         nodes = &layerP.nodes;
-
-        // #if FT_ENABLED(FT_MONITOR)
-        //     _socket->registerEvent("monitor");
-        //     _server->on("/rest/monitorLayout", HTTP_GET, [&](PsychicRequest *request) {
-        //         ESP_LOGV(TAG, "rest monitor triggered");
-
-        //         //trigger pass 1 mapping of layout
-        //         layerP.pass = 1; //(requestMapPhysical=1 physical rerun)
-        //         layerP.mapLayout();
-
-        //         PsychicJsonResponse response = PsychicJsonResponse(request, false);
-        //         return response.send();
-        //     });
-        // #endif
     }
 
     void addNodes(JsonArray values) override {

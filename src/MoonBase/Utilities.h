@@ -18,6 +18,15 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x) //e.g. for pio.ini settings (see ML_CHIPSET)
 
+#define MB_LOGV(tag, fmt, ...) ESP_LOGV(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGD(tag, fmt, ...) ESP_LOGD(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGI(tag, fmt, ...) ESP_LOGI(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGW(tag, fmt, ...) ESP_LOGW(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGE(tag, fmt, ...) ESP_LOGE(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+
+#define MB_TAG "🌙"
+#define ML_TAG "💫"
+
 struct Coord3D {
 
     uint16_t x;
@@ -273,3 +282,21 @@ void extractPath(const char *filepath, char *path);
 void walkThroughFiles(File folder, std::function<void(File, File)> fun);
 
 bool copyFile(const char* srcPath, const char* dstPath);
+
+template<typename T>
+struct PSRAMAllocator {
+    using value_type = T;
+    
+    T* allocate(size_t n) {
+        MB_LOGI(MB_TAG, "trying to allocate in PSRAM size %d", n);
+        void * res = heap_caps_malloc(n * sizeof(T), MALLOC_CAP_SPIRAM);
+        if (!res) MB_LOGE(MB_TAG, "heap_caps_malloc not succeeded");
+        return static_cast<T*>(res);
+    }
+    
+    void deallocate(T* p, size_t n) {
+        heap_caps_free(p);
+    }
+};
+
+bool isInPSRAM(void* ptr);

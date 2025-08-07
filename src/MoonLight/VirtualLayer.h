@@ -52,8 +52,8 @@ class VirtualLayer {
   Coord3D middle = {8,8,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
 
   //they will be reused to avoid fragmentation
-  std::vector<PhysMap> mappingTable;
-  std::vector<std::vector<uint16_t>> mappingTableIndexes;
+  std::vector<PhysMap, PSRAMAllocator<PhysMap>> mappingTable;
+  std::vector<std::vector<uint16_t>, PSRAMAllocator<std::vector<uint16_t>>> mappingTableIndexes;
   uint16_t mappingTableSizeUsed = 0; 
   uint16_t mappingTableIndexesSizeUsed = 0; 
 

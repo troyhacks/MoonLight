@@ -78,11 +78,11 @@ void effectTask(void* pvParameters) {
 
         #if FT_ENABLED(FT_MOONLIGHT)
             if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100))==pdFALSE) {
-                // ESP_LOGE(SVK_TAG, "effectSemaphore wait too long");
+                // ESP_LOGE(SVK_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
             }
-            if (layerP.lights.header.isPositions == 0) {//otherwise lights is used for positions etc.
-                layerP.loop(); //run all the effects of all virtual layers (currently only one)
-            }
+
+            layerP.loop(); //run all the effects of all virtual layers (currently only one)
+
             xSemaphoreGive(driverSemaphore);
         #endif
             
@@ -216,12 +216,15 @@ void setup()
 
                 moduleLightsControl.read([&](ModuleState& _state) {
                     if (layerP.lights.header.isPositions == 2) { //send to UI
-                        if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                            _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS));
-                        layerP.lights.header.isPositions = 0;
+                        if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
+                            _socket->emitEvent("monitor", (char *)&layerP.lights.header, sizeof(LightsHeader));
+                            _socket->emitEvent("monitor", (char *)layerP.lights.channels,  MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS)); //*3 is for 3 bytes position
+                        }
+                        MB_LOGD(ML_TAG, "pos from 2 to 3");
+                        layerP.lights.header.isPositions = 3;
                     } else if (layerP.lights.header.isPositions == 0) {//send to UI
                         if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                            _socket->emitEvent("monitor", (char *)&layerP.lights, sizeof(LightsHeader) + MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
+                            _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
                     }
                 });
             }

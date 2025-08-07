@@ -19,6 +19,8 @@
 
 #include <ESP32SvelteKit.h> //for safeModeMB
 
+#include "../MoonBase/Utilities.h"
+
 PhysicalLayer::PhysicalLayer() {
         ESP_LOGV(TAG, "constructor");
 
@@ -39,28 +41,37 @@ PhysicalLayer::PhysicalLayer() {
     
     //run one loop of an effect
     void PhysicalLayer::loop() {
-        //runs the loop of all effects / nodes in the layer
-        for (VirtualLayer * layer: layerV) {
-            if (layer) layer->loop(); //if (layer) needed when deleting rows ...
+        if (lights.header.isPositions == 0 || lights.header.isPositions == 3) {//otherwise lights is used for positions etc.
+
+            //runs the loop of all effects / nodes in the layer
+            for (VirtualLayer * layer: layerV) {
+                if (layer) layer->loop(); //if (layer) needed when deleting rows ...
+            }
+
+            if (requestMapPhysical) {
+                ESP_LOGD(TAG, "mapLayout physical requested");
+                
+                pass = 1;
+                mapLayout();
+
+                requestMapPhysical = false;
+            }
+
+            if (requestMapVirtual) {
+                ESP_LOGD(TAG, "mapLayout virtual requested");
+
+                pass = 2;
+                mapLayout();
+                
+                requestMapVirtual = false;
+            }    
+
+            if (lights.header.isPositions == 3) {
+                MB_LOGD(ML_TAG, "pos from 3 to 0");
+                lights.header.isPositions = 0; //now driver can show again
+            }
         }
 
-        if (requestMapPhysical) {
-            ESP_LOGV(TAG, "mapLayout physical requested");
-            
-            pass = 1;
-            mapLayout();
-
-            requestMapPhysical = false;
-        }
-
-        if (requestMapVirtual) {
-            ESP_LOGV(TAG, "mapLayout virtual requested");
-
-            pass = 2;
-            mapLayout();
-            
-            requestMapVirtual = false;
-        }    
     }
     
     void PhysicalLayer::mapLayout() {
@@ -79,6 +90,7 @@ PhysicalLayer::PhysicalLayer() {
 
         if (pass == 1) {
             lights.header.size = {0,0,0};
+            MB_LOGD(ML_TAG, "pos from x(%d) to 1", lights.header.isPositions);
             lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects
             //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
@@ -158,6 +170,7 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.size += Coord3D{1,1,1};
             ESP_LOGV(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.channels));
             //send the positions to the UI _socket_emit
+            MB_LOGD(ML_TAG, "pos from x(%d) to 2", lights.header.isPositions);
             lights.header.isPositions = 2; //filled with positions, set back to ct_Leds in ModuleEffects
 
             // initLightsToBlend();
