@@ -108,20 +108,16 @@ public:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
+        MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         if (updatedItem.name == "red") {
-            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.red = _state.data["red"];
         } else if (updatedItem.name == "green") {
-            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.green = _state.data["green"];
         } else if (updatedItem.name == "blue") {
-            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.blue = _state.data["blue"];
         } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             layerP.lights.header.brightness = _state.data["lightsOn"]?_state.data["brightness"]:0;
         } else if (updatedItem.name == "palette") {
-            ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             // String value = _state.data["palette"];//updatedItem.oldValue;
             if (updatedItem.value == 0) layerP.palette = CloudColors_p;
             else if (updatedItem.value == 1) layerP.palette = LavaColors_p;
@@ -147,7 +143,6 @@ public:
                 uint16_t select = updatedItem.value["select"];
                 Char<32> presetFile;
                 presetFile.format("/.config/presets/preset%02d.json", select);
-                ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
                 if (updatedItem.value["action"] == "click") {
                     updatedItem.value["selected"] = select; //store the selected preset
@@ -169,8 +164,7 @@ public:
                     setPresetsFromFolder(); //update presets in UI
                 }
             }
-        } else 
-            ESP_LOGV(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        }
     }
 
     //update _state.data["preset"]["list"] and send update to endpoints
