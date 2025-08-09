@@ -469,7 +469,7 @@ class SE16Layout: public Node {
       addStrip(1, ledsPerPin, 2*ledsPerPin-1, 10); addStrip(1, ledsPerPin-1, 0, 2);
       addStrip(0, ledsPerPin, 2*ledsPerPin-1, 3);  addStrip(0, ledsPerPin-1, 0, 1);
     } else { //ewowi
-      addStrip(14, 0, ledsPerPin-1, 16); addStrip(15, 0, ledsPerPin-1, 48);
+      addStrip(14, 0, ledsPerPin-1, 47); addStrip(15, 0, ledsPerPin-1, 48);
       addStrip(12, 0, ledsPerPin-1, 21); addStrip(13, 0, ledsPerPin-1, 38);
       addStrip(10, 0, ledsPerPin-1, 14); addStrip(11, 0, ledsPerPin-1, 39);
       addStrip(8, 0, ledsPerPin-1, 13); addStrip(9, 0, ledsPerPin-1, 40);
