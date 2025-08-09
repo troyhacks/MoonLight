@@ -94,7 +94,6 @@ private:
     PsychicHttpServer *_server;
 
     void onConfigUpdated();
-
 };
 
 #endif

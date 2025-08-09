@@ -28,6 +28,8 @@
     static PhysicalDriverESP32S3 ledsDriver; //    sizeof(driver) = 1080K !
   #elif CONFIG_IDF_TARGET_ESP32
     static PhysicalDriverESP32D0 ledsDriver; //    sizeof(driver) = 1080K !
+  #else
+    static LedsDriver ledsDriver; //   only the core driver, for setBirghtness and setColorCorrection and LUT
   #endif
 #endif
 

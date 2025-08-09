@@ -82,9 +82,11 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
             
             // For RTC GPIOs, can also use RTC-specific read
             int rtc_level = -1;
-            if (is_rtc_gpio) {
-                rtc_level = rtc_gpio_get_level((gpio_num_t)gpio_num);
-            }
+            #ifndef CONFIG_IDF_TARGET_ESP32C3
+                if (is_rtc_gpio) {
+                    rtc_level = rtc_gpio_get_level((gpio_num_t)gpio_num); //to do find c3 alternative
+                }
+            #endif
             
             // Get drive capability (if output capable)
             gpio_drive_cap_t drive_cap = GPIO_DRIVE_CAP_DEFAULT;
