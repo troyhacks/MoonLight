@@ -140,7 +140,7 @@ class BouncingBallsEffect: public Node {
         }
 
         // uint32_t color = SEGCOLOR(0);
-        // if (layerV->palette) {
+        // if (layerV->layerP->palette) {
         //   color = layerV->color_wheel(i*(256/MAX(numBalls, 8)));
         // } 
         // else if (hasCol2) {
@@ -400,6 +400,157 @@ public:
     }
   }
 };
+
+// Author: @TroyHacks
+// @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+class GEQ3DEffect: public Node {
+  public:
+  static const char * name() {return "GEQ 3D ♫💡📺";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  uint8_t speed = 2;
+  uint8_t frontFill = 228;
+  uint8_t horizon = 0;
+  uint8_t depth = 176;
+  uint8_t numBands = 16;
+  bool borders = true;
+  bool softHack = true;
+
+  void setup() override {
+    layerV->fadeToBlackBy(16);
+
+    addControl(speed, "speed", "range", 1, 10);
+    addControl(frontFill, "frontFill", "range");
+    addControl(horizon, "horizon", "range", 0, layerV->size.x-1); //layerV->size.x-1 is not always set here
+    addControl(depth, "depth", "range");
+    addControl(numBands, "numBands", "range", 2, 16);
+    addControl(borders, "borders", "checkbox");
+    addControl(softHack, "softHack", "checkbox");
+
+    // "GEQ 3D ☾@Speed,Front Fill,Horizon,Depth,Num Bands,Borders,Soft,;!,,Peaks;!;2f;sx=255,ix=228,c1=255,c2=255,c3=15,pal=11";
+  }
+
+  uint16_t projector;
+  int8_t projector_dir;
+  uint32_t counter;
+
+  void loop() override {
+    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+
+    if (numBands == 0) return; //init Effect
+
+    const int cols = layerV->size.x;
+    const int rows = layerV->size.y;
+
+    if (counter++ % (11-speed) == 0) projector += projector_dir;
+    if (projector >= cols) projector_dir = -1;
+    if (projector <= 0) projector_dir = 1;
+
+    layerV->fill_solid(CRGB::Black);
+
+    CRGB ledColorTemp;
+    const int NUM_BANDS = numBands;
+    uint_fast8_t split  = map(projector,0,cols,0,(NUM_BANDS - 1));
+
+    uint8_t heights[NUM_GEQ_CHANNELS] = { 0 };
+    const uint8_t maxHeight = roundf(float(rows) * ((rows<18) ? 0.75f : 0.85f));           // slightly reduce bar height on small panels 
+    for (int i=0; i<NUM_BANDS; i++) {
+      unsigned band = i;
+      if (NUM_BANDS < NUM_GEQ_CHANNELS) band = map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1); // always use full range.
+      heights[i] = map8(sharedData.bands[band],0,maxHeight); // cache fftResult[] as data might be updated in parallel by the audioreactive core
+    }
+
+
+    for (int i=0; i<=split; i++) { // paint right vertical faces and top - LEFT to RIGHT
+      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
+      CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
+      int linex = i*(cols/NUM_BANDS);
+
+      if (heights[i] > 1) {
+        ledColorTemp = blend(ledColor, CRGB::Black, 255-32);
+        int pPos = max(0, linex+(cols/NUM_BANDS)-1);
+        for (int y = (i<NUM_BANDS-1) ? heights[i+1] : 0; y <= heights[i]; y++) { // don't bother drawing what we'll hide anyway
+          if (rows-y > 0) layerV->drawLine(pPos,rows-y-1,projector,horizon,ledColorTemp,false,depth); // right side perspective
+        } 
+
+        ledColorTemp = blend(ledColor, CRGB::Black, 255-128);
+        if (heights[i] < rows-horizon && (projector <=linex || projector >= pPos)) { // draw if above horizon AND not directly under projector (special case later)
+          if (rows-heights[i] > 1) {  // sanity check - avoid negative Y
+            for (uint_fast8_t x=linex; x<=pPos;x++) { 
+              bool doSoft = softHack && ((x==linex) || (x==pPos)); // only first and last line need AA
+              layerV->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
+            }
+          }
+        }
+      }
+    }
+
+
+    for (int i=(NUM_BANDS - 1); i>split; i--) { // paint left vertical faces and top - RIGHT to LEFT
+      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
+      CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
+      int linex = i*(cols/NUM_BANDS);
+      int pPos = max(0, linex+(cols/NUM_BANDS)-1);
+
+      if (heights[i] > 1) {
+        ledColorTemp = blend(ledColor, CRGB::Black, 255-32);
+        for (uint_fast8_t y = (i>0) ? heights[i-1] : 0; y <= heights[i]; y++) { // don't bother drawing what we'll hide anyway
+          if (rows-y > 0) layerV->drawLine(linex,rows-y-1,projector,horizon,ledColorTemp,false,depth); // left side perspective
+        }
+
+        ledColorTemp = blend(ledColor, CRGB::Black, 255-128);
+        if (heights[i] < rows-horizon && (projector <=linex || projector >= pPos)) { // draw if above horizon AND not directly under projector (special case later)
+          if (rows-heights[i] > 1) {  // sanity check - avoid negative Y
+            for (uint_fast8_t x=linex; x<=pPos;x++) {
+              bool doSoft = softHack && ((x==linex) || (x==pPos)); // only first and last line need AA
+              layerV->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
+            }
+          }
+        }
+      }
+    }
+
+
+    for (int i=0; i<NUM_BANDS; i++) {
+      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
+      CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
+      int linex = i*(cols/NUM_BANDS);
+      int pPos  = linex+(cols/NUM_BANDS)-1;
+      int pPos1 = linex+(cols/NUM_BANDS);
+
+      if (projector >=linex && projector <= pPos) { // special case when top perspective is directly under the projector
+        if ((heights[i] > 1) && (heights[i] < rows-horizon) && (rows-heights[i] > 1)) {
+          ledColorTemp = blend(ledColor, CRGB::Black, 255-128);
+          for (uint_fast8_t x=linex; x<=pPos;x++) {
+            bool doSoft = softHack && ((x==linex) || (x==pPos)); // only first and last line need AA
+            layerV->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
+          }
+        }
+      }
+
+      if ((heights[i] > 1) && (rows-heights[i] > 0)) {
+        ledColorTemp = blend(ledColor, CRGB::Black, 255-frontFill);
+        for (uint_fast8_t x=linex; x<pPos1;x++) { 
+          layerV->drawLine(x,rows-1,x,rows-heights[i]-1,ledColorTemp); // front fill
+        }
+
+        if (!borders && heights[i] > rows-horizon) {
+          if (frontFill == 0) ledColorTemp = blend(ledColor, CRGB::Black, 255-32); // match side fill if we're in blackout mode
+          layerV->drawLine(linex,rows-heights[i]-1,linex+(cols/NUM_BANDS)-1,rows-heights[i]-1,ledColorTemp); // top line to simulate hidden top fill
+        }
+
+        if ((borders) && (rows-heights[i] > 1)) {
+          layerV->drawLine(linex,                   rows-1,linex,rows-heights[i]-1,ledColor); // left side line
+          layerV->drawLine(linex+(cols/NUM_BANDS)-1,rows-1,linex+(cols/NUM_BANDS)-1,rows-heights[i]-1,ledColor); // right side line
+          layerV->drawLine(linex,                   rows-heights[i]-2,linex+(cols/NUM_BANDS)-1,rows-heights[i]-2,ledColor); // top line
+          layerV->drawLine(linex,                   rows-1,linex+(cols/NUM_BANDS)-1,rows-1,ledColor); // bottom line
+        }
+      }
+    }
+  }
+
+}; //GEQ3DEffect
 
 class LinesEffect: public Node {
 public:

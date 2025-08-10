@@ -103,6 +103,7 @@ public:
         values.add(DistortionWavesEffect::name());
         values.add(FreqMatrixEffect::name());
         values.add(GEQEffect::name());
+        values.add(GEQ3DEffect::name());
         values.add(LinesEffect::name());
         values.add(LissajousEffect::name());
         values.add(PaintBrushEffect::name());
@@ -145,6 +146,7 @@ public:
         else if (equal(name, DistortionWavesEffect::name())) node = new DistortionWavesEffect();
         else if (equal(name, FreqMatrixEffect::name())) node = new FreqMatrixEffect();
         else if (equal(name, GEQEffect::name())) node = new GEQEffect();
+        else if (equal(name, GEQ3DEffect::name())) node = new GEQ3DEffect();
         else if (equal(name, LinesEffect::name())) node = new LinesEffect();
         else if (equal(name, LissajousEffect::name())) node = new LissajousEffect();
         else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
