@@ -81,6 +81,8 @@ void WiFiSettingsService::reconfigureWiFiConnection()
 
     ESP_LOGI(SVK_TAG, "Reconfiguring WiFi connection to: %s", connectionMode.c_str());
 
+    ESP_LOGI(SVK_TAG, "Reconfiguring WiFi TxPower to: %d", _state.txPower); // 🌙
+
     // disconnect and de-configure wifi
     if (WiFi.disconnect(true))
     {
@@ -244,9 +246,32 @@ void WiFiSettingsService::configureNetwork(wifi_settings_t &network)
     WiFi.begin(network.ssid.c_str(), network.password.c_str(), network.channel, network.bssid);
     // WiFi.begin(network.ssid.c_str(), network.password.c_str());
 
-#if CONFIG_IDF_TARGET_ESP32C3 | LOLIN_WIFI_FIX // 🌙
-    WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
-#endif
+    // 🌙 AP will use the LOLIN_WIFI_FIX, WiFi can set the power which works best for the board
+    if (_state.txPower != 0 && _state.txPower != abs(WiFi.getTxPower())) { // abs to make 4 of -4 (WIFI_POWER_MINUS_1dBm)
+        switch (_state.txPower)
+        {
+            case 84: WiFi.setTxPower(WIFI_POWER_21dBm); break;
+            case 82: WiFi.setTxPower(WIFI_POWER_20_5dBm); break;
+            case 80: WiFi.setTxPower(WIFI_POWER_20dBm); break;
+            case 78: WiFi.setTxPower(WIFI_POWER_19_5dBm); break;
+            case 76: WiFi.setTxPower(WIFI_POWER_19dBm); break;
+            case 74: WiFi.setTxPower(WIFI_POWER_18_5dBm); break;
+            case 68: WiFi.setTxPower(WIFI_POWER_17dBm); break;
+            case 60: WiFi.setTxPower(WIFI_POWER_15dBm); break;
+            case 52: WiFi.setTxPower(WIFI_POWER_13dBm); break;
+            case 44: WiFi.setTxPower(WIFI_POWER_11dBm); break;
+            case 34: WiFi.setTxPower(WIFI_POWER_8_5dBm); break;
+            case 28: WiFi.setTxPower(WIFI_POWER_7dBm); break;
+            case 20: WiFi.setTxPower(WIFI_POWER_5dBm); break;
+            case 8: WiFi.setTxPower(WIFI_POWER_2dBm); break;
+            case 4: WiFi.setTxPower(WIFI_POWER_MINUS_1dBm); break;
+            case 0: break; //default, do not set the power
+            default:
+                ESP_LOGE(SVK_TAG, "Invalid txPower value: %d", _state.txPower);
+                return;
+        }
+        ESP_LOGI(SVK_TAG, "WiFi setTxPower to: %d", _state.txPower);
+    }
 }
 
 void WiFiSettingsService::updateRSSI()

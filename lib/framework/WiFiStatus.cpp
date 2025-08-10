@@ -45,7 +45,7 @@ void WiFiStatus::onStationModeConnected(WiFiEvent_t event, WiFiEventInfo_t info)
 
 void WiFiStatus::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
-    ESP_LOGI(SVK_TAG, "WiFi Disconnected. Reason code=%d%s", info.wifi_sta_disconnected.reason, info.wifi_sta_disconnected.reason==WIFI_REASON_NO_AP_FOUND?" (NO_AP_FOUND)":""); //🌙 add tekst
+    ESP_LOGI(SVK_TAG, "WiFi Disconnected. Reason code=%d%s", info.wifi_sta_disconnected.reason, info.wifi_sta_disconnected.reason==WIFI_REASON_NO_AP_FOUND?" (NO_AP_FOUND)":info.wifi_sta_disconnected.reason==WIFI_REASON_ASSOC_LEAVE?" (ASSOC_LEAVE)":""); //🌙 add tekst
 
 #ifdef SERIAL_INFO
     Serial.print("WiFi Disconnected. Reason code=");

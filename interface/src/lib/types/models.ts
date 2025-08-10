@@ -15,6 +15,8 @@ export type WifiStatus = {
 export type WifiSettings = {
 	hostname: string;
 	connection_mode: number;
+	txPower: number; // 🌙
+	txPowerMeasured: number; // 🌙
 	wifi_networks: KnownNetworkItem[];
 };
 

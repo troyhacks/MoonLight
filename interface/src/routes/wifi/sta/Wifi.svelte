@@ -82,6 +82,34 @@
 		}
 	];
 
+	// 🌙
+	let txPowerIDToText = [
+		{id: 0,text: `default`},
+		{id: 4,text: `-1dBm`}, // abs(-4)
+		{id: 8,text: `2dBm`},
+		{id: 20,text: `5dBm`},
+		{id: 28,text: `7dBm`},
+		{id: 34,text: `8.5dBm (Lolin Fix)`},
+		{id: 44,text: `11dBm`},
+		{id: 52,text: `13dBm`},
+		{id: 60,text: `15dBm`},
+		{id: 68,text: `17dBm`},
+		{id: 74,text: `18.5dBm`},
+		{id: 76,text: `19dBm`},
+		{id: 78,text: `19.5dBm`},
+		{id: 80,text: `20dBm`},
+		{id: 82,text: `20.5dBm`},
+		{id: 84,text: `21dBm`}
+	];
+	function getTxPowerText(id: number) {
+		for (const power of txPowerIDToText) {
+			if (power.id === id) {
+				return power.text;
+			}
+		}
+		return 'Unknown';
+	}
+
 	async function getWifiStatus() {
 		try {
 			const response = await fetch('/rest/wifiStatus', {
@@ -596,6 +624,18 @@
 										</option>
 									{/each}
 								</select>
+							</div>
+							<!-- 🌙 -->
+							<div>
+								<label class="label" for="apmode">WiFi TX Power </label>
+								<select class="select w-full" id="apmode" bind:value={wifiSettings.txPower}>
+									{#each txPowerIDToText as mode}
+										<option value={mode.id}>
+											{mode.text}
+										</option>
+									{/each}
+								</select>
+								<span>(🔍{getTxPowerText(wifiSettings.txPowerMeasured)})</span>
 							</div>
 						</div>
 
