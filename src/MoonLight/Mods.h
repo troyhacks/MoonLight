@@ -32,7 +32,6 @@ static struct SharedData {
 #include "Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
 
 class DriverNode: public Node {
-  uint8_t lightPreset = 3;
   uint16_t maxPower = 10;
   uint8_t brightnessSaved = UINT8_MAX;
   
@@ -43,8 +42,10 @@ class DriverNode: public Node {
   #if HP_ALL_DRIVERS
     CRGB savedColorCorrection;
     bool initDone = false;
-    uint8_t colorOrder = 3;
   #endif
+
+  protected:
+  uint8_t lightPreset = 3;
 
   public:
 
