@@ -82,7 +82,7 @@ class VirtualLayer {
   void setRGB(const uint16_t indexV, CRGB color) {
     if (layerP->lights.header.offsetWhite != UINT8_MAX && layerP->lights.header.offsetWhite == layerP->lights.header.offsetRGB + 3) { //RGBW adjacent
       uint8_t rgbw[4];
-      rgbw[3] = MIN(MIN(color.r, color.g), color.b) >> 1; //calc white channel, only do half of the minimum as not to turn off one of RGB completely (to be tweaked)
+      rgbw[3] = MIN(MIN(color.r, color.g), color.b) * 0.8;// >> 1; //calc white channel, only do half of the minimum as not to turn off one of RGB completely (to be tweaked)
       rgbw[0] = color.red - rgbw[3]; //subtract from other channels
       rgbw[1] = color.green - rgbw[3];
       rgbw[2] = color.blue - rgbw[3];
