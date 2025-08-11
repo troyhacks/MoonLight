@@ -878,7 +878,7 @@ public:
         else // more than 10 days
           text.format("%dh", millis()/(MILLIS_PER_DAY));  //days
         break;
-      case 5: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP0":sharedData.connectionStatus==2?"AP1":sharedData.connectionStatus==3?"Sta0":sharedData.connectionStatus==4?"Sta1":"mqqt"); break;
+      case 5: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP-":sharedData.connectionStatus==2?"AP+":sharedData.connectionStatus==3?"Sta-":sharedData.connectionStatus==4?"Sta+":"mqqt"); break;
       case 6: text.format("%dC", sharedData.clientListSize); break;
       case 7: text.format("%dCC", sharedData.connectedClients); break;
     }

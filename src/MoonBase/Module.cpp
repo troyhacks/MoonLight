@@ -18,10 +18,10 @@ void setDefaults(JsonObject root, JsonArray definition) {
         if (property["type"] != "array") {
             root[property["name"]] = property["default"];
         } else {
-            JsonArray array = root[property["name"]].to<JsonArray>();
-            //loop over detail propertys (recursive)
-            JsonObject object = array.add<JsonObject>(); // add one row
-            setDefaults(object, property["n"].as<JsonArray>());
+            // JsonArray array = root[property["name"]].to<JsonArray>();
+            // //loop over detail propertys (recursive)
+            // JsonObject object = array.add<JsonObject>(); // add one row
+            // setDefaults(object, property["n"].as<JsonArray>());
         }
     }
 }
@@ -42,9 +42,9 @@ void ModuleState::setupData() {
         setDefaults(doc.to<JsonObject>(), definition.as<JsonArray>());
             
         //assign the new defaults to state and run onUpdate
-        data.to<JsonObject>();
+        data.to<JsonObject>(); //clear data
         UpdatedItem updatedItem;
-        compareRecursive("", data, doc.as<JsonObject>(), updatedItem);
+        compareRecursive("", data, doc.as<JsonObject>(), updatedItem); //fill data with doc
 }
 
     //to do: check if the file matches the definition

@@ -13,7 +13,7 @@
 
 #include "Mods.h"
 
-#include <ESP32SvelteKit.h>
+#include <ESP32SvelteKit.h> // for safeModeMB and restartNeeded
 
 #if HP_ALL_DRIVERS
   #define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
@@ -607,10 +607,10 @@ void ArtNetDriverMod::loop() {
       if (layerV->layerP->pass == 1) { //physical
         initDone = true;
         ESP_LOGV(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
-        if (safeModeMB) {
-            ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
-            return;
-        }
+        // if (safeModeMB) {
+        //     ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
+        //     return;
+        // }
 
         int pins[NUMSTRIPS]; //max 16 pins
         int lengths[NUMSTRIPS];
