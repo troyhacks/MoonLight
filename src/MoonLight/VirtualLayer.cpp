@@ -147,7 +147,7 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
       default: ;
     }
   }
-  else if (indexV * layerP->lights.header.channelsPerLight + offset + length < MAX_CHANNELS) {//no mapping
+  else if (indexV * layerP->lights.header.channelsPerLight + offset + length < layerP->lights.nrOfChannels) {//no mapping
     memcpy(&layerP->lights.channels[indexV*layerP->lights.header.channelsPerLight + offset], channels, length);
   }
 }
@@ -177,7 +177,7 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
         break;
     }
   }
-  else if (indexV * layerP->lights.header.channelsPerLight + offset + 3 < MAX_CHANNELS) { //no mapping
+  else if (indexV * layerP->lights.header.channelsPerLight + offset + 3 < layerP->lights.nrOfChannels) { //no mapping
     T *result = (T*)&layerP->lights.channels[indexV * layerP->lights.header.channelsPerLight + offset];
     return *result; //return the color as CRGB
   } else {

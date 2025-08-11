@@ -22,9 +22,26 @@
 #include "../MoonBase/Utilities.h"
 
 PhysicalLayer::PhysicalLayer() {
-        ESP_LOGV(TAG, "constructor");
+        MB_LOGD(ML_TAG, "constructor");
 
-        memset(lights.channels, 0, MAX_CHANNELS); // set all the channels to 0
+        if (psramFound()) {
+            lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 122880*3); //fill halve with channels, max 128K LEDs
+            lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_SPIRAM);
+            if (lights.channels)
+                MB_LOGD(ML_TAG, "allocated %d bytes of PSRAM", lights.nrOfChannels );
+        }
+        if (!lights.channels) {
+            lights.nrOfChannels = 4096 * 3;
+            lights.channels = (uint8_t *)malloc(lights.nrOfChannels);
+            if (lights.channels)
+                MB_LOGD(ML_TAG, "allocated %d bytes of RAM", lights.nrOfChannels );
+        }
+        if (!lights.channels) {
+            MB_LOGD(ML_TAG, "failed to allocated RAM or PSRAM" );
+            lights.nrOfChannels = 0;
+        }
+
+        memset(lights.channels, 0, lights.nrOfChannels); // set all the channels to 0
 
         // initLightsToBlend();
 
@@ -71,9 +88,17 @@ PhysicalLayer::PhysicalLayer() {
                 lights.header.isPositions = 0; //now driver can show again
             }
         }
-
     }
-    
+
+    void PhysicalLayer::loopDrivers() {
+        if (lights.header.isPositions == 0) {//otherwise lights is used for positions etc.
+            for (Node *node: nodes) {
+                if (node->on)
+                    node->loop();
+            }
+        }
+    }
+
     void PhysicalLayer::mapLayout() {
         addLayoutPre();
         for (Node *node: nodes) {
@@ -94,7 +119,7 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects
             //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
-            memset(lights.channels, 0, MAX_CHANNELS); // set all the channels to 0
+            memset(lights.channels, 0, lights.nrOfChannels); // set all the channels to 0
             //dealloc pins
             sortedPins.clear(); //clear the added pins for the next pass
         } else if (pass == 2) {
@@ -121,7 +146,7 @@ PhysicalLayer::PhysicalLayer() {
 
         if (pass == 1) {
             // ESP_LOGV(TAG, "%d,%d,%d", position.x, position.y, position.z);
-            if (lights.header.nrOfLights < MAX_CHANNELS / 3) {
+            if (lights.header.nrOfLights < lights.nrOfChannels / 3) {
                 packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights*3], position);
             }
              

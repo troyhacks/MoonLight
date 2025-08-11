@@ -191,6 +191,30 @@ public:
         }
     }
 
+    void loop() {
+        #if FT_ENABLED(FT_MONITOR)
+
+            EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
+                EventSocket *_socket = esp32sveltekit.getSocket();
+
+                read([&](ModuleState& _state) {
+                    if (layerP.lights.header.isPositions == 2) { //send to UI
+                        if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
+                            _socket->emitEvent("monitor", (char *)&layerP.lights.header, sizeof(LightsHeader));
+                            _socket->emitEvent("monitor", (char *)layerP.lights.channels,  MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.nrOfChannels)); //*3 is for 3 bytes position
+                        }
+                        MB_LOGD(ML_TAG, "pos from 2 to 3");
+                        layerP.lights.header.isPositions = 3;
+                    } else if (layerP.lights.header.isPositions == 0) {//send to UI
+                        if (_socket->getConnectedClients() && _state.data["monitorOn"])
+                            _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.nrOfChannels));
+                    }
+                });
+            }
+
+        #endif
+    }
+
 }; // class ModuleLightsControl
 
 #endif

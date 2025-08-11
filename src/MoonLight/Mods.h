@@ -134,7 +134,7 @@ class FastLEDDriverMod: public Node {
 class HUB75DriverMod: public Node {
   public:
 
-  static const char * name() {return "HUB75 Driver ☸️";}
+  static const char * name() {return "HUB75 Driver ☸️🚧";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
@@ -160,7 +160,7 @@ class PhysicalDriverMod: public DriverNode {
 class VirtualDriverMod: public DriverNode {
   public:
 
-  static const char * name() {return "Virtual Driver ☸️";}
+  static const char * name() {return "Virtual Driver ☸️🚧";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 

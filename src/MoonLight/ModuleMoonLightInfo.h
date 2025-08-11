@@ -12,7 +12,7 @@
 #ifndef ModuleMoonLightInfo_h
 #define ModuleMoonLightInfo_h
 
-#if FT_MOONBASE == 1
+#if FT_MOONLIGHT == 1
 
 #include "../MoonBase/Module.h"
 class ModuleMoonLightInfo : public Module
@@ -71,7 +71,7 @@ public:
                 data["FastLEDI2S"] = "No";
             #endif
             data["colorOrder"] = TOSTRING(ML_COLOR_ORDER);
-            data["maxChannels"] = MAX_CHANNELS;
+            data["maxChannels"] = layerP.lights.nrOfChannels;
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;
             data["size"]["z"] = layerP.lights.header.size.z;

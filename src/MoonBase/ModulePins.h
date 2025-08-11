@@ -106,9 +106,7 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
 
         JsonObject data = _state.data.as<JsonObject>();
         _socket->emitEvent("pins", data);
-
     }
-
 };
 
 #endif

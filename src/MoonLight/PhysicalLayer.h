@@ -16,15 +16,6 @@
 #undef TAG
 #define TAG "💫"
 
-#ifndef MAX_CHANNELS
-  #if BOARD_HAS_PSRAM
-      #define MAX_CHANNELS 122880*3 //physical channels, matching 122880 RGB LEDs or 120 pins (Virtual driver max) with 1024 leds each at 30 FPS , only 368640 bytes in psram 🤷‍♂️
-    #else
-      #define MAX_CHANNELS 4096*3 //physical channels, matching 4096 RGB LEDs
-  #endif
-#endif
-
-
 #include <Arduino.h>
 #include <vector>
 #include "FastLED.h"
@@ -93,8 +84,8 @@ struct LightsHeader {
 
 struct Lights {
   LightsHeader header;
-  // uint8_t channels[MAX_CHANNELS]; //pka leds
-  uint8_t *channels = (uint8_t *)heap_caps_malloc(MAX_CHANNELS, MALLOC_CAP_SPIRAM); //pka leds
+  uint8_t *channels = nullptr; // //pka leds, created in constructor
+  size_t nrOfChannels = 0;
 
   // std::vector<size_t> universes; //tells at which byte the universe starts
 };
@@ -128,6 +119,7 @@ class PhysicalLayer {
 
     void setup();
     void loop();
+    void loopDrivers();
 
     //mapLayout calls addLayoutPre, addLayout for each node and addLayoutPost and expects pass to be set (1 or 2)
     void mapLayout();

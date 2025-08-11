@@ -15,31 +15,6 @@
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
 
-#if FT_ENABLED(FT_MOONLIGHT)
-    TaskHandle_t effectTaskHandle = NULL;
-    TaskHandle_t driverTaskHandle = NULL;
-#endif
-
-// 🌙
-#if FT_ENABLED(FT_MOONBASE)
-    #include "MoonBase/FileManager.h"
-    #include "MoonBase/ModuleDevices.h"
-    #include "MoonBase/ModuleTasks.h"
-    #include "MoonBase/ModulePins.h"
-
-    // 💫
-    #if FT_ENABLED(FT_MOONLIGHT)
-        #include "MoonLight/ModuleLightsControl.h"
-        #include "MoonLight/ModuleEffects.h"
-        #include "MoonLight/ModuleDrivers.h"
-        #if FT_ENABLED(FT_LIVESCRIPT)
-            #include "MoonLight/ModuleLiveScripts.h"
-        #endif
-        #include "MoonLight/ModuleChannels.h"
-        #include "MoonLight/ModuleMoonLightInfo.h"
-    #endif
-#endif
-
 #define SERIAL_BAUD_RATE 115200
 
 #undef TAG
@@ -51,6 +26,11 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
+    #include "MoonBase/FileManager.h"
+    #include "MoonBase/ModuleDevices.h"
+    #include "MoonBase/ModuleTasks.h"
+    #include "MoonBase/ModulePins.h"
+
     FileManager fileManager = FileManager(&server, &esp32sveltekit);
     ModuleDevices moduleDevices = ModuleDevices(&server, &esp32sveltekit);
     ModuleTasks moduleTasks = ModuleTasks(&server, &esp32sveltekit);
@@ -58,74 +38,75 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
+        #include "MoonLight/ModuleLightsControl.h"
+        #include "MoonLight/ModuleEffects.h"
+        #include "MoonLight/ModuleDrivers.h"
+        #include "MoonLight/ModuleChannels.h"
+        #include "MoonLight/ModuleMoonLightInfo.h"
         ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
         ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);
         ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit);
         #if FT_ENABLED(FT_LIVESCRIPT)
+            #include "MoonLight/ModuleLiveScripts.h"
             ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects);
         #endif
         ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
         ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
-    #endif
-#endif
 
-#if FT_ENABLED(FT_MOONLIGHT)
-    volatile xSemaphoreHandle effectSemaphore = xSemaphoreCreateBinary();
-    volatile xSemaphoreHandle driverSemaphore = xSemaphoreCreateBinary();
+        volatile xSemaphoreHandle effectSemaphore = xSemaphoreCreateBinary();
+        volatile xSemaphoreHandle driverSemaphore = xSemaphoreCreateBinary();
 
-    void effectTask(void* pvParameters) {
-        // 🌙
+        TaskHandle_t effectTaskHandle = NULL;
+        TaskHandle_t driverTaskHandle = NULL;
 
-        for (;;) {
-            esp32sveltekit.lps++; // 🌙
+        void effectTask(void* pvParameters) {
+            // 🌙
 
-            if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100))==pdFALSE) {
-                // ESP_LOGE(SVK_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
+            for (;;) {
+                esp32sveltekit.lps++; // 🌙 todo: not moonlight specific?
+
+                if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100))==pdFALSE) {
+                    // ESP_LOGE(SVK_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
+                }
+
+                layerP.loop(); //run all the effects of all virtual layers (currently only one)
+
+                xSemaphoreGive(driverSemaphore);
+                    
+                while (!runInTask1.empty()) {
+                    ESP_LOGV(TAG, "runInTask1 %d", runInTask1.size());
+                    runInTask1.front()();
+                    runInTask1.erase(runInTask1.begin());
+                }
+
+                vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
             }
-
-            layerP.loop(); //run all the effects of all virtual layers (currently only one)
-
-            xSemaphoreGive(driverSemaphore);
-                
-            while (!runInTask1.empty()) {
-                ESP_LOGV(TAG, "runInTask1 %d", runInTask1.size());
-                runInTask1.front()();
-                runInTask1.erase(runInTask1.begin());
-            }
-
-            vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
         }
-    }
 
-    void driverTask(void* pvParameters) {
-        // 🌙
+        void driverTask(void* pvParameters) {
+            // 🌙
 
-        // layerP.setup2();
+            // layerP.setup2();
 
-        for (;;) {
+            for (;;) {
 
-            #if FT_ENABLED(FT_MOONLIGHT)
                 xSemaphoreTake(driverSemaphore, pdMS_TO_TICKS(100));
 
-                if (layerP.lights.header.isPositions == 0) {//otherwise lights is used for positions etc.
-                    for (Node *node: layerP.nodes) {
-                        if (node->on)
-                            node->loop();
-                    }
-                }
+                layerP.loopDrivers();
+
                 xSemaphoreGive(effectSemaphore);
-            #endif
 
-            while (!runInTask2.empty()) {
-                ESP_LOGV(TAG, "runInTask2 %d", runInTask2.size());
-                runInTask2.front()();
-                runInTask2.erase(runInTask2.begin());
+                while (!runInTask2.empty()) {
+                    ESP_LOGV(TAG, "runInTask2 %d", runInTask2.size());
+                    runInTask2.front()();
+                    runInTask2.erase(runInTask2.begin());
+                }
+
+                vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
             }
-
-            vTaskDelay(1); // yield to other tasks, 1 tick (~1ms)
         }
-    }
-#endif //FT_MOONLIGHT
+    #endif
+#endif
 
 // 🌙 Custom log output function - WIP
 static int custom_vprintf(const char* fmt, va_list args)
@@ -152,7 +133,7 @@ void setup()
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
-    // delay(5000); // 🌙 to capture all the serial output
+    delay(5000); // 🌙 to capture all the serial output
 
     // 🌙 safeMode
     if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) { //see verbosePrintResetReason
@@ -169,103 +150,84 @@ void setup()
         moduleDevices.begin();
         moduleTasks.begin();
         modulePins.begin();
-    #endif
-    
-    // MoonLight
-    #if FT_ENABLED(FT_MOONLIGHT)
-        moduleEffects.begin();
-        moduleDrivers.begin();
-        moduleLightsControl.begin();
-        moduleChannels.begin();
-        moduleMoonLightInfo.begin();
-        #if FT_ENABLED(FT_LIVESCRIPT)
-            moduleLiveScripts.begin();
-        #endif
-    #endif
 
-    esp32sveltekit.addLoopFunction([]() { 
-
+        // MoonLight
         #if FT_ENABLED(FT_MOONLIGHT)
-            moduleEffects.loop();
-            moduleDrivers.loop();
-        #endif
-
-        static unsigned long lastSecond = 0;
-        if (millis() - lastSecond >= 1000) {
-            lastSecond = millis();
-
-            moduleDevices.loop1s();
-            moduleTasks.loop1s(); 
-            modulePins.loop1s(); 
-
-            #if FT_ENABLED(FT_MOONLIGHT)
-                //set shared data (eg used in scrolling text effect)
-                sharedData.fps = esp32sveltekit.getAnalyticsService()->lps;
-                sharedData.connectionStatus = (uint8_t) esp32sveltekit.getConnectionStatus();
-                sharedData.clientListSize = esp32sveltekit.getServer()->getClientList().size();
-                sharedData.connectedClients = esp32sveltekit.getSocket()->getConnectedClients(); 
-
-                #if FT_ENABLED(FT_LIVESCRIPT)
-                    moduleLiveScripts.loop1s();
-                #endif
+            moduleEffects.begin();
+            moduleDrivers.begin();
+            moduleLightsControl.begin();
+            moduleChannels.begin();
+            moduleMoonLightInfo.begin();
+            #if FT_ENABLED(FT_LIVESCRIPT)
+                moduleLiveScripts.begin();
             #endif
 
-        }
+            xSemaphoreGive(effectSemaphore);  //Allow effectTask to run first
 
-        static unsigned long last10Second = 0;
-        if (millis() - last10Second >= 1000) {
-            last10Second = millis();
-            
-            moduleDevices.loop10s();
-        }
+            // 🌙
+            xTaskCreateUniversal(
+                effectTask,              // task function
+                "AppEffectTask",            // name
+                8 * 1024,             // stack size in words (without livescripts we can do with 12...)
+                NULL,                  // parameter
+                8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                &effectTaskHandle,       // task handle
+                1                      // core (0 or 1)
+            );
 
-        #if FT_ENABLED(FT_MOONLIGHT) && FT_ENABLED(FT_MONITOR)
+            xTaskCreateUniversal(
+                driverTask,              // task function
+                "AppDriverTask",            // name
+                8 * 1024,             // stack size in words (without livescripts we can do with 12...)
+                NULL,                  // parameter
+                8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                &driverTaskHandle,       // task handle
+                1                      // core (0 or 1)
+            );
+        #endif
 
-            EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
-                EventSocket *_socket = esp32sveltekit.getSocket();
+        //run UI stuff in the sveltekit task
+        esp32sveltekit.addLoopFunction([]() { 
 
-                moduleLightsControl.read([&](ModuleState& _state) {
-                    if (layerP.lights.header.isPositions == 2) { //send to UI
-                        if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
-                            _socket->emitEvent("monitor", (char *)&layerP.lights.header, sizeof(LightsHeader));
-                            _socket->emitEvent("monitor", (char *)layerP.lights.channels,  MIN(layerP.lights.header.nrOfLights * 3, MAX_CHANNELS)); //*3 is for 3 bytes position
-                        }
-                        MB_LOGD(ML_TAG, "pos from 2 to 3");
-                        layerP.lights.header.isPositions = 3;
-                    } else if (layerP.lights.header.isPositions == 0) {//send to UI
-                        if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                            _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, MAX_CHANNELS));
-                    }
-                });
+            #if FT_ENABLED(FT_MOONLIGHT)
+                moduleEffects.loop(); //requestUIUpdate
+                moduleDrivers.loop(); //requestUIUpdate
+                moduleLightsControl.loop(); //monitor
+            #endif
+
+            //every second
+            static unsigned long lastSecond = 0;
+            if (millis() - lastSecond >= 1000) {
+                lastSecond = millis();
+
+                moduleDevices.loop1s();
+                moduleTasks.loop1s(); 
+                modulePins.loop1s(); 
+
+                #if FT_ENABLED(FT_MOONLIGHT)
+                    //set shared data (eg used in scrolling text effect)
+                    sharedData.fps = esp32sveltekit.getAnalyticsService()->lps;
+                    sharedData.connectionStatus = (uint8_t) esp32sveltekit.getConnectionStatus();
+                    sharedData.clientListSize = esp32sveltekit.getServer()->getClientList().size();
+                    sharedData.connectedClients = esp32sveltekit.getSocket()->getConnectedClients(); 
+
+                    #if FT_ENABLED(FT_LIVESCRIPT)
+                        moduleLiveScripts.loop1s();
+                    #endif
+                #endif
             }
 
-        #endif
-    });
+            //every 10 seconds
+            static unsigned long last10Second = 0;
+            if (millis() - last10Second >= 10000) {
+                last10Second = millis();
+                
+                moduleDevices.loop10s();
+            }
 
-    #if FT_ENABLED(FT_MOONLIGHT)
-        xSemaphoreGive(effectSemaphore);  //Allow effectTask to run first
+        });
 
-        // 🌙
-        xTaskCreateUniversal(
-            effectTask,              // task function
-            "AppEffectTask",            // name
-            8 * 1024,             // stack size in words (without livescripts we can do with 12...)
-            NULL,                  // parameter
-            8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
-            &effectTaskHandle,       // task handle
-            1                      // core (0 or 1)
-        );
-
-        xTaskCreateUniversal(
-            driverTask,              // task function
-            "AppDriverTask",            // name
-            8 * 1024,             // stack size in words (without livescripts we can do with 12...)
-            NULL,                  // parameter
-            8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
-            &driverTaskHandle,       // task handle
-            1                      // core (0 or 1)
-        );
-    #endif //FT_MOONLIGHT
+    #endif //FT_MOONBASE
 
     // #if CONFIG_IDF_TARGET_ESP32
     //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager

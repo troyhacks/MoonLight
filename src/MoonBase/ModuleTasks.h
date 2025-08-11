@@ -123,9 +123,7 @@ public:
 
         JsonObject data = _state.data.as<JsonObject>();
         _socket->emitEvent("tasks", data);
-
     }
-
 };
 
 #endif

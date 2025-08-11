@@ -12,7 +12,7 @@
 #ifndef ModuleChannels_h
 #define ModuleChannels_h
 
-#if FT_MOONBASE == 1
+#if FT_MOONLIGHT == 1
 
 #include "../MoonBase/Module.h"
 class ModuleChannels : public Module

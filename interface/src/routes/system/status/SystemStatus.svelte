@@ -303,7 +303,7 @@
 						<Sketch class="text-primary-content h-auto w-full scale-75" />
 					</div>
 					<div>
-						<div class="font-bold">Sketch</div>
+						<div class="font-bold">Firmware Size</div> <!-- 🌙 -->
 						<div class="flex flex-wrap justify-start gap-1 text-sm opacity-75">
 							<span>
 								{(

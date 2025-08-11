@@ -18,7 +18,7 @@
 #if HP_ALL_DRIVERS
   #define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
   // #define NUM_LEDS_PER_STRIP 256 not for non virtal... (only setting __delay when NO_WAIT)
-  #define __NB_DMA_BUFFER 40
+  #define __NB_DMA_BUFFER 100
   #include "I2SClocklessLedDriver.h"
   static I2SClocklessLedDriver ledsDriver;
 #else //ESP32_LEDSDRIVER  

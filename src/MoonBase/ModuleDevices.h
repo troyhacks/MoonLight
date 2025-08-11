@@ -116,7 +116,11 @@ public:
             // ESP_LOGV(TAG, "data %s", buffer);
             if (!_socket->getConnectedClients()) return; 
 
-            JsonObject data = _state.data.as<JsonObject>();
+            //send only the readonly values ...
+            JsonDocument devices;
+            devices["devices"] = _state.data["devices"];
+
+            JsonObject data = devices.as<JsonObject>();
             _socket->emitEvent("devices", data);
         }
     }
@@ -129,7 +133,6 @@ public:
             deviceUDP.write((uint8_t *)&message, sizeof(message));
             deviceUDP.endPacket();
             // ESP_LOGV(TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
-
         }
     }
 };
