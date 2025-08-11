@@ -152,8 +152,8 @@ class BouncingBallsEffect: public Node {
         CRGB color = ColorFromPalette(layerV->layerP->palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
         layerV->setRGB({pos, y, 0}, color);
-        // if (layerV->size.x<32) layerV->setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
-        // else           layerV->setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+        // if (layerV->size.x<32) layerV->setRGB(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
+        // else           layerV->setRGB(balls[i].height + (stripNr+1)*10.0f, color);
       } //balls      layerV->fill_solid(CRGB::White);
     }
   }
@@ -620,18 +620,32 @@ public:
   }
 };
 
-class RainbowEffect: public Node {
-public:
-
-  static const char * name() {return "Rainbow 🔥";}
-  static uint8_t dim() {return _1D;}
+class Noise2DEffect: public Node {
+  public:
+  static const char * name() {return "Noise2D 💡";}
+  static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
+  
+  uint8_t speed = 8;
+  uint8_t scale = 64;
+
+  void setup() override {
+    addControl(speed, "speed", "range", 0, 15);
+    addControl(scale, "scale", "range", 2, 255);
+  }
 
   void loop() override {
-    static uint8_t hue = 0;
-    layerV->fill_rainbow(hue++, 7);
+    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+
+    for (int y = 0; y < layerV->size.y; y++) {
+      for (int x = 0; x < layerV->size.x; x++) {
+        uint8_t pixelHue8 = inoise8(x * scale, y * scale, millis() / (16 - speed));
+        // layerV->setRGB(x, y, ColorFromPalette(layerV->layerP->palette, pixelHue8));
+        layerV->setRGB(Coord3D(x, y), ColorFromPalette(layerV->layerP->palette, pixelHue8));
+      }
+    }
   }
-};
+}; //Noise2D
 
 // Author: @TroyHacks, from WLED MoonModules
 // @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
@@ -707,6 +721,19 @@ public:
           layerV->drawLine(x1, y1, x2, y2, color, soft, length);
       }
     }
+  }
+};
+
+class RainbowEffect: public Node {
+public:
+
+  static const char * name() {return "Rainbow 🔥";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "";}
+
+  void loop() override {
+    static uint8_t hue = 0;
+    layerV->fill_rainbow(hue++, 7);
   }
 };
 
@@ -941,7 +968,180 @@ class SphereMoveEffect: public Node {
         }
     }
   }
-}; // SphereMove3DEffect
+}; // SphereMoveEffect
+
+//by @Brandon502
+class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Train https://www.youtube.com/watch?v=17WoOqgXsRM
+  public:
+  static const char * name() {return "StarField 💫";}
+  static uint8_t     dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  struct Star {
+    int x, y, z;
+    uint8_t colorIndex;
+  };
+
+  static float fmap(const float x, const float in_min, const float in_max, const float out_min, const float out_max) {
+    return (out_max - out_min) * (x - in_min) / (in_max - in_min) + out_min;
+  }
+
+  uint8_t speed = 20;
+  uint8_t numStars = 16;
+  uint8_t blur = 128;
+  bool usePalette = false;
+
+  void setup() override {
+    addControl(speed, "speed", "range", 0, 30);
+    addControl(numStars, "numStars", "range", 1, 255);
+    addControl(blur, "blur", "range", 0, 255);
+    addControl(usePalette, "usePalette", "checkbox");
+
+    //set up all stars
+    for (int i = 0; i < 255; i++) {
+      stars[i].x = random(-layerV->size.x, layerV->size.x);
+      stars[i].y = random(-layerV->size.y, layerV->size.y);
+      stars[i].z = random(layerV->size.x);
+      stars[i].colorIndex = random8();
+    }
+  }
+
+  unsigned long step;
+  Star stars[255];
+
+  void loop() override {
+
+    if (!speed || millis() - step < 1000 / speed) return; // Not enough time passed
+
+    layerV->fadeToBlackBy(blur);
+
+    for (int i = 0; i < numStars; i++) {
+      //update star
+      // ppf("Star %d Pos: %d, %d, %d -> ", i, stars[i].x, stars[i].y, stars[i].z);
+      float sx = layerV->size.x/2.0 + fmap(float(stars[i].x) / stars[i].z, 0, 1, 0, layerV->size.x/2.0);
+      float sy = layerV->size.y/2.0 + fmap(float(stars[i].y) / stars[i].z, 0, 1, 0, layerV->size.y/2.0);
+
+      // ppf(" %f, %f\n", sx, sy);
+
+      Coord3D pos = Coord3D(sx, sy);
+      if (!pos.isOutofBounds(layerV->size)) {
+        if (usePalette) layerV->setRGB(Coord3D(sx, sy), ColorFromPalette(layerV->layerP->palette, stars[i].colorIndex, map(stars[i].z, 0, layerV->size.x, 255, 150)));
+        else {
+          uint8_t color = map(stars[i].colorIndex, 0, 255, 120, 255);
+          int brightness = map(stars[i].z, 0, layerV->size.x, 7, 10);
+          color *= brightness/10.0;
+          layerV->setRGB(Coord3D(sx, sy), CRGB(color, color, color));
+        }
+      }
+      stars[i].z -= 1;
+      if (stars[i].z <= 0 || pos.isOutofBounds(layerV->size)) {
+        stars[i].x = random(-layerV->size.x, layerV->size.x);
+        stars[i].y = random(-layerV->size.y, layerV->size.y);
+        stars[i].z = layerV->size.x;
+        stars[i].colorIndex = random8();
+      }
+    }
+
+    step = millis();
+  }
+}; //StarFieldEffect
+
+ // BY MONSOONO / @Flavourdynamics 
+class PraxisEffect: public Node {
+public:
+  static const char * name() {return "Praxis 💫";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+
+  uint8_t macroMutatorFreq = 3;
+  uint8_t macroMutatorMin = 250;
+  uint8_t macroMutatorMax = 255;
+  uint8_t microMutatorFreq = 4;
+  uint8_t microMutatorMin = 200;
+  uint8_t microMutatorMax = 255;
+
+  void setup() override {
+    addControl(macroMutatorFreq, "macroMutatorFreq", "range", 0, 15);
+    addControl(macroMutatorMin, "macroMutatorMin", "range", 0, 255);
+    addControl(macroMutatorMax, "macroMutatorMax", "range", 0, 255);
+    addControl(microMutatorFreq, "microMutatorFreq", "range", 0, 15);
+    addControl(microMutatorMin, "microMutatorMin", "range", 0, 255);
+    addControl(microMutatorMax, "microMutatorMax", "range", 0, 255);
+    //ui->initSlider(parentVar, "hueSpeed", layerV->effectData.write<uint8_t>(20), 1, 100); // (14), 1, 255)
+    //ui->initSlider(parentVar, "saturation", layerV->effectData.write<uint8_t>(255), 0, 255);
+  }
+
+  void loop() override {
+    //uint8_t huespeed = layerV->effectData.read<uint8_t>();
+    //uint8_t saturation = layerV->effectData.read<uint8_t>(); I will revisit this when I have a display
+
+    uint16_t macro_mutator = beatsin16(macroMutatorFreq, macroMutatorMin << 8, macroMutatorMax << 8); // beatsin16(14, 65350, 65530);
+    uint16_t micro_mutator = beatsin16(microMutatorFreq, microMutatorMin, microMutatorMax); // beatsin16(2, 550, 900);
+    //uint16_t macro_mutator = beatsin8(macroMutatorFreq, macroMutatorMin, macroMutatorMax); // beatsin16(14, 65350, 65530);
+    //uint16_t micro_mutator = beatsin8(microMutatorFreq, microMutatorMin, microMutatorMax); // beatsin16(2, 550, 900);
+    
+    Coord3D pos = {0,0,0};
+    uint8_t huebase = millis() / 40; // 1 + ~huespeed
+
+    for (pos.x = 0; pos.x < layerV->size.x; pos.x++){
+      for(pos.y = 0; pos.y < layerV->size.y; pos.y++){
+        //uint8_t hue = huebase + (-(pos.x+pos.y)*macro_mutator*10) + ((pos.x+pos.x*pos.y*(macro_mutator*256))/(micro_mutator+1));
+        uint8_t hue = huebase + ((pos.x+pos.y*macro_mutator*pos.x)/(micro_mutator+1));
+        // uint8_t hue = huebase + ((pos.x+pos.y)*(250-macro_mutator)/5) + ((pos.x+pos.y*macro_mutator*pos.x)/(micro_mutator+1)); Original
+        CRGB colour = ColorFromPalette(layerV->layerP->palette, hue, 255);
+        layerV->setRGB(pos, colour);// blend(layerV->getPixelColor(pos), colour, 155);
+      }
+    }
+  }
+}; // Praxis
+
+
+class WaverlyEffect: public Node {
+  public:
+  static const char * name() {return "Waverly ♪💡";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "";}
+  
+  uint8_t fadeRate = 128;
+  uint8_t amplification = 30;
+  bool noClouds = false;
+
+  void setup() override {
+    addControl(fadeRate, "fadeRate", "range");
+    addControl(amplification, "amplification", "range");
+    addControl(noClouds, "noClouds", "checkbox");
+
+    // ui->initCheckBox(parentVar, "soundPressure", layerV->effectData.write<bool>(false));
+    // ui->initCheckBox(parentVar, "AGCDebug", layerV->effectData.write<bool>(false));
+  }
+
+  void loop() override {
+    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+    // bool soundPressure = layerV->effectData.read<bool>();
+    // bool agcDebug = layerV->effectData.read<bool>();
+
+    layerV->fadeToBlackBy(fadeRate);
+    //netmindz: cannot find these in audio sync
+    // if (agcDebug && soundPressure) soundPressure = false;                 // only one of the two at any time
+    // if ((soundPressure) && (audioSync->sync.volumeSmth > 0.5f)) audioSync->sync.volumeSmth = audioSync->sync.soundPressure;    // show sound pressure instead of volume
+    // if (agcDebug) audioSync->sync.volumeSmth = 255.0 - audioSync->sync.agcSensitivity;                    // show AGC level instead of volume
+
+    long t = millis() / 2; 
+    Coord3D pos = {0,0,0}; //initialize z otherwise wrong results
+    for (pos.x = 0; pos.x < layerV->size.x; pos.x++) {
+      uint16_t thisVal = sharedData.volume * amplification * inoise8(pos.x * 45 , t , t) / 4096;      // WLEDMM back to SR code
+      uint16_t thisMax = min(map(thisVal, 0, 512, 0, layerV->size.y), (long)layerV->size.y);
+
+      for (pos.y = 0; pos.y < thisMax; pos.y++) {
+        CRGB color = ColorFromPalette(layerV->layerP->palette, map(pos.y, 0, thisMax, 250, 0));
+        if (!noClouds)
+          layerV->addRGB(pos, color);
+        layerV->addRGB(Coord3D((layerV->size.x - 1) - pos.x, (layerV->size.y - 1) - pos.y), color);
+      }
+    }
+    layerV->blur2d(16);
+  }
+}; //Waverly
 
 class WaveEffect: public Node {
 public:

@@ -84,6 +84,9 @@ struct Coord3D {
         return Coord3D(max(x, rhs.x), max(y, rhs.y), max(z, rhs.z));
     }
 
+    bool isOutofBounds(const Coord3D rhs) const {
+        return x < 0 || y < 0 || z < 0 || x >= rhs.x || y >= rhs.y || z >= rhs.z;
+    }
 };
 
 //https://arduinojson.org/news/2021/05/04/version-6-18-0/

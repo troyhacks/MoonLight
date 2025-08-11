@@ -168,6 +168,8 @@ class VirtualLayer {
   }
   CRGB getRGB(Coord3D pos) { return getRGB(XYZ(pos)); }
 
+  void addRGB(const Coord3D &pixel, const CRGB &color) {setRGB(pixel, getRGB(pixel) + color);}
+
   uint8_t getWhite(const uint16_t indexV) {
     return getLight<uint8_t>(indexV, layerP->lights.header.offsetWhite);
   }
@@ -205,6 +207,75 @@ class VirtualLayer {
   
   //addLight is called by addLayout for each light in the layout
   void addLight(Coord3D position);
+
+  void blur1d(fract8 blur_amount)
+  {
+    const uint8_t keep = 255 - blur_amount;
+    const uint8_t seep = blur_amount >> 1;
+    CRGB carryover = CRGB::Black;
+    for( uint16_t i = 0; i < size.x; ++i) {
+        CRGB cur = getRGB(i);
+        CRGB part = cur;
+        part.nscale8( seep);
+        cur.nscale8( keep);
+        cur += carryover;
+        if( i) addRGB(i-1, part);
+        setRGB(i, cur);
+        carryover = part;
+    }
+  }
+
+  void blur2d(fract8 blur_amount)
+  {
+      blurRows(size.x, size.y, blur_amount);
+      blurColumns(size.x, size.y, blur_amount);
+  }
+
+  void blurRows(uint16_t width, uint16_t height, fract8 blur_amount)
+  {
+  /*    for (uint16_t row = 0; row < height; row++) {
+          CRGB* rowbase = leds + (row * width);
+          blur1d( rowbase, width, blur_amount);
+      }
+  */
+      // blur rows same as columns, for irregular matrix
+      uint8_t keep = 255 - blur_amount;
+      uint8_t seep = blur_amount >> 1;
+      for (uint16_t row = 0; row < height; row++) {
+          CRGB carryover = CRGB::Black;
+          for (uint16_t i = 0; i < width; i++) {
+              CRGB cur = getRGB(Coord3D(i, row));
+              CRGB part = cur;
+              part.nscale8( seep);
+              cur.nscale8( keep);
+              cur += carryover;
+              if( i) addRGB(Coord3D(i-1, row), part);
+              setRGB(Coord3D(i, row), cur);
+              carryover = part;
+          }
+      }
+  }
+
+  // blurColumns: perform a blur1d on each column of a rectangular matrix
+  void blurColumns(uint16_t width, uint16_t height, fract8 blur_amount)
+  {
+      // blur columns
+      uint8_t keep = 255 - blur_amount;
+      uint8_t seep = blur_amount >> 1;
+      for (uint16_t col = 0; col < width; ++col) {
+          CRGB carryover = CRGB::Black;
+          for (uint16_t i = 0; i < height; ++i) {
+              CRGB cur = getRGB(Coord3D(col, i));
+              CRGB part = cur;
+              part.nscale8( seep);
+              cur.nscale8( keep);
+              cur += carryover;
+              if( i) addRGB(Coord3D(col, i-1), part);
+              setRGB(Coord3D(col, i), cur);
+              carryover = part;
+          }
+      }
+  }
 
   void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX);
 

@@ -106,6 +106,7 @@ public:
         values.add(GEQ3DEffect::name());
         values.add(LinesEffect::name());
         values.add(LissajousEffect::name());
+        values.add(Noise2DEffect::name());
         values.add(PaintBrushEffect::name());
         values.add(RainbowEffect::name());
         values.add(RandomEffect::name());
@@ -114,6 +115,9 @@ public:
         values.add(ScrollingTextEffect::name());
         values.add(SinusEffect::name());
         values.add(SphereMoveEffect::name());
+        values.add(StarFieldEffect::name());
+        values.add(PraxisEffect::name());
+        values.add(WaverlyEffect::name());
         values.add(WaveEffect::name());
         values.add(FixedRectangleEffect::name());
         values.add(MHTroy1Effect::name());
@@ -149,6 +153,7 @@ public:
         else if (equal(name, GEQ3DEffect::name())) node = new GEQ3DEffect();
         else if (equal(name, LinesEffect::name())) node = new LinesEffect();
         else if (equal(name, LissajousEffect::name())) node = new LissajousEffect();
+        else if (equal(name, Noise2DEffect::name())) node = new Noise2DEffect();
         else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
         else if (equal(name, RainbowEffect::name())) node = new RainbowEffect();
         else if (equal(name, RandomEffect::name())) node = new RandomEffect();
@@ -157,6 +162,9 @@ public:
         else if (equal(name, ScrollingTextEffect::name())) node = new ScrollingTextEffect();
         else if (equal(name, SinusEffect::name())) node = new SinusEffect();
         else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
+        else if (equal(name, StarFieldEffect::name())) node = new StarFieldEffect();
+        else if (equal(name, PraxisEffect::name())) node = new PraxisEffect();
+        else if (equal(name, WaverlyEffect::name())) node = new WaverlyEffect();
         else if (equal(name, FixedRectangleEffect::name())) node = new FixedRectangleEffect();
         else if (equal(name, WaveEffect::name())) node = new WaveEffect();
         else if (equal(name, MHTroy1Effect::name())) node = new MHTroy1Effect();

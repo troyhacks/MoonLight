@@ -270,7 +270,7 @@ class RippleYZModifier: public Node {
 // RotateNodifier rotates the light position around the center of the layout.
 // It can flip the x and y coordinates, reverse the rotation direction, and alternate the rotation
 // direction every full rotation. It also supports shear transformations to create a more dynamic effect.
-// by WildCats08
+// by WildCats08 / @Brandon502
 class RotateNodifier: public Node {
   public:
 
