@@ -32,7 +32,7 @@
 
 	const handleMonitor = (data: Uint8Array) => {
 
-		if (data.length == 24)
+		if (data.length == 29)
 			handleHeader(data)
 		else {
 			if (isPositions == 2) {
@@ -59,17 +59,20 @@
 	let channelsPerLight:number;
 	let offsetRGB:number;
 	let isPositions: number = 0;
+	// let offsetRed:number;
+	// let offsetGreen:number;
+	// let offsetBlue:number;
+	// let offsetWhite:number;
 
 	const handleHeader = (header: Uint8Array) => {
 		console.log("Monitor.handleHeader", header);
 
-		const headerLength = 24; // Define the length of the header
-
 		// let isPositions:number = header[6]; 
 		isPositions   = (header[6] >> 0) & 0x3; // bits 0-1
-		const offsetRed     = (header[6] >> 2) & 0x3; // bits 2-3
-		const offsetGreen   = (header[6] >> 4) & 0x3; // bits 4-5
-		const offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7
+		// offsetRed     = (header[6] >> 2) & 0x3; // bits 2-3
+		// offsetGreen   = (header[6] >> 4) & 0x3; // bits 4-5
+		// offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7
+		// offsetWhite   = header[13];
 
 		nrOfLights = header[4] + 256 * header[5];
 		channelsPerLight = header[11];
@@ -86,7 +89,7 @@
 
 		// let nrOfLights = header[4] + 256 * header[5];
 
-		console.log("Monitor.handleHeader", nrOfLights, width, height, depth);
+		console.log("Monitor.handleHeader", nrOfLights, channelsPerLight, width, height, depth);
 
 	}
 
@@ -116,9 +119,9 @@
 		clearColors();
 		for (let index = 0; index < nrOfLights * channelsPerLight; index +=channelsPerLight) {
 			// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
-			const r = channels[index + offsetRGB] / 255;
-			const g = channels[index + 1 + offsetRGB] / 255;
-			const b = channels[index + 2 + offsetRGB] / 255;
+			const r = channels[index + offsetRGB + 0] / 255;
+			const g = channels[index + offsetRGB + 1] / 255;
+			const b = channels[index + offsetRGB + 2] / 255;
 			const a = 1.0; // Full opacity
 			colors.push(r, g, b, a);
 		}

@@ -56,7 +56,7 @@ void DriverNode::loop() {
 
   LightsHeader *header = &layerV->layerP->lights.header;
 
-  //use ledsDriver LUT for super efficient leds dimming 🔥 (used by reOrderAndDimRGB)
+  //use ledsDriver LUT for super efficient leds dimming 🔥 (used by reOrderAndDimRGBW)
 
   uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
 
@@ -106,15 +106,16 @@ void DriverNode::updateControl(JsonObject control) {
     header->resetOffsets(); //after this addLayout is called of different layout nodes which might set additional offsets (WIP)
 
     if (lightPreset == 0) { header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3;} //GRBW
-    else if (lightPreset == 1) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //RGB
-    else if (lightPreset == 2) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //RBG
-    else if (lightPreset == 3) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = UINT8_MAX;} //GRB
-    else if (lightPreset == 4) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1; header->offsetWhite = UINT8_MAX;} //GBR
-    else if (lightPreset == 5) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BRG
-    else if (lightPreset == 6) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0; header->offsetWhite = UINT8_MAX;} //BGR
-    else if (lightPreset == 7) { header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3;} //GRBW6
+    else if (lightPreset == 1) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;} //RGB
+    else if (lightPreset == 2) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1;} //RBG
+    else if (lightPreset == 3) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2;} //GRB
+    else if (lightPreset == 4) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1;} //GBR
+    else if (lightPreset == 5) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0;} //BRG
+    else if (lightPreset == 6) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0;} //BGR
+    else if (lightPreset == 7) { header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2;} //GRBW6
     else if (lightPreset == 8) { //troy32
       layerV->layerP->lights.header.channelsPerLight = 32;
+      header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
       layerV->layerP->lights.header.offsetRGB = 9;
       layerV->layerP->lights.header.offsetRGB1 = 13;
       layerV->layerP->lights.header.offsetRGB2 = 17;
@@ -126,6 +127,7 @@ void DriverNode::updateControl(JsonObject control) {
     }
     else if (lightPreset == 9) { //troyMH15
       layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
+      header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
       layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
       layerV->layerP->lights.header.offsetPan = 0;
       layerV->layerP->lights.header.offsetTilt = 1;
@@ -136,6 +138,7 @@ void DriverNode::updateControl(JsonObject control) {
     }
     else if (lightPreset == 10) { //wowiMH24
       layerV->layerP->lights.header.channelsPerLight = 24;
+      header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
       layerV->layerP->lights.header.offsetPan = 0;
       layerV->layerP->lights.header.offsetTilt = 1;
       layerV->layerP->lights.header.offsetBrightness = 3;
@@ -169,13 +172,15 @@ void DriverNode::updateControl(JsonObject control) {
   }
 }
 
-void DriverNode::reOrderAndDimRGB(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel) {
+inline void DriverNode::reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel) {
   //use ledsDriver.__rbg_map[0]; for super fast brightness and gamma correction! see secondPixel in ESP32-LedDriver!
   //apply the LUT to the RGB channels !
   
   packetRGBChannel[layerV->layerP->lights.header.offsetRed] = ledsDriver.__red_map[lightsRGBChannel[0]];
   packetRGBChannel[layerV->layerP->lights.header.offsetGreen] = ledsDriver.__green_map[lightsRGBChannel[1]];
   packetRGBChannel[layerV->layerP->lights.header.offsetBlue] = ledsDriver.__blue_map[lightsRGBChannel[2]];
+  if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX)
+    packetRGBChannel[layerV->layerP->lights.header.offsetWhite] = ledsDriver.__white_map[lightsRGBChannel[3]];
 }
 
 void ArtNetDriverMod::setup() {
@@ -230,9 +235,9 @@ void ArtNetDriverMod::loop() {
 
   if (sequenceNumber == 0) sequenceNumber = 1; // just in case, as 0 is considered "Sequence not in use"
   if (sequenceNumber > 255) sequenceNumber = 1;
-  
+
   for (uint_fast16_t hardware_output = 0; hardware_output < nrOfOutputs; hardware_output++) { //loop over all outputs
-      
+    
     if (bufferOffset > header->nrOfLights * header->channelsPerLight) {
         // This stop is reached if we don't have enough pixels for the defined Art-Net output.
         Serial.print("🥒");
@@ -262,30 +267,25 @@ void ArtNetDriverMod::loop() {
         packet_buffer[17] = packetSize;//uint16_t over 2 bytes
 
         // bulk copy the buffer range to the packet buffer after the header 
-        memcpy(packet_buffer+18, (&layerV->layerP->lights.channels[0])+bufferOffset, packetSize); //start from the first byte of ledsP[0]
+        memcpy(packet_buffer+18, &layerV->layerP->lights.channels[bufferOffset], packetSize); //start from the first byte of ledsP[0]
 
         //no brightness scaling for the time being
-        for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) { //fill the packet with lights (all channels of the light)
+        for (int i = 18; i < packetSize+18 - header->channelsPerLight; i+= header->channelsPerLight) { //fill the packet with lights (all channels of the light)
 
           // set brightness all at once - seems slightly faster than scale8()?
-            // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
+          // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
 
-            //reorder RGB and apply brightness and gamma correction
+          //reorder RGB and apply brightness and gamma correction
 
-            reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB]);
+          reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB]);
 
-            if (header->offsetRGB1 != UINT8_MAX )
-              reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB1], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB1]);
-            if (header->offsetRGB2 != UINT8_MAX )
-              reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB2], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB2]);
-            if (header->offsetRGB3 != UINT8_MAX )
-              reOrderAndDimRGB(&packet_buffer[i+header->offsetRGB3], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB3]);
+          if (header->offsetRGB1 != UINT8_MAX )
+            reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB1], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB1]);
+          if (header->offsetRGB2 != UINT8_MAX )
+            reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB2], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB2]);
+          if (header->offsetRGB3 != UINT8_MAX )
+            reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB3], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB3]);
 
-            // offsetWhite correct in buffer directly as now reordering of RGB needed
-            if (header->offsetWhite != UINT8_MAX && header->offsetBrightness == UINT8_MAX && header->brightness != 255)
-                packet_buffer[i+header->offsetWhite] = (packet_buffer[i+header->offsetWhite] * header->brightness) >> 8;
-
-            //todo: correct values using RGB correction: header->red/green/blue. Need to know the color order first ...
         }
 
         bufferOffset += packetSize; //multiple of channelsPerLight

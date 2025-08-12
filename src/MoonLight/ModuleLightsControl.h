@@ -200,10 +200,11 @@ public:
                 read([&](ModuleState& _state) {
                     if (layerP.lights.header.isPositions == 2) { //send to UI
                         if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
-                            _socket->emitEvent("monitor", (char *)&layerP.lights.header, sizeof(LightsHeader));
-                            _socket->emitEvent("monitor", (char *)layerP.lights.channels,  MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.nrOfChannels)); //*3 is for 3 bytes position
+                            _socket->emitEvent("monitor", (char *)&layerP.lights.header, 29);//sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above it to avoid monitor data to be seen as header
+                            _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.nrOfChannels)); //*3 is for 3 bytes position
                         }
                         MB_LOGD(ML_TAG, "pos from 2 to 3");
+                        memset(layerP.lights.channels, 0, layerP.lights.nrOfChannels); // set all the channels to 0 //cleaning the positions
                         layerP.lights.header.isPositions = 3;
                     } else if (layerP.lights.header.isPositions == 0) {//send to UI
                         if (_socket->getConnectedClients() && _state.data["monitorOn"])

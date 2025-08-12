@@ -53,7 +53,7 @@ class DriverNode: public Node {
 
   void loop() override;
 
-  void reOrderAndDimRGB(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel);
+  void reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel);
 
   void updateControl(JsonObject control) override;
 };

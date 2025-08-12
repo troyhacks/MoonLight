@@ -1349,7 +1349,7 @@ class MHTroy2Effect: public Node {
   }
 
   void loop() override {
-
+    bool coolDownSet = false;
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
         layerV->setRGB(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]));
@@ -1358,10 +1358,10 @@ class MHTroy2Effect: public Node {
         layerV->setRGB3(x, CRGB(sharedData.bands[15]>cutin?::map(sharedData.bands[15],cutin-1,255,0,255):0,sharedData.bands[7]>cutin?::map(sharedData.bands[7],cutin-1,255,0,255):0,sharedData.bands[0]>cutin?::map(sharedData.bands[0],cutin-1,255,0,255):0));
         if (sharedData.bands[0] > cutin) {
           layerV->setZoom(x, 255);
-          cooldown = millis();
+          coolDownSet = true;
         } else if (cooldown + 5000 < millis()) {
           layerV->setZoom(x, 0);
-          cooldown = millis();
+          coolDownSet = true;
         }
         // layerV->setZoom(x, (sharedData.bands[0]>cutin)?255:0);
         uint8_t mypan = beatsin8(bpm, pan-range, pan+range, 0, sharedData.bands[0]/2);
@@ -1384,6 +1384,7 @@ class MHTroy2Effect: public Node {
         // layerV->setBrightness(x, layerV->layerP->lights.header.brightness); // done automatically
       }
     }
+    if (coolDownSet) cooldown = millis();
   }
 };
 
