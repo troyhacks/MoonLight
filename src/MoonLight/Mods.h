@@ -159,7 +159,9 @@ class PhysicalDriverMod: public DriverNode {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  char version[30] = HP_ALL_VERSION;
+  #if HP_ALL_DRIVERS
+    char version[30] = HP_ALL_VERSION;
+  #endif
 
   void setup() override;
   void loop() override;

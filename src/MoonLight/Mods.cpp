@@ -604,7 +604,9 @@ void ArtNetDriverMod::loop() {
     hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
 
     DriverNode::setup();
-    addControl(version, "Version", "text", 0, 30, true);
+    #if HP_ALL_DRIVERS
+      addControl(version, "Version", "text", 0, 30, true);
+    #endif
   }
 
   void PhysicalDriverMod::addLayout() {
