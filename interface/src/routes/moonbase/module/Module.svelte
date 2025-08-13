@@ -132,14 +132,15 @@
 					if (!oldData[key]) oldData[key] = []; //create an empty array
 					for (let i = 0; i < Math.max(oldData[key].length, newData[key].length); i++) {
 						if (oldData[key][i] == undefined) {
+							// console.log("add row", key, i, newData[key][i]);
 							oldData[key][i] = newData[key][i]; //create new row if not existed, trigger reactiveness
 						} else if (newData[key][i] == undefined) {
-							console.log("remove row", key, i);
-							//remove row if not existing anymore
-							oldData[key].splice(i, 1);
-							// oldData[key] = [...oldData[key]]; //Trigger reactivity ???
-						} else
+							// console.log("remove remaining rows", key, i, oldData[key][i]);
+							oldData[key].splice(i);
+						} else {
+							// console.log("change row", key, i, oldData[key][i], newData[key][i]);
 							updateRecursive(oldData[key][i], newData[key][i]);
+						}
 					}
 				} else {
 					if (newData[key] != oldData[key]) {

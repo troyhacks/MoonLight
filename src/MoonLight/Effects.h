@@ -39,7 +39,7 @@ class SolidEffect: public Node {
 class FixedRectangleEffect: public Node {
   public:
 
-  static const char * name() {return "Fixed Rectangle 🔥💡";}
+  static const char * name() {return "Fixed Rectangle 🔥";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
