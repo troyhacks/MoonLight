@@ -33,10 +33,6 @@ public:
 
         property = root.add<JsonObject>(); property["name"] = "nrOfLights"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
         property = root.add<JsonObject>(); property["name"] = "channelsPerLight"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
-        property = root.add<JsonObject>(); property["name"] = "chipset"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
-        property = root.add<JsonObject>(); property["name"] = "FastLED"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
-        property = root.add<JsonObject>(); property["name"] = "FastLEDI2S"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
-        property = root.add<JsonObject>(); property["name"] = "colorOrder"; property["type"] = "text"; property["max"] = 32; property["ro"] = true;
         property = root.add<JsonObject>(); property["name"] = "maxChannels"; property["type"] = "number"; property["max"] = 65538; property["ro"] = true;
         property = root.add<JsonObject>(); property["name"] = "size"; property["type"] = "coord3D"; property["ro"] = true;
         property = root.add<JsonObject>(); property["name"] = "nodes#"; property["type"] = "number"; property["max"] = 65536; property["ro"] = true;
@@ -62,15 +58,6 @@ public:
             //this should be updated each time the UI queries for it ... (now only at boot)
             data["nrOfLights"] = layerP.lights.header.nrOfLights;
             data["channelsPerLight"] = layerP.lights.header.channelsPerLight;
-            data["chipset"] = TOSTRING(ML_CHIPSET);
-            const char* fastledVersion = TOSTRING(FASTLED_VERSION);// "." TOSTRING(FASTLED_VERSION_MINOR) "." TOSTRING(FASTLED_VERSION_PATCH);
-            data["FastLED"] = fastledVersion;
-            #if FASTLED_USES_ESP32S3_I2S
-                data["FastLEDI2S"] = "Yes";
-            #else
-                data["FastLEDI2S"] = "No";
-            #endif
-            data["colorOrder"] = TOSTRING(ML_COLOR_ORDER);
             data["maxChannels"] = layerP.lights.nrOfChannels;
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;

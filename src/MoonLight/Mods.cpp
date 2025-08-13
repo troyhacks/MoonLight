@@ -320,6 +320,10 @@ void ArtNetDriverMod::loop() {
     hasLayout = true; //so addLayout is called if layout changes (works for FASTLED)
 
     addControl(maxPower, "maxPower", "number", 0, 100);
+    addControl(version, "Version", "text", 0, 20, true);
+    addControl(chipSet, "chipSet", "text", 0, 20, true);
+    addControl(colorOrder, "colorOrder", "text", 0, 20, true);
+    addControl(usesI2S, "usesI2S", "checkbox", 0, 20, true);
   }
 
   void  FastLEDDriverMod::addLayout() {
@@ -600,6 +604,7 @@ void ArtNetDriverMod::loop() {
     hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
 
     DriverNode::setup();
+    addControl(version, "Version", "text", 0, 30, true);
   }
 
   void PhysicalDriverMod::addLayout() {

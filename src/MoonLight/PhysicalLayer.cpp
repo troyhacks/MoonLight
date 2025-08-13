@@ -66,7 +66,7 @@ PhysicalLayer::PhysicalLayer() {
             }
 
             if (requestMapPhysical) {
-                ESP_LOGD(TAG, "mapLayout physical requested");
+                MB_LOGD(ML_TAG, "mapLayout physical requested");
                 
                 pass = 1;
                 mapLayout();
@@ -75,7 +75,7 @@ PhysicalLayer::PhysicalLayer() {
             }
 
             if (requestMapVirtual) {
-                ESP_LOGD(TAG, "mapLayout virtual requested");
+                MB_LOGD(ML_TAG, "mapLayout virtual requested");
 
                 pass = 2;
                 mapLayout();
@@ -111,7 +111,7 @@ PhysicalLayer::PhysicalLayer() {
 
     void PhysicalLayer::addLayoutPre() {
         lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
-        ESP_LOGV(TAG, "pass %d %d", pass, lights.header.nrOfLights);
+        MB_LOGD(ML_TAG, "pass %d %d", pass, lights.header.nrOfLights);
 
         if (pass == 1) {
             lights.header.size = {0,0,0};
@@ -145,7 +145,7 @@ PhysicalLayer::PhysicalLayer() {
         }
 
         if (pass == 1) {
-            // ESP_LOGV(TAG, "%d,%d,%d", position.x, position.y, position.z);
+            // MB_LOGD(ML_TAG, "%d,%d,%d", position.x, position.y, position.z);
             if (lights.header.nrOfLights < lights.nrOfChannels / 3) {
                 packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights*3], position);
             }
@@ -162,7 +162,7 @@ PhysicalLayer::PhysicalLayer() {
 
     void PhysicalLayer::addPin(uint8_t pinNr) {
         if (pass == 1) {
-            ESP_LOGV(TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
+            MB_LOGD(ML_TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
 
             SortedPin previousPin;
             if (!sortedPins.empty()) {
@@ -193,7 +193,7 @@ PhysicalLayer::PhysicalLayer() {
     void PhysicalLayer::addLayoutPost() {
         if (pass == 1) {
             lights.header.size += Coord3D{1,1,1};
-            ESP_LOGV(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.channels));
+            MB_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
             //send the positions to the UI _socket_emit
             MB_LOGD(ML_TAG, "pos from x(%d) to 2", lights.header.isPositions);
             lights.header.isPositions = 2; //filled with positions, set back to ct_Leds in ModuleEffects
@@ -210,7 +210,7 @@ PhysicalLayer::PhysicalLayer() {
 
             } //pins defined
         } else if (pass == 2) {
-            ESP_LOGV(TAG, "pass %d %d", pass, lights.header.nrOfLights);
+            MB_LOGD(ML_TAG, "pass %d %d", pass, lights.header.nrOfLights);
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
                 layer->addLayoutPost();
@@ -220,9 +220,9 @@ PhysicalLayer::PhysicalLayer() {
     // an effect is using a virtual layer: tell the effect in which layer to run...
 
     void PhysicalLayer::removeNode(Node *node) {
-        ESP_LOGV(TAG, "remove node (s:%d p:%p)", layerV[0]->nodes.size(), node);
+        MB_LOGD(ML_TAG, "remove node (s:%d p:%p)", layerV[0]->nodes.size(), node);
         // node->destructor(); //now ˜destructor is called in Node destructor
-        // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
+        delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
         // //can cause a crash if it has addControl ...  (e.g. panel layout)
         
         // layerV[0]->nodes[index] = nullptr;

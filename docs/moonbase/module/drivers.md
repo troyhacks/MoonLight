@@ -72,13 +72,20 @@ sends LED output to ESP32 gpio pins.
 
 * Switch off to see the effect framerate in System Status/Metrics
 * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 LEDs, 24 bits is 130 fps theoretically - 120 practically)
-* Will move to driver node later ...
+* **Chipset**: FastLED chipset defined (for FastLED hardcoded in the firmware ...)
+* **FastLED**: FastLED version used (301001 is 3.10.1)
+* **FastLED I2S**: Is the I2S driver used: Used on ESP32-S3 boards (temporary, will move to Physical driver), other boards use RMT5
+* **Color order**: FastLED color order (for FastLED hardcoded in the firmware ...), will not work on I2S, see [FastLED issue 1966](https://github.com/FastLED/FastLED/issues/1966)
 
 ### Physical driver ☸️
 
-Implemented but not tested
+Implemented and tested
 
-### Virtual driver ☸️
+### Virtual driver ☸️ 🚧
+
+Not implemented yet
+
+### HUB75 driver ☸️ 🚧
 
 Not implemented yet
 

@@ -26,7 +26,7 @@ void Node::updateControl(JsonObject control) {
                 *valuePointer = control["value"];
                 // ESP_LOGV(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
             }
-            else if (control["type"] == "selectFile") {
+            else if (control["type"] == "selectFile" || control["type"] == "text") {
                 char *valuePointer = (char *)pointer;
                 strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
             }
@@ -235,9 +235,6 @@ void LiveScriptNode::compileAndRun() {
 
           ESP_LOGV(TAG, "script \n%s", scScript.c_str());
 
-          TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-          ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
-  
           // ESP_LOGV(TAG, "parsing %s", scScript.c_str());
 
           Executable executable = parser.parseScript(&scScript); // note that this class will be deleted after the function call !!!

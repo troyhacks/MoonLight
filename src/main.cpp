@@ -168,7 +168,7 @@ void setup()
             xTaskCreateUniversal(
                 effectTask,              // task function
                 "AppEffectTask",            // name
-                8 * 1024,             // stack size in words (without livescripts we can do with 12...)
+                4 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
                 8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle
@@ -178,7 +178,7 @@ void setup()
             xTaskCreateUniversal(
                 driverTask,              // task function
                 "AppDriverTask",            // name
-                8 * 1024,             // stack size in words (without livescripts we can do with 12...)
+                4 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
                 8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &driverTaskHandle,       // task handle

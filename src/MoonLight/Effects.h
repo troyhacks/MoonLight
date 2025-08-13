@@ -820,14 +820,14 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
+  char textIn[32];
   Char<32> text = Char<32>("MoonLight");
   uint8_t speed = 0;
   uint8_t font = 0;
   uint8_t preset = 0;
+  Coord3D ctest;
 
   void setup() override {
-    // addControl(text, "text", "text");
-    addControl(speed, "speed", "range");
     JsonObject property;
     JsonArray values;
     property = addControl(font, "font", "select");
@@ -837,9 +837,11 @@ public:
     values.add("5x12");
     values.add("6x8");
     values.add("7x9");
+
     property = addControl(preset, "preset", "select");
     values = property["values"].to<JsonArray>();
     values.add("Auto");
+    values.add("Text");
     values.add("IP");
     values.add("FPS");
     values.add("Time");
@@ -847,19 +849,32 @@ public:
     values.add("Status 🛜");
     values.add("Clients 🛜");
     values.add("Connected 🛜");
+
+    addControl(textIn, "text", "text", 1, sizeof(textIn)); //size needed to protect char array!
+
+    addControl(speed, "speed", "range");
   }
 
   void loop() override {
 
     layerV->fadeToBlackBy();
 
-    uint8_t choice = preset ? preset : (millis()/1000 % 7)+1;
+    uint8_t choice;
+    if (preset > 0) //not auto
+      choice = preset;
+    else {
+      if (strlen(textIn) == 0) 
+        choice = (millis()/1000 % 7)+2;
+      else
+        choice = (millis()/1000 % 8)+1;
+    } 
     
     switch (choice) {
-      case 1: text.format(".%d", WiFi.localIP()[3]); break;
-      case 2: text.format("%ds", sharedData.fps); break;
-      case 3: text.formatTime(time(nullptr), "%H%M"); break;
-      case 4: 
+      case 1: text.format("%s", textIn); break;
+      case 2: text.format(".%d", WiFi.localIP()[3]); break;
+      case 3: text.format("%ds", sharedData.fps); break;
+      case 4: text.formatTime(time(nullptr), "%H%M"); break;
+      case 5: 
         #define MILLIS_PER_MINUTE (60*1000)
         #define MILLIS_PER_HOUR (MILLIS_PER_MINUTE * 60)
         #define MILLIS_PER_DAY (MILLIS_PER_HOUR * 24)
@@ -878,9 +893,9 @@ public:
         else // more than 10 days
           text.format("%dh", millis()/(MILLIS_PER_DAY));  //days
         break;
-      case 5: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP-":sharedData.connectionStatus==2?"AP+":sharedData.connectionStatus==3?"Sta-":sharedData.connectionStatus==4?"Sta+":"mqqt"); break;
-      case 6: text.format("%dC", sharedData.clientListSize); break;
-      case 7: text.format("%dCC", sharedData.connectedClients); break;
+      case 6: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP-":sharedData.connectionStatus==2?"AP+":sharedData.connectionStatus==3?"Sta-":sharedData.connectionStatus==4?"Sta+":"mqqt"); break;
+      case 7: text.format("%dC", sharedData.clientListSize); break;
+      case 8: text.format("%dCC", sharedData.connectedClients); break;
     }
     layerV->setRGB(Coord3D(choice-1, 0), CRGB::Blue); 
 

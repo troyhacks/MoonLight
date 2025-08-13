@@ -121,6 +121,14 @@ class FastLEDDriverMod: public Node {
   static const char * tags() {return "";}
 
   uint16_t maxPower = 10;
+  char chipSet[20] = TOSTRING(ML_CHIPSET);
+  char version[20] = TOSTRING(FASTLED_VERSION);// "." TOSTRING(FASTLED_VERSION_MINOR) "." TOSTRING(FASTLED_VERSION_PATCH);
+  char colorOrder[20] = TOSTRING(ML_COLOR_ORDER);
+  #if FASTLED_USES_ESP32S3_I2S
+    bool usesI2S = true;
+  #else
+    bool usesI2S = true;
+  #endif
 
   void setup() override;
   void loop() override;
@@ -150,6 +158,8 @@ class PhysicalDriverMod: public DriverNode {
   static const char * name() {return "Physical Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
+
+  char version[30] = HP_ALL_VERSION;
 
   void setup() override;
   void loop() override;

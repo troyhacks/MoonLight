@@ -127,16 +127,14 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                         runInTask1.push_back([&, updatedItem, stateData]() mutable { //mutable as updatedItem is called by reference (&)
                             ESP_LOGV(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
                             if (onUpdate) onUpdate(updatedItem);
-                            // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-                            // ESP_LOGV(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                            // ESP_LOGV(TAG, "changed %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                         });
                     }
                     else if (onUpdateRunInTask == 2) { //if set to 0, run in main loopTask
                         runInTask2.push_back([&, updatedItem, stateData]() mutable { //mutable as updatedItem is called by reference (&)
                             ESP_LOGV(TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
                             if (onUpdate) onUpdate(updatedItem);
-                            // TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-                            // ESP_LOGV(TAG, "changed %s = %s -> %s (%s %d)", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                            // ESP_LOGV(TAG, "changed %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                         });
                     }
                     else

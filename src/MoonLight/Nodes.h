@@ -49,7 +49,7 @@ public:
   //effect, layout and modifier
 
   template <class ControlType>
-  JsonObject addControl(ControlType &variable, const char *name, const char *type, int min = 0, int max = UINT8_MAX) {
+  JsonObject addControl(ControlType &variable, const char *name, const char *type, int min = 0, int max = UINT8_MAX, bool ro = false) {
     uint32_t pointer = (uint32_t)&variable;
 
     bool newControl = false; //flag to check if control is new or already exists
@@ -57,7 +57,7 @@ public:
     JsonObject control;
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
-        ESP_LOGV(TAG, "update control %s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+        MB_LOGD(ML_TAG, "update control %s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
         control1["p"] = pointer;
         control = control1; //set control to the found one
         break;
@@ -69,59 +69,64 @@ public:
       control["name"] = name;
       control["type"] = type;
       control["default"] = variable;
+      if (ro) control["ro"] = true;
       control["p"] = pointer;
       if (min != 0) control["min"] = min;
       if (max != UINT8_MAX) control["max"] = max;
       newControl = true; //set flag to true, as control is new
     }
 
-    ESP_LOGV(TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+    MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
     //setValue
     if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
       if (sizeof(ControlType) != 1) {
         ESP_LOGE(TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        uint8_t * valuePointer = (uint8_t *)pointer;
-        *valuePointer = variable;
-        control["value"] = *valuePointer;
+        // uint8_t * valuePointer = (uint8_t *)pointer;
+        // *valuePointer = variable;
+        // control["value"] = *valuePointer;
+        control["value"] = variable;
       }
     }
-    else if (control["type"] == "selectFile") {
-      if (sizeof(ControlType) != 4) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
-      } else if (newControl) {
-        char *valuePointer = (char *)pointer;
-        *valuePointer = variable;
-        control["value"] = valuePointer;
+    else if (control["type"] == "selectFile" || control["type"] == "text") {
+      // if (sizeof(ControlType) != 4) {
+      //   ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+      // } else 
+      if (newControl) {
+        // char *valuePointer = (char *)pointer;
+        // *valuePointer = variable;
+        // control["value"] = valuePointer;
+        control["value"] = variable;
       }
     }
     else if (control["type"] == "number") {
       if (sizeof(ControlType) != 2) {
         ESP_LOGE(TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        uint16_t *valuePointer = (uint16_t *)pointer;
-        *valuePointer = variable;
-        control["value"] = *valuePointer;
+        // uint16_t *valuePointer = (uint16_t *)pointer;
+        // *valuePointer = variable;
+        // control["value"] = *valuePointer;
+        control["value"] = variable;
       }
     }
     else if (control["type"] == "checkbox") {
       if (sizeof(ControlType) != 1) {
         ESP_LOGE(TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        bool *valuePointer = (bool *)pointer;
+        // bool *valuePointer = (bool *)pointer;
+        // control["value"] = variable;
+        // *valuePointer = control["value"];
         control["value"] = variable;
-        *valuePointer = control["value"];
       }
-      // *valuePointer = variable;
-      // control["value"] = *valuePointer;
     }
     else if (control["type"] == "coord3D") {
       if (sizeof(ControlType) != sizeof(Coord3D)) {
         ESP_LOGE(TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        Coord3D *valuePointer = (Coord3D *)pointer;
+        // Coord3D *valuePointer = (Coord3D *)pointer;
+        // control["value"] = variable;
+        // *valuePointer = control["value"];
         control["value"] = variable;
-        *valuePointer = control["value"];
       }
     }
     else
@@ -134,11 +139,11 @@ public:
 
   void requestMappings() {
     if (hasModifier || hasLayout) {
-        ESP_LOGV(TAG, "hasLayout or Modifier -> requestMapVirtual");
+        MB_LOGD(ML_TAG, "hasLayout or Modifier -> requestMapVirtual");
         layerV->layerP->requestMapVirtual = true;
     }
     if (hasLayout) {
-        ESP_LOGV(TAG, "hasLayout -> requestMapPhysical");
+        MB_LOGD(ML_TAG, "hasLayout -> requestMapPhysical");
         layerV->layerP->requestMapPhysical = true;
     }
   }
@@ -167,7 +172,7 @@ public:
   virtual ~Node() {
     //delete any allocated memory
 
-    ESP_LOGV(TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
+    MB_LOGD(ML_TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
 
   }
 

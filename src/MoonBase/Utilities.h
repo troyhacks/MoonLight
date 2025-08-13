@@ -21,7 +21,7 @@
 #define MB_LOGE(tag, fmt, ...) ESP_LOGE(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
 #define MB_LOGW(tag, fmt, ...) ESP_LOGW(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
 #define MB_LOGI(tag, fmt, ...) ESP_LOGI(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define MB_LOGD(tag, fmt, ...) ESP_LOGD(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
 #define MB_LOGV(tag, fmt, ...) ESP_LOGV(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
 #define MB_TAG "🌙"

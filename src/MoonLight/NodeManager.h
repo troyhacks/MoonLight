@@ -78,7 +78,6 @@ protected:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
         // handle nodes
         if (updatedItem.parent[0] == "nodes") { // onNodes
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
@@ -94,11 +93,11 @@ protected:
 
                     //if old node exists then remove it's controls
                     if (updatedItem.oldValue != "null") {
-                        ESP_LOGV(TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                        MB_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                         nodeState.remove("controls"); //remove the controls from the nodeState
                     }
 
-                    ESP_LOGV(TAG, "add %s[%d]%s[%d].%s = %s -> %s task %s %d", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
+                    MB_LOGD(ML_TAG, "add %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     
                     if (nodeState["controls"].isNull()) { //if controls are not set, create empty array
                         nodeState["controls"].to<JsonArray>(); //clear the controls
@@ -114,34 +113,34 @@ protected:
 
                         requestUIUpdate = true;
 
-                        ESP_LOGV(TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
+                        MB_LOGD(ML_TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
 
                         //make sure "p" is also updated
 
                         nodeClass->requestMappings();
                     }
                     else
-                        ESP_LOGW(TAG, "Nodeclass %s not found", updatedItem.value.as<String>().c_str());
+                        MB_LOGW(ML_TAG, "Nodeclass %s not found", updatedItem.value.as<String>().c_str());
 
                     if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
-                        ESP_LOGW(TAG, "Restart needed");
+                        MB_LOGW(ML_TAG, "Restart needed");
                         restartNeeded = true;
                     }
                 }
 
                 //if a node existed and no new node in place, remove 
                 if (updatedItem.oldValue != "null" && oldNode) {
-                    ESP_LOGV(TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    MB_LOGD(ML_TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     if (!newNode) {
                         //remove oldNode from the nodes list 
                         for (uint8_t i = 0; i < nodes->size(); i++) {
                             if ((*nodes)[i] == oldNode) {
-                                ESP_LOGV(TAG, "remove node %d", i);
+                                MB_LOGD(ML_TAG, "remove node %d", i);
                                 nodes->erase(nodes->begin() + i);
                                 break;
                             }
                         }
-                        ESP_LOGV(TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], nodes->size());
+                        MB_LOGD(ML_TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], nodes->size());
                     }
 
                     oldNode->requestMappings();
@@ -154,7 +153,7 @@ protected:
                     //     ESP_LOGV(TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
                     //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]);
                     //     if (liveScriptNode) liveScriptNode->kill(); 
-                    //     else ESP_LOGW(TAG, "liveScriptNode not found %s", node["nodeName"].as<String>().c_str());
+                    //     else MB_LOGW(ML_TAG, "liveScriptNode not found %s", node["nodeName"].as<String>().c_str());
                     // }
                     // if (!node["nodeName"].isNull() && !node["type"].isNull()) {
                     //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]); //todo: can be 2 nodes with the same name ...
@@ -166,21 +165,21 @@ protected:
 
             if (updatedItem.name == "on") {
                 if (updatedItem.index[0] < nodes->size()) {
-                    ESP_LOGV(TAG, "on %s %s (%d)", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
+                    MB_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["nodeName"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
-                        ESP_LOGV(TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasLayout, nodeClass->hasModifier);
+                        MB_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasLayout, nodeClass->hasModifier);
 
                         nodeClass->requestMappings();
                     }
                     else
-                        ESP_LOGW(TAG, "Nodeclass %s not found", nodeState["nodeName"].as<String>().c_str());
+                        MB_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["nodeName"].as<String>().c_str());
                 }
             }
 
             if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
-                ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 if (updatedItem.index[0] < nodes->size()) {
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
@@ -188,19 +187,19 @@ protected:
 
                         nodeClass->requestMappings();
                     }
-                    else ESP_LOGW(TAG, "nodeClass not found %s", nodeState["nodeName"].as<String>().c_str());
+                    else MB_LOGW(ML_TAG, "nodeClass not found %s", nodeState["nodeName"].as<String>().c_str());
                 }
             }
             // end Nodes
         }
         // else
-        // ESP_LOGV(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        // MB_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop() {
         if (requestUIUpdate) {
             requestUIUpdate = false; //reset the flag
-            ESP_LOGV(TAG, "requestUIUpdate");
+            MB_LOGD(ML_TAG, "requestUIUpdate");
 
             // update state to UI
             update([&](ModuleState &state) {

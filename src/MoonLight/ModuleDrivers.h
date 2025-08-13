@@ -34,7 +34,7 @@ public:
     }
 
     void begin() {
-        _state.onUpdateRunInTask = 2;
+        _state.onUpdateRunInTask = 1; //also in effects class!, the driver only drives !!!
         NodeManager::begin();
 
         nodes = &layerP.nodes;
