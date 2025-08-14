@@ -33,8 +33,6 @@
   #endif
 #endif
 
-#include <AsyncUDP.h>
-
 void DriverNode::setup() {
   addControl(maxPower, "maxPower", "number", 0, 100);
   JsonObject property = addControl(lightPreset, "lightPreset", "select"); 
@@ -195,9 +193,12 @@ void ArtNetDriverMod::setup() {
   addControl(nrOfOutputs, "nrOfOutputs", "number");
   addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
   addControl(universesPerOutput, "universesPerOutput", "number");
+
+  memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER)); // copy in the Art-Net header.
+
 }
 
-#define ART_NET_HEADER (char[]){0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e} //: Saying Art-Net\0, opcode = 0x5000 (ArtDMX opcode), version = 0x0e00 (Version 14)
+#define ARTNET_CHANNELS_PER_PACKET 512
 
 void ArtNetDriverMod::loop() {
 
@@ -206,37 +207,35 @@ void ArtNetDriverMod::loop() {
   LightsHeader *header = &layerV->layerP->lights.header;
 
   //continue with Art-Net code
-  controllerIP[0] = WiFi.localIP()[0];
-  controllerIP[1] = WiFi.localIP()[1];
-  controllerIP[2] = WiFi.localIP()[2];
+  controllerIP = WiFi.localIP();
   controllerIP[3] = controllerIP3;
-
   if(!controllerIP) return;
   
   if (header->isPositions != 0) return; //don't update if positions are sent
 
   //wait until the throttle FPS is reached
-  unsigned long wait = 1000 / FPSLimiter + lastMillis - millis();
+  //wait needed to avoid misalignment between packages sent and displayed - WIP
+  wait = 1000 / FPSLimiter + lastMillis - millis();
   if (wait > 0 && wait < 1000 / FPSLimiter)
     delay(wait); // delay in ms
   // else
   //   ESP_LOGW(TAG, "wait %d", wait);
+  // if (millis() - lastMillis < 1000 / FPSLimiter)
+  //   delay(1000 / FPSLimiter + lastMillis - millis()); // delay in ms
+  //   return;
   lastMillis = millis();
 
   // calculate the number of UDP packets we need to send
-
-  uint8_t packet_buffer[sizeof(ART_NET_HEADER) + 6 + 512];
-  memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER)); // copy in the Art-Net header.
-
-  AsyncUDP artnetudp;// AsyncUDP so we can just blast packets.
-
-  uint_fast16_t bufferOffset = 0;
-  uint_fast16_t hardware_output_universe = 0;
-  
+  bufferOffset = 0;
+  hardware_output_universe = 0;
+ 
   sequenceNumber++;
 
   if (sequenceNumber == 0) sequenceNumber = 1; // just in case, as 0 is considered "Sequence not in use"
   if (sequenceNumber > 255) sequenceNumber = 1;
+
+  packet_buffer[12] = sequenceNumber; //The sequence number is used to ensure that ArtDmx packets are used in the correct order
+  // packet_buffer[13] = ?; //The physical input port from which DMX512 data was input
 
   for (uint_fast16_t hardware_output = 0; hardware_output < nrOfOutputs; hardware_output++) { //loop over all outputs
     
@@ -248,12 +247,11 @@ void ArtNetDriverMod::loop() {
 
     hardware_output_universe = hardware_output * universesPerOutput;
 
-    uint_fast16_t channels_remaining = channelsPerOutput;
+    channels_remaining = channelsPerOutput;
 
     while (channels_remaining > 0) { //loop per universe
-        const uint_fast16_t ARTNET_CHANNELS_PER_PACKET = 510; // 512/4=128 RGBW LEDs, 510/3=170 RGB LEDs
 
-        uint_fast16_t packetSize = ARTNET_CHANNELS_PER_PACKET;
+        packetSize = (ARTNET_CHANNELS_PER_PACKET / header->channelsPerLight) * header->channelsPerLight; //packetSize must be a multitude of channelsPerLight
 
         if (channels_remaining < ARTNET_CHANNELS_PER_PACKET) {
             packetSize = channels_remaining;
@@ -263,16 +261,16 @@ void ArtNetDriverMod::loop() {
         }
 
         // set the parts of the Art-Net packet header that change:
-        packet_buffer[12] = sequenceNumber;
-        packet_buffer[14] = hardware_output_universe;
-        packet_buffer[16] = packetSize >> 8; //uint16_t over 2 bytes
-        packet_buffer[17] = packetSize;//uint16_t over 2 bytes
+        packet_buffer[14] = hardware_output_universe; //The low byte of the 15 bit Port-Address to which this packet is destined
+        packet_buffer[15] = hardware_output_universe >> 8; //The top 7 bits of the 15 bit Port-Address to which this packet is destined
+        packet_buffer[16] = packetSize >> 8; //The length of the DMX512 data array. High Byte
+        packet_buffer[17] = packetSize; //Low Byte of above
 
         // bulk copy the buffer range to the packet buffer after the header 
         memcpy(packet_buffer+18, &layerV->layerP->lights.channels[bufferOffset], packetSize); //start from the first byte of ledsP[0]
 
         //no brightness scaling for the time being
-        for (int i = 18; i < packetSize+18 - header->channelsPerLight; i+= header->channelsPerLight) { //fill the packet with lights (all channels of the light)
+        for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) { //fill the packet with lights (all channels of the light)
 
           // set brightness all at once - seems slightly faster than scale8()?
           // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.

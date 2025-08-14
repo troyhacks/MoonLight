@@ -133,7 +133,7 @@ void setup()
     // start serial and filesystem
     Serial.begin(SERIAL_BAUD_RATE);
 
-    delay(5000); // 🌙 to capture all the serial output
+    // delay(5000); // 🌙 to capture all the serial output
 
     // 🌙 safeMode
     if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) { //see verbosePrintResetReason
@@ -168,7 +168,7 @@ void setup()
             xTaskCreateUniversal(
                 effectTask,              // task function
                 "AppEffectTask",            // name
-                4 * 1024,             // stack size in words (without livescripts we can do with 12...)
+                8 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
                 8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle

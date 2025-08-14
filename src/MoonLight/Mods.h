@@ -58,6 +58,13 @@ class DriverNode: public Node {
   void updateControl(JsonObject control) override;
 };
 
+#define ART_NET_HEADER (char[]){0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e}
+                                //0..7: Array of 8 characters, the final character is a null termination. Value = 'A' 'r' 't' '-' 'N' 'e' 't' 0x00
+                                //8-9: OpOutput Transmitted low byte first (so 0x50, 0x00)
+                                //10: High byte of the Art-Net protocol revision number
+                                //11: Low byte of the Art-Net protocol revision number. Current value 14
+#include <AsyncUDP.h>
+
 class ArtNetDriverMod: public DriverNode {
   public:
 
@@ -74,10 +81,18 @@ class ArtNetDriverMod: public DriverNode {
 
   void setup() override;
 
+  //loop variables:
   IPAddress controllerIP; //tbd: controllerIP also configurable from fixtures and Art-Net instead of pin output
-  size_t sequenceNumber = 0;
-
   unsigned long lastMillis = millis();
+  unsigned long wait;
+  uint8_t packet_buffer[sizeof(ART_NET_HEADER) + 6 + 512];
+  uint_fast16_t packetSize;
+  size_t sequenceNumber = 0; // this needs to be shared across all outputs
+  AsyncUDP artnetudp;// AsyncUDP so we can just blast packets.
+  
+  uint_fast16_t bufferOffset = 0;
+  uint_fast16_t hardware_output_universe = 0;
+  uint_fast16_t channels_remaining;
 
   void loop() override;
 };

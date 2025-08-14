@@ -286,20 +286,22 @@ void walkThroughFiles(File folder, std::function<void(File, File)> fun);
 
 bool copyFile(const char* srcPath, const char* dstPath);
 
+bool isInPSRAM(void* ptr);
+
 template<typename T>
 struct PSRAMAllocator {
     using value_type = T;
     
     T* allocate(size_t n) {
-        MB_LOGI(MB_TAG, "trying to allocate in PSRAM size %d", n);
-        void * res = heap_caps_malloc(n * sizeof(T), MALLOC_CAP_SPIRAM);
-        if (!res) MB_LOGE(MB_TAG, "heap_caps_malloc not succeeded");
-        return static_cast<T*>(res);
+        T* res = (T*)heap_caps_malloc_prefer(n * sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+        if (res)
+            MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s", n, sizeof(T), isInPSRAM(res)?"PSRAM":"default");
+        else 
+            MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
+        return res;
     }
     
     void deallocate(T* p, size_t n) {
         heap_caps_free(p);
     }
 };
-
-bool isInPSRAM(void* ptr);

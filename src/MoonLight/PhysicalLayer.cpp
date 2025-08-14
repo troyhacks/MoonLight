@@ -26,13 +26,14 @@ PhysicalLayer::PhysicalLayer() {
 
         if (psramFound()) {
             lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 122880*3); //fill halve with channels, max 128K LEDs
-            lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_SPIRAM);
+            // lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_SPIRAM);
+            lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
             if (lights.channels)
-                MB_LOGD(ML_TAG, "allocated %d bytes of PSRAM", lights.nrOfChannels );
+                MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.nrOfChannels, isInPSRAM(lights.channels)?"PSRAM":"default" );
         }
         if (!lights.channels) {
             lights.nrOfChannels = 4096 * 3;
-            lights.channels = (uint8_t *)malloc(lights.nrOfChannels);
+            lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
             if (lights.channels)
                 MB_LOGD(ML_TAG, "allocated %d bytes of RAM", lights.nrOfChannels );
         }
