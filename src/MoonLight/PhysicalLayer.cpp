@@ -169,7 +169,7 @@ PhysicalLayer::PhysicalLayer() {
             if (!sortedPins.empty()) {
                 previousPin = sortedPins.back(); //get the last added pin
                 if (previousPin.pin == pinNr) { //if the same pin, just increase the number of LEDs
-                    previousPin.nrOfLights += lights.header.nrOfLights - previousPin.startLed;
+                    previousPin.nrOfLights = lights.header.nrOfLights - previousPin.startLed;
                     sortedPins.back() = previousPin; //update the last added pin
                     return; //no need to add a new pin
                 }

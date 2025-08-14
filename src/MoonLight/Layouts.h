@@ -24,7 +24,7 @@ class HumanSizedCubeLayout: public Node {
   uint8_t height = 10;
   uint8_t depth = 10;
   // bool snake;
-  uint8_t pin = 16;
+  char pins[20] = "12,13,14,15,16"; //minimal 5, 1 for each side.
 
   void setup() override {
     hasLayout = true;
@@ -33,37 +33,56 @@ class HumanSizedCubeLayout: public Node {
     addControl(height, "height", "range", 1, 20);
     addControl(depth, "depth", "range", 1, 20);
     // addControl(snake, "snake", "checkbox");
-    addControl(pin, "pin", "pin", 1, 48);
+    addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
   void addLayout() override {
 
+    char *nextPin = pins;
+
     //front: z = 0
     for (uint8_t x = 0; x<width; x++) for (uint8_t y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, 0));
-    addPin(pin);
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
 
     //back: z = depth+1
     for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, depth+1));
-    addPin(pin-1); //update with real values (move to controls)
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
 
     //above: y = 0
     for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, 0, z+1));
-    addPin(pin-2); //update with real values (move to controls)
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
 
-    //below: y = height+1
-    for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, height+1, z+1));
-    addPin(pin-3); //update with real values (move to controls)
+    // //below: y = height+1
+    // for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, height+1, z+1));
+    // while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
 
     //left: x = 0
     for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(Coord3D(0, y+1, z+1));
-    addPin(pin-4); //update with real values (move to controls)
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
 
     //right: x = width+1
     for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(Coord3D(width+1, y+1, z+1));
-    addPin(pin-5); //update with real values (move to controls)
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
   }
 };
 
+struct Wiring {
+  uint16_t size[3] = {16, 16, 16}; //panels of 16x16
+  uint8_t wiringOrder = 1; //first Y, then X, then Z
+  bool inc[3] = {true, true}; //left, top, front
+  bool snake[3] = {false, true, false}; //snake on Y
+  uint8_t* axes;
+
+  void iterate(int axis, int snaker, std::function<void(uint16_t)> fun) {
+    bool iInc = inc[axes[axis]];
+    if (snake[axis] && snaker%2==1) iInc = !iInc; //reverse order for snake
+    for (int j = iInc? 0 : size[axes[axis]]-1 ; iInc? j < size[axes[axis]] : j>=0 ; j+= iInc? 1 : -1) {
+      fun(j);
+    } 
+  }
+};
+
+//PanelLayout is a simplified version of PanelsLayout (only one panel)
 class PanelLayout: public Node {
   public:
 
@@ -71,135 +90,45 @@ class PanelLayout: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint16_t width = 16;
-  uint16_t height = 16;
-  uint8_t orientation = 1; //first Y increases, then X
-  bool incX = true; //Left
-  bool incY = true; //Top
-  bool snake = true;
-  uint8_t pin = 16;
+  Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
+
+  char pins[20] = "16";
 
   void setup() override {
     hasLayout = true;
-    
-    addControl(width, "width", "number", 1, 2047);
-    addControl(height, "height", "number", 1, 255);
     JsonObject property;
     JsonArray values;
-    property = addControl(orientation, "orientation", "select"); 
-    values = property["values"].to<JsonArray>();
-    values.add("XY");
-    values.add("YX");
-    addControl(incX, "X++", "checkbox"); 
-    addControl(incY, "Y++", "checkbox"); 
-    addControl(snake, "snake", "checkbox");
-    addControl(pin, "pin", "pin", 1, 48);
+
+    addControl(panel.size[0], "panelWidth", "number", 1, 2047);
+    addControl(panel.size[1], "panelHeight", "number", 1, 255);
+    property = addControl(panel.wiringOrder, "wiringOrder", "select"); values = property["values"].to<JsonArray>(); values.add("XY"); values.add("YX");
+    addControl(panel.inc[0], "X++", "checkbox"); addControl(panel.inc[1], "Y++", "checkbox"); 
+    addControl(panel.snake[1], "snake", "checkbox");
+
+    addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
   void addLayout() override {
-    const uint8_t axisOrders[6][3] = {
-      {1, 0}, // Z (outer), Y (middle), X (inner) -- X fastest
-      {0, 1}, // Z, X, Y
+
+    char *nextPin = pins;
+
+    uint8_t axisOrders[2][2] = {
+      {1, 0}, // Y(1) outer loop, X(0) inner loop
+      {0, 1}, // X(0) outer loop, Y(1) inner loop
     };
 
-    const uint8_t* axes = axisOrders[orientation];
-    uint16_t ends[2] = {width, height};
-    bool inc[2] = {incX, incY};
+    panel.axes = axisOrders[panel.wiringOrder]; //choose one of the orders
+    panel.iterate(0, 0, [&](uint16_t i) {
+      panel.iterate(1, i, [&](uint16_t j) {
+        int coords[2];
+        coords[panel.axes[0]] = i;
+        coords[panel.axes[1]] = j;
+        addLight(Coord3D(coords[0], coords[1]));
+      });
+    });
 
-    bool iInc = inc[axes[0]];
-    for (int i = iInc? 0 : ends[axes[0]]-1 ; iInc? i < ends[axes[0]] : i>=0 ; i+= iInc? 1 : -1) {
-      bool jInc = inc[axes[1]];
-      if (snake && i%2==1) jInc = !jInc; //reverse order for snake
-      for (int j = jInc? 0 : ends[axes[1]]-1 ; jInc? j < ends[axes[1]] : j>=0 ; j+= jInc? 1 : -1) {
-            int coords[2];
-            coords[axes[0]] = i;
-            coords[axes[1]] = j;
-            addLight(Coord3D(coords[0], coords[1], 0));
-      }
-    }
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
 
-    addPin(pin);
-  }
-
-};
-
-class CubeLayout: public Node {
-  public:
-
-  static const char * name() {return "Cube 🚥🧊";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
-
-  uint16_t width = 10;
-  uint16_t height = 10;
-  uint16_t depth = 10;
-  uint8_t orientation = 3; //first Y increases, then X
-  bool incX = true; //Left
-  bool incY = true; //Top
-  bool incZ = true; //Front
-  bool snakeX = false;
-  bool snakeY = true;
-  bool snakeZ = false;
-  uint8_t pin = 16;
-
-  void setup() override {
-    hasLayout = true;
-    
-    addControl(width, "width", "number", 1, 2047);
-    addControl(height, "height", "number", 1, 255);
-    addControl(depth, "depth", "number", 1, 31);
-    JsonObject property;
-    JsonArray values;
-    property = addControl(orientation, "orientation", "select"); 
-    values = property["values"].to<JsonArray>();
-    values.add("XYZ");
-    values.add("YXZ");
-    values.add("XZY");
-    values.add("YZX");
-    values.add("ZXY");
-    values.add("ZYX");
-    addControl(incX, "X++", "checkbox"); 
-    addControl(incY, "Y++", "checkbox"); 
-    addControl(incZ, "Z++", "checkbox"); 
-    addControl(snakeX, "snakeX", "checkbox");
-    addControl(snakeY, "snakeY", "checkbox");
-    addControl(snakeZ, "snakeZ", "checkbox");
-    addControl(pin, "pin", "pin", 1, 48);
-  }
-
-  void addLayout() override {
-    const uint8_t axisOrders[6][3] = {
-      {2, 1, 0}, // Z (outer), Y (middle), X (inner) -- X fastest
-      {2, 0, 1}, // Z, X, Y
-      {1, 2, 0}, // Y, Z, X
-      {1, 0, 2}, // Y, X, Z
-      {0, 2, 1}, // X, Z, Y
-      {0, 1, 2}  // X, Y, Z
-    };
-
-    const uint8_t* axes = axisOrders[orientation];
-    uint16_t ends[3] = {width, height, depth};
-    bool inc[3] = {incX, incY, incZ};
-    bool snakes[3] = {snakeX, snakeY, snakeZ};
-
-    bool iInc = inc[axes[0]];
-    for (int i = iInc? 0 : ends[axes[0]]-1 ; iInc? i < ends[axes[0]] : i>=0 ; i+= iInc? 1 : -1) {
-      bool jInc = inc[axes[1]];
-      if (snakes[axes[1]] && i%2==1) jInc = !jInc; //reverse order for snake
-      for (int j = jInc? 0 : ends[axes[1]]-1 ; jInc? j < ends[axes[1]] : j>=0 ; j+= jInc? 1 : -1) {
-        bool kInc = inc[axes[2]];
-        if (snakes[axes[2]] && j%2==1) kInc = !kInc; //reverse order for snake
-        for (int k = kInc? 0 : ends[axes[2]]-1 ; kInc? k < ends[axes[2]] : k>=0 ; k+= kInc? 1 : -1) {
-            int coords[3];
-            coords[axes[0]] = i;
-            coords[axes[1]] = j;
-            coords[axes[2]] = k;
-            addLight(Coord3D(coords[0], coords[1], coords[2]));
-        }
-      }
-    }
-
-    addPin(pin);
   }
 
 };
@@ -211,43 +140,129 @@ class PanelsLayout: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint8_t  horizontalPanels = 1;
-  uint8_t  verticalPanels = 4;
-  uint8_t  panelWidth = 32;
-  uint8_t  panelHeight = 8;
-  bool snake = true;
-  uint8_t pin = 16;
+  Wiring panels = {{2,2,1}, 1, {true,true,true}, {false,true,false}}; // 2x2 panels, increasing over the axis, snake on the Y-axis
+  Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
+
+  char pins[20] = "16,15,14,13";
 
   void setup() override {
     hasLayout = true;
-    
-    addControl(horizontalPanels, "horizontalPanels", "range", 1, 32);
-    addControl(verticalPanels, "verticalPanels", "range", 1, 32);
-    addControl(panelWidth, "panelWidth", "range", 1, 64);
-    addControl(panelHeight, "panelHeight", "range", 1, 64);
-    addControl(snake, "snake", "checkbox");
-    addControl(pin, "pin", "pin", 1, 48);
+    JsonObject property;
+    JsonArray values;
+
+    addControl(panels.size[0], "horizontalPanels", "number", 1, 8);
+    addControl(panels.size[1], "verticalPanels", "number", 1, 6);
+    property = addControl(panels.wiringOrder, "wiringOrderP", "select"); values = property["values"].to<JsonArray>(); values.add("XY"); values.add("YX");
+    addControl(panels.inc[0], "X++P", "checkbox"); addControl(panels.inc[1], "Y++P", "checkbox"); 
+    addControl(panels.snake[1], "snakeP", "checkbox");
+
+    addControl(panel.size[0], "panelWidth", "number", 1, 2047);
+    addControl(panel.size[1], "panelHeight", "number", 1, 255);
+    property = addControl(panel.wiringOrder, "wiringOrder", "select"); values = property["values"].to<JsonArray>(); values.add("XY"); values.add("YX");
+    addControl(panel.inc[0], "X++", "checkbox"); addControl(panel.inc[1], "Y++", "checkbox"); 
+    addControl(panel.snake[1], "snake", "checkbox");
+
+    addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
   void addLayout() override {
 
-    for (int panelY = verticalPanels - 1; panelY >=0; panelY--) {
+    char *nextPin = pins;
 
-      for (int panelX = horizontalPanels-1; panelX >=0; panelX--) {
+    uint8_t axisOrders[2][2] = {
+      {1, 0}, // Y(1) outer loop, X(0) inner loop
+      {0, 1}, // X(0) outer loop, Y(1) inner loop
+    };
 
-        for (int x=panelWidth-1; x>=0; x--) {
-          for (int y=panelHeight-1; y>=0; y--) {
-            int y2 = y; if (snake && x%2 == 0) {y2 = panelHeight - 1 - y;}
-            addLight(Coord3D(panelX * panelWidth + x, panelY * panelHeight + y2, 0));
-          }
-        }
+    panels.axes = axisOrders[panels.wiringOrder]; //choose one of the orders
+    panels.iterate(0, 0, [&](uint16_t a) {
+      panels.iterate(1, a, [&](uint16_t b) {
+        int coordsP[2];
+        coordsP[panels.axes[0]] = a;
+        coordsP[panels.axes[1]] = b;
 
-      }
+        panel.axes = axisOrders[panel.wiringOrder]; //choose one of the orders
+        panel.iterate(0, 0, [&](uint16_t i) {
+          panel.iterate(1, i, [&](uint16_t j) {
+            int coords[2];
+            coords[panel.axes[0]] = i;
+            coords[panel.axes[1]] = j;
+            addLight(Coord3D(coordsP[0] * panel.size[0] + coords[0], coordsP[1] * panel.size[1] + coords[1]));
+          });
+        });
 
-      addPin(pin);
+        while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
 
-    }
+      });
+    });
+
   }
+};
+
+class CubeLayout: public Node {
+  public:
+
+  static const char * name() {return "Cube 🚥🧊";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  Wiring panels = {{10,10,10}, 3, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
+
+  char pins[20] = "12,13,14,15,16,17";
+
+  void setup() override {
+    hasLayout = true;
+    
+    addControl(panels.size[0], "width", "number", 1, 2047);
+    addControl(panels.size[1], "height", "number", 1, 255);
+    addControl(panels.size[2], "depth", "number", 1, 31);
+    JsonObject property;
+    JsonArray values;
+    property = addControl(panels.wiringOrder, "wiringOrder", "select"); 
+    values = property["values"].to<JsonArray>();
+    values.add("XYZ");
+    values.add("YXZ");
+    values.add("XZY");
+    values.add("YZX");
+    values.add("ZXY");
+    values.add("ZYX");
+    addControl(panels.inc[0], "X++", "checkbox"); 
+    addControl(panels.inc[1], "Y++", "checkbox"); 
+    addControl(panels.inc[2], "Z++", "checkbox"); 
+    addControl(panels.snake[0], "snakeX", "checkbox");
+    addControl(panels.snake[1], "snakeY", "checkbox");
+    addControl(panels.snake[2], "snakeZ", "checkbox");
+    addControl(pins, "pins", "text", 1, sizeof(pins));
+  }
+
+  void addLayout() override {
+    uint8_t axisOrders[6][3] = {
+      {2, 1, 0}, // Z (outer), Y (middle), X (inner) -- X fastest
+      {2, 0, 1}, // Z, X, Y
+      {1, 2, 0}, // Y, Z, X
+      {1, 0, 2}, // Y, X, Z
+      {0, 2, 1}, // X, Z, Y
+      {0, 1, 2}  // X, Y, Z
+    };
+    char *nextPin = pins;
+
+    panels.axes = axisOrders[panels.wiringOrder]; //choose one of the orders
+    panels.iterate(0, 0, [&](uint16_t i) {
+      panels.iterate(1, i, [&](uint16_t j) {
+        panels.iterate(2, j, [&](uint16_t k) {
+          int coords[3];
+          coords[panels.axes[0]] = i;
+          coords[panels.axes[1]] = j;
+          coords[panels.axes[2]] = k;
+          addLight(Coord3D(coords[0], coords[1], coords[2]));
+        });
+      });
+
+      while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    });
+
+  }
+
 };
 
 class SingleLineLayout: public Node {
