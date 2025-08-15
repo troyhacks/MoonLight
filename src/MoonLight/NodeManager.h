@@ -23,6 +23,7 @@ PhysicalLayer layerP; //global declaration of the physical layer
 class NodeManager : public Module {
 public: 
     bool requestUIUpdate = false;
+    const char* defaultNodeName = nullptr;
 
 protected:
     PsychicHttpServer *_server;
@@ -54,7 +55,7 @@ protected:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "nodeName"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); //property["default"] = RandomEffect::name(); 
+            property = details.add<JsonObject>(); property["name"] = "nodeName"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName;
 
             addNodes(values);
 

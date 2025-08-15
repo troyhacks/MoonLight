@@ -35,9 +35,9 @@
 		if (data.length == 29)
 			handleHeader(data)
 		else {
-			if (isPositions == 2) {
+			if (isPositions) {
 				handlePositions(data)
-				isPositions = 0;
+				isPositions = false;
 			}
 			else
 				handleChannels(data);
@@ -58,7 +58,7 @@
 	let nrOfLights:number;
 	let channelsPerLight:number;
 	let offsetRGB:number;
-	let isPositions: number = 0;
+	let isPositions: boolean = false;
 	// let offsetRed:number;
 	// let offsetGreen:number;
 	// let offsetBlue:number;
@@ -68,7 +68,7 @@
 		console.log("Monitor.handleHeader", header);
 
 		// let isPositions:number = header[6]; 
-		isPositions   = (header[6] >> 0) & 0x3; // bits 0-1
+		isPositions   = true;//(header[6] >> 0) & 0x3; // bits 0-1
 		// offsetRed     = (header[6] >> 2) & 0x3; // bits 2-3
 		// offsetGreen   = (header[6] >> 4) & 0x3; // bits 4-5
 		// offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7

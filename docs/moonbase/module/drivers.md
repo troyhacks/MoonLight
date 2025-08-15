@@ -1,7 +1,5 @@
 # Drivers module
 
-🆕 (in release v0.5.7 Virtual and physical layers modules are still in one module called editor)
-
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
 The Drivers module allows you to define a **layout** (e.g. a panel 16x16), to drive LEDs (e.g. FastLED driver) and to run **supporting processes** (e.g. audiosync to run sound reactive effects and Art-Net to send light channels to an Art-Net controller).
@@ -18,7 +16,7 @@ Typically a node will define a modifier (💎) or a supporting process (☸️) 
         * If a 1D strip is longer, you can address more LEDs by pretending it is a 2D fixture, e.g. 32x32 to address a strip of 1024 LEDs. 
         * In the future we might look at redefining Coord3D where width is 12 bytes, height is 7 bytes and depth is 5 bytes allowing for max 4096 x 128 x 32 ...
     * Currently **pins** are by default driven by FastLED.show. FastLED needs all LEDs specifications be defined at compile time, e.g. LED type, color order, etc. Normally also the pin(s) need to be defined beforehand but all pins are predefined in the code to avoid this (at a cost of larger firmware). As we want to be able to define all LED specs in the UI instead of during compile, we need to see how / if this can be done.
-    * 🆕 **Multiple layout nodes** can be defined which will execute one after the other
+    * **Multiple layout nodes** can be defined which will execute one after the other
     * In the future, instead of pins, also **IP addresses and universes** can be specified to support sending lights data to Art-Net devices - e.g. [Pknight Art-Net DMX 512](https://s.click.aliexpress.com/e/_ExQK8Dc) to control DMX lights or [Art-Net LED controller](https://s.click.aliexpress.com/e/_Ex9uaOk) to control LED strips or panels over local network. Currently this is handled by the [Art-Net Node](https://moonmodules.org/MoonLight/moonlight/nodes/#art-net/).
     * Alternatively Moonlight supports 2 other drivers: [Physical Driver](https://github.com/hpwit/I2SClocklessLedDriver) and [Virtual Driver](https://github.com/ewowi/I2SClocklessVirtualLedDriver). Firmware ending with PD or VD will have this enabled. Code has been included but not tested yet (tested in StarLight), this is planned for June/July. 
         * The physical driver is an alternative to the FastLED driver and does not need LED specifications defined at compile time, all can be controlled via UI. 
@@ -35,7 +33,7 @@ Typically a node will define a modifier (💎) or a supporting process (☸️) 
 ## Layout 🚥 Nodes
 🚧
 
-### PanelLayout 🚥 🆕
+### PanelLayout 🚥
 
 * Defines a 2D panel with width and height
 * Controls:
@@ -45,7 +43,7 @@ Typically a node will define a modifier (💎) or a supporting process (☸️) 
     * snake: is the first axis in snake / serpentine layout?
     * pin: to do add more pins
 
-### CubeLayout 🚥 🆕
+### CubeLayout 🚥
 
 * Panel layout + depth
 * Controls:

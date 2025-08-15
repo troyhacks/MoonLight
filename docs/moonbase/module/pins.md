@@ -2,7 +2,7 @@
 
 Shows info in gpio pins.
 
-🆕 🚧
+🚧
 
 * Per pin:
     * GPIO = gpio_num;

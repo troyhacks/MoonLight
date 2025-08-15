@@ -111,10 +111,10 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::addLayoutPre() {
-        lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
-        MB_LOGD(ML_TAG, "pass %d %d", pass, lights.header.nrOfLights);
-
+        MB_LOGD(ML_TAG, "pass %d", pass);
+        
         if (pass == 1) {
+            lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
             lights.header.size = {0,0,0};
             MB_LOGD(ML_TAG, "pos from x(%d) to 1", lights.header.isPositions);
             lights.header.isPositions = 1; //in progress...
@@ -124,6 +124,7 @@ PhysicalLayer::PhysicalLayer() {
             //dealloc pins
             sortedPins.clear(); //clear the added pins for the next pass
         } else if (pass == 2) {
+            indexP = 0;
             for (VirtualLayer * layer: layerV) {
                 //add the lights in the virtual layer
                 layer->addLayoutPre();
@@ -152,13 +153,14 @@ PhysicalLayer::PhysicalLayer() {
             }
              
             lights.header.size = lights.header.size.maximum(position);
+            lights.header.nrOfLights++;
         } else {
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
                 layer->addLight(position);
             }
+            indexP++;
         }
-        lights.header.nrOfLights++;
     }
 
     void PhysicalLayer::addPin(uint8_t pinNr) {
@@ -196,8 +198,8 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.size += Coord3D{1,1,1};
             MB_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
             //send the positions to the UI _socket_emit
-            MB_LOGD(ML_TAG, "pos from x(%d) to 2", lights.header.isPositions);
-            lights.header.isPositions = 2; //filled with positions, set back to ct_Leds in ModuleEffects
+            MB_LOGD(ML_TAG, "pos from x(%d) to %d", lights.header.isPositions, lights.header.nrOfLights?2:3);
+            lights.header.isPositions = lights.header.nrOfLights?2:3; //filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
 
             // initLightsToBlend();
 
@@ -211,7 +213,7 @@ PhysicalLayer::PhysicalLayer() {
 
             } //pins defined
         } else if (pass == 2) {
-            MB_LOGD(ML_TAG, "pass %d %d", pass, lights.header.nrOfLights);
+            MB_LOGD(ML_TAG, "pass %d %d", pass, indexP);
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
                 layer->addLayoutPost();

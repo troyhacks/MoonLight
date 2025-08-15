@@ -112,6 +112,8 @@ class PhysicalLayer {
 
     std::vector<Node *> nodes;
 
+    uint16_t indexP = 0;
+
     PhysicalLayer();
 
     void setup();

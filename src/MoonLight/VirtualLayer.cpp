@@ -321,7 +321,7 @@ void VirtualLayer::addLight(Coord3D position) {
     nrOfLights = indexV + 1;
     mappingTableSizeUsed = nrOfLights;
   }
-  addIndexP(mappingTable[indexV], layerP->lights.header.nrOfLights);
+  addIndexP(mappingTable[indexV], layerP->indexP);
 }
 
 void VirtualLayer::addLayoutPost() {

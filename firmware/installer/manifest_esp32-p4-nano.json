@@ -1,6 +1,6 @@
 {
   "name": "MoonLight on esp32-p4-nano",
-  "version": "0.5.7.1",
+  "version": "0.5.8",
   "home_assistant_domain": "esphome",
   "funding_url": "https://esphome.io/guides/supporters.html",
   "new_install_prompt_erase": true,

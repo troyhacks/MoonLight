@@ -744,6 +744,10 @@ class RandomEffect: public Node {
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
+  uint8_t speed=128;
+  void setup() {
+    addControl(speed, "speed", "range");
+  }
   void loop() override {
       layerV->fadeToBlackBy(70);
       layerV->setRGB(random16(layerV->nrOfLights), CRGB(255, random8(), 0));

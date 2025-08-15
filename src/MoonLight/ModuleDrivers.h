@@ -32,6 +32,8 @@ public:
 
     void begin() {
         _state.onUpdateRunInTask = 1; //also in effects class!, the driver only drives !!!
+        defaultNodeName = PanelLayout::name();
+
         NodeManager::begin();
 
         nodes = &layerP.nodes;

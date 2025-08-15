@@ -1,7 +1,5 @@
 # Effects module
 
-🆕 (in release v0.5.7 Effects and drivers modules are still combined in one module called editor)
-
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
 The Effects module allows you to define the tasks to run an **effect** (e.g. bouncing balls), to **modify** the effect (e.g mirror).
@@ -39,7 +37,7 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 * Controls: Red, Green, Blue, Brightness
 * Usage: Can be used as background to other effects, order it before other effects
 
-### Scrolling text 🔥 🆕
+### Scrolling text 🔥
 
 * WIP: Currently shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended). Later custom texts will be possible
 * Controls:

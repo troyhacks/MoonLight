@@ -36,6 +36,7 @@ public:
 
     void begin() {
         _state.onUpdateRunInTask = 1;
+        defaultNodeName = RandomEffect::name();
         NodeManager::begin();
 
         nodes = &(layerP.layerV[0]->nodes);

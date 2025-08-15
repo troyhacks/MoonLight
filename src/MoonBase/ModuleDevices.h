@@ -122,8 +122,6 @@ public:
         devices["devices"].to<JsonArray>();
         for (auto& obj : v) devices["devices"].add(obj);
 
-        serializeJson(devices, Serial);
-
         JsonObject data = devices.as<JsonObject>();
         _socket->emitEvent("devices", data);        
     }
