@@ -143,7 +143,7 @@ class PanelsLayout: public Node {
   Wiring panels = {{2,2,1}, 1, {true,true,true}, {false,true,false}}; // 2x2 panels, increasing over the axis, snake on the Y-axis
   Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
 
-  char pins[20] = "16,15,14,13";
+  char pins[80] = "47,48,21,38,14,39,16,13,40,12,41,11,42,10,2,3";//,1"; //add 16 in the middle
 
   void setup() override {
     hasLayout = true;

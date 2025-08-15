@@ -79,7 +79,7 @@ void DriverNode::loop() {
     uint8_t white;
     ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
     if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
-      ESP_LOGV(TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
+      MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
       ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
     }
   #endif
@@ -333,7 +333,7 @@ void ArtNetDriverMod::loop() {
       //     return;
       // }
 
-      ESP_LOGV(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+      MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
 
       uint8_t pinCount = 0;
       for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
@@ -342,7 +342,7 @@ void ArtNetDriverMod::loop() {
           ESP_LOGW(TAG, "Too many pins!");
           break;
         }
-        ESP_LOGV(TAG, "sortpins s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+        MB_LOGD(ML_TAG, "sortpins s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
 
         uint16_t startLed = sortedPin.startLed;
         uint16_t nrOfLights = sortedPin.nrOfLights;
@@ -613,7 +613,7 @@ void ArtNetDriverMod::loop() {
 
       if (layerV->layerP->pass == 1) { //physical
         initDone = true;
-        ESP_LOGV(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+        MB_LOGV(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
         // if (safeModeMB) {
         //     ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
         //     return;
@@ -624,7 +624,7 @@ void ArtNetDriverMod::loop() {
         int nb_pins=0;
 
         for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
-          ESP_LOGV(TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+          MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
           if (nb_pins < NUMSTRIPS) {
             pins[nb_pins] = sortedPin.pin;
             lengths[nb_pins] = sortedPin.nrOfLights;
@@ -671,7 +671,7 @@ void ArtNetDriverMod::loop() {
       if (!lightPresetSaved || ledsDriver.initLedsDone || layerV->layerP->sortedPins.size() == 0) return;
 
       if (layerV->layerP->pass == 1) { //physical
-        ESP_LOGV(TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+        MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
         if (safeModeMB) {
           ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
           return;
@@ -683,7 +683,7 @@ void ArtNetDriverMod::loop() {
 
 
           for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
-            ESP_LOGV(TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+            MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
             if (numPins < MAX_PINS) {
               pinConfig[numPins].gpio = sortedPin.pin;
               pinConfig[numPins].nrOfLeds =  sortedPin.nrOfLights;
@@ -691,9 +691,9 @@ void ArtNetDriverMod::loop() {
             }
           }
 
-          ESP_LOGV(TAG, "pins[");
+          MB_LOGD(ML_TAG, "pins[");
           for (int i=0; i<numPins; i++) {
-            ESP_LOGV(TAG, ", %d", pinConfig[i].gpio);
+            MB_LOGD(ML_TAG, ", %d", pinConfig[i].gpio);
           }
 
           if (numPins > 0) {

@@ -58,6 +58,7 @@ public:
             property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "ip"; property["type"] = "ip"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "time"; property["type"] = "time"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "mac"; property["type"] = "text"; property["ro"] = true;
         }
     }
 
@@ -75,9 +76,11 @@ public:
     }
 
     void loop10s() {
+        if (!_socket->getConnectedClients()) return; 
+
         if (!deviceUDPConnected) {
             deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
-            ESP_LOGV(TAG, "deviceUDPConnected %d i:%d p:%d", deviceUDPConnected, deviceUDP.remoteIP()[3], deviceUDPPort);
+            MB_LOGD(ML_TAG, "deviceUDPConnected %d i:%d p:%d", deviceUDPConnected, deviceUDP.remoteIP()[3], deviceUDPPort);
         }
 
         if (!deviceUDPConnected) return;
@@ -85,43 +88,54 @@ public:
         writeUDP();
     }
 
+    void updateDevices(const char * name, IPAddress ip) {
+
+        if (_state.data["devices"].isNull()) _state.data["devices"].to<JsonArray>();
+
+        JsonObject device = JsonObject();
+
+        for (JsonObject dev: _state.data["devices"].as<JsonArray>()) {
+            if (dev["ip"] == ip.toString()) {
+                device = dev;
+                // MB_LOGD(ML_TAG, "updated ...%d %s", ip[3], name);
+            }
+        }
+        if (device.isNull()) {
+            device = _state.data["devices"].as<JsonArray>().add<JsonObject>();
+            MB_LOGD(ML_TAG, "added ...%d %s", ip[3], name);
+            device["ip"] = ip.toString();
+        }
+        
+        device["name"] = name; //name can change
+        device["time"] = time(nullptr); //time will change
+
+        if (!_socket->getConnectedClients()) return; 
+
+        //sort in vector
+        std::vector<JsonObject> v; for (JsonObject obj : _state.data["devices"].as<JsonArray>()) v.push_back(obj);
+        std::sort(v.begin(), v.end(), [](JsonObject a, JsonObject b) {return a["name"] < b["name"];});
+
+        //send only the readonly values ...
+
+        //add sorted to devices
+        JsonDocument devices;
+        devices["devices"].to<JsonArray>();
+        for (auto& obj : v) devices["devices"].add(obj);
+
+        serializeJson(devices, Serial);
+
+        JsonObject data = devices.as<JsonObject>();
+        _socket->emitEvent("devices", data);        
+    }
+
     void readUDP() {
         size_t packetSize = deviceUDP.parsePacket();
         if (packetSize > 0) {
             char buffer[packetSize];
             deviceUDP.read(buffer, packetSize);
-            // ESP_LOGV(TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer+6, packetSize);
+            // MB_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer+6, packetSize);
 
-            bool found = false;
-
-            //use state.data or newData?
-            for (JsonObject device: _state.data["devices"].as<JsonArray>()) {
-                if (device["ip"] == deviceUDP.remoteIP().toString()) {
-                    found = true;
-                    device["name"] = buffer+6;
-                    device["time"] = time(nullptr);
-                    // ESP_LOGV(TAG, "updated %s %s %lu", device["ip"].as<String>().c_str(), device["time"].as<String>().c_str(), time(nullptr));
-                }
-            }
-            if (!found) {
-                JsonObject device = _state.data["devices"].as<JsonArray>().add<JsonObject>();
-                device["ip"] = deviceUDP.remoteIP().toString();
-                device["name"] = buffer+6;
-                device["time"] = time(nullptr);
-                ESP_LOGV(TAG, "added %s %s", device["ip"].as<String>().c_str(), buffer+6);
-            }
-
-            // char buffer[2048];
-            // serializeJson(_state.data, buffer, sizeof(buffer));
-            // ESP_LOGV(TAG, "data %s", buffer);
-            if (!_socket->getConnectedClients()) return; 
-
-            //send only the readonly values ...
-            JsonDocument devices;
-            devices["devices"] = _state.data["devices"];
-
-            JsonObject data = devices.as<JsonObject>();
-            _socket->emitEvent("devices", data);
+            updateDevices(buffer+6, deviceUDP.remoteIP());
         }
     }
 
@@ -133,6 +147,9 @@ public:
             deviceUDP.write((uint8_t *)&message, sizeof(message));
             deviceUDP.endPacket();
             // ESP_LOGV(TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
+
+            updateDevices(_state.data["deviceName"], WiFi.localIP());
+
         }
     }
 };
