@@ -14,9 +14,6 @@
 
 #if FT_MOONLIGHT
 
-#undef TAG
-#define TAG "💫"
-
 #include "FastLED.h"
 // #include "../MoonBase/Module.h"
 #include "NodeManager.h"
@@ -33,7 +30,7 @@ public:
         ESP32SvelteKit *sveltekit,
         FileManager *fileManager
     ) : NodeManager("effects", server, sveltekit) {
-        ESP_LOGV(TAG, "constructor");
+        MB_LOGV(ML_TAG, "constructor");
         _fileManager = fileManager;
     }
 
@@ -47,15 +44,15 @@ public:
         //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
         _fileManager->addUpdateHandler([&](const String &originId)
         { 
-            ESP_LOGV(TAG, "FileManager::updateHandler %s", originId.c_str());
+            MB_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
             //read the file state (read all files and folders on FS and collect changes)
             _fileManager->read([&](FilesState &filesState) {
                 // loop over all changed files (normally only one)
                 for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current live script, recompile it (to do: multiple live effects)
-                    ESP_LOGV(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                    MB_LOGV(ML_TAG, "updateHandler updatedItem %s", updatedItem.c_str());
                     if (equal(updatedItem.c_str(), "/.config/virtual.json")) {
-                        ESP_LOGV(TAG, " virtual.json updated -> call update %s", updatedItem.c_str());
+                        MB_LOGV(ML_TAG, " virtual.json updated -> call update %s", updatedItem.c_str());
                         readFromFS(); //repopulates the state, processing file changes
                     }
                     // uint8_t index = 0;
@@ -63,7 +60,7 @@ public:
                     //     String nodeName = nodeState["nodeName"];
 
                     //     if (updatedItem == nodeName) {
-                    //         ESP_LOGV(TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                    //         MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                     //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["nodeName"]);
                     //         if (liveScriptNode) {
                     //             liveScriptNode->compileAndRun();
@@ -73,7 +70,7 @@ public:
                     //             _moduleEffects->requestUIUpdate = true; //update the Effects UI
                     //         }
 
-                    //         ESP_LOGV(TAG, "update due to new node %s done", nodeName.c_str());
+                    //         MB_LOGV(ML_TAG, "update due to new node %s done", nodeName.c_str());
                     //     }
                     //     index++;
                     // }
@@ -84,7 +81,7 @@ public:
         #if FT_ENABLED(FT_MONITOR)
             _socket->registerEvent("monitor");
             _server->on("/rest/monitorLayout", HTTP_GET, [&](PsychicRequest *request) {
-                ESP_LOGV(TAG, "rest monitor triggered");
+                MB_LOGV(ML_TAG, "rest monitor triggered");
 
                 //trigger pass 1 mapping of layout
                 layerP.pass = 1; //(requestMapPhysical=1 physical rerun)
@@ -135,7 +132,7 @@ public:
         File rootFolder = ESPFS.open("/");
         walkThroughFiles(rootFolder, [&](File folder, File file) {
             if (strstr(file.name(), ".sc")) {
-                // ESP_LOGV(TAG, "found file %s", file.path());
+                // MB_LOGV(ML_TAG, "found file %s", file.path());
                 values.add((char *)file.path());
             }
         });
@@ -196,7 +193,7 @@ public:
                 layerP.layerV[0]->nodes[index] = node; //add the node to the layer
         }
 
-        ESP_LOGV(TAG, "%s (s:%d p:%p)", name, layerP.layerV[0]->nodes.size(), node);
+        MB_LOGV(ML_TAG, "%s (s:%d p:%p)", name, layerP.layerV[0]->nodes.size(), node);
 
         return node;
     }

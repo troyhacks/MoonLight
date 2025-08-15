@@ -37,7 +37,7 @@ struct PhysMap {
     }; // 2 bytes  
     
     PhysMap() {
-      // ESP_LOGV(TAG, "Constructor");
+      // MB_LOGV(ML_TAG, "Constructor");
       mapType = m_zeroLights; // the default until indexP is added
       rgb14 = 0;
     }
@@ -63,7 +63,7 @@ class VirtualLayer {
   uint8_t fadeMin;
 
   VirtualLayer() {
-    ESP_LOGV(TAG, "constructor");
+    MB_LOGV(ML_TAG, "constructor");
   }
   
   ~VirtualLayer();

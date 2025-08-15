@@ -13,9 +13,6 @@
 
 #if FT_MOONLIGHT
 
-#undef TAG
-#define TAG "💫"
-
 #include <Arduino.h>
 #include <vector>
 #include "FastLED.h"

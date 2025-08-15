@@ -14,9 +14,6 @@
 
 #if FT_MOONLIGHT
 
-#undef TAG
-#define TAG "💫"
-
 #include "FastLED.h"
 // #include "../MoonBase/Module.h"
 #include "NodeManager.h"
@@ -30,7 +27,7 @@ public:
     ModuleDrivers(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit
     ) : NodeManager("drivers", server, sveltekit) {
-        ESP_LOGV(TAG, "constructor");
+        MB_LOGV(ML_TAG, "constructor");
     }
 
     void begin() {
@@ -103,7 +100,7 @@ public:
                 layerP.nodes[index] = node; //add the node to the layer
         }
 
-        ESP_LOGV(TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
+        MB_LOGV(ML_TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
 
         return node;
     }

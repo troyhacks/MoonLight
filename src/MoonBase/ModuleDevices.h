@@ -34,11 +34,11 @@ public:
     ModuleDevices(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
         ) : Module("devices", server, sveltekit) {
-            ESP_LOGV(TAG, "constructor");
+            MB_LOGV(MB_TAG, "constructor");
     }
 
     void setupDefinition(JsonArray root) override{
-        ESP_LOGV(TAG, "");
+        MB_LOGV(MB_TAG, "");
         JsonObject property; // state.data has one or more properties
         JsonArray details; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
@@ -64,7 +64,7 @@ public:
 
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        ESP_LOGV(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        MB_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     void loop1s() {
@@ -146,7 +146,7 @@ public:
             message.name = _state.data["deviceName"].as<String>().c_str();
             deviceUDP.write((uint8_t *)&message, sizeof(message));
             deviceUDP.endPacket();
-            // ESP_LOGV(TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
+            // MB_LOGV(MB_TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
 
             updateDevices(_state.data["deviceName"], WiFi.localIP());
 

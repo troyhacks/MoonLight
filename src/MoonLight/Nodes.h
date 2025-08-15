@@ -80,7 +80,7 @@ public:
     //setValue
     if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
       if (sizeof(ControlType) != 1) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
         // uint8_t * valuePointer = (uint8_t *)pointer;
         // *valuePointer = variable;
@@ -90,7 +90,7 @@ public:
     }
     else if (control["type"] == "selectFile" || control["type"] == "text") {
       // if (sizeof(ControlType) != 4) {
-      //   ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+      //   MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       // } else 
       if (newControl) {
         // char *valuePointer = (char *)pointer;
@@ -101,7 +101,7 @@ public:
     }
     else if (control["type"] == "number") {
       if (sizeof(ControlType) != 2) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
         // uint16_t *valuePointer = (uint16_t *)pointer;
         // *valuePointer = variable;
@@ -111,7 +111,7 @@ public:
     }
     else if (control["type"] == "checkbox") {
       if (sizeof(ControlType) != 1) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
         // bool *valuePointer = (bool *)pointer;
         // control["value"] = variable;
@@ -121,7 +121,7 @@ public:
     }
     else if (control["type"] == "coord3D") {
       if (sizeof(ControlType) != sizeof(Coord3D)) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
         // Coord3D *valuePointer = (Coord3D *)pointer;
         // control["value"] = variable;
@@ -130,7 +130,7 @@ public:
       }
     }
     else
-      ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+      MB_LOGE(ML_TAG, "type not supported yet %s", control["type"].as<String>().c_str());
 
     return control;
   }

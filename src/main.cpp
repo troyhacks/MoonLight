@@ -17,9 +17,6 @@
 
 #define SERIAL_BAUD_RATE 115200
 
-#undef TAG
-#define TAG "🌙"
-
 PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
@@ -66,7 +63,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                 esp32sveltekit.lps++; // 🌙 todo: not moonlight specific?
 
                 if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100))==pdFALSE) {
-                    // ESP_LOGE(SVK_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
+                    // MB_LOGE(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
                 }
 
                 layerP.loop(); //run all the effects of all virtual layers (currently only one)
@@ -74,7 +71,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                 xSemaphoreGive(driverSemaphore);
                     
                 while (!runInTask1.empty()) {
-                    ESP_LOGV(TAG, "runInTask1 %d", runInTask1.size());
+                    MB_LOGV(ML_TAG, "runInTask1 %d", runInTask1.size());
                     runInTask1.front()();
                     runInTask1.erase(runInTask1.begin());
                 }
@@ -97,7 +94,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                 xSemaphoreGive(effectSemaphore);
 
                 while (!runInTask2.empty()) {
-                    ESP_LOGV(TAG, "runInTask2 %d", runInTask2.size());
+                    MB_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
                     runInTask2.front()();
                     runInTask2.erase(runInTask2.begin());
                 }

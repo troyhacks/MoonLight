@@ -146,7 +146,7 @@ void DriverNode::updateControl(JsonObject control) {
       layerV->layerP->lights.header.offsetZoom = 17;
     }
 
-    ESP_LOGI(TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
+    MB_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
     
     // FASTLED_ASSERT(true, "oki");
     
@@ -219,7 +219,7 @@ void ArtNetDriverMod::loop() {
   if (wait > 0 && wait < 1000 / FPSLimiter)
     delay(wait); // delay in ms
   // else
-  //   ESP_LOGW(TAG, "wait %d", wait);
+  //   MB_LOGW(ML_TAG, "wait %d", wait);
   // if (millis() - lastMillis < 1000 / FPSLimiter)
   //   delay(1000 / FPSLimiter + lastMillis - millis()); // delay in ms
   //   return;
@@ -329,7 +329,7 @@ void ArtNetDriverMod::loop() {
 
     if (layerV->layerP->pass == 1) { //physical
       // if (safeModeMB) {
-      //     ESP_LOGW(TAG, "Safe mode enabled, not adding FastLED driver");
+      //     MB_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
       //     return;
       // }
 
@@ -339,7 +339,7 @@ void ArtNetDriverMod::loop() {
       for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
         pinCount++;
         if (pinCount > 4) {//FastLED RMT supports max 4 pins!
-          ESP_LOGW(TAG, "Too many pins!");
+          MB_LOGW(ML_TAG, "Too many pins!");
           break;
         }
         MB_LOGD(ML_TAG, "sortpins s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
@@ -546,7 +546,7 @@ void ArtNetDriverMod::loop() {
           case 48: FastLED.addLeds<ML_CHIPSET, 48 COLOR_ORDER_ARG>(leds, startLed, nrOfLights).setCorrection(TypicalLEDStrip) RGBW_CALL; break;
         #endif //CONFIG_IDF_TARGET_ESP32S3
 
-        default: ESP_LOGW(TAG, "FastLEDPin assignment: pin not supported %d", sortedPin.pin);
+        default: MB_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", sortedPin.pin);
         } //switch pinNr
 
       } //sortedPins    
@@ -615,7 +615,7 @@ void ArtNetDriverMod::loop() {
         initDone = true;
         MB_LOGV(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
         // if (safeModeMB) {
-        //     ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
+        //     MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
         //     return;
         // }
 
@@ -673,7 +673,7 @@ void ArtNetDriverMod::loop() {
       if (layerV->layerP->pass == 1) { //physical
         MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
         if (safeModeMB) {
-          ESP_LOGW(TAG, "Safe mode enabled, not adding Physical driver");
+          MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
           return;
         }
 

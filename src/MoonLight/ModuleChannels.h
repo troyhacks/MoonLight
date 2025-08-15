@@ -22,11 +22,11 @@ public:
     ModuleChannels(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
         ) : Module("channels", server, sveltekit) {
-            ESP_LOGV(TAG, "constructor");
+            MB_LOGV(ML_TAG, "constructor");
     }
 
     void setupDefinition(JsonArray root) override{
-        ESP_LOGV(TAG, "");
+        MB_LOGV(ML_TAG, "");
         JsonObject property; // state.data has one or more properties
         // JsonArray details; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
@@ -61,7 +61,7 @@ public:
             if (!group) count *= layerP.lights.header.channelsPerLight;
             if (count > 512) count = 512;
             _state.data["channel"]["count"] = count;
-            ESP_LOGV(TAG, "set count %d", count);
+            MB_LOGV(ML_TAG, "set count %d", count);
 
             // update state to UI
             update([&](ModuleState &state) {
@@ -71,7 +71,7 @@ public:
         } else if (updatedItem.name == "channel") {
             //copy the file to the hidden folder...
             if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
-                ESP_LOGV(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                MB_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 uint16_t select = updatedItem.value["select"];
                 uint8_t value = updatedItem.value["action"] == "mouseenter"?255:0;
                 if (view == 0) {
@@ -89,7 +89,7 @@ public:
                 }
             }
         } else
-            ESP_LOGV(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            MB_LOGV(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 };
 

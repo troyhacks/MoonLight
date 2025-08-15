@@ -27,7 +27,7 @@ void fastled_fill_rainbow(struct CRGB * targetArray, int numToFill, uint8_t init
 }
 
 VirtualLayer::~VirtualLayer() {
-  ESP_LOGV(TAG, "destructor");
+  MB_LOGV(ML_TAG, "destructor");
   fadeToBlackBy(255); //clear the LEDs
 
   for (Node *node: nodes) {
@@ -70,7 +70,7 @@ void VirtualLayer::loop() {
 };
 
 void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
-  // ESP_LOGV(TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
+  // MB_LOGV(ML_TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
   switch (physMap.mapType) {
     case m_zeroLights:
     // case m_rgbColor:
@@ -92,10 +92,10 @@ void VirtualLayer::addIndexP(PhysMap &physMap, uint16_t indexP) {
     case m_moreLights:
       // mappingTableIndexes.reserve(physMap.indexes+1);
       mappingTableIndexes[physMap.indexes].push_back(indexP);
-      // ESP_LOGV(TAG, " more %d", mappingTableIndexes.size());
+      // MB_LOGV(ML_TAG, " more %d", mappingTableIndexes.size());
       break;
   }
-  // ESP_LOGV(TAG, "\n");
+  // MB_LOGV(ML_TAG, "\n");
 }
 uint16_t VirtualLayer::XYZ(Coord3D &position) {
 
@@ -121,7 +121,7 @@ uint16_t VirtualLayer::XYZ(Coord3D &position) {
 
 void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length) {
   if (indexV < mappingTableSizeUsed) {
-    // ESP_LOGV(TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
+    // MB_LOGV(ML_TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
     switch (mappingTable[indexV].mapType) {
       case m_zeroLights:{
         //only room for storing colors
@@ -142,7 +142,7 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
             memcpy(&layerP->lights.channels[indexP*layerP->lights.header.channelsPerLight + offset], channels, length);
           }
         else
-          ESP_LOGW(TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
+          MB_LOGW(ML_TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
         break;
       default: ;
     }
@@ -182,7 +182,7 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
     return *result; //return the color as CRGB
   } else {
     // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // ESP_LOGV(TAG, " dev gPC %d >= %d", indexV, MAX_CHANNELS);
+    // MB_LOGV(ML_TAG, " dev gPC %d >= %d", indexV, MAX_CHANNELS);
     return T();
   }
 }
@@ -336,7 +336,7 @@ void VirtualLayer::addLayoutPost() {
         nrOfZeroLights++;
         break;
       case m_oneLight:
-        // ESP_LOGV(TAG,"%d mapping =1: #ledsP : %d", i, map.indexP);
+        // MB_LOGV(ML_TAG,"%d mapping =1: #ledsP : %d", i, map.indexP);
         nrOfOneLight++;
         break;
       case m_moreLights:
@@ -345,14 +345,14 @@ void VirtualLayer::addLayoutPost() {
           // str += indexP;
           nrOfMoreLights++;
         }
-        // ESP_LOGV(TAG, "%d mapping >1: #ledsP : %s", i, str.c_str());
+        // MB_LOGV(ML_TAG, "%d mapping >1: #ledsP : %s", i, str.c_str());
         break;
     }
     // else
-    //   ESP_LOGV(TAG, "%d no mapping\n", x);
+    //   MB_LOGV(ML_TAG, "%d no mapping\n", x);
   }
 
-  ESP_LOGD(TAG, "V:%d x %d x %d = v:%d = 1:0:%d + 1:1:%d + mti:%d (1:m:%d)", size.x, size.y, size.z, nrOfLights, nrOfZeroLights, nrOfOneLight, mappingTableIndexesSizeUsed, nrOfMoreLights);
+  MB_LOGD(MB_TAG, "V:%d x %d x %d = v:%d = 1:0:%d + 1:1:%d + mti:%d (1:m:%d)", size.x, size.y, size.z, nrOfLights, nrOfZeroLights, nrOfOneLight, mappingTableIndexesSizeUsed, nrOfMoreLights);
 
 }
 
@@ -362,7 +362,7 @@ void VirtualLayer::addLayoutPost() {
             if (node && node->isLiveScriptNode()) {
                 LiveScriptNode *liveScriptNode = (LiveScriptNode *)node;
                 if (equal(liveScriptNode->animation, animation)) {
-                    ESP_LOGV(TAG, "found %s", animation);
+                    MB_LOGV(ML_TAG, "found %s", animation);
                     return liveScriptNode;
                 }
             }

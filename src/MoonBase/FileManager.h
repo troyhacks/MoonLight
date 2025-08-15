@@ -21,9 +21,6 @@
 #include <PsychicHttp.h>
 #include <ESP32SvelteKit.h>
 
-#undef TAG
-#define TAG "🌙"
-
 class FilesState
 {
 public:

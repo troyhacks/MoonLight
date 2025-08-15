@@ -29,7 +29,7 @@ ModuleDemo(PsychicHttpServer *server
       , ESP32SvelteKit *sveltekit
       , FileManager *fileManager
     ) : Module("demo", server, sveltekit) {
-        ESP_LOGD(TAG, "constructor");
+        MB_LOGD(MB_TAG, "constructor");
     }
 }
 ```
@@ -69,16 +69,16 @@ void setupDefinition(JsonArray root) override{
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            MB_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (updatedItem.parent[0] == "nodes" && updatedItem.name == "name") {    
-            ESP_LOGD(TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            MB_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue.length())
-                ESP_LOGD(TAG, "delete %s ...", updatedItem.oldValue.c_str());
+                MB_LOGD(MB_TAG, "delete %s ...", updatedItem.oldValue.c_str());
             if (updatedItem.value.as<String>().length())
                 compileAndRun(updatedItem.value);
         } else
-            ESP_LOGD(TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            MB_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 ```
 

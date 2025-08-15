@@ -14,9 +14,6 @@
 
 #if FT_MOONLIGHT
 
-#undef TAG
-#define TAG "💫"
-
 #include "FastLED.h"
 #include "../MoonBase/Module.h"
 
@@ -35,7 +32,7 @@ public:
         ESP32SvelteKit *sveltekit,
         FileManager *fileManager
     ) : Module("lightsControl", server, sveltekit) {
-        ESP_LOGV(TAG, "constructor");
+        MB_LOGV(ML_TAG, "constructor");
         _server = server;
         _fileManager = fileManager;
     }
@@ -52,21 +49,21 @@ public:
         //update presets if files changed in presets folder
         _fileManager->addUpdateHandler([&](const String &originId)
         { 
-            ESP_LOGV(TAG, "FileManager::updateHandler %s", originId.c_str());
+            MB_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
             //read the file state (read all files and folders on FS and collect changes)
             _fileManager->read([&](FilesState &filesState) {
                 // loop over all changed files (normally only one)
                 bool presetChanged = false;
                 for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current live script, recompile it (to do: multiple live effects)
-                    ESP_LOGV(TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+                    MB_LOGV(ML_TAG, "updateHandler updatedItem %s", updatedItem.c_str());
                     if (strstr(updatedItem.c_str(), "/.config/presets")) {
-                        ESP_LOGV(TAG, " preset.json updated -> call update %s", updatedItem.c_str());
+                        MB_LOGV(ML_TAG, " preset.json updated -> call update %s", updatedItem.c_str());
                         presetChanged = true;
                     }
                 }
                 if (presetChanged) {
-                    ESP_LOGV(TAG, "setPresetsFromFolder");
+                    MB_LOGV(ML_TAG, "setPresetsFromFolder");
                     setPresetsFromFolder(); // update the presets from the folder
                 }
             });
@@ -75,7 +72,7 @@ public:
 
     //define the data model
     void setupDefinition(JsonArray root) override {
-        ESP_LOGV(TAG, "");
+        MB_LOGV(ML_TAG, "");
         JsonObject property; // state.data has one or more properties
         JsonArray details = root; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
@@ -177,7 +174,7 @@ public:
             int seq = -1;
             if (sscanf(file.name(), "preset%02d.json", &seq) == 1) {
                 // seq now contains the 2-digit number, e.g., 34
-                ESP_LOGV(TAG, "Preset %d found", seq);
+                MB_LOGV(ML_TAG, "Preset %d found", seq);
                 _state.data["preset"]["list"].add(seq); // add the preset to the preset array
                 changed = true;
             }

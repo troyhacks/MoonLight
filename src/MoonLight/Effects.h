@@ -311,7 +311,7 @@ public:
 
     previousBarHeight = (uint16_t*)malloc(layerV->size.x * sizeof(uint16_t));
     if (!previousBarHeight) {
-      ESP_LOGE(TAG, "malloc failed for previousBarHeight");
+      MB_LOGE(ML_TAG, "malloc failed for previousBarHeight");
       return;
     }
     memset(previousBarHeight, 0, layerV->size.x * sizeof(uint16_t)); // initialize to 0
@@ -319,7 +319,7 @@ public:
   }
 
   ~GEQEffect() {
-    // ESP_LOGI(TAG, "free previousBarHeight");
+    // MB_LOGI(ML_TAG, "free previousBarHeight");
     if (previousBarHeight) {
       free(previousBarHeight);
       previousBarHeight = nullptr;
@@ -405,7 +405,7 @@ public:
 // @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 class GEQ3DEffect: public Node {
   public:
-  static const char * name() {return "GEQ 3D ♫💡📺";}
+  static const char * name() {return "GEQ 3D 🔥♫💡";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
@@ -555,7 +555,7 @@ class GEQ3DEffect: public Node {
 class LinesEffect: public Node {
 public:
 
-  static const char * name() {return "Lines 🔥💫";}
+  static const char * name() {return "Lines 🔥";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -622,7 +622,7 @@ public:
 
 class Noise2DEffect: public Node {
   public:
-  static const char * name() {return "Noise2D 💡";}
+  static const char * name() {return "Noise2D 🔥💡";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
   
@@ -753,7 +753,7 @@ class RandomEffect: public Node {
 class RipplesEffect: public Node {
   public:
 
-  static const char * name() {return "Ripples 🔥🧊💫";}
+  static const char * name() {return "Ripples 🔥🧊";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
   
@@ -947,7 +947,7 @@ class SinusEffect: public Node {
 class SphereMoveEffect: public Node {
   public:
 
-  static const char * name() {return "SphereMove 🔥🧊💫";}
+  static const char * name() {return "SphereMove 🔥🧊";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
@@ -988,7 +988,7 @@ class SphereMoveEffect: public Node {
 //by @Brandon502
 class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Train https://www.youtube.com/watch?v=17WoOqgXsRM
   public:
-  static const char * name() {return "StarField 💫";}
+  static const char * name() {return "StarField 🔥";}
   static uint8_t     dim() {return _2D;}
   static const char * tags() {return "";}
 
@@ -1064,7 +1064,7 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
  // BY MONSOONO / @Flavourdynamics 
 class PraxisEffect: public Node {
 public:
-  static const char * name() {return "Praxis 💫";}
+  static const char * name() {return "Praxis 🔥";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
@@ -1113,7 +1113,7 @@ public:
 
 class WaverlyEffect: public Node {
   public:
-  static const char * name() {return "Waverly ♪💡";}
+  static const char * name() {return "Waverly 🔥♪💡";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
   
@@ -1161,7 +1161,7 @@ class WaverlyEffect: public Node {
 class WaveEffect: public Node {
 public:
 
-  static const char * name() {return "Wave 🔥💫";}
+  static const char * name() {return "Wave 🔥";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -1220,7 +1220,7 @@ public:
 class MHTroy1Effect: public Node {
   public:
 
-  static const char * name() {return "MHTroy1 🔥♫💫🐺";}
+  static const char * name() {return "MHTroy1 🔥♫🐺";}
 
   //set default values here
   uint8_t bpm = 30;
@@ -1318,7 +1318,7 @@ class MHTroy1Effect: public Node {
 class MHTroy2Effect: public Node {
   public:
 
-  static const char * name() {return "MHTroy2 🔥♫💫🐺";}
+  static const char * name() {return "MHTroy2 🔥♫🐺";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
@@ -1406,7 +1406,7 @@ class MHTroy2Effect: public Node {
 class MHWowiEffect: public Node {
   public:
 
-  static const char * name() {return "MHWowi 🔥♫💫";}
+  static const char * name() {return "MHWowi 🔥♫";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;

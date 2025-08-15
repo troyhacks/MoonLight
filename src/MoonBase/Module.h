@@ -14,9 +14,6 @@
 
 #if FT_MOONBASE == 1
 
-#undef TAG
-#define TAG "🌙"
-
 #include <EventSocket.h>
 #include <HttpEndpoint.h>
 #include <EventEndpoint.h>

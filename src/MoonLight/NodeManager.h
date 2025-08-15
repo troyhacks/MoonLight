@@ -14,9 +14,6 @@
 
 #if FT_MOONLIGHT
 
-#undef TAG
-#define TAG "💫"
-
 #include "../MoonBase/Module.h"
 
 #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
@@ -36,7 +33,7 @@ protected:
         PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit
     ) : Module(moduleName, server, sveltekit) {
-        ESP_LOGV(TAG, "constructor");
+        MB_LOGV(ML_TAG, "constructor");
         _server = server;
     }
 
@@ -50,7 +47,7 @@ protected:
 
     //define the data model
     void setupDefinition(JsonArray root) override {
-        ESP_LOGV(TAG, "");
+        MB_LOGV(ML_TAG, "");
         JsonObject property; // state.data has one or more properties
         JsonArray details = root; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
@@ -150,7 +147,7 @@ protected:
                     
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     // if (updatedItem.oldValue.length()) {
-                    //     ESP_LOGV(TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
+                    //     MB_LOGV(ML_TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
                     //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]);
                     //     if (liveScriptNode) liveScriptNode->kill(); 
                     //     else MB_LOGW(ML_TAG, "liveScriptNode not found %s", node["nodeName"].as<String>().c_str());

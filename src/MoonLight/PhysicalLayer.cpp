@@ -141,7 +141,7 @@ PhysicalLayer::PhysicalLayer() {
     void PhysicalLayer::addLight(Coord3D position) {
 
         if (safeModeMB && lights.header.nrOfLights > 1023) {
-            // ESP_LOGW(TAG, "Safe mode enabled, not adding lights > 1023");
+            // MB_LOGW(ML_TAG, "Safe mode enabled, not adding lights > 1023");
             return;
         }
 
