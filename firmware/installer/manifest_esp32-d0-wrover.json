@@ -1,5 +1,5 @@
 {
-  "name": "MoonLight on esp-wrover-kit",
+  "name": "MoonLight on esp32-d0-wrover",
   "version": "0.5.8",
   "home_assistant_domain": "esphome",
   "funding_url": "https://esphome.io/guides/supporters.html",
@@ -8,10 +8,10 @@
   "builds": [
     {
       "chipFamily": "ESP32",
-      "name": "esp-wrover-kit",
-      "image": "./images/esp-wrover-kit.jpg",
+      "name": "esp32-d0-wrover",
+      "image": "./images/esp32-d0-wrover.jpg",
       "parts": [
-        { "path": "./MoonLight_esp-wrover-kit_0-5-7_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-d0-wrover_0-5-8_webflash.bin", "offset": 0 }
       ]
     }
   ]

@@ -195,7 +195,6 @@ void ArtNetDriverMod::setup() {
   addControl(universesPerOutput, "universesPerOutput", "number");
 
   memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER)); // copy in the Art-Net header.
-
 }
 
 #define ARTNET_CHANNELS_PER_PACKET 512
@@ -229,13 +228,8 @@ void ArtNetDriverMod::loop() {
   bufferOffset = 0;
   hardware_output_universe = 0;
  
-  sequenceNumber++;
-
-  if (sequenceNumber == 0) sequenceNumber = 1; // just in case, as 0 is considered "Sequence not in use"
-  if (sequenceNumber > 255) sequenceNumber = 1;
-
-  packet_buffer[12] = sequenceNumber; //The sequence number is used to ensure that ArtDmx packets are used in the correct order
-  // packet_buffer[13] = ?; //The physical input port from which DMX512 data was input
+  packet_buffer[12] = (sequenceNumber++%254)+1; //The sequence number is used to ensure that ArtDmx packets are used in the correct order, ranging from 1..255
+  packet_buffer[13] = 0; //The physical input port from which DMX512 data was input
 
   for (uint_fast16_t hardware_output = 0; hardware_output < nrOfOutputs; hardware_output++) { //loop over all outputs
     

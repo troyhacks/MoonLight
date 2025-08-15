@@ -1,5 +1,5 @@
 {
-  "name": "MoonLight on olimex-esp32-p4",
+  "name": "MoonLight on esp32-p4-olimex",
   "version": "0.5.8",
   "home_assistant_domain": "esphome",
   "funding_url": "https://esphome.io/guides/supporters.html",
@@ -8,10 +8,10 @@
   "builds": [
     {
       "chipFamily": "ESP32-P4",
-      "name": "olimex-esp32-p4",
+      "name": "esp32-p4-olimex",
       "image": "./images/olimex-esp32-p4.jpg",
       "parts": [
-        { "path": "./MoonLight_olimex-esp32-p4_0-5-7_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-p4-olimex_0-5-8_webflash.bin", "offset": 0 }
       ]
     }
   ]
