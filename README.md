@@ -15,7 +15,7 @@ MoonLight functionality is aimed at running effects on multiple lights. It's pri
 
 MoonLight is a [MoonModules.org](https://moonmodules.org) project. MoonModules is a group of lighting enthusiasts who also made WLED MM and contribute to WLED. Where WLED (MM) is aimed at 1D and 2D effects and LED setups, MoonLight is build to support 2D and 3D effects and multiple light setups. MoonLight has been built from scratch using the experience gained working on WLED (MM).
 
-* Latest release can be found [here](https://github.com/MoonModules/MoonLight/releases). Release v0.5.6 is a developer release and works towards MoonLight 0.6.0 which is aimed at end users and is expected in September 2025. Containing presets controller pad, user friendly installer, physical and virtual driver for large displays, WLED audio sync and more.
+* Latest release can be found [here](https://github.com/MoonModules/MoonLight/releases). Release v0.5.8 is a developer release and works towards MoonLight 0.6.0 which is aimed at end users and is expected in September 2025. Containing presets controller pad, user friendly installer, physical and virtual driver for large displays, WLED audio sync and more.
 * Progress can be tracked in the [Kanban board](https://github.com/users/MoonModules/projects/2/)
 * Get started [here](https://moonmodules.org/MoonLight/gettingstarted/overview/)
 * Follow us on [Discord/MoonLight](https://discord.gg/TC8NSUSCdV) or [Reddit](https://reddit.com/r/moonmodules).
