@@ -26,7 +26,7 @@ export const load = (async () => {
 		features: item,
 		title: 'ESP32-SvelteKit',
 		github: 'theelims/ESP32-sveltekit',
-		copyright: '2024 theelims',
+		copyright: '2025 theelims',
 		appName: 'ESP32 SvelteKit'
 	};
 }) satisfies LayoutLoad;

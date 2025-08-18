@@ -17,7 +17,7 @@ hide:
 
   <div class="moonlight-buttons">
     <a href="gettingstarted/overview/" class="moonlight-btn">🚀 Get Started</a>
-    <a href="https://github.com/MoonModules/MoonLight" class="moonlight-btn moonlight-btn-secondary" >⭐ GitHub</a>
+    <a href="https://github.com/MoonModules/MoonLight" class="moonlight-btn moonlight-btn-secondary">⭐ GitHub</a>
     <a href="https://discord.gg/TC8NSUSCdV" class="moonlight-btn moonlight-btn-secondary">💬 Discord</a>
   </div>
 </div>
@@ -44,6 +44,10 @@ hide:
     <div class="moonlight-stat-label">Effects Engine</div>
   </div>
 </div>
+
+## 🌟 What is MoonLight?
+
+MoonLight is software that runs on [ESP32 microcontrollers](https://www.espressif.com/en/products/socs/esp32), providing a web-browser interface to control lights and IoT services. ESP32 devices connect to your local network via WiFi or Ethernet, allowing control through any web browser using the device's IP address or network name.
 
 <div class="features-section">
   <div class="section-header">
@@ -114,54 +118,16 @@ hide:
   </div>
 </div>
 
----
+## 🏗️ Architecture
 
-## 🌟 What is MoonLight?
-
-MoonLight is software which runs on [ESP32 microcontrollers](https://www.espressif.com/en/products/socs/esp32) providing a web-browser interface to control lights in particular and any IOT service in general. ESP32 devices can be connected to your local network via WiFi or Ethernet, MoonLight can be controlled via a web browser selecting the IP-address or network name of the device.
-
-## 🚀 High Performance LED Control
-
-- **12,288 LEDs at 120 FPS** - Maximum performance for demanding applications
-- **65,000+ LEDs** - Scale to massive installations at lower framerates  
-- **16 Parallel Strips** - Drive multiple LED strips simultaneously
-- **120 Virtual Strips** - Advanced mapping and control capabilities
-
-## 🌐 Web-Based Interface
-
-MoonLight can be installed on ESP32 by means of a web installer or if you are a developer, via Visual Studio Code with the PlatformIO plugin installed.
-
-- Intuitive browser-based control panel built with **SvelteKit**
-- Control from any device on your network
-- No apps required - works in any modern browser
-- Real-time updates and responsive design
-
-## 🎨 Advanced Effects Engine
-
-- **2D & 3D Effects** - Professional-grade visual effects
-- **Node-based System** - Flexible effect creation and modification  
-- **Virtual & Physical Layers** - Advanced mapping capabilities
-- **WLED Compatibility** - Audio sync and ecosystem integration
-
-## 🔧 Complete IoT Platform
-
-MoonLight's core functionality is called **MoonBase**, Lighting specific functionality is called **MoonLight**. MoonLight is a standalone product for end users controlling lights but can also be used to create custom IoT services:
-
-- Create GitHub forks for custom applications
-- Build anything from smart plugs to greenhouse management
-- Utilize ESP32 GPIO ports and network protocols
-- Extensible architecture for developers
-
-### 🏗️ Architecture
-
-MoonLight's core functionality is called **MoonBase**, Lighting specific functionality is called **MoonLight**. MoonLight is a standalone product for end users controlling lights but can also be used to create custom IoT services:
+MoonLight's core functionality is called **MoonBase**, while lighting-specific functionality is **MoonLight**. MoonLight serves as both a standalone product for end users and a foundation for custom IoT applications:
 
 - **Fork and customize** - Create GitHub forks for custom applications
 - **Extensible platform** - Build anything from smart plugs to greenhouse management
 - **Hardware interfaces** - Utilize ESP32 GPIO ports and network protocols
 - **Modular design** - Add or remove features as needed
 
-### 🎯 Installation Options
+## 🎯 Installation Options
 
 <div class="moonlight-buttons">
   <a href="gettingstarted/installation/" class="moonlight-btn">📱 Web Installer</a>
@@ -222,7 +188,7 @@ MoonLight's core functionality is called **MoonBase**, Lighting specific functio
 
 ---
 
-## 🌟 Key Features & Capabilities
+## 🌟 Key Capabilities
 
 ### 🎮 MoonLight Features  
 - **Multi-light Control** - LED strips, panels, and DMX equipment
@@ -237,27 +203,6 @@ MoonLight's core functionality is called **MoonBase**, Lighting specific functio
 - **Firmware Updates** - Over-the-air update system
 - **System Status** - Real-time device monitoring
 - **File Manager** - Direct device file access
-
-## 🚀 Quick Start
-
-1. **Install via Web Installer** - Flash your ESP32 device easily
-2. **Connect to Network** - Configure WiFi or Ethernet  
-3. **Access Interface** - Open browser to device IP address
-4. **Start Creating** - Design and deploy your LED effects
-
----
-
-<div class="cta-section">
-  <div class="cta-title">Ready to Get Started?</div>
-  <div class="cta-subtitle">
-    Join thousands of creators using MoonLight for their LED projects
-  </div>
-  
-  <div class="moonlight-buttons">
-    <a href="gettingstarted/overview/" class="moonlight-btn">🚀 Get Started Now</a>
-    <a href="https://github.com/MoonModules/MoonLight/releases" class="moonlight-btn moonlight-btn-secondary">📦 Download Latest</a>
-  </div>
-</div>
 
 ---
 
@@ -279,13 +224,6 @@ MoonLight's core functionality is called **MoonBase**, Lighting specific functio
 - 📋 [Kanban Board](https://github.com/users/MoonModules/projects/2/) - Track development progress
 - 🔄 [Evolution Story](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live) - From StarMod to MoonLight
 - 📚 [Complete Documentation](https://moonmodules.org/MoonLight/) - Full technical documentation
-
-## 📈 Project Status
-
-- **Latest Release**: [v0.5.8](https://github.com/MoonModules/MoonLight/releases) (Developer Preview)
-- **Progress Tracking**: [Kanban Board](https://github.com/users/MoonModules/projects/2/)
-- **Documentation**: [Complete Docs](https://moonmodules.org/MoonLight/)
-- **Evolution**: [From StarMod to MoonLight](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live)
 
 ---
 
@@ -313,12 +251,13 @@ MoonLight's core functionality is called **MoonBase**, Lighting specific functio
 
 **MoonLight is a [MoonModules.org](https://moonmodules.org) project** created by lighting enthusiasts who also developed WLED MM and contribute to the broader WLED ecosystem.
 
----
-
+**Additional Resources:**
 - **GitHub**: [Star the Repository](https://github.com/MoonModules/MoonLight) ⭐
 - **Discord**: [Join MoonLight Community](https://discord.gg/TC8NSUSCdV) 💬  
 - **Reddit**: [r/moonmodules](https://reddit.com/r/moonmodules) 🗨️
 - **Discussions**: [GitHub Discussions](https://github.com/MoonModules/MoonLight/discussions)
+
+---
 
 ## 👨‍💻 For Developers
 
@@ -337,6 +276,20 @@ MoonLight's core functionality is called **MoonBase**, Lighting specific functio
 - 🗨️ [Reddit Developer Discussions](https://reddit.com/r/moonmodules)
 - 📋 [GitHub Issues](https://github.com/MoonModules/MoonLight/issues)
 - 🔄 [Pull Requests Welcome](https://github.com/MoonModules/MoonLight/pulls)
+
+---
+
+<div class="cta-section">
+  <div class="cta-title">Ready to Get Started?</div>
+  <div class="cta-subtitle">
+    Join thousands of creators using MoonLight for their LED projects
+  </div>
+  
+  <div class="moonlight-buttons">
+    <a href="gettingstarted/overview/" class="moonlight-btn">🚀 Get Started Now</a>
+    <a href="https://github.com/MoonModules/MoonLight/releases" class="moonlight-btn moonlight-btn-secondary">📦 Download Latest</a>
+  </div>
+</div>
 
 ---
 
@@ -362,9 +315,9 @@ MoonLight's core functionality is called **MoonBase**, Lighting specific functio
 - [FastLED](https://github.com/FastLED/FastLED) - Robust LED driver library
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - JSON processing
 - [I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver) - Parallel LED control
-- [I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver): Virtual Driver
+- [I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver) - Virtual Driver
 - [ESPLiveScript](https://github.com/hpwit/ESPLiveScript) - Scripts
-- [WLED-sync](https://github.com/netmindz/WLED-sync): Audio
+- [WLED-sync](https://github.com/netmindz/WLED-sync) - Audio
 
 ---
 

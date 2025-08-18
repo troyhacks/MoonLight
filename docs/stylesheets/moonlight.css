@@ -1,4 +1,26 @@
-/* MoonLight Custom Styling - Clean Version */
+.moonlight-stat-number {
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, var(--moonlight-primary), var(--moonlight-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: block;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+  counter-reset: number var(--number, 0);
+}
+
+.moonlight-stat-label {
+  opacity: 0.85;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}/* MoonLight Custom Styling - Clean Version */
 
 /* CSS Variables */
 :root {
@@ -7,6 +29,21 @@
   --moonlight-blue: #77dbff;
   --moonlight-gradient: linear-gradient(45deg, var(--moonlight-primary), var(--moonlight-accent));
   --moonlight-glow: 0 0 20px rgba(119, 119, 198, 0.3);
+}
+
+/* Performance Optimization */
+* {
+  transform-style: flat;
+}
+
+.moonlight-hero,
+.moonlight-stat,
+.feature-card,
+.moonlight-btn,
+.performance-section {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Dark Mode Adjustments */
@@ -205,7 +242,7 @@
   background: rgba(119, 119, 198, 0.05);
 }
 
-/* Hero Section */
+/* Hero Section - Optimized */
 .moonlight-hero {
   text-align: center;
   padding: 6rem 2rem 4rem;
@@ -218,21 +255,23 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Reduced complexity on mobile */
 }
 
-.moonlight-hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(119, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, rgba(119, 219, 255, 0.3) 0%, transparent 50%);
-  animation: heroGlow 8s ease-in-out infinite alternate;
-  z-index: 0;
+@media (min-width: 769px) {
+  .moonlight-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(119, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+    animation: heroGlow 8s ease-in-out infinite alternate;
+    z-index: 0;
+  }
 }
 
 .hero-title {
@@ -278,21 +317,12 @@
   animation: fadeInUp 1s ease-out 0.6s forwards;
 }
 
-/* Stats Grid */
+/* Stats Grid - Also scroll animated */
 .moonlight-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
   margin: 4rem 0;
-  opacity: 1;
-  transform: translateY(0);
-  animation: fadeInUp 0.8s ease-out 0.2s both;
-}
-
-.moonlight-stats.animate {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.8s ease-out;
 }
 
 .moonlight-stat {
@@ -304,16 +334,20 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  opacity: 1;
-  transform: translateY(0);
-  animation: fadeInUp 0.6s ease-out calc(0.1s * var(--index, 0)) both;
-  transition: all 0.5s ease-out;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.moonlight-stat.animate {
-  transform: translateY(0);
+.moonlight-stat.animate-in {
   opacity: 1;
+  transform: translateY(0);
 }
+
+.moonlight-stat.animate-in:nth-child(1) { transition-delay: 0.1s; }
+.moonlight-stat.animate-in:nth-child(2) { transition-delay: 0.2s; }
+.moonlight-stat.animate-in:nth-child(3) { transition-delay: 0.3s; }
+.moonlight-stat.animate-in:nth-child(4) { transition-delay: 0.4s; }
 
 .moonlight-stat::before {
   content: '';
@@ -324,50 +358,35 @@
   bottom: 0;
   background: var(--moonlight-gradient);
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease;
   z-index: 0;
 }
 
-.moonlight-stat:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 15px 35px rgba(119, 119, 198, 0.4);
-  border-color: rgba(119, 119, 198, 0.5);
+/* Simplified hover effects for mobile */
+@media (min-width: 769px) {
+  .moonlight-stat:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(119, 119, 198, 0.4);
+    border-color: rgba(119, 119, 198, 0.5);
+  }
+  
+  .moonlight-stat:hover::before {
+    opacity: 0.15;
+  }
+  
+  .moonlight-stat:hover .moonlight-stat-number {
+    transform: scale(1.1);
+  }
+  
+  .moonlight-stat:hover .moonlight-stat-label {
+    opacity: 1;
+  }
 }
 
-.moonlight-stat:hover::before {
-  opacity: 0.15;
-}
-
-.moonlight-stat-number {
-  font-size: 3.5rem;
-  font-weight: 900;
-  background: linear-gradient(45deg, var(--moonlight-primary), var(--moonlight-blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: block;
-  position: relative;
-  z-index: 1;
-  transition: transform 0.3s ease;
-  counter-reset: number var(--number, 0);
-}
-
-.moonlight-stat:hover .moonlight-stat-number {
-  transform: scale(1.1);
-}
-
-.moonlight-stat-label {
-  opacity: 0.85;
-  margin-top: 1rem;
-  font-weight: 600;
-  font-size: 1rem;
-  position: relative;
-  z-index: 1;
-  transition: opacity 0.3s ease;
-}
-
-.moonlight-stat:hover .moonlight-stat-label {
-  opacity: 1;
+@media (max-width: 768px) {
+  .moonlight-stat:active {
+    transform: scale(0.98);
+  }
 }
 
 /* Features Section */
@@ -413,6 +432,7 @@
   margin: 2rem 0;
 }
 
+/* Feature Cards - Scroll Animation Ready */
 .feature-card {
   background: rgba(119, 119, 198, 0.06);
   border: 1px solid rgba(119, 119, 198, 0.15);
@@ -421,15 +441,30 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  opacity: 1;
-  transform: translateY(0);
-  animation: fadeInUp 0.6s ease-out calc(0.6s + 0.1s * var(--index, 0)) both;
-  transition: all 0.6s ease-out;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.feature-card.animate {
-  transform: translateY(0);
+.feature-card.animate-in {
   opacity: 1;
+  transform: translateY(0);
+}
+
+.feature-card.animate-in:nth-child(1) {
+  transition-delay: 0.1s;
+}
+
+.feature-card.animate-in:nth-child(2) {
+  transition-delay: 0.2s;
+}
+
+.feature-card.animate-in:nth-child(3) {
+  transition-delay: 0.3s;
+}
+
+.feature-card.animate-in:nth-child(4) {
+  transition-delay: 0.4s;
 }
 
 .feature-card::before {
@@ -441,18 +476,37 @@
   bottom: 0;
   background: linear-gradient(135deg, rgba(119, 119, 198, 0.1), rgba(255, 119, 198, 0.1));
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease;
   z-index: 0;
 }
 
-.feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(119, 119, 198, 0.3);
-  border-color: rgba(119, 119, 198, 0.4);
+/* Desktop-only hover effects */
+@media (min-width: 769px) {
+  .feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(119, 119, 198, 0.3);
+    border-color: rgba(119, 119, 198, 0.4);
+  }
+
+  .feature-card:hover::before {
+    opacity: 1;
+  }
+
+  .feature-card:hover .feature-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
 }
 
-.feature-card:hover::before {
-  opacity: 1;
+/* Mobile touch feedback */
+@media (max-width: 768px) {
+  .feature-card:active {
+    transform: scale(0.98);
+  }
+  
+  /* Simpler animation on mobile */
+  .feature-card {
+    transform: translateY(30px);
+  }
 }
 
 .feature-icon {
@@ -494,7 +548,7 @@
   font-size: 1rem;
 }
 
-/* Performance Section */
+/* Performance Section - Scroll animated */
 .performance-section {
   background: linear-gradient(135deg, rgba(119, 119, 198, 0.1), rgba(255, 119, 198, 0.05));
   border-radius: 25px;
@@ -503,26 +557,28 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  opacity: 1;
-  transform: translateY(0);
-  animation: fadeInUp 0.8s ease-out 1s both;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.performance-section.animate {
+.performance-section.animate-in {
   opacity: 1;
   transform: translateY(0);
-  transition: all 0.8s ease-out;
 }
 
-.performance-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, rgba(119, 119, 198, 0.2) 0%, transparent 70%);
-  animation: performancePulse 4s ease-in-out infinite alternate;
+/* Complex animations only on desktop */
+@media (min-width: 769px) {
+  .performance-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(119, 119, 198, 0.2) 0%, transparent 70%);
+    animation: performancePulse 4s ease-in-out infinite alternate;
+  }
 }
 
 .performance-title {
@@ -619,6 +675,7 @@
   transition: all 0.6s ease-out;
 }
 
+/* Buttons - Simplified mobile interactions */
 .moonlight-btn {
   display: inline-flex;
   align-items: center;
@@ -630,7 +687,7 @@
   border-radius: 50px;
   font-weight: 700;
   font-size: 1.1rem;
-  transition: all 0.4s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 8px 25px rgba(119, 119, 198, 0.3);
   border: none;
   cursor: pointer;
@@ -638,25 +695,35 @@
   overflow: hidden;
 }
 
-.moonlight-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+/* Shimmer effect only on desktop */
+@media (min-width: 769px) {
+  .moonlight-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .moonlight-btn:hover::before {
+    left: 100%;
+  }
+
+  .moonlight-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(119, 119, 198, 0.5);
+    color: white !important;
+  }
 }
 
-.moonlight-btn:hover::before {
-  left: 100%;
-}
-
-.moonlight-btn:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 15px 35px rgba(119, 119, 198, 0.5);
-  color: white !important;
+/* Mobile touch feedback */
+@media (max-width: 768px) {
+  .moonlight-btn:active {
+    transform: scale(0.95);
+  }
 }
 
 /* Secondary Button - Higher Specificity */
@@ -794,8 +861,9 @@
   }
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive - Performance Optimized */
 @media (max-width: 768px) {
+  /* Reduce complex gradients */
   .hero-title {
     font-size: 3rem;
   }
@@ -811,6 +879,7 @@
   
   .features-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
   .moonlight-buttons {
@@ -830,4 +899,76 @@
   .section-title {
     font-size: 2.2rem;
   }
+  
+  /* Disable expensive effects on mobile */
+  .moonlight-hero::before,
+  .performance-section::before {
+    display: none;
+  }
+  
+  /* Reduce backdrop-filter usage */
+  .md-tabs {
+    backdrop-filter: none;
+  }
+  
+  .md-search__form {
+    backdrop-filter: none;
+  }
+  
+  /* Disable floating elements on mobile */
+  .floating-element {
+    display: none;
+  }
+  
+  /* Simpler scroll animations on mobile */
+  .feature-card,
+  .moonlight-stat,
+  .performance-section {
+    transform: translateY(20px);
+  }
 }
+
+/* JavaScript for Scroll Animation */
+/*
+Add this JavaScript to your page:
+
+<script>
+// Intersection Observer for scroll animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate-in');
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+// Observe elements when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Observe feature cards
+  document.querySelectorAll('.feature-card').forEach(card => {
+    observer.observe(card);
+  });
+  
+  // Observe stats
+  document.querySelectorAll('.moonlight-stat').forEach(stat => {
+    observer.observe(stat);
+  });
+  
+  // Observe performance section
+  document.querySelectorAll('.performance-section').forEach(section => {
+    observer.observe(section);
+  });
+  
+  // Observe any other elements with scroll animations
+  document.querySelectorAll('.scroll-animate').forEach(element => {
+    observer.observe(element);
+  });
+});
+</script>
+*/

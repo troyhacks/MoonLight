@@ -1,22 +1,15 @@
-// MoonLight Homepage JavaScript Enhancement
+// MoonLight Homepage JavaScript Enhancement - Clean Version
 document.addEventListener('DOMContentLoaded', function() {
-    // Scroll Progress Bar
+    // Initialize all features
     createScrollProgress();
-    
-    // Intersection Observer for Animations
     setupScrollAnimations();
-    
-    // Animated Counters
     setupCounterAnimations();
-    
-    // Floating Elements
     createFloatingElements();
-    
-    // Enhanced Interactions
     setupInteractiveElements();
-    
-    // Parallax Effect
     setupParallaxEffect();
+    setupThemeColorChange();
+    setupSparkleEffects();
+    addRequiredStyles();
 });
 
 // Create Scroll Progress Bar
@@ -31,7 +24,7 @@ function createScrollProgress() {
     });
 }
 
-// Setup Scroll Animations
+// Setup Scroll Animations (Consolidated)
 function setupScrollAnimations() {
     const observerOptions = {
         threshold: 0.1,
@@ -43,17 +36,19 @@ function setupScrollAnimations() {
             if (entry.isIntersecting) {
                 // Add staggered delay for multiple elements
                 setTimeout(() => {
+                    entry.target.classList.add('animate-in');
                     entry.target.classList.add('animate');
                 }, index * 100);
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
     
-    // Observe elements for animation
+    // Observe all animation elements
     const animateElements = document.querySelectorAll(
         '.moonlight-stats, .features-section, .performance-section, ' +
         '.feature-card, .moonlight-stat, .moonlight-buttons, ' +
-        '.slide-in-left, .slide-in-right, .scale-in'
+        '.slide-in-left, .slide-in-right, .scale-in, .scroll-animate'
     );
     
     animateElements.forEach(el => observer.observe(el));
@@ -105,12 +100,14 @@ function animateCounter(element) {
 // Create Floating Elements
 function createFloatingElements() {
     const hero = document.querySelector('.moonlight-hero');
-    if (!hero) return;
+    if (!hero || window.innerWidth <= 768) return; // Skip on mobile
+    
+    const emojis = ['🌙', '⭐', '✨'];
     
     for (let i = 0; i < 3; i++) {
         const floating = document.createElement('div');
         floating.className = 'floating-element';
-        floating.innerHTML = ['🌙', '⭐', '✨'][i];
+        floating.innerHTML = emojis[i];
         floating.style.cssText = `
             top: ${Math.random() * 70 + 10}%;
             left: ${Math.random() * 80 + 10}%;
@@ -123,12 +120,14 @@ function createFloatingElements() {
 
 // Interactive Elements
 function setupInteractiveElements() {
-    // Feature cards tilt effect
-    const cards = document.querySelectorAll('.feature-card, .moonlight-stat');
-    cards.forEach(card => {
-        card.addEventListener('mousemove', handleCardTilt);
-        card.addEventListener('mouseleave', resetCardTilt);
-    });
+    // Feature cards tilt effect (desktop only)
+    if (window.innerWidth > 768) {
+        const cards = document.querySelectorAll('.feature-card, .moonlight-stat');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', handleCardTilt);
+            card.addEventListener('mouseleave', resetCardTilt);
+        });
+    }
     
     // Button ripple effect
     const buttons = document.querySelectorAll('.moonlight-btn');
@@ -196,48 +195,63 @@ function createRipple(e) {
     ripple.addEventListener('animationend', () => ripple.remove());
 }
 
-// Parallax Effect
+// Parallax Effect (desktop only)
 function setupParallaxEffect() {
-    window.addEventListener('scroll', () => {
+    if (window.innerWidth <= 768) return; // Skip on mobile for performance
+    
+    let ticking = false;
+    
+    function updateParallax() {
         const scrolled = window.pageYOffset;
         const hero = document.querySelector('.moonlight-hero');
         const performance = document.querySelector('.performance-section');
         
         if (hero) {
-            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            hero.style.transform = `translateY(${scrolled * 0.3}px)`;
         }
         
         if (performance) {
-            performance.style.transform = `translateY(${scrolled * 0.2}px)`;
+            performance.style.transform = `translateY(${scrolled * 0.1}px)`;
+        }
+        
+        ticking = false;
+    }
+    
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(updateParallax);
+            ticking = true;
         }
     });
 }
 
-// Add ripple animation CSS
-const rippleStyle = document.createElement('style');
-rippleStyle.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(rippleStyle);
-
 // Dynamic theme color changes based on scroll
-window.addEventListener('scroll', () => {
-    const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-    const hue = 250 + (scrollPercent * 30); // From purple to pink
-    document.documentElement.style.setProperty('--moonlight-primary', `hsl(${hue}, 60%, 70%)`);
-});
-
-// Add some sparkle effects on click
-document.addEventListener('click', (e) => {
-    if (Math.random() > 0.7) {
-        createSparkle(e.clientX, e.clientY);
+function setupThemeColorChange() {
+    let ticking = false;
+    
+    function updateThemeColor() {
+        const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+        const hue = 250 + (scrollPercent * 30); // From purple to pink
+        document.documentElement.style.setProperty('--moonlight-primary', `hsl(${hue}, 60%, 70%)`);
+        ticking = false;
     }
-});
+    
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(updateThemeColor);
+            ticking = true;
+        }
+    });
+}
+
+// Sparkle effects on click
+function setupSparkleEffects() {
+    document.addEventListener('click', (e) => {
+        if (Math.random() > 0.8) { // Reduced frequency
+            createSparkle(e.clientX, e.clientY);
+        }
+    });
+}
 
 function createSparkle(x, y) {
     const sparkle = document.createElement('div');
@@ -253,21 +267,30 @@ function createSparkle(x, y) {
     `;
     
     document.body.appendChild(sparkle);
-    
     setTimeout(() => sparkle.remove(), 1000);
 }
 
-const sparkleStyleAnim = document.createElement('style');
-sparkleStyleAnim.textContent = `
-    @keyframes sparkleAnim {
-        0% {
-            opacity: 1;
-            transform: scale(0) rotate(0deg);
+// Add required CSS animations
+function addRequiredStyles() {
+    const styles = document.createElement('style');
+    styles.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
         }
-        100% {
-            opacity: 0;
-            transform: scale(1.5) rotate(180deg) translateY(-50px);
+        
+        @keyframes sparkleAnim {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5) rotate(180deg) translateY(-50px);
+            }
         }
-    }
-`;
-document.head.appendChild(sparkleStyleAnim);
+    `;
+    document.head.appendChild(styles);
+}
