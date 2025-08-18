@@ -1,5 +1,6 @@
-/* MoonLight Custom Styling - Maximum Impact with Minimal Changes */
+/* MoonLight Custom Styling - Clean Version */
 
+/* CSS Variables */
 :root {
   --moonlight-primary: #7777c6;
   --moonlight-accent: #ff77c6;
@@ -8,7 +9,59 @@
   --moonlight-glow: 0 0 20px rgba(119, 119, 198, 0.3);
 }
 
-/* Enhanced Header with MoonLight Colors */
+/* Dark Mode Adjustments */
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #0a0a0a;
+}
+
+[data-md-color-scheme="slate"] .moonlight-stat {
+  background: rgba(119, 119, 198, 0.15);
+  border-color: rgba(119, 119, 198, 0.3);
+}
+
+[data-md-color-scheme="slate"] .moonlight-hero {
+  background: linear-gradient(135deg, rgba(119, 119, 198, 0.15), rgba(255, 119, 198, 0.15));
+}
+
+/* Keyframe Animations */
+@keyframes moonGlow {
+  0%, 100% { 
+    opacity: 0.7; 
+    transform: rotate(0deg);
+  }
+  50% { 
+    opacity: 1; 
+    transform: rotate(-10deg);
+  }
+}
+
+@keyframes heroGlow {
+  0% { opacity: 0.4; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes performancePulse {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Header Styling */
 .md-header {
   background: var(--moonlight-gradient) !important;
   box-shadow: var(--moonlight-glow);
@@ -19,12 +72,11 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Logo enhancement */
 .md-header__button.md-logo img {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* Navigation tabs styling */
+/* Navigation */
 .md-tabs {
   background: rgba(119, 119, 198, 0.1);
   backdrop-filter: blur(10px);
@@ -46,7 +98,12 @@
   color: white !important;
 }
 
-/* Homepage Title Enhancement */
+/* Content Styling */
+.md-content {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Homepage Title */
 .md-content h1:first-of-type {
   font-size: clamp(3rem, 8vw, 5rem);
   text-align: center;
@@ -65,17 +122,6 @@
   font-size: 0.8em;
   animation: moonGlow 3s ease-in-out infinite;
   display: inline-block;
-}
-
-@keyframes moonGlow {
-  0%, 100% { 
-    opacity: 0.7; 
-    transform: rotate(0deg);
-  }
-  50% { 
-    opacity: 1; 
-    transform: rotate(-10deg);
-  }
 }
 
 /* Enhanced Headings */
@@ -159,207 +205,7 @@
   background: rgba(119, 119, 198, 0.05);
 }
 
-/* Custom Components for Homepage */
-.moonlight-hero {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(135deg, rgba(119, 119, 198, 0.1), rgba(255, 119, 198, 0.1));
-  border-radius: 20px;
-  margin: 2rem 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.moonlight-hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 30% 50%, rgba(119, 119, 198, 0.2) 0%, transparent 50%),
-              radial-gradient(circle at 70% 80%, rgba(255, 119, 198, 0.2) 0%, transparent 50%);
-  animation: heroGlow 6s ease-in-out infinite alternate;
-}
-
-@keyframes heroGlow {
-  0% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-.moonlight-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin: 3rem 0;
-}
-
-.moonlight-stat {
-  text-align: center;
-  padding: 2rem 1rem;
-  background: rgba(119, 119, 198, 0.1);
-  border-radius: 16px;
-  border: 1px solid rgba(119, 119, 198, 0.2);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.moonlight-stat::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--moonlight-gradient);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.moonlight-stat:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 30px rgba(119, 119, 198, 0.3);
-}
-
-.moonlight-stat:hover::before {
-  opacity: 0.1;
-}
-
-.moonlight-stat-number {
-  font-size: 3rem;
-  font-weight: 900;
-  background: linear-gradient(45deg, var(--moonlight-primary), var(--moonlight-blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: block;
-  position: relative;
-  z-index: 1;
-}
-
-.moonlight-stat-label {
-  opacity: 0.8;
-  margin-top: 0.5rem;
-  font-weight: 500;
-  position: relative;
-  z-index: 1;
-}
-
-.moonlight-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 2rem 0;
-}
-
-.moonlight-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 2rem;
-  background: var(--moonlight-gradient);
-  color: white !important;
-  text-decoration: none !important;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(119, 119, 198, 0.3);
-  border: none;
-}
-
-.moonlight-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(119, 119, 198, 0.4);
-  color: white !important;
-}
-
-.moonlight-btn-secondary {
-  background: transparent !important;
-  border: 2px solid var(--moonlight-accent) !important;
-  color: var(--moonlight-accent) !important;
-}
-
-.moonlight-btn-secondary:hover {
-  background: var(--moonlight-accent) !important;
-  color: white !important;
-}
-
-/* Page animations */
-.md-content {
-  animation: fadeInUp 0.8s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Footer Enhancement */
-.md-footer {
-  background: linear-gradient(45deg, #1a1a2e, #16213e) !important;
-  border-top: 1px solid rgba(119, 119, 198, 0.3);
-}
-
-.md-footer__link {
-  color: var(--moonlight-accent) !important;
-}
-
-/* Search Enhancement */
-.md-search__form {
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.md-search__input {
-  background: transparent;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .md-content h1:first-of-type {
-    font-size: 2.5rem;
-  }
-  
-  .moonlight-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .moonlight-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .moonlight-hero {
-    padding: 2rem 1rem;
-  }
-}
-
-/* Dark mode specific adjustments */
-[data-md-color-scheme="slate"] {
-  --md-default-bg-color: #0a0a0a;
-}
-
-[data-md-color-scheme="slate"] .moonlight-stat {
-  background: rgba(119, 119, 198, 0.15);
-  border-color: rgba(119, 119, 198, 0.3);
-}
-
-[data-md-color-scheme="slate"] .moonlight-hero {
-  background: linear-gradient(135deg, rgba(119, 119, 198, 0.15), rgba(255, 119, 198, 0.15));
-}
-
-/* Keep all your existing CSS and add these new sections */
-
-/* Enhanced Hero Section */
+/* Hero Section */
 .moonlight-hero {
   text-align: center;
   padding: 6rem 2rem 4rem;
@@ -387,11 +233,6 @@
     radial-gradient(circle at 40% 80%, rgba(119, 219, 255, 0.3) 0%, transparent 50%);
   animation: heroGlow 8s ease-in-out infinite alternate;
   z-index: 0;
-}
-
-@keyframes heroGlow {
-  0% { opacity: 0.4; }
-  100% { opacity: 0.8; }
 }
 
 .hero-title {
@@ -437,21 +278,15 @@
   animation: fadeInUp 1s ease-out 0.6s forwards;
 }
 
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Enhanced Stats Grid */
+/* Stats Grid */
 .moonlight-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
   margin: 4rem 0;
-  opacity: 0;
-  transform: translateY(50px);
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
 .moonlight-stats.animate {
@@ -469,8 +304,9 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transform: translateY(20px);
-  opacity: 0;
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.6s ease-out calc(0.1s * var(--index, 0)) both;
   transition: all 0.5s ease-out;
 }
 
@@ -534,11 +370,12 @@
   opacity: 1;
 }
 
-/* Feature Cards Section */
+/* Features Section */
 .features-section {
   margin: 6rem 0;
-  opacity: 0;
-  transform: translateY(50px);
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.8s ease-out 0.4s both;
 }
 
 .features-section.animate {
@@ -584,8 +421,9 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transform: translateY(30px);
-  opacity: 0;
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.6s ease-out calc(0.6s + 0.1s * var(--index, 0)) both;
   transition: all 0.6s ease-out;
 }
 
@@ -656,7 +494,7 @@
   font-size: 1rem;
 }
 
-/* Performance Metrics Section */
+/* Performance Section */
 .performance-section {
   background: linear-gradient(135deg, rgba(119, 119, 198, 0.1), rgba(255, 119, 198, 0.05));
   border-radius: 25px;
@@ -665,8 +503,9 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  opacity: 0;
-  transform: translateY(50px);
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.8s ease-out 1s both;
 }
 
 .performance-section.animate {
@@ -684,11 +523,6 @@
   bottom: 0;
   background: radial-gradient(circle at center, rgba(119, 119, 198, 0.2) 0%, transparent 70%);
   animation: performancePulse 4s ease-in-out infinite alternate;
-}
-
-@keyframes performancePulse {
-  0% { opacity: 0.5; }
-  100% { opacity: 1; }
 }
 
 .performance-title {
@@ -767,15 +601,16 @@
   margin-right: auto;
 }
 
-/* Enhanced Buttons */
+/* Buttons */
 .moonlight-buttons {
   display: flex;
   gap: 1.5rem;
   justify-content: center;
   flex-wrap: wrap;
   margin: 3rem 0;
-  opacity: 0;
-  transform: translateY(30px);
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.6s ease-out 0.8s both;
 }
 
 .moonlight-buttons.animate {
@@ -824,20 +659,53 @@
   color: white !important;
 }
 
-.moonlight-btn-secondary {
+/* Secondary Button - Higher Specificity */
+.moonlight-btn.moonlight-btn-secondary {
   background: transparent !important;
   border: 2px solid var(--moonlight-accent) !important;
   color: var(--moonlight-accent) !important;
-  box-shadow: 0 8px 25px rgba(255, 119, 198, 0.2);
+  box-shadow: 0 8px 25px rgba(255, 119, 198, 0.2) !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: var(--moonlight-accent) !important;
+  background-clip: unset !important;
 }
 
-.moonlight-btn-secondary:hover {
+.moonlight-btn.moonlight-btn-secondary::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 119, 198, 0.2), transparent);
+}
+
+.moonlight-btn.moonlight-btn-secondary:hover {
   background: var(--moonlight-accent) !important;
   color: white !important;
-  box-shadow: 0 15px 35px rgba(255, 119, 198, 0.4);
+  box-shadow: 0 15px 35px rgba(255, 119, 198, 0.4) !important;
+  transform: translateY(-4px) scale(1.05);
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: white !important;
+  background-clip: unset !important;
 }
 
-/* Scroll Progress Bar */
+/* Footer */
+.md-footer {
+  background: linear-gradient(45deg, #1a1a2e, #16213e) !important;
+  border-top: 1px solid rgba(119, 119, 198, 0.3);
+}
+
+.md-footer__link {
+  color: var(--moonlight-accent) !important;
+}
+
+/* Search */
+.md-search__form {
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.md-search__input {
+  background: transparent;
+}
+
+/* Scroll Progress */
 .scroll-progress {
   position: fixed;
   top: 0;
@@ -861,15 +729,79 @@
 .floating-element:nth-child(2) { animation-delay: 2s; }
 .floating-element:nth-child(3) { animation-delay: 4s; }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+/* Animation Classes */
+.slide-in-left {
+  opacity: 1;
+  transform: translateX(0);
+  animation: slideInLeft 0.8s ease-out both;
 }
 
-/* Mobile Responsive Enhancements */
+.slide-in-right {
+  opacity: 1;
+  transform: translateX(0);
+  animation: slideInRight 0.8s ease-out both;
+}
+
+.slide-in-left.animate,
+.slide-in-right.animate {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.8s ease-out;
+}
+
+.scale-in {
+  opacity: 1;
+  transform: scale(1);
+  animation: scaleIn 0.6s ease-out both;
+}
+
+.scale-in.animate {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .hero-title {
     font-size: 3rem;
+  }
+  
+  .md-content h1:first-of-type {
+    font-size: 2.5rem;
   }
   
   .moonlight-stats {
@@ -898,33 +830,4 @@
   .section-title {
     font-size: 2.2rem;
   }
-}
-
-/* Additional Animation Classes */
-.slide-in-left {
-  opacity: 0;
-  transform: translateX(-50px);
-}
-
-.slide-in-right {
-  opacity: 0;
-  transform: translateX(50px);
-}
-
-.slide-in-left.animate,
-.slide-in-right.animate {
-  opacity: 1;
-  transform: translateX(0);
-  transition: all 0.8s ease-out;
-}
-
-.scale-in {
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-.scale-in.animate {
-  opacity: 1;
-  transform: scale(1);
-  transition: all 0.6s ease-out;
 }
