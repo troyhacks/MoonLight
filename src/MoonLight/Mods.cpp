@@ -37,14 +37,15 @@ void DriverNode::setup() {
   addControl(maxPower, "maxPower", "number", 0, 100);
   JsonObject property = addControl(lightPreset, "lightPreset", "select"); 
   JsonArray values = property["values"].to<JsonArray>();
-  values.add("GRBW");
   values.add("RGB");
   values.add("RBG");
-  values.add("GRB");
+  values.add("GRB"); //default
   values.add("GBR");
   values.add("BRG");
   values.add("BGR");
-  values.add("GRBW6");
+  values.add("RGBW"); //par light
+  values.add("GRBW"); //rgbw led eg. sk6812
+  values.add("GRBW6"); //some curtains
   values.add("TroyMH15");
   values.add("TroyMH32");
   values.add("WowiMH24");
@@ -103,48 +104,52 @@ void DriverNode::updateControl(JsonObject control) {
 
     header->resetOffsets(); //after this addLayout is called of different layout nodes which might set additional offsets (WIP)
 
-    if (lightPreset == 0) { header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3;} //GRBW
-    else if (lightPreset == 1) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;} //RGB
-    else if (lightPreset == 2) { header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1;} //RBG
-    else if (lightPreset == 3) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2;} //GRB
-    else if (lightPreset == 4) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1;} //GBR
-    else if (lightPreset == 5) { header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0;} //BRG
-    else if (lightPreset == 6) { header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0;} //BGR
-    else if (lightPreset == 7) { header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2;} //GRBW6
-    else if (lightPreset == 8) { //troy32
-      layerV->layerP->lights.header.channelsPerLight = 32;
-      header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
-      layerV->layerP->lights.header.offsetRGB = 9;
-      layerV->layerP->lights.header.offsetRGB1 = 13;
-      layerV->layerP->lights.header.offsetRGB2 = 17;
-      layerV->layerP->lights.header.offsetRGB3 = 24;
-      layerV->layerP->lights.header.offsetPan = 0;
-      layerV->layerP->lights.header.offsetTilt = 2;
-      layerV->layerP->lights.header.offsetZoom = 5;
-      layerV->layerP->lights.header.offsetBrightness = 6;
+    switch (lightPreset) {
+      case 0: header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; break; //RGB
+      case 1: header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1; break; //RBG
+      case 2: header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRB
+      case 3: header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1; break; //GBR
+      case 4: header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0; break; //BRG
+      case 5: header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0; break; //BGR
+      case 6: header->channelsPerLight = 4; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBW - Par Lights
+      case 7: header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3; break; //GRBW - RGBW Leds
+      case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRBW6
+      case 9: //troy32
+        layerV->layerP->lights.header.channelsPerLight = 32;
+        header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
+        layerV->layerP->lights.header.offsetRGB = 9;
+        layerV->layerP->lights.header.offsetRGB1 = 13;
+        layerV->layerP->lights.header.offsetRGB2 = 17;
+        layerV->layerP->lights.header.offsetRGB3 = 24;
+        layerV->layerP->lights.header.offsetPan = 0;
+        layerV->layerP->lights.header.offsetTilt = 2;
+        layerV->layerP->lights.header.offsetZoom = 5;
+        layerV->layerP->lights.header.offsetBrightness = 6;
+        break;
+      case 10: //troyMH15
+        layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
+        header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
+        layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
+        layerV->layerP->lights.header.offsetPan = 0;
+        layerV->layerP->lights.header.offsetTilt = 1;
+        layerV->layerP->lights.header.offsetZoom = 7;
+        layerV->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
+        layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
+        layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
+        break;
+      case 11: //wowiMH24
+        layerV->layerP->lights.header.channelsPerLight = 24;
+        header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
+        layerV->layerP->lights.header.offsetPan = 0;
+        layerV->layerP->lights.header.offsetTilt = 1;
+        layerV->layerP->lights.header.offsetBrightness = 3;
+        layerV->layerP->lights.header.offsetRGB = 4;
+        layerV->layerP->lights.header.offsetRGB1 = 8;
+        layerV->layerP->lights.header.offsetRGB2 = 12;
+        layerV->layerP->lights.header.offsetZoom = 17;
+        break;
     }
-    else if (lightPreset == 9) { //troyMH15
-      layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
-      header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
-      layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
-      layerV->layerP->lights.header.offsetPan = 0;
-      layerV->layerP->lights.header.offsetTilt = 1;
-      layerV->layerP->lights.header.offsetZoom = 7;
-      layerV->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
-      layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
-      layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
-    }
-    else if (lightPreset == 10) { //wowiMH24
-      layerV->layerP->lights.header.channelsPerLight = 24;
-      header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
-      layerV->layerP->lights.header.offsetPan = 0;
-      layerV->layerP->lights.header.offsetTilt = 1;
-      layerV->layerP->lights.header.offsetBrightness = 3;
-      layerV->layerP->lights.header.offsetRGB = 4;
-      layerV->layerP->lights.header.offsetRGB1 = 8;
-      layerV->layerP->lights.header.offsetRGB2 = 12;
-      layerV->layerP->lights.header.offsetZoom = 17;
-    }
+
 
     MB_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
     
@@ -642,16 +647,16 @@ void ArtNetDriverMod::loop() {
 
         if (nb_pins > 0) {
 
-          uint8_t colorOrder = 3;
+          uint8_t colorOrder = ORDER_GRB; //default
 
-          if (lightPreset == 0) colorOrder = ORDER_GRBW;
-          else if (lightPreset == 1) colorOrder = ORDER_RGB;
-          else if (lightPreset == 2) colorOrder = ORDER_RBG;
-          else if (lightPreset == 3) colorOrder = ORDER_GRB;
-          else if (lightPreset == 4) colorOrder = ORDER_GBR;
-          else if (lightPreset == 5) colorOrder = ORDER_BRG;
-          else if (lightPreset == 6) colorOrder = ORDER_BGR;
-          else colorOrder = ORDER_GRBW; //best we can offer is 4 channels, to do: driver accepts more channels
+          if (lightPreset == 0) colorOrder = ORDER_RGB;
+          else if (lightPreset == 1) colorOrder = ORDER_RBG;
+          else if (lightPreset == 2) colorOrder = ORDER_GRB;
+          else if (lightPreset == 3) colorOrder = ORDER_GBR;
+          else if (lightPreset == 4) colorOrder = ORDER_BRG;
+          else if (lightPreset == 5) colorOrder = ORDER_BGR;
+          // else if (lightPreset == 6) colorOrder = ORDER_RGBW; // doesn't exist!
+          else colorOrder = ORDER_GRBW; //best we can offer is 4 channels GRBW, to do: driver accepts more channels
 
           ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins, (colorarrangment)colorOrder);
           #if ML_LIVE_MAPPING

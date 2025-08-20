@@ -52,8 +52,8 @@ public:
                 for (auto updatedItem : filesState.updatedItems) {
                     //if file is the current live script, recompile it (to do: multiple live effects)
                     MB_LOGV(ML_TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-                    if (equal(updatedItem.c_str(), "/.config/virtual.json")) {
-                        MB_LOGV(ML_TAG, " virtual.json updated -> call update %s", updatedItem.c_str());
+                    if (equal(updatedItem.c_str(), "/.config/effects.json")) {
+                        MB_LOGV(ML_TAG, " effects.json updated -> call update %s", updatedItem.c_str());
                         readFromFS(); //repopulates the state, processing file changes
                     }
                     // uint8_t index = 0;
@@ -194,7 +194,7 @@ public:
                 layerP.layerV[0]->nodes[index] = node; //add the node to the layer
         }
 
-        MB_LOGV(ML_TAG, "%s (s:%d p:%p)", name, layerP.layerV[0]->nodes.size(), node);
+        MB_LOGD(ML_TAG, "%s (s:%d p:%p)", name, layerP.layerV[0]->nodes.size(), node);
 
         return node;
     }

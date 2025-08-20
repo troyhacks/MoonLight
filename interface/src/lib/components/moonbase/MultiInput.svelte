@@ -269,7 +269,7 @@
                                 preventClick = true;
                                 clearTimeout(clickTimeout);
                                 value.select = x + y * property.width;
-                                console.log("delete", y, x, value.select);
+                                console.log("dblclick", y, x, value.select);
                                 value.action = "dblclick";
                                 onChange(event)
                             }}

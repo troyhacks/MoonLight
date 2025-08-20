@@ -177,7 +177,7 @@ protected:
             }
 
             if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
-                MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 if (updatedItem.index[0] < nodes->size()) {
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {

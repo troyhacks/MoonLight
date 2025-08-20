@@ -45,7 +45,7 @@ class DriverNode: public Node {
   #endif
 
   protected:
-  uint8_t lightPreset = 3;
+  uint8_t lightPreset = 2; //GRB
 
   public:
 
@@ -58,11 +58,11 @@ class DriverNode: public Node {
   void updateControl(JsonObject control) override;
 };
 
-#define ART_NET_HEADER (char[]){0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e}
-                                //0..7: Array of 8 characters, the final character is a null termination. Value = 'A' 'r' 't' '-' 'N' 'e' 't' 0x00
-                                //8-9: OpOutput Transmitted low byte first (so 0x50, 0x00)
-                                //10: High byte of the Art-Net protocol revision number
-                                //11: Low byte of the Art-Net protocol revision number. Current value 14
+static const uint8_t ART_NET_HEADER[] = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
+//0..7: Array of 8 characters, the final character is a null termination. Value = 'A' 'r' 't' '-' 'N' 'e' 't' 0x00
+//8-9: OpOutput Transmitted low byte first (so 0x50, 0x00)
+//10: High byte of the Art-Net protocol revision number
+//11: Low byte of the Art-Net protocol revision number. Current value 14
 #include <AsyncUDP.h>
 
 class ArtNetDriverMod: public DriverNode {

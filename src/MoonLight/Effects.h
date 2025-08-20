@@ -825,7 +825,7 @@ public:
   static const char * tags() {return "";}
 
   char textIn[32];
-  Char<32> text = Char<32>("MoonLight");
+  Char<32> text;// = Char<32>("MoonLight");
   uint8_t speed = 0;
   uint8_t font = 0;
   uint8_t preset = 0;

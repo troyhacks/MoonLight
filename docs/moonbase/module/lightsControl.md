@@ -8,8 +8,14 @@ Controls:
 * Brightness: brightness of the LEDs when on
 * RGB Sliders: control each color separately.
 * Palette: Global palette setting. Effects with the palette icon 🎨 use this palette setting.
-* Presets: Control pad style, store or retrieve a set of nodes with their controls.
-* Monitor On: sends LED output the monitor in the UI.
+* Presets: Store the current effects or retrieve earlier saved presets. 64 slots available:
+    * Blue: Empty preset
+    * Green: Saved preset 
+        * Hover with the mouse to see effects and modifiers in the preset
+        * Double click on a saved preset to delete the preset.
+    * Red: Selected preset
+    * Note: Save (💾) or cancel (🚫 effects first, before storing them as a preset!
+* Monitor On: sends LED output to the monitor.
 
 Light Controls is the interface to control lights for the UI, but also for all protocols eg. HA, DMX, Hardware buttons, displays etc
 e.g. a DMX controller, can control presets, but not individual preset details.

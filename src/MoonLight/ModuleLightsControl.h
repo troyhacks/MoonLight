@@ -134,7 +134,7 @@ public:
             }
             // layerP.palette = LavaColors_p;
         } else if (updatedItem.name == "preset") {
-            //copy /.config/virtual.json to the hidden folder /.config/presets/preset[x].json
+            //copy /.config/effects.json to the hidden folder /.config/presets/preset[x].json
             //do not set preset at boot...
             if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
                 uint16_t select = updatedItem.value["select"];
@@ -144,16 +144,16 @@ public:
                 if (updatedItem.value["action"] == "click") {
                     updatedItem.value["selected"] = select; //store the selected preset
                     if (arrayContainsValue(updatedItem.value["list"], select)) {
-                        copyFile(presetFile.c_str(), "/.config/virtual.json");
+                        copyFile(presetFile.c_str(), "/.config/effects.json");
 
-                        //trigger notification of update of virtual.json
+                        //trigger notification of update of effects.json
                         _fileManager->update([&](FilesState &state) {
-                            state.updatedItems.push_back("/.config/virtual.json");
+                            state.updatedItems.push_back("/.config/effects.json");
                             return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                         }, "server");
 
                     } else {
-                        copyFile("/.config/virtual.json", presetFile.c_str());
+                        copyFile("/.config/effects.json", presetFile.c_str());
                         setPresetsFromFolder(); //update presets in UI
                     }
                 } else if (updatedItem.value["action"] == "dblclick") {

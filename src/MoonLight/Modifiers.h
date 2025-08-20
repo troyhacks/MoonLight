@@ -101,6 +101,7 @@ class MultiplyModifier: public Node {
 
   void setup() override {
     hasModifier = true;
+    addControl(proMulti, "multipliers", "coord3D");
   }
 
   void modifySize() override {

@@ -77,7 +77,14 @@ sends LED output to ESP32 gpio pins.
 
 ### Physical driver ☸️
 
-Implemented and tested
+Sends led signals to the pins / outputs as defined in the layout nodes. This is an alternative to the FastLED driver and uses I2S as the protocol / perephiral to drive the pins.
+
+* **Max Power**: max amount of power in watts to send to LEDs. Default 10: 5V * 2A = 10W (so it runs fine on USB)
+* **Light preset**: Defines the channels per light and color order
+    * RGB to BGR for 3 lights per channel, RGB lights, GRB is default
+    * RGBW for Par Lights
+    * GRBW for LEDs with white channel like SK6812.
+    * MH* for Moving Heads lights - WIP
 
 ### Virtual driver ☸️ 🚧
 
@@ -91,20 +98,14 @@ Not implemented yet
 
 This node sends the content of the Lights array in Art-Net compatible packages to an Art-Net controller specified by the IP address provided.
 
-* Controller IP: The last segment of the IP address within your local network, of the the hardware Art-Net controller.
-* FPS Limiter: set the max frames per second Art-Net packages are send out (also all the other nodes will run at this speed).
-
-Example of compatible controllers can be found [here](https://moonmodules.org/hardware/). Both Art-Net LED controllers and Art-Net DMX controllers can be used as output.
-
-The node supports this setup:
-```cpp
-    std::vector<uint16_t> hardware_outputs = {1024,1024,1024,1024,1024,1024,1024,1024};
-    std::vector<uint16_t> hardware_outputs_universe_start = { 0,7,14,21,28,35,42,49 }; //7*170 = 1190 LEDs => last universe not completely used
-```
-
-Todo: 
-* Add controls for other hardware_outputs
-* MoonLight can also act as a receiving Art-Net controller, sending dmx commands (not implemented yet)
+* **Max Power**and **Light preset**: See Physical driver. **Note**: Currently if using multiple drivers, all drivers need the same Light preset.
+* **Controller IP**: The last segment of the IP address within your local network, of the the hardware Art-Net controller.
+* **Port**: The network port added to the IP address, 6454 is the default for Art-Net.
+* **FPS Limiter**: set the max frames per second Art-Net packages are send out (also all the other nodes will run at this speed).
+* **Nr of outputs**: Art-Net LED controllers can have more then 1 output (e.g. 12)
+* **Channels per ouput**: each output can drive a maximum number of channels (e.g. 3 * 1024)
+* **Universes per output**: Each universe supports max 512 channels (e.g. 510 for 170 RGB lights, 512 for 128 RGBW lights). One output supports multiple universes (e.g. 7 = 7 * 170 = 1190, last universe not completely used)
+* Example of compatible controllers can be found [here](https://moonmodules.org/hardware/). Both Art-Net LED controllers and Art-Net DMX controllers can be used as output.
 
 ### AudioSync ☸️ ♫
 
