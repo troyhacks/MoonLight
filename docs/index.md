@@ -6,6 +6,8 @@ hide:
 
 # MoonLight
 
+<img width="350" src="https://github.com/user-attachments/assets/278ed02e-7f7a-497c-80ee-089486ddf379" />
+
 <div class="moonlight-hero">
   <!-- <div class="hero-title">🌙 MoonLight</div> -->
   <div class="hero-subtitle">
