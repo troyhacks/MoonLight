@@ -640,12 +640,48 @@ class Noise2DEffect: public Node {
     for (int y = 0; y < layerV->size.y; y++) {
       for (int x = 0; x < layerV->size.x; x++) {
         uint8_t pixelHue8 = inoise8(x * scale, y * scale, millis() / (16 - speed));
-        // layerV->setRGB(x, y, ColorFromPalette(layerV->layerP->palette, pixelHue8));
         layerV->setRGB(Coord3D(x, y), ColorFromPalette(layerV->layerP->palette, pixelHue8));
       }
     }
   }
 }; //Noise2D
+
+class NoiseMeterEffect: public Node {
+  public:
+  static const char * name() {return "NoiseMeter ♪💡🎨";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "";}
+  
+  uint8_t fadeRate = 248;
+  uint8_t width = 128;
+
+  void setup() override {
+    addControl(fadeRate, "fadeRate", "range", 200, 254);
+    addControl(width, "width", "range", 0, 255);
+  }
+
+  uint8_t aux0;
+  uint8_t aux1;
+
+  void loop() override {
+    layerV->fadeToBlackBy(fadeRate);
+
+    float tmpSound2 = sharedData.volumeRaw * 2.0 * (float)width / 255.0;
+    int maxLen = map(tmpSound2, 0, 255, 0, layerV->size.x); // map to pixels availeable in current segment              // Still a bit too sensitive.
+    // if (maxLen <0) maxLen = 0;
+    // if (maxLen >layerV->size.x) maxLen = layerV->size.x;
+
+    for (int i=0; i<maxLen; i++) {                                    // The louder the sound, the wider the soundbar. By Andrew Tuline.
+      uint8_t index = inoise8(i * sharedData.volume + aux0, aux1 + i * sharedData.volume);  // Get a value from the noise function. I'm using both x and y axis.
+      for (uint8_t y = 0; y < layerV->size.y; y++) //propagate to other dimensions
+        for (uint8_t z = 0; z < layerV->size.z; z++)
+          layerV->setRGB(Coord3D(i, y, z), ColorFromPalette(layerV->layerP->palette, index));//, 255, PALETTE_SOLID_WRAP));
+    }
+
+    aux0+=beatsin8(5,0,10);
+    aux1+=beatsin8(4,0,10);
+  }
+}; //NoiseMeter
 
 // Author: @TroyHacks, from WLED MoonModules
 // @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007

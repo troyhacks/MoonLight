@@ -202,8 +202,6 @@ void ArtNetDriverMod::setup() {
   memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER)); // copy in the Art-Net header.
 }
 
-#define ARTNET_CHANNELS_PER_PACKET 512
-
 void ArtNetDriverMod::loop() {
 
   DriverNode::loop();
@@ -252,11 +250,11 @@ void ArtNetDriverMod::loop() {
 
         packetSize = (ARTNET_CHANNELS_PER_PACKET / header->channelsPerLight) * header->channelsPerLight; //packetSize must be a multitude of channelsPerLight
 
-        if (channels_remaining < ARTNET_CHANNELS_PER_PACKET) {
-            packetSize = channels_remaining;
+        if (channels_remaining < packetSize) {
+            packetSize = channels_remaining; // 258
             channels_remaining = 0;
         } else {
-            channels_remaining -= packetSize;
+            channels_remaining -= packetSize; // 768 (256) - 510 (170) = 258 (86)
         }
 
         // set the parts of the Art-Net packet header that change:
@@ -266,7 +264,7 @@ void ArtNetDriverMod::loop() {
         packet_buffer[17] = packetSize; //Low Byte of above
 
         // bulk copy the buffer range to the packet buffer after the header 
-        memcpy(packet_buffer+18, &layerV->layerP->lights.channels[bufferOffset], packetSize); //start from the first byte of ledsP[0]
+        memcpy(packet_buffer+18, &layerV->layerP->lights.channels[bufferOffset], packetSize); //start from the first byte of ledsP[0] //510
 
         //no brightness scaling for the time being
         for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) { //fill the packet with lights (all channels of the light)

@@ -22,6 +22,7 @@
 static struct SharedData {
   uint8_t bands[16]= {0}; // Our calculated freq. channel result table to be used by effects
   float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
+  int16_t volumeRaw; 
   float majorPeak; // FFT: strongest (peak) frequency
   uint16_t fps;
   uint8_t connectionStatus;
@@ -58,6 +59,7 @@ class DriverNode: public Node {
   void updateControl(JsonObject control) override;
 };
 
+#define ARTNET_CHANNELS_PER_PACKET 512
 static const uint8_t ART_NET_HEADER[] = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
 //0..7: Array of 8 characters, the final character is a null termination. Value = 'A' 'r' 't' '-' 'N' 'e' 't' 0x00
 //8-9: OpOutput Transmitted low byte first (so 0x50, 0x00)
@@ -85,7 +87,7 @@ class ArtNetDriverMod: public DriverNode {
   IPAddress controllerIP; //tbd: controllerIP also configurable from fixtures and Art-Net instead of pin output
   unsigned long lastMillis = millis();
   unsigned long wait;
-  uint8_t packet_buffer[sizeof(ART_NET_HEADER) + 6 + 512];
+  uint8_t packet_buffer[sizeof(ART_NET_HEADER) + 6 + ARTNET_CHANNELS_PER_PACKET];
   uint_fast16_t packetSize;
   size_t sequenceNumber = 0; // this needs to be shared across all outputs
   AsyncUDP artnetudp;// AsyncUDP so we can just blast packets.
@@ -117,6 +119,7 @@ class AudioSyncMod: public Node {
     if (sync.read()) {
       memcpy(sharedData.bands, sync.fftResult, NUM_GEQ_CHANNELS);
       sharedData.volume = sync.volumeSmth;
+      sharedData.volumeRaw = sync.volumeRaw;
       sharedData.majorPeak = sync.FFT_MajorPeak;
       // if (audio.bands[0] > 0) {
       //   MB_LOGV(ML_TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);

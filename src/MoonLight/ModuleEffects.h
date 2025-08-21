@@ -105,6 +105,7 @@ public:
         values.add(LinesEffect::name());
         values.add(LissajousEffect::name());
         values.add(Noise2DEffect::name());
+        values.add(NoiseMeterEffect::name());
         values.add(PaintBrushEffect::name());
         values.add(RainbowEffect::name());
         values.add(RandomEffect::name());
@@ -152,6 +153,7 @@ public:
         else if (equal(name, LinesEffect::name())) node = new LinesEffect();
         else if (equal(name, LissajousEffect::name())) node = new LissajousEffect();
         else if (equal(name, Noise2DEffect::name())) node = new Noise2DEffect();
+        else if (equal(name, NoiseMeterEffect::name())) node = new NoiseMeterEffect();
         else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
         else if (equal(name, RainbowEffect::name())) node = new RainbowEffect();
         else if (equal(name, RandomEffect::name())) node = new RandomEffect();

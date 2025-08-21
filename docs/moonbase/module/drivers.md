@@ -85,6 +85,7 @@ Sends led signals to the pins / outputs as defined in the layout nodes. This is 
     * RGBW for Par Lights
     * GRBW for LEDs with white channel like SK6812.
     * MH* for Moving Heads lights - WIP
+    * Note: Currently, if using multiple drivers, all drivers need the same Light preset.
 
 ### Virtual driver ☸️ 🚧
 
@@ -97,15 +98,30 @@ Not implemented yet
 ### Art-Net ☸️
 
 This node sends the content of the Lights array in Art-Net compatible packages to an Art-Net controller specified by the IP address provided.
+The following devices are known to work:
 
-* **Max Power**and **Light preset**: See Physical driver. **Note**: Currently if using multiple drivers, all drivers need the same Light preset.
+* Driving LEDs: [Club Lights 12 Pro Artnet Controller - CL12P](https://s.click.aliexpress.com/e/_Ex9uaOk): 12 output leds controller, max 8 universes per channel. Max 512 channels per universe. Select IC-Type UCS2903
+* Driving DMX fixtures: [PKNight ArtNet2-CR021R](https://s.click.aliexpress.com/e/_ExRrKe4): 2 universes, max 512 channels per universe. Used to drive the Moving Head effects and light presets.
+
+Controls:
+
+* **Max Power**and **Light preset**: See Physical driver.
 * **Controller IP**: The last segment of the IP address within your local network, of the the hardware Art-Net controller.
 * **Port**: The network port added to the IP address, 6454 is the default for Art-Net.
 * **FPS Limiter**: set the max frames per second Art-Net packages are send out (also all the other nodes will run at this speed).
+    * Art-Net specs recommend about 44 FPS.
+    * CL12P runs fine until ~130FPS
 * **Nr of outputs**: Art-Net LED controllers can have more then 1 output (e.g. 12)
-* **Channels per ouput**: each output can drive a maximum number of channels (e.g. 3 * 1024)
-* **Universes per output**: Each universe supports max 512 channels (e.g. 510 for 170 RGB lights, 512 for 128 RGBW lights). One output supports multiple universes (e.g. 7 = 7 * 170 = 1190, last universe not completely used)
-* Example of compatible controllers can be found [here](https://moonmodules.org/hardware/). Both Art-Net LED controllers and Art-Net DMX controllers can be used as output.
+    * CL12P: Until 12 outputs
+    * CR021R: 1
+* **Channels per ouput**: each output can drive a maximum number of channels
+    * CL12P: max 8 * 512. Each color in a LED is one channel: For RGB max 170 LEDs is 510 channels per universe, for RGBW max 128 LEDs per universe is 512 channels per universe => max 1360 RGB LEDs and 1024 RGBW LEDs per output. EG: if one output drives one 256 LED RGB panel, this can be set to 768, so one package sends 170 LEDs (510 channels) and the second 86 LEDs / 256 channels. However this has not been proofed to work (Some Art-Net devices expect a minimum packet size, even if fewer channels are used). Workaround: set to 1020 channels works.
+    * CR021R: 512 channels
+* **Universes per output**: How many universes can each output handle
+    * CL12P: One output supports multiple universes. Set universes per output the same as in MoonLight. Set channels per universe to 510 for RGB and 512 for RGBW (no proof yet it makes a difference ...)  (e.g. 7 = 7 * 170 = 1190, last universe not completely used)
+    * CR021R: 2 -> 2 DMX outputs.
+
+Note: Dmx channels count from 1 to 512. At the moment we start counting from 0..511.
 
 ### AudioSync ☸️ ♫
 
