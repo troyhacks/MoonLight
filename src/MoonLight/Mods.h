@@ -77,9 +77,9 @@ class ArtNetDriverMod: public DriverNode {
   uint16_t controllerIP3 = 11;
   uint16_t port = 6454;
   uint16_t FPSLimiter = 50; //default 50ms
-  uint16_t nrOfOutputs = 1; //8 on Art-Net LED Controller
-  uint16_t channelsPerOutput = 768; //3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
-  uint16_t universesPerOutput = 1; //7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
+  uint16_t nrOfOutputs = 1; //max 12 on Art-Net LED Controller
+  uint16_t channelsPerOutput = 1024; //3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
+  uint16_t universesPerOutput = 2; //7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
 
   void setup() override;
 

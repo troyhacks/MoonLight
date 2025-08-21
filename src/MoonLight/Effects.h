@@ -232,9 +232,10 @@ public:
 
   uint8_t speed = 255;
   uint8_t fx = 128;
-  uint8_t lowBin = 18;
-  uint8_t highBin = 48;
+  uint8_t lowBin = 0;//18;
+  uint8_t highBin = 0;//48;
   uint8_t sensitivity10 = 30;
+  bool audioSpeed = false; //💫
 
   void setup() override {
     addControl(speed, "speed", "range");
@@ -242,13 +243,27 @@ public:
     addControl(lowBin, "lowBin", "range");
     addControl(highBin, "highBin", "range");
     addControl(sensitivity10, "sensitivity", "range", 10, 100);
+    addControl(audioSpeed, "audioSpeed", "checkbox");
   }
 
   uint8_t aux0;
+  unsigned long bassMemory = 0;
 
   void loop() override {
-    uint8_t secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
-    if((speed > 254) || (aux0 != secondHand)) {   // WLEDMM allow run run at full speed
+    
+    uint8_t secondHand;
+    if (audioSpeed) {
+      if (sharedData.bands[0] > 100) {
+        if (bassMemory < 5000) bassMemory++; 
+      }
+      else 
+        if (bassMemory) bassMemory--; //5000 frames cooldown
+
+      secondHand = (micros()/(256-speed* bassMemory / 5000)/500 % 16);
+    } else
+      secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
+
+    if ((speed > 254) || (aux0 != secondHand)) {   // WLEDMM allow run run at full speed
       aux0 = secondHand;
 
       // Pixel brightness (value) based on volume * sensitivity * intensity
