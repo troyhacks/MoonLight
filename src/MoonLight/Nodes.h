@@ -69,14 +69,18 @@ public:
       control["name"] = name;
       control["type"] = type;
       control["default"] = variable;
-      if (ro) control["ro"] = true;
+
       control["p"] = pointer;
-      if (min != 0) control["min"] = min;
-      if (max != UINT8_MAX) control["max"] = max;
+
+      if (ro) control["ro"] = true; //else if (!control["ro"].isNull()) control.remove("ro");
+      if (min != 0) control["min"] = min; //else if (!control["min"].isNull()) control.remove("min");
+      if (max != UINT8_MAX) control["max"] = max; //else if (!control["max"].isNull()) control.remove("max");
+
       newControl = true; //set flag to true, as control is new
     }
 
     MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+
     //setValue
     if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
       if (sizeof(ControlType) != 1) {

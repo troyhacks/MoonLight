@@ -6,7 +6,7 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Router from '~icons/tabler/router';
 	import Help from '~icons/tabler/help';
-	import Cancel from '~icons/tabler/x';
+	// import Cancel from '~icons/tabler/x';
 	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 	import { socket } from '$lib/stores/socket';
 	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
@@ -151,6 +151,12 @@
 				}
 			// }
 		}
+		//remove properties that are not in newData (e.g. control min and max)
+		for (let key in oldData) {
+			if (newData[key] == null) {
+				delete oldData[key]; //remove property if not in newData
+			}
+		}
 	}
 
 	const handleState = (state: any) => {
@@ -197,6 +203,7 @@
 								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
 						{:else if property.type == "array"}
+						    <!-- e.g. definition: [name:"nodes", n: [name: ,,, name:"on", name:"controls", n:[]]]] -->
 							<ObjectArray property={property} bind:data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></ObjectArray>
 						{/if}
 					{/each}

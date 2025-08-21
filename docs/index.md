@@ -46,7 +46,7 @@ hide:
     <div class="moonlight-stat-label">Effects Engine</div>
   </div>
 </div>
-(Recommended setup, max is 128K Leds and 120 parallel outputs)
+(Recommended maximum setup. Max is 128K Leds and 120 parallel outputs)
 
 ## 🌟 Why Choose MoonLight?
 

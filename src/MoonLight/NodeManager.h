@@ -128,12 +128,12 @@ protected:
 
                 //if a node existed and no new node in place, remove 
                 if (updatedItem.oldValue != "null" && oldNode) {
-                    MB_LOGD(ML_TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                    // MB_LOGD(ML_TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                     if (!newNode) {
                         //remove oldNode from the nodes list 
                         for (uint8_t i = 0; i < nodes->size(); i++) {
                             if ((*nodes)[i] == oldNode) {
-                                MB_LOGD(ML_TAG, "remove node %d", i);
+                                MB_LOGD(ML_TAG, "remove node %d %s", i, updatedItem.oldValue.c_str());
                                 nodes->erase(nodes->begin() + i);
                                 break;
                             }

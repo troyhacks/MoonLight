@@ -224,7 +224,6 @@ PhysicalLayer::PhysicalLayer() {
 
     void PhysicalLayer::removeNode(Node *node) {
         MB_LOGD(ML_TAG, "remove node (s:%d p:%p)", layerV[0]->nodes.size(), node);
-        // node->destructor(); //now ˜destructor is called in Node destructor
         delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
         // //can cause a crash if it has addControl ...  (e.g. panel layout)
         
