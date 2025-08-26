@@ -92,10 +92,10 @@ class ArtNetDriverMod: public DriverNode {
   size_t sequenceNumber = 0; // this needs to be shared across all outputs
   AsyncUDP artnetudp;// AsyncUDP so we can just blast packets.
   
-  uint_fast16_t bufferOffset = 0;
-  uint_fast16_t hardware_output_universe = 0;
+  uint_fast16_t universe = 0;
   uint_fast16_t channels_remaining;
 
+  bool writePackage();
   void loop() override;
 };
 

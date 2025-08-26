@@ -7,7 +7,7 @@
 * [Channels](https://moonmodules.org/MoonLight/moonbase/module/channels/)
 * [MoonLight info](https://moonmodules.org/MoonLight/moonbase/module/moonLightInfo/)
 
-Note: These docs are updated also after a release has been published preparing for the next release. This means some functionality might be described while not in the latest release. The 🆕 is a sign for this. If you want to try latest, see [Installation Developer](https://moonmodules.org/MoonLight/develop/overview/#installation-developer)
+🚨: These docs are updated also after a release has been published preparing for the next release. This means some functionality might be described while not in the latest release. The 🆕 is a sign for this. If you want to try latest, see [Installation Developer](https://moonmodules.org/MoonLight/develop/overview/#installation-developer)
 
 ## Menu
 

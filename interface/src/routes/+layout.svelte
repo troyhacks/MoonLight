@@ -96,7 +96,7 @@
 	const handleClose = () => {
 		if (!location.host.includes("captive.apple.com")) // 🌙 dirty workaround to not show this on macOS captive portal...
 			notifications.error('Connection to device lost', 5000);
-		telemetry.setRSSI({ rssi: 0, ssid: '', safeMode: false, restartNeeded: false, saveNeeded: false });
+		telemetry.setRSSI({ rssi: 0, ssid: '', safeMode: false, restartNeeded: false, saveNeeded: false , hostName: '' });
 	};
 
 	const handleError = (data: any) => console.error(data);
@@ -135,7 +135,7 @@
 </script>
 
 <svelte:head>
-	<title>{page.data.devices.deviceName}</title>
+	<title>{$telemetry.rssi.hostName}</title>
 </svelte:head>
 
 {#if page.data.features.security && $user.bearer_token === ''}

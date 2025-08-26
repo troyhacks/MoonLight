@@ -7,7 +7,7 @@ Currently this only works on esp32-S3 boards as normal esp32 boards do not have 
 
 This module shows all running live scripts
 
-* Scrips: Running Live scripts (WIP)
+* Scrips: Running Live scripts (🚧)
 * Press the edit button to stop start or kill a script (current bug: double click the button)
 
 ## How to run a live script

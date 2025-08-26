@@ -105,14 +105,14 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
     #endif
 #endif
 
-// 🌙 Custom log output function - WIP
+// 🌙 Custom log output function - 🚧
 static int custom_vprintf(const char* fmt, va_list args)
 {
     // Example 1: Write to a custom UART or buffer
     char buffer[256];
     int len = vsnprintf(buffer, sizeof(buffer), fmt, args);
 
-    Serial.printf("🌙"); //to test it works - WIP to send logging to UI
+    Serial.printf("🌙"); //to test it works - 🚧 to send logging to UI
     
     // Send to custom output (e.g., external UART, network, file, etc.)
     // custom_uart_write(buffer, len);

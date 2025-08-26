@@ -107,6 +107,7 @@ public:
         values.add(Noise2DEffect::name());
         values.add(NoiseMeterEffect::name());
         values.add(PaintBrushEffect::name());
+        values.add(PopCornEffect::name());
         values.add(RainbowEffect::name());
         values.add(RandomEffect::name());
         values.add(RipplesEffect::name());
@@ -129,6 +130,7 @@ public:
         values.add(RippleYZModifier::name());
         values.add(PinwheelModifier::name());
         values.add(RotateNodifier::name());
+        values.add(TransposeModifier::name());
 
         //find all the .sc files on FS
         File rootFolder = ESPFS.open("/");
@@ -155,6 +157,7 @@ public:
         else if (equal(name, Noise2DEffect::name())) node = new Noise2DEffect();
         else if (equal(name, NoiseMeterEffect::name())) node = new NoiseMeterEffect();
         else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
+        else if (equal(name, PopCornEffect::name())) node = new PopCornEffect();
         else if (equal(name, RainbowEffect::name())) node = new RainbowEffect();
         else if (equal(name, RandomEffect::name())) node = new RandomEffect();
         else if (equal(name, RipplesEffect::name())) node = new RipplesEffect();
@@ -177,6 +180,7 @@ public:
         else if (equal(name, RippleYZModifier::name())) node = new RippleYZModifier();
         else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
         else if (equal(name, RotateNodifier::name())) node = new RotateNodifier();
+        else if (equal(name, TransposeModifier::name())) node = new TransposeModifier();
         
         #if FT_LIVESCRIPT
             else {

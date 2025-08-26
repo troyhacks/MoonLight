@@ -146,7 +146,7 @@ class PinwheelModifier: public Node {
   }
   
   void modifySize() override {
-    // if (leds.projectionDimension > _1D && leds.effectDimension > _1D) {
+    // if (layerV->projectionDimension > _1D && layerV->effectDimension > _1D) {
       layerV->size.y = sqrt(sq(max<uint8_t>(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
                             sq(max<uint8_t>(layerV->size.y - layerV->middle.y, layerV->middle.y))) + 1; // Adjust y before x
       layerV->size.x = petals;
@@ -187,7 +187,7 @@ class PinwheelModifier: public Node {
 
     position.x = value;
     position.y = 0;
-    // if (leds.effectDimension > _1D && leds.projectionDimension > _1D) {
+    // if (layerV->effectDimension > _1D && layerV->projectionDimension > _1D) {
       position.y = int(sqrt(sq(dx) + sq(dy))); // Round produced blank position
     // }
     position.z = 0;
@@ -244,7 +244,7 @@ class RippleYZModifier: public Node {
 
     //1D->2D: each X is rippled through the y-axis
     if (towardsY) {
-      // if (leds.effectDimension == _1D && leds.projectionDimension > _1D) {
+      // if (layerV->effectDimension == _1D && layerV->projectionDimension > _1D) {
         for (int y=layerV->size.y-1; y>=1; y--) {
           for (int x=0; x<layerV->size.x; x++) {
             layerV->setRGB(Coord3D(x, y, 0), layerV->getRGB(Coord3D(x,y-1,0)));
@@ -255,7 +255,7 @@ class RippleYZModifier: public Node {
 
     //2D->3D: each XY plane is rippled through the z-axis
     if (towardsZ) { //not relevant for 2D fixtures
-      // if (leds.effectDimension < _3D && leds.projectionDimension == _3D) {
+      // if (layerV->effectDimension < _3D && layerV->projectionDimension == _3D) {
         for (int z=layerV->size.z-1; z>=1; z--) {
           for (int y=0; y<layerV->size.y; y++) {
             for (int x=0; x<layerV->size.x; x++) {
@@ -402,5 +402,40 @@ class RotateNodifier: public Node {
     else if (position.y >= maxY) position.y = maxY - 1;
   }
 }; //RotateNodifier
+
+class TransposeModifier: public Node {
+  public:
+
+  static const char * name() {return "Transpose 💎💡";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  bool transposeXY = true;
+  bool transposeXZ = false;
+  bool transposeYZ = false;
+  
+  void setup() override {
+    hasModifier = true;
+    addControl(transposeXY, "XY", "checkbox");
+    addControl(transposeXZ, "XZ", "checkbox");
+    addControl(transposeYZ, "YZ", "checkbox");
+  }
+
+  Coord3D originalSize;
+  
+  void modifySize() override {
+    if (transposeXY) { int temp = layerV->size.x; layerV->size.x = layerV->size.y; layerV->size.y = temp; }
+    if (transposeXZ) { int temp = layerV->size.x; layerV->size.x = layerV->size.z; layerV->size.z = temp; }
+    if (transposeYZ) { int temp = layerV->size.y; layerV->size.y = layerV->size.z; layerV->size.z = temp; }
+    originalSize = layerV->size;
+    MB_LOGV(ML_TAG, "transpose %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+  }
+
+  void modifyPosition(Coord3D &position) override {
+    if (transposeXY) { int temp = position.x; position.x = position.y; position.y = temp; }
+    if (transposeXZ) { int temp = position.x; position.x = position.z; position.z = temp; }
+    if (transposeYZ) { int temp = position.y; position.y = position.z; position.z = temp; }
+  }
+}; //Transpose
 
 #endif

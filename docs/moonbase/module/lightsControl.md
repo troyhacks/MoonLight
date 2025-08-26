@@ -14,7 +14,8 @@ Controls:
         * Hover with the mouse to see effects and modifiers in the preset
         * Double click on a saved preset to delete the preset.
     * Red: Selected preset
-    * Note: Save (💾) or cancel (🚫 effects first, before storing them as a preset!
+    * 🚨: Save (💾) or cancel (🚫 effects first, before storing them as a preset!
+* Preset loop: loop over presets (seconds per presets) - 🚧
 * Monitor On: sends LED output to the monitor.
 
 Light Controls is the interface to control lights for the UI, but also for all protocols eg. HA, DMX, Hardware buttons, displays etc

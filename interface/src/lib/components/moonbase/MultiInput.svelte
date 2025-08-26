@@ -96,6 +96,11 @@
             href="http://{value}"
             target ="_blank"
         >{value}</a>
+    {:else if property.type == "mdnsName"}
+        <a 
+            href="http://{value}.local"
+            target ="_blank"
+        >{value}</a>
     {:else if property.type == "coord3D"}
         <span>{value.x}, {value.y}, {value.z}</span> 
     {:else}

@@ -125,7 +125,7 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
     switch (mappingTable[indexV].mapType) {
       case m_zeroLights:{
         //only room for storing colors
-        if (length <= 4) { //also for RGBW, but store only RGB ... WIP
+        if (length <= 4) { //also for RGBW, but store only RGB ... 🚧
           mappingTable[indexV].rgb14 = ((min(channels[0] + 3, 255) >> 3) << 9) + 
                                       ((min(channels[1] + 3, 255) >> 3) << 4) + 
                                       (min(channels[2] + 7, 255) >> 4);
@@ -165,7 +165,7 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
         return *result; //return the color as CRGB
         break; }
       default: // m_zeroLights:
-        if (layerP->lights.header.channelsPerLight <= 4) { //also for RGBW but retrieve only RGB ... WIP
+        if (layerP->lights.header.channelsPerLight <= 4) { //also for RGBW but retrieve only RGB ... 🚧
           T result;
           ((uint8_t*)&result)[0] = (mappingTable[indexV].rgb14 >> 9) << 3;
           ((uint8_t*)&result)[1] = (mappingTable[indexV].rgb14 >> 4) << 3;

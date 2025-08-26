@@ -43,18 +43,18 @@ class FixedRectangleEffect: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  uint8_t red = 255;
-  uint8_t green = 255;
-  uint8_t blue = 255;
+  uint8_t red = 182;
+  uint8_t green = 15;
+  uint8_t blue = 98;
   uint8_t width = 1;
   uint8_t x = 0;
   uint8_t height = 1;
-  uint8_t y = 1;
+  uint8_t y = 0;
 
   void setup() override {
-    addControl(red, "red", "range", 50);
-    addControl(green, "green", "range", 50);
-    addControl(blue, "blue", "range", 50);
+    addControl(red, "red", "range");
+    addControl(green, "green", "range");
+    addControl(blue, "blue", "range");
     addControl(x, "X position", "range", 0);
     addControl(y, "Y position", "range", 0);
     addControl(width, "Rectangle width", "range", 1);
@@ -87,6 +87,7 @@ struct Ball {
   float height;
 };
 
+#define maxColumns 32 //max 32 rows for now
 class BouncingBallsEffect: public Node {
   public:
 
@@ -103,7 +104,7 @@ class BouncingBallsEffect: public Node {
   }
 
   //binding of loop persistent values (pointers)
-  Ball balls[16][maxNumBalls];
+  Ball balls[maxColumns][maxNumBalls];
 
   void loop() override {
     layerV->fadeToBlackBy(100);
@@ -118,7 +119,7 @@ class BouncingBallsEffect: public Node {
     //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     // }
 
-    for (uint8_t y =0; y < MIN(layerV->size.y,16); y++) { //Min for the time being
+    for (uint8_t y =0; y < MIN(layerV->size.y,maxColumns); y++) { //Min for the time being
       for (size_t i = 0; i < MIN(numBalls, maxNumBalls); i++) {
         float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
         float timeSec = timeSinceLastBounce/1000.0f;
@@ -774,6 +775,96 @@ public:
     }
   }
 };
+
+//each needs 19 bytes
+//Spark type is used for popcorn, fireworks, and drip
+struct Spark {
+  float pos, posX;
+  float vel, velX;
+  uint16_t col;
+  uint8_t colIndex;
+};
+
+#define maxNumPopcorn 21 // max 21 on 16 segment ESP8266
+#define NUM_COLORS       3 /* number of colors per segment */
+
+class PopCornEffect: public Node {
+  public:
+  static const char * name() {return "PopCorn ♪💡";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "";}
+  
+  uint8_t speed = 128;
+  uint8_t numPopcorn = maxNumPopcorn/2;
+  bool useaudio = false;
+
+  void setup() override {
+    addControl(speed, "speed", "range");
+    addControl(numPopcorn, "corns", "range", 1, maxNumPopcorn);
+    addControl(useaudio, "useaudio", "checkbox");
+  }
+
+  Spark popcorn[maxNumPopcorn]; //array
+
+  void loop() override {
+
+    //binding of loop persistent values (pointers)
+
+    layerV->fill_solid(CRGB::Black);
+
+    float gravity = -0.0001f - (speed/200000.0f); // m/s/s
+    gravity *= layerV->size.x;
+
+    if (numPopcorn == 0) numPopcorn = 1;
+
+    for (int i = 0; i < numPopcorn; i++) {
+      if (popcorn[i].pos >= 0.0f) { // if kernel is active, update its position
+        popcorn[i].pos += popcorn[i].vel;
+        popcorn[i].vel += gravity;
+      } else { // if kernel is inactive, randomly pop it
+        bool doPopCorn = false;  // WLEDMM allows to inhibit new pops
+        // WLEDMM begin
+        if (useaudio) {
+          if (  (sharedData.volume > 1.0f)                      // no pops in silence
+              // &&((audioSync->sync.samplePeak > 0) || (audioSync->sync.volumeRaw > 128))  // try to pop at onsets (our peek detector still sucks)
+              &&(random8() < 4) )                        // stay somewhat random
+            doPopCorn = true;
+        } else {         
+          if (random8() < 2) doPopCorn = true; // default POP!!!
+        }
+
+        if (doPopCorn) { // POP!!!
+          popcorn[i].pos = 0.01f;
+
+          uint16_t peakHeight = 128 + random8(128); //0-255
+          peakHeight = (peakHeight * (layerV->size.x -1)) >> 8;
+          popcorn[i].vel = sqrtf(-2.0f * gravity * peakHeight);
+
+          // if (layerV->palette)
+          // {
+            popcorn[i].colIndex = random8();
+          // } else {
+          //   byte col = random8(0, NUM_COLORS);
+          //   if (!SEGCOLOR(2) || !SEGCOLOR(col)) col = 0;
+          //   popcorn[i].colIndex = col;
+          // }
+        }
+      }
+      if (popcorn[i].pos >= 0.0f) { // draw now active popcorn (either active before or just popped)
+        // uint32_t col = layerV->color_wheel(popcorn[i].colIndex);
+        // if (!layerV->palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
+        uint16_t ledIndex = popcorn[i].pos;
+        CRGB col = ColorFromPalette(layerV->layerP->palette, popcorn[i].colIndex*(256/maxNumPopcorn));
+        if (ledIndex < layerV->size.x) {
+          layerV->setRGB(ledIndex, col);
+          for (uint8_t y = 0; y < layerV->size.y; y++)
+            for (uint8_t z = 0; z < layerV->size.z; z++)
+              layerV->setRGB(Coord3D(ledIndex,y,z), col);
+        }
+      }
+    }
+  }
+}; //PopCorn
 
 class RainbowEffect: public Node {
 public:

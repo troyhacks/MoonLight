@@ -39,7 +39,7 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 
 ### Scrolling text 🔥
 
-* WIP: Currently shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended). Later custom texts will be possible
+* 🚧: Currently shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended). Later custom texts will be possible
 * Controls:
     * Speed: scrolling speed if the text is wider then the display width
     * Font: Different font sizes
@@ -75,5 +75,5 @@ Takes lights of an effect and copies them to other lights. E.g. 1D effect will b
 * towardsY: copies X into Y
 * towardsZ: copies XY into Z
 
-Note: some effects already do this theirselves e.g. FreqMatrix runs on 1D but copies to 2D and 3D if size allows.
+🚨: some effects already do this theirselves e.g. FreqMatrix runs on 1D but copies to 2D and 3D if size allows.
 

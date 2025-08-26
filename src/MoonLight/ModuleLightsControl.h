@@ -97,6 +97,8 @@ public:
         property["default"]["list"].to<JsonArray>();
         property["default"]["count"] = 64;
 
+        property = root.add<JsonObject>(); property["name"] = "presetLoop"; property["type"] = "range"; property["default"] = 0;
+
         #if FT_ENABLED(FT_MONITOR)
             property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
         #endif
@@ -161,6 +163,7 @@ public:
                     setPresetsFromFolder(); //update presets in UI
                 }
             }
+        } else if (updatedItem.name == "presetLoop") {
         }
     }
 

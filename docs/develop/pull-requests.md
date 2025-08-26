@@ -23,7 +23,7 @@ Below lists are ordered in terms of likelyhood to be accepted:
 * 💡 [menu-href-unique](https://github.com/theelims/ESP32-sveltekit/commit/92acbd046e478bccf7eec469e0dab5dcda53c0ae): Allow multiple modules using same Module.svelte
 * 💡 [measure-battery-pin](https://github.com/theelims/ESP32-sveltekit/commit/bcd3abd1f981d48d7a76c5ee71fc99f4fe54eb08)
 
-## Pending - WIP
+## Pending - 🚧
 
 * [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)
 * [Devices](https://moonmodules.org/MoonLight/moonbase/module/devices/)
@@ -55,7 +55,7 @@ Below lists are ordered in terms of likelyhood to be accepted:
     * comment response.addHeader("Cache-Control", "public, immutable, max-age=31536000");
 * interface/source/routes/+layout.svelte
     * Show monitor only on moon functions (so captive portal on small screen looks fine): #if (page.data.features.monitor && page.url.pathname.includes("moon"))
-* main.cpp: esp_log_set_vprintf(my_vprintf); WIP
+* main.cpp: esp_log_set_vprintf(my_vprintf); 🚧
 * ci pio
 * run in loopTask to avoid stack size crashes in httpd
 * updatedItems (to see what specifically has been updated)

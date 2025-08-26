@@ -52,7 +52,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 * **Step 14**: Go to **MoonLight Drivers**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. Add a driver node, FastLED driver is best to start with. Physical driver if you have more then 4 LED strips or panels.  Press save (💾)
 
-* **Step 15**: In some cases restart the device to make layout changes effective is needed - WIP.
+* **Step 15**: In some cases restart the device to make layout changes effective is needed - 🚧.
 
    <img width="400" src="https://github.com/user-attachments/assets/17fe6f38-375b-4d96-923b-607897e7d4db" />
 

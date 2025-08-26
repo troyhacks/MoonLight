@@ -43,9 +43,10 @@ void DriverNode::setup() {
   values.add("GBR");
   values.add("BRG");
   values.add("BGR");
-  values.add("RGBW"); //par light
+  values.add("RGBW"); //4 channel par/dmx light
   values.add("GRBW"); //rgbw led eg. sk6812
   values.add("GRBW6"); //some curtains
+  values.add("RGBWYP"); //6 channel par/dmx light with UV etc
   values.add("TroyMH15");
   values.add("TroyMH32");
   values.add("WowiMH24");
@@ -102,7 +103,7 @@ void DriverNode::updateControl(JsonObject control) {
   else if (control["name"] == "lightPreset") {
     uint8_t oldChannelsPerLight = header->channelsPerLight;
 
-    header->resetOffsets(); //after this addLayout is called of different layout nodes which might set additional offsets (WIP)
+    header->resetOffsets();
 
     switch (lightPreset) {
       case 0: header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; break; //RGB
@@ -114,7 +115,8 @@ void DriverNode::updateControl(JsonObject control) {
       case 6: header->channelsPerLight = 4; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBW - Par Lights
       case 7: header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3; break; //GRBW - RGBW Leds
       case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRBW6
-      case 9: //troy32
+      case 9: header->channelsPerLight = 6; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBWYP - 6 channel Par/DMX Lights with UV etc
+      case 10: //troy32
         layerV->layerP->lights.header.channelsPerLight = 32;
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
         layerV->layerP->lights.header.offsetRGB = 9;
@@ -126,7 +128,7 @@ void DriverNode::updateControl(JsonObject control) {
         layerV->layerP->lights.header.offsetZoom = 5;
         layerV->layerP->lights.header.offsetBrightness = 6;
         break;
-      case 10: //troyMH15
+      case 11: //troyMH15
         layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
         layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
@@ -137,7 +139,7 @@ void DriverNode::updateControl(JsonObject control) {
         layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
         layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
         break;
-      case 11: //wowiMH24
+      case 12: //wowiMH24
         layerV->layerP->lights.header.channelsPerLight = 24;
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
         layerV->layerP->lights.header.offsetPan = 0;
@@ -196,10 +198,28 @@ void ArtNetDriverMod::setup() {
   addControl(port, "port", "number");
   addControl(FPSLimiter, "FPSLimiter", "number");
   addControl(nrOfOutputs, "nrOfOutputs", "number");
-  addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
   addControl(universesPerOutput, "universesPerOutput", "number");
+  addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
 
   memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER)); // copy in the Art-Net header.
+}
+
+bool ArtNetDriverMod::writePackage() {
+  // set the parts of the Art-Net packet header that change:
+  packet_buffer[14] = universe; //The low byte of the 15 bit Port-Address to which this packet is destined
+  packet_buffer[15] = universe >> 8; //The top 7 bits of the 15 bit Port-Address to which this packet is destined
+  packet_buffer[16] = packetSize >> 8; //The length of the DMX512 data array. High Byte
+  packet_buffer[17] = packetSize; //Low Byte of above
+
+  if (!artnetudp.writeTo(packet_buffer, MIN(packetSize, 512)+18, controllerIP, port)) {
+      Serial.print("🐛");
+      return false; // borked //no connection...
+  } 
+  // else Serial.printf(" %d", packetSize);
+
+  packetSize = 0;
+  universe++; //each packet is one universe
+  return true;
 }
 
 void ArtNetDriverMod::loop() {
@@ -216,7 +236,7 @@ void ArtNetDriverMod::loop() {
   if (header->isPositions != 0) return; //don't update if positions are sent
 
   //wait until the throttle FPS is reached
-  //wait needed to avoid misalignment between packages sent and displayed - WIP
+  //wait needed to avoid misalignment between packages sent and displayed - 🚧
   wait = 1000 / FPSLimiter + lastMillis - millis();
   if (wait > 0 && wait < 1000 / FPSLimiter)
     delay(wait); // delay in ms
@@ -228,73 +248,55 @@ void ArtNetDriverMod::loop() {
   lastMillis = millis();
 
   // calculate the number of UDP packets we need to send
-  bufferOffset = 0;
-  hardware_output_universe = 0;
+  universe = 0;
  
   packet_buffer[12] = (sequenceNumber++%254)+1; //The sequence number is used to ensure that ArtDmx packets are used in the correct order, ranging from 1..255
   packet_buffer[13] = 0; //The physical input port from which DMX512 data was input
 
-  for (uint_fast16_t hardware_output = 0; hardware_output < nrOfOutputs; hardware_output++) { //loop over all outputs
-    
-    if (bufferOffset > header->nrOfLights * header->channelsPerLight) {
-        // This stop is reached if we don't have enough pixels for the defined Art-Net output.
-        Serial.print("🥒");
-        return; // stop when we hit end of LEDs
-    }
+  //send all the leds to artnet
+  packetSize = 0;
+  channels_remaining = channelsPerOutput;
 
-    hardware_output_universe = hardware_output * universesPerOutput;
+  for (int indexP = 0; indexP < header->nrOfLights; indexP++) {
+    //fill a package
 
-    channels_remaining = channelsPerOutput;
+    reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB]);
 
-    while (channels_remaining > 0) { //loop per universe
+    if (header->offsetRGB1 != UINT8_MAX )
+      reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB1], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB1]);
+    if (header->offsetRGB2 != UINT8_MAX )
+      reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB2], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB2]);
+    if (header->offsetRGB3 != UINT8_MAX )
+      reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB3], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB3]);
 
-        packetSize = (ARTNET_CHANNELS_PER_PACKET / header->channelsPerLight) * header->channelsPerLight; //packetSize must be a multitude of channelsPerLight
+    if (lightPreset == 9 && indexP < 36)
+      packetSize += 4; // this config assumes first 36 lights are 4 channels per Light !!!!
+    else
+      packetSize += header->channelsPerLight;
 
-        if (channels_remaining < packetSize) {
-            packetSize = channels_remaining; // 258
-            channels_remaining = 0;
-        } else {
-            channels_remaining -= packetSize; // 768 (256) - 510 (170) = 258 (86)
-        }
+    channels_remaining -= header->channelsPerLight;
 
-        // set the parts of the Art-Net packet header that change:
-        packet_buffer[14] = hardware_output_universe; //The low byte of the 15 bit Port-Address to which this packet is destined
-        packet_buffer[15] = hardware_output_universe >> 8; //The top 7 bits of the 15 bit Port-Address to which this packet is destined
-        packet_buffer[16] = packetSize >> 8; //The length of the DMX512 data array. High Byte
-        packet_buffer[17] = packetSize; //Low Byte of above
+    //if packet_buffer full, or output full, send the buffer
+    if (packetSize + header->channelsPerLight > ARTNET_CHANNELS_PER_PACKET || channels_remaining < header->channelsPerLight) { //next light will not fit in the package, so send what we got
+      // Serial.printf("; %d %d %d", header->nrOfLights, packetSize+18, header->nrOfLights*header->channelsPerLight);
 
-        // bulk copy the buffer range to the packet buffer after the header 
-        memcpy(packet_buffer+18, &layerV->layerP->lights.channels[bufferOffset], packetSize); //start from the first byte of ledsP[0] //510
+      if (!writePackage()) return; //resets packagesize
 
-        //no brightness scaling for the time being
-        for (int i = 18; i < packetSize+18; i+= header->channelsPerLight) { //fill the packet with lights (all channels of the light)
+      if (channels_remaining < header->channelsPerLight) {// jump to next output
+        channels_remaining = channelsPerOutput; //reset for a new output
 
-          // set brightness all at once - seems slightly faster than scale8()?
-          // for some reason, doing 3/4 at a time is 200 micros faster than 1 at a time.
-
-          //reorder RGB and apply brightness and gamma correction
-
-          reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB]);
-
-          if (header->offsetRGB1 != UINT8_MAX )
-            reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB1], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB1]);
-          if (header->offsetRGB2 != UINT8_MAX )
-            reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB2], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB2]);
-          if (header->offsetRGB3 != UINT8_MAX )
-            reOrderAndDimRGBW(&packet_buffer[i+header->offsetRGB3], &layerV->layerP->lights.channels[bufferOffset + (i-18) + header->offsetRGB3]);
-
-        }
-
-        bufferOffset += packetSize; //multiple of channelsPerLight
-        
-        if (!artnetudp.writeTo(packet_buffer, packetSize+18, controllerIP, port)) {
-            Serial.print("🐛");
-            return; // borked
-        }
-
-        hardware_output_universe++; //each packet is one universe
+        while (universe%universesPerOutput != 0) universe++; //advance to next port
+      }
     }
   }
+
+  //send the last partially filled package
+  if (packetSize > 0) {
+    // Serial.printf(", %d %d %d", header->nrOfLights, packetSize+18, header->nrOfLights*header->channelsPerLight);
+
+    writePackage(); //remaining
+  }
+
 }
 
 // Expand to , COLOR_ORDER if defined
@@ -611,10 +613,10 @@ void ArtNetDriverMod::loop() {
       if (layerV->layerP->pass == 1) { //physical
         initDone = true;
         MB_LOGV(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
-        // if (safeModeMB) {
-        //     MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
-        //     return;
-        // }
+        if (safeModeMB) {
+          MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
+          return;
+        }
 
         int pins[NUMSTRIPS]; //max 16 pins
         int lengths[NUMSTRIPS];
@@ -654,7 +656,8 @@ void ArtNetDriverMod::loop() {
           else if (lightPreset == 4) colorOrder = ORDER_BRG;
           else if (lightPreset == 5) colorOrder = ORDER_BGR;
           // else if (lightPreset == 6) colorOrder = ORDER_RGBW; // doesn't exist!
-          else colorOrder = ORDER_GRBW; //best we can offer is 4 channels GRBW, to do: driver accepts more channels
+          else
+            colorOrder = ORDER_GRBW; //best we can offer is 4 channels GRBW, to do: driver accepts more channels
 
           ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins, (colorarrangment)colorOrder);
           #if ML_LIVE_MAPPING

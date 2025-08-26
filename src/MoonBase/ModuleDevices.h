@@ -43,19 +43,9 @@ public:
         JsonArray details; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
 
-        Char<32> deviceName;
-        deviceName = "MoonLight-";
-        uint8_t mac[6];
-        esp_read_mac(mac, ESP_MAC_WIFI_STA);
-        char macStr[5] = {0};
-        sprintf(macStr, "%02x%02x", mac[4], mac[5]);
-        // deviceName += WiFi.macAddress().substring(12);//localIP().toString().c_str();
-        deviceName += macStr;
-        property = root.add<JsonObject>(); property["name"] = "deviceName"; property["type"] = "text"; property["default"] = deviceName.c_str();
-
         property = root.add<JsonObject>(); property["name"] = "devices"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "mdnsName"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "ip"; property["type"] = "ip"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "time"; property["type"] = "time"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "mac"; property["type"] = "text"; property["ro"] = true;
@@ -141,12 +131,12 @@ public:
         if (deviceUDP.beginPacket(IPAddress(255, 255, 255, 255), deviceUDPPort)) {
             
             UDPMessage message;
-            message.name = _state.data["deviceName"].as<String>().c_str();
+            message.name = esp32sveltekit.getWiFiSettingsService()->getHostname().c_str();
             deviceUDP.write((uint8_t *)&message, sizeof(message));
             deviceUDP.endPacket();
             // MB_LOGV(MB_TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
 
-            updateDevices(_state.data["deviceName"], WiFi.localIP());
+            updateDevices(message.name.c_str(), WiFi.localIP());
 
         }
     }

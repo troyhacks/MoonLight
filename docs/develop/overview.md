@@ -20,7 +20,7 @@ Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg
 * Read [Customizing Sveltekit](https://moonmodules.org/MoonLight/develop/customizingsveltekit/)
 * Instead of cloning the repo directly from MoonLight as described above, create a fork first so you have your own environment to make changes to. See also Pull Requests below.
 * UI dev: configure vite.config.ts, go to interface folder, npm install, npm run dev. A local webserver starts on localhost. UI changes will directly be shown via this webserver
-* Changes made to the UI are not always visible in the browser, issue with caching / max-age (WIP), clear the browser cache to see latest UI.
+* Changes made to the UI are not always visible in the browser, issue with caching / max-age (🚧), clear the browser cache to see latest UI.
 * Serial Log shows which code is from which library using emoji:
 
    <img width="500" alt="Screenshot 2025-06-07 at 12 09 06" src="https://github.com/user-attachments/assets/9ac673d3-6303-40ee-b2a0-26a0befbda01" />

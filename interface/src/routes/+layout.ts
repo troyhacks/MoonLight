@@ -7,14 +7,11 @@ export const ssr = false;
 export const load = (async ({ fetch }) => {
 	const result = await fetch('/rest/features');
 	const item = await result.json();
-	const devices = await fetch('/rest/devices');
-	const devicesJson = await devices.json();
 	return {
 		features: item,
 		title: 'MoonLight',
 		github: 'MoonModules/MoonLight',
 		copyright: '2025 MoonModules⚖️GPLv3',
 		appName: 'MoonLight',
-		devices: devicesJson
 	};
 }) satisfies LayoutLoad;

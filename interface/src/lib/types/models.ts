@@ -105,7 +105,8 @@ export type RSSI = {
 	ssid: string;
 	safeMode: boolean; // 🌙 safeMode Indicates if the system is in safe mode
 	restartNeeded: boolean; // 🌙 restartNeeded Indicates if the system needs to be restarted
-	saveNeeded: boolean // 🌙 saveNeeded Indicates that changes has been made which need to be saved (or canceled)
+	saveNeeded: boolean; // 🌙 saveNeeded Indicates that changes has been made which need to be saved (or canceled)
+	hostName: string; // 🌙 to show in title and statusbar
 };
 
 export type Battery = {

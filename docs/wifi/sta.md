@@ -8,4 +8,4 @@
 	    * For most indoor applications: 15-17 dBm
 	    * For battery-powered devices: 10-15 dBm
 	    * For close-range applications: 8-12 dBm
-    * Note: When the board is in AP mode, it is set to 8.5dBM as most boards work okay with this. WiFi is also initially set to 8.5dBM
+    * 🚨: When the board is in AP mode, it is set to 8.5dBM as most boards work okay with this. WiFi is also initially set to 8.5dBM

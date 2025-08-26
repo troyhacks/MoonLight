@@ -284,6 +284,7 @@ void WiFiSettingsService::updateRSSI()
     doc["safeMode"] = safeModeMB; // 🌙
     doc["restartNeeded"] = restartNeeded; // 🌙
     doc["saveNeeded"] = saveNeeded; // 🌙
+    doc["hostName"] = getHostname(); // 🌙
     JsonObject jsonObject = doc.as<JsonObject>();
     _socket->emitEvent(EVENT_RSSI, jsonObject);
 }

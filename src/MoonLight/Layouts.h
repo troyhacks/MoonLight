@@ -42,27 +42,27 @@ class HumanSizedCubeLayout: public Node {
 
     //front: z = 0
     for (uint8_t x = 0; x<width; x++) for (uint8_t y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, 0));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
     //back: z = depth+1
     for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, depth+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
     //above: y = 0
     for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, 0, z+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
     // //below: y = height+1
     // for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, height+1, z+1));
-    // while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    // while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
     //left: x = 0
     for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(Coord3D(0, y+1, z+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
     //right: x = width+1
     for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(Coord3D(width+1, y+1, z+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
   }
 };
 
@@ -127,7 +127,7 @@ class PanelLayout: public Node {
       });
     });
 
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
   }
 
@@ -191,7 +191,7 @@ class PanelsLayout: public Node {
           });
         });
 
-        while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+        while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
       });
     });
@@ -258,7 +258,7 @@ class CubeLayout: public Node {
         });
       });
 
-      while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin - WIP
+      while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
     });
 
   }
