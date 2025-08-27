@@ -54,12 +54,6 @@
 	let showEditor: boolean = $state(false);
 	let path: string = $state("");
 
-	const cookieValue = getCookie('breadCrumbs');
-	// console.log("cookie", cookieValue);
-	if (cookieValue) {
-		breadCrumbs = JSON.parse(cookieValue);
-	}
-
 	async function getState() {
 		try {
 			const response = await fetch('/rest/FileManager', {
@@ -166,7 +160,7 @@
 			breadCrumbs.pop(); //remove last folder
 			folderListFromBreadCrumbs();
 
-			setCookie('breadCrumbs', JSON.stringify(breadCrumbs), 7);
+			localStorage.setItem('breadCrumbs', JSON.stringify(breadCrumbs));
 			showEditor = false;
 			console.log("handleEdit parent", folderList, breadCrumbs)
 		} else if (editableFile.isFile) { 
@@ -176,7 +170,7 @@
 		} else { 
 			//if folder, go to folder
 			breadCrumbs.push(editableFile.name);
-			setCookie('breadCrumbs', JSON.stringify(breadCrumbs), 7);
+			localStorage.setItem('breadCrumbs', JSON.stringify(breadCrumbs));
 			// folderList = [folderList[index], ...editableFile.files];
 			folderListFromBreadCrumbs();
 			// showEditor = true; await tick(); //wait for reactivity, not needed here
@@ -218,43 +212,18 @@
 		console.log("socket update received");
 		filesState = data;
 		folderListFromBreadCrumbs();
-		// dataLoaded = true;
 	};
 
 	onMount(() => {
+		let bc = localStorage.getItem('breadCrumbs');
+		if (bc)
+			breadCrumbs = JSON.parse(bc);
+
 		socket.on('FileManager', handleFilesState);
 		// getState(); //done in settingscard
 	});
 
 	onDestroy(() => socket.off('FileManager', handleFilesState));
-
-	//uitility function...
-	function setCookie(name: string, value: string, days: number) {
-		let expires = "";
-		if (days) {
-			const date = new Date();
-			date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-			expires = "; expires=" + date.toUTCString();
-		}
-		document.cookie = name + "=" + (value || "") + expires + "; path=/";
-	}
-
-	//uitility funtcion...
-	function getCookie(name: string) {
-		const nameEQ = name + "=";
-		const ca = document.cookie.split(';');
-		for (let i = 0; i < ca.length; i++) {
-			let c = ca[i];
-			while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-		}
-		return null;
-	}
-
-	//uitility function...
-	function eraseCookie(name: string) {
-		document.cookie = name + '=; Max-Age=-99999999;';
-	}
 
 </script>
 

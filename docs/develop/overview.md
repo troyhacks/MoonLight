@@ -124,7 +124,7 @@ There are 3 files to consider when making a board definition.
 * editableFile: current file
 * getState / postFilesState: get filesState and post changes to files (update, delete, new)
 * addFile / addFolder: create new items
-* breadcrumbs(String): folder path as string array and as string, also stored as cookie
+* breadcrumbs(String): folder path as string array and as string, stored in localStorage
 * folderListFromBreadCrumbs: create folderList of current folder
 * handleEdit: when edit button pressed: navigate back and forward through folders, edit current file
 * confirmDelete: when delete button pressed
