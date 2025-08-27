@@ -121,6 +121,11 @@ static int custom_vprintf(const char* fmt, va_list args)
     return vprintf(fmt, args);
 }
 
+#if USE_M5UNIFIED
+    #include <M5Unified.h>
+    #include "moonlight_logo.h"
+#endif
+
 void setup()
 {
     //🌙 use ESP_IDF_LOG
@@ -229,10 +234,28 @@ void setup()
     // #if CONFIG_IDF_TARGET_ESP32
     //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
     // #endif
+
+    #if USE_M5UNIFIED
+        auto cfg = M5.config();
+        M5.begin(cfg);
+        // M5.Display.fillScreen(BLACK);
+
+        M5.Display.drawPng(moonlight_logo_png, sizeof(moonlight_logo_png),0, 0, 0, 0, 0, 0, 100/320, 100/320);
+
+        // M5.Display.fillRect(50, 50, 100, 100, RED);
+        // M5.Display.setTextColor(WHITE);
+        // M5.Display.setTextSize(2);
+        // M5.Display.drawString("MoonLight", 0, 0);
+    #endif
 }
 
 void loop()
 {
-    // Delete Arduino loop task, as it is not needed in this example
-    vTaskDelete(NULL);
+    #if USE_M5UNIFIED
+        M5.update();
+        delay(100);
+    #else
+        // Delete Arduino loop task, as it is not needed in this example
+        // vTaskDelete(NULL);
+    #endif
 }

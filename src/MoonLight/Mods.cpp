@@ -247,16 +247,15 @@ void ArtNetDriverMod::loop() {
   //   return;
   lastMillis = millis();
 
-  // calculate the number of UDP packets we need to send
-  universe = 0;
- 
+  // only need to set once per frame
   packet_buffer[12] = (sequenceNumber++%254)+1; //The sequence number is used to ensure that ArtDmx packets are used in the correct order, ranging from 1..255
   packet_buffer[13] = 0; //The physical input port from which DMX512 data was input
-
-  //send all the leds to artnet
+  
+  universe = 0;
   packetSize = 0;
   channels_remaining = channelsPerOutput;
-
+  
+  //send all the leds to artnet
   for (int indexP = 0; indexP < header->nrOfLights; indexP++) {
     //fill a package
 
