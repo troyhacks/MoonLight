@@ -12,9 +12,12 @@ Above is the minimum requirement to have lights burning.
 
 ## Recommended hardware
 
-* Level shifter
+![esp32-s3-atoms3r](https://github.com/user-attachments/assets/dcfebd95-09ea-42af-824f-445ffc236013)
+
+* [M5Stack AtomS3R](https://docs.m5stack.com/en/core/AtomS3R)
+* [Level shifter SN74HCT125(N)](https://s.click.aliexpress.com/e/_EIVbQ2w)
+* Resistors: 33 or 249 ohm, see [QuinLed - The Myth of the Data Signal Resistor](https://quinled.info/data-signal-cable-conditioning/)
 * External power supply
-* Resistors
 * Capacitors
 
 For more information [QuinLed](https://quinled.info)
