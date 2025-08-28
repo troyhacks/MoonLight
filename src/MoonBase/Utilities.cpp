@@ -116,3 +116,43 @@ bool isInPSRAM(void* ptr) {
     MB_LOGE(MB_TAG, "isInPSRAM not implemented for this target");
     return false;
 }
+
+uint16_t crc16(const unsigned char* data_p, size_t length) {
+  uint8_t x;
+  uint16_t crc = 0xFFFF;
+  if (!length) return 0x1D0F;
+  while (length--) {
+    x = crc >> 8 ^ *data_p++;
+    x ^= x>>4;
+    crc = (crc << 8) ^ ((uint16_t)(x << 12)) ^ ((uint16_t)(x <<5)) ^ ((uint16_t)x);
+  }
+  return crc;
+}
+
+uint16_t gcd(uint16_t a, uint16_t b) {
+  while (b != 0) {
+    uint16_t t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
+}
+
+uint16_t lcm(uint16_t a, uint16_t b) {
+  return a / gcd(a, b) * b;
+}
+
+bool getBitValue(const uint8_t* byteArray, size_t n) {
+    size_t byteIndex = n / 8;
+    size_t bitIndex = n % 8;
+    uint8_t byte = byteArray[byteIndex];
+    return (byte >> bitIndex) & 1;
+}
+void setBitValue(uint8_t* byteArray, size_t n, bool value) {
+    size_t byteIndex = n / 8;
+    size_t bitIndex = n % 8;
+    if (value)
+        byteArray[byteIndex] |= (1 << bitIndex);
+    else
+        byteArray[byteIndex] &= ~(1 << bitIndex);
+}

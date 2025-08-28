@@ -27,21 +27,25 @@ enum mapType {
   };
   
 struct PhysMap {
-    union {
-      struct {                 //condensed rgb
-        uint16_t rgb14: 14;    //14 bits (554 RGB)
-        uint8_t mapType:2;        //2 bits (4)
-      }; //16 bits
-      uint16_t indexP: 14;   //16384 one physical light (type==1) index to ledsP array
-      uint16_t indexes:14;  //16384 multiple physical lights (type==2) index in std::vector<std::vector<uint16_t>> mappingTableIndexes;
-    }; // 2 bytes  
-    
-    PhysMap() {
-      // MB_LOGV(ML_TAG, "Constructor");
-      mapType = m_zeroLights; // the default until indexP is added
-      rgb14 = 0;
-    }
-  };
+  union {
+    struct {                 //condensed rgb
+      uint16_t rgb14: 14;    //14 bits (554 RGB)
+      uint8_t mapType:2;        //2 bits (4)
+    }; //16 bits
+    uint16_t indexP: 14;   //16384 one physical light (type==1) index to ledsP array
+    uint16_t indexes:14;  //16384 multiple physical lights (type==2) index in std::vector<std::vector<uint16_t>> mappingTableIndexes;
+  }; // 2 bytes  
+  
+  PhysMap() {
+    // MB_LOGV(ML_TAG, "Constructor");
+    mapType = m_zeroLights; // the default until indexP is added
+    rgb14 = 0;
+  }
+};
+
+#define _1D 1
+#define _2D 2
+#define _3D 3
 
 class VirtualLayer {
 
@@ -62,6 +66,9 @@ class VirtualLayer {
 
   uint8_t fadeMin;
 
+  uint8_t effectDimension = _3D; //assuming 3D for the moment
+  uint8_t layerDimension = UINT8_MAX;
+
   VirtualLayer() {
     MB_LOGV(ML_TAG, "constructor");
   }
@@ -73,6 +80,7 @@ class VirtualLayer {
 
   void addIndexP(PhysMap &physMap, uint16_t indexP);
 
+  //position is by reference as within XYZ, the position can be modified, for efficiency reasons, don't declare an extra variable for that in XYZ
   uint16_t XYZ(Coord3D &position);
   
   uint16_t XYZUnModified(const Coord3D &position) const {
@@ -168,7 +176,12 @@ class VirtualLayer {
   }
   CRGB getRGB(Coord3D pos) { return getRGB(XYZ(pos)); }
 
-  void addRGB(const Coord3D &pixel, const CRGB &color) {setRGB(pixel, getRGB(pixel) + color);}
+  void addRGB(const Coord3D &position, const CRGB &color) {setRGB(position, getRGB(position) + color);}
+
+  void blendColor(const uint16_t indexV, const CRGB& color, uint8_t blendAmount) {
+    setRGB(indexV, blend(color, getRGB(indexV), blendAmount));
+  }
+  void blendColor(Coord3D &position, const CRGB& color, const uint8_t blendAmount) {blendColor(XYZ(position), color, blendAmount);}
 
   uint8_t getWhite(const uint16_t indexV) {
     return getLight<uint8_t>(indexV, layerP->lights.header.offsetWhite);
@@ -207,6 +220,11 @@ class VirtualLayer {
   
   //addLight is called by addLayout for each light in the layout
   void addLight(Coord3D position);
+
+    //checks if a virtual light is mapped to a physical light (use with XY() or XYZ() to get the indexV)
+  bool isMapped(int indexV) const {
+    return indexV < mappingTableSizeUsed && (mappingTable[indexV].mapType == m_oneLight || mappingTable[indexV].mapType == m_moreLights);
+  }
 
   void blur1d(fract8 blur_amount)
   {

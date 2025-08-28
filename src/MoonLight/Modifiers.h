@@ -146,17 +146,17 @@ class PinwheelModifier: public Node {
   }
   
   void modifySize() override {
-    // if (layerV->projectionDimension > _1D && layerV->effectDimension > _1D) {
+    if (layerV->layerDimension > _1D && layerV->effectDimension > _1D) {
       layerV->size.y = sqrt(sq(max<uint8_t>(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
                             sq(max<uint8_t>(layerV->size.y - layerV->middle.y, layerV->middle.y))) + 1; // Adjust y before x
       layerV->size.x = petals;
       layerV->size.z = 1;
-    // }
-    // else {
-    //   layerV->size.x = petals;
-    //   layerV->size.y = 1;
-    //   layerV->size.z = 1;
-    // }
+    }
+    else {
+      layerV->size.x = petals;
+      layerV->size.y = 1;
+      layerV->size.z = 1;
+    }
     if (petals < 1) petals = 1; // Ensure at least one petal
     const int FACTORS[23] = {360, 180, 120, 90, 72, 60, 45, 40, 36, 30, 24, 20, 18, 15, 12, 10, 9, 8, 6, 5, 4, 3, 2}; // Factors of 360
     int factor;
@@ -187,9 +187,9 @@ class PinwheelModifier: public Node {
 
     position.x = value;
     position.y = 0;
-    // if (layerV->effectDimension > _1D && layerV->projectionDimension > _1D) {
+    if (layerV->effectDimension > _1D && layerV->layerDimension > _1D) {
       position.y = int(sqrt(sq(dx) + sq(dy))); // Round produced blank position
-    // }
+    }
     position.z = 0;
 
     // if (position.x == 0 && position.y == 0 && position.z == 0) ppf("Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layerV->middle.x, layerV->middle.y, swirlVal, symmetry, petals, zTwist);
@@ -244,18 +244,18 @@ class RippleYZModifier: public Node {
 
     //1D->2D: each X is rippled through the y-axis
     if (towardsY) {
-      // if (layerV->effectDimension == _1D && layerV->projectionDimension > _1D) {
+      if (layerV->effectDimension == _1D && layerV->layerDimension > _1D) {
         for (int y=layerV->size.y-1; y>=1; y--) {
           for (int x=0; x<layerV->size.x; x++) {
             layerV->setRGB(Coord3D(x, y, 0), layerV->getRGB(Coord3D(x,y-1,0)));
           }
         }
-      // }
+      }
     }
 
     //2D->3D: each XY plane is rippled through the z-axis
     if (towardsZ) { //not relevant for 2D fixtures
-      // if (layerV->effectDimension < _3D && layerV->projectionDimension == _3D) {
+      if (layerV->effectDimension < _3D && layerV->layerDimension == _3D) {
         for (int z=layerV->size.z-1; z>=1; z--) {
           for (int y=0; y<layerV->size.y; y++) {
             for (int x=0; x<layerV->size.x; x++) {
@@ -263,7 +263,7 @@ class RippleYZModifier: public Node {
             }
           }
         }
-      // }
+      }
     }
   }
 }; //RippleYZ

@@ -9,7 +9,7 @@ MoonLight's core functionality is called MoonBase, Lighting specific functionali
 
 Examples of Moonbase functionality are monitor and manage a device, manage WiFi, Firmware updates, System Status and Restart. On top of that there is a file manager and an instance manager.
 
-MoonLight functionality is aimed at running effects on multiple lights. It's primarely focused on LED strips or LED panels but also DMX lights can be controlled via Art-Net. Depending on the type of ESP32 used and the amount of memory available, the number of LEDs can go up to 12288 at 120 FPS! Even more LEDs are possible, upon 65K at lower framerates. Also a large number of DMX lights can be controlled. MoonLight works with virtual and physical layers of lights and contains a node based model where nodes can be light layouts, effects and modifiers and run effects on a virtual layer and map the effect onto physical lights. 
+MoonLight functionality is aimed at running effects on multiple lights. It's primarely focused on LED strips or LED panels but also DMX lights can be controlled via Art-Net. Depending on the type of ESP32 used and the amount of memory available, the number of LEDs can go up to 12288 at 120 FPS! Even more LEDs are possible, upon 61440 (120x512) at lower framerates. Also a large number of DMX lights can be controlled. MoonLight works with virtual and physical layers of lights and contains a node based model where nodes can be light layouts, effects and modifiers and run effects on a virtual layer and map the effect onto physical lights. 
 
 <img width="400" src="https://github.com/user-attachments/assets/09143feb-1356-463c-bc23-6982ef3eeb42"/>
 

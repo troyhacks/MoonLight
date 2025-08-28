@@ -114,7 +114,7 @@ class BouncingBallsEffect: public Node {
     // const bool hasCol2 = SEGCOLOR(2);
     const unsigned long time = millis();
 
-    //not necessary as effectControls is cleared at setup(LedsLayer &leds)
+    //not necessary as effectControls is cleared at setup()
     // if (call == 0) {
     //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     // }
@@ -152,7 +152,7 @@ class BouncingBallsEffect: public Node {
 
         CRGB color = ColorFromPalette(layerV->layerP->palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
-        layerV->setRGB({pos, y, 0}, color);
+        layerV->setRGB(Coord3D(pos, y), color);
         // if (layerV->size.x<32) layerV->setRGB(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
         // else           layerV->setRGB(balls[i].height + (stripNr+1)*10.0f, color);
       } //balls      layerV->fill_solid(CRGB::White);
@@ -204,13 +204,13 @@ public:
       for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
         yoffs += scale;
 
-        byte rdistort = cos8((cos8(((pos.x<<3)+a )&255)+cos8(((pos.y<<3)-a2)&255)+a3   )&255)>>1; 
-        byte gdistort = cos8((cos8(((pos.x<<3)-a2)&255)+cos8(((pos.y<<3)+a3)&255)+a+32 )&255)>>1; 
-        byte bdistort = cos8((cos8(((pos.x<<3)+a3)&255)+cos8(((pos.y<<3)-a) &255)+a2+64)&255)>>1; 
+        uint8_t  rdistort = cos8((cos8(((pos.x<<3)+a )&255)+cos8(((pos.y<<3)-a2)&255)+a3   )&255)>>1; 
+        uint8_t  gdistort = cos8((cos8(((pos.x<<3)-a2)&255)+cos8(((pos.y<<3)+a3)&255)+a+32 )&255)>>1; 
+        uint8_t  bdistort = cos8((cos8(((pos.x<<3)+a3)&255)+cos8(((pos.y<<3)-a) &255)+a2+64)&255)>>1; 
 
-        byte valueR = rdistort+ w*  (a- ( ((xoffs - cx)  * (xoffs - cx)  + (yoffs - cy)  * (yoffs - cy))>>7  ));
-        byte valueG = gdistort+ w*  (a2-( ((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1))>>7 ));
-        byte valueB = bdistort+ w*  (a3-( ((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2))>>7 ));
+        uint8_t  valueR = rdistort+ w*  (a- ( ((xoffs - cx)  * (xoffs - cx)  + (yoffs - cy)  * (yoffs - cy))>>7  ));
+        uint8_t  valueG = gdistort+ w*  (a2-( ((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1))>>7 ));
+        uint8_t  valueB = bdistort+ w*  (a3-( ((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2))>>7 ));
 
         valueR = gamma8(cos8(valueR));
         valueG = gamma8(cos8(valueG));
@@ -372,7 +372,7 @@ public:
       if (remaining < 1) {band++; remaining+= bandwidth;} //increase remaining but keep the current remaining
       remaining--; //consume remaining
 
-      // ppf("x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
+      // MB_LOGD(ML_TAG, "x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
       uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):band; // always use full range. comment out this line to get the previous behaviour.
       // frBand = constrain(frBand, 0, 15); //WLEDMM can never be out of bounds (I think...)
       uint16_t colorIndex = frBand * 17; //WLEDMM 0.255
@@ -405,11 +405,11 @@ public:
 
         ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
 
-        layerV->setRGB(Coord3D(pos.x, layerV->size.y - 1 - pos.y, 0), ledColor);
+        layerV->setRGB(Coord3D(pos.x, layerV->size.y - 1 - pos.y), ledColor);
       }
 
       if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
-        layerV->setRGB(Coord3D(pos.x, layerV->size.y - previousBarHeight[pos.x], 0), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
+        layerV->setRGB(Coord3D(pos.x, layerV->size.y - previousBarHeight[pos.x]), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
 
       if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
 
@@ -844,7 +844,7 @@ class PopCornEffect: public Node {
           // {
             popcorn[i].colIndex = random8();
           // } else {
-          //   byte col = random8(0, NUM_COLORS);
+          //   uint8_t  col = random8(0, NUM_COLORS);
           //   if (!SEGCOLOR(2) || !SEGCOLOR(col)) col = 0;
           //   popcorn[i].colIndex = col;
           // }
@@ -955,7 +955,7 @@ class RGBWParEffect: public Node {
 
     uint8_t pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
 
-    layerV->setRGB({pos,0,0}, CRGB(red, green, blue));
+    layerV->setRGB(Coord3D(pos), CRGB(red, green, blue));
     layerV->setWhite({pos,0,0}, white);
   }
 };
@@ -1043,7 +1043,7 @@ public:
       case 7: text.format("%dC", sharedData.clientListSize); break;
       case 8: text.format("%dCC", sharedData.connectedClients); break;
     }
-    layerV->setRGB(Coord3D(choice-1, 0), CRGB::Blue); 
+    layerV->setRGB(Coord3D(choice-1), CRGB::Blue); 
 
     // EVERY_N_SECONDS(1)
     //   Serial.printf(" %d:%s", choice-1, text.c_str());
@@ -1178,11 +1178,11 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
 
     for (int i = 0; i < numStars; i++) {
       //update star
-      // ppf("Star %d Pos: %d, %d, %d -> ", i, stars[i].x, stars[i].y, stars[i].z);
+      // MB_LOGD(ML_TAG, "Star %d Pos: %d, %d, %d -> ", i, stars[i].x, stars[i].y, stars[i].z);
       float sx = layerV->size.x/2.0 + fmap(float(stars[i].x) / stars[i].z, 0, 1, 0, layerV->size.x/2.0);
       float sy = layerV->size.y/2.0 + fmap(float(stars[i].y) / stars[i].z, 0, 1, 0, layerV->size.y/2.0);
 
-      // ppf(" %f, %f\n", sx, sy);
+      // MB_LOGD(ML_TAG, " %f, %f\n", sx, sy);
 
       Coord3D pos = Coord3D(sx, sy);
       if (!pos.isOutofBounds(layerV->size)) {
@@ -1250,7 +1250,7 @@ public:
         uint8_t hue = huebase + ((pos.x+pos.y*macro_mutator*pos.x)/(micro_mutator+1));
         // uint8_t hue = huebase + ((pos.x+pos.y)*(250-macro_mutator)/5) + ((pos.x+pos.y*macro_mutator*pos.x)/(micro_mutator+1)); Original
         CRGB colour = ColorFromPalette(layerV->layerP->palette, hue, 255);
-        layerV->setRGB(pos, colour);// blend(layerV->getPixelColor(pos), colour, 155);
+        layerV->setRGB(pos, colour);// blend(layerV->getRGB(pos), colour, 155);
       }
     }
   }
@@ -1272,8 +1272,8 @@ class WaverlyEffect: public Node {
     addControl(amplification, "amplification", "range");
     addControl(noClouds, "noClouds", "checkbox");
 
-    // ui->initCheckBox(parentVar, "soundPressure", layerV->effectData.write<bool>(false));
-    // ui->initCheckBox(parentVar, "AGCDebug", layerV->effectData.write<bool>(false));
+    // addControl(bool, "soundPressure", layerV->effectData.write<bool>(false));
+    // addControl(bool, "AGCDebug", layerV->effectData.write<bool>(false));
   }
 
   void loop() override {
@@ -1354,10 +1354,10 @@ public:
       //connect saw and square
       if ((type == 0 || type == 3) && abs(prevPos - pos) > layerV->size.x / 2) {
         for (uint8_t x=0; x<layerV->size.x; x++)
-          layerV->setRGB({x, y, 0}, color);
+          layerV->setRGB(Coord3D(x, y), color);
       }
 
-      layerV->setRGB({pos, y, 0}, color); //= CRGB(255, random8(), 0);
+      layerV->setRGB(Coord3D(pos, y), color); //= CRGB(255, random8(), 0);
       prevPos = pos;
     }
   }
@@ -1603,5 +1603,2309 @@ class MHWowiEffect: public Node {
     }
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Written by Ewoud Wijma in 2022, inspired by https://natureofcode.com/book/chapter-7-cellular-automata/ and https://github.com/DougHaber/nlife-color ,
+// Modified By: Brandon Butler in 2024
+class GameOfLifeEffect: public Node {
+  public:
+  static const char * name() {return "GameOfLife 💫";}
+  static uint8_t dim() {return _3D;} //supports 3D but also 2D (1D as well?)
+  static const char * tags() {return "";}
+
+  void placePentomino(uint8_t  *futureCells, bool colorByAge) {
+    uint8_t  pattern[5][2] = {{1, 0}, {0, 1}, {1, 1}, {2, 1}, {2, 2}}; // R-pentomino
+    if (!random8(5)) pattern[0][1] = 3; // 1/5 chance to use glider
+    CRGB color = ColorFromPalette(layerV->layerP->palette, random8());
+    for (int attempts = 0; attempts < 100; attempts++) {
+      int x = random8(1, layerV->size.x - 3);
+      int y = random8(1, layerV->size.y - 5);
+      int z = random8(2) * (layerV->size.z - 1);
+      bool canPlace = true;
+      for (int i = 0; i < 5; i++) {
+        int nx = x + pattern[i][0];
+        int ny = y + pattern[i][1];
+        if (getBitValue(futureCells, layerV->XYZUnModified(Coord3D(nx, ny, z)))) {canPlace = false; break;}
+      }
+      if (canPlace || attempts == 99) {
+        for (int i = 0; i < 5; i++) {
+          int nx = x + pattern[i][0];
+          int ny = y + pattern[i][1];
+          setBitValue(futureCells, layerV->XYZUnModified(Coord3D(nx, ny, z)), true);
+          layerV->setRGB(Coord3D(nx, ny, z), colorByAge ? CRGB::Green : color);
+        }
+        return;
+      }
+    }
+  }
+
+  bool ruleChanged = true;
+  Coord3D bgC             = {0,0,0};
+  uint8_t  ruleset            = 1;
+  String customRuleString = "B/S";
+  uint8_t speed           = 20;
+  uint8_t  lifeChance         = 32;
+  uint8_t mutation        = 2;
+  bool wrap         = true;
+  bool disablePause = false;
+  bool colorByAge   = false;
+  bool infinite     = false;
+  uint8_t blur            = 128;
+
+  void updateControl(JsonObject control) override {
+    Node::updateControl(control);
+
+    if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
+      String ruleString = "";
+      if      (ruleset == 0) ruleString = customRuleString; //Custom
+      else if (ruleset == 1) ruleString = "B3/S23";         //Conway's Game of Life
+      else if (ruleset == 2) ruleString = "B36/S23";        //HighLife
+      else if (ruleset == 3) ruleString = "B0123478/S34678";//InverseLife
+      else if (ruleset == 4) ruleString = "B3/S12345";      //Maze
+      else if (ruleset == 5) ruleString = "B3/S1234";       //Mazecentric
+      else if (ruleset == 6) ruleString = "B367/S23";       //DrighLife
+
+      memset(birthNumbers,   0, sizeof(bool) * 9);
+      memset(surviveNumbers, 0, sizeof(bool) * 9);
+
+      //Rule String Parsing
+      int slashIndex = ruleString.indexOf('/');
+      for (int i = 0; i < ruleString.length(); i++) {
+        int num = ruleString.charAt(i) - '0';
+        if (num >= 0 && num < 9) {
+          if (i < slashIndex) birthNumbers[num] = true;
+          else surviveNumbers[num] = true;
+        }
+      }
+    }
+  }
+
+  void setup() override {
+    addControl(bgC, "backgroundColor", "coord3D", 0, 255);
+    JsonObject property = addControl(ruleset, "ruleset", "select"); 
+    JsonArray values = property["values"].to<JsonArray>();
+    values.add("Custom B/S");
+    values.add("Conway's Game of Life B3/S23");
+    values.add("HighLife B36/S23");
+    values.add("InverseLife B0123478/S34678");
+    values.add("Maze B3/S12345");
+    values.add("Mazecentric B3/S1234");
+    values.add("DrighLife B367/S23");
+
+    addControl(customRuleString, "customRuleString", "text", 0, 32);
+
+    addControl(speed, "GameSpeed (FPS)", "range", 0, 100);
+    addControl(lifeChance, "startingLifeDensity", "range", 10, 90);
+    addControl(mutation, "mutationChance", "range", 0, 100);
+    addControl(wrap, "wrap", "checkbox");
+    addControl(disablePause, "disablePause", "checkbox");
+    addControl(colorByAge, "colorByAge", "checkbox");
+    addControl(infinite, "infinite", "checkbox");
+    addControl(blur, "blur", "range", 0, 255);
+
+    // startNewGameOfLife();
+  }
+
+  unsigned long step;
+  uint16_t gliderLength;
+  uint16_t cubeGliderLength;
+  uint16_t oscillatorCRC;
+  uint16_t spaceshipCRC;
+  uint16_t cubeGliderCRC;
+  bool     soloGlider;
+  uint16_t generation;
+  bool     birthNumbers[9];
+  bool     surviveNumbers[9];
+  CRGB     prevPalette;
+  uint8_t      *cells = nullptr;
+  uint8_t      *futureCells = nullptr;
+  uint8_t      *cellColors = nullptr;
+
+  void startNewGameOfLife() {
+    prevPalette  = ColorFromPalette(layerV->layerP->palette, 0);
+    generation = 1;
+    disablePause ? step = millis() : step = millis() + 1500;
+
+    // Setup Grid
+    memset(cells, 0, dataSize);
+    memset(cellColors, 0, layerV->size.x * layerV->size.y * layerV->size.z);
+
+    for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++){
+      if (layerV->layerDimension == _3D && !layerV->isMapped(layerV->XYZUnModified(Coord3D(x,y,z)))) continue;
+      if (random8(100) < lifeChance) {
+        int index = layerV->XYZUnModified(Coord3D(x,y,z));
+        setBitValue(cells, index, true);
+        cellColors[index] = random8(1, 255);
+        layerV->setRGB(Coord3D(x,y,z), colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, cellColors[index]));
+        // layerV->setRGB(Coord3D(x,y,z), bgColor); // Color set in redraw loop
+      }
+    }
+    memcpy(futureCells, cells, dataSize);
+
+    soloGlider = false;
+    // Change CRCs
+    uint16_t crc = crc16((const unsigned char*)cells, dataSize);
+    oscillatorCRC = crc, spaceshipCRC = crc, cubeGliderCRC = crc;
+    gliderLength  = lcm(layerV->size.y, layerV->size.x) * 4;
+    cubeGliderLength = gliderLength * 6; // Change later for rectangular cuboid
+  }
+
+  int dataSize = 0;
+
+  ~GameOfLifeEffect() {
+    //destructor
+    Node::~Node();
+
+    if (cells)      heap_caps_free(cells);
+    if (futureCells) heap_caps_free(futureCells);
+    if (cellColors)  heap_caps_free(cellColors);
+  }
+
+  void loop() override {
+
+    static int prevSizeX = 0, prevSizeY = 0, prevSizeZ = 0;
+    int sizeX = layerV->size.x;
+    int sizeY = layerV->size.y;
+    int sizeZ = layerV->size.z;
+
+    if (sizeX != prevSizeX || sizeY != prevSizeY || sizeZ != prevSizeZ) {
+        prevSizeX = sizeX;
+        prevSizeY = sizeY;
+        prevSizeZ = sizeZ;
+
+        dataSize = ((sizeX * sizeY * sizeZ + 7) / 8);
+
+        if (cells)      heap_caps_free(cells);
+        if (futureCells) heap_caps_free(futureCells);
+        if (cellColors)  heap_caps_free(cellColors);
+
+        cells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+        futureCells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+        cellColors  = (uint8_t*)heap_caps_malloc_prefer(sizeX * sizeY * sizeZ, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+
+        if (!cells || !futureCells || !cellColors) {
+            MB_LOGE(ML_TAG, "GameOfLife: heap_caps_malloc_prefer failed");
+            return;
+        }
+        memset(cells, 0, dataSize);
+        memset(futureCells, 0, dataSize);
+        memset(cellColors, 0, sizeX * sizeY * sizeZ);
+
+        startNewGameOfLife();
+    } else if (generation == 0 && step < millis()) {
+      startNewGameOfLife();
+      return; //?
+    }
+
+    CRGB bgColor = CRGB(bgC.x, bgC.y, bgC.z);
+    CRGB color   = ColorFromPalette(layerV->layerP->palette, random8()); // Used if all parents died
+
+    int fadedBackground = 0;
+    if (blur > 220 && !colorByAge) { // Keep faded background if blur > 220
+      fadedBackground = bgColor.r + bgColor.g + bgColor.b + 20 + (blur-220);
+      blur -= (blur-220);
+    }
+    bool blurDead = step > millis() && !fadedBackground;
+    // Redraw Loop
+    if (generation <= 1 || blurDead) { // Readd overlay support when implemented
+      for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++){
+        uint16_t cIndex = layerV->XYZUnModified(Coord3D(x,y,z)); // Current cell index (bit grid lookup)
+        Coord3D cLocPos = Coord3D(x,y,z);
+        uint16_t cLoc   = layerV->XYZ(cLocPos);            // Current cell location (led index)
+        if (!layerV->isMapped(cIndex)) continue;
+        bool alive = getBitValue(cells, cIndex);
+        bool recolor = (alive && generation == 1 && cellColors[cIndex] == 0 && !random(16)); // Palette change or Initial Color
+        // Redraw alive if palette changed, spawn initial colors randomly, age alive cells while paused
+        if      (alive && recolor) {
+          cellColors[cIndex] = random8(1, 255);
+          layerV->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, cellColors[cIndex]));
+        }
+        else if (alive && colorByAge && !generation) layerV->blendColor(cLoc, CRGB::Red, 248); // Age alive cells while paused
+        else if (alive && cellColors[cIndex] != 0) layerV->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, cellColors[cIndex]));
+        // Redraw dead if palette changed, blur paused game, fade on newgame
+        // if      (!alive && (paletteChanged || disablePause)) layerV->setRGB(cLoc, bgColor);   // Remove blended dead cells
+        else if (!alive && blurDead)         layerV->blendColor(cLoc, bgColor, blur);           // Blend dead cells while paused
+        else if (!alive && generation == 1) layerV->blendColor(cLoc, bgColor, 248);            // Fade dead on new game
+      }
+    }
+
+    // if (!speed || step > millis() || millis() - step < 1000 / speed) return; // Check if enough time has passed for updating
+    if (!speed || step > millis() || (speed != 100 && millis() - step < 1000 / speed)) return; // Uncapped speed when slider maxed
+
+    //Update Game of Life
+    int aliveCount = 0, deadCount = 0; // Detect solo gliders and dead grids
+    const int zAxis  = (layerV->layerDimension == _3D) ? 1 : 0; // Avoids looping through z axis neighbors if 2D
+    bool disableWrap = !wrap || soloGlider || generation % 1500 == 0 || zAxis;
+    //Loop through all cells. Count neighbors, apply rules, setPixel
+    for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++){
+      Coord3D  cPos      = Coord3D(x, y, z);
+      uint16_t cIndex    = layerV->XYZUnModified(cPos);
+      bool     cellValue = getBitValue(cells, cIndex);
+      if (cellValue) aliveCount++; else deadCount++;
+      if (zAxis && !layerV->isMapped(cIndex)) continue; // Skip if not physical led on 3D fixtures
+      uint8_t  neighbors = 0, colorCount = 0;
+      uint8_t  nColors[9];
+
+      for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -zAxis; k <= zAxis; k++) {
+        if (i==0 && j==0 && k==0) continue; // Ignore itself
+        Coord3D nPos = Coord3D(x+i, y+j, z+k);
+        if (nPos.isOutofBounds(layerV->size)) {
+          // Wrap is disabled when unchecked, for 3D fixtures, every 1500 generations, and solo gliders
+          if (disableWrap) continue;
+          nPos = (nPos + layerV->size) % layerV->size; // Wrap around 3D
+        }
+        uint16_t nIndex = layerV->XYZUnModified(nPos);
+        // Count neighbors and store up to 9 neighbor colors
+        if (getBitValue(cells, nIndex)) {
+          neighbors++;
+          if (cellValue || colorByAge) continue; // Skip if cell is alive (color already set) or color by age (colors are not used)
+          if (cellColors[nIndex] == 0) continue; // Skip if neighbor color is 0 (dead cell)
+          nColors[colorCount % 9] = cellColors[nIndex];
+          colorCount++;
+        }
+      }
+      // Rules of Life
+      if (cellValue && !surviveNumbers[neighbors]) {
+        // Loneliness or Overpopulation
+        setBitValue(futureCells, cIndex, false);
+        layerV->blendColor(cPos, bgColor, blur);
+      }
+      else if (!cellValue && birthNumbers[neighbors]){
+        // Reproduction
+        setBitValue(futureCells, cIndex, true);
+        uint8_t  colorIndex = nColors[random8(colorCount)];
+        if (random8(100) < mutation) colorIndex = random8();
+        cellColors[cIndex] = colorIndex;
+        layerV->setRGB(cPos, colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, colorIndex));
+      }
+      else {
+        // Blending, fade dead cells further causing blurring effect to moving cells
+        if (!cellValue) {
+          if (fadedBackground) {
+              CRGB val = layerV->getRGB(cPos);
+              if (fadedBackground < val.r + val.g + val.b) layerV->blendColor(cPos, bgColor, blur);
+          }
+          else layerV->blendColor(cPos, bgColor, blur);
+        }
+        else { // alive
+          if (colorByAge) layerV->blendColor(cPos, CRGB::Red, 248);
+          else layerV->setRGB(cPos, ColorFromPalette(layerV->layerP->palette, cellColors[cIndex]));
+        }
+      }
+    }
+
+    if (aliveCount == 5) soloGlider = true; else soloGlider = false;
+    memcpy(cells, futureCells, dataSize);
+    uint16_t crc = crc16((const unsigned char*)cells, dataSize);
+
+    bool repetition = false;
+    if (!aliveCount || crc == oscillatorCRC || crc == spaceshipCRC || crc == cubeGliderCRC) repetition = true;
+    if ((repetition && infinite) || (infinite && !random8(50)) || (infinite && float(aliveCount)/(aliveCount + deadCount) < 0.05)) {
+      placePentomino(futureCells, colorByAge); // Place R-pentomino/Glider if infinite mode is enabled
+      memcpy(cells, futureCells, dataSize);
+      repetition = false;
+    }
+    if (repetition) {
+      generation = 0;
+      disablePause ? step = millis() : step = millis() + 1000;
+      return;
+    }
+    // Update CRC values
+    if (generation % 16 == 0) oscillatorCRC = crc;
+    if (gliderLength     && generation % gliderLength     == 0) spaceshipCRC = crc;
+    if (cubeGliderLength && generation % cubeGliderLength == 0) cubeGliderCRC = crc;
+    (generation)++;
+    step = millis();
+  }
+}; //GameOfLife
+
+
+
+// class RubiksCubeEffect: public Node {
+//   public:
+//   static const char * name() {return "Rubik's Cube 💫";}
+//   static uint8_t     dim() {return _3D;}
+//   static const char * tags() {return "💫";}
+
+//   struct Cube {
+//       uint8_t SIZE;
+//       static const uint8_t MAX_SIZE = 8;
+//       using Face = std::array<std::array<uint8_t, MAX_SIZE>, MAX_SIZE>;
+//       Face front;
+//       Face back;
+//       Face left;
+//       Face right;
+//       Face top;
+//       Face bottom;
+
+//       Cube() {
+//         init(SIZE);
+//       }
+      
+//       void init(uint8_t cubeSize) {
+//         SIZE = cubeSize;
+//         for (int i = 0; i < MAX_SIZE; i++) for (int j = 0; j < MAX_SIZE; j++) {
+//           front[i][j]  = 0;
+//           back[i][j]   = 1;  
+//           left[i][j]   = 2;  
+//           right[i][j]  = 3; 
+//           top[i][j]    = 4;   
+//           bottom[i][j] = 5;
+//         }
+//       }
+
+//       void rotateFace(Face& face, bool clockwise) {
+//         Face temp = face;
+//         if (clockwise) for (int i = 0; i < SIZE; i++) for (int j = 0; j < SIZE; j++) {
+//           face[j][SIZE - 1 - i] = temp[i][j]; 
+//         }  
+//         else for (int i = 0; i < SIZE; i++) for (int j = 0; j < SIZE; j++) {
+//           face[SIZE - 1 - j][i] = temp[i][j];
+//         }
+//       }
+
+//       void rotateRow(int startRow, int stopRow, bool clockwise) {
+//         std::array<uint8_t, MAX_SIZE> temp;
+//         for (int row = startRow; row <= stopRow; row++) {
+//           if (clockwise) for (int i = 0; i < SIZE; i++) {
+//             temp[i]       = left[row][i];
+//             left[row][i]  = front[row][i];
+//             front[row][i] = right[row][i];
+//             right[row][i] = back[row][i];
+//             back[row][i]  = temp[i];
+//           } 
+//           else for (int i = 0; i < SIZE; i++) {
+//             temp[i]       = left[row][i];
+//             left[row][i]  = back[row][i];
+//             back[row][i]  = right[row][i];
+//             right[row][i] = front[row][i];
+//             front[row][i] = temp[i];
+//           }
+//         }
+//       }
+
+//       void rotateColumn(int startCol, int stopCol, bool clockwise) {
+//         std::array<uint8_t, MAX_SIZE> temp;
+//         for (int col = startCol; col <= stopCol; col++) {
+//           if (clockwise) for (int i = 0; i < SIZE; i++) {
+//             temp[i]        = top[i][col];
+//             top[i][col]    = front[i][col];
+//             front[i][col]  = bottom[i][col];
+//             bottom[i][col] = back[SIZE - 1 - i][SIZE - 1 - col];
+//             back[SIZE - 1 - i][SIZE - 1 - col] = temp[i];   
+//           }    
+//           else for (int i = 0; i < SIZE; i++) {
+//             temp[i]        = top[i][col];
+//             top[i][col]    = back[SIZE - 1 - i][SIZE - 1 - col];
+//             back[SIZE - 1 - i][SIZE - 1 - col] = bottom[i][col];
+//             bottom[i][col] = front[i][col];
+//             front[i][col]  = temp[i];
+//           }
+//         }
+//       }
+
+//       void rotateFaceLayer(bool clockwise, int startLayer, int endLayer) {
+//         for (int layer = startLayer; layer <= endLayer; layer++) {
+//           std::array<uint8_t, MAX_SIZE> temp;
+//           for (int i = 0; i < SIZE; i++) temp[i] = clockwise ? top[SIZE - 1 - layer][i] : bottom[layer][i];
+//           for (int i = 0; i < SIZE; i++) {
+//             if (clockwise) {
+//               top[SIZE - 1 - layer][i] = left[SIZE - 1 - i][SIZE - 1 - layer];
+//               left[SIZE - 1 - i][SIZE - 1 - layer] = bottom[layer][SIZE - 1 - i];
+//               bottom[layer][SIZE - 1 - i] = right[i][layer];
+//               right[i][layer] = temp[i];
+//             } else {
+//               bottom[layer][SIZE - 1 - i] = left[SIZE - 1 - i][SIZE - 1 - layer];
+//               left[SIZE - 1 - i][SIZE - 1 - layer] = top[SIZE - 1 - layer][i];
+//               top[SIZE - 1 - layer][i] = right[i][layer];
+//               right[i][layer] = temp[SIZE - 1 - i];
+//             }
+//           }
+//         }
+//       }
+
+//       void rotateFront(bool clockwise, uint8_t width) {
+//         rotateFaceLayer(clockwise, 0, width - 1);
+//         rotateFace(front, clockwise);
+//         if (width >= SIZE) rotateFace(back, !clockwise);
+//       }
+//       void rotateBack(bool clockwise, uint8_t width) {
+//         rotateFaceLayer(!clockwise, SIZE - width, SIZE - 1);
+//         rotateFace(back, clockwise);
+//         if (width >= SIZE) rotateFace(front, !clockwise);
+//       }
+//       void rotateLeft(bool clockwise, uint8_t width) {
+//         rotateFace(left, clockwise);
+//         rotateColumn(0, width - 1, !clockwise);
+//         if (width >= SIZE) rotateFace(right, !clockwise);
+//       }
+//       void rotateRight(bool clockwise, uint8_t width) {
+//         rotateFace(right, clockwise);
+//         rotateColumn(SIZE - width, SIZE - 1, clockwise);
+//         if (width >= SIZE) rotateFace(left, !clockwise);
+//       }
+//       void rotateTop(bool clockwise, uint8_t width) {
+//         rotateFace(top, clockwise);
+//         rotateRow(0, width - 1, clockwise);
+//         if (width >= SIZE) rotateFace(bottom, !clockwise);
+//       }
+//       void rotateBottom(bool clockwise, uint8_t width) {
+//         rotateFace(bottom, clockwise);
+//         rotateRow(SIZE - width, SIZE - 1, !clockwise);
+//         if (width >= SIZE) rotateFace(top, !clockwise);
+//       }
+
+//       void drawCube() {
+//         int sizeX = MAX(layerV->size.x-1, 1);
+//         int sizeY = MAX(layerV->size.y-1, 1);
+//         int sizeZ = MAX(layerV->size.z-1, 1);
+
+//         // 3 Sided Cube Cheat add 1 to led size if "panels" missing. May affect different fixture types
+//         if (layerV->layerDimension == _3D) {
+//           if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(0, layerV->size.y/2, layerV->size.z/2})) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x-1, layerV->size.y/2, layerV->size.z/2}))) sizeX++;
+//           if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, 0, layerV->size.z/2})) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y-1, layerV->size.z/2}))) sizeY++;
+//           if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, 0})) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, layerV->size.z-1}))) sizeZ++;
+//         }
+
+//         // Previously SIZE - 1. Cube size expanded by 2, makes edges thicker. Constrains are used to prevent out of bounds
+//         const float scaleX = (SIZE + 1.0) / sizeX;
+//         const float scaleY = (SIZE + 1.0) / sizeY;
+//         const float scaleZ = (SIZE + 1.0) / sizeZ;
+
+//         // Calculate once for optimization
+//         const int halfX = sizeX / 2;
+//         const int halfY = sizeY / 2;
+//         const int halfZ = sizeZ / 2;
+
+//         const CRGB COLOR_MAP[] = {CRGB::Red, CRGB::DarkOrange, CRGB::Blue, CRGB::Green, CRGB::Yellow, CRGB::White};
+        
+//         for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++) { 
+//           Coord3D led = {x, y, z};
+//           if (layerV->isMapped(layerV->XYZUnModified(led)) == 0) continue; // skip if not a physical LED
+
+//           // Normalize the coordinates to the Rubik's cube range. Subtract 1 since cube expanded by 2
+//           int normalizedX = constrain(round(x * scaleX) - 1, 0, SIZE - 1);
+//           int normalizedY = constrain(round(y * scaleY) - 1, 0, SIZE - 1);
+//           int normalizedZ = constrain(round(z * scaleZ) - 1, 0, SIZE - 1);
+          
+//           // Calculate the distance to the closest face
+//           int distX = min(x, sizeX - x);
+//           int distY = min(y, sizeY - y);
+//           int distZ = min(z, sizeZ - z);
+//           int dist  = min(distX, min(distY, distZ));
+
+//           if      (dist == distZ && z < halfZ)  layerV->setRGB(led, COLOR_MAP[front[normalizedY][normalizedX]]);
+//           else if (dist == distX && x < halfX)  layerV->setRGB(led, COLOR_MAP[left[normalizedY][SIZE - 1 - normalizedZ]]);
+//           else if (dist == distY && y < halfY)  layerV->setRGB(led, COLOR_MAP[top[SIZE - 1 - normalizedZ][normalizedX]]);
+//           else if (dist == distZ && z >= halfZ) layerV->setRGB(led, COLOR_MAP[back[normalizedY][SIZE - 1 - normalizedX]]);
+//           else if (dist == distX && x >= halfX) layerV->setRGB(led, COLOR_MAP[right[normalizedY][normalizedZ]]);
+//           else if (dist == distY && y >= halfY) layerV->setRGB(led, COLOR_MAP[bottom[normalizedZ][normalizedX]]);
+//         }
+//       }
+//   };
+
+//   struct Move {
+//       uint8_t face;      // 0-5 (3 bits)
+//       uint8_t width;     // 0-7 (3 bits)
+//       uint8_t direction; // 0 or 1 (1 bit)
+//   };
+
+//   Move createRandomMoveStruct(uint8_t cubeSize, uint8_t prevFace) {
+//       Move move;
+//       do {
+//         move.face = random(6);
+//       } while (move.face/2 == prevFace/2);
+//       move.width     = random(cubeSize-2);
+//       move.direction = random(2);
+//       return move;
+//   }
+
+//   uint8_t packMove(Move move) {
+//       uint8_t packed = (move.face & 0b00000111) | 
+//                       ((move.width << 3) & 0b00111000) | 
+//                       ((move.direction << 6) & 0b01000000);
+//       return packed;
+//   }
+
+//   Move unpackMove(uint8_t packedMove) {
+//       Move move;
+//       move.face      = packedMove & 0b00000111;
+//       move.width     = (packedMove >> 3) & 0b00000111;
+//       move.direction = (packedMove >> 6) & 0b00000001;
+//       return move;
+//   }
+
+//   // UI control variables
+//   uint8_t turnsPerSecond;
+//   uint8_t cubeSize;
+//   bool randomTurning;
+
+//   void setup() override {
+//     // bool *setup = layerV->effectData.write<bool>(true);
+//     // addControl(bgC, "turnsPerSecond", layerV->effectData.write<uint8_t>(1), 0, 20);   
+//     // addControl(bgC, "cubeSize",       layerV->effectData.write<uint8_t>(2), 1, 8, false, [setup] (EventArguments) { switch (eventType) {
+//     //   case onChange: {*setup = true; return true;}
+//     //   default: return false;
+//     // }});
+//     // addControl(bool, "randomTurning", layerV->effectData.write<bool>(false), false, [setup] (EventArguments) { switch (eventType) {
+//     //   case onChange: {if (!variable.value().as<bool>()) *setup = true; return true;}
+//     //   default: return false;
+//     // }});
+//     init();
+//   }
+
+//   unsigned long step;
+//   Cube    cube;
+//   uint8_t moveList[100];
+//   uint8_t moveIndex;
+//   uint8_t prevFaceMoved;
+
+//   void init() {
+//       cube.init(cubeSize);
+//       uint8_t moveCount = cubeSize * 10 + random(20);
+//       // Randomly turn entire cube
+//       for (int x = 0; x < 3; x++) {
+//         if (random(2)) cube.rotateRight(1, cubeSize);
+//         if (random(2)) cube.rotateTop  (1, cubeSize);
+//         if (random(2)) cube.rotateFront(1, cubeSize);
+//       }
+//       // Generate scramble
+//       for (int i = 0; i < moveCount; i++) {
+//         Move move = createRandomMoveStruct(cubeSize, prevFaceMoved);
+//         prevFaceMoved = move.face;
+//         moveList[i] = packMove(move);
+
+//         (cube.*rotateFuncs[move.face])(move.direction, move.width + 1);
+//       }
+
+//       moveIndex = moveCount - 1;
+
+//       cube.drawCube();
+
+//   }
+
+//   typedef void (Cube::*RotateFunc)(bool direction, uint8_t width);
+//   RotateFunc rotateFuncs[6] = {&Cube::rotateFront, &Cube::rotateBack, &Cube::rotateLeft, &Cube::rotateRight, &Cube::rotateTop, &Cube::rotateBottom};
+
+//   void loop() override {
+    
+//     if (millis() > step || step - 3100 > millis()) { // step - 3100 > millis() temp fix for default on boot
+//       step = millis() + 1000;
+//       init();
+//     }
+
+//     if (!turnsPerSecond || millis() - step < 1000 / turnsPerSecond || millis() < step) return;
+
+//     Move move = randomTurning ? createRandomMoveStruct(cubeSize, prevFaceMoved) : unpackMove(moveList[moveIndex]);
+
+//     (cube.*rotateFuncs[move.face])(!move.direction, move.width + 1);
+      
+//     cube.drawCube();
+    
+//     if (!randomTurning && moveIndex == 0) {
+//       step = millis() + 3000;
+//       init();
+//       return;
+//     }
+//     if (!randomTurning) moveIndex--;
+//     step = millis();
+//   }
+// };
+
+// class ParticleTestEffect: public Node {
+//   static const char * name() {return "Particle Test 💫🧭";}
+//   static uint8_t      dim() {return _3D;}
+//   static const char * tags() {return "";}
+  
+//   struct Particle {
+//     float x, y, z;
+//     float vx, vy, vz;
+//     CRGB color;
+
+//     void update() {
+//       x += vx;
+//       y += vy;
+//       z += vz;
+//     }
+//     void revert() {
+//       x -= vx;
+//       y -= vy;
+//       z -= vz;
+//     }
+
+//     Coord3D toCoord3DRounded() {
+//       return Coord3D(int(round(x)), int(round(y)), int(round(z));
+//     }
+
+//     void updatePositionandDraw(int particleIndex = 0, bool debugPrint = false) {
+//       if (debugPrint) MB_LOGD(ML_TAG, "Particle %d: Pos: %f, %f, %f Velocity: %f, %f, %f\n", particleIndex, x, y, z, vx, vy, vz);
+
+//       Coord3D prevPos = toCoord3DRounded();
+//       if (debugPrint) MB_LOGD(ML_TAG, "     PrevPos: %d, %d, %d\n", prevPos.x, prevPos.y, prevPos.z);
+      
+//       update();
+//       Coord3D newPos = toCoord3DRounded();
+//       if (debugPrint) MB_LOGD(ML_TAG, "     NewPos: %d, %d, %d\n", newPos.x, newPos.y, newPos.z);
+
+//       if (newPos == prevPos) return; // Skip if no change in position
+
+//       layerV->setRGB(prevPos, CRGB::Black); // Clear previous position
+
+//       if (layerV->isMapped(layerV->XYZUnModified(newPos)) && !newPos.isOutofBounds(layerV->size) && layerV->getRGB(newPos) == CRGB::Black) {
+//         if (debugPrint) MB_LOGD(ML_TAG, "     New Pos was mapped and particle placed\n");
+//         layerV->setRGB(newPos, color); // Set new position
+//         return;
+//       }
+      
+//       // Particle is not mapped, find nearest mapped pixel
+//       Coord3D nearestMapped = prevPos;                          // Set nearest to previous position
+//       unsigned nearestDist = newPos.distanceSquared(prevPos);   // Set distance to previous position
+//       int diff = 0;                                             // If distance the same check how many coordinates are different (larger is better)
+//       bool changed = false;
+
+//       if (debugPrint) MB_LOGD(ML_TAG, "     %d, %d, %d, Not Mapped! Nearest: %d, %d, %d dist: %d diff: %d\n", newPos.x, newPos.y, newPos.z, nearestMapped.x, nearestMapped.y, nearestMapped.z, nearestDist, diff);
+      
+//       // Check neighbors for nearest mapped pixel. This should be changed to check neighbors with similar velocity
+//       for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++) {
+//         Coord3D testPos = newPos + Coord3D(i, j, k);
+//         if (testPos == prevPos)                         continue; // Skip current position
+//         if (!layerV->isMapped(layerV->XYZUnModified(testPos)))    continue; // Skip if not mapped
+//         if (testPos.isOutofBounds(layerV->size))           continue; // Skip out of bounds
+//         if (layerV->getRGB(testPos) != CRGB::Black) continue; // Skip if already colored by another particle
+//         unsigned dist = testPos.distanceSquared(newPos);
+//         int differences = (prevPos.x != testPos.x) + (prevPos.y != testPos.y) + (prevPos.z != testPos.z);
+//         if (debugPrint) ppf ("     TestPos: %d %d %d Dist: %d Diff: %d", testPos.x, testPos.y, testPos.z, dist, differences);
+//         if (debugPrint) ppf ("     New Velocities: %d, %d, %d\n", (testPos.x - prevPos.x), (testPos.y - prevPos.y), (testPos.z - prevPos.z));
+//         if (dist < nearestDist || (dist == nearestDist && differences >= diff)) {
+//           nearestDist = dist;
+//           nearestMapped = testPos;
+//           diff = differences;
+//           changed = true;
+//         }
+//       }
+//       if (changed) { // Change velocity to move towards nearest mapped pixel. Update position.
+//         if (newPos.x != nearestMapped.x) vx = constrain(nearestMapped.x - prevPos.x, -1, 1);
+//         if (newPos.y != nearestMapped.y) vy = constrain(nearestMapped.y - prevPos.y, -1, 1);
+//         if (newPos.z != nearestMapped.z) vz = constrain(nearestMapped.z - prevPos.z, -1, 1);
+
+//         x = nearestMapped.x; 
+//         y = nearestMapped.y; 
+//         z = nearestMapped.z;
+        
+//         if (debugPrint) MB_LOGD(ML_TAG, "     New Position: %d, %d, %d New Velocity: %f, %f, %f\n", nearestMapped.x, nearestMapped.y, nearestMapped.z, vx, vy, vz);
+//       }
+//       else {
+//         // No valid position found, revert to previous position
+//         // Find which direction is causing OoB / not mapped and set velocity to 0
+//         Coord3D testing = toCoord3DRounded();
+//         revert();
+//         // change X val
+//         testing.x = newPos.x;
+//         if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vx = 0;
+//         // change Y val
+//         testing = toCoord3DRounded();
+//         testing.y = newPos.y;
+//         if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vy = 0;
+//         // change Z val
+//         testing = toCoord3DRounded();
+//         testing.z = newPos.z;
+//         if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vz = 0;
+        
+//         if (debugPrint) MB_LOGD(ML_TAG, "     No valid position found, reverted. Velocity Updated\n");
+//         if (debugPrint) MB_LOGD(ML_TAG, "     New Pos: %f, %f, %f Velo: %f, %f, %f\n", x, y, z, vx, vy, vz);
+//       }
+
+//       layerV->setRGB(toCoord3DRounded(), color);
+//     }
+//   };
+
+//   void setup() override {
+//     // bool *setup = layerV->effectData.write<bool>(true);
+//     addControl(bgC, "speed", layerV->effectData.write<uint8_t>(15), 0, 30);
+//     addControl(bgC, "number of Particles", layerV->effectData.write<uint8_t>(10), 1, 255, false, [setup] (EventArguments) { switch (eventType) {
+//       case onChange: {*setup = true; return true;}
+//       default: return false;
+//     }});
+//     addControl(bool, "barriers", layerV->effectData.write<bool>(0) , false, [setup] (EventArguments) { switch (eventType) {
+//       case onChange: {*setup = true; return true;}
+//       default: return false;
+//     }});
+//     #ifdef STARBASE_USERMOD_MPU6050
+//       addControl(bool, "gyro", layerV->effectData.write<bool>(0));
+//     #endif
+//     addControl(bool, "randomGravity",          layerV->effectData.write<bool>(1));
+//     addControl(bgC, "gravityChangeInterval", layerV->effectData.write<uint8_t>(5), 1, 10);
+//     // addControl(bool, "Debug Print",             layerV->effectData.write<bool>(0));
+//   }
+
+//   void loop() override {
+//     // UI Variables
+//     bool   *setup        = layerV->effectData.readWrite<bool>();
+//     uint8_t speed        = layerV->effectData.read<uint8_t>();
+//     uint8_t numParticles = layerV->effectData.read<uint8_t>();
+//     bool barriers        = layerV->effectData.read<bool>();
+//     #ifdef STARBASE_USERMOD_MPU6050
+//       bool gyro = layerV->effectData.read<bool>();
+//     #else
+//       bool gyro = false;
+//     #endif
+//     bool randomGravity = layerV->effectData.read<bool>();
+//     uint8_t gravityChangeInterval = layerV->effectData.read<uint8_t>();
+//     // bool debugPrint    = layerV->effectData.read<bool>();
+//     bool debugPrint = false;
+
+//     // Effect Variables
+//     Particle *particles       = layerV->effectData.readWrite<Particle>(255);
+//     unsigned long step       = layerV->effectData.readWrite<unsigned long>();
+//     unsigned long *gravUpdate = layerV->effectData.readWrite<unsigned long>();
+//     float *gravity = layerV->effectData.readWrite<float>(3);
+
+//     if (*setup) {
+//       MB_LOGD(ML_TAG, "Setting Up Particles\n");
+//       *setup = false;
+//       layerV->fill_solid(CRGB::Black);
+
+//       if (barriers) {
+//         // create a 2 pixel thick barrier around middle y value with gaps
+//         for (int x = 0; x < layerV->size.x; x++) for (int z = 0; z < layerV->size.z; z++) {
+//           if (!random8(5)) continue;
+//           layerV->setRGB(Coord3D(x, layerV->size.y/2, z), CRGB::White);
+//           layerV->setRGB(Coord3D(x, layerV->size.y/2 - 1, z), CRGB::White);
+//         }
+//       }
+
+//       for (int index = 0 ; index < numParticles; index++) {
+//         Coord3D rPos; 
+//         int attempts = 0; 
+//         do { // Get random mapped position that isn't colored (infinite loop if small fixture size and high particle count)
+//           rPos = {random8(layerV->size.x), random8(layerV->size.y), random8(layerV->size.z)};
+//           attempts++;
+//         } while ((!layerV->isMapped(layerV->XYZUnModified(rPos)) || layerV->getRGB(rPos) != CRGB::Black) && attempts < 1000);
+//         // rPos = {1,1,0};
+//         particles[index].x = rPos.x;
+//         particles[index].y = rPos.y;
+//         particles[index].z = rPos.z;
+
+//         particles[index].vx = (random8() / 256.0f) * 2.0f - 1.0f;
+//         particles[index].vy = (random8() / 256.0f) * 2.0f - 1.0f;
+//         if (layerV->layerDimension == _3D) particles[index].vz = (random8() / 256.0f) * 2.0f - 1.0f;
+//         else particles[index].vz = 0;
+
+//         particles[index].color = ColorFromPalette(layerV->layerP->palette, random8());
+//         Coord3D initPos = particles[index].toCoord3DRounded();
+//         layerV->setRGB(initPos, particles[index].color);
+//       }
+//       MB_LOGD(ML_TAG, "Particles Set Up\n");
+//       step = millis();
+//     }
+
+//     if (!speed || millis() - step < 1000 / speed) return; // Not enough time passed
+
+//     float gravityX, gravityY, gravityZ; // Gravity if using gyro or random gravity
+
+//     #ifdef STARBASE_USERMOD_MPU6050
+//     if (gyro) {
+//       gravity[0] = -mpu6050->gravityVector.x;
+//       gravity[1] =  mpu6050->gravityVector.z; // Swap Y and Z axis
+//       gravity[2] = -mpu6050->gravityVector.y;
+
+//       if (layerV->layerDimension == _2D) { // Swap back Y and Z axis set Z to 0
+//         gravity[1] = -gravity[2];
+//         gravity[2] = 0;
+//       }
+//     }
+//     #endif
+
+//     if (randomGravity) {
+//       if (millis() - *gravUpdate > gravityChangeInterval * 1000) {
+//         *gravUpdate = millis();
+//         float scale = 5.0f;
+//         // Generate Perlin noise values and scale them
+//         gravity[0] = (inoise8(step, 0, 0) / 128.0f - 1.0f) * scale;
+//         gravity[1] = (inoise8(0, step, 0) / 128.0f - 1.0f) * scale;
+//         gravity[2] = (inoise8(0, 0, step) / 128.0f - 1.0f) * scale;
+
+//         gravity[0] = constrain(gravity[0], -1.0f, 1.0f);
+//         gravity[1] = constrain(gravity[1], -1.0f, 1.0f);
+//         gravity[2] = constrain(gravity[2], -1.0f, 1.0f);
+
+//         if (layerV->layerDimension == _2D) gravity[2] = 0;
+//         // MB_LOGD(ML_TAG, "Random Gravity: %f, %f, %f\n", gravity[0], gravity[1], gravity[2]);
+//       }
+//     }
+
+//     for (int index = 0; index < numParticles; index++) {
+//       if (gyro || randomGravity) { // Lerp gravity towards gyro or random gravity if enabled
+//         float lerpFactor = .75;
+//         particles[index].vx += (gravity[0] - particles[index].vx) * lerpFactor;
+//         particles[index].vy += (gravity[1] - particles[index].vy) * lerpFactor; // Swap Y and Z axis
+//         particles[index].vz += (gravity[2] - particles[index].vz) * lerpFactor;
+//       }
+//       particles[index].updatePositionandDraw(leds, index, debugPrint);  
+//     }
+
+//     step = millis();
+//   }
+// };
+
+
+
+
+
+
+
+
+// // By: Stepko https://editor.soulmatelights.com/gallery/1012 , Modified by: Andrew Tuline
+// class BlackHoleEffect: public Node {
+//   static const char * name() {return "BlackHole";}
+//   static uint8_t dim() {return _2D;}
+//   static const char * tags() {return "💡";}
+  
+//   void setup() override {
+//     ui->initSlider(parentVar, "fade", leds.effectData.write<uint8_t>(16), 0, 32);
+//     ui->initSlider(parentVar, "outX", leds.effectData.write<uint8_t>(16), 0, 32);
+//     ui->initSlider(parentVar, "outY", leds.effectData.write<uint8_t>(16), 0, 32);
+//     ui->initSlider(parentVar, "inX", leds.effectData.write<uint8_t>(16), 0, 32);
+//     ui->initSlider(parentVar, "inY", leds.effectData.write<uint8_t>(16), 0, 32);
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t fade = leds.effectData.read<uint8_t>();
+//     uint8_t outX = leds.effectData.read<uint8_t>();
+//     uint8_t outY = leds.effectData.read<uint8_t>();
+//     uint8_t inX = leds.effectData.read<uint8_t>();
+//     uint8_t inY = leds.effectData.read<uint8_t>();
+
+//     uint16_t x, y;
+
+//     leds.fadeToBlackBy(16 + (fade)); // create fading trails
+//     unsigned long t = sys->now/128;                 // timebase
+//     // outer stars
+//     for (size_t i = 0; i < 8; i++) {
+//       x = beatsin8(outX,   0, leds.size.x - 1, 0, ((i % 2) ? 128 : 0) + t * i);
+//       y = beatsin8(outY, 0, leds.size.y - 1, 0, ((i % 2) ? 192 : 64) + t * i);
+//       leds.addPixelColor(x, y, CHSV(i*32, 255, 255));
+//     }
+//     // inner stars
+//     for (size_t i = 0; i < 4; i++) {
+//       x = beatsin8(inX, leds.size.x/4, leds.size.x - 1 - leds.size.x/4, 0, ((i % 2) ? 128 : 0) + t * i);
+//       y = beatsin8(inY, leds.size.y/4, leds.size.y - 1 - leds.size.y/4, 0, ((i % 2) ? 192 : 64) + t * i);
+//       leds.addPixelColor(x, y, CHSV(i*32, 255, 255));
+//     }
+//     // central white dot
+//     leds.setPixelColor(leds.size.x/2, leds.size.y/2, CHSV(0, 0, 255));
+
+//     // blur everything a bit
+//     leds.blur2d(16);
+
+//   }
+// }; // BlackHole
+
+// // dna originally by by ldirko at https://pastebin.com/pCkkkzcs. Updated by Preyy. WLED conversion by Andrew Tuline.
+// class DNAEffect: public Node {
+//   const char * name() override {return "DNA";}
+//   uint8_t dim() override {return _2D;}
+//   const char * tags() override {return "💡💫";}
+  
+//   void setup() override {
+//     Effect::setup(leds, parentVar);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(16), 0, 32);
+//     ui->initSlider(parentVar, "blur", leds.effectData.write<uint8_t>(128));
+//     ui->initSlider(parentVar, "phases", leds.effectData.write<uint8_t>(64));
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t speed = leds.effectData.read<uint8_t>();
+//     uint8_t blur = leds.effectData.read<uint8_t>();
+//     uint8_t phases = leds.effectData.read<uint8_t>();
+
+//     const int cols = leds.size.x;
+//     const int rows = leds.size.y;
+
+//     leds.fadeToBlackBy(64);
+
+//     // WLEDMM optimized to prevent holes at height > 32
+//     int lastY1 = -1;
+//     int lastY2 = -1;
+//     for (int i = 0; i < cols; i++) {
+//             //256 is a complete phase
+//       // half a phase is dna is 128
+//       uint8_t phase;// = cols * i / 8; 
+//       //32: 4 * i
+//       //16: 8 * i
+//       phase = i * phases / cols;
+
+//       // phase = i * 2 / (cols+1) * phases;
+
+
+//       int posY1 = beatsin8(speed, 0, rows-1, 0, phase    );
+//       int posY2 = beatsin8(speed, 0, rows-1, 0, phase + 128);
+//       if ((i==0) || ((abs(lastY1 - posY1) < 2) && (abs(lastY2 - posY2) < 2))) {   // use original code when no holes
+//         leds.setPixelColor(i, posY1, ColorFromPalette(leds.palette, i*5+sys->now/17, beatsin8(5, 55, 255, 0, i*10)));
+//         leds.setPixelColor(i, posY2, ColorFromPalette(leds.palette, i*5+128+sys->now/17, beatsin8(5, 55, 255, 0, i*10+128)));
+//       } else {                                                                    // draw line to prevent holes
+//         leds.drawLine(i-1, lastY1, i, posY1, ColorFromPalette(leds.palette, i*5+sys->now/17, beatsin8(5, 55, 255, 0, i*10)));
+//         leds.drawLine(i-1, lastY2, i, posY2, ColorFromPalette(leds.palette, i*5+128+sys->now/17, beatsin8(5, 55, 255, 0, i*10+128)));
+//       }
+//       lastY1 = posY1;
+//       lastY2 = posY2;
+//     }
+//     leds.blur2d(blur);
+//   }
+// }; // DNA
+
+
+// //Octopus inspired by WLED, Stepko and Sutaburosu and blazoncek 
+// //Idea from https://www.youtube.com/watch?v=HsA-6KIbgto&ab_channel=GreatScott%21 (https://editor.soulmatelights.com/gallery/671-octopus)
+// class OctopusEffect: public Node {
+//   const char * name() override {return "Octopus";}
+//   uint8_t dim() override {return _2D;}
+//   const char * tags() override {return "💡";}
+
+//   struct Map_t {
+//     uint8_t angle;
+//     uint8_t radius;
+//   };
+
+//   void setup() override {
+//     Effect::setup(leds, parentVar); //palette
+//     bool *setup = leds.effectData.write<bool>(true);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(16), 1, 32);
+//     ui->initSlider(parentVar, "offsetX", leds.effectData.write<uint8_t>(128), 0, 255, false, [setup] (EventArguments) { switch (eventType) {
+//       case onChange: {*setup = true; return true;}
+//       default: return false;
+//     }});
+//     ui->initSlider(parentVar, "offsetY", leds.effectData.write<uint8_t>(128), 0, 255, false, [setup] (EventArguments) { switch (eventType) {
+//       case onChange: {*setup = true; return true;}
+//       default: return false;
+//     }});
+//     ui->initSlider(parentVar, "legs", leds.effectData.write<uint8_t>(4), 1, 8);
+
+//     ui->initCheckBox(parentVar, "radialWave", leds.effectData.write<bool>(false));
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     bool   *setup = leds.effectData.readWrite<bool>();
+//     uint8_t speed = leds.effectData.read<uint8_t>();
+//     uint8_t offsetX = leds.effectData.read<uint8_t>();
+//     uint8_t offsetY = leds.effectData.read<uint8_t>();
+//     uint8_t legs = leds.effectData.read<uint8_t>();
+//     bool radialWave = leds.effectData.read<bool>();
+
+//     // Effect Variables
+//     Coord3D  *prevLedSize = leds.effectData.readWrite<Coord3D>();
+//     Map_t    *rMap = leds.effectData.readWrite<Map_t>(leds.size.x * leds.size.y); //array
+//     uint32_t *step = leds.effectData.readWrite<uint32_t>();
+
+//     if (leds.effectData.success()) { //octopus allocates quite a lot, so worth checking
+
+//       const uint8_t mapp = 180 / max(leds.size.x,leds.size.y);
+
+//       Coord3D pos = {0,0,0};
+
+//       if (*setup || *prevLedSize != leds.size) { // Setup map if leds.size or offset changes
+//         *setup = false;
+//         *prevLedSize = leds.size;
+//         const uint8_t C_X = leds.size.x / 2 + (offsetX - 128)*leds.size.x/255;
+//         const uint8_t C_Y = leds.size.y / 2 + (offsetY - 128)*leds.size.y/255;
+//         for (pos.x = 0; pos.x < leds.size.x; pos.x++) {
+//           for (pos.y = 0; pos.y < leds.size.y; pos.y++) {
+//             uint16_t indexV = leds.XYZUnprojected(pos);
+//             if (indexV < leds.size.x * leds.size.y) { //excluding UINT16_MAX from XY if out of bounds due to projection
+//               rMap[indexV].angle = 40.7436f * atan2f(pos.y - C_Y, pos.x - C_X); // avoid 128*atan2()/PI
+//               rMap[indexV].radius = hypotf(pos.x - C_X, pos.y - C_Y) * mapp; //thanks Sutaburosu
+//             }
+//           }
+//         }
+//       }
+
+      
+//       *step = sys->now * speed / 25; //sys.now/25 = 40 per second. speed / 32: 1-4 range ? (1-8 ??)
+//       if (radialWave)
+//         *step = 3 * (*step) / 4; // 7/6 = 1.16 for RadialWave mode
+//       else
+//         *step = (*step) / 2; // 1/2 for Octopus mode
+
+//       for (pos.x = 0; pos.x < leds.size.x; pos.x++) {
+//         for (pos.y = 0; pos.y < leds.size.y; pos.y++) {
+//           uint16_t indexV = leds.XYZUnprojected(pos);
+//           if (indexV < leds.size.x * leds.size.y) { //excluding UINT16_MAX from XY if out of bounds due to projection
+//             byte angle = rMap[indexV].angle;
+//             byte radius = rMap[indexV].radius;
+//             uint16_t intensity;
+//             if (radialWave)
+//               intensity = sin8(*step + sin8(*step - radius) + angle * legs);                               // RadialWave
+//             else
+//               intensity = sin8(sin8((angle * 4 - radius) / 4 + (*step)/2) + radius - (*step) + angle * legs); //octopus
+//             intensity = intensity * intensity / 255; // add a bit of non-linearity for cleaner display
+//             leds[pos] = ColorFromPalette(leds.palette, (*step) / 2 - radius, intensity);
+//           }
+//         }
+//       }
+//     } //if (leds.effectData.success())
+//   }
+  
+// }; // Octopus
+
+//   const uint32_t colors[] = {
+//     0x000000,
+//     0x100000,
+//     0x300000,
+//     0x600000,
+//     0x800000,
+//     0xA00000,
+//     0xC02000,
+//     0xC04000,
+//     0xC06000,
+//     0xC08000,
+//     0x807080
+//   };
+
+// //https://github.com/toggledbits/MatrixFireFast/blob/master/MatrixFireFast/MatrixFireFast.ino
+// class FireEffect: public Node {
+//   const char * name() {return "Fire";}
+//   uint8_t dim() {return _2D;}
+//   const char * tags() {return "💫";}
+
+//   const uint8_t NCOLORS = (sizeof(colors)/sizeof(colors[0]));
+
+//   void glow(int x, int y, int z, uint8_t flareDecay, bool usePalette) {
+//     int b = z * 10 / flareDecay + 1;
+//     for ( int i=(y-b); i<(y+b); ++i ) {
+//       for ( int j=(x-b); j<(x+b); ++j ) {
+//         if ( i >=0 && j >= 0 && i < leds.size.y && j < leds.size.x ) {
+//           int d = ( flareDecay * isqrt((x-j)*(x-j) + (y-i)*(y-i)) + 5 ) / 10;
+//           uint8_t n = 0;
+//           if ( z > d ) n = z - d;
+//           if ( leds[leds.XY(j, leds.size.y - 1 - i)] < usePalette?ColorFromPalette(leds.palette, n*23): colors[n]) { // can only get brighter
+//             leds[leds.XY(j, leds.size.y - 1 - i)] = usePalette?ColorFromPalette(leds.palette, n*23): colors[n]; //23*11 -> within palette range
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   //utility function?
+//   uint32_t isqrt(uint32_t n) {
+//     if ( n < 2 ) return n;
+//     uint32_t smallCandidate = isqrt(n >> 2) << 1;
+//     uint32_t largeCandidate = smallCandidate + 1;
+//     return (largeCandidate*largeCandidate > n) ? smallCandidate : largeCandidate;
+//   }
+
+//   void setup() {
+//     Effect::setup(leds, parentVar); //palette
+
+//     ui->initCheckBox(parentVar, "usePalette",    leds.effectData.write<bool>(false));
+//     ui->initSlider(parentVar, "flareRows", leds.effectData.write<uint8_t>(2), 0, 5);    /* number of rows (from bottom) allowed to flare */
+//     ui->initSlider(parentVar, "maxFlare", leds.effectData.write<uint8_t>(8), 0, 18);     /* max number of simultaneous flares */
+//     ui->initSlider(parentVar, "flareChance", leds.effectData.write<uint8_t>(50), 0, 100); /* chance (%) of a new flare (if there's room) */
+//     ui->initSlider(parentVar, "flareDecay", leds.effectData.write<uint8_t>(14), 0, 28);  /* decay rate of flare radiation; 14 is good */
+//   }
+
+//   void loop() {
+
+//     bool usePalette = leds.effectData.read<bool>();
+//     uint8_t flareRows = leds.effectData.read<uint8_t>();
+//     uint8_t maxFlare = leds.effectData.read<uint8_t>();
+//     uint8_t flareChance = leds.effectData.read<uint8_t>();
+//     uint8_t flareDecay = leds.effectData.read<uint8_t>();
+
+//     // Effect Variables
+//     uint8_t *nflare = leds.effectData.readWrite<uint8_t>();
+//     uint32_t *flare = leds.effectData.readWrite<uint32_t>(18);
+
+//     // First, move all existing heat points up the display and fade
+//     for (int y=leds.size.y-1; y>0; --y ) {
+//       for (int x=0; x<leds.size.x; ++x ) {
+//         CRGB n = CRGB::Black;
+//         if ( leds[leds.XY(x, leds.size.y - y)] != CRGB::Black) {
+//           n = leds[leds.XY(x, leds.size.y - y)] - 0; //-0 to force conversion to CRGB
+//           if (n.red > 10) n.red -= 10; else n.red = 0;
+//           if (n.green > 10) n.green -= 10; else n.green = 0;
+//           if (n.blue > 10) n.blue -= 10; else n.blue = 0;
+//         }
+//         leds[leds.XY(x, leds.size.y - 1 - y)] = n;
+//       }
+//     }
+
+//     // Heat the bottom row
+//     for (int x=0; x<leds.size.x; ++x ) {
+//       CRGB i = leds[leds.XY(x, leds.size.y - 1 - 0)] - 0; //-0 to force conversion to CRGB
+//       if ( i != CRGB::Black ) {
+//         leds[leds.XY(x, leds.size.y - 1 - 0)] = usePalette?ColorFromPalette(leds.palette, random8()): colors[random(NCOLORS-6, NCOLORS-2)];
+//       }
+//     }
+
+//     // flare
+//     for (int i=0; i<*nflare; ++i ) {
+//       int x = flare[i] & 0xff;
+//       int y = (flare[i] >> 8) & 0xff;
+//       int z = (flare[i] >> 16) & 0xff;
+
+//       glow( x, y, z, flareDecay, leds, usePalette);
+
+//       if ( z > 1 ) {
+//         flare[i] = (flare[i] & 0xffff) | ((z-1)<<16);
+//       } else {
+//         // This flare is out
+//         for ( int j=i+1; j<*nflare; ++j ) {
+//           flare[j-1] = flare[j];
+//         }
+//         --(*nflare);
+//       }
+//     }
+
+//     //newflare();
+//     if ( *nflare < maxFlare && random(1,101) <= flareChance ) {
+//       int x = random(0, leds.size.x);
+//       int y = random(0, flareRows);
+//       int z = NCOLORS - 1;
+//       flare[(*nflare)++] = (z<<16) | (y<<8) | (x&0xff);
+
+//       glow( x, y, z, flareDecay, leds, usePalette);
+//     }
+//   }
+  
+// }; // Fire Effect
+
+// //Frizzles inspired by WLED, Stepko, Andrew Tuline, https://editor.soulmatelights.com/gallery/640-color-frizzles
+// class FrizzlesEffect: public Node {
+//   const char * name() override {return "Frizzles";}
+//   uint8_t dim() override {return _2D;}
+//   const char * tags() override {return "💡";}
+
+//   void setup() override {
+//     Effect::setup(leds, parentVar);
+//     ui->initSlider(parentVar, "BPM", leds.effectData.write<uint8_t>(60));
+//     ui->initSlider(parentVar, "intensity", leds.effectData.write<uint8_t>(128));
+//     ui->initSlider(parentVar, "blur", leds.effectData.write<uint8_t>(128));
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t bpm = leds.effectData.read<uint8_t>();
+//     uint8_t intensity = leds.effectData.read<uint8_t>();
+//     uint8_t blur = leds.effectData.read<uint8_t>();
+
+//     leds.fadeToBlackBy(16);
+
+//     for (int i = 8; i > 0; i--) {
+//       Coord3D pos = {0,0,0};
+//       pos.x = beatsin8(bpm/8 + i, 0, leds.size.x - 1);
+//       pos.y = beatsin8(intensity/8 - i, 0, leds.size.y - 1);
+//       CRGB color = ColorFromPalette(leds.palette, beatsin8(12, 0, 255));
+//       leds[pos] = color;
+//     }
+//     leds.blur2d(blur);
+//   }
+// }; // Frizzles
+
+// /*
+//  * Exploding fireworks effect
+//  * adapted from: http://www.anirama.com/1000leds/1d-fireworks/
+//  * adapted for 2D WLED by blazoncek (Blaz Kristan (AKA blazoncek))
+//  * simplified for StarLight by ewowi in Nov 24
+//  */
+// class FireworksEffect: public Node {
+//   const char * name() override {return "Fireworks";}
+//   uint8_t dim() override {return _2D;}
+//   const char * tags() override {return "💡";}
+
+//   void setup() override {
+//     leds.fadeToBlackBy(16);
+//     Effect::setup(leds, parentVar);
+//     ui->initSlider(parentVar, "gravity", leds.effectData.write<uint8_t>(128));
+//     ui->initSlider(parentVar, "firingSide", leds.effectData.write<uint8_t>(128));
+//     ui->initSlider(parentVar, "numSparks", leds.effectData.write<uint8_t>(128));
+//     // PROGMEM = "Fireworks 1D@Gravity,Firing side;!,!;!;12;pal=11,ix=128";
+//   }
+
+//   void loop() override {
+
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t gravityC = leds.effectData.read<uint8_t>();
+//     uint8_t firingSide = leds.effectData.read<uint8_t>();
+//     uint8_t numSparks = leds.effectData.read<uint8_t>();
+
+//     float *dying_gravity = leds.effectData.readWrite<float>();
+//     uint16_t *aux0Flare = leds.effectData.readWrite<uint16_t>();
+//     Spark* sparks = leds.effectData.readWrite<Spark>(255);
+//     Spark* flare = sparks; //first spark is flare data
+
+//     const uint16_t cols = leds.size.x;
+//     const uint16_t rows = leds.size.y;
+
+//     //allocate segment data
+
+//     // if (dataSize != SEGENV.aux1) { //reset to flare if sparks were reallocated (it may be good idea to reset segment if bounds change)
+//     //   *dying_gravity = 0.0f;
+//     //   (*aux0Flare) = 0;
+//     //   SEGENV.aux1 = dataSize;
+//     // }
+
+//     leds.fadeToBlackBy(252); //fade_out(252);
+
+//     float gravity = -0.0004f - (gravityC/800000.0f); // m/s/s
+//     gravity *= rows;
+
+//     if ((*aux0Flare) < 2) { //FLARE
+//       if ((*aux0Flare) == 0) { //init flare
+//         flare->pos = 0;
+//         flare->posX = random16(2,cols-3);
+//         uint16_t peakHeight = 75 + random8(180); //0-255
+//         peakHeight = (peakHeight * (rows -1)) >> 8;
+//         flare->vel = sqrtf(-2.0f * gravity * peakHeight);
+//         flare->velX = (random8(9)-4)/32.f;
+//         flare->col = 255; //brightness
+//         (*aux0Flare) = 1;
+//       }
+
+//       // launch
+//       if (flare->vel > 12 * gravity) {
+//         // flare
+//         leds.setPixelColor(int(flare->posX), rows - uint16_t(flare->pos) - 1, CRGB(flare->col, flare->col, flare->col));
+//         flare->pos  += flare->vel;
+//         flare->posX += flare->velX;
+//         flare->pos  = constrain(flare->pos, 0, rows-1);
+//         flare->posX = constrain(flare->posX, 0, cols-1);
+//         flare->vel  += gravity;
+//         flare->col  -= 2;
+//       } else {
+//         (*aux0Flare) = 2;  // ready to explode
+//       }
+//     } else if ((*aux0Flare) < 4) {
+//       /*
+//       * Explode!
+//       *
+//       * Explosion happens where the flare ended.
+//       * Size is proportional to the height.
+//       */
+//       uint8_t nSparks = flare->pos + random8(4);
+//       // nSparks = std::max(nSparks, 4U);  // This is not a standard constrain; numSparks is not guaranteed to be at least 4
+//       nSparks = std::min(nSparks, numSparks);
+
+//       // initialize sparks
+//       if ((*aux0Flare) == 2) {
+//         for (int i = 1; i < nSparks; i++) {
+//           sparks[i].pos  = flare->pos;
+//           sparks[i].posX = flare->posX;
+//           sparks[i].vel  = (float(random16(20001)) / 10000.0f) - 0.9f; // from -0.9 to 1.1
+//           // sparks[i].vel *= rows<32 ? 0.5f : 1; // reduce velocity for smaller strips
+//           sparks[i].velX  = (float(random16(20001)) / 10000.0f) - 0.9f; // from -0.9 to 1.1
+//           // sparks[i].velX = (float(random16(10001)) / 10000.0f) - 0.5f; // from -0.5 to 0.5
+//           sparks[i].col  = 345;//abs(sparks[i].vel * 750.0); // set colors before scaling velocity to keep them bright
+//           //sparks[i].col = constrain(sparks[i].col, 0, 345);
+//           sparks[i].colIndex = random8();
+//           sparks[i].vel  *= flare->pos/rows; // proportional to height
+//           sparks[i].velX *= flare->posX/cols; // proportional to width
+//           sparks[i].vel  *= -gravity *50;
+//         }
+//         //sparks[1].col = 345; // this will be our known spark
+//         *dying_gravity = gravity/2;
+//         (*aux0Flare) = 3;
+//       }
+
+//       if (sparks[1].col > 4) {//&& sparks[1].pos > 0) { // as long as our known spark is lit, work with all the sparks
+//         for (int i = 1; i < nSparks; i++) {
+//           sparks[i].pos  += sparks[i].vel;
+//           sparks[i].posX += sparks[i].velX;
+//           sparks[i].vel  += *dying_gravity;
+//           sparks[i].velX += *dying_gravity;
+//           if (sparks[i].col > 3) sparks[i].col -= 4;
+
+//           if (sparks[i].pos > 0 && sparks[i].pos < rows) {
+//             if (!(sparks[i].posX >= 0 && sparks[i].posX < cols)) continue;
+//             uint16_t prog = sparks[i].col;
+//             CRGB spColor = ColorFromPalette(leds.palette, sparks[i].colIndex);
+//             CRGB c = CRGB::Black; //HeatColor(sparks[i].col);
+//             if (prog > 300) { //fade from white to spark color
+//               c = CRGB(blend(spColor, CRGB::White, (prog - 300)*5));
+//             } else if (prog > 45) { //fade from spark color to black
+//               c = CRGB(blend(CRGB::Black, spColor, prog - 45));
+//               uint8_t cooling = (300 - prog) >> 5;
+//               c.g = qsub8(c.g, cooling);
+//               c.b = qsub8(c.b, cooling * 2);
+//             }
+//             leds.setPixelColor(sparks[i].posX, rows - sparks[i].pos - 1, c);
+//           }
+//         }
+//         leds.blur2d(16);
+//         *dying_gravity *= .8f; // as sparks burn out they fall slower
+//       } else {
+//         (*aux0Flare) = 6 + random8(10); //wait for this many frames
+//       }
+//     } else {
+//       (*aux0Flare)--;
+//       if ((*aux0Flare) < 4) {
+//         (*aux0Flare) = 0; //back to flare
+//       }
+//     }
+//   }
+
+// }; //FireworksEffect
+
+
+// class FunkyPlankEffect: public Node {
+//   const char * name() override {return "Funky Plank";}
+//   uint8_t dim() override {return _2D;}
+//   const char * tags() override {return "♫💡💫";}
+
+//   void setup() override {
+//     leds.fill_solid(CRGB::Black);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(255));
+//     ui->initSlider(parentVar, "bands", leds.effectData.write<uint8_t>(NUM_GEQ_CHANNELS), 1, NUM_GEQ_CHANNELS);
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t speed = leds.effectData.read<uint8_t>();
+//     uint8_t num_bands = leds.effectData.read<uint8_t>();
+
+//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
+//     uint8_t *aux0 = leds.effectData.readWrite<uint8_t>();
+
+//     uint8_t secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
+//     if ((speed > 254) || (*aux0 != secondHand)) {   // WLEDMM allow run run at full speed
+//       *aux0 = secondHand;
+
+//       //evenly distribute see also GEQ/By ewowi/From AXI
+//       float bandwidth = (float)leds.size.x / num_bands;
+//       float remaining = bandwidth;
+//       uint8_t band = 0;
+//       for (int posx=0; posx < leds.size.x; posx++) {
+//         if (remaining < 1) {band++; remaining += bandwidth;} //increase remaining but keep the current remaining
+//         remaining--; //consume remaining
+
+//         int hue = audioSync->fftResults[map(band, 0, num_bands-1, 0, 15)];
+//         int v = map(hue, 0, 255, 10, 255);
+//         leds.setPixelColor(posx, 0, CHSV(hue, 255, v));
+//       }
+
+//       // drip down:
+//       for (int i = (leds.size.y - 1); i > 0; i--) {
+//         for (int j = (leds.size.x - 1); j >= 0; j--) {
+//           leds.setPixelColor(j, i, leds.getPixelColor(j, i-1));
+//         }
+//       }
+//     }
+//   }
+// }; //FunkyPlank
+
+// class VUMeterEffect: public Node {
+//   const char * name() override {return "VU Meter";}
+//   uint8_t dim() override {return _2D;}
+//   const char * tags() override {return "♫💫📺";}
+
+//   void drawNeedle(float angle, Coord3D topLeft, Coord3D size, CRGB color) {
+//       int x0 = topLeft.x + size.x / 2; // Center of the needle
+//       int y0 = topLeft.y + size.y - 1; // Bottom of the needle
+
+//       leds.drawCircle(topLeft.x + size.x / 2, topLeft.y + size.y / 2, size.x/2, ColorFromPalette(leds.palette, 35, 128), false);
+
+//       // Calculate needle end position
+//       int x1 = x0 - round(size.y * 0.7 * cos((angle + 30) * PI / 180));
+//       int y1 = y0 - round(size.y * 0.7 * sin((angle + 30) * PI / 180));
+
+//       // Draw the needle
+//       leds.drawLine(x0, y0, x1, y1, color, true);
+//   }
+
+//   void setup() override {
+//     Effect::setup(leds, parentVar); //palette
+//     leds.fill_solid(CRGB::Black);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(255));
+//     ui->initSlider(parentVar, "bands", leds.effectData.write<uint8_t>(NUM_GEQ_CHANNELS), 1, NUM_GEQ_CHANNELS);
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t speed = leds.effectData.read<uint8_t>();
+//     uint8_t num_bands = leds.effectData.read<uint8_t>();
+//     leds.fadeToBlackBy(200);
+
+//     uint8_t nHorizontal = 4;
+//     uint8_t nVertical = 2;
+
+//     uint8_t band = 0;
+//     for (int h = 0; h < nHorizontal; h++) {
+//       for (int v = 0; v < nVertical; v++) {
+//         drawNeedle(leds, (float)audioSync->fftResults[2*(band++)] / 2.0, {leds.size.x * h / nHorizontal, leds.size.y * v / nVertical, 0}, {leds.size.x / nHorizontal, leds.size.y / nVertical, 0}, 
+//                 ColorFromPalette(leds.palette, 255 / (nHorizontal * nVertical) * band));
+//       } //audioSync->fftResults[band++] / 200
+//     }
+//     // ppf(" v:%f, f:%f", audioSync->volumeSmth, (float) audioSync->fftResults[5]);
+//   }
+// }; //VUMeter
+
+// class PixelMapEffect: public Node {
+//   const char * name() override {return "PixelMap";}
+//   uint8_t dim() override {return _3D;}
+//   const char * tags() override {return "💫";}
+  
+//   void setup() override {
+//     ui->initSlider(parentVar, "x", leds.effectData.write<uint8_t>(0), 0, leds.size.x - 1);
+//     ui->initSlider(parentVar, "y", leds.effectData.write<uint8_t>(0), 0, leds.size.y - 1);
+//     ui->initSlider(parentVar, "z", leds.effectData.write<uint8_t>(0), 0, leds.size.z - 1);
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t x = leds.effectData.read<uint8_t>();
+//     uint8_t y = leds.effectData.read<uint8_t>();
+//     uint8_t z = leds.effectData.read<uint8_t>();
+
+//     leds.fill_solid(CRGB::Black);
+
+//     Coord3D pos = {x, y, z};
+//     leds[pos] = CHSV( sys->now/50 + random8(64), 255, 255);// ColorFromPalette(leds.palette,call, bri);
+//   }
+// }; // PixelMap
+
+// class MarioTestEffect: public Node {
+//   const char * name() override {return "MarioTest";}
+//   uint8_t       dim() override {return _2D;}
+//   const char * tags() override {return "💫";}
+  
+//   void setup() override {
+//     ui->initCheckBox(parentVar, "background", leds.effectData.write<bool>(false));
+//     ui->initSlider(parentVar, "offsetX", leds.effectData.write<uint8_t>(leds.size.x/2 - 8), 0, leds.size.x - 16);
+//     ui->initSlider(parentVar, "offsetY", leds.effectData.write<uint8_t>(leds.size.y/2 - 8), 0, leds.size.y - 16);
+//   }
+
+//   void loop() override {
+//     bool background = leds.effectData.read<bool>();
+//     uint8_t offsetX = leds.effectData.read<uint8_t>();
+//     uint8_t offsetY = leds.effectData.read<uint8_t>();
+
+//     const uint8_t mario[16][16] = {
+//       {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
+//       {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0},
+//       {0, 0, 0, 0, 2, 2, 2, 3, 3, 4, 3, 0, 0, 0, 0, 0},
+//       {0, 0, 0, 2, 3, 2, 3, 3, 3, 4, 3, 3, 3, 0, 0, 0},
+//       {0, 0, 0, 2, 3, 2, 2, 3, 3, 3, 4, 3, 3, 3, 0, 0},
+//       {0, 0, 0, 0, 2, 3, 3, 3, 3, 4, 4, 4, 4, 0, 0, 0},
+//       {0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0},
+//       {0, 0, 0, 0, 5, 5, 1, 5, 5, 1, 0, 0, 0, 0, 0, 0},
+//       {0, 0, 0, 5, 5, 5, 1, 5, 5, 1, 5, 5, 5, 0, 0, 0},
+//       {0, 0, 5, 5, 5, 5, 1, 5, 5, 1, 5, 5, 5, 5, 0, 0},
+//       {0, 0, 3, 3, 5, 5, 1, 1, 1, 1, 5, 5, 3, 3, 0, 0},
+//       {0, 0, 3, 3, 3, 1, 6, 1, 1, 6, 1, 3, 3, 3, 0, 0},
+//       {0, 0, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 0, 0},
+//       {0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0},
+//       {0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0},
+//       {0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0}
+//     };
+
+//     CRGB colors[7] = {CRGB::DimGrey, CRGB::Red, CRGB::Brown, CRGB::Tan, CRGB::Black, CRGB::Blue, CRGB::Yellow};
+
+//     if (background) leds.fill_solid(CRGB::DimGrey);
+//     else leds.fill_solid(CRGB::Black);
+//     //draw 16x16 mario
+//     for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) {
+//       leds[Coord3D(x + offsetX, y + offsetY)] = colors[mario[y][x]];
+//     }
+//   }
+// }; // MarioTest
+
+// class RainbowWithGlitterEffect: public Node {
+//   const char * name() override {return "Rainbow with glitter";}
+//   uint8_t dim() override {return _1D;}
+//   const char * tags() override {return "⚡";} //⚡ means FastLED origin
+
+//   void setup() override {
+//     //no palette control is created
+//     ui->initCheckBox(parentVar, "glitter", leds.effectData.write<bool>(false));
+//   }
+
+//   void loop() override {
+//     bool glitter = leds.effectData.read<bool>();
+
+//     // built-in FastLED rainbow, plus some random sparkly glitter
+//     // FastLED's built-in rainbow generator
+//     leds.fill_rainbow(sys->now/50, 7);
+
+//     if (glitter)
+//       addGlitter(leds, 80);
+//   }
+
+//   void addGlitter(fract8 chanceOfGlitter) 
+//   {
+//     if( random8() < chanceOfGlitter) {
+//       leds[ random16(leds.size.x) ] += CRGB::White;
+//     }
+//   }
+// };
+
+// // Best of both worlds from Palette and Spot effects. By Aircoookie
+// class FlowEffect: public Node {
+//   const char * name() override {return "Flow";}
+//   uint8_t      dim()  override {return _1D;}
+//   const char * tags() override {return "💡";} //💡 means wled origin
+  
+//   void setup() override {
+//     Effect::setup(leds, parentVar);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(128));
+//     ui->initSlider(parentVar, "zones", leds.effectData.write<uint8_t>(128));
+//   }
+
+//   void loop() override {
+//     // UI Variables
+//     uint8_t speed   = leds.effectData.read<uint8_t>();
+//     uint8_t zonesUI = leds.effectData.read<uint8_t>();
+
+//     uint16_t counter = 0;
+//     if (speed != 0) {
+//       counter = sys->now * ((speed >> 2) +1);
+//       counter = counter >> 8;
+//     }
+
+//     uint16_t maxZones = leds.size.x / 6; //only looks good if each zone has at least 6 LEDs
+//     uint16_t zones    = (zonesUI * maxZones) >> 8;
+//     if (zones & 0x01) zones++; //zones must be even
+//     if (zones < 2)    zones = 2;
+//     uint16_t zoneLen = leds.size.x / zones;
+//     uint16_t offset  = (leds.size.x - zones * zoneLen) >> 1;
+
+//     leds.fill_solid(ColorFromPalette(leds.palette, -counter));
+
+//     for (int z = 0; z < zones; z++) {
+//       uint16_t pos = offset + z * zoneLen;
+//       for (int i = 0; i < zoneLen; i++) {
+//         uint8_t  colorIndex = (i * 255 / zoneLen) - counter;
+//         uint16_t led = (z & 0x01) ? i : (zoneLen -1) -i;
+//         leds[pos + led] = ColorFromPalette(leds.palette, colorIndex);
+//       }
+//     }
+//   }
+// };
+
+// class RingEffect: public Node {
+//   protected:
+
+//   void setRing(int ring, CRGB colour) { //so britisch ;-)
+//     leds[ring] = colour;
+//   }
+
+// };
+
+// class RingRandomFlowEffect: public RingEffect {
+//   const char * name() override {return "RingRandomFlow";}
+//   uint8_t dim() override {return _1D;}
+//   const char * tags() override {return "💫";}
+
+//   void setup() override {} //so no palette control is created
+
+//   void loop() override {
+//     //binding of loop persistent values (pointers)
+//     uint8_t *hue = leds.effectData.readWrite<uint8_t>(leds.size.x); //array
+
+//     hue[0] = random(0, 255);
+//     for (int r = 0; r < leds.size.x; r++) {
+//       setRing(leds, r, CHSV(hue[r], 255, 255));
+//     }
+//     for (int r = (leds.size.x - 1); r >= 1; r--) {
+//       hue[r] = hue[(r - 1)]; // set this ruing based on the inner
+//     }
+//     // FastLED.delay(SPEED);
+//   }
+// };
+
+// void mode_fireworks(uint16_t *aux0, uint16_t *aux1, uint8_t speed, uint8_t intensity, bool useAudio = false) {
+//   // fade_out(0);
+//   leds.fadeToBlackBy(10);
+//   // if (SEGENV.call == 0) {
+//   //   *aux0 = UINT16_MAX;
+//   //   *aux1 = UINT16_MAX;
+//   // }
+//   bool valid1 = (*aux0 < leds.size.x);
+//   bool valid2 = (*aux1 < leds.size.x);
+//   CRGB sv1 = 0, sv2 = 0;
+//   if (valid1) sv1 = leds.getPixelColor(*aux0);
+//   if (valid2) sv2 = leds.getPixelColor(*aux1);
+
+//   // WLEDSR
+//   uint8_t blurAmount   = 255 - speed;
+//   uint8_t my_intensity = 129 - intensity;
+//   bool addPixels = true;                        // false -> inhibit new pixels in silence
+//   int soundColor = -1;                          // -1 = random color; 0..255 = use as palette index
+
+//   // if (useAudio) {
+//   //   if (FFT_MajorPeak < 100)    { blurAmount = 254;} // big blobs
+//   //   else {
+//   //     if (FFT_MajorPeak > 3200) { blurAmount = 1;}   // small blobs
+//   //     else {                                         // blur + color depends on major frequency
+//   //       float musicIndex = logf(FFT_MajorPeak);            // log scaling of peak freq
+//   //       blurAmount = mapff(musicIndex, 4.60, 8.08, 253, 1);// map to blur range (low freq = more blur)
+//   //       blurAmount = constrain(blurAmount, 1, 253);        // remove possible "overshot" results
+//   //       soundColor = mapff(musicIndex, 4.6, 8.08, 0, 255); // pick color from frequency
+//   //   } }
+//   //   if (sampleAgc <= 1.0) {      // silence -> no new pixels, just blur
+//   //     valid1 = valid2 = false;   // do not copy last pixels
+//   //     addPixels = false;         
+//   //     blurAmount = 128;
+//   //   }
+//   //   my_intensity = 129 - (speed >> 1); // dirty hack: use "speed" slider value intensity (no idea how to _disable_ the first slider, but show the second one)
+//   //   if (samplePeak == 1) my_intensity -= my_intensity / 4;    // inclease intensity at peaks
+//   //   if (samplePeak > 1) my_intensity = my_intensity / 2;      // double intensity at main peaks
+//   // }
+//   // // WLEDSR end
+
+//   leds.blur1d(blurAmount);
+//   if (valid1) leds.setPixelColor(*aux0, sv1);
+//   if (valid2) leds.setPixelColor(*aux1, sv2);
+
+//   if (addPixels) {                                                                             // WLEDSR
+//     for(uint16_t i=0; i<max(1, leds.size.x/20); i++) {
+//       if(random8(my_intensity) == 0) {
+//         uint16_t index = random(leds.size.x);
+//         if (soundColor < 0)
+//           leds.setPixelColor(index, ColorFromPalette(leds.palette, random8()));
+//         else
+//           leds.setPixelColor(index, ColorFromPalette(leds.palette, soundColor + random8(24))); // WLEDSR
+//         *aux1 = *aux0;
+//         *aux0 = index;
+//       }
+//     }
+//   }
+//   // return FRAMETIME;
+// }
+
+// class RainEffect: public Node {
+//   const char * name() override {return "Rain";}
+//   uint8_t dim() override {return _1D;}
+//   const char * tags() override {return "💡";}
+  
+//   void setup() override {
+//     Effect::setup(leds, parentVar);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(128), 1, 255);
+//     ui->initSlider(parentVar, "intensity", leds.effectData.write<uint8_t>(64), 1, 128);
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t speed = leds.effectData.read<uint8_t>();
+//     uint8_t intensity = leds.effectData.read<uint8_t>();
+
+//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
+//     uint16_t *aux0 = leds.effectData.readWrite<uint16_t>();
+//     uint16_t *aux1 = leds.effectData.readWrite<uint16_t>();
+//     uint16_t *step = leds.effectData.readWrite<uint16_t>();
+
+//     // if(SEGENV.call == 0) {
+//       // leds.fill(BLACK);
+//     // }
+//     *step += 1000 / 40;// FRAMETIME;
+//     if (*step > (5U + (50U*(255U - speed))/leds.size.x)) { //SPEED_FORMULA_L) {
+//       *step = 1;
+//       // if (strip.isMatrix) {
+//       //   //uint32_t ctemp[leds.size.x];
+//       //   //for (int i = 0; i<leds.size.x; i++) ctemp[i] = leds.getPixelColor(i, leds.size.y-1);
+//       //   leds.move(6, 1, true);  // move all pixels down
+//       //   //for (int i = 0; i<leds.size.x; i++) leds.setPixelColor(i, 0, ctemp[i]); // wrap around
+//       //   *aux0 = (*aux0 % leds.size.x) + (*aux0 / leds.size.x + 1) * leds.size.x;
+//       //   *aux1 = (*aux1 % leds.size.x) + (*aux1 / leds.size.x + 1) * leds.size.x;
+//       // } else 
+//       {
+//         //shift all leds left
+//         CRGB ctemp = leds.getPixelColor(0);
+//         for (int i = 0; i < leds.size.x - 1; i++) {
+//           leds.setPixelColor(i, leds.getPixelColor(i+1));
+//         }
+//         leds.setPixelColor(leds.size.x -1, ctemp); // wrap around
+//         *aux0++;  // increase spark index
+//         *aux1++;
+//       }
+//       if (*aux0 == 0) *aux0 = UINT16_MAX; // reset previous spark position
+//       if (*aux1 == 0) *aux0 = UINT16_MAX; // reset previous spark position
+//       if (*aux0 >= leds.size.x*leds.size.y) *aux0 = 0;     // ignore
+//       if (*aux1 >= leds.size.x*leds.size.y) *aux1 = 0;
+//     }
+//     mode_fireworks(leds, aux0, aux1, speed, intensity);
+//   }
+// }; // RainEffect
+
+// //each needs 19 bytes
+// //Spark type is used for popcorn, fireworks, and drip
+// struct Spark {
+//   float pos, posX;
+//   float vel, velX;
+//   uint16_t col;
+//   uint8_t colIndex;
+// };
+
+// #define maxNumDrops 6
+// class DripEffect: public Node {
+//   const char * name() override {return "Drip";}
+//   uint8_t dim() override {return _1D;}
+//   const char * tags() override {return "💡💫";}
+  
+//   void setup() override {
+//     Effect::setup(leds, parentVar);
+//     ui->initSlider(parentVar, "gravity", leds.effectData.write<uint8_t>(128), 1, 255);
+//     ui->initSlider(parentVar, "drips", leds.effectData.write<uint8_t>(4), 1, 6);
+//     ui->initSlider(parentVar, "swell", leds.effectData.write<uint8_t>(4), 1, 6);
+//     ui->initCheckBox(parentVar, "invert", leds.effectData.write<bool>(false));
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t grav = leds.effectData.read<uint8_t>();
+//     uint8_t drips = leds.effectData.read<uint8_t>();
+//     uint8_t swell = leds.effectData.read<uint8_t>();
+//     bool invert = leds.effectData.read<bool>();
+
+//     //binding of loop persistent values (pointers)
+//     Spark* drops = leds.effectData.readWrite<Spark>(maxNumDrops);
+
+//     // leds.fadeToBlackBy(90);
+//     leds.fill_solid(CRGB::Black);
+
+//     float gravity = -0.0005f - (grav/25000.0f); //increased gravity (50000 to 25000)
+//     gravity *= max(1, leds.size.x-1);
+//     int sourcedrop = 12;
+
+//     for (int j=0;j<drips;j++) {
+//       if (drops[j].colIndex == 0) { //init
+//         drops[j].pos = leds.size.x-1;    // start at end
+//         drops[j].vel = 0;           // speed
+//         drops[j].col = sourcedrop;  // brightness
+//         drops[j].colIndex = 1;      // drop state (0 init, 1 forming, 2 falling, 5 bouncing)
+//         drops[j].velX = (uint32_t)ColorFromPalette(leds.palette, random8()); // random color
+//       }
+//       CRGB dropColor = drops[j].velX;
+
+//       leds.setPixelColor(invert?0:leds.size.x-1, blend(CRGB::Black, dropColor, sourcedrop));// water source
+//       if (drops[j].colIndex==1) {
+//         if (drops[j].col>255) drops[j].col=255;
+//         leds.setPixelColor(invert?leds.size.x-1-drops[j].pos:drops[j].pos, blend(CRGB::Black, dropColor, drops[j].col));
+
+//         drops[j].col += swell; // swelling
+
+//         if (random16() <= drops[j].col * swell * swell / 10) {               // random drop
+//           drops[j].colIndex=2;               //fall
+//           drops[j].col=255;
+//         }
+//       }
+//       if (drops[j].colIndex > 1) {           // falling
+//         if (drops[j].pos > 0) {              // fall until end of segment
+//           drops[j].pos += drops[j].vel;
+//           if (drops[j].pos < 0) drops[j].pos = 0;
+//           drops[j].vel += gravity;           // gravity is negative
+
+//           for (int i=1;i<7-drops[j].colIndex;i++) { // some minor math so we don't expand bouncing droplets
+//             uint16_t pos = constrain(uint16_t(drops[j].pos) +i, 0, leds.size.x-1); //this is BAD, returns a pos >= leds.size.x occasionally
+//             leds.setPixelColor(invert?leds.size.x-1-pos:pos, blend(CRGB::Black, dropColor, drops[j].col/i)); //spread pixel with fade while falling
+//           }
+
+//           if (drops[j].colIndex > 2) {       // during bounce, some water is on the floor
+//             leds.setPixelColor(invert?leds.size.x-1:0, blend(dropColor, CRGB::Black, drops[j].col));
+//           }
+//         } else {                             // we hit bottom
+//           if (drops[j].colIndex > 2) {       // already hit once, so back to forming
+//             drops[j].colIndex = 0;
+//             // drops[j].col = sourcedrop;
+
+//           } else {
+
+//             if (drops[j].colIndex==2) {      // init bounce
+//               drops[j].vel = -drops[j].vel/4;// reverse velocity with damping
+//               drops[j].pos += drops[j].vel;
+//             }
+//             drops[j].col = sourcedrop*2;
+//             drops[j].colIndex = 5;           // bouncing
+//           }
+//         }
+//       }
+//     }
+//   }
+// }; // DripEffect
+
+// class HeartBeatEffect: public Node {
+//   const char * name() override {return "HeartBeat";}
+//   uint8_t dim() override {return _1D;}
+//   const char * tags() override {return "💡💫♥";}
+  
+//   void setup() override {
+//     Effect::setup(leds, parentVar);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(15), 0, 31);
+//     ui->initSlider(parentVar, "intensity", leds.effectData.write<uint8_t>(128));
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t speed = leds.effectData.read<uint8_t>();
+//     uint8_t intensity = leds.effectData.read<uint8_t>();
+
+//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
+//     bool *isSecond = leds.effectData.readWrite<bool>();
+//     uint16_t *bri_lower = leds.effectData.readWrite<uint16_t>();
+//     unsigned long *step = leds.effectData.readWrite<unsigned long>();
+
+//     uint8_t bpm = 40 + (speed);
+//     uint32_t msPerBeat = (60000L / bpm);
+//     uint32_t secondBeat = (msPerBeat / 3);
+//     unsigned long beatTimer = sys->now - *step;
+
+//     *bri_lower = *bri_lower * 2042 / (2048 + intensity);
+
+//     if ((beatTimer > secondBeat) && !*isSecond) { // time for the second beat?
+//       *bri_lower = UINT16_MAX; //3/4 bri
+//       *isSecond = true;
+//     }
+
+//     if (beatTimer > msPerBeat) { // time to reset the beat timer?
+//       *bri_lower = UINT16_MAX; //full bri
+//       *isSecond = false;
+//       *step = sys->now;
+//     }
+
+//     for (int i = 0; i < leds.size.x; i++) {
+//       leds.setPixelColor(i, ColorFromPalette(leds.palette, map(i, 0, leds.size.x, 0, 255), 255 - (*bri_lower >> 8)));
+//     }
+//   }
+// }; // HeartBeatEffect
+
+// class AudioRingsEffect: public RingEffect {
+//   const char * name() override {return "AudioRings";}
+//   uint8_t dim() override {return _1D;}
+//   const char * tags() override {return "♫💫";}
+
+//   void setup() override {
+//     Effect::setup(leds, parentVar);
+//     ui->initCheckBox(parentVar, "inWards", leds.effectData.write<bool>(true));
+//     ui->initSlider(parentVar, "rings", leds.effectData.write<uint8_t>(7), 1, 50);
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     bool inWards = leds.effectData.read<bool>();
+//     uint8_t nrOfRings = leds.effectData.read<uint8_t>();
+
+//     for (int i = 0; i < nrOfRings; i++) {
+
+//       uint8_t band = map(i, 0, nrOfRings-1, 0, 15);
+
+//       byte val;
+//       if (inWards) {
+//         val = audioSync->fftResults[band];
+//       }
+//       else {
+//         val = audioSync->fftResults[15 - band];
+//       }
+  
+//       // Visualize leds to the beat
+//       CRGB color = ColorFromPalette(leds.palette, val, val);
+// //      CRGB color = ColorFromPalette(currentPalette, val, 255, currentBlending);
+// //      color.nscale8_video(val);
+//       setRing(leds, i, color);
+// //        setRingFromFtt((i * 2), i); 
+//     }
+
+//     setRingFromFtt(leds, 2, 7); // set outer ring to bass
+//     setRingFromFtt(leds, 0, 8); // set outer ring to bass
+
+//   }
+//   void setRingFromFtt(int index, int ring) {
+//     byte val = audioSync->fftResults[index];
+//     // Visualize leds to the beat
+//     CRGB color = ColorFromPalette(leds.palette, val);
+//     color.nscale8_video(val);
+//     setRing(leds, ring, color);
+//   }
+// };
+
+// class DJLightEffect: public Node {
+//   const char * name() override {return "DJLight";}
+//   uint8_t dim() override {return _1D;}
+//   const char * tags() override {return "♫💡";}
+
+//   void setup() override {
+//     leds.fill_solid(CRGB::Black);
+//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(255));
+//     ui->initCheckBox(parentVar, "candyFactory", leds.effectData.write<bool>(true));
+//     ui->initSlider(parentVar, "fade", leds.effectData.write<uint8_t>(4), 0, 10);
+//   }
+
+//   void loop() override {
+//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
+//     uint8_t speed = leds.effectData.read<uint8_t>();
+//     bool candyFactory = leds.effectData.read<bool>();
+//     uint8_t fade = leds.effectData.read<uint8_t>();
+
+//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
+//     uint8_t *aux0 = leds.effectData.readWrite<uint8_t>();
+
+//     const int mid = leds.size.x / 2;
+
+//     uint8_t *fftResult = audioSync->fftResults;
+//     float volumeSmth   = audioSync->volumeSmth;
+
+//     uint8_t secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
+//     if((speed > 254) || (*aux0 != secondHand)) {   // WLEDMM allow run run at full speed
+//       *aux0 = secondHand;
+
+//       CRGB color = CRGB(0,0,0);
+//       // color = CRGB(fftResult[15]/2, fftResult[5]/2, fftResult[0]/2);   // formula from 0.13.x (10Khz): R = 3880-5120, G=240-340, B=60-100
+//       if (!candyFactory) {
+//         color = CRGB(fftResult[12]/2, fftResult[3]/2, fftResult[1]/2);    // formula for 0.14.x  (22Khz): R = 3015-3704, G=216-301, B=86-129
+//       } else {
+//         // candy factory: an attempt to get more colors
+//         color = CRGB(fftResult[11]/2 + fftResult[12]/4 + fftResult[14]/4, // red  : 2412-3704 + 4479-7106 
+//                     fftResult[4]/2 + fftResult[3]/4,                     // green: 216-430
+//                     fftResult[0]/4 + fftResult[1]/4 + fftResult[2]/4);   // blue:  46-216
+//         if ((color.getLuma() < 96) && (volumeSmth >= 1.5f)) {             // enhance "almost dark" pixels with yellow, based on not-yet-used channels 
+//           unsigned yello_g = (fftResult[5] + fftResult[6] + fftResult[7]) / 3;
+//           unsigned yello_r = (fftResult[7] + fftResult[8] + fftResult[9] + fftResult[10]) / 4;
+//           color.green += (uint8_t) yello_g / 2;
+//           color.red += (uint8_t) yello_r / 2;
+//         }
+//       }
+
+//       if (volumeSmth < 1.0f) color = CRGB(0,0,0); // silence = black
+
+//       // make colors less "pastel", by turning up color saturation in HSV space
+//       if (color.getLuma() > 32) {                                      // don't change "dark" pixels
+//         CHSV hsvColor = rgb2hsv_approximate(color);
+//         hsvColor.v = min(max(hsvColor.v, (uint8_t)48), (uint8_t)204);  // 48 < brightness < 204
+//         if (candyFactory)
+//           hsvColor.s = max(hsvColor.s, (uint8_t)204);                  // candy factory mode: strongly turn up color saturation (> 192)
+//         else
+//           hsvColor.s = max(hsvColor.s, (uint8_t)108);                  // normal mode: turn up color saturation to avoid pastels
+//         color = hsvColor;
+//       }
+//       //if (color.getLuma() > 12) color.maximizeBrightness();          // for testing
+
+//       //leds.setPixelColor(mid, color.fadeToBlackBy(map(fftResult[4], 0, 255, 255, 4)));     // 0.13.x  fade -> 180hz-260hz
+//       uint8_t fadeVal = map(fftResult[3], 0, 255, 255, 4);                                      // 0.14.x  fade -> 216hz-301hz
+//       if (candyFactory) fadeVal = constrain(fadeVal, 0, 176);  // "candy factory" mode - avoid complete fade-out
+//       leds.setPixelColor(mid, color.fadeToBlackBy(fadeVal));
+
+//       for (int i = leds.size.x - 1; i > mid; i--)   leds.setPixelColor(i, leds.getPixelColor(i-1)); // move to the left
+//       for (int i = 0; i < mid; i++)            leds.setPixelColor(i, leds.getPixelColor(i+1)); // move to the right
+
+//       leds.fadeToBlackBy(fade);
+
+//     }
+//   }
+// }; //DJLight
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /*
+//  * Spotlights moving back and forth that cast dancing shadows.
+//  * Shine this through tree branches/leaves or other close-up objects that cast
+//  * interesting shadows onto a ceiling or tarp.
+//  *
+//  * By Steve Pomeroy @xxv
+//  */
+// uint16_t mode_dancing_shadows(void)
+// {
+//   if (SEGLEN == 1) return mode_static();
+//   uint8_t numSpotlights = map(SEGMENT.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
+//   bool initialize = SEGENV.aux0 != numSpotlights;
+//   SEGENV.aux0 = numSpotlights;
+
+//   uint16_t dataSize = sizeof(spotlight) * numSpotlights;
+//   if (!SEGENV.allocateData(dataSize)) return mode_static(); //allocation failed
+//   Spotlight* spotlights = reinterpret_cast<Spotlight*>(SEGENV.data);
+//   if (SEGENV.call == 0) SEGENV.setUpLeds();   // WLEDMM use lossless getRGB()
+
+//   SEGMENT.fill(BLACK);
+
+//   unsigned long time = strip.now;
+//   bool respawn = false;
+
+//   for (size_t i = 0; i < numSpotlights; i++) {
+//     if (!initialize) {
+//       // advance the position of the spotlight
+//       int16_t delta = (float)(time - spotlights[i].lastUpdateTime) *
+//                   (spotlights[i].speed * ((1.0f + SEGMENT.speed)/100.0f));
+
+//       if (abs(delta) >= 1) {
+//         spotlights[i].position += delta;
+//         spotlights[i].lastUpdateTime = time;
+//       }
+
+//       respawn = (spotlights[i].speed > 0.0 && spotlights[i].position > (SEGLEN + 2))
+//              || (spotlights[i].speed < 0.0 && spotlights[i].position < -(spotlights[i].width + 2));
+//     }
+
+//     if (initialize || respawn) {
+//       spotlights[i].colorIdx = random8();
+//       spotlights[i].width = random8(1, 10);
+
+//       spotlights[i].speed = 1.0f/random8(4, 50);
+
+//       if (initialize) {
+//         spotlights[i].position = random16(SEGLEN);
+//         spotlights[i].speed *= random8(2) > 0 ? 1.0 : -1.0;
+//       } else {
+//         if (random8(2)) {
+//           spotlights[i].position = SEGLEN + spotlights[i].width;
+//           spotlights[i].speed *= -1.0f;
+//         }else {
+//           spotlights[i].position = -spotlights[i].width;
+//         }
+//       }
+
+//       spotlights[i].lastUpdateTime = time;
+//       spotlights[i].type = random8(SPOT_TYPES_COUNT);
+//     }
+
+//     uint32_t color = SEGMENT.color_from_palette(spotlights[i].colorIdx, false, false, 255);
+//     int start = spotlights[i].position;
+
+//     if (spotlights[i].width <= 1) {
+//       if (start >= 0 && start < SEGLEN) {
+//         SEGMENT.blendColor(start, color, 128);
+//       }
+//     } else {
+//       switch (spotlights[i].type) {
+//         case SPOT_TYPE_SOLID:
+//           for (size_t j = 0; j < spotlights[i].width; j++) {
+//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
+//               SEGMENT.blendColor(start + j, color, 128);
+//             }
+//           }
+//         break;
+
+//         case SPOT_TYPE_GRADIENT:
+//           for (size_t j = 0; j < spotlights[i].width; j++) {
+//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
+//               SEGMENT.blendColor(start + j, color, cubicwave8(map(j, 0, spotlights[i].width - 1, 0, 255)));
+//             }
+//           }
+//         break;
+
+//         case SPOT_TYPE_2X_GRADIENT:
+//           for (size_t j = 0; j < spotlights[i].width; j++) {
+//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
+//               SEGMENT.blendColor(start + j, color, cubicwave8(2 * map(j, 0, spotlights[i].width - 1, 0, 255)));
+//             }
+//           }
+//         break;
+
+//         case SPOT_TYPE_2X_DOT:
+//           for (size_t j = 0; j < spotlights[i].width; j += 2) {
+//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
+//               SEGMENT.blendColor(start + j, color, 128);
+//             }
+//           }
+//         break;
+
+//         case SPOT_TYPE_3X_DOT:
+//           for (size_t j = 0; j < spotlights[i].width; j += 3) {
+//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
+//               SEGMENT.blendColor(start + j, color, 128);
+//             }
+//           }
+//         break;
+
+//         case SPOT_TYPE_4X_DOT:
+//           for (size_t j = 0; j < spotlights[i].width; j += 4) {
+//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
+//               SEGMENT.blendColor(start + j, color, 128);
+//             }
+//           }
+//         break;
+//       }
+//     }
+//   }
+
+//   return FRAMETIME;
+// }
+// static const char _data_FX_MODE_DANCING_SHADOWS[] PROGMEM = "Dancing Shadows@!,# of shadows;!;!";
+
+// //  TwinkleFOX by Mark Kriegsman: https://gist.github.com/kriegsman/756ea6dcae8e30845b5a
+// //
+// //  TwinkleFOX: Twinkling 'holiday' lights that fade in and out.
+// //  Colors are chosen from a palette. Read more about this effect using the link above!
+
+// // If COOL_LIKE_INCANDESCENT is set to 1, colors will
+// // fade out slighted 'reddened', similar to how
+// // incandescent bulbs change color as they get dim down.
+// #define COOL_LIKE_INCANDESCENT 1
+
+// CRGB twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
+// {
+//   // Overall twinkle speed (changed)
+//   uint16_t ticks = ms / SEGENV.aux0;
+//   uint8_t fastcycle8 = ticks;
+//   uint16_t slowcycle16 = (ticks >> 8) + salt;
+//   slowcycle16 += sin8_t(slowcycle16);
+//   slowcycle16 = (slowcycle16 * 2053) + 1384;
+//   uint8_t slowcycle8 = (slowcycle16 & 0xFF) + (slowcycle16 >> 8);
+
+//   // Overall twinkle density.
+//   // 0 (NONE lit) to 8 (ALL lit at once).
+//   // Default is 5.
+//   uint8_t twinkleDensity = (SEGMENT.intensity >> 5) +1;
+
+//   uint8_t bright = 0;
+//   if (((slowcycle8 & 0x0E)/2) < twinkleDensity) {
+//     uint8_t ph = fastcycle8;
+//     // This is like 'triwave8', which produces a
+//     // symmetrical up-and-down triangle sawtooth waveform, except that this
+//     // function produces a triangle wave with a faster attack and a slower decay
+//     if (cat) //twinklecat, variant where the leds instantly turn on
+//     {
+//       bright = 255 - ph;
+//     } else { //vanilla twinklefox
+//       if (ph < 86) {
+//       bright = ph * 3;
+//       } else {
+//         ph -= 86;
+//         bright = 255 - (ph + (ph/2));
+//       }
+//     }
+//   }
+
+//   uint8_t hue = slowcycle8 - salt;
+//   CRGB c;
+//   if (bright > 0) {
+//     c = ColorFromPalette(SEGPALETTE, hue, bright, NOBLEND);
+//     if(COOL_LIKE_INCANDESCENT == 1) {
+//       // This code takes a pixel, and if its in the 'fading down'
+//       // part of the cycle, it adjusts the color a little bit like the
+//       // way that incandescent bulbs fade toward 'red' as they dim.
+//       if (fastcycle8 >= 128)
+//       {
+//         uint8_t cooling = (fastcycle8 - 128) >> 4;
+//         c.g = qsub8(c.g, cooling);
+//         c.b = qsub8(c.b, cooling * 2);
+//       }
+//     }
+//   } else {
+//     c = CRGB::Black;
+//   }
+//   return c;
+// }
+
+// //  This function loops over each pixel, calculates the
+// //  adjusted 'clock' that this pixel should use, and calls
+// //  "CalculateOneTwinkle" on each pixel.  It then displays
+// //  either the twinkle color of the background color,
+// //  whichever is brighter.
+// uint16_t twinklefox_base(bool cat)
+// {
+//   // "PRNG16" is the pseudorandom number generator
+//   // It MUST be reset to the same starting value each time
+//   // this function is called, so that the sequence of 'random'
+//   // numbers that it generates is (paradoxically) stable.
+//   uint16_t PRNG16 = 11337;
+
+//   // Calculate speed
+//   if (SEGMENT.speed > 100) SEGENV.aux0 = 3 + ((255 - SEGMENT.speed) >> 3);
+//   else SEGENV.aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
+
+//   // Set up the background color, "bg".
+//   CRGB bg = CRGB(SEGCOLOR(1));
+//   uint8_t bglight = bg.getAverageLight();
+//   if (bglight > 64) {
+//     bg.nscale8_video(16); // very bright, so scale to 1/16th
+//   } else if (bglight > 16) {
+//     bg.nscale8_video(64); // not that bright, so scale to 1/4th
+//   } else {
+//     bg.nscale8_video(86); // dim, scale to 1/3rd.
+//   }
+
+//   uint8_t backgroundBrightness = bg.getAverageLight();
+
+//   for (int i = 0; i < SEGLEN; i++) {
+
+//     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
+//     uint16_t myclockoffset16= PRNG16; // use that number as clock offset
+//     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
+//     // use that number as clock speed adjustment factor (in 8ths, from 8/8ths to 23/8ths)
+//     uint8_t myspeedmultiplierQ5_3 =  ((((PRNG16 & 0xFF)>>4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
+//     uint32_t myclock30 = (uint32_t)((strip.now * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
+//     uint8_t  myunique8 = PRNG16 >> 8; // get 'salt' value for this pixel
+
+//     // We now have the adjusted 'clock' for this pixel, now we call
+//     // the function that computes what color the pixel should be based
+//     // on the "brightness = f( time )" idea.
+//     CRGB c = twinklefox_one_twinkle(myclock30, myunique8, cat);
+
+//     uint8_t cbright = c.getAverageLight();
+//     int16_t deltabright = cbright - backgroundBrightness;
+//     if (deltabright >= 32 || (!bg)) {
+//       // If the new pixel is significantly brighter than the background color,
+//       // use the new color.
+//       SEGMENT.setPixelColor(i, c.red, c.green, c.blue);
+//     } else if (deltabright > 0) {
+//       // If the new pixel is just slightly brighter than the background color,
+//       // mix a blend of the new color and the background color
+//       SEGMENT.setPixelColor(i, color_blend(RGBW32(bg.r,bg.g,bg.b,0), RGBW32(c.r,c.g,c.b,0), deltabright * 8));
+//     } else {
+//       // if the new pixel is not at all brighter than the background color,
+//       // just use the background color.
+//       SEGMENT.setPixelColor(i, bg.r, bg.g, bg.b);
+//     }
+//   }
+//   return FRAMETIME;
+// }
+
+
+// uint16_t mode_twinklefox()
+// {
+//   return twinklefox_base(false);
+// }
+// static const char _data_FX_MODE_TWINKLEFOX[] PROGMEM = "Twinklefox@!,Twinkle rate;!,!;!";
+
+
+// uint16_t mode_twinklecat()
+// {
+//   return twinklefox_base(true);
+// }
+// static const char _data_FX_MODE_TWINKLECAT[] PROGMEM = "Twinklecat@!,Twinkle rate;!,!;!";
+
+
 
 #endif

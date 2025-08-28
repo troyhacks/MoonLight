@@ -196,7 +196,7 @@ void VirtualLayer::fadeToBlackMin() {
   if (fadeMin > 0) { //at least one fadeBy
 
     uint8_t fadeBy = fadeMin;// + fadeMax / div;
-    // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
+    // if (effectDimension < layerDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
     //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
     //     for (int x=0; x<size.x; x++) {
     //       CRGB color = getLight({x,y,0});
@@ -240,7 +240,7 @@ void VirtualLayer::fadeToBlackMin() {
 }
 
 void VirtualLayer::fill_solid(const CRGB& color) {
-  // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
+  // if (effectDimension < layerDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   for (int y=0; y < ((effectDimension == _1D)?1:size.y); y++) { //1D effects only on y=0, 2D effects loop over y
   //     for (int x=0; x<size.x; x++) {
   //       setRGB({x,y,0}, color);
@@ -256,7 +256,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
 }
 
 void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue) {
-  // if (effectDimension < projectionDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
+  // if (effectDimension < layerDimension) { //only process the effect lights (so modifiers can do things with the other dimension)
   //   CHSV hsv;
   //   hsv.hue = initialhue;
   //   hsv.val = 255;
@@ -305,6 +305,13 @@ void VirtualLayer::addLayoutPre() {
     if (node->hasModifier && node->on)
       node->modifySize();
   }
+
+    // 0 to 3D depending on start and end (e.g. to display ScrollingText on one side of a cube)
+  layerDimension = 0;
+  if (size.x > 1) layerDimension++;
+  if (size.y > 1) layerDimension++;
+  if (size.z > 1) layerDimension++;
+
 }
 
 void VirtualLayer::addLight(Coord3D position) {

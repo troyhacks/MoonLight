@@ -25,7 +25,7 @@ PhysicalLayer::PhysicalLayer() {
         MB_LOGD(ML_TAG, "constructor");
 
         if (psramFound()) {
-            lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 122880*3); //fill halve with channels, max 128K LEDs
+            lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 61440*3); //fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
             // lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_SPIRAM);
             lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
             if (lights.channels)

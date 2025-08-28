@@ -13,10 +13,6 @@
 
 #if FT_MOONLIGHT
 
-#define _1D 1
-#define _2D 2
-#define _3D 3
-
 #include "VirtualLayer.h" //VirtualLayer.h will include PhysicalLayer.h
 
 #include <ESPFS.h>

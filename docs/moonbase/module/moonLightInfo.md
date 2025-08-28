@@ -6,7 +6,7 @@ Shows info about the physical and virtual layer
 
 * **NrOfLights**: the nr of lights defined in the layer
 * **Channels per light**: e.g. normal RGB strip/panel is 3 channels per light
-* **Max channels**: Max channels availeble (12288x3 for boards with PSRAM, 4096*3 for other boards -> 12288 / 4096 RGB LEDs)
+* **Max channels**: Max channels availeble (61440x3 for boards with PSRAM (120 pins x 512 LEDs), 4096x3 for other boards -> 12288 / 4096 RGB LEDs)
 * **Size**: the outer bounds of the fixture, e.g. for a 16x16 panel it is 16x16x1
 * **Layers**: The virtual layers defined (currently only 1)
     * **NrOfLights and size**: virtual layer can differ from the physical layer (.e.g when mirroring it is only half)

@@ -305,3 +305,10 @@ struct PSRAMAllocator {
         heap_caps_free(p);
     }
 };
+
+//for game of live
+uint16_t crc16(const unsigned char* data_p, size_t length);
+uint16_t gcd(uint16_t a, uint16_t b);
+uint16_t lcm(uint16_t a, uint16_t b);
+bool getBitValue(const uint8_t* byteArray, size_t n);
+void setBitValue(uint8_t* byteArray, size_t n, bool value);

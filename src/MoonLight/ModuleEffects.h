@@ -100,6 +100,7 @@ public:
         values.add(BouncingBallsEffect::name());
         values.add(DistortionWavesEffect::name());
         values.add(FreqMatrixEffect::name());
+        values.add(GameOfLifeEffect::name());
         values.add(GEQEffect::name());
         values.add(GEQ3DEffect::name());
         values.add(LinesEffect::name());
@@ -150,6 +151,7 @@ public:
         else if (equal(name, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
         else if (equal(name, DistortionWavesEffect::name())) node = new DistortionWavesEffect();
         else if (equal(name, FreqMatrixEffect::name())) node = new FreqMatrixEffect();
+        else if (equal(name, GameOfLifeEffect::name())) node = new GameOfLifeEffect();
         else if (equal(name, GEQEffect::name())) node = new GEQEffect();
         else if (equal(name, GEQ3DEffect::name())) node = new GEQ3DEffect();
         else if (equal(name, LinesEffect::name())) node = new LinesEffect();
