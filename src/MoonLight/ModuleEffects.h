@@ -195,6 +195,8 @@ public:
         #endif
 
         if (node) {
+            MB_LOGD(ML_TAG, "%s (p:%p pr:%d)", name, node, isInPSRAM(node));
+
             node->constructor(layerP.layerV[0], controls); //pass the layer to the node
             node->setup(); //run the setup of the effect
             // layerV[0]->nodes.reserve(index+1);
@@ -203,8 +205,6 @@ public:
             else
                 layerP.layerV[0]->nodes[index] = node; //add the node to the layer
         }
-
-        MB_LOGD(ML_TAG, "%s (s:%d p:%p)", name, layerP.layerV[0]->nodes.size(), node);
 
         return node;
     }

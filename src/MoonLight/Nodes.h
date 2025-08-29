@@ -139,11 +139,11 @@ public:
 
   void requestMappings() {
     if (hasModifier || hasLayout) {
-        MB_LOGD(ML_TAG, "hasLayout or Modifier -> requestMapVirtual");
+        // MB_LOGD(ML_TAG, "hasLayout or Modifier -> requestMapVirtual");
         layerV->layerP->requestMapVirtual = true;
     }
     if (hasLayout) {
-        MB_LOGD(ML_TAG, "hasLayout -> requestMapPhysical");
+        // MB_LOGD(ML_TAG, "hasLayout -> requestMapPhysical");
         layerV->layerP->requestMapPhysical = true;
     }
   }

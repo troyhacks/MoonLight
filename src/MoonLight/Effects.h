@@ -9,6 +9,14 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
+
+/**
+ * Guidelines:
+ * 
+ * 1) Don't use String type class variables but char[x] as can crash when node is destructed (node in PSRAM, string in heap)
+ * 2) no static variables in node classes as we can run multiple instances of the same node which should not share data -> class variables.
+ */
+
 #if FT_MOONLIGHT
 
 class SolidEffect: public Node {
@@ -1643,7 +1651,7 @@ class MHWowiEffect: public Node {
 // todo: ewowi check with wildcats08: can background color be removed as it is now easy to add solid as background color (blending ...?)
 class GameOfLifeEffect: public Node {
   public:
-  static const char * name() {return "GameOfLife 💫";}
+  static const char * name() {return "Game Of Life 💫";}
   static uint8_t dim() {return _3D;} //supports 3D but also 2D (1D as well?)
   static const char * tags() {return "";}
 
@@ -1673,23 +1681,19 @@ class GameOfLifeEffect: public Node {
     }
   }
 
-  bool ruleChanged = true;
-  Coord3D bgC             = {0,0,0};
-  uint8_t  ruleset            = 1;
-  String customRuleString = "B/S";
-  uint8_t speed           = 20;
-  uint8_t  lifeChance         = 32;
-  uint8_t mutation        = 2;
-  bool wrap         = true;
-  bool disablePause = false;
-  bool colorByAge   = false;
-  bool infinite     = false;
-  uint8_t blur            = 128;
+  Coord3D bgC                  = {0,0,0};
+  uint8_t ruleset              = 1;
+  char    customRuleString[20] = "B/S";
+  uint8_t speed                = 20;
+  uint8_t lifeChance           = 32;
+  uint8_t mutation             = 2;
+  bool    wrap                 = true;
+  bool    disablePause         = false;
+  bool    colorByAge           = false;
+  bool    infinite             = false;
+  uint8_t blur                 = 128;
 
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
-
-    if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
+  void setBirthAndSurvive() {
       String ruleString = "";
       if      (ruleset == 0) ruleString = customRuleString; //Custom
       else if (ruleset == 1) ruleString = "B3/S23";         //Conway's Game of Life
@@ -1711,6 +1715,13 @@ class GameOfLifeEffect: public Node {
           else surviveNumbers[num] = true;
         }
       }
+  }
+
+  void updateControl(JsonObject control) override {
+    Node::updateControl(control);
+
+    if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
+      setBirthAndSurvive();
     }
   }
 
@@ -1737,7 +1748,7 @@ class GameOfLifeEffect: public Node {
     addControl(infinite, "infinite", "checkbox");
     addControl(blur, "blur", "range", 0, 255);
 
-    // startNewGameOfLife();
+    setBirthAndSurvive(); //initiate based on ruleset and customRuleString
   }
 
   unsigned long step;
@@ -1751,11 +1762,12 @@ class GameOfLifeEffect: public Node {
   bool     birthNumbers[9];
   bool     surviveNumbers[9];
   CRGB     prevPalette;
-  uint8_t      *cells = nullptr;
-  uint8_t      *futureCells = nullptr;
-  uint8_t      *cellColors = nullptr;
+  uint8_t  *cells = nullptr;
+  uint8_t  *futureCells = nullptr;
+  uint8_t  *cellColors = nullptr;
 
   void startNewGameOfLife() {
+    MB_LOGD(ML_TAG, "startNewGameOfLife");
     prevPalette  = ColorFromPalette(layerV->layerP->palette, 0);
     generation = 1;
     disablePause ? step = millis() : step = millis() + 1500;
@@ -1787,12 +1799,17 @@ class GameOfLifeEffect: public Node {
   int dataSize = 0;
 
   ~GameOfLifeEffect() {
+    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct cells %d", isInPSRAM(cells));
+    if (cells)      heap_caps_free(cells);
+    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct futureCells %d", isInPSRAM(futureCells));
+    if (futureCells) heap_caps_free(futureCells);
+    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct cellColors %d", isInPSRAM(cellColors));
+    if (cellColors)  heap_caps_free(cellColors);
+    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct done");
+
     //destructor
     Node::~Node();
 
-    if (cells)      heap_caps_free(cells);
-    if (futureCells) heap_caps_free(futureCells);
-    if (cellColors)  heap_caps_free(cellColors);
   }
 
   Coord3D prevSize = Coord3D(0,0,0);
@@ -1800,6 +1817,7 @@ class GameOfLifeEffect: public Node {
   void loop() override {
 
     if (layerV->size != prevSize) {
+      MB_LOGD(ML_TAG, "size change");
       prevSize = layerV->size;
 
       dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
@@ -1821,9 +1839,11 @@ class GameOfLifeEffect: public Node {
       memset(cellColors, 0, layerV->size.x * layerV->size.y * layerV->size.z);
 
       startNewGameOfLife();
+      return; // show the start
     } else if (generation == 0 && step < millis()) {
+      MB_LOGD(ML_TAG, "gen / step");
       startNewGameOfLife();
-      return; //?
+      return; // show the start
     }
 
     CRGB bgColor = CRGB(bgC.x, bgC.y, bgC.z);

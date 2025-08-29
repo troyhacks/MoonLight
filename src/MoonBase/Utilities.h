@@ -51,8 +51,8 @@ struct Coord3D {
     //comparisons
     bool operator!=(Coord3D rhs) {
         // ppf("Coord3D compare%d %d %d %d %d %d\n", x, y, z, rhs.x, rhs.y, rhs.z);
-        // return x != rhs.x || y != rhs.y || z != rhs.z;
-        return !(*this==rhs);
+        return x != rhs.x || y != rhs.y || z != rhs.z;
+        // return !(*this==rhs);
     }
     bool operator==(const Coord3D rhs) const {
         return x == rhs.x && y == rhs.y && z == rhs.z;
@@ -76,13 +76,13 @@ struct Coord3D {
     }
 
     //assignments
-    // Coord3D operator=(const Coord3D rhs) {
-    //     // ppf("Coord3D assign %d,%d,%d\n", rhs.x, rhs.y, rhs.z);
-    //     x = rhs.x;
-    //     y = rhs.y;
-    //     z = rhs.z;
-    //     return *this;
-    // }
+    Coord3D operator=(const Coord3D rhs) {
+        // ppf("Coord3D assign %d,%d,%d\n", rhs.x, rhs.y, rhs.z);
+        x = rhs.x;
+        y = rhs.y;
+        z = rhs.z;
+        return *this;
+    }
     Coord3D operator+=(const Coord3D rhs) {
         x += rhs.x;
         y += rhs.y;
@@ -330,15 +330,20 @@ T* allocateInPSRAM(Args&&... args) {
         MB_LOGD(MB_TAG, "heap_caps_malloc_prefer success");
         return new(mem) T(std::forward<Args>(args)...);
     } else {
-        MB_LOGW(MB_TAG, "heap_caps_malloc_prefer failed, doing old fashioned new");
-        return new T(std::forward<Args>(args)...);
+        // MB_LOGW(MB_TAG, "heap_caps_malloc_prefer failed, doing old fashioned new");
+        // return new T(std::forward<Args>(args)...);
+        MB_LOGW(MB_TAG, "heap_caps_malloc_prefer failed");
+        return nullptr;
     }
 }
 
 template<typename T>
 void freePSRAMObject(T* obj) {
     if (obj) {
+        MB_LOGD(MB_TAG, "trying to freePSRAMObject (inPR:%d)", isInPSRAM(obj));
         obj->~T();
+        MB_LOGD(MB_TAG, "freePSRAMObject destructor done");
         heap_caps_free(obj);
+        MB_LOGD(MB_TAG, "freePSRAMObject heap_caps_free done");
     }
 }
