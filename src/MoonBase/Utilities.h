@@ -48,6 +48,16 @@ struct Coord3D {
         this->z = z;
     }
 
+    //comparisons
+    bool operator!=(Coord3D rhs) {
+        // ppf("Coord3D compare%d %d %d %d %d %d\n", x, y, z, rhs.x, rhs.y, rhs.z);
+        // return x != rhs.x || y != rhs.y || z != rhs.z;
+        return !(*this==rhs);
+    }
+    bool operator==(const Coord3D rhs) const {
+        return x == rhs.x && y == rhs.y && z == rhs.z;
+    }
+
     //Minus / delta (abs)
     Coord3D operator-(const Coord3D rhs) const {
         return Coord3D(x - rhs.x, y - rhs.y, z - rhs.z);
@@ -312,3 +322,23 @@ uint16_t gcd(uint16_t a, uint16_t b);
 uint16_t lcm(uint16_t a, uint16_t b);
 bool getBitValue(const uint8_t* byteArray, size_t n);
 void setBitValue(uint8_t* byteArray, size_t n, bool value);
+
+template<typename T, typename... Args>
+T* allocateInPSRAM(Args&&... args) {
+    void* mem = heap_caps_malloc_prefer(sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_8BIT);
+    if (mem) {
+        MB_LOGD(MB_TAG, "heap_caps_malloc_prefer success");
+        return new(mem) T(std::forward<Args>(args)...);
+    } else {
+        MB_LOGW(MB_TAG, "heap_caps_malloc_prefer failed, doing old fashioned new");
+        return new T(std::forward<Args>(args)...);
+    }
+}
+
+template<typename T>
+void freePSRAMObject(T* obj) {
+    if (obj) {
+        obj->~T();
+        heap_caps_free(obj);
+    }
+}

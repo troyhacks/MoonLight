@@ -16,6 +16,8 @@
 #include <esp_ota_ops.h>
 #include <esp_app_format.h>
 
+#define EVENT_DOWNLOAD_OTA "otastatus" // 🌙
+
 using namespace std::placeholders; // for `_1` etc
 
 static char md5[33] = "\0";
@@ -23,14 +25,56 @@ static char md5[33] = "\0";
 static FileType fileType = ft_none;
 
 UploadFirmwareService::UploadFirmwareService(PsychicHttpServer *server,
-                                             SecurityManager *securityManager) : _server(server),
-                                                                                 _securityManager(securityManager)
+                                             SecurityManager *securityManager, EventSocket *socket) : _server(server),
+                                                                                 _securityManager(securityManager),
+                                                                        _socket(socket)
 {
 }
 
+// 🌙 add UI updates, see DownloadFirmWareService.cpp: todo: merge both!!
+// static int previousProgress = 0;
+
+void UploadFirmwareService::update_started()
+{
+    JsonDocument doc;
+    String output;
+    doc["status"] = "preparing";
+    JsonObject jsonObject = doc.as<JsonObject>();
+    _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+    ESP_LOGD(SVK_TAG, "HTTP update started");
+}
+
+void UploadFirmwareService::update_progress(int currentBytes, int totalBytes)
+{
+    JsonDocument doc;
+    doc["status"] = "progress";
+    int progress = ((currentBytes * 100) / totalBytes);
+    // if (progress > previousProgress)
+    {
+        doc["progress"] = progress;
+        JsonObject jsonObject = doc.as<JsonObject>();
+        _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+        ESP_LOGD(SVK_TAG, "HTTP update process at %d of %d bytes... (%d %%)", currentBytes, totalBytes, progress);
+    }
+    // previousProgress = progress;
+}
+
+void UploadFirmwareService::update_finished()
+{
+    JsonDocument doc;
+    doc["status"] = "finished";
+    JsonObject jsonObject = doc.as<JsonObject>();
+    _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+    ESP_LOGD(SVK_TAG, "HTTP update finished");
+
+    // delay to allow the event to be sent out
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+}
+
+
 void UploadFirmwareService::begin()
 {
-    _server->maxUploadSize = 2300000; // 2.3 MB
+    _server->maxUploadSize = 0x300000; // 2.3 MB 🌙 3MB is in partition table (2313696 3145728 app1)
 
     PsychicUploadHandler *uploadHandler = new PsychicUploadHandler();
 
@@ -59,11 +103,12 @@ esp_err_t UploadFirmwareService::handleUpload(PsychicRequest *request,
     // at init
     if (!index)
     {
+        update_started();
         // check details of the file, to see if its a valid bin or json file
         std::string fname(filename.c_str());
         auto position = fname.find_last_of(".");
         std::string extension = fname.substr(position + 1);
-        size_t fsize = request->contentLength();
+        fsize = request->contentLength();
 
         fileType = ft_none;
         if ((extension == "bin") && (fsize > 1000000))
@@ -139,7 +184,8 @@ esp_err_t UploadFirmwareService::handleUpload(PsychicRequest *request,
             {
                 handleError(request, 500);
             }
-        }
+        } else
+            update_progress(index, fsize);
     }
 
     return ESP_OK;
@@ -147,6 +193,7 @@ esp_err_t UploadFirmwareService::handleUpload(PsychicRequest *request,
 
 esp_err_t UploadFirmwareService::uploadComplete(PsychicRequest *request)
 {
+    update_finished();
     // if we completed uploading a md5 file create a JSON response
     if (fileType == ft_md5)
     {

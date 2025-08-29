@@ -62,7 +62,7 @@ class VirtualLayer {
   uint16_t mappingTableIndexesSizeUsed = 0; 
 
   PhysicalLayer *layerP; //physical LEDs the virtual LEDs are mapped to
-  std::vector<Node *> nodes;
+  std::vector<Node *, PSRAMAllocator<Node *>> nodes;
 
   uint8_t fadeMin;
 
@@ -228,6 +228,7 @@ class VirtualLayer {
 
   void blur1d(fract8 blur_amount)
   {
+    // todo: check updated in wled-MM
     const uint8_t keep = 255 - blur_amount;
     const uint8_t seep = blur_amount >> 1;
     CRGB carryover = CRGB::Black;

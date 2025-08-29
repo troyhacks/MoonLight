@@ -474,7 +474,7 @@ class GEQ3DEffect: public Node {
     for (int i=0; i<NUM_BANDS; i++) {
       unsigned band = i;
       if (NUM_BANDS < NUM_GEQ_CHANNELS) band = map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1); // always use full range.
-      heights[i] = map8(sharedData.bands[band],0,maxHeight); // cache fftResult[] as data might be updated in parallel by the audioreactive core
+      heights[i] = map8(sharedData.bands[band],0,maxHeight); // cache sharedData.bands[] as data might be updated in parallel by the audioreactive core
     }
 
 
@@ -960,6 +960,10 @@ class RGBWParEffect: public Node {
   }
 };
 
+#if USE_M5UNIFIED
+    #include <M5Unified.h>
+#endif
+
 class ScrollingTextEffect: public Node {
 public:
   static const char * name() {return "ScrollingText 🔥";}
@@ -995,6 +999,7 @@ public:
     values.add("Status 🛜");
     values.add("Clients 🛜");
     values.add("Connected 🛜");
+    values.add("Free memory");
 
     addControl(textIn, "text", "text", 1, sizeof(textIn)); //size needed to protect char array!
 
@@ -1010,9 +1015,9 @@ public:
       choice = preset;
     else {
       if (strlen(textIn) == 0) 
-        choice = (millis()/1000 % 7)+2;
+        choice = (millis()/1000 % 8)+2;
       else
-        choice = (millis()/1000 % 8)+1;
+        choice = (millis()/1000 % 9)+1;
     } 
     
     switch (choice) {
@@ -1042,6 +1047,7 @@ public:
       case 6: text.format("%s", sharedData.connectionStatus==0?"Off":sharedData.connectionStatus==1?"AP-":sharedData.connectionStatus==2?"AP+":sharedData.connectionStatus==3?"Sta-":sharedData.connectionStatus==4?"Sta+":"mqqt"); break;
       case 7: text.format("%dC", sharedData.clientListSize); break;
       case 8: text.format("%dCC", sharedData.connectedClients); break;
+      case 9: text.format("%dKB", ESP.getFreeHeap()/1024); break;
     }
     layerV->setRGB(Coord3D(choice-1), CRGB::Blue); 
 
@@ -1052,6 +1058,12 @@ public:
       layerV->drawText(text.c_str(), 0, 1, font, CRGB::Red, - (millis()/25*speed/256)); //instead of call
     // }
 
+    #if USE_M5UNIFIED
+      M5.Display.fillRect(0, 0, 100, 15, BLACK);
+      M5.Display.setTextColor(WHITE);
+      M5.Display.setTextSize(2);
+      M5.Display.drawString(text.c_str(), 0, 0);
+    #endif
   }
 }; //ScrollingText
 
@@ -1628,6 +1640,7 @@ class MHWowiEffect: public Node {
 
 // Written by Ewoud Wijma in 2022, inspired by https://natureofcode.com/book/chapter-7-cellular-automata/ and https://github.com/DougHaber/nlife-color ,
 // Modified By: Brandon Butler in 2024
+// todo: ewowi check with wildcats08: can background color be removed as it is now easy to add solid as background color (blending ...?)
 class GameOfLifeEffect: public Node {
   public:
   static const char * name() {return "GameOfLife 💫";}
@@ -1782,37 +1795,32 @@ class GameOfLifeEffect: public Node {
     if (cellColors)  heap_caps_free(cellColors);
   }
 
+  Coord3D prevSize = Coord3D(0,0,0);
+
   void loop() override {
 
-    static int prevSizeX = 0, prevSizeY = 0, prevSizeZ = 0;
-    int sizeX = layerV->size.x;
-    int sizeY = layerV->size.y;
-    int sizeZ = layerV->size.z;
+    if (layerV->size != prevSize) {
+      prevSize = layerV->size;
 
-    if (sizeX != prevSizeX || sizeY != prevSizeY || sizeZ != prevSizeZ) {
-        prevSizeX = sizeX;
-        prevSizeY = sizeY;
-        prevSizeZ = sizeZ;
+      dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
 
-        dataSize = ((sizeX * sizeY * sizeZ + 7) / 8);
+      if (cells)      heap_caps_free(cells);
+      if (futureCells) heap_caps_free(futureCells);
+      if (cellColors)  heap_caps_free(cellColors);
 
-        if (cells)      heap_caps_free(cells);
-        if (futureCells) heap_caps_free(futureCells);
-        if (cellColors)  heap_caps_free(cellColors);
+      cells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+      futureCells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+      cellColors  = (uint8_t*)heap_caps_malloc_prefer(layerV->size.x * layerV->size.y * layerV->size.z, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
 
-        cells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-        futureCells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-        cellColors  = (uint8_t*)heap_caps_malloc_prefer(sizeX * sizeY * sizeZ, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+      if (!cells || !futureCells || !cellColors) {
+          MB_LOGE(ML_TAG, "GameOfLife: heap_caps_malloc_prefer failed");
+          return;
+      }
+      memset(cells, 0, dataSize);
+      memset(futureCells, 0, dataSize);
+      memset(cellColors, 0, layerV->size.x * layerV->size.y * layerV->size.z);
 
-        if (!cells || !futureCells || !cellColors) {
-            MB_LOGE(ML_TAG, "GameOfLife: heap_caps_malloc_prefer failed");
-            return;
-        }
-        memset(cells, 0, dataSize);
-        memset(futureCells, 0, dataSize);
-        memset(cellColors, 0, sizeX * sizeY * sizeZ);
-
-        startNewGameOfLife();
+      startNewGameOfLife();
     } else if (generation == 0 && step < millis()) {
       startNewGameOfLife();
       return; //?
@@ -1940,6 +1948,82 @@ class GameOfLifeEffect: public Node {
   }
 }; //GameOfLife
 
+// original version from SR 0.13, with some enhancements by @softhack007
+// Blurz. By Andrew Tuline.
+// Hint: Looks best with segment brightness set to max (use global brightness to reduce brightness)
+// even with 1D effect we have to take logic for 2D segments for allocation as fill_solid() fills whole segment
+#define MAX_FREQ_LOG10  4.04238f       // log10(MAX_FREQUENCY)
+class BlurzEffect: public Node {
+  public:
+  static const char * name() {return "Blurz 🎵☾";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+  
+  // static const char _data_FX_MODE_BLURZ[] PROGMEM = "Blurz Plus ☾@Fade rate,Blur,,,,FreqMap ☾,GEQ Scanner ☾,;!,Color mix;!;01f;sx=48,ix=127,m12=7,si=0"; // Pinwheel, Beatsin
+
+  uint16_t aux0 = 0;
+  uint16_t  aux1 = 65535; // last pixel postion. 65535 = none
+  CRGB  step = {0,0,0};  // last pixel color
+  uint32_t  call = 0;  // last pixel color
+
+  uint8_t fadeRate = 48;
+  uint8_t blur = 127;
+  bool freqMap;
+  bool geqScanner;
+
+  void setup() override {
+    addControl(fadeRate, "fadeRate", "range", 1, 255);
+    addControl(blur, "blur", "range", 1, 255);
+    addControl(freqMap, "freqMap", "checkbox");
+    addControl(geqScanner, "geqScanner", "checkbox");
+
+    layerV->fadeToBlackBy(255);
+  }
+
+  void loop() override {
+    random16_add_entropy(esp_random() & 0xFFFF); // improves randonmess
+
+    int fadeoutDelay = (256 - fadeRate) / 24;
+    if ((fadeoutDelay <= 1 ) || ((call % fadeoutDelay) == 0))
+        layerV->fadeToBlackBy(fadeRate);
+    else {
+      layerV->blur2d(8 + blur/8 + fadeoutDelay*4);
+    }
+    if ((aux1 < layerV->size.x * layerV->size.y * layerV->size.z) && (sharedData.volume > 1.0f)) layerV->setRGB(aux1, step); // "repaint" last pixel after blur
+
+    unsigned freqBand = aux0 % 16;
+    uint16_t segLoc = random16(layerV->size.x * layerV->size.y * layerV->size.z);
+
+    if (freqMap) {                                                                                   // FreqMap mode : blob location by major frequency
+      int freqLocn;
+      unsigned maxLen = (geqScanner) ? MAX(1, layerV->size.x * layerV->size.y * layerV->size.z-16): layerV->size.x * layerV->size.y * layerV->size.z;                                       // usable segment length - leave 16 pixels when embedding "GEQ scan"
+      freqLocn = roundf((log10f((float)sharedData.majorPeak) - 1.78f) * float(maxLen)/(MAX_FREQ_LOG10 - 1.78f));  // log10 frequency range is from 1.78 to 3.71. Let's scale to layerV->size.x * layerV->size.y * layerV->size.z. // WLEDMM proper rounding
+      if (freqLocn < 1) freqLocn = 0; // avoid underflow
+      segLoc =  (geqScanner) ? freqLocn + freqBand : freqLocn;
+    } else if (geqScanner) {                                                                            // GEQ Scanner mode: blob location is defined by frequency band + random offset
+      float bandWidth = float(layerV->size.x * layerV->size.y * layerV->size.z)  / 16.0f;
+      int bandStart = roundf(bandWidth * freqBand);
+      segLoc = bandStart + random16(max(1, int(bandWidth)));
+    }
+    segLoc = MAX(uint16_t(0), MIN(uint16_t(layerV->size.x * layerV->size.y * layerV->size.z-1), segLoc));  // fix overflows
+
+    if (layerV->size.x * layerV->size.y * layerV->size.z < 2) segLoc = 0; // WLEDMM just to be sure
+    unsigned pixColor = (2*sharedData.bands[freqBand]*240)/max(1, layerV->size.x * layerV->size.y * layerV->size.z-1);                  // WLEDMM avoid uint8 overflow, and preserve pixel parameters for redraw
+    unsigned pixIntensity = min((unsigned)(2.0f*sharedData.bands[freqBand]), 255U);
+
+    if (sharedData.volume > 1.0f) {
+      layerV->setRGB(segLoc, ColorFromPalette(layerV->layerP->palette, pixColor));
+      step = layerV->getRGB(segLoc);  // remember last color
+      aux1 = segLoc;                         // remember last position
+
+      layerV->blur2d(blur);
+      aux0 ++;
+      aux0 %= 16; // make sure it doesn't cross 16
+      layerV->addRGB(segLoc,  ColorFromPalette(layerV->layerP->palette, pixColor)); // repaint center pixel after blur
+    } else layerV->blur2d(blur);  // silence - just blur it again
+    call++;
+  } //loop
+}; // BlurzEffect
 
 
 // class RubiksCubeEffect: public Node {
@@ -2862,10 +2946,10 @@ class GameOfLifeEffect: public Node {
 
 //     //allocate segment data
 
-//     // if (dataSize != SEGENV.aux1) { //reset to flare if sparks were reallocated (it may be good idea to reset segment if bounds change)
+//     // if (dataSize != aux1) { //reset to flare if sparks were reallocated (it may be good idea to reset segment if bounds change)
 //     //   *dying_gravity = 0.0f;
 //     //   (*aux0Flare) = 0;
-//     //   SEGENV.aux1 = dataSize;
+//     //   aux1 = dataSize;
 //     // }
 
 //     leds.fadeToBlackBy(252); //fade_out(252);
@@ -3001,7 +3085,7 @@ class GameOfLifeEffect: public Node {
 //         if (remaining < 1) {band++; remaining += bandwidth;} //increase remaining but keep the current remaining
 //         remaining--; //consume remaining
 
-//         int hue = audioSync->fftResults[map(band, 0, num_bands-1, 0, 15)];
+//         int hue = sharedData.bands[map(band, 0, num_bands-1, 0, 15)];
 //         int v = map(hue, 0, 255, 10, 255);
 //         leds.setPixelColor(posx, 0, CHSV(hue, 255, v));
 //       }
@@ -3054,11 +3138,11 @@ class GameOfLifeEffect: public Node {
 //     uint8_t band = 0;
 //     for (int h = 0; h < nHorizontal; h++) {
 //       for (int v = 0; v < nVertical; v++) {
-//         drawNeedle(leds, (float)audioSync->fftResults[2*(band++)] / 2.0, {leds.size.x * h / nHorizontal, leds.size.y * v / nVertical, 0}, {leds.size.x / nHorizontal, leds.size.y / nVertical, 0}, 
+//         drawNeedle(leds, (float)sharedData.bands[2*(band++)] / 2.0, {leds.size.x * h / nHorizontal, leds.size.y * v / nVertical, 0}, {leds.size.x / nHorizontal, leds.size.y / nVertical, 0}, 
 //                 ColorFromPalette(leds.palette, 255 / (nHorizontal * nVertical) * band));
-//       } //audioSync->fftResults[band++] / 200
+//       } //sharedData.bands[band++] / 200
 //     }
-//     // ppf(" v:%f, f:%f", audioSync->volumeSmth, (float) audioSync->fftResults[5]);
+//     // ppf(" v:%f, f:%f", sharedData.volume, (float) sharedData.bands[5]);
 //   }
 // }; //VUMeter
 
@@ -3238,7 +3322,7 @@ class GameOfLifeEffect: public Node {
 // void mode_fireworks(uint16_t *aux0, uint16_t *aux1, uint8_t speed, uint8_t intensity, bool useAudio = false) {
 //   // fade_out(0);
 //   leds.fadeToBlackBy(10);
-//   // if (SEGENV.call == 0) {
+//   // if (call == 0) {
 //   //   *aux0 = UINT16_MAX;
 //   //   *aux1 = UINT16_MAX;
 //   // }
@@ -3316,7 +3400,7 @@ class GameOfLifeEffect: public Node {
 //     uint16_t *aux1 = leds.effectData.readWrite<uint16_t>();
 //     uint16_t *step = leds.effectData.readWrite<uint16_t>();
 
-//     // if(SEGENV.call == 0) {
+//     // if(call == 0) {
 //       // leds.fill(BLACK);
 //     // }
 //     *step += 1000 / 40;// FRAMETIME;
@@ -3512,10 +3596,10 @@ class GameOfLifeEffect: public Node {
 
 //       byte val;
 //       if (inWards) {
-//         val = audioSync->fftResults[band];
+//         val = sharedData.bands[band];
 //       }
 //       else {
-//         val = audioSync->fftResults[15 - band];
+//         val = sharedData.bands[15 - band];
 //       }
   
 //       // Visualize leds to the beat
@@ -3531,7 +3615,7 @@ class GameOfLifeEffect: public Node {
 
 //   }
 //   void setRingFromFtt(int index, int ring) {
-//     byte val = audioSync->fftResults[index];
+//     byte val = sharedData.bands[index];
 //     // Visualize leds to the beat
 //     CRGB color = ColorFromPalette(leds.palette, val);
 //     color.nscale8_video(val);
@@ -3562,25 +3646,22 @@ class GameOfLifeEffect: public Node {
 
 //     const int mid = leds.size.x / 2;
 
-//     uint8_t *fftResult = audioSync->fftResults;
-//     float volumeSmth   = audioSync->volumeSmth;
-
 //     uint8_t secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
 //     if((speed > 254) || (*aux0 != secondHand)) {   // WLEDMM allow run run at full speed
 //       *aux0 = secondHand;
 
 //       CRGB color = CRGB(0,0,0);
-//       // color = CRGB(fftResult[15]/2, fftResult[5]/2, fftResult[0]/2);   // formula from 0.13.x (10Khz): R = 3880-5120, G=240-340, B=60-100
+//       // color = CRGB(sharedData.bands[15]/2, sharedData.bands[5]/2, sharedData.bands[0]/2);   // formula from 0.13.x (10Khz): R = 3880-5120, G=240-340, B=60-100
 //       if (!candyFactory) {
-//         color = CRGB(fftResult[12]/2, fftResult[3]/2, fftResult[1]/2);    // formula for 0.14.x  (22Khz): R = 3015-3704, G=216-301, B=86-129
+//         color = CRGB(sharedData.bands[12]/2, sharedData.bands[3]/2, sharedData.bands[1]/2);    // formula for 0.14.x  (22Khz): R = 3015-3704, G=216-301, B=86-129
 //       } else {
 //         // candy factory: an attempt to get more colors
-//         color = CRGB(fftResult[11]/2 + fftResult[12]/4 + fftResult[14]/4, // red  : 2412-3704 + 4479-7106 
-//                     fftResult[4]/2 + fftResult[3]/4,                     // green: 216-430
-//                     fftResult[0]/4 + fftResult[1]/4 + fftResult[2]/4);   // blue:  46-216
+//         color = CRGB(sharedData.bands[11]/2 + sharedData.bands[12]/4 + sharedData.bands[14]/4, // red  : 2412-3704 + 4479-7106 
+//                     sharedData.bands[4]/2 + sharedData.bands[3]/4,                     // green: 216-430
+//                     sharedData.bands[0]/4 + sharedData.bands[1]/4 + sharedData.bands[2]/4);   // blue:  46-216
 //         if ((color.getLuma() < 96) && (volumeSmth >= 1.5f)) {             // enhance "almost dark" pixels with yellow, based on not-yet-used channels 
-//           unsigned yello_g = (fftResult[5] + fftResult[6] + fftResult[7]) / 3;
-//           unsigned yello_r = (fftResult[7] + fftResult[8] + fftResult[9] + fftResult[10]) / 4;
+//           unsigned yello_g = (sharedData.bands[5] + sharedData.bands[6] + sharedData.bands[7]) / 3;
+//           unsigned yello_r = (sharedData.bands[7] + sharedData.bands[8] + sharedData.bands[9] + sharedData.bands[10]) / 4;
 //           color.green += (uint8_t) yello_g / 2;
 //           color.red += (uint8_t) yello_r / 2;
 //         }
@@ -3600,8 +3681,8 @@ class GameOfLifeEffect: public Node {
 //       }
 //       //if (color.getLuma() > 12) color.maximizeBrightness();          // for testing
 
-//       //leds.setPixelColor(mid, color.fadeToBlackBy(map(fftResult[4], 0, 255, 255, 4)));     // 0.13.x  fade -> 180hz-260hz
-//       uint8_t fadeVal = map(fftResult[3], 0, 255, 255, 4);                                      // 0.14.x  fade -> 216hz-301hz
+//       //leds.setPixelColor(mid, color.fadeToBlackBy(map(sharedData.bands[4], 0, 255, 255, 4)));     // 0.13.x  fade -> 180hz-260hz
+//       uint8_t fadeVal = map(sharedData.bands[3], 0, 255, 255, 4);                                      // 0.14.x  fade -> 216hz-301hz
 //       if (candyFactory) fadeVal = constrain(fadeVal, 0, 176);  // "candy factory" mode - avoid complete fade-out
 //       leds.setPixelColor(mid, color.fadeToBlackBy(fadeVal));
 
@@ -3649,13 +3730,13 @@ class GameOfLifeEffect: public Node {
 // {
 //   if (SEGLEN == 1) return mode_static();
 //   uint8_t numSpotlights = map(SEGMENT.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
-//   bool initialize = SEGENV.aux0 != numSpotlights;
-//   SEGENV.aux0 = numSpotlights;
+//   bool initialize = aux0 != numSpotlights;
+//   aux0 = numSpotlights;
 
 //   uint16_t dataSize = sizeof(spotlight) * numSpotlights;
 //   if (!SEGENV.allocateData(dataSize)) return mode_static(); //allocation failed
 //   Spotlight* spotlights = reinterpret_cast<Spotlight*>(SEGENV.data);
-//   if (SEGENV.call == 0) SEGENV.setUpLeds();   // WLEDMM use lossless getRGB()
+//   if (call == 0) SEGENV.setUpLeds();   // WLEDMM use lossless getRGB()
 
 //   SEGMENT.fill(BLACK);
 
@@ -3666,7 +3747,7 @@ class GameOfLifeEffect: public Node {
 //     if (!initialize) {
 //       // advance the position of the spotlight
 //       int16_t delta = (float)(time - spotlights[i].lastUpdateTime) *
-//                   (spotlights[i].speed * ((1.0f + SEGMENT.speed)/100.0f));
+//                   (spotlights[i].speed * ((1.0f + speed)/100.0f));
 
 //       if (abs(delta) >= 1) {
 //         spotlights[i].position += delta;
@@ -3699,7 +3780,7 @@ class GameOfLifeEffect: public Node {
 //       spotlights[i].type = random8(SPOT_TYPES_COUNT);
 //     }
 
-//     uint32_t color = SEGMENT.color_from_palette(spotlights[i].colorIdx, false, false, 255);
+//     uint32_t color = SEGMENT. ColorFromPalette(layerV->layerP->palette, spotlights[i].colorIdx);
 //     int start = spotlights[i].position;
 
 //     if (spotlights[i].width <= 1) {
@@ -3776,7 +3857,7 @@ class GameOfLifeEffect: public Node {
 // CRGB twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
 // {
 //   // Overall twinkle speed (changed)
-//   uint16_t ticks = ms / SEGENV.aux0;
+//   uint16_t ticks = ms / aux0;
 //   uint8_t fastcycle8 = ticks;
 //   uint16_t slowcycle16 = (ticks >> 8) + salt;
 //   slowcycle16 += sin8_t(slowcycle16);
@@ -3842,8 +3923,8 @@ class GameOfLifeEffect: public Node {
 //   uint16_t PRNG16 = 11337;
 
 //   // Calculate speed
-//   if (SEGMENT.speed > 100) SEGENV.aux0 = 3 + ((255 - SEGMENT.speed) >> 3);
-//   else SEGENV.aux0 = 22 + ((100 - SEGMENT.speed) >> 1);
+//   if (speed > 100) aux0 = 3 + ((255 - speed) >> 3);
+//   else aux0 = 22 + ((100 - speed) >> 1);
 
 //   // Set up the background color, "bg".
 //   CRGB bg = CRGB(SEGCOLOR(1));
@@ -3878,15 +3959,15 @@ class GameOfLifeEffect: public Node {
 //     if (deltabright >= 32 || (!bg)) {
 //       // If the new pixel is significantly brighter than the background color,
 //       // use the new color.
-//       SEGMENT.setPixelColor(i, c.red, c.green, c.blue);
+//       layerV->setRGB(i, c.red, c.green, c.blue);
 //     } else if (deltabright > 0) {
 //       // If the new pixel is just slightly brighter than the background color,
 //       // mix a blend of the new color and the background color
-//       SEGMENT.setPixelColor(i, color_blend(RGBW32(bg.r,bg.g,bg.b,0), RGBW32(c.r,c.g,c.b,0), deltabright * 8));
+//       layerV->setRGB(i, color_blend(RGBW32(bg.r,bg.g,bg.b,0), RGBW32(c.r,c.g,c.b,0), deltabright * 8));
 //     } else {
 //       // if the new pixel is not at all brighter than the background color,
 //       // just use the background color.
-//       SEGMENT.setPixelColor(i, bg.r, bg.g, bg.b);
+//       layerV->setRGB(i, bg.r, bg.g, bg.b);
 //     }
 //   }
 //   return FRAMETIME;

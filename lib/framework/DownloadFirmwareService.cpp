@@ -37,7 +37,7 @@ void update_progress(int currentBytes, int totalBytes)
         doc["progress"] = progress;
         JsonObject jsonObject = doc.as<JsonObject>();
         _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
-        ESP_LOGV(SVK_TAG, "HTTP update process at %d of %d bytes... (%d %%)", currentBytes, totalBytes, progress);
+        ESP_LOGD(SVK_TAG, "HTTP update process at %d of %d bytes... (%d %%)", currentBytes, totalBytes, progress);
     }
     previousProgress = progress;
 }
@@ -69,9 +69,9 @@ void updateTask(void *param)
 
     String url = *((String *)param);
     String output;
-    // httpUpdate.onStart(update_started);
-    // httpUpdate.onProgress(update_progress);
-    // httpUpdate.onEnd(update_finished);
+    httpUpdate.onStart(update_started);
+    httpUpdate.onProgress(update_progress);
+    httpUpdate.onEnd(update_finished);
 
     t_httpUpdate_return ret = httpUpdate.update(client, url.c_str());
     JsonObject jsonObject;
@@ -131,7 +131,7 @@ void DownloadFirmwareService::begin()
                     std::bind(&DownloadFirmwareService::downloadUpdate, this, std::placeholders::_1, std::placeholders::_2),
                     AuthenticationPredicates::IS_ADMIN));
 
-    ESP_LOGV(SVK_TAG, "Registered POST endpoint: %s", GITHUB_FIRMWARE_PATH);
+    ESP_LOGD(SVK_TAG, "Registered POST endpoint: %s", GITHUB_FIRMWARE_PATH);
 }
 
 esp_err_t DownloadFirmwareService::downloadUpdate(PsychicRequest *request, JsonVariant &json)

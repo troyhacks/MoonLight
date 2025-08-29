@@ -12,6 +12,33 @@
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
  **/
 
+ #include <Arduino.h>
+
+// Threshold (bytes) above which allocations go into PSRAM
+constexpr size_t PSRAM_THRESHOLD = 0;  //87K free, works fine until now
+// constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
+// constexpr size_t PSRAM_THRESHOLD = 64;  //65K free, fallback if 0 gives problems?
+
+// Override global new/delete
+void* operator new(size_t size) {
+    void *ptr = nullptr;
+    if (size > PSRAM_THRESHOLD) {
+        // Serial.printf("new %d\n", size);
+        // Try PSRAM first
+        ptr = heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+        if (ptr) return ptr;  // success
+    }
+    // 
+    Serial.printf("new Fallback: internal RAM %d\n", size);
+    ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    return ptr;
+}
+
+void operator delete(void* ptr) noexcept {
+    // Serial.printf("delete\n");
+    heap_caps_free(ptr);
+}
+
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
 
@@ -172,7 +199,7 @@ void setup()
                 "AppEffectTask",            // name
                 8 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
-                8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                5,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle
                 1                      // core (0 or 1)
             );
@@ -182,7 +209,7 @@ void setup()
                 "AppDriverTask",            // name
                 4 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
-                8,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                5,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &driverTaskHandle,       // task handle
                 1                      // core (0 or 1)
             );

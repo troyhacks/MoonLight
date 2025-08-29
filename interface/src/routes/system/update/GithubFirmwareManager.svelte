@@ -88,7 +88,7 @@
 			onConfirm: () => {
 				postGithubDownload(url);
 				modals.open(GithubUpdateDialog, {
-					onConfirm: () => modals.closeAlls()
+					onConfirm: () => modals.closeAll() // 🌙 corrected typo (closeAlls)
 				});
 			}
 		});

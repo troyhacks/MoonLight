@@ -26,6 +26,8 @@
 
 #define UPLOAD_FIRMWARE_PATH "/rest/uploadFirmware"
 
+#include <EventSocket.h> // 🌙
+
 enum FileType
 {
     ft_none = 0,
@@ -36,13 +38,14 @@ enum FileType
 class UploadFirmwareService
 {
 public:
-    UploadFirmwareService(PsychicHttpServer *server, SecurityManager *securityManager);
+    UploadFirmwareService(PsychicHttpServer *server, SecurityManager *securityManager, EventSocket *socket);
 
     void begin();
 
 private:
     PsychicHttpServer *_server;
     SecurityManager *_securityManager;
+    EventSocket *_socket; // 🌙
 
     esp_err_t handleUpload(PsychicRequest *request,
                            const String &filename,
@@ -53,6 +56,12 @@ private:
     esp_err_t uploadComplete(PsychicRequest *request);
     esp_err_t handleError(PsychicRequest *request, int code);
     esp_err_t handleEarlyDisconnect();
+
+    // 🌙 add UI updates, see DownloadFirmWareService.cpp: todo: merge both!!
+    size_t fsize;
+    void update_started();
+    void update_progress(int currentBytes, int totalBytes);
+    void update_finished();
 };
 
 #endif // end UploadFirmwareService_h

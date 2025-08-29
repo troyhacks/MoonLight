@@ -28,7 +28,7 @@ public:
 protected:
     PsychicHttpServer *_server;
 
-    std::vector<Node *> *nodes;
+    std::vector<Node *, PSRAMAllocator<Node *>> *nodes;
 
     NodeManager(String moduleName,
         PsychicHttpServer *server,

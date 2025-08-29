@@ -18,7 +18,7 @@
 #if HP_ALL_DRIVERS
   #define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
   // #define NUM_LEDS_PER_STRIP 256 not for non virtal... (only setting __delay when NO_WAIT)
-  #define __NB_DMA_BUFFER 50
+  #define __NB_DMA_BUFFER 75
   #include "I2SClocklessLedDriver.h"
   static I2SClocklessLedDriver ledsDriver;
 #else //ESP32_LEDSDRIVER  
@@ -212,7 +212,7 @@ bool ArtNetDriverMod::writePackage() {
   packet_buffer[17] = packetSize; //Low Byte of above
 
   if (!artnetudp.writeTo(packet_buffer, MIN(packetSize, 512)+18, controllerIP, port)) {
-      Serial.print("🐛");
+      // Serial.print("🐛");
       return false; // borked //no connection...
   } 
   // else Serial.printf(" %d", packetSize);

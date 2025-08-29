@@ -7,6 +7,7 @@
 	import OTA from '~icons/tabler/file-upload';
 	import Warning from '~icons/tabler/alert-triangle';
 	import Cancel from '~icons/tabler/x';
+	import GithubUpdateDialog from '$lib/components/GithubUpdateDialog.svelte'; // 🌙
 
 	let files: FileList = $state();
 
@@ -29,15 +30,17 @@
 
 	function confirmBinUpload() {
 		modals.open(ConfirmDialog, {
-			title: 'Confirm Flashing the Device',
+			title: 'Confirm Flashing new firmware to the Device',
 			message: 'Are you sure you want to overwrite the existing firmware with a new one?',
 			labels: {
 				cancel: { label: 'Abort', icon: Cancel },
 				confirm: { label: 'Upload', icon: OTA }
 			},
 			onConfirm: () => {
-				modals.close();
 				uploadBIN();
+				modals.open(GithubUpdateDialog, {  // 🌙 add dialog / progress
+					onConfirm: () => modals.closeAll()
+				});
 			}
 		});
 	}
