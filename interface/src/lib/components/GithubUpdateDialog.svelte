@@ -32,7 +32,7 @@
 
 	$effect(() => {
 		if ($telemetry.download_ota.status == 'progress') {
-			message = 'Downloading ...';
+			message = 'Installing ...'; // 🌙 Downloading?
 		} else if ($telemetry.download_ota.status == 'error') {
 			message = $telemetry.download_ota.error;
 		} else if ($telemetry.download_ota.status == 'finished') {

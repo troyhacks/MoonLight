@@ -136,6 +136,8 @@ class PinwheelModifier: public Node {
   uint8_t zTwist = 0;
   float petalWidth = 6.0;
 
+  Coord3D originalSize;
+
   void setup() override {
     hasModifier = true;
     addControl(petals, "petals", "range");
@@ -165,13 +167,13 @@ class PinwheelModifier: public Node {
     else factor = 360; // Default to 360 if symmetry is <= 0
     petalWidth = factor / float(petals);
 
-    MB_LOGV(ML_TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    originalSize = layerV->size;
+    MB_LOGD(ML_TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
     // Coord3D mapped;
-    // UI Variables
-         
+
     const int dx = position.x - layerV->middle.x;
     const int dy = position.y - layerV->middle.y;
     const int swirlFactor = swirlVal == 0 ? 0 : hypot(dy, dx) * abs(swirlVal); // Only calculate if swirlVal != 0
@@ -192,8 +194,8 @@ class PinwheelModifier: public Node {
     }
     position.z = 0;
 
-    // if (position.x == 0 && position.y == 0 && position.z == 0) ppf("Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layerV->middle.x, layerV->middle.y, swirlVal, symmetry, petals, zTwist);
-    // ppf("position %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", position.x, position.y, position.z, mapped.x, mapped.y, mapped.z, angle, value);
+    // if (position.x == 0 && position.y == 0 && position.z == 0) MB_LOGD(ML_TAG, "Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layerV->middle.x, layerV->middle.y, swirlVal, symmetry, petals, zTwist);
+    // MB_LOGD(ML_TAG, "position %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", position.x, position.y, position.z, mapped.x, mapped.y, mapped.z, angle, value);
   }
 };
 
@@ -437,5 +439,45 @@ class TransposeModifier: public Node {
     if (transposeYZ) { int temp = position.y; position.y = position.z; position.z = temp; }
   }
 }; //Transpose
+
+//by WildCats08 / @Brandon502
+class CheckerboardModifier: public Node {
+  public:
+  static const char * name() {return "Checkerboard 💎💫";}
+  static const char * tags() {return "";}
+
+  Coord3D    size   = {3,3,3};
+  bool invert = false;
+  bool group  = false;
+
+  void setup() override {
+    hasModifier = true;
+    addControl(size, "squareSize", "coord3D", 1, 100);
+    addControl(invert, "invert", "checkbox");
+    addControl(group, "group", "checkbox");
+  }
+
+  Coord3D originalSize;
+  
+  void modifySize() override {
+
+    if (group) { layerV->middle /= size; layerV->size = (layerV->size + (size - Coord3D{1,1,1})) / size; }
+    originalSize = layerV->size;
+  }
+
+  void modifyPosition(Coord3D &position) override {
+    Coord3D check = position / size;
+
+    if (group) position /= size;
+
+    if ((check.x + check.y + check.z) % 2 == 0) {
+      if (invert)  { position.x = UINT16_MAX; return; }//do not show this pixel
+    } 
+    else {
+      if (!invert) { position.x = UINT16_MAX; return; } //do not show this pixel
+    }
+
+  }
+}; //CheckerboardModifier
 
 #endif

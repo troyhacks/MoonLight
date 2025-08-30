@@ -299,6 +299,9 @@ void VirtualLayer::addLayoutPre() {
 
   nrOfLights = 0;
   size = layerP->lights.header.size; //start with the physical size
+  start = {0,0,0};
+  end = size - 1;
+  middle = size / 2;
 
   //modifiers
   for (Node *node: nodes) {
@@ -322,13 +325,19 @@ void VirtualLayer::addLight(Coord3D position) {
       node->modifyPosition(position);
   }
 
-  uint16_t indexV = XYZUnModified(position);
-  if (indexV >= nrOfLights) {
-    mappingTable.resize(indexV + 1); //make sure the index fits
-    nrOfLights = indexV + 1;
-    mappingTableSizeUsed = nrOfLights;
+  if (position.x != UINT16_MAX) {  //can be set to UINT16_MAX by modifier todo: check multiple modifiers
+    uint16_t indexV = XYZUnModified(position);
+    if (indexV >= nrOfLights) {
+      mappingTable.resize(indexV + 1); //make sure the index fits
+      nrOfLights = indexV + 1;
+      mappingTableSizeUsed = nrOfLights;
+    }
+    addIndexP(mappingTable[indexV], layerP->indexP);
   }
-  addIndexP(mappingTable[indexV], layerP->indexP);
+  else {
+    //set unmapped lights to 0, e.g. needed by checkerboard modifier
+    memset(&layerP->lights.channels[layerP->indexP*layerP->lights.header.channelsPerLight], 0, layerP->lights.header.channelsPerLight);
+  }
 }
 
 void VirtualLayer::addLayoutPost() {

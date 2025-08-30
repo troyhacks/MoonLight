@@ -55,7 +55,7 @@ void WiFiStatus::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t in
 
 void WiFiStatus::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
 {
-    ESP_LOGI(SVK_TAG, "WiFi Got IP. localIP=%s, hostName=%s", WiFi.localIP().toString().c_str(), WiFi.getHostname());
+    ESP_LOGI(SVK_TAG, "WiFi Got IP. localIP=http://%s, hostName=http://%s.local", WiFi.localIP().toString().c_str(), WiFi.getHostname()); //🌙make it clickable
 #ifdef SERIAL_INFO
     Serial.printf("WiFi Got IP. localIP=%s, hostName=%s\r\n", WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif

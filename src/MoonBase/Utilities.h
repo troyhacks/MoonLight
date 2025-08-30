@@ -62,6 +62,9 @@ struct Coord3D {
     Coord3D operator-(const Coord3D rhs) const {
         return Coord3D(x - rhs.x, y - rhs.y, z - rhs.z);
     }
+    Coord3D operator-(const int rhs) const {
+        return Coord3D(x - rhs, y - rhs, z - rhs);
+    }
     Coord3D operator+(const Coord3D rhs) const {
         return Coord3D(x + rhs.x, y + rhs.y, z + rhs.z);
     }
@@ -70,6 +73,9 @@ struct Coord3D {
     }
     Coord3D operator/(const Coord3D rhs) const {
         return Coord3D(x / rhs.x, y / rhs.y, z / rhs.z);
+    }
+    Coord3D operator/(const int rhs) const {
+        return Coord3D(x / rhs, y / rhs, z / rhs);
     }
     Coord3D operator%(const Coord3D rhs) const {
         return Coord3D(x % rhs.x, y % rhs.y, z % rhs.z);
@@ -88,10 +94,21 @@ struct Coord3D {
         y += rhs.y;
         z += rhs.z;
         return *this;
-      }
+    }
+    Coord3D operator/=(const Coord3D rhs) {
+        if (rhs.x) x /= rhs.x;
+        if (rhs.y) y /= rhs.y;
+        if (rhs.z) z /= rhs.z;
+        return *this;
+    }
     
     Coord3D maximum(const Coord3D rhs) const {
         return Coord3D(max(x, rhs.x), max(y, rhs.y), max(z, rhs.z));
+    }
+
+    unsigned distanceSquared(const Coord3D rhs) const {
+        Coord3D delta = (*this-rhs);
+        return (delta.x)*(delta.x) + (delta.y)*(delta.y) + (delta.z)*(delta.z);
     }
 
     bool isOutofBounds(const Coord3D rhs) const {

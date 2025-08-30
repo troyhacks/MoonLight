@@ -53,7 +53,7 @@ class VirtualLayer {
 
   uint16_t nrOfLights = 256;
   Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
-  Coord3D middle = {8,8,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
+  Coord3D start = {0,0,0}, middle = size/2, end = size-1;//{UINT16_MAX,UINT16_MAX,UINT16_MAX}; //default
 
   //they will be reused to avoid fragmentation
   std::vector<PhysMap, PSRAMAllocator<PhysMap>> mappingTable;

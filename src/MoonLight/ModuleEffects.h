@@ -109,10 +109,12 @@ public:
         values.add(Noise2DEffect::name());
         values.add(NoiseMeterEffect::name());
         values.add(PaintBrushEffect::name());
+        values.add(ParticlesEffect::name());
         values.add(PopCornEffect::name());
         values.add(RainbowEffect::name());
         values.add(RandomEffect::name());
         values.add(RipplesEffect::name());
+        values.add(RubiksCubeEffect::name());
         values.add(RGBWParEffect::name());
         values.add(ScrollingTextEffect::name());
         values.add(SinusEffect::name());
@@ -122,10 +124,14 @@ public:
         values.add(WaverlyEffect::name());
         values.add(WaveEffect::name());
         values.add(FixedRectangleEffect::name());
-        values.add(MHTroy1Effect::name());
-        values.add(MHTroy2Effect::name());
-        values.add(MHWowiEffect::name());
+        values.add(MHTroy1ColorEffect::name());
+        values.add(MHTroy1MoveEffect::name());
+        values.add(MHTroy2ColorEffect::name());
+        values.add(MHTroy2MoveEffect::name());
+        values.add(MHWowiColorEffect::name());
+        values.add(MHWowiMoveEffect::name());
 
+        values.add(CheckerboardModifier::name());
         values.add(CircleModifier::name());
         values.add(MirrorModifier::name());
         values.add(MultiplyModifier::name());
@@ -161,10 +167,12 @@ public:
         else if (equal(name, Noise2DEffect::name())) node = allocateInPSRAM<Noise2DEffect>();
         else if (equal(name, NoiseMeterEffect::name())) node = allocateInPSRAM<NoiseMeterEffect>();
         else if (equal(name, PaintBrushEffect::name())) node = allocateInPSRAM<PaintBrushEffect>();
+        else if (equal(name, ParticlesEffect::name())) node = allocateInPSRAM<ParticlesEffect>();
         else if (equal(name, PopCornEffect::name())) node = allocateInPSRAM<PopCornEffect>();
         else if (equal(name, RainbowEffect::name())) node = allocateInPSRAM<RainbowEffect>();
         else if (equal(name, RandomEffect::name())) node = allocateInPSRAM<RandomEffect>();
         else if (equal(name, RipplesEffect::name())) node = allocateInPSRAM<RipplesEffect>();
+        else if (equal(name, RubiksCubeEffect::name())) node = allocateInPSRAM<RubiksCubeEffect>();
         else if (equal(name, RGBWParEffect::name())) node = allocateInPSRAM<RGBWParEffect>();
         else if (equal(name, ScrollingTextEffect::name())) node = allocateInPSRAM<ScrollingTextEffect>();
         else if (equal(name, SinusEffect::name())) node = allocateInPSRAM<SinusEffect>();
@@ -174,10 +182,14 @@ public:
         else if (equal(name, WaverlyEffect::name())) node = allocateInPSRAM<WaverlyEffect>();
         else if (equal(name, FixedRectangleEffect::name())) node = allocateInPSRAM<FixedRectangleEffect>();
         else if (equal(name, WaveEffect::name())) node = allocateInPSRAM<WaveEffect>();
-        else if (equal(name, MHTroy1Effect::name())) node = allocateInPSRAM<MHTroy1Effect>();
-        else if (equal(name, MHTroy2Effect::name())) node = allocateInPSRAM<MHTroy2Effect>();
-        else if (equal(name, MHWowiEffect::name())) node = allocateInPSRAM<MHWowiEffect>();
+        else if (equal(name, MHTroy1ColorEffect::name())) node = allocateInPSRAM<MHTroy1ColorEffect>();
+        else if (equal(name, MHTroy1MoveEffect::name())) node = allocateInPSRAM<MHTroy1MoveEffect>();
+        else if (equal(name, MHTroy2ColorEffect::name())) node = allocateInPSRAM<MHTroy2ColorEffect>();
+        else if (equal(name, MHTroy2MoveEffect::name())) node = allocateInPSRAM<MHTroy2MoveEffect>();
+        else if (equal(name, MHWowiColorEffect::name())) node = allocateInPSRAM<MHWowiColorEffect>();
+        else if (equal(name, MHWowiMoveEffect::name())) node = allocateInPSRAM<MHWowiMoveEffect>();
 
+        else if (equal(name, CheckerboardModifier::name())) node = allocateInPSRAM<CheckerboardModifier>();
         else if (equal(name, CircleModifier::name())) node = allocateInPSRAM<CircleModifier>();
         else if (equal(name, MirrorModifier::name())) node = allocateInPSRAM<MirrorModifier>();
         else if (equal(name, MultiplyModifier::name())) node = allocateInPSRAM<MultiplyModifier>();

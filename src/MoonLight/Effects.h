@@ -1383,10 +1383,35 @@ public:
   }
 };
 
-class MHTroy1Effect: public Node {
+class MHTroy1ColorEffect: public Node {
   public:
 
-  static const char * name() {return "MHTroy1 🔥♫🐺";}
+  static const char * name() {return "MHTroy1 color 🔥♫🐺";}
+
+  bool audioReactive = true;
+
+  void setup() override {
+    addControl(audioReactive, "audioReactive", "checkbox");
+  }
+
+  void loop() override {
+
+    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+      if (audioReactive) {
+        layerV->setRGB(x, CRGB(sharedData.bands[15],sharedData.bands[7],sharedData.bands[0]));
+        layerV->setBrightness(x, (sharedData.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
+      } else {
+        layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
+        // layerV->setBrightness(x, layerV->layerP->lights.header.brightness); // done automatically
+      }
+    }
+  }
+};
+
+class MHTroy1MoveEffect: public Node {
+  public:
+
+  static const char * name() {return "MHTroy1 Move 🔥♫🐺";}
 
   //set default values here
   uint8_t bpm = 30;
@@ -1452,7 +1477,6 @@ class MHTroy1Effect: public Node {
 
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
-        layerV->setRGB(x, CRGB(sharedData.bands[15],sharedData.bands[7],sharedData.bands[0]));
         if (sharedData.bands[2] > 200 && cooldown + 3000 < millis()) { //cooldown for 3 seconds
           cooldown = millis();
           colorwheel = random8(8)*5; //random colorwheel index and convert to 0-35 range
@@ -1468,9 +1492,7 @@ class MHTroy1Effect: public Node {
         }
         layerV->setPan(x, mypan); 
         layerV->setTilt(x, mytilt);
-        layerV->setBrightness(x, (sharedData.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
       } else {
-        layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
         layerV->setGobo(x,colorwheel);
         layerV->setBrightness2(x, colorwheelbrightness); // layerV->layerP->lights.header.brightness);
         layerV->setPan(x, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
@@ -1481,10 +1503,60 @@ class MHTroy1Effect: public Node {
   }
 };
 
-class MHTroy2Effect: public Node {
+class MHTroy2ColorEffect: public Node {
   public:
 
-  static const char * name() {return "MHTroy2 🔥♫🐺";}
+  static const char * name() {return "MHTroy2 Color 🔥♫🐺";}
+
+  uint8_t bpm = 30;
+  // uint8_t pan = 175;
+  // uint8_t tilt = 90;
+  // uint8_t zoom = 20;
+  // uint8_t range = 20;
+  uint8_t cutin = 200;
+  // time_t cooldown = millis();
+  
+  // bool autoMove = true;
+  bool audioReactive = true;
+  // bool invert = true;
+
+  void setup() override {
+    addControl(bpm, "bpm", "range");
+    // addControl(pan, "pan", "range");
+    // addControl(tilt, "tilt", "range");
+    // addControl(zoom, "zoom", "range");
+    addControl(cutin, "cutin", "range");
+    // addControl(autoMove, "autoMove", "checkbox");
+    // addControl(range, "range", "range");
+    addControl(audioReactive, "audioReactive", "checkbox");
+    // addControl(invert, "invert", "checkbox");
+  }
+
+  void loop() override {
+    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+      if (audioReactive) {
+        layerV->setRGB(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]));
+        layerV->setRGB1(x, CRGB(sharedData.bands[15],sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]>cutin?sharedData.bands[0]:0));
+        layerV->setRGB2(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7],sharedData.bands[0]>cutin?sharedData.bands[0]:0));
+        layerV->setRGB3(x, CRGB(sharedData.bands[15]>cutin?::map(sharedData.bands[15],cutin-1,255,0,255):0,sharedData.bands[7]>cutin?::map(sharedData.bands[7],cutin-1,255,0,255):0,sharedData.bands[0]>cutin?::map(sharedData.bands[0],cutin-1,255,0,255):0));
+        // layerV->setZoom(x, (sharedData.bands[0]>cutin)?255:0);
+        if (sharedData.bands[0]+sharedData.bands[7]+sharedData.bands[15] > 1) {
+          layerV->setBrightness(x, 255);
+        } else {
+          layerV->setBrightness(x, 0);
+        }
+      } else {
+        layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
+        // layerV->setBrightness(x, layerV->layerP->lights.header.brightness); // done automatically
+      }
+    }
+  }
+};
+
+class MHTroy2MoveEffect: public Node {
+  public:
+
+  static const char * name() {return "MHTroy2Move 🔥♫🐺";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
@@ -1533,10 +1605,6 @@ class MHTroy2Effect: public Node {
     bool coolDownSet = false;
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
-        layerV->setRGB(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]));
-        layerV->setRGB1(x, CRGB(sharedData.bands[15],sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]>cutin?sharedData.bands[0]:0));
-        layerV->setRGB2(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7],sharedData.bands[0]>cutin?sharedData.bands[0]:0));
-        layerV->setRGB3(x, CRGB(sharedData.bands[15]>cutin?::map(sharedData.bands[15],cutin-1,255,0,255):0,sharedData.bands[7]>cutin?::map(sharedData.bands[7],cutin-1,255,0,255):0,sharedData.bands[0]>cutin?::map(sharedData.bands[0],cutin-1,255,0,255):0));
         if (sharedData.bands[0] > cutin) {
           layerV->setZoom(x, 255);
           coolDownSet = true;
@@ -1554,12 +1622,9 @@ class MHTroy2Effect: public Node {
         if (sharedData.bands[0]+sharedData.bands[7]+sharedData.bands[15] > 1) {
           layerV->setPan(x, mypan); 
           layerV->setTilt(x, mytilt);
-          layerV->setBrightness(x, 255);
         } else {
-          layerV->setBrightness(x, 0);
         }
       } else {
-        layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
         layerV->setPan(x, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
         layerV->setTilt(x, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
         // layerV->setBrightness(x, layerV->layerP->lights.header.brightness); // done automatically
@@ -1569,29 +1634,17 @@ class MHTroy2Effect: public Node {
   }
 };
 
-class MHWowiEffect: public Node {
+class MHWowiColorEffect: public Node {
   public:
 
-  static const char * name() {return "MHWowi 🔥♫";}
+  static const char * name() {return "MHWowi Color 🔥♫";}
 
   uint8_t bpm = 30;
-  uint8_t pan = 175;
-  uint8_t tilt = 90;
-  uint8_t zoom = 20;
-  uint8_t range = 20;;
-  bool autoMove = true;
   bool audioReactive = true;
-  bool invert = true;
 
   void setup() override {
     addControl(bpm, "bpm", "range");
-    addControl(pan, "pan", "range");
-    addControl(tilt, "tilt", "range");
-    addControl(zoom, "zoom", "range");
-    addControl(autoMove, "autoMove", "checkbox");
-    addControl(range, "range", "range");
     addControl(audioReactive, "audioReactive", "checkbox");
-    addControl(invert, "invert", "checkbox");
   }
 
   void loop() override {
@@ -1616,6 +1669,39 @@ class MHWowiEffect: public Node {
         }
       }
 
+      // layerV->setBrightness({x,0,0}, layerV->layerP->lights.header.brightness); // done automatically
+    }
+  }
+};
+
+class MHWowiMoveEffect: public Node {
+  public:
+
+  static const char * name() {return "MHWowi Move 🔥♫";}
+
+  uint8_t bpm = 30;
+  uint8_t pan = 175;
+  uint8_t tilt = 90;
+  uint8_t zoom = 20;
+  uint8_t range = 20;;
+  bool autoMove = true;
+  bool invert = true;
+
+  void setup() override {
+    addControl(bpm, "bpm", "range");
+    addControl(pan, "pan", "range");
+    addControl(tilt, "tilt", "range");
+    addControl(zoom, "zoom", "range");
+    addControl(autoMove, "autoMove", "checkbox");
+    addControl(range, "range", "range");
+    addControl(invert, "invert", "checkbox");
+  }
+
+  void loop() override {
+
+    layerV->fadeToBlackBy(50);
+
+    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       layerV->setPan({x,0,0}, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
       layerV->setTilt({x,0,0}, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
       layerV->setZoom({x,0,0}, zoom);
@@ -1647,11 +1733,11 @@ class MHWowiEffect: public Node {
 
 
 // Written by Ewoud Wijma in 2022, inspired by https://natureofcode.com/book/chapter-7-cellular-automata/ and https://github.com/DougHaber/nlife-color ,
-// Modified By: Brandon Butler in 2024
+// Modified By: Brandon Butler / @Brandon502 / wildcats08 in 2024
 // todo: ewowi check with wildcats08: can background color be removed as it is now easy to add solid as background color (blending ...?)
 class GameOfLifeEffect: public Node {
   public:
-  static const char * name() {return "Game Of Life 💫";}
+  static const char * name() {return "Game Of Life 🔥💫";}
   static uint8_t dim() {return _3D;} //supports 3D but also 2D (1D as well?)
   static const char * tags() {return "";}
 
@@ -1717,14 +1803,6 @@ class GameOfLifeEffect: public Node {
       }
   }
 
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
-
-    if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
-      setBirthAndSurvive();
-    }
-  }
-
   void setup() override {
     addControl(bgC, "backgroundColor", "coord3D", 0, 255);
     JsonObject property = addControl(ruleset, "ruleset", "select"); 
@@ -1749,6 +1827,14 @@ class GameOfLifeEffect: public Node {
     addControl(blur, "blur", "range", 0, 255);
 
     setBirthAndSurvive(); //initiate based on ruleset and customRuleString
+  }
+
+  void updateControl(JsonObject control) override {
+    Node::updateControl(control);
+
+    if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
+      setBirthAndSurvive();
+    }
   }
 
   unsigned long step;
@@ -1975,7 +2061,7 @@ class GameOfLifeEffect: public Node {
 #define MAX_FREQ_LOG10  4.04238f       // log10(MAX_FREQUENCY)
 class BlurzEffect: public Node {
   public:
-  static const char * name() {return "Blurz 🎵☾";}
+  static const char * name() {return "Blurz 🔥🎵☾";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
   
@@ -2046,532 +2132,537 @@ class BlurzEffect: public Node {
 }; // BlurzEffect
 
 
-// class RubiksCubeEffect: public Node {
-//   public:
-//   static const char * name() {return "Rubik's Cube 💫";}
-//   static uint8_t     dim() {return _3D;}
-//   static const char * tags() {return "💫";}
+//by WildCats08 / @Brandon502
+class RubiksCubeEffect: public Node {
+  public:
+  static const char * name() {return "Rubik's Cube 🔥💫";}
+  static uint8_t     dim() {return _3D;}
+  static const char * tags() {return "💫";}
 
-//   struct Cube {
-//       uint8_t SIZE;
-//       static const uint8_t MAX_SIZE = 8;
-//       using Face = std::array<std::array<uint8_t, MAX_SIZE>, MAX_SIZE>;
-//       Face front;
-//       Face back;
-//       Face left;
-//       Face right;
-//       Face top;
-//       Face bottom;
+  struct Cube {
+      uint8_t SIZE;
+      static const uint8_t MAX_SIZE = 8;
+      using Face = std::array<std::array<uint8_t, MAX_SIZE>, MAX_SIZE>;
+      Face front;
+      Face back;
+      Face left;
+      Face right;
+      Face top;
+      Face bottom;
 
-//       Cube() {
-//         init(SIZE);
-//       }
+      Cube() {
+        init(SIZE);
+      }
       
-//       void init(uint8_t cubeSize) {
-//         SIZE = cubeSize;
-//         for (int i = 0; i < MAX_SIZE; i++) for (int j = 0; j < MAX_SIZE; j++) {
-//           front[i][j]  = 0;
-//           back[i][j]   = 1;  
-//           left[i][j]   = 2;  
-//           right[i][j]  = 3; 
-//           top[i][j]    = 4;   
-//           bottom[i][j] = 5;
-//         }
-//       }
+      void init(uint8_t cubeSize) {
+        SIZE = cubeSize;
+        for (int i = 0; i < MAX_SIZE; i++) for (int j = 0; j < MAX_SIZE; j++) {
+          front[i][j]  = 0;
+          back[i][j]   = 1;  
+          left[i][j]   = 2;  
+          right[i][j]  = 3; 
+          top[i][j]    = 4;   
+          bottom[i][j] = 5;
+        }
+      }
 
-//       void rotateFace(Face& face, bool clockwise) {
-//         Face temp = face;
-//         if (clockwise) for (int i = 0; i < SIZE; i++) for (int j = 0; j < SIZE; j++) {
-//           face[j][SIZE - 1 - i] = temp[i][j]; 
-//         }  
-//         else for (int i = 0; i < SIZE; i++) for (int j = 0; j < SIZE; j++) {
-//           face[SIZE - 1 - j][i] = temp[i][j];
-//         }
-//       }
+      void rotateFace(Face& face, bool clockwise) {
+        Face temp = face;
+        if (clockwise) for (int i = 0; i < SIZE; i++) for (int j = 0; j < SIZE; j++) {
+          face[j][SIZE - 1 - i] = temp[i][j]; 
+        }  
+        else for (int i = 0; i < SIZE; i++) for (int j = 0; j < SIZE; j++) {
+          face[SIZE - 1 - j][i] = temp[i][j];
+        }
+      }
 
-//       void rotateRow(int startRow, int stopRow, bool clockwise) {
-//         std::array<uint8_t, MAX_SIZE> temp;
-//         for (int row = startRow; row <= stopRow; row++) {
-//           if (clockwise) for (int i = 0; i < SIZE; i++) {
-//             temp[i]       = left[row][i];
-//             left[row][i]  = front[row][i];
-//             front[row][i] = right[row][i];
-//             right[row][i] = back[row][i];
-//             back[row][i]  = temp[i];
-//           } 
-//           else for (int i = 0; i < SIZE; i++) {
-//             temp[i]       = left[row][i];
-//             left[row][i]  = back[row][i];
-//             back[row][i]  = right[row][i];
-//             right[row][i] = front[row][i];
-//             front[row][i] = temp[i];
-//           }
-//         }
-//       }
+      void rotateRow(int startRow, int stopRow, bool clockwise) {
+        std::array<uint8_t, MAX_SIZE> temp;
+        for (int row = startRow; row <= stopRow; row++) {
+          if (clockwise) for (int i = 0; i < SIZE; i++) {
+            temp[i]       = left[row][i];
+            left[row][i]  = front[row][i];
+            front[row][i] = right[row][i];
+            right[row][i] = back[row][i];
+            back[row][i]  = temp[i];
+          } 
+          else for (int i = 0; i < SIZE; i++) {
+            temp[i]       = left[row][i];
+            left[row][i]  = back[row][i];
+            back[row][i]  = right[row][i];
+            right[row][i] = front[row][i];
+            front[row][i] = temp[i];
+          }
+        }
+      }
 
-//       void rotateColumn(int startCol, int stopCol, bool clockwise) {
-//         std::array<uint8_t, MAX_SIZE> temp;
-//         for (int col = startCol; col <= stopCol; col++) {
-//           if (clockwise) for (int i = 0; i < SIZE; i++) {
-//             temp[i]        = top[i][col];
-//             top[i][col]    = front[i][col];
-//             front[i][col]  = bottom[i][col];
-//             bottom[i][col] = back[SIZE - 1 - i][SIZE - 1 - col];
-//             back[SIZE - 1 - i][SIZE - 1 - col] = temp[i];   
-//           }    
-//           else for (int i = 0; i < SIZE; i++) {
-//             temp[i]        = top[i][col];
-//             top[i][col]    = back[SIZE - 1 - i][SIZE - 1 - col];
-//             back[SIZE - 1 - i][SIZE - 1 - col] = bottom[i][col];
-//             bottom[i][col] = front[i][col];
-//             front[i][col]  = temp[i];
-//           }
-//         }
-//       }
+      void rotateColumn(int startCol, int stopCol, bool clockwise) {
+        std::array<uint8_t, MAX_SIZE> temp;
+        for (int col = startCol; col <= stopCol; col++) {
+          if (clockwise) for (int i = 0; i < SIZE; i++) {
+            temp[i]        = top[i][col];
+            top[i][col]    = front[i][col];
+            front[i][col]  = bottom[i][col];
+            bottom[i][col] = back[SIZE - 1 - i][SIZE - 1 - col];
+            back[SIZE - 1 - i][SIZE - 1 - col] = temp[i];   
+          }    
+          else for (int i = 0; i < SIZE; i++) {
+            temp[i]        = top[i][col];
+            top[i][col]    = back[SIZE - 1 - i][SIZE - 1 - col];
+            back[SIZE - 1 - i][SIZE - 1 - col] = bottom[i][col];
+            bottom[i][col] = front[i][col];
+            front[i][col]  = temp[i];
+          }
+        }
+      }
 
-//       void rotateFaceLayer(bool clockwise, int startLayer, int endLayer) {
-//         for (int layer = startLayer; layer <= endLayer; layer++) {
-//           std::array<uint8_t, MAX_SIZE> temp;
-//           for (int i = 0; i < SIZE; i++) temp[i] = clockwise ? top[SIZE - 1 - layer][i] : bottom[layer][i];
-//           for (int i = 0; i < SIZE; i++) {
-//             if (clockwise) {
-//               top[SIZE - 1 - layer][i] = left[SIZE - 1 - i][SIZE - 1 - layer];
-//               left[SIZE - 1 - i][SIZE - 1 - layer] = bottom[layer][SIZE - 1 - i];
-//               bottom[layer][SIZE - 1 - i] = right[i][layer];
-//               right[i][layer] = temp[i];
-//             } else {
-//               bottom[layer][SIZE - 1 - i] = left[SIZE - 1 - i][SIZE - 1 - layer];
-//               left[SIZE - 1 - i][SIZE - 1 - layer] = top[SIZE - 1 - layer][i];
-//               top[SIZE - 1 - layer][i] = right[i][layer];
-//               right[i][layer] = temp[SIZE - 1 - i];
-//             }
-//           }
-//         }
-//       }
+      void rotateFaceLayer(bool clockwise, int startLayer, int endLayer) {
+        for (int layer = startLayer; layer <= endLayer; layer++) {
+          std::array<uint8_t, MAX_SIZE> temp;
+          for (int i = 0; i < SIZE; i++) temp[i] = clockwise ? top[SIZE - 1 - layer][i] : bottom[layer][i];
+          for (int i = 0; i < SIZE; i++) {
+            if (clockwise) {
+              top[SIZE - 1 - layer][i] = left[SIZE - 1 - i][SIZE - 1 - layer];
+              left[SIZE - 1 - i][SIZE - 1 - layer] = bottom[layer][SIZE - 1 - i];
+              bottom[layer][SIZE - 1 - i] = right[i][layer];
+              right[i][layer] = temp[i];
+            } else {
+              bottom[layer][SIZE - 1 - i] = left[SIZE - 1 - i][SIZE - 1 - layer];
+              left[SIZE - 1 - i][SIZE - 1 - layer] = top[SIZE - 1 - layer][i];
+              top[SIZE - 1 - layer][i] = right[i][layer];
+              right[i][layer] = temp[SIZE - 1 - i];
+            }
+          }
+        }
+      }
 
-//       void rotateFront(bool clockwise, uint8_t width) {
-//         rotateFaceLayer(clockwise, 0, width - 1);
-//         rotateFace(front, clockwise);
-//         if (width >= SIZE) rotateFace(back, !clockwise);
-//       }
-//       void rotateBack(bool clockwise, uint8_t width) {
-//         rotateFaceLayer(!clockwise, SIZE - width, SIZE - 1);
-//         rotateFace(back, clockwise);
-//         if (width >= SIZE) rotateFace(front, !clockwise);
-//       }
-//       void rotateLeft(bool clockwise, uint8_t width) {
-//         rotateFace(left, clockwise);
-//         rotateColumn(0, width - 1, !clockwise);
-//         if (width >= SIZE) rotateFace(right, !clockwise);
-//       }
-//       void rotateRight(bool clockwise, uint8_t width) {
-//         rotateFace(right, clockwise);
-//         rotateColumn(SIZE - width, SIZE - 1, clockwise);
-//         if (width >= SIZE) rotateFace(left, !clockwise);
-//       }
-//       void rotateTop(bool clockwise, uint8_t width) {
-//         rotateFace(top, clockwise);
-//         rotateRow(0, width - 1, clockwise);
-//         if (width >= SIZE) rotateFace(bottom, !clockwise);
-//       }
-//       void rotateBottom(bool clockwise, uint8_t width) {
-//         rotateFace(bottom, clockwise);
-//         rotateRow(SIZE - width, SIZE - 1, !clockwise);
-//         if (width >= SIZE) rotateFace(top, !clockwise);
-//       }
+      void rotateFront(bool clockwise, uint8_t width) {
+        rotateFaceLayer(clockwise, 0, width - 1);
+        rotateFace(front, clockwise);
+        if (width >= SIZE) rotateFace(back, !clockwise);
+      }
+      void rotateBack(bool clockwise, uint8_t width) {
+        rotateFaceLayer(!clockwise, SIZE - width, SIZE - 1);
+        rotateFace(back, clockwise);
+        if (width >= SIZE) rotateFace(front, !clockwise);
+      }
+      void rotateLeft(bool clockwise, uint8_t width) {
+        rotateFace(left, clockwise);
+        rotateColumn(0, width - 1, !clockwise);
+        if (width >= SIZE) rotateFace(right, !clockwise);
+      }
+      void rotateRight(bool clockwise, uint8_t width) {
+        rotateFace(right, clockwise);
+        rotateColumn(SIZE - width, SIZE - 1, clockwise);
+        if (width >= SIZE) rotateFace(left, !clockwise);
+      }
+      void rotateTop(bool clockwise, uint8_t width) {
+        rotateFace(top, clockwise);
+        rotateRow(0, width - 1, clockwise);
+        if (width >= SIZE) rotateFace(bottom, !clockwise);
+      }
+      void rotateBottom(bool clockwise, uint8_t width) {
+        rotateFace(bottom, clockwise);
+        rotateRow(SIZE - width, SIZE - 1, !clockwise);
+        if (width >= SIZE) rotateFace(top, !clockwise);
+      }
 
-//       void drawCube() {
-//         int sizeX = MAX(layerV->size.x-1, 1);
-//         int sizeY = MAX(layerV->size.y-1, 1);
-//         int sizeZ = MAX(layerV->size.z-1, 1);
+      void drawCube(VirtualLayer *layerV) {
+        int sizeX = MAX(layerV->size.x-1, 1);
+        int sizeY = MAX(layerV->size.y-1, 1);
+        int sizeZ = MAX(layerV->size.z-1, 1);
 
-//         // 3 Sided Cube Cheat add 1 to led size if "panels" missing. May affect different fixture types
-//         if (layerV->layerDimension == _3D) {
-//           if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(0, layerV->size.y/2, layerV->size.z/2})) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x-1, layerV->size.y/2, layerV->size.z/2}))) sizeX++;
-//           if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, 0, layerV->size.z/2})) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y-1, layerV->size.z/2}))) sizeY++;
-//           if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, 0})) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, layerV->size.z-1}))) sizeZ++;
-//         }
+        // 3 Sided Cube Cheat add 1 to led size if "panels" missing. May affect different fixture types
+        if (layerV->layerDimension == _3D) {
+          if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(0, layerV->size.y/2, layerV->size.z/2))) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x-1, layerV->size.y/2, layerV->size.z/2)))) sizeX++;
+          if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, 0, layerV->size.z/2))) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y-1, layerV->size.z/2)))) sizeY++;
+          if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, 0))) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, layerV->size.z-1)))) sizeZ++;
+        }
 
-//         // Previously SIZE - 1. Cube size expanded by 2, makes edges thicker. Constrains are used to prevent out of bounds
-//         const float scaleX = (SIZE + 1.0) / sizeX;
-//         const float scaleY = (SIZE + 1.0) / sizeY;
-//         const float scaleZ = (SIZE + 1.0) / sizeZ;
+        // Previously SIZE - 1. Cube size expanded by 2, makes edges thicker. Constrains are used to prevent out of bounds
+        const float scaleX = (SIZE + 1.0) / sizeX;
+        const float scaleY = (SIZE + 1.0) / sizeY;
+        const float scaleZ = (SIZE + 1.0) / sizeZ;
 
-//         // Calculate once for optimization
-//         const int halfX = sizeX / 2;
-//         const int halfY = sizeY / 2;
-//         const int halfZ = sizeZ / 2;
+        // Calculate once for optimization
+        const int halfX = sizeX / 2;
+        const int halfY = sizeY / 2;
+        const int halfZ = sizeZ / 2;
 
-//         const CRGB COLOR_MAP[] = {CRGB::Red, CRGB::DarkOrange, CRGB::Blue, CRGB::Green, CRGB::Yellow, CRGB::White};
+        const CRGB COLOR_MAP[] = {CRGB::Red, CRGB::DarkOrange, CRGB::Blue, CRGB::Green, CRGB::Yellow, CRGB::White};
         
-//         for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++) { 
-//           Coord3D led = {x, y, z};
-//           if (layerV->isMapped(layerV->XYZUnModified(led)) == 0) continue; // skip if not a physical LED
+        for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++) { 
+          Coord3D led = Coord3D(x, y, z);
+          if (layerV->isMapped(layerV->XYZUnModified(led)) == 0) continue; // skip if not a physical LED
 
-//           // Normalize the coordinates to the Rubik's cube range. Subtract 1 since cube expanded by 2
-//           int normalizedX = constrain(round(x * scaleX) - 1, 0, SIZE - 1);
-//           int normalizedY = constrain(round(y * scaleY) - 1, 0, SIZE - 1);
-//           int normalizedZ = constrain(round(z * scaleZ) - 1, 0, SIZE - 1);
+          // Normalize the coordinates to the Rubik's cube range. Subtract 1 since cube expanded by 2
+          int normalizedX = constrain(round(x * scaleX) - 1, 0, SIZE - 1);
+          int normalizedY = constrain(round(y * scaleY) - 1, 0, SIZE - 1);
+          int normalizedZ = constrain(round(z * scaleZ) - 1, 0, SIZE - 1);
           
-//           // Calculate the distance to the closest face
-//           int distX = min(x, sizeX - x);
-//           int distY = min(y, sizeY - y);
-//           int distZ = min(z, sizeZ - z);
-//           int dist  = min(distX, min(distY, distZ));
+          // Calculate the distance to the closest face
+          int distX = min(x, sizeX - x);
+          int distY = min(y, sizeY - y);
+          int distZ = min(z, sizeZ - z);
+          int dist  = min(distX, min(distY, distZ));
 
-//           if      (dist == distZ && z < halfZ)  layerV->setRGB(led, COLOR_MAP[front[normalizedY][normalizedX]]);
-//           else if (dist == distX && x < halfX)  layerV->setRGB(led, COLOR_MAP[left[normalizedY][SIZE - 1 - normalizedZ]]);
-//           else if (dist == distY && y < halfY)  layerV->setRGB(led, COLOR_MAP[top[SIZE - 1 - normalizedZ][normalizedX]]);
-//           else if (dist == distZ && z >= halfZ) layerV->setRGB(led, COLOR_MAP[back[normalizedY][SIZE - 1 - normalizedX]]);
-//           else if (dist == distX && x >= halfX) layerV->setRGB(led, COLOR_MAP[right[normalizedY][normalizedZ]]);
-//           else if (dist == distY && y >= halfY) layerV->setRGB(led, COLOR_MAP[bottom[normalizedZ][normalizedX]]);
-//         }
-//       }
-//   };
+          if      (dist == distZ && z < halfZ)  layerV->setRGB(led, COLOR_MAP[front[normalizedY][normalizedX]]);
+          else if (dist == distX && x < halfX)  layerV->setRGB(led, COLOR_MAP[left[normalizedY][SIZE - 1 - normalizedZ]]);
+          else if (dist == distY && y < halfY)  layerV->setRGB(led, COLOR_MAP[top[SIZE - 1 - normalizedZ][normalizedX]]);
+          else if (dist == distZ && z >= halfZ) layerV->setRGB(led, COLOR_MAP[back[normalizedY][SIZE - 1 - normalizedX]]);
+          else if (dist == distX && x >= halfX) layerV->setRGB(led, COLOR_MAP[right[normalizedY][normalizedZ]]);
+          else if (dist == distY && y >= halfY) layerV->setRGB(led, COLOR_MAP[bottom[normalizedZ][normalizedX]]);
+        }
+      }
+  };
 
-//   struct Move {
-//       uint8_t face;      // 0-5 (3 bits)
-//       uint8_t width;     // 0-7 (3 bits)
-//       uint8_t direction; // 0 or 1 (1 bit)
-//   };
+  struct Move {
+      uint8_t face;      // 0-5 (3 bits)
+      uint8_t width;     // 0-7 (3 bits)
+      uint8_t direction; // 0 or 1 (1 bit)
+  };
 
-//   Move createRandomMoveStruct(uint8_t cubeSize, uint8_t prevFace) {
-//       Move move;
-//       do {
-//         move.face = random(6);
-//       } while (move.face/2 == prevFace/2);
-//       move.width     = random(cubeSize-2);
-//       move.direction = random(2);
-//       return move;
-//   }
+  Move createRandomMoveStruct(uint8_t cubeSize, uint8_t prevFace) {
+      Move move;
+      do {
+        move.face = random(6);
+      } while (move.face/2 == prevFace/2);
+      move.width     = random(cubeSize-2);
+      move.direction = random(2);
+      return move;
+  }
 
-//   uint8_t packMove(Move move) {
-//       uint8_t packed = (move.face & 0b00000111) | 
-//                       ((move.width << 3) & 0b00111000) | 
-//                       ((move.direction << 6) & 0b01000000);
-//       return packed;
-//   }
+  uint8_t packMove(Move move) {
+      uint8_t packed = (move.face & 0b00000111) | 
+                      ((move.width << 3) & 0b00111000) | 
+                      ((move.direction << 6) & 0b01000000);
+      return packed;
+  }
 
-//   Move unpackMove(uint8_t packedMove) {
-//       Move move;
-//       move.face      = packedMove & 0b00000111;
-//       move.width     = (packedMove >> 3) & 0b00000111;
-//       move.direction = (packedMove >> 6) & 0b00000001;
-//       return move;
-//   }
+  Move unpackMove(uint8_t packedMove) {
+      Move move;
+      move.face      = packedMove & 0b00000111;
+      move.width     = (packedMove >> 3) & 0b00000111;
+      move.direction = (packedMove >> 6) & 0b00000001;
+      return move;
+  }
 
-//   // UI control variables
-//   uint8_t turnsPerSecond;
-//   uint8_t cubeSize;
-//   bool randomTurning;
+  // UI control variables
+  uint8_t turnsPerSecond = 2;
+  uint8_t cubeSize = 3;
+  bool randomTurning = false;
 
-//   void setup() override {
-//     // bool *setup = layerV->effectData.write<bool>(true);
-//     // addControl(bgC, "turnsPerSecond", layerV->effectData.write<uint8_t>(1), 0, 20);   
-//     // addControl(bgC, "cubeSize",       layerV->effectData.write<uint8_t>(2), 1, 8, false, [setup] (EventArguments) { switch (eventType) {
-//     //   case onChange: {*setup = true; return true;}
-//     //   default: return false;
-//     // }});
-//     // addControl(bool, "randomTurning", layerV->effectData.write<bool>(false), false, [setup] (EventArguments) { switch (eventType) {
-//     //   case onChange: {if (!variable.value().as<bool>()) *setup = true; return true;}
-//     //   default: return false;
-//     // }});
-//     init();
-//   }
+  void setup() override {
+    addControl(turnsPerSecond, "turnsPerSecond", "range", 0, 20);   
+    addControl(cubeSize, "cubeSize", "range", 1, 8);   
+    addControl(randomTurning, "randomTurning", "checkbox");   
+  }
 
-//   unsigned long step;
-//   Cube    cube;
-//   uint8_t moveList[100];
-//   uint8_t moveIndex;
-//   uint8_t prevFaceMoved;
+  bool doInit = true;
+  void updateControl(JsonObject control) override {
+    Node::updateControl(control);
 
-//   void init() {
-//       cube.init(cubeSize);
-//       uint8_t moveCount = cubeSize * 10 + random(20);
-//       // Randomly turn entire cube
-//       for (int x = 0; x < 3; x++) {
-//         if (random(2)) cube.rotateRight(1, cubeSize);
-//         if (random(2)) cube.rotateTop  (1, cubeSize);
-//         if (random(2)) cube.rotateFront(1, cubeSize);
-//       }
-//       // Generate scramble
-//       for (int i = 0; i < moveCount; i++) {
-//         Move move = createRandomMoveStruct(cubeSize, prevFaceMoved);
-//         prevFaceMoved = move.face;
-//         moveList[i] = packMove(move);
+    if (control["name"] == "cubeSize" || control["name"] == "randomTurning") {
+      doInit = true;
+    }
+  }
 
-//         (cube.*rotateFuncs[move.face])(move.direction, move.width + 1);
-//       }
+  unsigned long step;
+  Cube    cube;
+  uint8_t moveList[100];
+  uint8_t moveIndex;
+  uint8_t prevFaceMoved;
 
-//       moveIndex = moveCount - 1;
+  void init() {
+      cube.init(cubeSize);
+      uint8_t moveCount = cubeSize * 10 + random(20);
+      // Randomly turn entire cube
+      for (int x = 0; x < 3; x++) {
+        if (random(2)) cube.rotateRight(1, cubeSize);
+        if (random(2)) cube.rotateTop  (1, cubeSize);
+        if (random(2)) cube.rotateFront(1, cubeSize);
+      }
+      // Generate scramble
+      for (int i = 0; i < moveCount; i++) {
+        Move move = createRandomMoveStruct(cubeSize, prevFaceMoved);
+        prevFaceMoved = move.face;
+        moveList[i] = packMove(move);
 
-//       cube.drawCube();
+        (cube.*rotateFuncs[move.face])(move.direction, move.width + 1);
+      }
 
-//   }
+      moveIndex = moveCount - 1;
 
-//   typedef void (Cube::*RotateFunc)(bool direction, uint8_t width);
-//   RotateFunc rotateFuncs[6] = {&Cube::rotateFront, &Cube::rotateBack, &Cube::rotateLeft, &Cube::rotateRight, &Cube::rotateTop, &Cube::rotateBottom};
+      cube.drawCube(layerV);
 
-//   void loop() override {
+  }
+
+  typedef void (Cube::*RotateFunc)(bool direction, uint8_t width);
+  RotateFunc rotateFuncs[6] = {&Cube::rotateFront, &Cube::rotateBack, &Cube::rotateLeft, &Cube::rotateRight, &Cube::rotateTop, &Cube::rotateBottom};
+
+  void loop() override {
     
-//     if (millis() > step || step - 3100 > millis()) { // step - 3100 > millis() temp fix for default on boot
-//       step = millis() + 1000;
-//       init();
-//     }
+    if (doInit && millis() > step || step - 3100 > millis()) { // step - 3100 > millis() temp fix for default on boot
+      step = millis() + 1000;
+      doInit = false;
+      init();
+    }
 
-//     if (!turnsPerSecond || millis() - step < 1000 / turnsPerSecond || millis() < step) return;
+    if (!turnsPerSecond || millis() - step < 1000 / turnsPerSecond || millis() < step) return;
 
-//     Move move = randomTurning ? createRandomMoveStruct(cubeSize, prevFaceMoved) : unpackMove(moveList[moveIndex]);
+    Move move = randomTurning ? createRandomMoveStruct(cubeSize, prevFaceMoved) : unpackMove(moveList[moveIndex]);
 
-//     (cube.*rotateFuncs[move.face])(!move.direction, move.width + 1);
+    (cube.*rotateFuncs[move.face])(!move.direction, move.width + 1);
       
-//     cube.drawCube();
+    cube.drawCube(layerV);
     
-//     if (!randomTurning && moveIndex == 0) {
-//       step = millis() + 3000;
-//       init();
-//       return;
-//     }
-//     if (!randomTurning) moveIndex--;
-//     step = millis();
-//   }
-// };
+    if (!randomTurning && moveIndex == 0) {
+      step = millis() + 3000;
+      doInit = true;
+      return;
+    }
+    if (!randomTurning) moveIndex--;
+    step = millis();
+  }
+};
 
-// class ParticleTestEffect: public Node {
-//   static const char * name() {return "Particle Test 💫🧭";}
-//   static uint8_t      dim() {return _3D;}
-//   static const char * tags() {return "";}
+//by WildCats08 / @Brandon502
+class ParticlesEffect: public Node {
+  public:
+  static const char * name() {return "Particles 🔥💫🧭";}
+  static uint8_t      dim() {return _3D;}
+  static const char * tags() {return "";}
   
-//   struct Particle {
-//     float x, y, z;
-//     float vx, vy, vz;
-//     CRGB color;
+  struct Particle {
+    float x, y, z;
+    float vx, vy, vz;
+    CRGB color;
 
-//     void update() {
-//       x += vx;
-//       y += vy;
-//       z += vz;
-//     }
-//     void revert() {
-//       x -= vx;
-//       y -= vy;
-//       z -= vz;
-//     }
+    void update() {
+      x += vx;
+      y += vy;
+      z += vz;
+    }
+    void revert() {
+      x -= vx;
+      y -= vy;
+      z -= vz;
+    }
 
-//     Coord3D toCoord3DRounded() {
-//       return Coord3D(int(round(x)), int(round(y)), int(round(z));
-//     }
+    Coord3D toCoord3DRounded() {
+      return Coord3D(round(x), round(y), round(z));
+    }
 
-//     void updatePositionandDraw(int particleIndex = 0, bool debugPrint = false) {
-//       if (debugPrint) MB_LOGD(ML_TAG, "Particle %d: Pos: %f, %f, %f Velocity: %f, %f, %f\n", particleIndex, x, y, z, vx, vy, vz);
+    void updatePositionandDraw(VirtualLayer *layerV, int particleIndex = 0, bool debugPrint = false) {
+      if (debugPrint) MB_LOGD(ML_TAG, "Particle %d: Pos: %f, %f, %f Velocity: %f, %f, %f\n", particleIndex, x, y, z, vx, vy, vz);
 
-//       Coord3D prevPos = toCoord3DRounded();
-//       if (debugPrint) MB_LOGD(ML_TAG, "     PrevPos: %d, %d, %d\n", prevPos.x, prevPos.y, prevPos.z);
+      Coord3D prevPos = toCoord3DRounded();
+      if (debugPrint) MB_LOGD(ML_TAG, "     PrevPos: %d, %d, %d\n", prevPos.x, prevPos.y, prevPos.z);
       
-//       update();
-//       Coord3D newPos = toCoord3DRounded();
-//       if (debugPrint) MB_LOGD(ML_TAG, "     NewPos: %d, %d, %d\n", newPos.x, newPos.y, newPos.z);
+      update();
+      Coord3D newPos = toCoord3DRounded();
+      if (debugPrint) MB_LOGD(ML_TAG, "     NewPos: %d, %d, %d\n", newPos.x, newPos.y, newPos.z);
 
-//       if (newPos == prevPos) return; // Skip if no change in position
+      if (newPos == prevPos) return; // Skip if no change in position
 
-//       layerV->setRGB(prevPos, CRGB::Black); // Clear previous position
+      layerV->setRGB(prevPos, CRGB::Black); // Clear previous position
 
-//       if (layerV->isMapped(layerV->XYZUnModified(newPos)) && !newPos.isOutofBounds(layerV->size) && layerV->getRGB(newPos) == CRGB::Black) {
-//         if (debugPrint) MB_LOGD(ML_TAG, "     New Pos was mapped and particle placed\n");
-//         layerV->setRGB(newPos, color); // Set new position
-//         return;
-//       }
+      if (layerV->isMapped(layerV->XYZUnModified(newPos)) && !newPos.isOutofBounds(layerV->size) && layerV->getRGB(newPos) == CRGB::Black) {
+        if (debugPrint) MB_LOGD(ML_TAG, "     New Pos was mapped and particle placed\n");
+        layerV->setRGB(newPos, color); // Set new position
+        return;
+      }
       
-//       // Particle is not mapped, find nearest mapped pixel
-//       Coord3D nearestMapped = prevPos;                          // Set nearest to previous position
-//       unsigned nearestDist = newPos.distanceSquared(prevPos);   // Set distance to previous position
-//       int diff = 0;                                             // If distance the same check how many coordinates are different (larger is better)
-//       bool changed = false;
+      // Particle is not mapped, find nearest mapped pixel
+      Coord3D nearestMapped = prevPos;                          // Set nearest to previous position
+      unsigned nearestDist = newPos.distanceSquared(prevPos);   // Set distance to previous position
+      int diff = 0;                                             // If distance the same check how many coordinates are different (larger is better)
+      bool changed = false;
 
-//       if (debugPrint) MB_LOGD(ML_TAG, "     %d, %d, %d, Not Mapped! Nearest: %d, %d, %d dist: %d diff: %d\n", newPos.x, newPos.y, newPos.z, nearestMapped.x, nearestMapped.y, nearestMapped.z, nearestDist, diff);
+      if (debugPrint) MB_LOGD(ML_TAG, "     %d, %d, %d, Not Mapped! Nearest: %d, %d, %d dist: %d diff: %d\n", newPos.x, newPos.y, newPos.z, nearestMapped.x, nearestMapped.y, nearestMapped.z, nearestDist, diff);
       
-//       // Check neighbors for nearest mapped pixel. This should be changed to check neighbors with similar velocity
-//       for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++) {
-//         Coord3D testPos = newPos + Coord3D(i, j, k);
-//         if (testPos == prevPos)                         continue; // Skip current position
-//         if (!layerV->isMapped(layerV->XYZUnModified(testPos)))    continue; // Skip if not mapped
-//         if (testPos.isOutofBounds(layerV->size))           continue; // Skip out of bounds
-//         if (layerV->getRGB(testPos) != CRGB::Black) continue; // Skip if already colored by another particle
-//         unsigned dist = testPos.distanceSquared(newPos);
-//         int differences = (prevPos.x != testPos.x) + (prevPos.y != testPos.y) + (prevPos.z != testPos.z);
-//         if (debugPrint) ppf ("     TestPos: %d %d %d Dist: %d Diff: %d", testPos.x, testPos.y, testPos.z, dist, differences);
-//         if (debugPrint) ppf ("     New Velocities: %d, %d, %d\n", (testPos.x - prevPos.x), (testPos.y - prevPos.y), (testPos.z - prevPos.z));
-//         if (dist < nearestDist || (dist == nearestDist && differences >= diff)) {
-//           nearestDist = dist;
-//           nearestMapped = testPos;
-//           diff = differences;
-//           changed = true;
-//         }
-//       }
-//       if (changed) { // Change velocity to move towards nearest mapped pixel. Update position.
-//         if (newPos.x != nearestMapped.x) vx = constrain(nearestMapped.x - prevPos.x, -1, 1);
-//         if (newPos.y != nearestMapped.y) vy = constrain(nearestMapped.y - prevPos.y, -1, 1);
-//         if (newPos.z != nearestMapped.z) vz = constrain(nearestMapped.z - prevPos.z, -1, 1);
+      // Check neighbors for nearest mapped pixel. This should be changed to check neighbors with similar velocity
+      for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++) {
+        Coord3D testPos = newPos + Coord3D(i, j, k);
+        if (testPos == prevPos)                         continue; // Skip current position
+        if (!layerV->isMapped(layerV->XYZUnModified(testPos)))    continue; // Skip if not mapped
+        if (testPos.isOutofBounds(layerV->size))           continue; // Skip out of bounds
+        if (layerV->getRGB(testPos) != CRGB::Black) continue; // Skip if already colored by another particle
+        unsigned dist = testPos.distanceSquared(newPos);
+        int differences = (prevPos.x != testPos.x) + (prevPos.y != testPos.y) + (prevPos.z != testPos.z);
+        if (debugPrint) MB_LOGD(ML_TAG, "     TestPos: %d %d %d Dist: %d Diff: %d", testPos.x, testPos.y, testPos.z, dist, differences);
+        if (debugPrint) MB_LOGD(ML_TAG, "     New Velocities: %d, %d, %d\n", (testPos.x - prevPos.x), (testPos.y - prevPos.y), (testPos.z - prevPos.z));
+        if (dist < nearestDist || (dist == nearestDist && differences >= diff)) {
+          nearestDist = dist;
+          nearestMapped = testPos;
+          diff = differences;
+          changed = true;
+        }
+      }
+      if (changed) { // Change velocity to move towards nearest mapped pixel. Update position.
+        if (newPos.x != nearestMapped.x) vx = constrain(nearestMapped.x - prevPos.x, -1, 1);
+        if (newPos.y != nearestMapped.y) vy = constrain(nearestMapped.y - prevPos.y, -1, 1);
+        if (newPos.z != nearestMapped.z) vz = constrain(nearestMapped.z - prevPos.z, -1, 1);
 
-//         x = nearestMapped.x; 
-//         y = nearestMapped.y; 
-//         z = nearestMapped.z;
+        x = nearestMapped.x; 
+        y = nearestMapped.y; 
+        z = nearestMapped.z;
         
-//         if (debugPrint) MB_LOGD(ML_TAG, "     New Position: %d, %d, %d New Velocity: %f, %f, %f\n", nearestMapped.x, nearestMapped.y, nearestMapped.z, vx, vy, vz);
-//       }
-//       else {
-//         // No valid position found, revert to previous position
-//         // Find which direction is causing OoB / not mapped and set velocity to 0
-//         Coord3D testing = toCoord3DRounded();
-//         revert();
-//         // change X val
-//         testing.x = newPos.x;
-//         if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vx = 0;
-//         // change Y val
-//         testing = toCoord3DRounded();
-//         testing.y = newPos.y;
-//         if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vy = 0;
-//         // change Z val
-//         testing = toCoord3DRounded();
-//         testing.z = newPos.z;
-//         if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vz = 0;
+        if (debugPrint) MB_LOGD(ML_TAG, "     New Position: %d, %d, %d New Velocity: %f, %f, %f\n", nearestMapped.x, nearestMapped.y, nearestMapped.z, vx, vy, vz);
+      }
+      else {
+        // No valid position found, revert to previous position
+        // Find which direction is causing OoB / not mapped and set velocity to 0
+        Coord3D testing = toCoord3DRounded();
+        revert();
+        // change X val
+        testing.x = newPos.x;
+        if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vx = 0;
+        // change Y val
+        testing = toCoord3DRounded();
+        testing.y = newPos.y;
+        if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vy = 0;
+        // change Z val
+        testing = toCoord3DRounded();
+        testing.z = newPos.z;
+        if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vz = 0;
         
-//         if (debugPrint) MB_LOGD(ML_TAG, "     No valid position found, reverted. Velocity Updated\n");
-//         if (debugPrint) MB_LOGD(ML_TAG, "     New Pos: %f, %f, %f Velo: %f, %f, %f\n", x, y, z, vx, vy, vz);
-//       }
+        if (debugPrint) MB_LOGD(ML_TAG, "     No valid position found, reverted. Velocity Updated\n");
+        if (debugPrint) MB_LOGD(ML_TAG, "     New Pos: %f, %f, %f Velo: %f, %f, %f\n", x, y, z, vx, vy, vz);
+      }
 
-//       layerV->setRGB(toCoord3DRounded(), color);
-//     }
-//   };
+      layerV->setRGB(toCoord3DRounded(), color);
+    }
+  };
 
-//   void setup() override {
-//     // bool *setup = layerV->effectData.write<bool>(true);
-//     addControl(bgC, "speed", layerV->effectData.write<uint8_t>(15), 0, 30);
-//     addControl(bgC, "number of Particles", layerV->effectData.write<uint8_t>(10), 1, 255, false, [setup] (EventArguments) { switch (eventType) {
-//       case onChange: {*setup = true; return true;}
-//       default: return false;
-//     }});
-//     addControl(bool, "barriers", layerV->effectData.write<bool>(0) , false, [setup] (EventArguments) { switch (eventType) {
-//       case onChange: {*setup = true; return true;}
-//       default: return false;
-//     }});
-//     #ifdef STARBASE_USERMOD_MPU6050
-//       addControl(bool, "gyro", layerV->effectData.write<bool>(0));
-//     #endif
-//     addControl(bool, "randomGravity",          layerV->effectData.write<bool>(1));
-//     addControl(bgC, "gravityChangeInterval", layerV->effectData.write<uint8_t>(5), 1, 10);
-//     // addControl(bool, "Debug Print",             layerV->effectData.write<bool>(0));
-//   }
+  uint8_t speed        = 15;
+  uint8_t numParticles = 10;
+  bool   barriers        = false;
+  #ifdef STARBASE_USERMOD_MPU6050
+    bool gyro = true;
+  #else
+    bool gyro = false;
+  #endif
+  bool randomGravity = true;
+  uint8_t gravityChangeInterval = 5;
+  // bool debugPrint    = layerV->effectData.read<bool>();
+  bool debugPrint = false;
 
-//   void loop() override {
-//     // UI Variables
-//     bool   *setup        = layerV->effectData.readWrite<bool>();
-//     uint8_t speed        = layerV->effectData.read<uint8_t>();
-//     uint8_t numParticles = layerV->effectData.read<uint8_t>();
-//     bool barriers        = layerV->effectData.read<bool>();
-//     #ifdef STARBASE_USERMOD_MPU6050
-//       bool gyro = layerV->effectData.read<bool>();
-//     #else
-//       bool gyro = false;
-//     #endif
-//     bool randomGravity = layerV->effectData.read<bool>();
-//     uint8_t gravityChangeInterval = layerV->effectData.read<uint8_t>();
-//     // bool debugPrint    = layerV->effectData.read<bool>();
-//     bool debugPrint = false;
+  void setup() override {
+    addControl(speed, "speed", "range", 0, 30);
+    addControl(numParticles, "number of Particles", "range", 1, 255);
+    addControl(barriers, "barriers", "checkbox");
+    #ifdef STARBASE_USERMOD_MPU6050
+      addControl(gyro, "gyro", "checkbox");
+    #endif
+    addControl(randomGravity, "randomGravity", "checkbox");
+    addControl(gravityChangeInterval, "gravityChangeInterval", "range", 1, 10);
+    // addControl(bool, "Debug Print",             layerV->effectData.write<bool>(0));
 
-//     // Effect Variables
-//     Particle *particles       = layerV->effectData.readWrite<Particle>(255);
-//     unsigned long step       = layerV->effectData.readWrite<unsigned long>();
-//     unsigned long *gravUpdate = layerV->effectData.readWrite<unsigned long>();
-//     float *gravity = layerV->effectData.readWrite<float>(3);
+    settingUpParticles();
+  }
 
-//     if (*setup) {
-//       MB_LOGD(ML_TAG, "Setting Up Particles\n");
-//       *setup = false;
-//       layerV->fill_solid(CRGB::Black);
+  void updateControl(JsonObject control) override {
+    Node::updateControl(control);
 
-//       if (barriers) {
-//         // create a 2 pixel thick barrier around middle y value with gaps
-//         for (int x = 0; x < layerV->size.x; x++) for (int z = 0; z < layerV->size.z; z++) {
-//           if (!random8(5)) continue;
-//           layerV->setRGB(Coord3D(x, layerV->size.y/2, z), CRGB::White);
-//           layerV->setRGB(Coord3D(x, layerV->size.y/2 - 1, z), CRGB::White);
-//         }
-//       }
+    if (control["name"] == "number of Particles" || control["name"] == "barriers") {
+      settingUpParticles();
+    }
+  }
 
-//       for (int index = 0 ; index < numParticles; index++) {
-//         Coord3D rPos; 
-//         int attempts = 0; 
-//         do { // Get random mapped position that isn't colored (infinite loop if small fixture size and high particle count)
-//           rPos = {random8(layerV->size.x), random8(layerV->size.y), random8(layerV->size.z)};
-//           attempts++;
-//         } while ((!layerV->isMapped(layerV->XYZUnModified(rPos)) || layerV->getRGB(rPos) != CRGB::Black) && attempts < 1000);
-//         // rPos = {1,1,0};
-//         particles[index].x = rPos.x;
-//         particles[index].y = rPos.y;
-//         particles[index].z = rPos.z;
+  void settingUpParticles() {
+    MB_LOGD(ML_TAG, "Setting Up Particles\n");
+    layerV->fill_solid(CRGB::Black);
 
-//         particles[index].vx = (random8() / 256.0f) * 2.0f - 1.0f;
-//         particles[index].vy = (random8() / 256.0f) * 2.0f - 1.0f;
-//         if (layerV->layerDimension == _3D) particles[index].vz = (random8() / 256.0f) * 2.0f - 1.0f;
-//         else particles[index].vz = 0;
+    if (barriers) {
+      // create a 2 pixel thick barrier around middle y value with gaps
+      for (int x = 0; x < layerV->size.x; x++) for (int z = 0; z < layerV->size.z; z++) {
+        if (!random8(5)) continue;
+        layerV->setRGB(Coord3D(x, layerV->size.y/2, z), CRGB::White);
+        layerV->setRGB(Coord3D(x, layerV->size.y/2 - 1, z), CRGB::White);
+      }
+    }
 
-//         particles[index].color = ColorFromPalette(layerV->layerP->palette, random8());
-//         Coord3D initPos = particles[index].toCoord3DRounded();
-//         layerV->setRGB(initPos, particles[index].color);
-//       }
-//       MB_LOGD(ML_TAG, "Particles Set Up\n");
-//       step = millis();
-//     }
+    for (int index = 0 ; index < numParticles; index++) {
+      Coord3D rPos; 
+      int attempts = 0; 
+      do { // Get random mapped position that isn't colored (infinite loop if small fixture size and high particle count)
+        rPos = {random8(layerV->size.x), random8(layerV->size.y), random8(layerV->size.z)};
+        attempts++;
+      } while ((!layerV->isMapped(layerV->XYZUnModified(rPos)) || layerV->getRGB(rPos) != CRGB::Black) && attempts < 1000);
+      // rPos = {1,1,0};
+      particles[index].x = rPos.x;
+      particles[index].y = rPos.y;
+      particles[index].z = rPos.z;
 
-//     if (!speed || millis() - step < 1000 / speed) return; // Not enough time passed
+      particles[index].vx = (random8() / 256.0f) * 2.0f - 1.0f;
+      particles[index].vy = (random8() / 256.0f) * 2.0f - 1.0f;
+      if (layerV->layerDimension == _3D) particles[index].vz = (random8() / 256.0f) * 2.0f - 1.0f;
+      else particles[index].vz = 0;
 
-//     float gravityX, gravityY, gravityZ; // Gravity if using gyro or random gravity
+      particles[index].color = ColorFromPalette(layerV->layerP->palette, random8());
+      Coord3D initPos = particles[index].toCoord3DRounded();
+      layerV->setRGB(initPos, particles[index].color);
+    }
+    MB_LOGD(ML_TAG, "Particles Set Up\n");
+    step = millis();
+  }
 
-//     #ifdef STARBASE_USERMOD_MPU6050
-//     if (gyro) {
-//       gravity[0] = -mpu6050->gravityVector.x;
-//       gravity[1] =  mpu6050->gravityVector.z; // Swap Y and Z axis
-//       gravity[2] = -mpu6050->gravityVector.y;
+  Particle particles[255];
+  unsigned long step;
+  unsigned long gravUpdate = 0;
+  float gravity[3];
 
-//       if (layerV->layerDimension == _2D) { // Swap back Y and Z axis set Z to 0
-//         gravity[1] = -gravity[2];
-//         gravity[2] = 0;
-//       }
-//     }
-//     #endif
+  void loop() override {
 
-//     if (randomGravity) {
-//       if (millis() - *gravUpdate > gravityChangeInterval * 1000) {
-//         *gravUpdate = millis();
-//         float scale = 5.0f;
-//         // Generate Perlin noise values and scale them
-//         gravity[0] = (inoise8(step, 0, 0) / 128.0f - 1.0f) * scale;
-//         gravity[1] = (inoise8(0, step, 0) / 128.0f - 1.0f) * scale;
-//         gravity[2] = (inoise8(0, 0, step) / 128.0f - 1.0f) * scale;
+    if (!speed || millis() - step < 1000 / speed) return; // Not enough time passed
 
-//         gravity[0] = constrain(gravity[0], -1.0f, 1.0f);
-//         gravity[1] = constrain(gravity[1], -1.0f, 1.0f);
-//         gravity[2] = constrain(gravity[2], -1.0f, 1.0f);
+    float gravityX, gravityY, gravityZ; // Gravity if using gyro or random gravity
 
-//         if (layerV->layerDimension == _2D) gravity[2] = 0;
-//         // MB_LOGD(ML_TAG, "Random Gravity: %f, %f, %f\n", gravity[0], gravity[1], gravity[2]);
-//       }
-//     }
+    #ifdef STARBASE_USERMOD_MPU6050
+    if (gyro) {
+      gravity[0] = -mpu6050->gravityVector.x;
+      gravity[1] =  mpu6050->gravityVector.z; // Swap Y and Z axis
+      gravity[2] = -mpu6050->gravityVector.y;
 
-//     for (int index = 0; index < numParticles; index++) {
-//       if (gyro || randomGravity) { // Lerp gravity towards gyro or random gravity if enabled
-//         float lerpFactor = .75;
-//         particles[index].vx += (gravity[0] - particles[index].vx) * lerpFactor;
-//         particles[index].vy += (gravity[1] - particles[index].vy) * lerpFactor; // Swap Y and Z axis
-//         particles[index].vz += (gravity[2] - particles[index].vz) * lerpFactor;
-//       }
-//       particles[index].updatePositionandDraw(leds, index, debugPrint);  
-//     }
+      if (layerV->layerDimension == _2D) { // Swap back Y and Z axis set Z to 0
+        gravity[1] = -gravity[2];
+        gravity[2] = 0;
+      }
+    }
+    #endif
 
-//     step = millis();
-//   }
-// };
+    if (randomGravity) {
+      if (millis() - gravUpdate > gravityChangeInterval * 1000) {
+        gravUpdate = millis();
+        float scale = 5.0f;
+        // Generate Perlin noise values and scale them
+        gravity[0] = (inoise8(step, 0, 0) / 128.0f - 1.0f) * scale;
+        gravity[1] = (inoise8(0, step, 0) / 128.0f - 1.0f) * scale;
+        gravity[2] = (inoise8(0, 0, step) / 128.0f - 1.0f) * scale;
+
+        gravity[0] = constrain(gravity[0], -1.0f, 1.0f);
+        gravity[1] = constrain(gravity[1], -1.0f, 1.0f);
+        gravity[2] = constrain(gravity[2], -1.0f, 1.0f);
+
+        if (layerV->layerDimension == _2D) gravity[2] = 0;
+        // MB_LOGD(ML_TAG, "Random Gravity: %f, %f, %f\n", gravity[0], gravity[1], gravity[2]);
+      }
+    }
+
+    for (int index = 0; index < numParticles; index++) {
+      if (gyro || randomGravity) { // Lerp gravity towards gyro or random gravity if enabled
+        float lerpFactor = .75;
+        particles[index].vx += (gravity[0] - particles[index].vx) * lerpFactor;
+        particles[index].vy += (gravity[1] - particles[index].vy) * lerpFactor; // Swap Y and Z axis
+        particles[index].vz += (gravity[2] - particles[index].vz) * lerpFactor;
+      }
+      particles[index].updatePositionandDraw(layerV, index, debugPrint);  
+    }
+
+    step = millis();
+  }
+};
 
 
 

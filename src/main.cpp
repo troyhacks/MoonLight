@@ -98,7 +98,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                 xSemaphoreGive(driverSemaphore);
                     
                 while (!runInTask1.empty()) {
-                    MB_LOGV(ML_TAG, "runInTask1 %d", runInTask1.size());
+                    // MB_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
                     runInTask1.front()();
                     runInTask1.erase(runInTask1.begin());
                 }
@@ -199,7 +199,7 @@ void setup()
                 "AppEffectTask",            // name
                 8 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
-                5,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                2,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle
                 1                      // core (0 or 1)
             );
@@ -209,7 +209,7 @@ void setup()
                 "AppDriverTask",            // name
                 4 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
-                5,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                2,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &driverTaskHandle,       // task handle
                 1                      // core (0 or 1)
             );

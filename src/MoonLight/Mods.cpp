@@ -205,6 +205,7 @@ void ArtNetDriverMod::setup() {
 }
 
 bool ArtNetDriverMod::writePackage() {
+  // for (int i=0; i< 18+packetSize;i++) Serial.printf(" %d", packet_buffer[i]);Serial.println();
   // set the parts of the Art-Net packet header that change:
   packet_buffer[14] = universe; //The low byte of the 15 bit Port-Address to which this packet is destined
   packet_buffer[15] = universe >> 8; //The top 7 bits of the 15 bit Port-Address to which this packet is destined
@@ -258,7 +259,9 @@ void ArtNetDriverMod::loop() {
   //send all the leds to artnet
   for (int indexP = 0; indexP < header->nrOfLights; indexP++) {
     //fill a package
+    memcpy(&packet_buffer[packetSize+18], &layerV->layerP->lights.channels[indexP*header->channelsPerLight], header->channelsPerLight); //set all the channels
 
+    //correct the RGB channels for color order and brightness
     reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB]);
 
     if (header->offsetRGB1 != UINT8_MAX )
