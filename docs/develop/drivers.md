@@ -8,6 +8,8 @@ Applies to Art-Net (currently working like this), to be added to physical and vi
 
 The main idea is that a context will be set and can dynamically change. Driver.show will use these variables to et the right data to the right output.
 
+Initless means there is no addLeds (like in FastLed) or initLeds (like in physical and virtual driver)
+
 The main advantage of this is:
 
 * No need to recompile any changed configs
@@ -22,12 +24,13 @@ make sure the following is available before calling driver.show. Note: setup onl
 * offsets within the channels (RGBW and more like pan and tilt)
 * outputs[]: pins for leds drivers, outputs for Art-Net
 * lengths[]: nr of lights per output
+* driver[]: shows for each output for which driver it is ... 🚧
 
 ### driver.show
 
 Called by loop function.
 
-* loop over all outputs (or pins)
+* loop over all outputs (or pins) which are meant for a specific driver (e.g. all outputs for artnet)
     * pre channel actions (...)
     * loop over all lights in the output
         * for each light
