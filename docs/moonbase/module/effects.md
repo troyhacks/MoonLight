@@ -19,13 +19,15 @@ Typically a node will define a layout (🚥), or an effect (🔥), or a modifier
 ## Emoji coding:
 
 * 🔥 Effect
+* 🚨 Moving head color effect
+* 🗼 Moving head move effect
 * 💎 Modifier
 * 🎨 Using palette
 * 💡 WLED origin
 * 💫 MoonLight origin
 * ♫ Audio reactive FFT based
 * ♪ Audio reactive volume based
-* 🧊 3D
+* 🧊 also works on 3D
 
 ## Effect 🔥 Nodes
 🚧

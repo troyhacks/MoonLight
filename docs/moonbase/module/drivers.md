@@ -77,11 +77,14 @@ Controls:
 * **Max Power**: max amount of power in watts to send to LEDs. Default 10: 5V * 2A = 10W (so it runs fine on USB)
 * **Light preset**: Defines the channels per light and color order
     * RGB to BGR for 3 lights per channel, RGB lights, GRB is default
-    * RGBW for Par/DMX Lights
     * GRBW for LEDs with white channel like SK6812.
+    * RGBW for Par/DMX Lights
     * GRBW6 for LED curtains with 6 channels per light (only rgb used)
-    * RGBWYP: 6 channel RGBW(YP) lights: 🚧: currently setup to have the first 36 lights 4 channel RGBW, after that 6 channel RGBWYP ! Used for 18 channel light bars
+    * RGBWYP: Compatible with [DMX 18x12W LED RGBW/RGBWUAV](https://s.click.aliexpress.com/e/_EJQoRlM) (RGBW is 4x18=72 channels, RGBWUAV is 6x18=104 channels). 🚧: currently setup to have the first 36 lights 4 channel RGBW, after that 6 channel RGBWYP ! Used for 18 channel light bars
     * MH* for Moving Heads lights
+        * MHBeTopper19x15W-32: [BeTopper / Big Dipper](https://betopperdj.com/products/betopper-19x15w-rgbw-with-light-strip-effect-moving-head-light)
+        * MHBeeEyes-15: [Bee eyes](https://a.co/d/bkTY4DX)
+        * MH19x15W-24: [19x15W Zoom Wash Lights RGBW Beam Moving Head](https://s.click.aliexpress.com/e/_EwBfFYw)
     * 🚨: Currently, if using multiple drivers, all drivers need the same Light preset !!
 * **Controller IP**: The last segment of the IP address within your local network, of the the hardware Art-Net controller.
 * **Port**: The network port added to the IP address, 6454 is the default for Art-Net.

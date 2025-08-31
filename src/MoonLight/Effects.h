@@ -29,18 +29,22 @@ class SolidEffect: public Node {
   uint8_t red = 182;
   uint8_t green = 15;
   uint8_t blue = 98;
+  uint8_t white = 0;
   uint8_t brightness = 255;
 
   void setup() override {
     addControl(red, "red", "range");
     addControl(green, "green", "range");
     addControl(blue, "blue", "range");
+    addControl(white, "white", "range");
     addControl(brightness, "brightness", "range");
 
   }
 
   void loop() override {
       layerV->fill_solid(CRGB(red * brightness/255, green * brightness/255, blue * brightness/255));
+      if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX)
+        for (int index; index < layerV->nrOfLights; index++) layerV->setWhite(index, white * brightness/255);
   }
 };
 
@@ -99,7 +103,7 @@ struct Ball {
 class BouncingBallsEffect: public Node {
   public:
 
-  static const char * name() {return "BouncingBalls 🔥🎨💡";}
+  static const char * name() {return "Bouncing Balls 🔥🎨💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -175,7 +179,7 @@ static uint8_t gamma8(uint8_t b) { //we do nothing with gamma for now
 
 class DistortionWavesEffect: public Node {
 public:
-  static const char * name() {return "DistortionWaves 🔥💡";}
+  static const char * name() {return "Distortion Waves 🔥💡";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
@@ -235,7 +239,7 @@ public:
 class FreqMatrixEffect: public Node {
 public:
 
-  static const char * name() {return "FreqMatrix 🔥♪💡";}
+  static const char * name() {return "Freq Matrix 🔥♪💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -333,7 +337,7 @@ public:
     addControl(colorBars, "colorBars", "checkbox");
     addControl(smoothBars, "smoothBars", "checkbox");
 
-    previousBarHeight = (uint16_t*)malloc(layerV->size.x * sizeof(uint16_t));
+    previousBarHeight = (uint16_t*)heap_caps_malloc_prefer(layerV->size.x * sizeof(uint16_t), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
     if (!previousBarHeight) {
       MB_LOGE(ML_TAG, "malloc failed for previousBarHeight");
       return;
@@ -345,9 +349,11 @@ public:
   ~GEQEffect() {
     // MB_LOGI(ML_TAG, "free previousBarHeight");
     if (previousBarHeight) {
-      free(previousBarHeight);
+      heap_caps_free(previousBarHeight);
       previousBarHeight = nullptr;
     }
+
+    Node::~Node();
   }
 
   void loop() override {
@@ -382,7 +388,7 @@ public:
 
       // MB_LOGD(ML_TAG, "x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
       uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):band; // always use full range. comment out this line to get the previous behaviour.
-      // frBand = constrain(frBand, 0, 15); //WLEDMM can never be out of bounds (I think...)
+      // frBand = constrain(frBand, 0, NUM_GEQ_CHANNELS-1); //WLEDMM can never be out of bounds (I think...)
       uint16_t colorIndex = frBand * 17; //WLEDMM 0.255
       uint16_t bandHeight = sharedData.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
 
@@ -429,7 +435,7 @@ public:
 // @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 class GEQ3DEffect: public Node {
   public:
-  static const char * name() {return "GEQ 3D 🔥♫💡";}
+  static const char * name() {return "GEQ 3D 🔥♫🐺";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
@@ -672,7 +678,7 @@ class Noise2DEffect: public Node {
 
 class NoiseMeterEffect: public Node {
   public:
-  static const char * name() {return "NoiseMeter ♪💡🎨";}
+  static const char * name() {return "Noise Meter ♪💡🎨";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
   
@@ -712,7 +718,7 @@ class NoiseMeterEffect: public Node {
 class PaintBrushEffect: public Node {
 public:
 
-  static const char * name() {return "Paintbrush 🔥🎨♫🧊💡";}
+  static const char * name() {return "Paintbrush 🔥🎨♫🧊🐺";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -750,18 +756,18 @@ public:
     aux1Chaos = phase_chaos?random8():0;
 
     for (size_t i = 0; i < numLines; i++) {
-      uint8_t bin = ::map(i,0,numLines,0,15);
+      uint8_t bin = ::map(i,0,numLines,0,NUM_GEQ_CHANNELS-1);
       
-      uint8_t x1 = beatsin8(oscillatorOffset*1 + sharedData.bands[0]/16, 0, (cols-1), sharedData.bands[bin], aux1Chaos);
-      uint8_t x2 = beatsin8(oscillatorOffset*2 + sharedData.bands[0]/16, 0, (cols-1), sharedData.bands[bin], aux1Chaos);
-      uint8_t y1 = beatsin8(oscillatorOffset*3 + sharedData.bands[0]/16, 0, (rows-1), sharedData.bands[bin], aux1Chaos);
-      uint8_t y2 = beatsin8(oscillatorOffset*4 + sharedData.bands[0]/16, 0, (rows-1), sharedData.bands[bin], aux1Chaos);
+      uint8_t x1 = beatsin8(oscillatorOffset*1 + sharedData.bands[0]/NUM_GEQ_CHANNELS, 0, (cols-1), sharedData.bands[bin], aux1Chaos);
+      uint8_t x2 = beatsin8(oscillatorOffset*2 + sharedData.bands[0]/NUM_GEQ_CHANNELS, 0, (cols-1), sharedData.bands[bin], aux1Chaos);
+      uint8_t y1 = beatsin8(oscillatorOffset*3 + sharedData.bands[0]/NUM_GEQ_CHANNELS, 0, (rows-1), sharedData.bands[bin], aux1Chaos);
+      uint8_t y2 = beatsin8(oscillatorOffset*4 + sharedData.bands[0]/NUM_GEQ_CHANNELS, 0, (rows-1), sharedData.bands[bin], aux1Chaos);
       uint8_t z1;
       uint8_t z2;
       int length;
       if (depth > 1) {
-        z1 = beatsin8(oscillatorOffset*5 + sharedData.bands[0]/16, 0, (depth-1), sharedData.bands[bin], aux1Chaos);
-        z2 = beatsin8(oscillatorOffset*6 + sharedData.bands[0]/16, 0, (depth-1), sharedData.bands[bin], aux1Chaos);
+        z1 = beatsin8(oscillatorOffset*5 + sharedData.bands[0]/NUM_GEQ_CHANNELS, 0, (depth-1), sharedData.bands[bin], aux1Chaos);
+        z2 = beatsin8(oscillatorOffset*6 + sharedData.bands[0]/NUM_GEQ_CHANNELS, 0, (depth-1), sharedData.bands[bin], aux1Chaos);
 
         length = sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1) + (z2-z1) * (z2-z1));
       } else 
@@ -939,42 +945,13 @@ class RipplesEffect: public Node {
   }
 };
 
-class RGBWParEffect: public Node {
-  public:
-
-  static const char * name() {return "RGBWPar 🔥";}
-
-  uint8_t bpm = 30;
-  uint8_t red = 30;
-  uint8_t green = 30;
-  uint8_t blue = 30;
-  uint8_t white = 0;
-
-  void setup() override {
-    addControl(bpm, "bpm", "range");
-    addControl(red, "red", "range"); //control["color"] = "Red"; ...
-    addControl(green, "green", "range");
-    addControl(blue, "blue", "range");
-    addControl(white, "white", "range");
-  }
-
-  void loop() override {
-    layerV->fadeToBlackBy(255); //reset all channels
-
-    uint8_t pos = millis()*bpm/6000 % layerV->size.x; //beatsin16( bpm, 0, layerV->size.x-1);
-
-    layerV->setRGB(Coord3D(pos), CRGB(red, green, blue));
-    layerV->setWhite({pos,0,0}, white);
-  }
-};
-
 #if USE_M5UNIFIED
     #include <M5Unified.h>
 #endif
 
 class ScrollingTextEffect: public Node {
 public:
-  static const char * name() {return "ScrollingText 🔥";}
+  static const char * name() {return "Scrolling Text 🔥";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
@@ -1113,7 +1090,7 @@ class SinusEffect: public Node {
 class SphereMoveEffect: public Node {
   public:
 
-  static const char * name() {return "SphereMove 🔥🧊";}
+  static const char * name() {return "Sphere Move 🔥🧊";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
@@ -1383,10 +1360,10 @@ public:
   }
 };
 
-class MHTroy1ColorEffect: public Node {
+class Troy1ColorEffect: public Node {
   public:
 
-  static const char * name() {return "MHTroy1 color 🔥♫🐺";}
+  static const char * name() {return "Troy1 Color 🚨♫🐺";}
 
   bool audioReactive = true;
 
@@ -1398,7 +1375,7 @@ class MHTroy1ColorEffect: public Node {
 
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
-        layerV->setRGB(x, CRGB(sharedData.bands[15],sharedData.bands[7],sharedData.bands[0]));
+        layerV->setRGB(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1],sharedData.bands[7],sharedData.bands[0]));
         layerV->setBrightness(x, (sharedData.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
       } else {
         layerV->setRGB(x, CHSV( beatsin8(10), 255, 255));
@@ -1408,10 +1385,10 @@ class MHTroy1ColorEffect: public Node {
   }
 };
 
-class MHTroy1MoveEffect: public Node {
+class Troy1MoveEffect: public Node {
   public:
 
-  static const char * name() {return "MHTroy1 Move 🔥♫🐺";}
+  static const char * name() {return "Troy1 Move 🗼♫🐺";}
 
   //set default values here
   uint8_t bpm = 30;
@@ -1503,10 +1480,10 @@ class MHTroy1MoveEffect: public Node {
   }
 };
 
-class MHTroy2ColorEffect: public Node {
+class Troy2ColorEffect: public Node {
   public:
 
-  static const char * name() {return "MHTroy2 Color 🔥♫🐺";}
+  static const char * name() {return "Troy2 Color 🚨♫🐺";}
 
   uint8_t bpm = 30;
   // uint8_t pan = 175;
@@ -1535,12 +1512,12 @@ class MHTroy2ColorEffect: public Node {
   void loop() override {
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
-        layerV->setRGB(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]));
-        layerV->setRGB1(x, CRGB(sharedData.bands[15],sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]>cutin?sharedData.bands[0]:0));
-        layerV->setRGB2(x, CRGB(sharedData.bands[15]>cutin?sharedData.bands[15]:0,sharedData.bands[7],sharedData.bands[0]>cutin?sharedData.bands[0]:0));
-        layerV->setRGB3(x, CRGB(sharedData.bands[15]>cutin?::map(sharedData.bands[15],cutin-1,255,0,255):0,sharedData.bands[7]>cutin?::map(sharedData.bands[7],cutin-1,255,0,255):0,sharedData.bands[0]>cutin?::map(sharedData.bands[0],cutin-1,255,0,255):0));
+        layerV->setRGB(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1]>cutin?sharedData.bands[NUM_GEQ_CHANNELS-1]:0,sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]));
+        layerV->setRGB1(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1],sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]>cutin?sharedData.bands[0]:0));
+        layerV->setRGB2(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1]>cutin?sharedData.bands[NUM_GEQ_CHANNELS-1]:0,sharedData.bands[7],sharedData.bands[0]>cutin?sharedData.bands[0]:0));
+        layerV->setRGB3(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1]>cutin?::map(sharedData.bands[NUM_GEQ_CHANNELS-1],cutin-1,255,0,255):0,sharedData.bands[7]>cutin?::map(sharedData.bands[7],cutin-1,255,0,255):0,sharedData.bands[0]>cutin?::map(sharedData.bands[0],cutin-1,255,0,255):0));
         // layerV->setZoom(x, (sharedData.bands[0]>cutin)?255:0);
-        if (sharedData.bands[0]+sharedData.bands[7]+sharedData.bands[15] > 1) {
+        if (sharedData.bands[0]+sharedData.bands[7]+sharedData.bands[NUM_GEQ_CHANNELS-1] > 1) {
           layerV->setBrightness(x, 255);
         } else {
           layerV->setBrightness(x, 0);
@@ -1553,10 +1530,10 @@ class MHTroy2ColorEffect: public Node {
   }
 };
 
-class MHTroy2MoveEffect: public Node {
+class Troy2MoveEffect: public Node {
   public:
 
-  static const char * name() {return "MHTroy2Move 🔥♫🐺";}
+  static const char * name() {return "Troy2 Move 🗼♫🐺";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
@@ -1619,7 +1596,7 @@ class MHTroy2MoveEffect: public Node {
           mypan = 255 - mypan; // invert pan
           mytilt = 255 - mytilt; // invert tilt
         }
-        if (sharedData.bands[0]+sharedData.bands[7]+sharedData.bands[15] > 1) {
+        if (sharedData.bands[0]+sharedData.bands[7]+sharedData.bands[NUM_GEQ_CHANNELS-1] > 1) {
           layerV->setPan(x, mypan); 
           layerV->setTilt(x, mytilt);
         } else {
@@ -1634,10 +1611,10 @@ class MHTroy2MoveEffect: public Node {
   }
 };
 
-class MHWowiColorEffect: public Node {
+class WowiColorEffect: public Node {
   public:
 
-  static const char * name() {return "MHWowi Color 🔥♫";}
+  static const char * name() {return "Wowi Color 🚨♫";}
 
   uint8_t bpm = 30;
   bool audioReactive = true;
@@ -1674,10 +1651,10 @@ class MHWowiColorEffect: public Node {
   }
 };
 
-class MHWowiMoveEffect: public Node {
+class WowiMoveEffect: public Node {
   public:
 
-  static const char * name() {return "MHWowi Move 🔥♫";}
+  static const char * name() {return "Wowi Move 🗼♫";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
@@ -1699,8 +1676,6 @@ class MHWowiMoveEffect: public Node {
 
   void loop() override {
 
-    layerV->fadeToBlackBy(50);
-
     for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       layerV->setPan({x,0,0}, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
       layerV->setTilt({x,0,0}, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
@@ -1710,6 +1685,92 @@ class MHWowiMoveEffect: public Node {
   }
 };
 
+class AmbientMoveEffect: public Node {
+  public:
+
+  static const char * name() {return "Ambient Move 🗼♫";}
+
+  uint8_t increaser = 255;
+  uint8_t decreaser = 8;
+  uint8_t tiltMin = 0;
+  uint8_t tiltMax = 128;
+  uint8_t panMin = 45;
+  uint8_t panMax = 135;
+  uint8_t panBPM = 5;
+
+  void setup() override {
+    addControl(increaser, "increaser", "range");
+    addControl(decreaser, "decreaser", "range");
+    addControl(tiltMin, "tiltMin", "range");
+    addControl(tiltMax, "tiltMax", "range");
+    addControl(panMin, "panMin", "range");
+    addControl(panMax, "panMax", "range");
+    addControl(panBPM, "panBPM", "range");
+    memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
+  }
+
+  uint16_t bandSpeed[NUM_GEQ_CHANNELS];
+
+  void loop() override {
+
+    for (uint8_t x = 0; x<layerV->size.x; x++) { //x-axis (column)
+
+      uint8_t band = map(x, 0, layerV->size.x-1, 2, NUM_GEQ_CHANNELS-3); //the frequency band applicable for the column, skip the lowest and the highest
+      uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
+
+      bandSpeed[band] = constrain(bandSpeed[band] + (volume * increaser) - decreaser * 10, 0, UINT16_MAX); // each band has a speed, increased by the volume and also decreased by decreaser. The decreaser should cause a delay
+
+      uint8_t tilt = map(bandSpeed[band], 0, UINT16_MAX, tiltMin, tiltMax); //the higher the band speed, the higher the tilt
+
+      uint8_t pan = map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0), 0, 255, panMin, panMax); //expect a bit of volume before panning
+
+      layerV->setTilt(x, 255-tilt);
+      layerV->setPan(x, pan);
+    }
+  }
+}; //AmbientMoveEffect
+
+
+class GEQSawEffect: public Node {
+  public:
+
+  static const char * name() {return "GEQ Saw 🔥♫🪚";}
+
+  uint8_t fade = 4;
+  uint8_t increaser = 165;
+  uint8_t decreaser = 92;
+  uint8_t bpmMax = 115;
+
+  void setup() override {
+    addControl(fade, "fade", "range");
+    addControl(increaser, "increaser", "range");
+    addControl(decreaser, "decreaser", "range");
+    addControl(bpmMax, "bpmMax", "range");
+    memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
+  }
+
+  uint16_t bandSpeed[NUM_GEQ_CHANNELS];
+
+  void loop() override {
+    layerV->fadeToBlackBy(fade);
+
+    for (uint8_t x = 0; x<layerV->size.x; x++) { //x-axis (column)
+
+      uint8_t band = map(x, 0, layerV->size.x-1, 2, NUM_GEQ_CHANNELS-3); //the frequency band applicable for the column, skip the lowest and the highest
+      uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
+
+      bandSpeed[band] = constrain(bandSpeed[band] + (volume * increaser / 255) - decreaser, 0, UINT16_MAX); // each band has a speed, increased by the volume and also decreased by decreaser. The decreaser should cause a delay
+
+      uint8_t bpm = map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
+
+      uint8_t y = map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+
+      //y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
+
+      layerV->setRGB(Coord3D(x, layerV->size.y - 1 - y), ColorFromPalette(layerV->layerP->palette, map(x, 0, layerV->size.x-1, 0, 255)));
+    }
+  }
+}; //GEQSawEffect
 
 
 
@@ -1737,7 +1798,7 @@ class MHWowiMoveEffect: public Node {
 // todo: ewowi check with wildcats08: can background color be removed as it is now easy to add solid as background color (blending ...?)
 class GameOfLifeEffect: public Node {
   public:
-  static const char * name() {return "Game Of Life 🔥💫";}
+  static const char * name() {return "Game Of Life 🔥💫🧊";}
   static uint8_t dim() {return _3D;} //supports 3D but also 2D (1D as well?)
   static const char * tags() {return "";}
 
@@ -2135,7 +2196,7 @@ class BlurzEffect: public Node {
 //by WildCats08 / @Brandon502
 class RubiksCubeEffect: public Node {
   public:
-  static const char * name() {return "Rubik's Cube 🔥💫";}
+  static const char * name() {return "Rubik's Cube 🔥💫🧊";}
   static uint8_t     dim() {return _3D;}
   static const char * tags() {return "💫";}
 
@@ -2429,7 +2490,7 @@ class RubiksCubeEffect: public Node {
 //by WildCats08 / @Brandon502
 class ParticlesEffect: public Node {
   public:
-  static const char * name() {return "Particles 🔥💫🧭";}
+  static const char * name() {return "Particles 🔥💫🧭🧊";}
   static uint8_t      dim() {return _3D;}
   static const char * tags() {return "";}
   
@@ -3196,7 +3257,7 @@ class ParticlesEffect: public Node {
 //         if (remaining < 1) {band++; remaining += bandwidth;} //increase remaining but keep the current remaining
 //         remaining--; //consume remaining
 
-//         int hue = sharedData.bands[map(band, 0, num_bands-1, 0, 15)];
+//         int hue = sharedData.bands[map(band, 0, num_bands-1, 0, NUM_GEQ_CHANNELS-1)];
 //         int v = map(hue, 0, 255, 10, 255);
 //         leds.setPixelColor(posx, 0, CHSV(hue, 255, v));
 //       }
@@ -3258,7 +3319,7 @@ class ParticlesEffect: public Node {
 // }; //VUMeter
 
 // class PixelMapEffect: public Node {
-//   const char * name() override {return "PixelMap";}
+//   const char * name() override {return "PixelMap 🧊";}
 //   uint8_t dim() override {return _3D;}
 //   const char * tags() override {return "💫";}
   
@@ -3703,14 +3764,14 @@ class ParticlesEffect: public Node {
 
 //     for (int i = 0; i < nrOfRings; i++) {
 
-//       uint8_t band = map(i, 0, nrOfRings-1, 0, 15);
+//       uint8_t band = map(i, 0, nrOfRings-1, 0, NUM_GEQ_CHANNELS-1);
 
 //       byte val;
 //       if (inWards) {
 //         val = sharedData.bands[band];
 //       }
 //       else {
-//         val = sharedData.bands[15 - band];
+//         val = sharedData.bands[NUM_GEQ_CHANNELS-1 - band];
 //       }
   
 //       // Visualize leds to the beat
@@ -3762,7 +3823,7 @@ class ParticlesEffect: public Node {
 //       *aux0 = secondHand;
 
 //       CRGB color = CRGB(0,0,0);
-//       // color = CRGB(sharedData.bands[15]/2, sharedData.bands[5]/2, sharedData.bands[0]/2);   // formula from 0.13.x (10Khz): R = 3880-5120, G=240-340, B=60-100
+//       // color = CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1]/2, sharedData.bands[5]/2, sharedData.bands[0]/2);   // formula from 0.13.x (10Khz): R = 3880-5120, G=240-340, B=60-100
 //       if (!candyFactory) {
 //         color = CRGB(sharedData.bands[12]/2, sharedData.bands[3]/2, sharedData.bands[1]/2);    // formula for 0.14.x  (22Khz): R = 3015-3704, G=216-301, B=86-129
 //       } else {
@@ -3783,7 +3844,7 @@ class ParticlesEffect: public Node {
 //       // make colors less "pastel", by turning up color saturation in HSV space
 //       if (color.getLuma() > 32) {                                      // don't change "dark" pixels
 //         CHSV hsvColor = rgb2hsv_approximate(color);
-//         hsvColor.v = min(max(hsvColor.v, (uint8_t)48), (uint8_t)204);  // 48 < brightness < 204
+//         hsvColor.v = constrain(hsvColor.v, 48, 204);  // 48 < brightness < 204
 //         if (candyFactory)
 //           hsvColor.s = max(hsvColor.s, (uint8_t)204);                  // candy factory mode: strongly turn up color saturation (> 192)
 //         else

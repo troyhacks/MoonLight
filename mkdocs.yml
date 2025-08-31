@@ -36,6 +36,7 @@ nav:
     - develop/documentation.md
     - develop/modules.md
     - develop/nodes.md
+    - develop/drivers.md
   - "ESP32 SvelteKit":
     - esp32sveltekit.md
   - "Build Tools":

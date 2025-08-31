@@ -104,6 +104,7 @@ public:
         values.add(GameOfLifeEffect::name());
         values.add(GEQEffect::name());
         values.add(GEQ3DEffect::name());
+        values.add(GEQSawEffect::name());
         values.add(LinesEffect::name());
         values.add(LissajousEffect::name());
         values.add(Noise2DEffect::name());
@@ -115,7 +116,6 @@ public:
         values.add(RandomEffect::name());
         values.add(RipplesEffect::name());
         values.add(RubiksCubeEffect::name());
-        values.add(RGBWParEffect::name());
         values.add(ScrollingTextEffect::name());
         values.add(SinusEffect::name());
         values.add(SphereMoveEffect::name());
@@ -124,12 +124,13 @@ public:
         values.add(WaverlyEffect::name());
         values.add(WaveEffect::name());
         values.add(FixedRectangleEffect::name());
-        values.add(MHTroy1ColorEffect::name());
-        values.add(MHTroy1MoveEffect::name());
-        values.add(MHTroy2ColorEffect::name());
-        values.add(MHTroy2MoveEffect::name());
-        values.add(MHWowiColorEffect::name());
-        values.add(MHWowiMoveEffect::name());
+        values.add(Troy1ColorEffect::name());
+        values.add(Troy1MoveEffect::name());
+        values.add(Troy2ColorEffect::name());
+        values.add(Troy2MoveEffect::name());
+        values.add(WowiColorEffect::name());
+        values.add(WowiMoveEffect::name());
+        values.add(AmbientMoveEffect::name());
 
         values.add(CheckerboardModifier::name());
         values.add(CircleModifier::name());
@@ -162,6 +163,7 @@ public:
         else if (equal(name, GameOfLifeEffect::name())) node = allocateInPSRAM<GameOfLifeEffect>();
         else if (equal(name, GEQEffect::name())) node = allocateInPSRAM<GEQEffect>();
         else if (equal(name, GEQ3DEffect::name())) node = allocateInPSRAM<GEQ3DEffect>();
+        else if (equal(name, GEQSawEffect::name())) node = allocateInPSRAM<GEQSawEffect>();
         else if (equal(name, LinesEffect::name())) node = allocateInPSRAM<LinesEffect>();
         else if (equal(name, LissajousEffect::name())) node = allocateInPSRAM<LissajousEffect>();
         else if (equal(name, Noise2DEffect::name())) node = allocateInPSRAM<Noise2DEffect>();
@@ -173,7 +175,6 @@ public:
         else if (equal(name, RandomEffect::name())) node = allocateInPSRAM<RandomEffect>();
         else if (equal(name, RipplesEffect::name())) node = allocateInPSRAM<RipplesEffect>();
         else if (equal(name, RubiksCubeEffect::name())) node = allocateInPSRAM<RubiksCubeEffect>();
-        else if (equal(name, RGBWParEffect::name())) node = allocateInPSRAM<RGBWParEffect>();
         else if (equal(name, ScrollingTextEffect::name())) node = allocateInPSRAM<ScrollingTextEffect>();
         else if (equal(name, SinusEffect::name())) node = allocateInPSRAM<SinusEffect>();
         else if (equal(name, SphereMoveEffect::name())) node = allocateInPSRAM<SphereMoveEffect>();
@@ -182,12 +183,13 @@ public:
         else if (equal(name, WaverlyEffect::name())) node = allocateInPSRAM<WaverlyEffect>();
         else if (equal(name, FixedRectangleEffect::name())) node = allocateInPSRAM<FixedRectangleEffect>();
         else if (equal(name, WaveEffect::name())) node = allocateInPSRAM<WaveEffect>();
-        else if (equal(name, MHTroy1ColorEffect::name())) node = allocateInPSRAM<MHTroy1ColorEffect>();
-        else if (equal(name, MHTroy1MoveEffect::name())) node = allocateInPSRAM<MHTroy1MoveEffect>();
-        else if (equal(name, MHTroy2ColorEffect::name())) node = allocateInPSRAM<MHTroy2ColorEffect>();
-        else if (equal(name, MHTroy2MoveEffect::name())) node = allocateInPSRAM<MHTroy2MoveEffect>();
-        else if (equal(name, MHWowiColorEffect::name())) node = allocateInPSRAM<MHWowiColorEffect>();
-        else if (equal(name, MHWowiMoveEffect::name())) node = allocateInPSRAM<MHWowiMoveEffect>();
+        else if (equal(name, Troy1ColorEffect::name())) node = allocateInPSRAM<Troy1ColorEffect>();
+        else if (equal(name, Troy1MoveEffect::name())) node = allocateInPSRAM<Troy1MoveEffect>();
+        else if (equal(name, Troy2ColorEffect::name())) node = allocateInPSRAM<Troy2ColorEffect>();
+        else if (equal(name, Troy2MoveEffect::name())) node = allocateInPSRAM<Troy2MoveEffect>();
+        else if (equal(name, WowiColorEffect::name())) node = allocateInPSRAM<WowiColorEffect>();
+        else if (equal(name, WowiMoveEffect::name())) node = allocateInPSRAM<WowiMoveEffect>();
+        else if (equal(name, AmbientMoveEffect::name())) node = allocateInPSRAM<AmbientMoveEffect>();
 
         else if (equal(name, CheckerboardModifier::name())) node = allocateInPSRAM<CheckerboardModifier>();
         else if (equal(name, CircleModifier::name())) node = allocateInPSRAM<CircleModifier>();

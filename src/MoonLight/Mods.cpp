@@ -39,17 +39,17 @@ void DriverNode::setup() {
   JsonArray values = property["values"].to<JsonArray>();
   values.add("RGB");
   values.add("RBG");
-  values.add("GRB"); //default
+  values.add("GRB"); //default WS2812
   values.add("GBR");
   values.add("BRG");
   values.add("BGR");
-  values.add("RGBW"); //4 channel par/dmx light
-  values.add("GRBW"); //rgbw led eg. sk6812
-  values.add("GRBW6"); //some curtains
+  values.add("RGBW"); //e.g. 4 channel par/dmx light
+  values.add("GRBW"); //rgbw LED eg. sk6812
+  values.add("GRBW6"); //some LED curtains
   values.add("RGBWYP"); //6 channel par/dmx light with UV etc
-  values.add("TroyMH15");
-  values.add("TroyMH32");
-  values.add("WowiMH24");
+  values.add("MHBeeEyes-15 🐺"); //15 channels moving head, see https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net
+  values.add("MHBeTopper19x15W-32 🐺"); //32 channels moving head
+  values.add("MH19x15W-24"); //24 channels moving heads
 }
 
 void DriverNode::loop() {
@@ -116,7 +116,7 @@ void DriverNode::updateControl(JsonObject control) {
       case 7: header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3; break; //GRBW - RGBW Leds
       case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRBW6
       case 9: header->channelsPerLight = 6; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBWYP - 6 channel Par/DMX Lights with UV etc
-      case 10: //troy32
+      case 10: //MHBeTopper19x15W-32
         layerV->layerP->lights.header.channelsPerLight = 32;
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
         layerV->layerP->lights.header.offsetRGB = 9;
@@ -128,7 +128,7 @@ void DriverNode::updateControl(JsonObject control) {
         layerV->layerP->lights.header.offsetZoom = 5;
         layerV->layerP->lights.header.offsetBrightness = 6;
         break;
-      case 11: //troyMH15
+      case 11: //MHBeeEyes-15
         layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
         layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
@@ -139,7 +139,7 @@ void DriverNode::updateControl(JsonObject control) {
         layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
         layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
         break;
-      case 12: //wowiMH24
+      case 12: //MH19x15W-24
         layerV->layerP->lights.header.channelsPerLight = 24;
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
         layerV->layerP->lights.header.offsetPan = 0;
