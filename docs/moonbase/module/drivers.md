@@ -83,7 +83,7 @@ Controls:
     * RGBWYP: Compatible with [DMX 18x12W LED RGBW/RGBWUAV](https://s.click.aliexpress.com/e/_EJQoRlM) (RGBW is 4x18=72 channels, RGBWUAV is 6x18=104 channels). 🚧: currently setup to have the first 36 lights 4 channel RGBW, after that 6 channel RGBWYP ! Used for 18 channel light bars
     * MH* for Moving Heads lights
         * MHBeTopper19x15W-32: [BeTopper / Big Dipper](https://betopperdj.com/products/betopper-19x15w-rgbw-with-light-strip-effect-moving-head-light)
-        * MHBeeEyes-15: [Bee eyes](https://a.co/d/bkTY4DX)
+        * MHBeeEyes150W-15: [Bee eyes](https://a.co/d/bkTY4DX)
         * MH19x15W-24: [19x15W Zoom Wash Lights RGBW Beam Moving Head](https://s.click.aliexpress.com/e/_EwBfFYw)
     * 🚨: Currently, if using multiple drivers, all drivers need the same Light preset !!
 * **Controller IP**: The last segment of the IP address within your local network, of the the hardware Art-Net controller.

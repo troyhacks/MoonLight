@@ -652,7 +652,7 @@ public:
 
 class Noise2DEffect: public Node {
   public:
-  static const char * name() {return "Noise2D 🔥💡";}
+  static const char * name() {return "Noise2D 🔥🎨💡";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
   
@@ -804,7 +804,7 @@ struct Spark {
 
 class PopCornEffect: public Node {
   public:
-  static const char * name() {return "PopCorn ♪💡";}
+  static const char * name() {return "PopCorn ♪🎨💡";}
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
   
@@ -1131,7 +1131,7 @@ class SphereMoveEffect: public Node {
 //by @Brandon502
 class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Train https://www.youtube.com/watch?v=17WoOqgXsRM
   public:
-  static const char * name() {return "StarField 🔥";}
+  static const char * name() {return "StarField 🔥🎨";}
   static uint8_t     dim() {return _2D;}
   static const char * tags() {return "";}
 
@@ -1207,7 +1207,7 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
  // BY MONSOONO / @Flavourdynamics 
 class PraxisEffect: public Node {
 public:
-  static const char * name() {return "Praxis 🔥";}
+  static const char * name() {return "Praxis 🔥🎨";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
@@ -1256,7 +1256,7 @@ public:
 
 class WaverlyEffect: public Node {
   public:
-  static const char * name() {return "Waverly 🔥♪💡";}
+  static const char * name() {return "Waverly 🔥♪🎨💡";}
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
   
@@ -1485,28 +1485,13 @@ class Troy2ColorEffect: public Node {
 
   static const char * name() {return "Troy2 Color 🚨♫🐺";}
 
-  uint8_t bpm = 30;
-  // uint8_t pan = 175;
-  // uint8_t tilt = 90;
-  // uint8_t zoom = 20;
-  // uint8_t range = 20;
   uint8_t cutin = 200;
-  // time_t cooldown = millis();
   
-  // bool autoMove = true;
   bool audioReactive = true;
-  // bool invert = true;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
-    // addControl(pan, "pan", "range");
-    // addControl(tilt, "tilt", "range");
-    // addControl(zoom, "zoom", "range");
     addControl(cutin, "cutin", "range");
-    // addControl(autoMove, "autoMove", "checkbox");
-    // addControl(range, "range", "range");
     addControl(audioReactive, "audioReactive", "checkbox");
-    // addControl(invert, "invert", "checkbox");
   }
 
   void loop() override {
@@ -1611,10 +1596,10 @@ class Troy2MoveEffect: public Node {
   }
 };
 
-class WowiColorEffect: public Node {
+class FreqColorsEffect: public Node {
   public:
 
-  static const char * name() {return "Wowi Color 🚨♫";}
+  static const char * name() {return "Freq Colors 🚨♫";}
 
   uint8_t bpm = 30;
   bool audioReactive = true;
@@ -1692,11 +1677,12 @@ class AmbientMoveEffect: public Node {
 
   uint8_t increaser = 255;
   uint8_t decreaser = 8;
-  uint8_t tiltMin = 0;
-  uint8_t tiltMax = 128;
+  uint8_t tiltMin = 128;
+  uint8_t tiltMax = 255;
   uint8_t panMin = 45;
   uint8_t panMax = 135;
   uint8_t panBPM = 5;
+  bool invert = true;
 
   void setup() override {
     addControl(increaser, "increaser", "range");
@@ -1706,6 +1692,8 @@ class AmbientMoveEffect: public Node {
     addControl(panMin, "panMin", "range");
     addControl(panMax, "panMax", "range");
     addControl(panBPM, "panBPM", "range");
+    addControl(invert, "invert", "checkbox");
+
     memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
   }
 
@@ -1722,9 +1710,10 @@ class AmbientMoveEffect: public Node {
 
       uint8_t tilt = map(bandSpeed[band], 0, UINT16_MAX, tiltMin, tiltMax); //the higher the band speed, the higher the tilt
 
-      uint8_t pan = map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0), 0, 255, panMin, panMax); //expect a bit of volume before panning
+      uint8_t pan = map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0, 0, 255, 0, (invert && x%2==0)?128:0), 0, 255, panMin, panMax); //expect a bit of volume before panning
+      uint8_t tilt2 = map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0, 0, 255, 0, 64), 0, 255, panMin, panMax); //this is beatcos8, so pan and tilt draw a circle
 
-      layerV->setTilt(x, 255-tilt);
+      layerV->setTilt(x, (tilt+tilt2)/2);
       layerV->setPan(x, pan);
     }
   }
@@ -1734,7 +1723,7 @@ class AmbientMoveEffect: public Node {
 class GEQSawEffect: public Node {
   public:
 
-  static const char * name() {return "GEQ Saw 🔥♫🪚";}
+  static const char * name() {return "GEQ Saw 🔥♫🎨🪚";}
 
   uint8_t fade = 4;
   uint8_t increaser = 165;
@@ -1761,13 +1750,15 @@ class GEQSawEffect: public Node {
 
       bandSpeed[band] = constrain(bandSpeed[band] + (volume * increaser / 255) - decreaser, 0, UINT16_MAX); // each band has a speed, increased by the volume and also decreased by decreaser. The decreaser should cause a delay
 
-      uint8_t bpm = map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
+      if (bandSpeed[band]>0) {
+        uint8_t bpm = map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
 
-      uint8_t y = map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+        uint8_t y = map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
 
-      //y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
+        //y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
 
-      layerV->setRGB(Coord3D(x, layerV->size.y - 1 - y), ColorFromPalette(layerV->layerP->palette, map(x, 0, layerV->size.x-1, 0, 255)));
+        layerV->setRGB(Coord3D(x, layerV->size.y - 1 - y), ColorFromPalette(layerV->layerP->palette, map(x, 0, layerV->size.x-1, 0, 255)));
+      }
     }
   }
 }; //GEQSawEffect
@@ -1798,7 +1789,7 @@ class GEQSawEffect: public Node {
 // todo: ewowi check with wildcats08: can background color be removed as it is now easy to add solid as background color (blending ...?)
 class GameOfLifeEffect: public Node {
   public:
-  static const char * name() {return "Game Of Life 🔥💫🧊";}
+  static const char * name() {return "Game Of Life 🔥💫🎨🧊";}
   static uint8_t dim() {return _3D;} //supports 3D but also 2D (1D as well?)
   static const char * tags() {return "";}
 
@@ -2122,7 +2113,7 @@ class GameOfLifeEffect: public Node {
 #define MAX_FREQ_LOG10  4.04238f       // log10(MAX_FREQUENCY)
 class BlurzEffect: public Node {
   public:
-  static const char * name() {return "Blurz 🔥🎵☾";}
+  static const char * name() {return "Blurz 🔥🎵🎨☾";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
   
@@ -2490,7 +2481,7 @@ class RubiksCubeEffect: public Node {
 //by WildCats08 / @Brandon502
 class ParticlesEffect: public Node {
   public:
-  static const char * name() {return "Particles 🔥💫🧭🧊";}
+  static const char * name() {return "Particles 🔥💫🧭🎨🧊";}
   static uint8_t      dim() {return _3D;}
   static const char * tags() {return "";}
   

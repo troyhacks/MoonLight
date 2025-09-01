@@ -47,7 +47,7 @@ void DriverNode::setup() {
   values.add("GRBW"); //rgbw LED eg. sk6812
   values.add("GRBW6"); //some LED curtains
   values.add("RGBWYP"); //6 channel par/dmx light with UV etc
-  values.add("MHBeeEyes-15 🐺"); //15 channels moving head, see https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net
+  values.add("MHBeeEyes150W-15 🐺"); //15 channels moving head, see https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net
   values.add("MHBeTopper19x15W-32 🐺"); //32 channels moving head
   values.add("MH19x15W-24"); //24 channels moving heads
 }
@@ -128,7 +128,7 @@ void DriverNode::updateControl(JsonObject control) {
         layerV->layerP->lights.header.offsetZoom = 5;
         layerV->layerP->lights.header.offsetBrightness = 6;
         break;
-      case 11: //MHBeeEyes-15
+      case 11: //MHBeeEyes150W-15
         layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
         layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map

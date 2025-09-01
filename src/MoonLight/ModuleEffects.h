@@ -128,7 +128,7 @@ public:
         values.add(Troy1MoveEffect::name());
         values.add(Troy2ColorEffect::name());
         values.add(Troy2MoveEffect::name());
-        values.add(WowiColorEffect::name());
+        values.add(FreqColorsEffect::name());
         values.add(WowiMoveEffect::name());
         values.add(AmbientMoveEffect::name());
 
@@ -187,7 +187,7 @@ public:
         else if (equal(name, Troy1MoveEffect::name())) node = allocateInPSRAM<Troy1MoveEffect>();
         else if (equal(name, Troy2ColorEffect::name())) node = allocateInPSRAM<Troy2ColorEffect>();
         else if (equal(name, Troy2MoveEffect::name())) node = allocateInPSRAM<Troy2MoveEffect>();
-        else if (equal(name, WowiColorEffect::name())) node = allocateInPSRAM<WowiColorEffect>();
+        else if (equal(name, FreqColorsEffect::name())) node = allocateInPSRAM<FreqColorsEffect>();
         else if (equal(name, WowiMoveEffect::name())) node = allocateInPSRAM<WowiMoveEffect>();
         else if (equal(name, AmbientMoveEffect::name())) node = allocateInPSRAM<AmbientMoveEffect>();
 

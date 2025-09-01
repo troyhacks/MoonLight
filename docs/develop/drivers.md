@@ -1,6 +1,6 @@
 # Drivers
 
-## Vverview
+## Overview
 
 ## Initless drivers
 
@@ -12,7 +12,7 @@ Initless means there is no addLeds (like in FastLed) or initLeds (like in physic
 
 The main advantage of this is:
 
-* No need to recompile any changed configs
+* No need to recompile any changed configs (e.g. colorOrder is fully flexible, not a setting in platformio.ini)
 * No need to restart while setting up a specific installation. Just change layouts until it works as intended.
 * Allows for a flexible mix of different outputs e.g. send the first 1024 leds to physical driver, next to virtual driver, next to spi, next to one Art-Net device, next to another Art-Net device. 
 
@@ -24,7 +24,7 @@ make sure the following is available before calling driver.show. Note: setup onl
 * offsets within the channels (RGBW and more like pan and tilt)
 * outputs[]: pins for leds drivers, outputs for Art-Net
 * lengths[]: nr of lights per output
-* driver[]: shows for each output for which driver it is ... 🚧
+* driver[]: shows for each output for which driver it is ... 🚧 as currenlty all drivers process all lights which sometimes is what you want (monitor on leds what is on moving heads) but not always
 
 ### driver.show
 
