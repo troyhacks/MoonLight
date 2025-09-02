@@ -25,7 +25,7 @@ Make sure the following is available before calling driver.show. Note: setup onl
 * channels[]: pka leds array (CRGB leds) but we now support any light: not only 3 or 4 channels
 * channelsPerLed: a light in the channels array can be found by index * channelsPerLed.
 * offsets within the channels (RGBW and more like pan and tilt)
-* outputs[]: pins for leds drivers, outputs for Art-Net
+* outputs[]: pins[] for leds drivers, outputs[] for Art-Net. Use generic name outputs[]
 * lengths[]: nr of lights per output
 * driver[]: shows for each output for which driver it is ... 🚧 as currenlty all drivers process all lights which sometimes is what you want (monitor on leds what is on moving heads) but not always
 
@@ -91,3 +91,11 @@ Note: Above concept can also be offered in a library and imported in other proje
 * initDMABuffers(): uses __NB_DMA_BUFFER, nb_components -> should be called by MoonLight as soon as dma buffer (would be very nice if this is a variable instead of a constant, so can be tweaked in MoonLight without recompiling) or lights preset (channelsPerLed) changes. Add function driver.updateLightsPreset(dma_buffer, channelsPerLight)...
     * putdefaultones: uses nb_components
 
+#### showPixels
+
+* loadAndTranspose(): uses this for all dma buffers. All Okay
+    * loop over num_strips (outputs[].length)
+    * loop over stripSize (lenghts[]), light by light: triggered by _I2SClocklessLedDriverinterruptHandler
+        * fills secondPixel using LUT and RGB(W) offsets
+        * transpose16x1_noinline2(secondpixel)
+* i2sStart: uses dma buffers: Okay
