@@ -104,7 +104,7 @@ public:
         values.add(GameOfLifeEffect::name());
         values.add(GEQEffect::name());
         values.add(GEQ3DEffect::name());
-        values.add(GEQSawEffect::name());
+        values.add(FreqSawsEffect::name());
         values.add(LinesEffect::name());
         values.add(LissajousEffect::name());
         values.add(Noise2DEffect::name());
@@ -154,55 +154,55 @@ public:
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
         Node *node = nullptr;
-        if (equal(name, SolidEffect::name())) node = allocateInPSRAM<SolidEffect>();
+        if (equal(name, SolidEffect::name())) node = allocMBObject<SolidEffect>();
         //alphabetically from here
-        else if (equal(name, BouncingBallsEffect::name())) node = allocateInPSRAM<BouncingBallsEffect>();
-        else if (equal(name, BlurzEffect::name())) node = allocateInPSRAM<BlurzEffect>();
-        else if (equal(name, DistortionWavesEffect::name())) node = allocateInPSRAM<DistortionWavesEffect>();
-        else if (equal(name, FreqMatrixEffect::name())) node = allocateInPSRAM<FreqMatrixEffect>();
-        else if (equal(name, GameOfLifeEffect::name())) node = allocateInPSRAM<GameOfLifeEffect>();
-        else if (equal(name, GEQEffect::name())) node = allocateInPSRAM<GEQEffect>();
-        else if (equal(name, GEQ3DEffect::name())) node = allocateInPSRAM<GEQ3DEffect>();
-        else if (equal(name, GEQSawEffect::name())) node = allocateInPSRAM<GEQSawEffect>();
-        else if (equal(name, LinesEffect::name())) node = allocateInPSRAM<LinesEffect>();
-        else if (equal(name, LissajousEffect::name())) node = allocateInPSRAM<LissajousEffect>();
-        else if (equal(name, Noise2DEffect::name())) node = allocateInPSRAM<Noise2DEffect>();
-        else if (equal(name, NoiseMeterEffect::name())) node = allocateInPSRAM<NoiseMeterEffect>();
-        else if (equal(name, PaintBrushEffect::name())) node = allocateInPSRAM<PaintBrushEffect>();
-        else if (equal(name, ParticlesEffect::name())) node = allocateInPSRAM<ParticlesEffect>();
-        else if (equal(name, PopCornEffect::name())) node = allocateInPSRAM<PopCornEffect>();
-        else if (equal(name, RainbowEffect::name())) node = allocateInPSRAM<RainbowEffect>();
-        else if (equal(name, RandomEffect::name())) node = allocateInPSRAM<RandomEffect>();
-        else if (equal(name, RipplesEffect::name())) node = allocateInPSRAM<RipplesEffect>();
-        else if (equal(name, RubiksCubeEffect::name())) node = allocateInPSRAM<RubiksCubeEffect>();
-        else if (equal(name, ScrollingTextEffect::name())) node = allocateInPSRAM<ScrollingTextEffect>();
-        else if (equal(name, SinusEffect::name())) node = allocateInPSRAM<SinusEffect>();
-        else if (equal(name, SphereMoveEffect::name())) node = allocateInPSRAM<SphereMoveEffect>();
-        else if (equal(name, StarFieldEffect::name())) node = allocateInPSRAM<StarFieldEffect>();
-        else if (equal(name, PraxisEffect::name())) node = allocateInPSRAM<PraxisEffect>();
-        else if (equal(name, WaverlyEffect::name())) node = allocateInPSRAM<WaverlyEffect>();
-        else if (equal(name, FixedRectangleEffect::name())) node = allocateInPSRAM<FixedRectangleEffect>();
-        else if (equal(name, WaveEffect::name())) node = allocateInPSRAM<WaveEffect>();
-        else if (equal(name, Troy1ColorEffect::name())) node = allocateInPSRAM<Troy1ColorEffect>();
-        else if (equal(name, Troy1MoveEffect::name())) node = allocateInPSRAM<Troy1MoveEffect>();
-        else if (equal(name, Troy2ColorEffect::name())) node = allocateInPSRAM<Troy2ColorEffect>();
-        else if (equal(name, Troy2MoveEffect::name())) node = allocateInPSRAM<Troy2MoveEffect>();
-        else if (equal(name, FreqColorsEffect::name())) node = allocateInPSRAM<FreqColorsEffect>();
-        else if (equal(name, WowiMoveEffect::name())) node = allocateInPSRAM<WowiMoveEffect>();
-        else if (equal(name, AmbientMoveEffect::name())) node = allocateInPSRAM<AmbientMoveEffect>();
+        else if (equal(name, BouncingBallsEffect::name())) node = allocMBObject<BouncingBallsEffect>();
+        else if (equal(name, BlurzEffect::name())) node = allocMBObject<BlurzEffect>();
+        else if (equal(name, DistortionWavesEffect::name())) node = allocMBObject<DistortionWavesEffect>();
+        else if (equal(name, FreqMatrixEffect::name())) node = allocMBObject<FreqMatrixEffect>();
+        else if (equal(name, GameOfLifeEffect::name())) node = allocMBObject<GameOfLifeEffect>();
+        else if (equal(name, GEQEffect::name())) node = allocMBObject<GEQEffect>();
+        else if (equal(name, GEQ3DEffect::name())) node = allocMBObject<GEQ3DEffect>();
+        else if (equal(name, FreqSawsEffect::name())) node = allocMBObject<FreqSawsEffect>();
+        else if (equal(name, LinesEffect::name())) node = allocMBObject<LinesEffect>();
+        else if (equal(name, LissajousEffect::name())) node = allocMBObject<LissajousEffect>();
+        else if (equal(name, Noise2DEffect::name())) node = allocMBObject<Noise2DEffect>();
+        else if (equal(name, NoiseMeterEffect::name())) node = allocMBObject<NoiseMeterEffect>();
+        else if (equal(name, PaintBrushEffect::name())) node = allocMBObject<PaintBrushEffect>();
+        else if (equal(name, ParticlesEffect::name())) node = allocMBObject<ParticlesEffect>();
+        else if (equal(name, PopCornEffect::name())) node = allocMBObject<PopCornEffect>();
+        else if (equal(name, RainbowEffect::name())) node = allocMBObject<RainbowEffect>();
+        else if (equal(name, RandomEffect::name())) node = allocMBObject<RandomEffect>();
+        else if (equal(name, RipplesEffect::name())) node = allocMBObject<RipplesEffect>();
+        else if (equal(name, RubiksCubeEffect::name())) node = allocMBObject<RubiksCubeEffect>();
+        else if (equal(name, ScrollingTextEffect::name())) node = allocMBObject<ScrollingTextEffect>();
+        else if (equal(name, SinusEffect::name())) node = allocMBObject<SinusEffect>();
+        else if (equal(name, SphereMoveEffect::name())) node = allocMBObject<SphereMoveEffect>();
+        else if (equal(name, StarFieldEffect::name())) node = allocMBObject<StarFieldEffect>();
+        else if (equal(name, PraxisEffect::name())) node = allocMBObject<PraxisEffect>();
+        else if (equal(name, WaverlyEffect::name())) node = allocMBObject<WaverlyEffect>();
+        else if (equal(name, FixedRectangleEffect::name())) node = allocMBObject<FixedRectangleEffect>();
+        else if (equal(name, WaveEffect::name())) node = allocMBObject<WaveEffect>();
+        else if (equal(name, Troy1ColorEffect::name())) node = allocMBObject<Troy1ColorEffect>();
+        else if (equal(name, Troy1MoveEffect::name())) node = allocMBObject<Troy1MoveEffect>();
+        else if (equal(name, Troy2ColorEffect::name())) node = allocMBObject<Troy2ColorEffect>();
+        else if (equal(name, Troy2MoveEffect::name())) node = allocMBObject<Troy2MoveEffect>();
+        else if (equal(name, FreqColorsEffect::name())) node = allocMBObject<FreqColorsEffect>();
+        else if (equal(name, WowiMoveEffect::name())) node = allocMBObject<WowiMoveEffect>();
+        else if (equal(name, AmbientMoveEffect::name())) node = allocMBObject<AmbientMoveEffect>();
 
-        else if (equal(name, CheckerboardModifier::name())) node = allocateInPSRAM<CheckerboardModifier>();
-        else if (equal(name, CircleModifier::name())) node = allocateInPSRAM<CircleModifier>();
-        else if (equal(name, MirrorModifier::name())) node = allocateInPSRAM<MirrorModifier>();
-        else if (equal(name, MultiplyModifier::name())) node = allocateInPSRAM<MultiplyModifier>();
-        else if (equal(name, RippleYZModifier::name())) node = allocateInPSRAM<RippleYZModifier>();
-        else if (equal(name, PinwheelModifier::name())) node = allocateInPSRAM<PinwheelModifier>();
-        else if (equal(name, RotateNodifier::name())) node = allocateInPSRAM<RotateNodifier>();
-        else if (equal(name, TransposeModifier::name())) node = allocateInPSRAM<TransposeModifier>();
+        else if (equal(name, CheckerboardModifier::name())) node = allocMBObject<CheckerboardModifier>();
+        else if (equal(name, CircleModifier::name())) node = allocMBObject<CircleModifier>();
+        else if (equal(name, MirrorModifier::name())) node = allocMBObject<MirrorModifier>();
+        else if (equal(name, MultiplyModifier::name())) node = allocMBObject<MultiplyModifier>();
+        else if (equal(name, RippleYZModifier::name())) node = allocMBObject<RippleYZModifier>();
+        else if (equal(name, PinwheelModifier::name())) node = allocMBObject<PinwheelModifier>();
+        else if (equal(name, RotateNodifier::name())) node = allocMBObject<RotateNodifier>();
+        else if (equal(name, TransposeModifier::name())) node = allocMBObject<TransposeModifier>();
         
         #if FT_LIVESCRIPT
             else {
-                LiveScriptNode *liveScriptNode = allocateInPSRAM<LiveScriptNode>();
+                LiveScriptNode *liveScriptNode = allocMBObject<LiveScriptNode>();
                 liveScriptNode->animation = name; //set the (file)name of the script
                 node = liveScriptNode;
             }

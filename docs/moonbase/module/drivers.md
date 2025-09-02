@@ -79,7 +79,7 @@ Controls:
     * RGB to BGR for 3 lights per channel, RGB lights, GRB is default
     * GRBW for LEDs with white channel like SK6812.
     * RGBW for Par/DMX Lights
-    * GRBW6 for LED curtains with 6 channels per light (only rgb used)
+    * GRB6 for LED curtains with 6 channels per light (only rgb used)
     * RGBWYP: Compatible with [DMX 18x12W LED RGBW/RGBWUAV](https://s.click.aliexpress.com/e/_EJQoRlM) (RGBW is 4x18=72 channels, RGBWUAV is 6x18=104 channels). 🚧: currently setup to have the first 36 lights 4 channel RGBW, after that 6 channel RGBWYP ! Used for 18 channel light bars
     * MH* for Moving Heads lights
         * MHBeTopper19x15W-32: [BeTopper / Big Dipper](https://betopperdj.com/products/betopper-19x15w-rgbw-with-light-strip-effect-moving-head-light)

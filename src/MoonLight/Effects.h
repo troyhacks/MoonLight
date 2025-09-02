@@ -99,7 +99,6 @@ struct Ball {
   float height;
 };
 
-#define maxColumns 32 //max 32 rows for now
 class BouncingBallsEffect: public Node {
   public:
 
@@ -116,9 +115,29 @@ class BouncingBallsEffect: public Node {
   }
 
   //binding of loop persistent values (pointers)
-  Ball balls[maxColumns][maxNumBalls];
+  Ball (*balls)[maxNumBalls] = nullptr ;//[maxColumns][maxNumBalls];
+
+  ~BouncingBallsEffect() {
+    freeMB(balls);
+
+    Node::~Node();
+  }
+
+  Coord3D prevSize = Coord3D(0,0,0);
 
   void loop() override {
+    if (layerV->size != prevSize) {
+      MB_LOGD(ML_TAG, "size change");
+      prevSize = layerV->size;
+      freeMB(balls);
+      balls = allocMB<Ball[maxNumBalls]>(layerV->size.y);
+
+      if (!balls) {
+        MB_LOGE(ML_TAG, "allocate balls failed");
+        return;
+      }
+    }
+
     layerV->fadeToBlackBy(100);
 
     // non-chosen color is a random color
@@ -131,7 +150,7 @@ class BouncingBallsEffect: public Node {
     //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     // }
 
-    for (uint8_t y =0; y < MIN(layerV->size.y,maxColumns); y++) { //Min for the time being
+    for (uint8_t y =0; y < layerV->size.y; y++) {
       for (size_t i = 0; i < MIN(numBalls, maxNumBalls); i++) {
         float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
         float timeSec = timeSinceLastBounce/1000.0f;
@@ -326,7 +345,6 @@ public:
   bool colorBars = false;
   bool smoothBars = true;
 
-  uint16_t *previousBarHeight; //array
   unsigned long step;
 
   void setup() override {
@@ -337,27 +355,33 @@ public:
     addControl(colorBars, "colorBars", "checkbox");
     addControl(smoothBars, "smoothBars", "checkbox");
 
-    previousBarHeight = (uint16_t*)heap_caps_malloc_prefer(layerV->size.x * sizeof(uint16_t), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-    if (!previousBarHeight) {
-      MB_LOGE(ML_TAG, "malloc failed for previousBarHeight");
-      return;
-    }
-    memset(previousBarHeight, 0, layerV->size.x * sizeof(uint16_t)); // initialize to 0
     step = millis();
   }
 
+  uint16_t *previousBarHeight = nullptr; //array
+
   ~GEQEffect() {
-    // MB_LOGI(ML_TAG, "free previousBarHeight");
-    if (previousBarHeight) {
-      heap_caps_free(previousBarHeight);
-      previousBarHeight = nullptr;
-    }
+    freeMB(previousBarHeight);
 
     Node::~Node();
   }
 
+  Coord3D prevSize = Coord3D(0,0,0);
+
   void loop() override {
     const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layerV->custom1, 0, 255, 1, 16);
+
+    if (layerV->size != prevSize) {
+      MB_LOGD(ML_TAG, "size change");
+      prevSize = layerV->size;
+
+      freeMB(previousBarHeight);
+      previousBarHeight = allocMB<uint16_t>(layerV->size.x);
+      if (!previousBarHeight) {
+        MB_LOGE(ML_TAG, "allocate previousBarHeight failed");
+        return;
+      }
+    }
 
     #ifdef SR_DEBUG
     uint8_t samplePeak = *(uint8_t*)um_data->u_data[3];
@@ -722,7 +746,7 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
-  uint8_t oscillatorOffset = 6 *  160/255;
+  uint8_t oscillatorOffset = 6 * 160 / 255;
   uint8_t numLines = 255;
   uint8_t fadeRate = 40;
   uint8_t minLength = 0;
@@ -1720,52 +1744,54 @@ class AmbientMoveEffect: public Node {
 }; //AmbientMoveEffect
 
 
-class GEQSawEffect: public Node {
-  public:
-
-  static const char * name() {return "GEQ Saw 🔥♫🎨🪚";}
-
+class FreqSawsEffect: public Node {
+public:
+  static const char * name() {return "Frequency Saws 🔥♫🎨🪚";}
   uint8_t fade = 4;
   uint8_t increaser = 165;
   uint8_t decreaser = 92;
   uint8_t bpmMax = 115;
-
+  bool invert = true;
+  bool phaseSync = true;
+  
   void setup() override {
     addControl(fade, "fade", "range");
     addControl(increaser, "increaser", "range");
     addControl(decreaser, "decreaser", "range");
     addControl(bpmMax, "bpmMax", "range");
+    addControl(invert, "invert", "checkbox");
+    addControl(phaseSync, "phaseSync", "checkbox");
     memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
+    memset(bandPhase, 0, NUM_GEQ_CHANNELS);
   }
-
+  
   uint16_t bandSpeed[NUM_GEQ_CHANNELS];
-
+  uint16_t bandPhase[NUM_GEQ_CHANNELS];  // Track phase position for each band
+  
   void loop() override {
     layerV->fadeToBlackBy(fade);
-
     for (uint8_t x = 0; x<layerV->size.x; x++) { //x-axis (column)
-
       uint8_t band = map(x, 0, layerV->size.x-1, 2, NUM_GEQ_CHANNELS-3); //the frequency band applicable for the column, skip the lowest and the highest
       uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
-
-      bandSpeed[band] = constrain(bandSpeed[band] + (volume * increaser / 255) - decreaser, 0, UINT16_MAX); // each band has a speed, increased by the volume and also decreased by decreaser. The decreaser should cause a delay
-
-      if (bandSpeed[band]>0) {
+      bandSpeed[band] = constrain(bandSpeed[band] + (volume * increaser / 10) - decreaser, 0, UINT16_MAX); // each band has a speed, increased by the volume and also decreased by decreaser. The decreaser should cause a delay
+      
+      if (bandSpeed[band]) {
         uint8_t bpm = map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
-
-        uint8_t y = map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
-
+        uint8_t y;
+        if (phaseSync) {
+          // Calculate phase increment based on current speed
+          bandPhase[band] += bpm;  // Direct increment - bpmMax controls the maximum speed
+          
+          y = map(bandPhase[band] >> 8, 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+        } else {
+          y = map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+        }
         //y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
-
-        layerV->setRGB(Coord3D(x, layerV->size.y - 1 - y), ColorFromPalette(layerV->layerP->palette, map(x, 0, layerV->size.x-1, 0, 255)));
+        layerV->setRGB(Coord3D(x, (invert && x%2==0)?layerV->size.y - 1 - y:y), ColorFromPalette(layerV->layerP->palette, map(x, 0, layerV->size.x-1, 0, 255)));
       }
     }
   }
-}; //GEQSawEffect
-
-
-
-
+}; //FreqSawsEffect
 
 
 
@@ -1905,7 +1931,7 @@ class GameOfLifeEffect: public Node {
   uint8_t  *cellColors = nullptr;
 
   void startNewGameOfLife() {
-    MB_LOGD(ML_TAG, "startNewGameOfLife");
+    // MB_LOGD(ML_TAG, "startNewGameOfLife");
     prevPalette  = ColorFromPalette(layerV->layerP->palette, 0);
     generation = 1;
     disablePause ? step = millis() : step = millis() + 1500;
@@ -1937,13 +1963,9 @@ class GameOfLifeEffect: public Node {
   int dataSize = 0;
 
   ~GameOfLifeEffect() {
-    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct cells %d", isInPSRAM(cells));
-    if (cells)      heap_caps_free(cells);
-    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct futureCells %d", isInPSRAM(futureCells));
-    if (futureCells) heap_caps_free(futureCells);
-    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct cellColors %d", isInPSRAM(cellColors));
-    if (cellColors)  heap_caps_free(cellColors);
-    MB_LOGD(ML_TAG, "GameOfLifeEffect destruct done");
+    freeMB(cells);
+    freeMB(futureCells);
+    freeMB(cellColors);
 
     //destructor
     Node::~Node();
@@ -1960,26 +1982,23 @@ class GameOfLifeEffect: public Node {
 
       dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
 
-      if (cells)      heap_caps_free(cells);
-      if (futureCells) heap_caps_free(futureCells);
-      if (cellColors)  heap_caps_free(cellColors);
+      freeMB(cells);
+      freeMB(futureCells);
+      freeMB(cellColors);
 
-      cells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-      futureCells = (uint8_t*)heap_caps_malloc_prefer(dataSize, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-      cellColors  = (uint8_t*)heap_caps_malloc_prefer(layerV->size.x * layerV->size.y * layerV->size.z, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+      cells = allocMB<uint8_t>(dataSize);
+      futureCells = allocMB<uint8_t>(dataSize);
+      cellColors = allocMB<uint8_t>(layerV->size.x * layerV->size.y * layerV->size.z);
 
       if (!cells || !futureCells || !cellColors) {
-          MB_LOGE(ML_TAG, "GameOfLife: heap_caps_malloc_prefer failed");
+          MB_LOGE(ML_TAG, "allocation of cells || !futureCells || !cellColors failed");
           return;
       }
-      memset(cells, 0, dataSize);
-      memset(futureCells, 0, dataSize);
-      memset(cellColors, 0, layerV->size.x * layerV->size.y * layerV->size.z);
 
       startNewGameOfLife();
       return; // show the start
     } else if (generation == 0 && step < millis()) {
-      MB_LOGD(ML_TAG, "gen / step");
+      // MB_LOGD(ML_TAG, "gen / step");
       startNewGameOfLife();
       return; // show the start
     }

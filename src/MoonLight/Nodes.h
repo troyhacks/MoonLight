@@ -53,7 +53,7 @@ public:
     JsonObject control;
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
-        MB_LOGD(ML_TAG, "update control %s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+        // MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
         control1["p"] = pointer;
         control = control1; //set control to the found one
         break;

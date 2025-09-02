@@ -45,7 +45,7 @@ void DriverNode::setup() {
   values.add("BGR");
   values.add("RGBW"); //e.g. 4 channel par/dmx light
   values.add("GRBW"); //rgbw LED eg. sk6812
-  values.add("GRBW6"); //some LED curtains
+  values.add("GRB6"); //some LED curtains
   values.add("RGBWYP"); //6 channel par/dmx light with UV etc
   values.add("MHBeeEyes150W-15 🐺"); //15 channels moving head, see https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net
   values.add("MHBeTopper19x15W-32 🐺"); //32 channels moving head
@@ -114,7 +114,7 @@ void DriverNode::updateControl(JsonObject control) {
       case 5: header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0; break; //BGR
       case 6: header->channelsPerLight = 4; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBW - Par Lights
       case 7: header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3; break; //GRBW - RGBW Leds
-      case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRBW6
+      case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRB6
       case 9: header->channelsPerLight = 6; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBWYP - 6 channel Par/DMX Lights with UV etc
       case 10: //MHBeTopper19x15W-32
         layerV->layerP->lights.header.channelsPerLight = 32;
@@ -625,7 +625,7 @@ void ArtNetDriverMod::loop() {
         int nb_pins=0;
 
         for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
-          MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+          // MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
           if (nb_pins < NUMSTRIPS) {
             pins[nb_pins] = sortedPin.pin;
             lengths[nb_pins] = sortedPin.nrOfLights;
@@ -645,7 +645,7 @@ void ArtNetDriverMod::loop() {
         for (int i=0; i<nb_pins; i++) {
           MB_LOGD(ML_TAG, ", %d (%d)", pins[i], lengths[i]);
         }
-        MB_LOGD(ML_TAG, "]\n");
+        MB_LOGD(ML_TAG, "]");
 
         if (nb_pins > 0) {
 

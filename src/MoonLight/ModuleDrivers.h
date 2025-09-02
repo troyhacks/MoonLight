@@ -65,27 +65,27 @@ public:
         Node *node = nullptr;
         //alphabetically from here
 
-        if (equal(name, PanelLayout::name())) node = allocateInPSRAM<PanelLayout>();
-        else if (equal(name, PanelsLayout::name())) node = allocateInPSRAM<PanelsLayout>();
-        else if (equal(name, CubeLayout::name())) node = allocateInPSRAM<CubeLayout>();
-        else if (equal(name, RingsLayout::name())) node = allocateInPSRAM<RingsLayout>();
-        else if (equal(name, WheelLayout::name())) node = allocateInPSRAM<WheelLayout>();
-        else if (equal(name, HumanSizedCubeLayout::name())) node = allocateInPSRAM<HumanSizedCubeLayout>();
-        else if (equal(name, SingleLineLayout::name())) node = allocateInPSRAM<SingleLineLayout>();
-        else if (equal(name, SingleRowLayout::name())) node = allocateInPSRAM<SingleRowLayout>();
+        if (equal(name, PanelLayout::name())) node = allocMBObject<PanelLayout>();
+        else if (equal(name, PanelsLayout::name())) node = allocMBObject<PanelsLayout>();
+        else if (equal(name, CubeLayout::name())) node = allocMBObject<CubeLayout>();
+        else if (equal(name, RingsLayout::name())) node = allocMBObject<RingsLayout>();
+        else if (equal(name, WheelLayout::name())) node = allocMBObject<WheelLayout>();
+        else if (equal(name, HumanSizedCubeLayout::name())) node = allocMBObject<HumanSizedCubeLayout>();
+        else if (equal(name, SingleLineLayout::name())) node = allocMBObject<SingleLineLayout>();
+        else if (equal(name, SingleRowLayout::name())) node = allocMBObject<SingleRowLayout>();
 
         //custom
-        else if (equal(name, SE16Layout::name())) node = allocateInPSRAM<SE16Layout>();
+        else if (equal(name, SE16Layout::name())) node = allocMBObject<SE16Layout>();
 
-        else if (equal(name, ArtNetDriverMod::name())) node = allocateInPSRAM<ArtNetDriverMod>();
-        else if (equal(name, FastLEDDriverMod::name())) node = allocateInPSRAM<FastLEDDriverMod>();
-        else if (equal(name, HUB75DriverMod::name())) node = allocateInPSRAM<HUB75DriverMod>();
-        else if (equal(name, PhysicalDriverMod::name())) node = allocateInPSRAM<PhysicalDriverMod>();
-        else if (equal(name, VirtualDriverMod::name())) node = allocateInPSRAM<VirtualDriverMod>();
-        else if (equal(name, AudioSyncMod::name())) node = allocateInPSRAM<AudioSyncMod>();
+        else if (equal(name, ArtNetDriverMod::name())) node = allocMBObject<ArtNetDriverMod>();
+        else if (equal(name, FastLEDDriverMod::name())) node = allocMBObject<FastLEDDriverMod>();
+        else if (equal(name, HUB75DriverMod::name())) node = allocMBObject<HUB75DriverMod>();
+        else if (equal(name, PhysicalDriverMod::name())) node = allocMBObject<PhysicalDriverMod>();
+        else if (equal(name, VirtualDriverMod::name())) node = allocMBObject<VirtualDriverMod>();
+        else if (equal(name, AudioSyncMod::name())) node = allocMBObject<AudioSyncMod>();
         #if FT_LIVESCRIPT
             else {
-                LiveScriptNode *liveScriptNode = allocateInPSRAM<LiveScriptNode>();
+                LiveScriptNode *liveScriptNode = allocMBObject<LiveScriptNode>();
                 liveScriptNode->animation = name; //set the (file)name of the script
                 node = liveScriptNode;
             }

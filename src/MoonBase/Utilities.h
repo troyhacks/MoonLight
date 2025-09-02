@@ -313,26 +313,6 @@ void walkThroughFiles(File folder, std::function<void(File, File)> fun);
 
 bool copyFile(const char* srcPath, const char* dstPath);
 
-bool isInPSRAM(void* ptr);
-
-template<typename T>
-struct PSRAMAllocator {
-    using value_type = T;
-    
-    T* allocate(size_t n) {
-        T* res = (T*)heap_caps_malloc_prefer(n * sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-        if (res)
-            MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s", n, sizeof(T), isInPSRAM(res)?"PSRAM":"default");
-        else 
-            MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
-        return res;
-    }
-    
-    void deallocate(T* p, size_t n) {
-        heap_caps_free(p);
-    }
-};
-
 //for game of live
 uint16_t crc16(const unsigned char* data_p, size_t length);
 uint16_t gcd(uint16_t a, uint16_t b);
@@ -340,27 +320,57 @@ uint16_t lcm(uint16_t a, uint16_t b);
 bool getBitValue(const uint8_t* byteArray, size_t n);
 void setBitValue(uint8_t* byteArray, size_t n, bool value);
 
+bool isInPSRAM(void* ptr);
+
+//allocate, try PSRAM, else default, use calloc: zero-initialized (all bytes = 0)
+template<typename T>
+T* allocMB(size_t n) {
+    T* res = (T*)heap_caps_calloc_prefer(n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
+    if (res)
+        MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s s:%d - %d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"default", sizeof(T), heap_caps_get_allocated_size(res));
+    else 
+        MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
+    return res;
+}
+
+//free memory
+template<typename T>
+void freeMB(T* p) {
+    if (p) {
+        MB_LOGD(MB_TAG, "free inPR:%d, s:%d - %d", isInPSRAM(p), sizeof(T), heap_caps_get_allocated_size(p));
+        heap_caps_free(p);
+    }
+    else
+        MB_LOGW(MB_TAG, "Nothing to free: pointer is null");
+}
+
+//allocate vector
+template<typename T>
+struct PSRAMAllocator {
+    using value_type = T;
+    
+    T* allocate(size_t n) {
+        return allocMB<T>(n);
+    }
+    
+    void deallocate(T* p, size_t n) {
+        freeMB(p);
+    }
+};
+
+//allocate object
 template<typename T, typename... Args>
-T* allocateInPSRAM(Args&&... args) {
-    void* mem = heap_caps_malloc_prefer(sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_8BIT);
+T* allocMBObject(Args&&... args) {
+    void* mem = allocMB<T>(1);
     if (mem) {
-        MB_LOGD(MB_TAG, "heap_caps_malloc_prefer success");
         return new(mem) T(std::forward<Args>(args)...);
     } else {
-        // MB_LOGW(MB_TAG, "heap_caps_malloc_prefer failed, doing old fashioned new");
-        // return new T(std::forward<Args>(args)...);
-        MB_LOGW(MB_TAG, "heap_caps_malloc_prefer failed");
         return nullptr;
     }
 }
 
+//free object
 template<typename T>
-void freePSRAMObject(T* obj) {
-    if (obj) {
-        MB_LOGD(MB_TAG, "trying to freePSRAMObject (inPR:%d)", isInPSRAM(obj));
-        obj->~T();
-        MB_LOGD(MB_TAG, "freePSRAMObject destructor done");
-        heap_caps_free(obj);
-        MB_LOGD(MB_TAG, "freePSRAMObject heap_caps_free done");
-    }
+void freeMBObject(T* obj) {
+    freeMB(obj);
 }
