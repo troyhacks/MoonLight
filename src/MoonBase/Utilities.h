@@ -374,3 +374,5 @@ template<typename T>
 void freeMBObject(T* obj) {
     freeMB(obj);
 }
+
+extern std::vector<std::function<void()>, PSRAMAllocator<std::function<void()>>> runInTask1, runInTask2; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)

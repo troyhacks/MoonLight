@@ -18,7 +18,7 @@ void Node::updateControl(JsonObject control) {
     // MB_LOGD(ML_TAG, "updateControl %s", control["name"].as<String>().c_str());
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if control is removed in compareRecursive
         int pointer = control["p"];
-        MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
+        // MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
             if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {

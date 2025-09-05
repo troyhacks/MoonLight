@@ -75,7 +75,7 @@ public:
       newControl = true; //set flag to true, as control is new
     }
 
-    MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+    // MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
 
     //setValue
     if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {

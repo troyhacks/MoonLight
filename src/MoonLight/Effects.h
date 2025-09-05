@@ -38,7 +38,6 @@ class SolidEffect: public Node {
     addControl(blue, "blue", "range");
     addControl(white, "white", "range");
     addControl(brightness, "brightness", "range");
-
   }
 
   void loop() override {
@@ -48,6 +47,7 @@ class SolidEffect: public Node {
   }
 };
 
+//by limpkin
 class FixedRectangleEffect: public Node {
   public:
 
@@ -62,6 +62,8 @@ class FixedRectangleEffect: public Node {
   uint8_t x = 0;
   uint8_t height = 1;
   uint8_t y = 0;
+  uint8_t depth = 1;
+  uint8_t z = 0;
 
   void setup() override {
     addControl(red, "red", "range");
@@ -69,22 +71,20 @@ class FixedRectangleEffect: public Node {
     addControl(blue, "blue", "range");
     addControl(x, "X position", "range", 0);
     addControl(y, "Y position", "range", 0);
+    addControl(z, "Z position", "range", 0);
     addControl(width, "Rectangle width", "range", 1);
     addControl(height, "Rectangle height", "range", 1);
+    addControl(depth, "Rectangle depth", "range", 1);
 
   }
 
   void loop() override {
+    layerV->fadeToBlackBy(10); //cleanup old leds if changing
     Coord3D pos = {0,0,0};
-    for (pos.x = 0; pos.x < layerV->size.x; pos.x++) {
-      for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
-        if (((pos.x >= x) && (pos.x < x + width)) && ((pos.y >= y) && (pos.y < y + height))) {
+    for (pos.x = x; pos.x < x+width; pos.x++)
+      for (pos.y = y; pos.y < y+height; pos.y++)
+        for (pos.z = z; pos.z < z+depth; pos.z++)
           layerV->setRGB(pos, CRGB(red, green, blue));
-        } else {
-          layerV->setRGB(pos, CRGB(0, 0, 0));
-        }
-      }
-    }
   }
 };
 
@@ -411,7 +411,7 @@ public:
       remaining--; //consume remaining
 
       // MB_LOGD(ML_TAG, "x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
-      uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):band; // always use full range. comment out this line to get the previous behaviour.
+      uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS):band; // always use full range. comment out this line to get the previous behaviour.
       // frBand = constrain(frBand, 0, NUM_GEQ_CHANNELS-1); //WLEDMM can never be out of bounds (I think...)
       uint16_t colorIndex = frBand * 17; //WLEDMM 0.255
       uint16_t bandHeight = sharedData.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
@@ -421,15 +421,15 @@ public:
         // get height of next (right side) bar
         uint8_t nextband = (remaining < 1)? band +1: band;
         nextband = constrain(nextband, 0, NUM_GEQ_CHANNELS-1);  // just to be sure
-        frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(nextband, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1):nextband; // always use full range. comment out this line to get the previous behaviour.
+        frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(nextband, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS):nextband; // always use full range. comment out this line to get the previous behaviour.
         uint16_t nextBandHeight = sharedData.bands[frBand];
         // smooth Band height
         bandHeight = (7*bandHeight + 3*lastBandHeight + 3*nextBandHeight) / 12;   // yeees, its 12 not 13 (10% amplification)
         bandHeight = constrain(bandHeight, 0, 255);   // remove potential over/underflows
-        colorIndex = ::map(pos.x, 0, layerV->size.x-1, 0, 255); //WLEDMM
+        colorIndex = ::map(pos.x, 0, layerV->size.x, 0, 256); //WLEDMM
       }
       lastBandHeight = bandHeight; // remember BandHeight (left side) for next iteration
-      uint16_t barHeight = ::map(bandHeight, 0, 255, 0, layerV->size.y); // Now we map bandHeight to barHeight. do not subtract -1 from layerV->size.y here
+      uint16_t barHeight = ::map(bandHeight, 0, 255, 0, layerV->size.y); // Now we map bandHeight to barHeight. do not subtract -1 from layerV->size.y here (should be 256 (ewowiHack) but then the top row is not displayed...)
       // WLEDMM end
 
       if (barHeight > layerV->size.y) barHeight = layerV->size.y;                      // WLEDMM ::map() can "overshoot" due to rounding errors
@@ -439,7 +439,7 @@ public:
 
       for (pos.y=0; pos.y < barHeight; pos.y++) {
         if (colorBars) //color_vertical / color bars toggle
-          colorIndex = ::map(pos.y, 0, layerV->size.y-1, 0, 255);
+          colorIndex = ::map(pos.y, 0, layerV->size.y, 0, 256);
 
         ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
 
@@ -511,13 +511,13 @@ class GEQ3DEffect: public Node {
     const uint8_t maxHeight = roundf(float(rows) * ((rows<18) ? 0.75f : 0.85f));           // slightly reduce bar height on small panels 
     for (int i=0; i<NUM_BANDS; i++) {
       unsigned band = i;
-      if (NUM_BANDS < NUM_GEQ_CHANNELS) band = map(band, 0, NUM_BANDS - 1, 0, NUM_GEQ_CHANNELS-1); // always use full range.
+      if (NUM_BANDS < NUM_GEQ_CHANNELS) band = map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS); // always use full range.
       heights[i] = map8(sharedData.bands[band],0,maxHeight); // cache sharedData.bands[] as data might be updated in parallel by the audioreactive core
     }
 
 
     for (int i=0; i<=split; i++) { // paint right vertical faces and top - LEFT to RIGHT
-      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
+      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols, 0, 256);
       CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
       int linex = i*(cols/NUM_BANDS);
 
@@ -911,9 +911,18 @@ public:
   static uint8_t dim() {return _1D;}
   static const char * tags() {return "";}
 
+  uint8_t deltaHue = 7;
+  uint8_t speed = 8; //default 8*32 = 256 / 256 = 1 = hue++
+
+  void setup() {
+    addControl(speed, "speed", "range", 0, 256);
+    addControl(deltaHue, "deltaHue", "range");
+  }
+
+  uint16_t hue = 0;
+
   void loop() override {
-    static uint8_t hue = 0;
-    layerV->fill_rainbow(hue++, 7);
+    layerV->fill_rainbow((hue+=speed*32) >> 8, deltaHue); //hue back to uint8_t
   }
 };
 
@@ -1748,43 +1757,87 @@ class FreqSawsEffect: public Node {
 public:
   static const char * name() {return "Frequency Saws 🔥♫🎨🪚";}
   uint8_t fade = 4;
-  uint8_t increaser = 165;
-  uint8_t decreaser = 92;
+  uint8_t increaser = 255;
+  uint8_t decreaser = 255;
   uint8_t bpmMax = 115;
-  bool invert = true;
-  bool phaseSync = true;
-  
+  bool invert = false;
+  bool keepOn = false;
+  uint8_t method = 2;
+
   void setup() override {
     addControl(fade, "fade", "range");
     addControl(increaser, "increaser", "range");
     addControl(decreaser, "decreaser", "range");
     addControl(bpmMax, "bpmMax", "range");
     addControl(invert, "invert", "checkbox");
-    addControl(phaseSync, "phaseSync", "checkbox");
+    addControl(keepOn, "keepOn", "checkbox");
+    JsonObject property = addControl(method, "method", "select");
+    JsonArray values = property["values"].to<JsonArray>();
+    values.add("Chaos");
+    values.add("Chaos fix");
+    values.add("BandPhases");
+  
     memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
     memset(bandPhase, 0, NUM_GEQ_CHANNELS);
+    memset(lastBpm, 0, NUM_GEQ_CHANNELS);
+    memset(phaseOffset, 0, NUM_GEQ_CHANNELS);
+  
+    lastTime = millis();
   }
-  
+
   uint16_t bandSpeed[NUM_GEQ_CHANNELS];
-  uint16_t bandPhase[NUM_GEQ_CHANNELS];  // Track phase position for each band
-  
+  uint16_t bandPhase[NUM_GEQ_CHANNELS]; // Track phase position for each band
+  uint8_t lastBpm[NUM_GEQ_CHANNELS]; // For beat8 continuity tracking
+  uint8_t phaseOffset[NUM_GEQ_CHANNELS]; // Phase offset for beat8 sync
+  unsigned long lastTime; // For time-based phase calculation
+
   void loop() override {
     layerV->fadeToBlackBy(fade);
+    // Update timing for frame-rate independent phase
+    unsigned long currentTime = millis();
+    uint32_t deltaMs = currentTime - lastTime;
+    lastTime = currentTime;
+
     for (uint8_t x = 0; x<layerV->size.x; x++) { //x-axis (column)
-      uint8_t band = map(x, 0, layerV->size.x-1, 2, NUM_GEQ_CHANNELS-3); //the frequency band applicable for the column, skip the lowest and the highest
+      uint8_t band = map(x, 0, layerV->size.x, 0, NUM_GEQ_CHANNELS); //the frequency band applicable for the column, skip the lowest and the highest
       uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
-      bandSpeed[band] = constrain(bandSpeed[band] + (volume * increaser / 10) - decreaser, 0, UINT16_MAX); // each band has a speed, increased by the volume and also decreased by decreaser. The decreaser should cause a delay
-      
-      if (bandSpeed[band]) {
+      // Target speed based on current volume
+      uint16_t targetSpeed = (volume * increaser * 257);
+
+      if (volume > 0) {
+        bandSpeed[band] = max(bandSpeed[band], targetSpeed);
+      } else {
+        // Calculate decay amount based on time to reach zero
+        if (decreaser > 0 && bandSpeed[band] > 0) {
+          uint32_t decayAmount = MAX((bandSpeed[band] * deltaMs) / (decreaser * 10UL), 1); // *10 to scale decreaser range 0-255 to 0-2550ms
+          if (decayAmount >= bandSpeed[band]) {
+            bandSpeed[band] = 0;
+          } else {
+            bandSpeed[band] -= decayAmount;
+          }
+        }
+      }
+
+      if (bandSpeed[band] > 1 || keepOn) { // for some reason bandSpeed[band] doesn't reach 0 ... WIP
         uint8_t bpm = map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
         uint8_t y;
-        if (phaseSync) {
-          // Calculate phase increment based on current speed
-          bandPhase[band] += bpm;  // Direct increment - bpmMax controls the maximum speed
-          
-          y = map(bandPhase[band] >> 8, 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
-        } else {
+        if (method == 0) { //chaos
           y = map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+        } else if (method == 1) { //chaos corrected
+          // Maintain phase continuity when BPM changes
+          if (bpm != lastBpm[band]) {
+            uint8_t currentPos = beat8(lastBpm[band]) + phaseOffset[band];
+            uint8_t newPos = beat8(bpm);
+            phaseOffset[band] = currentPos - newPos;
+            lastBpm[band] = bpm;
+          }
+          y = map(beat8(bpm) + phaseOffset[band], 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+        } else if (method == 2) { //bandphases
+          // Time-based phase increment - 1 complete cycle per second at 60 BPM
+          uint32_t phaseIncrement = (bpm * deltaMs * 65536UL) / (60UL * 1000UL);
+          phaseIncrement /= 2; // Make it 8x faster - adjust this multiplier as needed
+          bandPhase[band] += phaseIncrement;
+          y = map(bandPhase[band] >> 8, 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
         }
         //y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
         layerV->setRGB(Coord3D(x, (invert && x%2==0)?layerV->size.y - 1 - y:y), ColorFromPalette(layerV->layerP->palette, map(x, 0, layerV->size.x-1, 0, 255)));
@@ -1792,16 +1845,6 @@ public:
     }
   }
 }; //FreqSawsEffect
-
-
-
-
-
-
-
-
-
-
 
 
 

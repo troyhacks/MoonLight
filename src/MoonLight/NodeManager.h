@@ -91,7 +91,7 @@ protected:
 
                     //if old node exists then remove it's controls
                     if (updatedItem.oldValue != "null") {
-                        MB_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+                        // MB_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                         nodeState.remove("controls"); //remove the controls from the nodeState
                     }
 
@@ -111,7 +111,7 @@ protected:
 
                         requestUIUpdate = true;
 
-                        MB_LOGD(ML_TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
+                        // MB_LOGD(ML_TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
 
                         //make sure "p" is also updated
 
@@ -197,7 +197,7 @@ protected:
     void loop() {
         if (requestUIUpdate) {
             requestUIUpdate = false; //reset the flag
-            MB_LOGD(ML_TAG, "requestUIUpdate");
+            // MB_LOGD(ML_TAG, "requestUIUpdate");
 
             // update state to UI
             update([&](ModuleState &state) {

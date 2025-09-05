@@ -14,8 +14,7 @@
 
 #include <ESP32SvelteKit.h>
 
-std::vector<std::function<void()>> runInTask1; // 🌙 see .h
-std::vector<std::function<void()>> runInTask2; // 🌙 see .h
+//🌙 added to telemetry
 bool safeModeMB = false; // 🌙 see .h
 bool restartNeeded = false; // 🌙 see .h
 bool saveNeeded = false; // 🌙 see.h
@@ -90,7 +89,7 @@ void ESP32SvelteKit::begin()
                 response.setCode(200);
                 response.setContentType(contentType.c_str());
                 response.addHeader("Content-Encoding", "gzip");
-                // response.addHeader("Cache-Control", "public, immutable, max-age=31536000"); // 🌙 commented as during dev changes a lot
+                response.addHeader("Cache-Control", "public, immutable, max-age=31536000"); // 🌙 this is original, still tweaking for best results...
                 response.setContent(content, len);
                 return response.send();
             };

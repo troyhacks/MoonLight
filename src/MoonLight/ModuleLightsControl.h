@@ -98,6 +98,8 @@ public:
         property["default"]["count"] = 64;
 
         property = root.add<JsonObject>(); property["name"] = "presetLoop"; property["type"] = "range"; property["default"] = 0;
+        property = root.add<JsonObject>(); property["name"] = "firstPreset"; property["type"] = "range"; property["min"] = 0; property["max"] = 63; property["default"] = 0;
+        property = root.add<JsonObject>(); property["name"] = "lastPreset"; property["type"] = "range"; property["min"] = 0; property["max"] = 63; property["default"] = 63;
 
         #if FT_ENABLED(FT_MONITOR)
             property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;
@@ -163,7 +165,6 @@ public:
                     setPresetsFromFolder(); //update presets in UI
                 }
             }
-        } else if (updatedItem.name == "presetLoop") {
         }
     }
 
@@ -191,7 +192,51 @@ public:
         }
     }
 
+    uint8_t lastPresetLooped = 0;
+    unsigned long lastPresetTime = 0;
+
     void loop() {
+        // process presetLoop
+        uint8_t presetLoop = _state.data["presetLoop"];
+        if (presetLoop && millis() - lastPresetTime > presetLoop * 1000) { // every presetLoop seconds
+            lastPresetTime = millis();
+
+            runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
+                // load the xth preset from FS
+                JsonArray presets = _state.data["preset"]["list"];
+
+                if (_state.data["firstPreset"] <= _state.data["lastPreset"]) {
+
+                    //find the next preset within the range
+                    while (presets[lastPresetLooped%presets.size()] < _state.data["firstPreset"] || presets[lastPresetLooped%presets.size()] > _state.data["lastPreset"]) lastPresetLooped++;
+
+                    //correct overflow
+                    lastPresetLooped = lastPresetLooped%presets.size();
+
+                    Char<32> presetFile;
+                    presetFile.format("/.config/presets/preset%02d.json", presets[lastPresetLooped].as<uint8_t>());
+
+                    MB_LOGD(ML_TAG, "loading next preset %d %s", lastPresetLooped, presetFile.c_str());
+
+                    copyFile(presetFile.c_str(), "/.config/effects.json");
+
+                    _state.data["preset"]["selected"] = presets[lastPresetLooped];
+
+                    //update UI
+                    JsonObject data = _state.data.as<JsonObject>();
+                    _socket->emitEvent(_moduleName, data);
+
+                    //trigger file manager notification of update of effects.json
+                    _fileManager->update([&](FilesState &state) {
+                        state.updatedItems.push_back("/.config/effects.json");
+                        return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+                    }, "server");
+
+                    lastPresetLooped++; //next
+                }
+            });
+        }
+
         #if FT_ENABLED(FT_MONITOR)
             if (layerP.lights.header.isPositions == 2) { //send to UI
                 read([&](ModuleState& _state) {

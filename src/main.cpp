@@ -41,6 +41,7 @@ void operator delete(void* ptr) noexcept {
 
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
+#include "MoonBase/Utilities.h" // for runInTask1/2
 
 #define SERIAL_BAUD_RATE 115200
 

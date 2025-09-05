@@ -223,9 +223,9 @@ PhysicalLayer::PhysicalLayer() {
     // an effect is using a virtual layer: tell the effect in which layer to run...
 
     void PhysicalLayer::removeNode(Node *node) {
-        MB_LOGD(ML_TAG, "remove node (s:%d p:%p)", layerV[0]->nodes.size(), node);
+        MB_LOGD(ML_TAG, "s:%d p:%p", layerV[0]->nodes.size(), node);
         // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
-        MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
+        // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
         node->~Node();
         
         freeMBObject(node);

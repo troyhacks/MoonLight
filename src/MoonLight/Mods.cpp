@@ -115,7 +115,7 @@ void DriverNode::updateControl(JsonObject control) {
       case 6: header->channelsPerLight = 4; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBW - Par Lights
       case 7: header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3; break; //GRBW - RGBW Leds
       case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRB6
-      case 9: header->channelsPerLight = 6; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBWYP - 6 channel Par/DMX Lights with UV etc
+      case 9: header->channelsPerLight = 4; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBWYP - 6 channel Par/DMX Lights with UV etc
       case 10: //MHBeTopper19x15W-32
         layerV->layerP->lights.header.channelsPerLight = 32;
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
@@ -271,8 +271,8 @@ void ArtNetDriverMod::loop() {
     if (header->offsetRGB3 != UINT8_MAX )
       reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB3], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB3]);
 
-    if (lightPreset == 9 && indexP < 36)
-      packetSize += 4; // this config assumes first 36 lights are 4 channels per Light !!!!
+    if (lightPreset == 9 && indexP < 36) //RGBWYP this config assumes a mix of 4 channels and 6 channels per light !!!!
+      packetSize += 6; // this config assumes first 36 lights are 4 channels per Light !!!!
     else
       packetSize += header->channelsPerLight;
 
