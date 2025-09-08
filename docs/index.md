@@ -16,7 +16,7 @@ hide:
     The open-source lighting platform that scales from art installations to professional stages
   </div>
   <div class="hero-description">
-    Drive lots of lights and thousands of LEDs with stunning effects at high framerates. Built on modern web technologies for creators who demand professional results without enterprise costs.
+    Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs. Scales from small installations to large displays.
   </div>
 
   <div class="moonlight-buttons">
@@ -62,7 +62,7 @@ hide:
     <div class="feature-card fade-in">
       <div class="feature-icon">⚡</div>
       <h3 class="feature-title">High-Performance LED Control</h3>
-      <p class="feature-description">Drive thousands of LEDs at high frame rates with multiple parallel outputs. Scale from small installations to massive displays with professional-grade performance.</p>
+      <p class="feature-description">Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs. Scales from small installations to large displays.</p>
       <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
         • 12,288 LEDs @ 120 FPS<br>
         • 16-48 parallel LED outputs<br>
@@ -295,7 +295,7 @@ MoonLight is built on **MoonBase**, our complete IoT framework, making it incred
 <div class="cta-section">
   <div class="cta-title">Ready to Light Up Your World?</div>
   <div class="cta-subtitle">
-    Join thousands of creators using MoonLight for professional LED installations
+    Join the creators using MoonLight for professional LED installations
   </div>
   
   <div class="moonlight-buttons">

@@ -58,33 +58,50 @@ class FixedRectangleEffect: public Node {
   uint8_t red = 182;
   uint8_t green = 15;
   uint8_t blue = 98;
+  uint8_t white = 0;
   uint8_t width = 1;
   uint8_t x = 0;
   uint8_t height = 1;
   uint8_t y = 0;
   uint8_t depth = 1;
   uint8_t z = 0;
+  bool alternateWhite = false; // to be used for frontlight
 
   void setup() override {
     addControl(red, "red", "range");
     addControl(green, "green", "range");
     addControl(blue, "blue", "range");
+    addControl(white, "white", "range");
     addControl(x, "X position", "range", 0);
     addControl(y, "Y position", "range", 0);
     addControl(z, "Z position", "range", 0);
     addControl(width, "Rectangle width", "range", 1);
     addControl(height, "Rectangle height", "range", 1);
     addControl(depth, "Rectangle depth", "range", 1);
-
+    addControl(alternateWhite, "alternateWhite", "checkbox");
   }
 
+  bool alternate = true; 
+
   void loop() override {
+    alternate = false;
     layerV->fadeToBlackBy(10); //cleanup old leds if changing
     Coord3D pos = {0,0,0};
-    for (pos.x = x; pos.x < x+width; pos.x++)
-      for (pos.y = y; pos.y < y+height; pos.y++)
-        for (pos.z = z; pos.z < z+depth; pos.z++)
-          layerV->setRGB(pos, CRGB(red, green, blue));
+    for (pos.z = z; pos.z < z+depth; pos.z++) {
+      for (pos.y = y; pos.y < y+height; pos.y++) {
+        for (pos.x = x; pos.x < x+width; pos.x++) {
+          if (alternateWhite && alternate)
+            layerV->setRGB(pos, CRGB::White);
+          else
+            layerV->setRGB(pos, CRGB(red, green, blue));
+          layerV->setWhite(pos, white);
+          if (height < width)
+            alternate = !alternate;
+        }
+        if (height > width)
+          alternate = !alternate;
+      }
+    }
   }
 };
 
@@ -915,8 +932,8 @@ public:
   uint8_t speed = 8; //default 8*32 = 256 / 256 = 1 = hue++
 
   void setup() {
-    addControl(speed, "speed", "range", 0, 256);
-    addControl(deltaHue, "deltaHue", "range");
+    addControl(speed, "speed", "range", 0, 32);
+    addControl(deltaHue, "deltaHue", "range", 0, 32);
   }
 
   uint16_t hue = 0;
@@ -1845,8 +1862,6 @@ public:
     }
   }
 }; //FreqSawsEffect
-
-
 
 
 
