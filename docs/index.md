@@ -229,7 +229,7 @@ hide:
 ## 📈 Release Roadmap - User-Focused Development
 
 !!! info "Current Status"
-    **Version 0.5.8** - Developer preview available now
+    **Version 0.5.9** - Developer preview available now
     
     **Version 0.6.0** - **September 2025** - The user-friendly baseline release
     
