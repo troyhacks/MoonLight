@@ -305,8 +305,8 @@
                                     <!-- Popup for {cell} -->
                                     {#if fileContent && fileContent.nodes}
                                         {#each fileContent.nodes as node}
-                                            {console.log("node.nodeName", node.nodeName)}
-                                            <p>{node.nodeName} {node.on?"on":"off"}</p>
+                                            {console.log("node.name", node.name)}
+                                            <p>{node.name} {node.on?"on":"off"}</p>
                                         {/each}
                                     {/if}
                                 </div>

@@ -58,11 +58,11 @@ public:
                     }
                     // uint8_t index = 0;
                     // for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-                    //     String nodeName = nodeState["nodeName"];
+                    //     String name = nodeState["name"];
 
-                    //     if (updatedItem == nodeName) {
+                    //     if (updatedItem == name) {
                     //         MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                    //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["nodeName"]);
+                    //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
                     //         if (liveScriptNode) {
                     //             liveScriptNode->compileAndRun();
 
@@ -71,7 +71,7 @@ public:
                     //             _moduleEffects->requestUIUpdate = true; //update the Effects UI
                     //         }
 
-                    //         MB_LOGV(ML_TAG, "update due to new node %s done", nodeName.c_str());
+                    //         MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
                     //     }
                     //     index++;
                     // }

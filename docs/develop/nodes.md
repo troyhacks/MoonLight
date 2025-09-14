@@ -128,7 +128,7 @@ MoonLight specific
     {
   "nodes": [
     {
-      "nodeName": "Lissajous 🔥🎨💡",
+      "name": "Lissajous 🔥🎨💡",
       "on": true,
       "controls": [
         {
@@ -155,7 +155,7 @@ MoonLight specific
       ]
     },
     {
-      "nodeName": "Random 🔥",
+      "name": "Random 🔥",
       "on": true,
       "controls": [
         {

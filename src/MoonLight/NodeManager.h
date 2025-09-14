@@ -55,7 +55,7 @@ protected:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "nodeName"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName;
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName;
 
             addNodes(values);
 
@@ -81,7 +81,7 @@ protected:
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
             // serializeJson(nodeState, Serial); Serial.println();
 
-            if (updatedItem.name == "nodeName") { //onName
+            if (updatedItem.name == "name" && updatedItem.parent[1] == "") { //onName, exclude parent 1(node controls has also name)
 
                 Node *oldNode = updatedItem.index[0] < nodes->size() ? (*nodes)[updatedItem.index[0]] : nullptr; //find the node in the nodes list
                 bool newNode = false;
@@ -156,21 +156,21 @@ protected:
                 #if FT_ENABLED(FT_LIVESCRIPT)
                     // if (updatedItem.oldValue.length()) {
                     //     MB_LOGV(ML_TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]);
+                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]);
                     //     if (liveScriptNode) liveScriptNode->kill(); 
-                    //     else MB_LOGW(ML_TAG, "liveScriptNode not found %s", node["nodeName"].as<String>().c_str());
+                    //     else MB_LOGW(ML_TAG, "liveScriptNode not found %s", node["name"].as<String>().c_str());
                     // }
-                    // if (!node["nodeName"].isNull() && !node["type"].isNull()) {
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["nodeName"]); //todo: can be 2 nodes with the same name ...
+                    // if (!node["name"].isNull() && !node["type"].isNull()) {
+                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]); //todo: can be 2 nodes with the same name ...
                     //     if (liveScriptNode) liveScriptNode->compileAndRun();
                     //     // not needed as creating the node is already running it ...
                     // }
                 #endif
             }
 
-            if (updatedItem.name == "on") {
+            if (updatedItem.parent[1] == "controls" && updatedItem.name == "on") {
                 if (updatedItem.index[0] < nodes->size()) {
-                    MB_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["nodeName"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
+                    MB_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
@@ -179,7 +179,7 @@ protected:
                         nodeClass->requestMappings();
                     }
                     else
-                        MB_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["nodeName"].as<String>().c_str());
+                        MB_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<String>().c_str());
                 }
             }
 
@@ -192,7 +192,7 @@ protected:
 
                         nodeClass->requestMappings();
                     }
-                    else MB_LOGW(ML_TAG, "nodeClass not found %s", nodeState["nodeName"].as<String>().c_str());
+                    else MB_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
                 }
             }
             // end Nodes
