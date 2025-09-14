@@ -327,7 +327,17 @@ template<typename T>
 T* allocMB(size_t n) {
     T* res = (T*)heap_caps_calloc_prefer(n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
     if (res)
-        MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s s:%d - %d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"default", sizeof(T), heap_caps_get_allocated_size(res));
+        MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
+    else 
+        MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
+    return res;
+}
+
+template<typename T>
+T* reallocMB(T* p, size_t n) {
+    T* res = (T*)heap_caps_realloc_prefer(p, n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
+    if (res)
+        MB_LOGI(MB_TAG, "Re-Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
     else 
         MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
     return res;
@@ -337,8 +347,9 @@ T* allocMB(size_t n) {
 template<typename T>
 void freeMB(T* p) {
     if (p) {
-        MB_LOGD(MB_TAG, "free inPR:%d, s:%d - %d", isInPSRAM(p), sizeof(T), heap_caps_get_allocated_size(p));
+        MB_LOGD(MB_TAG, "free x x %d bytes in %s, s:%d", sizeof(T), isInPSRAM(p)?"PSRAM":"RAM", heap_caps_get_allocated_size(p));
         heap_caps_free(p);
+        p = nullptr;
     }
     else
         MB_LOGW(MB_TAG, "Nothing to free: pointer is null");
@@ -346,7 +357,7 @@ void freeMB(T* p) {
 
 //allocate vector
 template<typename T>
-struct PSRAMAllocator {
+struct VectorRAMAllocator {
     using value_type = T;
     
     T* allocate(size_t n) {
@@ -356,6 +367,27 @@ struct PSRAMAllocator {
     void deallocate(T* p, size_t n) {
         freeMB(p);
     }
+    T* reallocate(T* p, size_t n)  {
+        return reallocMB<T>(p, n);
+    }
+};
+
+// https://arduinojson.org/v7/api/jsondocument/
+struct JsonRAMAllocator: ArduinoJson::Allocator {
+    //(uint8_t*): simulate 1 byte
+  void* allocate(size_t n) override {
+    return allocMB<uint8_t>(n);
+  }
+  void deallocate(void* p) override {
+    freeMB<uint8_t>((uint8_t*)p);
+  }
+  void* reallocate(void* p, size_t n) override {
+    return reallocMB<uint8_t>((uint8_t*)p, n);
+  }
+  static Allocator* instance() {
+    static JsonRAMAllocator allocator;
+    return &allocator;
+  }
 };
 
 //allocate object
@@ -375,4 +407,10 @@ void freeMBObject(T* obj) {
     freeMB(obj);
 }
 
-extern std::vector<std::function<void()>, PSRAMAllocator<std::function<void()>>> runInTask1, runInTask2; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
+extern std::vector<std::function<void()>, VectorRAMAllocator<std::function<void()>>> runInTask1, runInTask2; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
+
+//to use in effect and on display
+#if USE_M5UNIFIED
+    extern unsigned char moonmanpng[];
+    extern unsigned int moonmanpng_len;
+#endif

@@ -45,15 +45,25 @@ typedef std::function<void(JsonObject data)> ReadHook;
 class ModuleState
 {
 public:
-    JsonDocument data;
+    JsonDocument *doc;
+    JsonObject data;
+
+    ModuleState() {
+        doc = new JsonDocument(JsonRAMAllocator::instance());
+        data = doc->to<JsonObject>();
+    }
 
     uint8_t onUpdateRunInTask = UINT8_MAX; //if set to UINT8_MAX, runInTask1 is not called, otherwise it is called with this value as index
 
     std::function<void(JsonArray root)> setupDefinition = nullptr;
 
     void setupData();
+    void execOnReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
+    void execOnUpdate(UpdatedItem &updatedItem);
     bool compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth = UINT8_MAX, uint8_t index =UINT8_MAX);
+    bool checkReOrderSwap(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth = UINT8_MAX, uint8_t index =UINT8_MAX);
     std::function<void(UpdatedItem &)> onUpdate = nullptr;
+    std::function<void(uint8_t, uint8_t)> onReOrderSwap = nullptr;
 
     static void read(ModuleState &state, JsonObject &root);
     static StateUpdateResult update(JsonObject &root, ModuleState &state);
@@ -76,6 +86,7 @@ public:
     virtual void setupDefinition(JsonArray root);
 
     virtual void onUpdate(UpdatedItem &updatedItem);
+    virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
 
 protected:
     EventSocket *_socket;

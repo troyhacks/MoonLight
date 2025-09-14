@@ -140,20 +140,19 @@ class BouncingBallsEffect: public Node {
     Node::~Node();
   }
 
-  Coord3D prevSize = Coord3D(0,0,0);
+  void sizeChanged(Coord3D prevSize) override {
+    freeMB(balls);
+    balls = allocMB<Ball[maxNumBalls]>(layerV->size.y);
+
+    if (!balls) {
+      MB_LOGE(ML_TAG, "allocate balls failed");
+    }
+  }
 
   void loop() override {
-    if (layerV->size != prevSize) {
-      MB_LOGD(ML_TAG, "size change");
-      prevSize = layerV->size;
-      freeMB(balls);
-      balls = allocMB<Ball[maxNumBalls]>(layerV->size.y);
+    Node::loop(); //for sizeChanged
 
-      if (!balls) {
-        MB_LOGE(ML_TAG, "allocate balls failed");
-        return;
-      }
-    }
+    if (!balls) return;
 
     layerV->fadeToBlackBy(100);
 
@@ -383,22 +382,18 @@ public:
     Node::~Node();
   }
 
-  Coord3D prevSize = Coord3D(0,0,0);
-
-  void loop() override {
-    const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layerV->custom1, 0, 255, 1, 16);
-
-    if (layerV->size != prevSize) {
-      MB_LOGD(ML_TAG, "size change");
-      prevSize = layerV->size;
-
+  void sizeChanged(Coord3D prevSize) override {
       freeMB(previousBarHeight);
       previousBarHeight = allocMB<uint16_t>(layerV->size.x);
       if (!previousBarHeight) {
         MB_LOGE(ML_TAG, "allocate previousBarHeight failed");
-        return;
       }
-    }
+  }
+
+  void loop() override {
+    Node::loop(); //for sizeChanged
+
+    const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layerV->custom1, 0, 255, 1, 16);
 
     #ifdef SR_DEBUG
     uint8_t samplePeak = *(uint8_t*)um_data->u_data[3];
@@ -450,7 +445,6 @@ public:
       // WLEDMM end
 
       if (barHeight > layerV->size.y) barHeight = layerV->size.y;                      // WLEDMM ::map() can "overshoot" due to rounding errors
-      if (barHeight > previousBarHeight[pos.x]) previousBarHeight[pos.x] = barHeight; //drive the peak up
 
       CRGB ledColor = CRGB::Black;
 
@@ -463,11 +457,13 @@ public:
         layerV->setRGB(Coord3D(pos.x, layerV->size.y - 1 - pos.y), ledColor);
       }
 
-      if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
-        layerV->setRGB(Coord3D(pos.x, layerV->size.y - previousBarHeight[pos.x]), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
+      if (previousBarHeight) {
+        if (barHeight > previousBarHeight[pos.x]) previousBarHeight[pos.x] = barHeight; //drive the peak up
+        if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
+          layerV->setRGB(Coord3D(pos.x, layerV->size.y - previousBarHeight[pos.x]), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
 
-      if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
-
+        if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
+      }
     }
   }
 };
@@ -1093,7 +1089,7 @@ public:
       layerV->drawText(text.c_str(), 0, 1, font, CRGB::Red, - (millis()/25*speed/256)); //instead of call
     // }
 
-    #if USE_M5UNIFIED
+    #if USE_M5UNIFIEDDisplay
       M5.Display.fillRect(0, 0, 100, 15, BLACK);
       M5.Display.setTextColor(WHITE);
       M5.Display.setTextSize(2);
@@ -2027,35 +2023,32 @@ class GameOfLifeEffect: public Node {
 
     //destructor
     Node::~Node();
-
   }
 
-  Coord3D prevSize = Coord3D(0,0,0);
+  void sizeChanged(Coord3D prevSize) override {
+    dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
+
+    freeMB(cells);
+    freeMB(futureCells);
+    freeMB(cellColors);
+
+    cells = allocMB<uint8_t>(dataSize);
+    futureCells = allocMB<uint8_t>(dataSize);
+    cellColors = allocMB<uint8_t>(layerV->size.x * layerV->size.y * layerV->size.z);
+
+    if (!cells || !futureCells || !cellColors) {
+        MB_LOGE(ML_TAG, "allocation of cells || !futureCells || !cellColors failed");
+    }
+
+    startNewGameOfLife();
+  }
 
   void loop() override {
+    Node::loop(); //for sizeChanged
 
-    if (layerV->size != prevSize) {
-      MB_LOGD(ML_TAG, "size change");
-      prevSize = layerV->size;
+    if (!cells || !futureCells || !cellColors) return;
 
-      dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
-
-      freeMB(cells);
-      freeMB(futureCells);
-      freeMB(cellColors);
-
-      cells = allocMB<uint8_t>(dataSize);
-      futureCells = allocMB<uint8_t>(dataSize);
-      cellColors = allocMB<uint8_t>(layerV->size.x * layerV->size.y * layerV->size.z);
-
-      if (!cells || !futureCells || !cellColors) {
-          MB_LOGE(ML_TAG, "allocation of cells || !futureCells || !cellColors failed");
-          return;
-      }
-
-      startNewGameOfLife();
-      return; // show the start
-    } else if (generation == 0 && step < millis()) {
+    if (generation == 0 && step < millis()) {
       // MB_LOGD(ML_TAG, "gen / step");
       startNewGameOfLife();
       return; // show the start
@@ -2080,7 +2073,7 @@ class GameOfLifeEffect: public Node {
         bool alive = getBitValue(cells, cIndex);
         bool recolor = (alive && generation == 1 && cellColors[cIndex] == 0 && !random(16)); // Palette change or Initial Color
         // Redraw alive if palette changed, spawn initial colors randomly, age alive cells while paused
-        if      (alive && recolor) {
+        if (alive && recolor) {
           cellColors[cIndex] = random8(1, 255);
           layerV->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, cellColors[cIndex]));
         }
@@ -2793,8 +2786,77 @@ class ParticlesEffect: public Node {
   }
 };
 
+#if USE_M5UNIFIED
+
+class MoonManEffect: public Node {
+  public:
+  static const char * name() {return "Moon Man 🔥🎵🎨☾";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+  
+  // Create an M5Canvas for PNG processing
+  M5Canvas *canvas;//(&M5.Display);
+
+  void setup() override {
+    canvas = new M5Canvas(&M5.Display);
+  }
+
+  void sizeChanged(Coord3D prevSize) override {
+    // Create canvas for processing
+    canvas->deleteSprite();
+    canvas->createSprite(layerV->size.x, layerV->size.y);
+    // Load and display PNG
+    displayPNGToPanel();
+  }
+
+  bool success = false;
+
+  void displayPNGToPanel() {
+    // Method 1: Direct decode to canvas (if PNG fits in memory)
+    canvas->fillSprite(TFT_BLACK);
+    
+    // Draw PNG to canvas - M5GFX handles scaling automatically
+    success = canvas->drawPng(moonmanpng, moonmanpng_len, 0, 0, 0, 0, 0, 0, layerV->size.x/320.0, layerV->size.y/320.0);
+    if (success) {
+      Serial.println("PNG decoded successfully!");
+      
+      // Transfer canvas to LED panel
+      transferCanvasToPanel();
+    } else {
+      Serial.println("PNG decode failed!");
+    }
+  }
+
+  void transferCanvasToPanel() {
+    // Read each pixel from canvas and send to LED panel
+    for (int y = 0; y < layerV->size.y; y++) {
+      for (int x = 0; x < layerV->size.x; x++) {
+        // Get pixel color from canvas
+        uint16_t color = canvas->readPixel(x, y);
+        
+        // Convert RGB565 to RGB888 for LED panel
+        uint8_t r = ((color >> 11) & 0x1F) << 3;  // 5 bits -> 8 bits
+        uint8_t g = ((color >> 5) & 0x3F) << 2;   // 6 bits -> 8 bits  
+        uint8_t b = (color & 0x1F) << 3;          // 5 bits -> 8 bits
+        
+        // Set pixel on LED panel
+        layerV->setRGB(Coord3D(x,y), CRGB(r,g,b));
+      }
+    }
+  }
+
+  void loop() override {
+    Node::loop(); //for sizeChanged
+
+    if (success)
+      // Transfer canvas to LED panel
+      transferCanvasToPanel();
+  } //loop
+
+}; // MoonManEffect
 
 
+#endif
 
 
 

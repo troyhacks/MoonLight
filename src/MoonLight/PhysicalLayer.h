@@ -103,14 +103,14 @@ class PhysicalLayer {
     // std::vector<bool> lightsToBlend; //this is a 1-bit vector !!! overlapping effects will blend
     // uint8_t globalBlend = 128; // to do add as UI control...
 
-    std::vector<VirtualLayer *, PSRAMAllocator<VirtualLayer *>> layerV; // the virtual layers using this physical layer 
+    std::vector<VirtualLayer *, VectorRAMAllocator<VirtualLayer *>> layerV; // the virtual layers using this physical layer 
 
     CRGBPalette16 palette = PartyColors_p;
 
     uint8_t requestMapPhysical = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
     uint8_t requestMapVirtual = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
 
-    std::vector<Node *, PSRAMAllocator<Node *>> nodes;
+    std::vector<Node *, VectorRAMAllocator<Node *>> nodes;
 
     uint16_t indexP = 0;
 
@@ -132,8 +132,6 @@ class PhysicalLayer {
     std::vector<SortedPin> sortedPins;
 
     // an effect is using a virtual layer: tell the effect in which layer to run...
-
-    void removeNode(Node * node);
 
     // to be called in setup, if more then one effect
     // void initLightsToBlend();

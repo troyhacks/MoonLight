@@ -25,8 +25,11 @@ PsychicHttpServer::PsychicHttpServer() :
   config.global_user_ctx = this;
   config.global_user_ctx_free_fn = destroy;
   config.max_uri_handlers = 20;
+  //🌙
   #ifdef HTTPD_STACK_SIZE
     config.stack_size = HTTPD_STACK_SIZE;
+  #else
+    config.stack_size = 4096;
   #endif
 }
 

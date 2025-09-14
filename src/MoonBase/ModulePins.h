@@ -64,10 +64,13 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
 
         if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI 
 
-        _state.data["pins"].to<JsonArray>(); //empty
+        // _state.data["pins"].to<JsonArray>(); //empty
+
+        JsonDocument root;
+        root["pins"].to<JsonArray>();
 
         for (int gpio_num = 0; gpio_num < SOC_GPIO_PIN_COUNT; gpio_num++) {
-            JsonObject task = _state.data["pins"].as<JsonArray>().add<JsonObject>();
+            JsonObject task = root["pins"].as<JsonArray>().add<JsonObject>();
 
             // Check if GPIO is valid
             bool is_valid = GPIO_IS_VALID_GPIO(gpio_num);
@@ -104,8 +107,11 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
             task["PinInfo"] = "";
         }
 
-        JsonObject data = _state.data.as<JsonObject>();
-        _socket->emitEvent("pins", data);
+        // UpdatedItem updatedItem;
+        // _state.compareRecursive("", _state.data, root, updatedItem); //fill data with doc
+
+        JsonObject object = root.as<JsonObject>();
+        _socket->emitEvent("pins", _state.data);
     }
 };
 

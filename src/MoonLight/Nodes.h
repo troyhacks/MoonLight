@@ -149,7 +149,15 @@ public:
   }
 
   //effect, layout and modifier (?)
-  virtual void loop() {}
+  Coord3D prevSize;
+  virtual void loop() {
+    if (prevSize != layerV->size) {
+      MB_LOGD(ML_TAG, "size change");
+      sizeChanged(prevSize);
+      prevSize = layerV->size;
+    }
+  }
+  virtual void sizeChanged(Coord3D oldSize) {}
 
   //layout
   virtual void addLayout() {} //the definition of the layout, called by mapLayout()
