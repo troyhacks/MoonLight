@@ -285,6 +285,12 @@ void ESP32SvelteKit::_loop()
                 // ESP_LOGD("", "bat mV %f p:%f", mV, perc);
                 _batteryService.updateSOC(perc * 100);
             #endif
+            #if FT_BATTERY && VOLTAGE_PIN //see esp32-s3-stephanelec-16p
+                float mV = analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
+                float perc = mV / 10000.0;
+                // ESP_LOGD("", "bat mV %f p:%f", mV, perc);
+                _batteryService.updateSOC(perc * 100.0);
+            #endif
 #ifdef TELEPLOT_TASKS
             Serial.printf(">ESP32SveltekitTask:%i:%i\n", millis(), uxTaskGetStackHighWaterMark(NULL));
 #endif
