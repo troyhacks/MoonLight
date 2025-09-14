@@ -107,6 +107,9 @@ public:
         values.add(FreqSawsEffect::name());
         values.add(LinesEffect::name());
         values.add(LissajousEffect::name());
+        #if USE_M5UNIFIED
+            values.add(MoonManEffect::name());
+        #endif
         values.add(Noise2DEffect::name());
         values.add(NoiseMeterEffect::name());
         values.add(PaintBrushEffect::name());
@@ -166,6 +169,9 @@ public:
         else if (equal(name, FreqSawsEffect::name())) node = allocMBObject<FreqSawsEffect>();
         else if (equal(name, LinesEffect::name())) node = allocMBObject<LinesEffect>();
         else if (equal(name, LissajousEffect::name())) node = allocMBObject<LissajousEffect>();
+        #if USE_M5UNIFIED
+            else if (equal(name, MoonManEffect::name())) node = allocMBObject<MoonManEffect>();
+        #endif
         else if (equal(name, Noise2DEffect::name())) node = allocMBObject<Noise2DEffect>();
         else if (equal(name, NoiseMeterEffect::name())) node = allocMBObject<NoiseMeterEffect>();
         else if (equal(name, PaintBrushEffect::name())) node = allocMBObject<PaintBrushEffect>();

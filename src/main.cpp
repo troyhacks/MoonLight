@@ -91,7 +91,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                 esp32sveltekit.lps++; // 🌙 todo: not moonlight specific?
 
                 if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100))==pdFALSE) {
-                    // MB_LOGE(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
+                    // MB_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
                 }
 
                 layerP.loop(); //run all the effects of all virtual layers (currently only one)
@@ -151,7 +151,6 @@ static int custom_vprintf(const char* fmt, va_list args)
 
 #if USE_M5UNIFIED
     #include <M5Unified.h>
-    #include "moonlight_logo.h"
 #endif
 
 void setup()
@@ -170,6 +169,22 @@ void setup()
         //ESP_RST_USB is after usb flashing! since esp-idf5
         safeModeMB = true;
     }
+
+    //check sizes ...
+    // sizeof(esp32sveltekit);
+    // sizeof(WiFiSettingsService);
+
+    // sizeof(fileManager);
+
+    // sizeof(Module);
+    // sizeof(moduleDevices);
+    // sizeof(modulePins);
+    // sizeof(moduleEffects);
+    // sizeof(moduleDrivers);
+    // sizeof(moduleLightsControl);
+    // sizeof(moduleChannels);
+    // sizeof(moduleLightsControl);
+    // sizeof(moduleMoonLightInfo);
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
@@ -198,7 +213,7 @@ void setup()
             xTaskCreateUniversal(
                 effectTask,              // task function
                 "AppEffectTask",            // name
-                8 * 1024,             // stack size in words (without livescripts we can do with 12...)
+                4 * 1024,             // stack size in words (without livescripts we can do with 12...)
                 NULL,                  // parameter
                 2,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle
@@ -231,8 +246,8 @@ void setup()
                 lastSecond = millis();
 
                 moduleDevices.loop1s();
-                moduleTasks.loop1s(); 
-                modulePins.loop1s(); 
+                moduleTasks.loop1s();
+                modulePins.loop1s();
 
                 #if FT_ENABLED(FT_MOONLIGHT)
                     //set shared data (eg used in scrolling text effect)
@@ -267,23 +282,24 @@ void setup()
         auto cfg = M5.config();
         M5.begin(cfg);
         // M5.Display.fillScreen(BLACK);
+        #if USE_M5UNIFIEDDisplay
+            M5.Display.drawPng(moonmanpng, moonmanpng_len,0, 0, 0, 0, 0, 0, 100/320, 100/320);
 
-        M5.Display.drawPng(moonlight_logo_png, sizeof(moonlight_logo_png),0, 0, 0, 0, 0, 0, 100/320, 100/320);
-
-        // M5.Display.fillRect(50, 50, 100, 100, RED);
-        // M5.Display.setTextColor(WHITE);
-        // M5.Display.setTextSize(2);
-        // M5.Display.drawString("MoonLight", 0, 0);
+            // M5.Display.fillRect(50, 50, 100, 100, RED);
+            // M5.Display.setTextColor(WHITE);
+            // M5.Display.setTextSize(2);
+            // M5.Display.drawString("MoonLight", 0, 0);
+        #endif
     #endif
 }
 
 void loop()
 {
-    #if USE_M5UNIFIED
+    #if USE_M5UNIFIEDDDisplay
         M5.update();
         delay(100);
     #else
         // Delete Arduino loop task, as it is not needed in this example
-        // vTaskDelete(NULL);
+        vTaskDelete(NULL);
     #endif
 }

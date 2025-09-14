@@ -122,4 +122,51 @@ MoonLight specific
     
     ✅: Done
     
-    
+    ### Example
+
+    ```json
+    {
+  "nodes": [
+    {
+      "nodeName": "Lissajous 🔥🎨💡",
+      "on": true,
+      "controls": [
+        {
+          "name": "xFrequency",
+          "type": "range",
+          "default": 64,
+          "p": 1065414703,
+          "value": 64
+        },
+        {
+          "name": "fadeRate",
+          "type": "range",
+          "default": 128,
+          "p": 1065414704,
+          "value": 128
+        },
+        {
+          "name": "speed",
+          "type": "range",
+          "default": 128,
+          "p": 1065414705,
+          "value": 128
+        }
+      ]
+    },
+    {
+      "nodeName": "Random 🔥",
+      "on": true,
+      "controls": [
+        {
+          "name": "speed",
+          "type": "range",
+          "default": 128,
+          "p": 1065405731,
+          "value": 128
+        }
+      ]
+    }
+  ]
+}
+```

@@ -109,7 +109,7 @@ public:
     //implement business logic
     void onUpdate(UpdatedItem &updatedItem) override
     {
-        MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         if (updatedItem.name == "red") {
             layerP.lights.header.red = _state.data["red"];
         } else if (updatedItem.name == "green") {
@@ -172,7 +172,7 @@ public:
     void setPresetsFromFolder() {
         //loop over all files in the presets folder and add them to the preset array
         File rootFolder = ESPFS.open("/.config/presets/");
-        _state.data["preset"]["list"].to<JsonArray>(); // clear the active preset array before adding new presets
+        _state.data["preset"]["list"].clear();//.to<JsonArray>(); // clear the active preset array before adding new presets
         bool changed = false;
         walkThroughFiles(rootFolder, [&](File folder, File file) {
             int seq = -1;
@@ -223,8 +223,7 @@ public:
                     _state.data["preset"]["selected"] = presets[lastPresetLooped];
 
                     //update UI
-                    JsonObject data = _state.data.as<JsonObject>();
-                    _socket->emitEvent(_moduleName, data);
+                    _socket->emitEvent(_moduleName, _state.data);
 
                     //trigger file manager notification of update of effects.json
                     _fileManager->update([&](FilesState &state) {

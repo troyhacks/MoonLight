@@ -28,7 +28,7 @@ public:
 protected:
     PsychicHttpServer *_server;
 
-    std::vector<Node *, PSRAMAllocator<Node *>> *nodes;
+    std::vector<Node *, VectorRAMAllocator<Node *>> *nodes;
 
     NodeManager(String moduleName,
         PsychicHttpServer *server,
@@ -143,7 +143,14 @@ protected:
 
                     oldNode->requestMappings();
 
-                    layerP.removeNode(oldNode);
+                    // layerP.removeNode(oldNode);
+                    MB_LOGD(ML_TAG, "s:%d p:%p", nodes->size(), oldNode);
+                    // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
+                    // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
+                    oldNode->~Node();
+                    
+                    freeMBObject(oldNode);
+
                 }
                     
                 #if FT_ENABLED(FT_LIVESCRIPT)
@@ -192,6 +199,15 @@ protected:
         }
         // else
         // MB_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    }
+
+    void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) override {
+        //reorder in layerP.nodes.
+        MB_LOGD(ML_TAG, "%d %d %d", nodes->size(), stateIndex, newIndex);
+        //swap nodes
+        Node *node = (*nodes)[stateIndex];
+        (*nodes)[stateIndex] = (*nodes)[newIndex];
+        (*nodes)[newIndex] = node;
     }
 
     void loop() {

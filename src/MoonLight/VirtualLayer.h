@@ -56,13 +56,13 @@ class VirtualLayer {
   Coord3D start = {0,0,0}, middle = size/2, end = size-1;//{UINT16_MAX,UINT16_MAX,UINT16_MAX}; //default
 
   //they will be reused to avoid fragmentation
-  std::vector<PhysMap, PSRAMAllocator<PhysMap>> mappingTable;
-  std::vector<std::vector<uint16_t>, PSRAMAllocator<std::vector<uint16_t>>> mappingTableIndexes;
+  std::vector<PhysMap, VectorRAMAllocator<PhysMap>> mappingTable;
+  std::vector<std::vector<uint16_t>, VectorRAMAllocator<std::vector<uint16_t>>> mappingTableIndexes;
   uint16_t mappingTableSizeUsed = 0; 
   uint16_t mappingTableIndexesSizeUsed = 0; 
 
   PhysicalLayer *layerP; //physical LEDs the virtual LEDs are mapped to
-  std::vector<Node *, PSRAMAllocator<Node *>> nodes;
+  std::vector<Node *, VectorRAMAllocator<Node *>> nodes;
 
   uint8_t fadeMin;
 

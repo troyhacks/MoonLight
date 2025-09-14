@@ -58,7 +58,7 @@ public:
 
         if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
 
-        #define MAX_TASKS 20
+        #define MAX_TASKS 30
 
         TaskStatus_t taskStatusArray[MAX_TASKS];
         UBaseType_t taskCount;
@@ -75,11 +75,12 @@ public:
         // printf("Found %d tasks\n", taskCount);
         // printf("Name\t\tState\tPrio\tStack\tRun Time\tCPU %%\tCore\n");
 
-        _state.data["tasks"].to<JsonArray>(); //empty
+        JsonDocument root;
+        root["tasks"].to<JsonArray>();
 
         for (UBaseType_t i = 0; i < taskCount; i++) {
 
-            JsonObject task = _state.data["tasks"].as<JsonArray>().add<JsonObject>();
+            JsonObject task = root["tasks"].as<JsonArray>().add<JsonObject>();
 
             TaskStatus_t *ts = &taskStatusArray[i];
 
@@ -117,12 +118,16 @@ public:
             TaskHandle_t current0 = xTaskGetCurrentTaskHandleForCore(0);
             TaskHandle_t current1 = xTaskGetCurrentTaskHandleForCore(1);
 
-            _state.data["core0"] = pcTaskGetName(current0);
-            _state.data["core1"] = pcTaskGetName(current1);
+            root["core0"] = pcTaskGetName(current0);
+            root["core1"] = pcTaskGetName(current1);
         #endif
 
-        JsonObject data = _state.data.as<JsonObject>();
-        _socket->emitEvent("tasks", data);
+        
+        // UpdatedItem updatedItem;
+        // _state.compareRecursive("", _state.data, root, updatedItem); //fill data with doc
+
+        JsonObject object = root.as<JsonObject>();
+        _socket->emitEvent("tasks", object);
     }
 };
 

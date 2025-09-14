@@ -212,7 +212,7 @@ void ESP32SvelteKit::begin()
     xTaskCreatePinnedToCore(
         this->_loopImpl,            // Function that should be called
         "ESP32 SvelteKit Loop",     // Name of the task (for debugging)
-        4096,                       // Stack size (bytes)
+        6144,                       // Stack size (bytes) 🌙4096 to 6144
         this,                       // Pass reference to this class instance
         (tskIDLE_PRIORITY + 2),     // task priority
         &_loopTaskHandle,           // Task handle
@@ -278,6 +278,7 @@ void ESP32SvelteKit::_loop()
             lastTime = millis();
             _analyticsService.lps = lps; // 🌙
             lps = 0; // 🌙
+            // 🌙 
             #if FT_BATTERY && BATTERY_PIN && BATTERY_MV
                 float mV = analogReadMilliVolts(BATTERY_PIN) * 2.0;
                 float perc = (mV - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%

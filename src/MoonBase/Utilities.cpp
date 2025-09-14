@@ -157,4 +157,8 @@ void setBitValue(uint8_t* byteArray, size_t n, bool value) {
         byteArray[byteIndex] &= ~(1 << bitIndex);
 }
 
-std::vector<std::function<void()>, PSRAMAllocator<std::function<void()>>> runInTask1, runInTask2;  // 🌙 see .h
+std::vector<std::function<void()>, VectorRAMAllocator<std::function<void()>>> runInTask1, runInTask2;  // 🌙 see .h
+
+#if USE_M5UNIFIED
+    #include "moonmanpng.h"
+#endif

@@ -42,7 +42,7 @@ void ModuleState::setupData() {
         setDefaults(doc.to<JsonObject>(), definition.as<JsonArray>());
             
         //assign the new defaults to state and run onUpdate
-        data.to<JsonObject>(); //clear data
+        data = this->doc->to<JsonObject>(); //clear data
         UpdatedItem updatedItem;
         compareRecursive("", data, doc.as<JsonObject>(), updatedItem); //fill data with doc
 }
@@ -53,9 +53,91 @@ void ModuleState::setupData() {
 void ModuleState::read(ModuleState &state, JsonObject &root)
 {
     if (state.readHook)
-        state.readHook(state.data.as<JsonObject>());
+        state.readHook(state.data);
 
-    root.set(state.data.as<JsonObject>()); //copy
+    root.set(state.data); //copy
+}
+
+void ModuleState::execOnReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {
+    if (onUpdateRunInTask == 1) { //if set to 0, run in main loopTask
+        runInTask1.push_back([&, stateIndex, newIndex]() {
+            onReOrderSwap(stateIndex, newIndex);
+        });
+    }
+    else if (onUpdateRunInTask == 2) { //if set to 0, run in main loopTask
+        runInTask2.push_back([&, stateIndex, newIndex]() {
+            onReOrderSwap(stateIndex, newIndex);
+        });
+    }
+    else
+        onReOrderSwap(stateIndex, newIndex);  //this code will swap the values in its array from stateIndex to newIndex, so the value at stateIndex is storage for the value which was on newIndex
+}
+
+bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth, uint8_t index) {
+
+    bool changed = false;
+    //check if root is a reordering of state
+    //if so reorder state, no comparison with updates needed
+    for (JsonPair newProperty : newData.as<JsonObject>()) {
+        if (newProperty.value().is<JsonArray>()) {
+            // bool reorderedRows = false;
+            JsonArray newArray = newProperty.value();
+            JsonArray stateArray = stateData[newProperty.key()];
+            //check each row with each row of stateArray and check if same row found
+
+            uint8_t parkedAtIndex;
+            uint8_t parkedFromIndex = UINT8_MAX;
+
+            for (uint8_t stateIndex = 0; stateIndex< stateArray.size(); stateIndex++) {//} JsonObject stateObject : stateArray) {
+                for (uint8_t newIndex = 0; newIndex < newArray.size(); newIndex++) {//} JsonObject newObject : newArray) {
+                    if (stateIndex != newIndex && stateArray[stateIndex] == newArray[newIndex]) {
+                        //if the old value found somewhere else, it has been moved so we can overwrite the current value
+                        stateArray[stateIndex].set(newArray[stateIndex]); //copies the value to the state array
+                        MB_LOGD(ML_TAG, "%d <- %d", stateIndex, newIndex);
+                        changed = true;
+
+                        //calculate swap indexes
+                        //eg 0 to 1 take 0 and store in 1. old 1 is parked in 0
+                        //.  1 to 2 take the 1 parked in 0 store old 2 in 0 
+                        //.  2 to 0 take the 2 parked in 0 . it is already in 0 so we are done!!!
+
+                        //temp = newindex; newindex = oldindex; oldindex = temp (storage)!
+
+                        //for each map which maps to another row, call onReOrderSwap
+
+                        //check if stateindex is stored somewhere else
+                        //if stateIndex refers to an index which is parked, use the parking spot.
+                        if (stateIndex == parkedFromIndex) //e.g. parkedFromIndex ==1
+                            stateIndex = parkedAtIndex; //e.g. 1 is stored in 0
+
+                        execOnReOrderSwap(stateIndex, newIndex);
+
+                        parkedAtIndex = stateIndex; //the parking spot created
+                        parkedFromIndex = newIndex; //the index of value in the array stored in the parking spot
+                    }
+                }
+            }
+        }
+    }
+    return changed;
+
+}
+
+void ModuleState::execOnUpdate(UpdatedItem &updatedItem) {
+    if (onUpdate) {
+        if (onUpdateRunInTask == 1) { //if set to 0, run in main loopTask
+            runInTask1.push_back([&, updatedItem]() mutable { //mutable as updatedItem is called by reference (&)
+                onUpdate(updatedItem);
+            });
+        }
+        else if (onUpdateRunInTask == 2) { //if set to 0, run in main loopTask
+            runInTask2.push_back([&, updatedItem]() mutable { //mutable as updatedItem is called by reference (&)
+                onUpdate(updatedItem);
+            });
+        }
+        else
+            onUpdate(updatedItem);
+    }
 }
 
 bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth, uint8_t index) {
@@ -108,7 +190,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                             updatedItem.oldValue = property.value().as<String>();
                             updatedItem.value = JsonVariant(); // Assign an empty JsonVariant
                             stateArray[i].remove(property.key()); //remove the property from the state row so onUpdate see it as empty
-                            if (onUpdate) onUpdate(updatedItem);
+                            execOnUpdate(updatedItem);
 
                         }
                         stateArray.remove(i); //remove the state row entirely
@@ -122,23 +204,9 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                     updatedItem.oldValue = stateValue.as<String>();
                     stateData[updatedItem.name] = newValue; //update the value in stateData, should not be done in runLoopTask as FS update then misses the change!!
                     updatedItem.value = stateData[updatedItem.name]; //store the stateData item (convenience)
-                    
-                    if (onUpdateRunInTask == 1) { //if set to 0, run in main loopTask
-                        runInTask1.push_back([&, updatedItem, stateData]() mutable { //mutable as updatedItem is called by reference (&)
-                            MB_LOGV(MB_TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
-                            if (onUpdate) onUpdate(updatedItem);
-                            // MB_LOGV(MB_TAG, "changed %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                        });
-                    }
-                    else if (onUpdateRunInTask == 2) { //if set to 0, run in main loopTask
-                        runInTask2.push_back([&, updatedItem, stateData]() mutable { //mutable as updatedItem is called by reference (&)
-                            MB_LOGV(MB_TAG, "update %s[%d].%s[%d].%s = %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
-                            if (onUpdate) onUpdate(updatedItem);
-                            // MB_LOGV(MB_TAG, "changed %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                        });
-                    }
-                    else
-                        if (onUpdate) onUpdate(updatedItem);
+
+                    execOnUpdate(updatedItem);
+
                 } 
                 // else {
                 //     MB_LOGV(MB_TAG, "do not update %s", key.c_str());
@@ -159,8 +227,16 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
             UpdatedItem updatedItem;
 
             bool isNew = state.data.isNull(); //device is starting
-            
-            bool changed = state.compareRecursive("", state.data, root, updatedItem);
+
+            bool changed = state.checkReOrderSwap("", state.data, root, updatedItem);
+
+            // serializeJson(state.data, Serial);Serial.println();
+
+            if (state.compareRecursive("", state.data, root, updatedItem)) {
+                if (changed)
+                    MB_LOGW(ML_TAG, "checkReOrderSwap changed, compareRecursive also changed?");
+                changed = true;
+            }
 
             if (!isNew && changed) saveNeeded = true;
 
@@ -206,6 +282,10 @@ Module::Module(String moduleName, PsychicHttpServer *server,
 
     _state.onUpdate = [&](UpdatedItem &updatedItem) {
         onUpdate(updatedItem); // Ensure updatedItem is of type UpdatedItem&
+    };
+
+    _state.onReOrderSwap = [&](uint8_t stateIndex, uint8_t newIndex) {
+        onReOrderSwap(stateIndex, newIndex); // Ensure updatedItem is of type UpdatedItem&
     };
 
     addUpdateHandler([&](const String &originId)
@@ -262,6 +342,10 @@ void Module::setupDefinition(JsonArray root) { //virtual so it can be overriden 
 }
 
 void Module::onUpdate(UpdatedItem &updatedItem) {
+    // MB_LOGW(MB_TAG, "not implemented %s = %s", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
+}
+
+void Module::onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {
     // MB_LOGW(MB_TAG, "not implemented %s = %s", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
 }
 

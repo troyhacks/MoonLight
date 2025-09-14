@@ -145,3 +145,35 @@ It might be arguable that readonly variables are not stored in state data.
 * [Module.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/moonbase/module/Module.svelte) will deal with the UI
 * [MultiInput.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/lib/components/moonbase/MultiInput.svelte) is used by Module.svelte to display the right UI widget based on what is defined in the definition json
 * Modifications done in [menu.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/menu.svelte) do identify a module by href and not by title alone
+
+### Example of json
+
+```json
+{
+  "nrOfLights": 256,
+  "channelsPerLight": 3,
+  "maxChannels": 12288,
+  "size": {
+    "x": 16,
+    "y": 16,
+    "z": 1
+  },
+  "nodes#": 2,
+  "layers": [
+    {
+      "nrOfLights": 256,
+      "size": {
+        "x": 16,
+        "y": 16,
+        "z": 1
+      },
+      "mappingTable#": 256,
+      "nrOfZeroLights": 0,
+      "nrOfOneLight": 256,
+      "mappingTableIndexes#": 0,
+      "nrOfMoreLights": 0,
+      "nodes#": 1
+    }
+  ]
+}
+```

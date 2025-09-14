@@ -78,7 +78,7 @@ void sync() {
     // Serial.print("s");
     // 🌙 adding semaphore wait too long logging
     if (xSemaphoreTake(WaitAnimationSync, pdMS_TO_TICKS(100))==pdFALSE) {
-        MB_LOGE(ML_TAG, "WaitAnimationSync wait too long");
+        MB_LOGW(ML_TAG, "WaitAnimationSync wait too long");
         xSemaphoreTake(WaitAnimationSync, portMAX_DELAY);
     }
 }

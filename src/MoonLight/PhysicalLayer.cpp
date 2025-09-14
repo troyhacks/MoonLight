@@ -29,11 +29,11 @@ PhysicalLayer::PhysicalLayer() {
             // lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_SPIRAM);
             lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
             if (lights.channels)
-                MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.nrOfChannels, isInPSRAM(lights.channels)?"PSRAM":"default" );
+                MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.nrOfChannels, isInPSRAM(lights.channels)?"PSRAM":"RAM" );
         }
         if (!lights.channels) {
             lights.nrOfChannels = 4096 * 3;
-            lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+            lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_DEFAULT, MALLOC_CAP_8BIT);//heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
             if (lights.channels)
                 MB_LOGD(ML_TAG, "allocated %d bytes of RAM", lights.nrOfChannels );
         }
@@ -42,7 +42,20 @@ PhysicalLayer::PhysicalLayer() {
             lights.nrOfChannels = 0;
         }
 
-        memset(lights.channels, 0, lights.nrOfChannels); // set all the channels to 0
+        //for some reason this says 
+        // E (1431) 🌙: [Utilities.h:332] allocMB: heap_caps_malloc of 184320 x 1 not succeeded
+        // E (1431) 💫: [PhysicalLayer.cpp:55] PhysicalLayer: failed to allocated RAM or PSRAM for 184320 channels
+        // if (psramFound())
+        //     lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 61440*3); //fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
+        // else
+        //     lights.nrOfChannels = 4096 * 3;
+
+        // lights.channels = allocMB<uint8_t>(lights.nrOfChannels); //including  memset(lights.channels, 0, lights.nrOfChannels); // set all the channels to 0
+            
+        // if (!lights.channels)
+        //     MB_LOGE(ML_TAG, "failed to allocated RAM or PSRAM for %d channels", lights.nrOfChannels);
+        //     lights.nrOfChannels = 0;
+        // }
 
         // initLightsToBlend();
 
@@ -221,17 +234,6 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
     // an effect is using a virtual layer: tell the effect in which layer to run...
-
-    void PhysicalLayer::removeNode(Node *node) {
-        MB_LOGD(ML_TAG, "s:%d p:%p", layerV[0]->nodes.size(), node);
-        // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
-        // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
-        node->~Node();
-        
-        freeMBObject(node);
-        
-        // layerV[0]->nodes[index] = nullptr;
-    }
 
     // // to be called in setup, if more then one effect
     // void PhysicalLayer::initLightsToBlend() {
