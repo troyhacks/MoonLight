@@ -280,18 +280,18 @@ void ESP32SvelteKit::_loop()
             lps = 0; // 🌙
             // 🌙 
             #if FT_BATTERY
-                #if  BATTERY_PIN && BATTERY_MV
+                #if BATTERY_PIN && BATTERY_MV
                     float mVB = analogReadMilliVolts(BATTERY_PIN) * 2.0;
                     float perc = (mVB - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%
                     // ESP_LOGD("", "bat mVB %f p:%f", mVB, perc);
                     _batteryService.updateSOC(perc * 100);
                 #endif
-                #if VOLTAGE_PIN //see esp32-s3-stephanelec-16p
-                    float mV = random(100);// analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
+                #ifdef VOLTAGE_PIN //see esp32-s3-stephanelec-16p
+                    float mV = random(10);// analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
                     _batteryService.updateVoltage(mV);
                 #endif
-                #if CURRENT_PIN //see esp32-s3-stephanelec-16p
-                    float mC = random(100);//analogReadMilliVolts(CURRENT_PIN); //limpkin, ReadAmps doesn't exist ... what is the range of values? 0.. ?
+                #ifdef CURRENT_PIN //see esp32-s3-stephanelec-16p
+                    float mC = random(10);//analogReadMilliVolts(CURRENT_PIN); //limpkin, ReadAmps doesn't exist ... what is the range of values? 0.. ?
                     _batteryService.updateCurrent(mC);
                 #endif
             #endif

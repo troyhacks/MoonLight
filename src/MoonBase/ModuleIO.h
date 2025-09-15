@@ -105,20 +105,20 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
             task["Level"] = (level >= 0) ? (level ? "HIGH" : "LOW") : "N/A";
             task["DriveCap"] = (drive_result == ESP_OK) ? drive_cap_to_string(drive_cap) : "N/A";
             task["PinInfo"] = "";
-            #if VOLTAGE_PIN
+            #ifdef VOLTAGE_PIN
                 if (gpio_num == VOLTAGE_PIN)
                     task["PinInfo"] = "Voltage";
             #endif
-            #if CURRENT_PIN
+            #ifdef CURRENT_PIN
                 if (gpio_num == CURRENT_PIN)
                     task["PinInfo"] = "Current";
             #endif
-            #if BATTERY_PIN
+            #ifdef BATTERY_PIN
                 if (gpio_num == BATTERY_PIN)
                     task["PinInfo"] = "Battery";
             #endif
-            #if LED_PINS
-                if (strstr(gpio_num,LED_PINS) != 0) //to do , this will give wrong pins, e.g. 1 also 10 etc
+            #ifdef LED_PINS
+                if (strstr(task["GPIO"].as<const char *>(), LED_PINS) != nullptr) //to do , this will give wrong pins, e.g. 1 also 10 etc
                     task["PinInfo"] = "LED";
             #endif
         }
