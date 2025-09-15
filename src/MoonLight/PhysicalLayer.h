@@ -107,8 +107,8 @@ class PhysicalLayer {
 
     CRGBPalette16 palette = PartyColors_p;
 
-    uint8_t requestMapPhysical = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
-    uint8_t requestMapVirtual = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
+    uint8_t requestMapPhysical = false; //collect requests to map as it is requested by setup and onUpdate and only need to be done once
+    uint8_t requestMapVirtual = false; //collect requests to map as it is requested by setup and onUpdate and only need to be done once
 
     std::vector<Node *, VectorRAMAllocator<Node *>> nodes;
 

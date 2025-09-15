@@ -188,7 +188,7 @@ protected:
                 if (updatedItem.index[0] < nodes->size()) {
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
-                        nodeClass->updateControl(nodeState["controls"][updatedItem.index[1]]);
+                        nodeClass->onUpdate(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);
 
                         nodeClass->requestMappings();
                     }

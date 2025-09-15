@@ -1961,8 +1961,8 @@ class GameOfLifeEffect: public Node {
     setBirthAndSurvive(); //initiate based on ruleset and customRuleString
   }
 
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
+  void onUpdate(String &oldValue, JsonObject control) override {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
       setBirthAndSurvive();
@@ -2481,8 +2481,8 @@ class RubiksCubeEffect: public Node {
   }
 
   bool doInit = true;
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
+  void onUpdate(String &oldValue, JsonObject control) override {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "cubeSize" || control["name"] == "randomTurning") {
       doInit = true;
@@ -2684,8 +2684,8 @@ class ParticlesEffect: public Node {
     settingUpParticles();
   }
 
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
+  void onUpdate(String &oldValue, JsonObject control) override {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "number of Particles" || control["name"] == "barriers") {
       settingUpParticles();

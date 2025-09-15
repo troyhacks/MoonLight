@@ -117,9 +117,9 @@
 					feature: page.data.features.moonbase,
 				},
 				{
-					title: 'Pins',
+					title: 'IO',
 					icon: CPU,
-					href: '/moonbase/module?module=pins',
+					href: '/moonbase/module?module=inputoutput',
 					feature: page.data.features.moonbase,
 				},
 			]

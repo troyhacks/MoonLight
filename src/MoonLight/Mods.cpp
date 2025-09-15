@@ -87,8 +87,8 @@ void DriverNode::loop() {
   #endif
 }
 
-void DriverNode::updateControl(JsonObject control) {
-  Node::updateControl(control);
+void DriverNode::onUpdate(String &oldValue, JsonObject control) {
+  Node::onUpdate(oldValue, control);
 
   LightsHeader *header = &layerV->layerP->lights.header;
 
@@ -581,8 +581,8 @@ void ArtNetDriverMod::loop() {
     }
   }
 
-  void FastLEDDriverMod::updateControl(JsonObject control) {
-    Node::updateControl(control);
+  void FastLEDDriverMod::onUpdate(String &oldValue, JsonObject control) {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "maxPower") {
         MB_LOGD(ML_TAG, "setMaxPowerInMilliWatts %d", maxPower);

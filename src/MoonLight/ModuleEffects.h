@@ -94,6 +94,19 @@ public:
         #endif
     }
 
+    void setupDefinition(JsonArray root) override {
+        MB_LOGV(ML_TAG, "");
+        JsonObject property; // state.data has one or more properties
+        JsonArray values; // if a property is a select, this is the values of the select
+        property = root.add<JsonObject>(); property["name"] = "layer"; property["type"] = "select"; property["default"] = 0; values = property["values"].to<JsonArray>();
+        uint8_t i = 0;
+        for (VirtualLayer * layer: layerP.layerV) {
+            values.add(i);
+            i++;
+        }
+        NodeManager::setupDefinition(root);
+    }
+
     void addNodes(JsonArray values) override {
         values.add(SolidEffect::name());
         //alphabetically from here

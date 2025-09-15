@@ -135,7 +135,7 @@ public:
     return control;
   }
 
-  virtual void updateControl(JsonObject control); // see Nodes.cpp for implementation
+  virtual void onUpdate(String &oldValue, JsonObject control); // see Nodes.cpp for implementation
 
   void requestMappings() {
     if (hasModifier || hasLayout) {

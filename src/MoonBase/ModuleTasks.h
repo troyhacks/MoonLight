@@ -127,7 +127,7 @@ public:
         // _state.compareRecursive("", _state.data, root, updatedItem); //fill data with doc
 
         JsonObject object = root.as<JsonObject>();
-        _socket->emitEvent("tasks", object);
+        _socket->emitEvent(_moduleName, object);
     }
 };
 

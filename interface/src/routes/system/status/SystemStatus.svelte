@@ -206,6 +206,18 @@
 								{$telemetry.battery.soc} %
 							</div>
 						</div>
+						<div>
+							<div class="font-bold">Voltage</div>
+							<div class="text-sm opacity-75">
+								{$telemetry.battery.voltage} V <!-- // 🌙 -->
+							</div>
+						</div>
+						<div>
+							<div class="font-bold">Current</div>
+							<div class="text-sm opacity-75">
+								{$telemetry.battery.current} A <!-- // 🌙 -->
+							</div>
+						</div>
 					</div>
 				{/if}
 

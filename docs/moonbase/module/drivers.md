@@ -6,7 +6,8 @@ The Drivers module allows you to define a **layout** (e.g. a panel 16x16), to dr
 
 Each task is defined as a node. A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager). A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
 
-Ultimately the nodes will be displayed in a graphical interface where nodes are connected by 'noodles' to define dependencies between nodes. For the time being nodes will be shown in a list.
+* Nodes: layouts, drivers and utilities will be shown as nodes with controls
+    * Reorder: Nodes can be reordered, defining the order of executions (layouts, which layout is first in the chain of lights. Drivers and utilities: no difference)
 
 Typically a node will define a modifier (💎) or a supporting process (☸️) but can also combine these tasks (experimental at the moment). To avoid duplication it's in most cases recommended to keep them separated so an effect can run on multiple layouts and a modifier can modify any effect. 
 

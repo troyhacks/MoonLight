@@ -1,6 +1,6 @@
-# Pins module
+# IO Module
 
-Shows info in gpio pins.
+Shows info about input / output devices, e.g. gpio pins.
 
 🚧
 

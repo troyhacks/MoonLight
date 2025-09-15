@@ -54,12 +54,12 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
     #include "MoonBase/FileManager.h"
     #include "MoonBase/ModuleDevices.h"
     #include "MoonBase/ModuleTasks.h"
-    #include "MoonBase/ModulePins.h"
+    #include "MoonBase/ModuleIO.h"
 
     FileManager fileManager = FileManager(&server, &esp32sveltekit);
     ModuleDevices moduleDevices = ModuleDevices(&server, &esp32sveltekit);
     ModuleTasks moduleTasks = ModuleTasks(&server, &esp32sveltekit);
-    ModulePins modulePins = ModulePins(&server, &esp32sveltekit);
+    ModuleIO moduleIO = ModuleIO(&server, &esp32sveltekit);
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
@@ -178,7 +178,7 @@ void setup()
 
     // sizeof(Module);
     // sizeof(moduleDevices);
-    // sizeof(modulePins);
+    // sizeof(moduleIO);
     // sizeof(moduleEffects);
     // sizeof(moduleDrivers);
     // sizeof(moduleLightsControl);
@@ -194,7 +194,7 @@ void setup()
         fileManager.begin();
         moduleDevices.begin();
         moduleTasks.begin();
-        modulePins.begin();
+        moduleIO.begin();
 
         // MoonLight
         #if FT_ENABLED(FT_MOONLIGHT)
@@ -247,7 +247,7 @@ void setup()
 
                 moduleDevices.loop1s();
                 moduleTasks.loop1s();
-                modulePins.loop1s();
+                moduleIO.loop1s();
 
                 #if FT_ENABLED(FT_MOONLIGHT)
                     //set shared data (eg used in scrolling text effect)

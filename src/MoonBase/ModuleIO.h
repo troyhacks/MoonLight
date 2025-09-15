@@ -1,6 +1,6 @@
 /**
     @title     MoonBase
-    @file      ModulePins.h
+    @file      ModuleIO.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonbase/module/pins/
@@ -9,20 +9,20 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-#ifndef ModulePins_h
-#define ModulePins_h
+#ifndef ModuleIO_h
+#define ModuleIO_h
 
 #if FT_MOONBASE == 1
 
 #include "Module.h"
 
-class ModulePins : public Module
+class ModuleIO : public Module
 {
 public:
 
-    ModulePins(PsychicHttpServer *server,
+    ModuleIO(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
-        ) : Module("pins", server, sveltekit) {
+        ) : Module("inputoutput", server, sveltekit) {
             MB_LOGV(MB_TAG, "constructor");
     }
 
@@ -105,15 +105,56 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
             task["Level"] = (level >= 0) ? (level ? "HIGH" : "LOW") : "N/A";
             task["DriveCap"] = (drive_result == ESP_OK) ? drive_cap_to_string(drive_cap) : "N/A";
             task["PinInfo"] = "";
+            #if VOLTAGE_PIN
+                if (gpio_num == VOLTAGE_PIN)
+                    task["PinInfo"] = "Voltage";
+            #endif
+            #if CURRENT_PIN
+                if (gpio_num == CURRENT_PIN)
+                    task["PinInfo"] = "Current";
+            #endif
+            #if BATTERY_PIN
+                if (gpio_num == BATTERY_PIN)
+                    task["PinInfo"] = "Battery";
+            #endif
+            #if LED_PINS
+                if (strstr(gpio_num,LED_PINS) != 0) //to do , this will give wrong pins, e.g. 1 also 10 etc
+                    task["PinInfo"] = "LED";
+            #endif
         }
 
         // UpdatedItem updatedItem;
         // _state.compareRecursive("", _state.data, root, updatedItem); //fill data with doc
 
+        // serializeJson(root, Serial); Serial.println();
+
         JsonObject object = root.as<JsonObject>();
-        _socket->emitEvent("pins", _state.data);
+        _socket->emitEvent(_moduleName, object);
     }
 };
 
 #endif
 #endif
+
+
+// format:
+// {
+//   "pins": [
+//     {
+//       "GPIO": 0,
+//       "Valid": true,
+//       "Output": true,
+//       "RTC": true,
+//       "Level": "HIGH",
+//       "DriveCap": "MEDIUM",
+//       "PinInfo": ""
+//     },
+//     {
+//       "GPIO": 1,
+//       "Valid": true,
+//       "Output": true,
+//       "RTC": false,
+//       "Level": "HIGH",
+//       "DriveCap": "MEDIUM",
+//       "PinInfo": ""
+//     },

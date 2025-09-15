@@ -34,6 +34,20 @@ boolean BatteryService::isCharging()
     return _isCharging;
 }
 
+// 🌙
+void BatteryService::updateVoltage(float voltage)
+{
+    _lastVoltage = voltage;
+    batteryEvent();
+}
+
+// 🌙
+void BatteryService::updateCurrent(float current)
+{
+    _lastCurrent = current;
+    batteryEvent();
+}
+
 int BatteryService::getSOC()
 {
     return _lastSOC;
@@ -51,6 +65,8 @@ void BatteryService::batteryEvent()
     JsonDocument doc;
     doc["soc"] = _lastSOC;
     doc["charging"] = _isCharging;
+    doc["voltage"] = _lastVoltage;
+    doc["current"] = _lastCurrent;
     JsonObject jsonObject = doc.as<JsonObject>();
     _socket->emitEvent(EVENT_BATTERY, jsonObject);
 }

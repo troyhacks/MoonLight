@@ -113,7 +113,7 @@ public:
         for (auto& obj : v) devices["devices"].add(obj);
 
         JsonObject data = devices.as<JsonObject>();
-        _socket->emitEvent("devices", data);        
+        _socket->emitEvent(_moduleName, data);        
     }
 
     void readUDP() {
