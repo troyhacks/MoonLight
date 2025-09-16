@@ -15,6 +15,13 @@
 
 void setDefaults(JsonObject root, JsonArray definition) {
     for (JsonObject property: definition) {
+        // if (property["type"] == "coord3Dxx") {
+        //     MB_LOGD(ML_TAG, "coord3D %d %d %d",  property["default"]["x"].as<int>(),  property["default"]["y"].as<int>(),  property["default"]["z"].as<int>());
+        //     JsonObject object = root[property["name"]].to<JsonObject>();
+        //     root[property["name"]]["x"] = property["default"]["x"];
+        //     root[property["name"]]["y"] = property["default"]["y"];
+        //     root[property["name"]]["z"] = property["default"]["z"];
+        // } else 
         if (property["type"] != "array") {
             root[property["name"]] = property["default"];
         } else {

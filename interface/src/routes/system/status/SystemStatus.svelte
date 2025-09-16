@@ -28,6 +28,7 @@
 	import type { SystemInformation, Analytics } from '$lib/types/models';
 	import { socket } from '$lib/stores/socket';
 	import { telemetry } from '$lib/stores/telemetry';
+	import Battery from '~icons/tabler/battery-automotive';
 
 	let systemInformation: SystemInformation = $state();
 
@@ -198,7 +199,7 @@
 				{#if page.data.features.battery}
 					<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 						<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
-							<Power class="text-primary-content h-auto w-full scale-75" />
+							<Battery class="text-primary-content h-auto w-full scale-75" />
 						</div>
 						<div>
 							<div class="font-bold">Battery</div>

@@ -42,22 +42,18 @@
 					},
 					{
 						label: 'Voltage [V]', // 🌙
-						borderColor: daisyColor('--color-secondary', 25),
-						backgroundColor: daisyColor('--color-secondary', 25),
-						borderWidth: 0,
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
+						borderWidth: 2,
 						data: $batteryHistory.voltage,
-						fill: true,
-						stepped: true,
 						yAxisID: 'y2'
 					},
 					{
 						label: 'Current [A]', // 🌙
-						borderColor: daisyColor('--color-secondary', 25),
-						backgroundColor: daisyColor('--color-secondary', 25),
-						borderWidth: 0,
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
+						borderWidth: 2,
 						data: $batteryHistory.current,
-						fill: true,
-						stepped: true,
 						yAxisID: 'y2'
 					},
 				]
@@ -182,7 +178,7 @@
 		<Battery class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span>Battery History</span>
+		<span>Energy History</span>
 	{/snippet}
 
 	<div class="w-full overflow-x-auto">

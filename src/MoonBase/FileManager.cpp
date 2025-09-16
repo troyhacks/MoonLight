@@ -70,7 +70,7 @@ StateUpdateResult FilesState::update(JsonObject &root, FilesState &state)
 
     if (root["showHidden"] != state.showHidden) {
         state.showHidden = root["showHidden"];
-        MB_LOGV(MB_TAG, "showHidden %d", state.showHidden);
+        MB_LOGD(MB_TAG, "showHidden %d", state.showHidden);
         changed = true;
     }
 

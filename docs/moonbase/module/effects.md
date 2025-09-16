@@ -5,7 +5,8 @@
 The Effects module allows you to define the tasks to run an **effect** (e.g. bouncing balls), to **modify** the effect (e.g mirror).
 Each task is defined as a node. A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager). A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
 
-* Layer: Choose the layer - currently only one layer (layer 0 supported)
+* Layer: Choose the layer - currently only one layer supported
+    * Start, End and Brightness: read only for now, when multiple layers are implemented (>v0.6.0), these can be set per layer
 * Nodes: effects and modifiers will be shown as nodes with controls
     * Reorder: Nodes can be reordered, defining the order of executions (effects: which effect on top of the other effect. Modifiers: which modifier is done first, e.g. circle then multiply will yield to a different result than multiply then circle)
 

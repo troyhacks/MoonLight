@@ -92,6 +92,16 @@ public:
                 return response.send();
             });
         #endif
+
+        _state.readHook = [&](JsonObject data) {
+            data["start"]["x"] = 0;
+            data["start"]["y"] = 0;
+            data["start"]["z"] = 0;
+            data["end"]["x"] = layerP.lights.header.size.x;
+            data["end"]["y"] = layerP.lights.header.size.y;
+            data["end"]["z"] = layerP.lights.header.size.z;
+            data["brightness"] = layerP.lights.header.brightness;
+        };
     }
 
     void setupDefinition(JsonArray root) override {
@@ -104,6 +114,10 @@ public:
             values.add(i);
             i++;
         }
+        property = root.add<JsonObject>(); property["name"] = "start"; property["type"] = "coord3D"; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "end"; property["type"] = "coord3D"; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["ro"] = true;
+
         NodeManager::setupDefinition(root);
     }
 

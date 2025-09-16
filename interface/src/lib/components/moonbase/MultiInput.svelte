@@ -101,7 +101,7 @@
             href="http://{value}.local"
             target ="_blank"
         >{value}</a>
-    {:else if property.type == "coord3D"}
+    {:else if property.type == "coord3D" && value != null} <!-- value not null otherwise value.x etc can cause errors-->
         <span>{value.x}, {value.y}, {value.z}</span> 
     {:else}
         <span>{value}</span> 
