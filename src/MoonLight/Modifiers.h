@@ -350,6 +350,8 @@ class RotateNodifier: public Node {
   void modifyXYZ(Coord3D &position) override {
 
     constexpr int Fixed_Scale = 1 << 10;
+    constexpr int Scale_Shift = 10;
+    
 
     if ((millis() - data.lastUpdate > 1000 / (rotateSpeed + 1)) && rotateSpeed) { // Only update if the angle has changed
       data.lastUpdate = millis();
@@ -388,9 +390,9 @@ class RotateNodifier: public Node {
     int dy = position.y - data.midY;
 
     // Apply the 3 shear transformations
-    int x1 = dx + data.shearX * dy / Fixed_Scale;
-    int y1 = dy + data.shearY * x1 / Fixed_Scale;
-    int x2 = x1 + data.shearX * y1 / Fixed_Scale;
+    int x1 = dx + ((data.shearX * dy + ( 1<<(Scale_Shift-1))) >> Scale_Shift);
+    int y1 = dy + ((data.shearY * x1 + ( 1<<(Scale_Shift-1))) >> Scale_Shift);
+    int x2 = x1 + ((data.shearX * y1 + ( 1<<(Scale_Shift-1))) >> Scale_Shift);
 
     // Translate position back and assign
     position.x = x2 + data.midX;
