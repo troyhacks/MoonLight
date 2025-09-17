@@ -70,7 +70,6 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
     
-    //run one loop of an effect
     void PhysicalLayer::loop() {
         if (lights.header.isPositions == 0 || lights.header.isPositions == 3) {//otherwise lights is used for positions etc.
 
@@ -105,11 +104,16 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::loopDrivers() {
-        if (lights.header.isPositions == 0) {//otherwise lights is used for positions etc.
+        if (prevSize != lights.header.size)
+            MB_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
+        if (lights.header.isPositions == 0) { //otherwise lights is used for positions etc.
             for (Node *node: nodes) {
+                if (prevSize != lights.header.size)
+                    node->onSizeChanged(prevSize);
                 if (node->on)
                     node->loop();
             }
+            prevSize = lights.header.size;
         }
     }
 

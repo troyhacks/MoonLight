@@ -46,9 +46,7 @@ VirtualLayer::~VirtualLayer() {
 }
 
 void VirtualLayer::setup() {
-  for (Node *node: nodes) {
-    node->setup();
-  }
+  //no node setup here as done in addNode !
 }
 
 void VirtualLayer::loop() {
@@ -62,10 +60,15 @@ void VirtualLayer::loop() {
     }
   }
 
+  if (prevSize != size)
+    MB_LOGD(ML_TAG, "onSizeChanged V %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, size.x, size.y, size.z);
   for (Node *node: nodes) {
+    if (prevSize != size)
+      node->onSizeChanged(prevSize);
     if (node->on)
       node->loop();
   }
+  prevSize = size;
 
 };
 

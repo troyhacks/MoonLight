@@ -81,7 +81,7 @@ protected:
             JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
             // serializeJson(nodeState, Serial); Serial.println();
 
-            if (updatedItem.name == "name" && updatedItem.parent[1] == "") { //onName, exclude parent 1(node controls has also name)
+            if (updatedItem.name == "name" && updatedItem.parent[1] == "") { // nodes[i].name
 
                 Node *oldNode = updatedItem.index[0] < nodes->size() ? (*nodes)[updatedItem.index[0]] : nullptr; //find the node in the nodes list
                 bool newNode = false;
@@ -166,9 +166,10 @@ protected:
                     //     // not needed as creating the node is already running it ...
                     // }
                 #endif
-            }
+            } // nodes[i].name
 
-            if (updatedItem.parent[1] == "controls" && updatedItem.name == "on") {
+            else if (updatedItem.name == "on" && updatedItem.parent[1] == "") { //nodes[i].on
+                // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 if (updatedItem.index[0] < nodes->size()) {
                     MB_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
@@ -181,9 +182,9 @@ protected:
                     else
                         MB_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<String>().c_str());
                 }
-            }
+            } //nodes[i].on
 
-            if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {    //process controls values 
+            else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {  //nodes[i].controls[j].value
                 // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
                 if (updatedItem.index[0] < nodes->size()) {
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
@@ -194,7 +195,9 @@ protected:
                     }
                     else MB_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
                 }
-            }
+            } //nodes[i].controls[j].value
+            // else
+            //     MB_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             // end Nodes
         }
         // else
@@ -205,9 +208,15 @@ protected:
         //reorder in layerP.nodes.
         MB_LOGD(ML_TAG, "%d %d %d", nodes->size(), stateIndex, newIndex);
         //swap nodes
-        Node *node = (*nodes)[stateIndex];
-        (*nodes)[stateIndex] = (*nodes)[newIndex];
-        (*nodes)[newIndex] = node;
+        Node *nodeS = (*nodes)[stateIndex];
+        Node *nodeN = (*nodes)[newIndex];
+        (*nodes)[stateIndex] = nodeN;
+        (*nodes)[newIndex] = nodeS;
+
+        //modifiers and layouts trigger remaps
+        nodeS->requestMappings();
+        nodeN->requestMappings();
+
     }
 
     void loop() {

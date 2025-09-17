@@ -114,6 +114,8 @@ class PhysicalLayer {
 
     uint16_t indexP = 0;
 
+    Coord3D prevSize; //to calculate size change
+
     PhysicalLayer();
 
     void setup();

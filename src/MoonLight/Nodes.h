@@ -33,7 +33,7 @@ public:
 
   bool on = false; //onUpdate will set it on
 
-  //C++ constructor is not inherited, so declare it as normal functions
+  //C++ constructors are not inherited, so declare it as normal functions
   virtual void constructor(VirtualLayer *layerV, JsonArray controls) {
     this->layerV = layerV;
     this->controls = controls;
@@ -149,15 +149,8 @@ public:
   }
 
   //effect, layout and modifier (?)
-  Coord3D prevSize;
-  virtual void loop() {
-    if (prevSize != layerV->size) {
-      MB_LOGD(ML_TAG, "size change");
-      sizeChanged(prevSize);
-      prevSize = layerV->size;
-    }
-  }
-  virtual void sizeChanged(Coord3D oldSize) {}
+  virtual void loop() {}
+  virtual void onSizeChanged(Coord3D oldSize) {} //virtual/effect nodes: virtual size, physical/driver nodes: physical size
 
   //layout
   virtual void addLayout() {} //the definition of the layout, called by mapLayout()

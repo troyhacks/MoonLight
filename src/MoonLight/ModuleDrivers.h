@@ -92,8 +92,9 @@ public:
         #endif
 
         if (node) {
-            node->constructor(layerP.layerV[0], controls); //pass the layer to the node
+            node->constructor(layerP.layerV[0], controls); //pass the layer to the node (C++ constructors are not inherited, so declare it as normal functions)
             node->setup(); //run the setup of the effect
+            node->onSizeChanged(Coord3D());
             // layerV[0]->nodes.reserve(index+1);
             if (index >= layerP.nodes.size())
                 layerP.nodes.push_back(node);

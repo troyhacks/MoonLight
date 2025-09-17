@@ -140,7 +140,7 @@ class BouncingBallsEffect: public Node {
     Node::~Node();
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
     freeMB(balls);
     balls = allocMB<Ball[maxNumBalls]>(layerV->size.y);
 
@@ -150,8 +150,6 @@ class BouncingBallsEffect: public Node {
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
-
     if (!balls) return;
 
     layerV->fadeToBlackBy(100);
@@ -382,7 +380,7 @@ public:
     Node::~Node();
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
       freeMB(previousBarHeight);
       previousBarHeight = allocMB<uint16_t>(layerV->size.x);
       if (!previousBarHeight) {
@@ -391,7 +389,6 @@ public:
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
 
     const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layerV->custom1, 0, 255, 1, 16);
 
@@ -2025,7 +2022,7 @@ class GameOfLifeEffect: public Node {
     Node::~Node();
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
     dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
 
     freeMB(cells);
@@ -2044,7 +2041,6 @@ class GameOfLifeEffect: public Node {
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
 
     if (!cells || !futureCells || !cellColors) return;
 
@@ -2801,7 +2797,7 @@ class MoonManEffect: public Node {
     canvas = new M5Canvas(&M5.Display);
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
     // Create canvas for processing
     canvas->deleteSprite();
     canvas->createSprite(layerV->size.x, layerV->size.y);
@@ -2846,7 +2842,6 @@ class MoonManEffect: public Node {
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
 
     if (success)
       // Transfer canvas to LED panel

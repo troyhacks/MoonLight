@@ -87,6 +87,8 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
         void effectTask(void* pvParameters) {
             // 🌙
 
+            layerP.setup(); //setup virtual layers (no node setup here as done in addNode)
+
             for (;;) {
                 esp32sveltekit.lps++; // 🌙 todo: not moonlight specific?
 
@@ -94,7 +96,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                     // MB_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
                 }
 
-                layerP.loop(); //run all the effects of all virtual layers (currently only one)
+                layerP.loop(); //run all the effects of all virtual layers (currently only one layer)
 
                 xSemaphoreGive(driverSemaphore);
                     
@@ -111,7 +113,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
         void driverTask(void* pvParameters) {
             // 🌙
 
-            // layerP.setup2();
+            // layerP.setup() done in effectTask
 
             for (;;) {
 

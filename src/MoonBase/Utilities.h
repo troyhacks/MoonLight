@@ -326,8 +326,9 @@ bool isInPSRAM(void* ptr);
 template<typename T>
 T* allocMB(size_t n) {
     T* res = (T*)heap_caps_calloc_prefer(n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
-    if (res)
-        MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
+    if (res) {
+        // MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
+    }
     else 
         MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
     return res;
@@ -336,8 +337,9 @@ T* allocMB(size_t n) {
 template<typename T>
 T* reallocMB(T* p, size_t n) {
     T* res = (T*)heap_caps_realloc_prefer(p, n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
-    if (res)
-        MB_LOGI(MB_TAG, "Re-Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
+    if (res) {
+        // MB_LOGI(MB_TAG, "Re-Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
+    }
     else 
         MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
     return res;
@@ -347,7 +349,7 @@ T* reallocMB(T* p, size_t n) {
 template<typename T>
 void freeMB(T* p) {
     if (p) {
-        MB_LOGD(MB_TAG, "free x x %d bytes in %s, s:%d", sizeof(T), isInPSRAM(p)?"PSRAM":"RAM", heap_caps_get_allocated_size(p));
+        // MB_LOGD(MB_TAG, "free x x %d bytes in %s, s:%d", sizeof(T), isInPSRAM(p)?"PSRAM":"RAM", heap_caps_get_allocated_size(p));
         heap_caps_free(p);
         p = nullptr;
     }
