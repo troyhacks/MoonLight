@@ -1,3 +1,4 @@
+
 # Develop Overview
 
 * [Start developing for MoonLight](https://moonmodules.org/MoonLight/develop/overview/)
@@ -58,8 +59,46 @@ Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg
 
 * Issues
     * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
-    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this. 
+    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
 
+In pictures:
+
+* Step 1: Erase ESP32 device:
+  
+	<img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
+
+* Step 2: Flash to ESP32 device
+  
+	<img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
+
+* Step 3: Check serial output
+  
+	<img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
+
+* Step 4: Connect to the WiFi AP of the ESP32 device: captive portal or via http://4.3.2.1
+  
+	<img width="350" src="https://github.com/user-attachments/assets/20b9f7fe-ab3d-4b8d-b20a-478129d79c6f" />
+
+* Step 5: Check AP settings
+
+	<img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
+  
+* Step 6: Change hostname and enter WiFi credentials
+
+	<img width="350" src="https://github.com/user-attachments/assets/81aab0c6-5d60-4ac9-8aee-54a7147be46e" />
+
+* Step 7: Add an effect
+
+	<img width="350" src="https://github.com/user-attachments/assets/6cc3749c-983a-4659-9c63-fab173b4750c" />
+
+* Step 8: Add a layout and set pin(s): Monitor shows effect
+
+	<img width="350" src="https://github.com/user-attachments/assets/d83277bd-4bc1-495c-ae21-85efe41ab8b1" />
+
+* Step 9: Add a driver: LEDs shows effect
+
+	<img width="350" src="https://github.com/user-attachments/assets/67447f55-7a22-41ab-af8c-0a2e98462792" />
+  
 ## Pull Requests
 
 * Want to make changes: fork the repo and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
