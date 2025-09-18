@@ -187,6 +187,8 @@ void setup()
     // sizeof(moduleChannels);
     // sizeof(moduleLightsControl);
     // sizeof(moduleMoonLightInfo);
+    // sizeof(layerP.lights);
+    // sizeof(layerP.lights.header);
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
