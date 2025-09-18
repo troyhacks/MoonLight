@@ -44,15 +44,70 @@
 		}
 	};
 
+	// function unpackCoord3DInto3Bytes(xin: number, yin: number, zin:number) {
+	// 	// Combine 3 bytes into a 24-bit number
+	// 	const packed = (xin << 16) | (yin << 8) | zin;
+
+	// 	const x = (packed >> 13) & 0x7FF; // 11 bits
+	// 	const y = (packed >> 5) & 0xFF;   // 8 bits
+	// 	const z = packed & 0x1F;          // 5 bits
+
+	// 	return { x, y, z };
+	// }
+
+	// JavaScript unpacking function
 	function unpackCoord3DInto3Bytes(xin: number, yin: number, zin:number) {
+		// Bit masks for each mode
+		const MODE0_X_MASK = 0x7F;    // 7 bits
+		const MODE0_Y_MASK = 0x7F;    // 7 bits
+		const MODE0_Z_MASK = 0xFF;    // 8 bits
+		
+		const MODE1_X_MASK = 0x1FF;   // 9 bits
+		const MODE1_Y_MASK = 0x1;     // 1 bit
+		const MODE1_Z_MASK = 0xFFF;   // 12 bits
+		
+		const MODE2_X_MASK = 0x1;     // 1 bit
+		const MODE2_Y_MASK = 0x1FF;   // 9 bits
+		const MODE2_Z_MASK = 0xFFF;   // 12 bits
+		
+		const MODE3_X_MASK = 0x1F;    // 5 bits
+		const MODE3_Y_MASK = 0x1F;    // 5 bits
+		const MODE3_Z_MASK = 0x1F;    // 5 bits
+		
 		// Combine 3 bytes into a 24-bit number
 		const packed = (xin << 16) | (yin << 8) | zin;
-
-		const x = (packed >> 13) & 0x7FF; // 11 bits
-		const y = (packed >> 5) & 0xFF;   // 8 bits
-		const z = packed & 0x1F;          // 5 bits
-
-		return { x, y, z };
+		
+		// Extract mode from top 2 bits
+		const mode = (packed >> 22) & 0x3;
+		
+		let x, y, z;
+		
+		switch(mode) {
+			case 0: // x=7, y=7, z=8 (max: 2^7=128, 2^7=128, 2^8=256) - for 128x128x1
+				x = (packed >> 15) & MODE0_X_MASK;
+				y = (packed >> 8) & MODE0_Y_MASK;
+				z = packed & MODE0_Z_MASK;
+				break;
+			case 1: // x=9, y=1, z=12 (max: 2^9=512, 1, 2^12=4096) - for 300x1x1 and 1x1x300
+				x = (packed >> 13) & MODE1_X_MASK;
+				y = (packed >> 12) & MODE1_Y_MASK;
+				z = packed & MODE1_Z_MASK;
+				break;
+			case 2: // x=1, y=9, z=12 (max: 1, 2^9=512, 2^12=4096) - for 1x300x1
+				x = (packed >> 21) & MODE2_X_MASK;
+				y = (packed >> 12) & MODE2_Y_MASK;
+				z = packed & MODE2_Z_MASK;
+				break;
+			case 3: // x=5, y=5, z=5 (max: 2^5=32, 2^5=32, 2^5=32) - for 30x30x30
+				x = (packed >> 17) & MODE3_X_MASK;
+				y = (packed >> 12) & MODE3_Y_MASK;
+				z = (packed >> 7) & MODE3_Z_MASK;
+				break;
+			default:
+				throw new Error("Invalid packing mode");
+		}
+		
+		return { x, y, z }; //, mode
 	}
 
 	let nrOfLights:number;

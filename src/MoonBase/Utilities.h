@@ -29,20 +29,20 @@
 
 struct Coord3D {
 
-    uint16_t x;
-    uint8_t y;
-    uint8_t z;
+    int x;
+    int y;
+    int z;
 
     // Coord3D() : x(0), y(0), z(0) {} // Default constructor
 
-    Coord3D () {
+    Coord3D() {
         this->x = 0;
         this->y = 0;
         this->z = 0;
     }
     
     //x max 2^11 -> 2047, y max 2^8 -> 255, z max 2^5 -> 31
-    Coord3D (uint16_t x, uint8_t y = 0, uint8_t z = 0) {
+    Coord3D(int x, int y = 0, int z = 0) {
         this->x = x;
         this->y = y;
         this->z = z;
