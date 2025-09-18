@@ -144,7 +144,7 @@ protected:
                     oldNode->requestMappings();
 
                     // layerP.removeNode(oldNode);
-                    MB_LOGD(ML_TAG, "s:%d p:%p", nodes->size(), oldNode);
+                    MB_LOGD(ML_TAG, "remove oldNode: %d p:%p", nodes->size(), oldNode);
                     // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
                     // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
                     oldNode->~Node();

@@ -104,9 +104,9 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::loopDrivers() {
-        if (prevSize != lights.header.size)
-            MB_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
         if (lights.header.isPositions == 0) { //otherwise lights is used for positions etc.
+            if (prevSize != lights.header.size)
+                MB_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
             for (Node *node: nodes) {
                 if (prevSize != lights.header.size)
                     node->onSizeChanged(prevSize);

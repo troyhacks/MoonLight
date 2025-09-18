@@ -58,10 +58,19 @@ public:
     std::function<void(JsonArray root)> setupDefinition = nullptr;
 
     void setupData();
+
+    //called from ModuleState::update.checkReOrderSwap
     void execOnReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
+
+    //called from compareRecursive
     void execOnUpdate(UpdatedItem &updatedItem);
+
+    //called from ModuleState::update and ModuleState::setupData()
     bool compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth = UINT8_MAX, uint8_t index =UINT8_MAX);
+
+    //called from ModuleState::update
     bool checkReOrderSwap(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem &updatedItem, uint8_t depth = UINT8_MAX, uint8_t index =UINT8_MAX);
+    
     std::function<void(UpdatedItem &)> onUpdate = nullptr;
     std::function<void(uint8_t, uint8_t)> onReOrderSwap = nullptr;
 
@@ -85,6 +94,7 @@ public:
 
     virtual void setupDefinition(JsonArray root);
 
+    //called in compareRecursive->execOnUpdate
     virtual void onUpdate(UpdatedItem &updatedItem);
     virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
 

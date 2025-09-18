@@ -1954,8 +1954,6 @@ class GameOfLifeEffect: public Node {
     addControl(colorByAge, "colorByAge", "checkbox");
     addControl(infinite, "infinite", "checkbox");
     addControl(blur, "blur", "range", 0, 255);
-
-    setBirthAndSurvive(); //initiate based on ruleset and customRuleString
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {
@@ -2476,7 +2474,7 @@ class RubiksCubeEffect: public Node {
     addControl(randomTurning, "randomTurning", "checkbox");   
   }
 
-  bool doInit = true;
+  bool doInit = false;
   void onUpdate(String &oldValue, JsonObject control) override {
     Node::onUpdate(oldValue, control);
 
@@ -2676,8 +2674,6 @@ class ParticlesEffect: public Node {
     addControl(randomGravity, "randomGravity", "checkbox");
     addControl(gravityChangeInterval, "gravityChangeInterval", "range", 1, 10);
     // addControl(bool, "Debug Print",             layerV->effectData.write<bool>(0));
-
-    settingUpParticles();
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {

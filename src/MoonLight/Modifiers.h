@@ -302,7 +302,7 @@ class RotateNodifier: public Node {
   RotateData data;
 
   uint8_t direction = 0;
-  uint8_t rotateBPM = 60;
+  uint8_t rotateBPM = 15;
   bool expand = false;
 
   void setup() override {
