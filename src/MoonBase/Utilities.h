@@ -262,12 +262,17 @@ struct Char {
       return s;
     }
 
-    void split(const char * splitter, std::function<void(const char *)> callback) {
-        char *token = strtok(s, splitter);
+    void split(const char * splitter, std::function<void(const char *, uint8_t)> callback) {
+        char savedS[N];
+        strncpy(savedS, s, N); //save s
+        char *token = strtok(s, splitter); //eat s
+        uint8_t sequence = 0;
         while (token != nullptr ) {
-            callback(token);
+            callback(token, sequence);
+            sequence++;
             token = strtok(nullptr, splitter);
         }
+        strncpy(s, savedS, N); //restore s
     }
 
     void formatTime(time_t time, const char *format)

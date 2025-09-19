@@ -69,6 +69,9 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
         JsonDocument root;
         root["pins"].to<JsonArray>();
 
+        Char<64> ledPins;
+        ledPins = LED_PINS;
+
         for (int gpio_num = 0; gpio_num < SOC_GPIO_PIN_COUNT; gpio_num++) {
             JsonObject task = root["pins"].as<JsonArray>().add<JsonObject>();
 
@@ -118,8 +121,15 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
                     task["PinInfo"] = "Battery";
             #endif
             #ifdef LED_PINS
-                if (strstr(task["GPIO"].as<const char *>(), LED_PINS) != nullptr) //to do , this will give wrong pins, e.g. 1 also 10 etc
-                    task["PinInfo"] = "LED";
+
+                ledPins.split(",",  [&](const char *token, uint8_t sequence) {
+                    if (gpio_num == atoi(token)) {
+                        // MB_LOGD(MB_TAG, "token: %s == %s (%d)", task["GPIO"].as<String>().c_str(), token, sequence);
+                        Char<32> text;
+                        text.format("LED #%d", sequence+1);
+                        task["PinInfo"] = text.c_str();
+                    }
+                });
             #endif
         }
 
