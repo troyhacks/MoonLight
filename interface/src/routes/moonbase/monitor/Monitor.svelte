@@ -32,7 +32,7 @@
 
 	const handleMonitor = (data: Uint8Array) => {
 
-		if (data.length == 29)
+		if (data.length == 37) //see ModuleLightsControl.h:243
 			handleHeader(data)
 		else {
 			if (isPositions) {
@@ -43,17 +43,6 @@
 				handleChannels(data);
 		}
 	};
-
-	function unpackCoord3DInto3Bytes(xin: number, yin: number, zin:number) {
-		// Combine 3 bytes into a 24-bit number
-		const packed = (xin << 16) | (yin << 8) | zin;
-
-		const x = (packed >> 13) & 0x7FF; // 11 bits
-		const y = (packed >> 5) & 0xFF;   // 8 bits
-		const z = packed & 0x1F;          // 5 bits
-
-		return { x, y, z };
-	}
 
 	let nrOfLights:number;
 	let channelsPerLight:number;
@@ -67,6 +56,8 @@
 	const handleHeader = (header: Uint8Array) => {
 		console.log("Monitor.handleHeader", header);
 
+		let view = new DataView(header.buffer);
+
 		// let isPositions:number = header[6]; 
 		isPositions   = true;//(header[6] >> 0) & 0x3; // bits 0-1
 		// offsetRed     = (header[6] >> 2) & 0x3; // bits 2-3
@@ -74,22 +65,22 @@
 		// offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7
 		// offsetWhite   = header[13];
 
-		nrOfLights = header[4] + 256 * header[5];
-		channelsPerLight = header[11];
-		offsetRGB = header[12];
+		nrOfLights = view.getUint16(12, true);//  header[12] + 256 * header[13];
+		channelsPerLight = view.getUint8(19);//header[19];
+		offsetRGB = view.getUint8(20);//header[20];
 
 		//rebuild scene
 		createScene(el);
 
 		// let ledFactor: number = 1;//header[1];
 		// let ledSize: number = header[23];
-		width = header[0] + 256 * header[1]; //max 2047
-		height = header[2];
-		depth = header[3];
+		width = view.getInt32(0, true);//header[0] + 256 * header[1];
+		height = view.getInt32(4, true);//header[4] + 256 * header[5];;
+		depth = view.getInt32(8, true);//header[8] + 256 * header[9];;
 
 		// let nrOfLights = header[4] + 256 * header[5];
 
-		console.log("Monitor.handleHeader", nrOfLights, channelsPerLight, width, height, depth);
+		console.log("Monitor.handleHeader", width, height, depth, nrOfLights, channelsPerLight, offsetRGB);
 
 	}
 
@@ -97,15 +88,18 @@
 		console.log("Monitor.handlePositions", positions);
 
 		for (let index = 0; index < nrOfLights * 3; index +=3) {
-			let position = unpackCoord3DInto3Bytes(positions[index], positions[index+1], positions[index+2])
+
+			let x = positions[index];
+			let y = positions[index+1];
+			let z = positions[index+2];
 
 			//set to -1,1 coordinate system of webGL
 			//width -1 etc as 0,0 should be top left, not bottom right
-			position.x = width==1?0:(((position.x) / (width - 1)) * 2.0 - 1.0);
-			position.y = height==1?0:(((height-1-position.y) / (height - 1)) * 2.0 - 1.0);
-			position.z = depth==1?0:(((depth-1-position.z) / (depth - 1)) * 2.0 - 1.0);
+			x = width==1?0:(((x) / (width - 1)) * 2.0 - 1.0);
+			y = height==1?0:(((height-1-y) / (height - 1)) * 2.0 - 1.0);
+			z = depth==1?0:(((depth-1-z) / (depth - 1)) * 2.0 - 1.0);
 
-			vertices.push(position.x, position.y, position.z);
+			vertices.push(x, y, z);
 		}
 	}
 
@@ -117,7 +111,8 @@
 			done = true;
 		}
 		clearColors();
-		for (let index = 0; index < nrOfLights * channelsPerLight; index +=channelsPerLight) {
+		//max size supported is 255x255x255 (index < width * height * depth) ... todo: only any of the component < 255
+		for (let index = 0; index < nrOfLights * channelsPerLight; index += channelsPerLight) { // && index < width * height * depth
 			// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
 			const r = channels[index + offsetRGB + 0] / 255;
 			const g = channels[index + offsetRGB + 1] / 255;

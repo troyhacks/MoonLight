@@ -4,6 +4,8 @@ import { writable } from 'svelte/store';
 let battery_history = {
     soc: <number[]>[],
     charging: <number[]>[],
+    voltage: <number[]>[], // 🌙
+    current: <number[]>[], // 🌙
     timestamp: <number[]>[]
 };
 
@@ -19,6 +21,8 @@ function createBatteryHistory() {
 				...battery_history,
 				soc: [...battery_history.soc, content.soc].slice(-maxAnalyticsData),
 				charging: [...battery_history.charging, content.charging ? 1 : 0].slice(-maxAnalyticsData),
+				voltage: [...battery_history.voltage, content.voltage].slice(-maxAnalyticsData), // 🌙
+				current: [...battery_history.current, content.current].slice(-maxAnalyticsData), // 🌙
 				timestamp: [...battery_history.timestamp, Date.now()].slice(-maxAnalyticsData)
 			}));
 		}

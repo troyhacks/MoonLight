@@ -140,7 +140,7 @@ class BouncingBallsEffect: public Node {
     Node::~Node();
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
     freeMB(balls);
     balls = allocMB<Ball[maxNumBalls]>(layerV->size.y);
 
@@ -150,8 +150,6 @@ class BouncingBallsEffect: public Node {
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
-
     if (!balls) return;
 
     layerV->fadeToBlackBy(100);
@@ -166,7 +164,7 @@ class BouncingBallsEffect: public Node {
     //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     // }
 
-    for (uint8_t y =0; y < layerV->size.y; y++) {
+    for (int y =0; y < layerV->size.y; y++) {
       for (size_t i = 0; i < MIN(numBalls, maxNumBalls); i++) {
         float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
         float timeSec = timeSinceLastBounce/1000.0f;
@@ -341,8 +339,8 @@ public:
       layerV->setRGB(0, color);
       for (int x = layerV->size.x - 1; x >= 0; x--) { //int as we count down!!!
         if (x!=0) color = layerV->getRGB(x-1);
-        for (uint8_t y = 0; y < layerV->size.y; y++)
-          for (uint8_t z = 0; z < layerV->size.z; z++)
+        for (int y = 0; y < layerV->size.y; y++)
+          for (int z = 0; z < layerV->size.z; z++)
             layerV->setRGB(Coord3D(x,y,z), color);
       }
     }
@@ -382,7 +380,7 @@ public:
     Node::~Node();
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
       freeMB(previousBarHeight);
       previousBarHeight = allocMB<uint16_t>(layerV->size.x);
       if (!previousBarHeight) {
@@ -391,7 +389,6 @@ public:
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
 
     const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layerV->custom1, 0, 255, 1, 16);
 
@@ -740,8 +737,8 @@ class NoiseMeterEffect: public Node {
 
     for (int i=0; i<maxLen; i++) {                                    // The louder the sound, the wider the soundbar. By Andrew Tuline.
       uint8_t index = inoise8(i * sharedData.volume + aux0, aux1 + i * sharedData.volume);  // Get a value from the noise function. I'm using both x and y axis.
-      for (uint8_t y = 0; y < layerV->size.y; y++) //propagate to other dimensions
-        for (uint8_t z = 0; z < layerV->size.z; z++)
+      for (int y = 0; y < layerV->size.y; y++) //propagate to other dimensions
+        for (int z = 0; z < layerV->size.z; z++)
           layerV->setRGB(Coord3D(i, y, z), ColorFromPalette(layerV->layerP->palette, index));//, 255, PALETTE_SOLID_WRAP));
     }
 
@@ -908,8 +905,8 @@ class PopCornEffect: public Node {
         CRGB col = ColorFromPalette(layerV->layerP->palette, popcorn[i].colIndex*(256/maxNumPopcorn));
         if (ledIndex < layerV->size.x) {
           layerV->setRGB(ledIndex, col);
-          for (uint8_t y = 0; y < layerV->size.y; y++)
-            for (uint8_t z = 0; z < layerV->size.z; z++)
+          for (int y = 0; y < layerV->size.y; y++)
+            for (int z = 0; z < layerV->size.z; z++)
               layerV->setRGB(Coord3D(ledIndex,y,z), col);
         }
       }
@@ -1376,10 +1373,10 @@ public:
 
     CRGB color = CHSV( millis()/50, 255, 255);
 
-    uint8_t prevPos = layerV->size.x/2; //somewhere in the middle
+    int prevPos = layerV->size.x/2; //somewhere in the middle
 
-    for (uint8_t y = 0; y<layerV->size.y; y++) {
-      uint8_t pos = 0;
+    for (int y = 0; y<layerV->size.y; y++) {
+      int pos = 0;
 
       uint8_t b8 = beat8(bpm, y*100);
       uint8_t bs8 = beatsin8( bpm, 0, 255, y * 100);
@@ -1396,7 +1393,7 @@ public:
 
       //connect saw and square
       if ((type == 0 || type == 3) && abs(prevPos - pos) > layerV->size.x / 2) {
-        for (uint8_t x=0; x<layerV->size.x; x++)
+        for (int x=0; x<layerV->size.x; x++)
           layerV->setRGB(Coord3D(x, y), color);
       }
 
@@ -1419,7 +1416,7 @@ class Troy1ColorEffect: public Node {
 
   void loop() override {
 
-    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+    for (int x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
         layerV->setRGB(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1],sharedData.bands[7],sharedData.bands[0]));
         layerV->setBrightness(x, (sharedData.bands[0]>200)?0:layerV->layerP->lights.header.brightness);
@@ -1498,7 +1495,7 @@ class Troy1MoveEffect: public Node {
 
   void loop() override {
 
-    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+    for (int x=0; x < layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
         if (sharedData.bands[2] > 200 && cooldown + 3000 < millis()) { //cooldown for 3 seconds
           cooldown = millis();
@@ -1541,7 +1538,7 @@ class Troy2ColorEffect: public Node {
   }
 
   void loop() override {
-    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+    for (int x=0; x < layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
         layerV->setRGB(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1]>cutin?sharedData.bands[NUM_GEQ_CHANNELS-1]:0,sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]));
         layerV->setRGB1(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1],sharedData.bands[7]>cutin?sharedData.bands[7]:0,sharedData.bands[0]>cutin?sharedData.bands[0]:0));
@@ -1611,7 +1608,7 @@ class Troy2MoveEffect: public Node {
 
   void loop() override {
     bool coolDownSet = false;
-    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+    for (int x=0; x < layerV->size.x; x++) { // loop over lights defined in layout
       if (audioReactive) {
         if (sharedData.bands[0] > cutin) {
           layerV->setZoom(x, 255);
@@ -1659,7 +1656,7 @@ class FreqColorsEffect: public Node {
 
     layerV->fadeToBlackBy(50);
 
-    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+    for (int x=0; x < layerV->size.x; x++) { // loop over lights defined in layout
 
       if (audioReactive) {
         uint8_t nrOfLights = layerV->size.x * 3;
@@ -1707,7 +1704,7 @@ class WowiMoveEffect: public Node {
 
   void loop() override {
 
-    for (uint8_t x=0; x<layerV->size.x; x++) { // loop over lights defined in layout
+    for (int x=0; x < layerV->size.x; x++) { // loop over lights defined in layout
       layerV->setPan({x,0,0}, autoMove?beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0): pan); //if automove, pan the light over a range
       layerV->setTilt({x,0,0}, autoMove?beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0): tilt);
       layerV->setZoom({x,0,0}, zoom);
@@ -1747,7 +1744,7 @@ class AmbientMoveEffect: public Node {
 
   void loop() override {
 
-    for (uint8_t x = 0; x<layerV->size.x; x++) { //x-axis (column)
+    for (int x = 0; x<layerV->size.x; x++) { //x-axis (column)
 
       uint8_t band = map(x, 0, layerV->size.x-1, 2, NUM_GEQ_CHANNELS-3); //the frequency band applicable for the column, skip the lowest and the highest
       uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
@@ -1811,7 +1808,7 @@ public:
     uint32_t deltaMs = currentTime - lastTime;
     lastTime = currentTime;
 
-    for (uint8_t x = 0; x<layerV->size.x; x++) { //x-axis (column)
+    for (int x = 0; x<layerV->size.x; x++) { //x-axis (column)
       uint8_t band = map(x, 0, layerV->size.x, 0, NUM_GEQ_CHANNELS); //the frequency band applicable for the column, skip the lowest and the highest
       uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
       // Target speed based on current volume
@@ -1957,12 +1954,10 @@ class GameOfLifeEffect: public Node {
     addControl(colorByAge, "colorByAge", "checkbox");
     addControl(infinite, "infinite", "checkbox");
     addControl(blur, "blur", "range", 0, 255);
-
-    setBirthAndSurvive(); //initiate based on ruleset and customRuleString
   }
 
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
+  void onUpdate(String &oldValue, JsonObject control) override {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
       setBirthAndSurvive();
@@ -2025,7 +2020,7 @@ class GameOfLifeEffect: public Node {
     Node::~Node();
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
     dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
 
     freeMB(cells);
@@ -2044,7 +2039,6 @@ class GameOfLifeEffect: public Node {
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
 
     if (!cells || !futureCells || !cellColors) return;
 
@@ -2480,9 +2474,9 @@ class RubiksCubeEffect: public Node {
     addControl(randomTurning, "randomTurning", "checkbox");   
   }
 
-  bool doInit = true;
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
+  bool doInit = false;
+  void onUpdate(String &oldValue, JsonObject control) override {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "cubeSize" || control["name"] == "randomTurning") {
       doInit = true;
@@ -2680,12 +2674,10 @@ class ParticlesEffect: public Node {
     addControl(randomGravity, "randomGravity", "checkbox");
     addControl(gravityChangeInterval, "gravityChangeInterval", "range", 1, 10);
     // addControl(bool, "Debug Print",             layerV->effectData.write<bool>(0));
-
-    settingUpParticles();
   }
 
-  void updateControl(JsonObject control) override {
-    Node::updateControl(control);
+  void onUpdate(String &oldValue, JsonObject control) override {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "number of Particles" || control["name"] == "barriers") {
       settingUpParticles();
@@ -2801,7 +2793,7 @@ class MoonManEffect: public Node {
     canvas = new M5Canvas(&M5.Display);
   }
 
-  void sizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(Coord3D prevSize) override {
     // Create canvas for processing
     canvas->deleteSprite();
     canvas->createSprite(layerV->size.x, layerV->size.y);
@@ -2846,7 +2838,6 @@ class MoonManEffect: public Node {
   }
 
   void loop() override {
-    Node::loop(); //for sizeChanged
 
     if (success)
       // Transfer canvas to LED panel

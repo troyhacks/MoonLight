@@ -37,8 +37,8 @@
 				datasets: [
 					{
 						label: 'Loops/s',
-						borderColor: daisyColor('--p'),
-						backgroundColor: daisyColor('--p', 50),
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $analytics.lps,
 						yAxisID: 'y'
@@ -77,7 +77,7 @@
 						title: {
 							display: true,
 							text: 'Performance',
-							color: daisyColor('--bc'),
+							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
 								weight: 'bold'

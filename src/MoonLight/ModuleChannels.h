@@ -36,7 +36,7 @@ public:
         uint8_t i = 0;
         for (VirtualLayer * layer: layerP.layerV) {
             Char<32> layerName;
-            layerName.format("Virtual layer %d", i);
+            layerName.format("Layer %d", i);
             values.add(layerName.c_str());
             i++;
         }

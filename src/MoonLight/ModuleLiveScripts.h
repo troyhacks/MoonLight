@@ -51,24 +51,27 @@ public:
                     for (auto updatedItem : filesState.updatedItems) {
                         //if file is the current live script, recompile it (to do: multiple live effects)
                         uint8_t index = 0;
-                        for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-                            String nodeName = nodeState["nodeName"];
+                        _moduleEffects->read([&](ModuleState &effectsState) {
+                            for (JsonObject nodeState: effectsState.data["nodes"].as<JsonArray>()) {
+                                String name = nodeState["name"];
 
-                            if (updatedItem == nodeName) {
-                                MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["nodeName"]);
-                                if (liveScriptNode) {
-                                    liveScriptNode->compileAndRun();
+                                if (updatedItem == name) {
+                                    MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
+                                    if (liveScriptNode) {
+                                        liveScriptNode->compileAndRun();
 
-                                    //wait until setup has been executed?
+                                        //wait until setup has been executed?
 
-                                    _moduleEffects->requestUIUpdate = true; //update the Effects UI
+                                        _moduleEffects->requestUIUpdate = true; //update the Effects UI
+                                    }
+
+                                    MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
                                 }
-
-                                MB_LOGV(ML_TAG, "update due to new node %s done", nodeName.c_str());
+                                index++;
                             }
-                            index++;
-                        }
+                        });
+                        //todo also for moduleDrivers
                     }
                 });
             });

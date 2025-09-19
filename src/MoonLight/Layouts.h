@@ -41,7 +41,7 @@ class HumanSizedCubeLayout: public Node {
     char *nextPin = pins;
 
     //front: z = 0
-    for (uint8_t x = 0; x<width; x++) for (uint8_t y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, 0));
+    for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, 0));
     while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
 
     //back: z = depth+1
@@ -99,8 +99,8 @@ class PanelLayout: public Node {
     JsonObject property;
     JsonArray values;
 
-    addControl(panel.size[0], "panelWidth", "number", 1, 2047);
-    addControl(panel.size[1], "panelHeight", "number", 1, 255);
+    addControl(panel.size[0], "panelWidth", "number", 1, 65536);
+    addControl(panel.size[1], "panelHeight", "number", 1, 65536);
     property = addControl(panel.wiringOrder, "wiringOrder", "select"); values = property["values"].to<JsonArray>(); values.add("XY"); values.add("YX");
     addControl(panel.inc[0], "X++", "checkbox"); addControl(panel.inc[1], "Y++", "checkbox"); 
     addControl(panel.snake[1], "snake", "checkbox");
@@ -156,8 +156,8 @@ class PanelsLayout: public Node {
     addControl(panels.inc[0], "X++P", "checkbox"); addControl(panels.inc[1], "Y++P", "checkbox"); 
     addControl(panels.snake[1], "snakeP", "checkbox");
 
-    addControl(panel.size[0], "panelWidth", "number", 1, 2047);
-    addControl(panel.size[1], "panelHeight", "number", 1, 255);
+    addControl(panel.size[0], "panelWidth", "number", 1, 65536);
+    addControl(panel.size[1], "panelHeight", "number", 1, 65536);
     property = addControl(panel.wiringOrder, "wiringOrder", "select"); values = property["values"].to<JsonArray>(); values.add("XY"); values.add("YX");
     addControl(panel.inc[0], "X++", "checkbox"); addControl(panel.inc[1], "Y++", "checkbox"); 
     addControl(panel.snake[1], "snake", "checkbox");
@@ -213,9 +213,9 @@ class CubeLayout: public Node {
   void setup() override {
     hasLayout = true;
     
-    addControl(panels.size[0], "width", "number", 1, 2047);
-    addControl(panels.size[1], "height", "number", 1, 255);
-    addControl(panels.size[2], "depth", "number", 1, 31);
+    addControl(panels.size[0], "width", "number", 1, 128);
+    addControl(panels.size[1], "height", "number", 1, 128);
+    addControl(panels.size[2], "depth", "number", 1, 128);
     JsonObject property;
     JsonArray values;
     property = addControl(panels.wiringOrder, "wiringOrder", "select"); 
@@ -273,7 +273,7 @@ class SingleLineLayout: public Node {
   static const char * tags() {return "";}
 
   uint8_t start_x = 0;
-  uint8_t width = 1;
+  uint8_t width = 30;
   uint16_t yposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
@@ -295,7 +295,7 @@ class SingleLineLayout: public Node {
       }
     }
     else {
-      for (uint8_t x = start_x; x<start_x+width; x++) {
+      for (int x = start_x; x<start_x+width; x++) {
         addLight(Coord3D(x, yposition, 0));
       }
     }
@@ -312,7 +312,7 @@ class SingleRowLayout: public Node {
   static const char * tags() {return "";}
 
   uint8_t start_y = 0;
-  uint8_t height = 1;
+  uint8_t height = 30;
   uint16_t xposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
@@ -334,7 +334,7 @@ class SingleRowLayout: public Node {
       }
     }
     else {
-      for (uint8_t y = start_y; y<start_y+height; y++) {
+      for (int y = start_y; y<start_y+height; y++) {
         addLight(Coord3D(xposition, y, 0));
       }
     }

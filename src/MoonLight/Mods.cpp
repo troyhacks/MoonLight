@@ -87,8 +87,8 @@ void DriverNode::loop() {
   #endif
 }
 
-void DriverNode::updateControl(JsonObject control) {
-  Node::updateControl(control);
+void DriverNode::onUpdate(String &oldValue, JsonObject control) {
+  Node::onUpdate(oldValue, control);
 
   LightsHeader *header = &layerV->layerP->lights.header;
 
@@ -162,8 +162,8 @@ void DriverNode::updateControl(JsonObject control) {
         
         // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
 
-        if (oldChannelsPerLight != header->channelsPerLight)
-          restartNeeded = true; //in case 
+        // if (oldChannelsPerLight != header->channelsPerLight)
+        //   restartNeeded = true; //in case 
       }
     #else //ESP32_LEDSDRIVER
       if (ledsDriver.initLedsDone) {
@@ -581,8 +581,8 @@ void ArtNetDriverMod::loop() {
     }
   }
 
-  void FastLEDDriverMod::updateControl(JsonObject control) {
-    Node::updateControl(control);
+  void FastLEDDriverMod::onUpdate(String &oldValue, JsonObject control) {
+    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "maxPower") {
         MB_LOGD(ML_TAG, "setMaxPowerInMilliWatts %d", maxPower);
@@ -604,17 +604,20 @@ void ArtNetDriverMod::loop() {
 
     DriverNode::setup();
     #if HP_ALL_DRIVERS
-      addControl(version, "Version", "text", 0, 30, true);
+      addControl(version, "Version", "text", 0, 30, true); //read only
     #endif
   }
 
   void PhysicalDriverMod::addLayout() {
     #if HP_ALL_DRIVERS
-      if (!lightPresetSaved || initDone || layerV->layerP->sortedPins.size() == 0) return;
+      if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
+        MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layerV->layerP->sortedPins.size());
+        return;
+      }
 
       if (layerV->layerP->pass == 1) { //physical
-        initDone = true;
-        MB_LOGV(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+
+        MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
         if (safeModeMB) {
           MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
           return;
@@ -649,24 +652,71 @@ void ArtNetDriverMod::loop() {
 
         if (nb_pins > 0) {
 
-          uint8_t colorOrder = ORDER_GRB; //default
+          if (initDone) {
+            //don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
-          if (lightPreset == 0) colorOrder = ORDER_RGB;
-          else if (lightPreset == 1) colorOrder = ORDER_RBG;
-          else if (lightPreset == 2) colorOrder = ORDER_GRB;
-          else if (lightPreset == 3) colorOrder = ORDER_GBR;
-          else if (lightPreset == 4) colorOrder = ORDER_BRG;
-          else if (lightPreset == 5) colorOrder = ORDER_BGR;
-          // else if (lightPreset == 6) colorOrder = ORDER_RGBW; // doesn't exist!
-          else
-            colorOrder = ORDER_GRBW; //best we can offer is 4 channels GRBW, to do: driver accepts more channels
+            //so do what ledsDriver.initled is doing:
 
-          ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins, (colorarrangment)colorOrder);
+            //from lightPresetSaved
+            ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
+            ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
+            ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
+            ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+
+            //from initled
+            ledsDriver.num_strips = nb_pins;
+            ledsDriver.total_leds = 0;
+            for (int i = 0; i < ledsDriver.num_strips; i++)
+            {
+                ledsDriver.stripSize[i] = lengths[i];
+                ledsDriver.total_leds += lengths[i];
+            }
+            int num_led_per_strip = ledsDriver.maxLength(lengths, ledsDriver.num_strips);
+
+            //from __initled:
+
+            ledsDriver.num_led_per_strip = num_led_per_strip;
+            ledsDriver._offsetDisplay.offsetx = 0;
+            ledsDriver._offsetDisplay.offsety = 0;
+            ledsDriver._offsetDisplay.panel_width = num_led_per_strip;
+            ledsDriver._offsetDisplay.panel_height = 9999;
+            ledsDriver._defaultOffsetDisplay = ledsDriver._offsetDisplay;
+            ledsDriver.linewidth = num_led_per_strip;
+
+            MB_LOGD(ML_TAG, "reinit physDriver %d x %d (%d)", ledsDriver.num_strips, num_led_per_strip, __NB_DMA_BUFFER);
+
+            ledsDriver.setPins(pins); //if pins and lengths changed, set that right
+
+            // i2sInit(); //not necessary, initled did it, no need to change
+
+            //delete allocations done by physical driver if total channels changes (larger)
+            for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+            {
+                heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
+                heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+            }
+
+            ledsDriver.initDMABuffers(); //create them again
+
+            return; //bye bye initled, we did it ourselves ;-)
+          }
+
+          uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
+
+          ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
+
+          ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
+          ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
+          ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
+          ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+
+          ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
+
           #if ML_LIVE_MAPPING
-            driver.setMapLed(&mapLed);
+            ledsDriver.setMapLed(&mapLed);
           #endif
-          //void initled(uint8_t *leds, int *Pinsq, int *sizes, int num_strips, colorarrangment cArr)
-          initDone = true; //so loop is called
+
+          initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
         }
       }
     #else //ESP32_LEDSDRIVER
@@ -734,7 +784,19 @@ void ArtNetDriverMod::loop() {
       }
     #endif
   }
+  PhysicalDriverMod::~PhysicalDriverMod() {
+    MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
+    for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+    {
+        heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
+        heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+    }
+
+    //anything else to delete? I2S ...
+
+    // if recreating the Physical driver later, still initled cannot be done again ?
+  }
   void VirtualDriverMod::setup() {
     hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
     DriverNode::setup();

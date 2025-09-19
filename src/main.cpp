@@ -54,12 +54,12 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
     #include "MoonBase/FileManager.h"
     #include "MoonBase/ModuleDevices.h"
     #include "MoonBase/ModuleTasks.h"
-    #include "MoonBase/ModulePins.h"
+    #include "MoonBase/ModuleIO.h"
 
     FileManager fileManager = FileManager(&server, &esp32sveltekit);
     ModuleDevices moduleDevices = ModuleDevices(&server, &esp32sveltekit);
     ModuleTasks moduleTasks = ModuleTasks(&server, &esp32sveltekit);
-    ModulePins modulePins = ModulePins(&server, &esp32sveltekit);
+    ModuleIO moduleIO = ModuleIO(&server, &esp32sveltekit);
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
@@ -87,6 +87,8 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
         void effectTask(void* pvParameters) {
             // 🌙
 
+            layerP.setup(); //setup virtual layers (no node setup here as done in addNode)
+
             for (;;) {
                 esp32sveltekit.lps++; // 🌙 todo: not moonlight specific?
 
@@ -94,7 +96,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                     // MB_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
                 }
 
-                layerP.loop(); //run all the effects of all virtual layers (currently only one)
+                layerP.loop(); //run all the effects of all virtual layers (currently only one layer)
 
                 xSemaphoreGive(driverSemaphore);
                     
@@ -111,7 +113,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
         void driverTask(void* pvParameters) {
             // 🌙
 
-            // layerP.setup2();
+            // layerP.setup() done in effectTask
 
             for (;;) {
 
@@ -178,13 +180,15 @@ void setup()
 
     // sizeof(Module);
     // sizeof(moduleDevices);
-    // sizeof(modulePins);
+    // sizeof(moduleIO);
     // sizeof(moduleEffects);
     // sizeof(moduleDrivers);
     // sizeof(moduleLightsControl);
     // sizeof(moduleChannels);
     // sizeof(moduleLightsControl);
     // sizeof(moduleMoonLightInfo);
+    // sizeof(layerP.lights);
+    // sizeof(layerP.lights.header);
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
@@ -194,7 +198,7 @@ void setup()
         fileManager.begin();
         moduleDevices.begin();
         moduleTasks.begin();
-        modulePins.begin();
+        moduleIO.begin();
 
         // MoonLight
         #if FT_ENABLED(FT_MOONLIGHT)
@@ -247,7 +251,7 @@ void setup()
 
                 moduleDevices.loop1s();
                 moduleTasks.loop1s();
-                modulePins.loop1s();
+                moduleIO.loop1s();
 
                 #if FT_ENABLED(FT_MOONLIGHT)
                     //set shared data (eg used in scrolling text effect)

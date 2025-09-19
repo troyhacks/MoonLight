@@ -15,6 +15,13 @@
 
 void setDefaults(JsonObject root, JsonArray definition) {
     for (JsonObject property: definition) {
+        // if (property["type"] == "coord3Dxx") {
+        //     MB_LOGD(ML_TAG, "coord3D %d %d %d",  property["default"]["x"].as<int>(),  property["default"]["y"].as<int>(),  property["default"]["z"].as<int>());
+        //     JsonObject object = root[property["name"]].to<JsonObject>();
+        //     root[property["name"]]["x"] = property["default"]["x"];
+        //     root[property["name"]]["y"] = property["default"]["y"];
+        //     root[property["name"]]["z"] = property["default"]["z"];
+        // } else 
         if (property["type"] != "array") {
             root[property["name"]] = property["default"];
         } else {
@@ -88,8 +95,9 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
             uint8_t parkedAtIndex;
             uint8_t parkedFromIndex = UINT8_MAX;
 
-            for (uint8_t stateIndex = 0; stateIndex< stateArray.size(); stateIndex++) {//} JsonObject stateObject : stateArray) {
-                for (uint8_t newIndex = 0; newIndex < newArray.size(); newIndex++) {//} JsonObject newObject : newArray) {
+            size_t minSize = min(stateArray.size(), newArray.size());
+            for (uint8_t stateIndex = 0; stateIndex < minSize; stateIndex++) {//} JsonObject stateObject : stateArray) {
+                for (uint8_t newIndex = 0; newIndex < minSize; newIndex++) {//} JsonObject newObject : newArray) {
                     if (stateIndex != newIndex && stateArray[stateIndex] == newArray[newIndex]) {
                         //if the old value found somewhere else, it has been moved so we can overwrite the current value
                         stateArray[stateIndex].set(newArray[stateIndex]); //copies the value to the state array

@@ -200,6 +200,7 @@
 				response.deletes.push(folderList[index]);
 				console.log("confirmDelete", response)
 				//send the new itemstate to server
+				response.showHidden = filesState.showHidden; //otherwise set to false
 				postFilesState(response);
 
 				showEditor = false;

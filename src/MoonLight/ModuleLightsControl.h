@@ -240,7 +240,7 @@ public:
             if (layerP.lights.header.isPositions == 2) { //send to UI
                 read([&](ModuleState& _state) {
                     if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
-                        _socket->emitEvent("monitor", (char *)&layerP.lights.header, 29);//sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above it to avoid monitor data to be seen as header
+                        _socket->emitEvent("monitor", (char *)&layerP.lights.header, 37);//sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above 32 to avoid monitor data to be seen as header
                         _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.nrOfChannels)); //*3 is for 3 bytes position
                     }
                     MB_LOGD(ML_TAG, "pos from 2 to 3 (noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.nrOfChannels);

@@ -106,7 +106,7 @@
 
 	function deleteItem(propertyName: string, index: number) {
 		// Check if item is currently been edited and delete as well
-		if (data[propertyName][index].nodeName === dataEditable.nodeName) { //todo: remove nodeName here...
+		if (data[propertyName][index].name === dataEditable.name) { //todo: remove name here...
 			addItem(propertyName);
 		}
 		// Remove item from array

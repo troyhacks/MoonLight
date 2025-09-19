@@ -58,11 +58,11 @@ public:
                     }
                     // uint8_t index = 0;
                     // for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-                    //     String nodeName = nodeState["nodeName"];
+                    //     String name = nodeState["name"];
 
-                    //     if (updatedItem == nodeName) {
+                    //     if (updatedItem == name) {
                     //         MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                    //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["nodeName"]);
+                    //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
                     //         if (liveScriptNode) {
                     //             liveScriptNode->compileAndRun();
 
@@ -71,7 +71,7 @@ public:
                     //             _moduleEffects->requestUIUpdate = true; //update the Effects UI
                     //         }
 
-                    //         MB_LOGV(ML_TAG, "update due to new node %s done", nodeName.c_str());
+                    //         MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
                     //     }
                     //     index++;
                     // }
@@ -92,6 +92,33 @@ public:
                 return response.send();
             });
         #endif
+
+        _state.readHook = [&](JsonObject data) {
+            data["start"]["x"] = 0;
+            data["start"]["y"] = 0;
+            data["start"]["z"] = 0;
+            data["end"]["x"] = layerP.lights.header.size.x;
+            data["end"]["y"] = layerP.lights.header.size.y;
+            data["end"]["z"] = layerP.lights.header.size.z;
+            data["brightness"] = layerP.lights.header.brightness;
+        };
+    }
+
+    void setupDefinition(JsonArray root) override {
+        MB_LOGV(ML_TAG, "");
+        JsonObject property; // state.data has one or more properties
+        JsonArray values; // if a property is a select, this is the values of the select
+        property = root.add<JsonObject>(); property["name"] = "layer"; property["type"] = "select"; property["default"] = 0; values = property["values"].to<JsonArray>();
+        uint8_t i = 0;
+        for (VirtualLayer * layer: layerP.layerV) {
+            values.add(i);
+            i++;
+        }
+        property = root.add<JsonObject>(); property["name"] = "start"; property["type"] = "coord3D"; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "end"; property["type"] = "coord3D"; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["ro"] = true;
+
+        NodeManager::setupDefinition(root);
     }
 
     void addNodes(JsonArray values) override {
@@ -219,6 +246,7 @@ public:
 
             node->constructor(layerP.layerV[0], controls); //pass the layer to the node
             node->setup(); //run the setup of the effect
+            node->onSizeChanged(Coord3D());
             // layerV[0]->nodes.reserve(index+1);
             if (index >= layerP.layerV[0]->nodes.size())
                 layerP.layerV[0]->nodes.push_back(node);

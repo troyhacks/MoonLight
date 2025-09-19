@@ -69,6 +69,8 @@ class VirtualLayer {
   uint8_t effectDimension = _3D; //assuming 3D for the moment
   uint8_t layerDimension = UINT8_MAX;
 
+  Coord3D prevSize; //to calculate size change
+
   VirtualLayer() {
     MB_LOGV(ML_TAG, "constructor");
   }

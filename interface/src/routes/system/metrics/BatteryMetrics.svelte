@@ -23,7 +23,7 @@
 				labels: $batteryHistory.timestamp,
 				datasets: [
 					{
-						label: 'SOC',
+						label: 'SOC [%]',
 						borderColor: daisyColor('--color-primary'),
 						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
@@ -39,7 +39,23 @@
 						fill: true,
 						stepped: true,
 						yAxisID: 'y2'
-					}
+					},
+					{
+						label: 'Voltage [V]', // 🌙
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
+						borderWidth: 2,
+						data: $batteryHistory.voltage,
+						yAxisID: 'y2'
+					},
+					{
+						label: 'Current [A]', // 🌙
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
+						borderWidth: 2,
+						data: $batteryHistory.current,
+						yAxisID: 'y2'
+					},
 				]
 			},
 			options: {
@@ -74,7 +90,7 @@
 						type: 'linear',
 						title: {
 							display: true,
-							text: 'State of Charge [%]',
+							text: 'Energy', // 🌙
 							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
@@ -96,6 +112,20 @@
 						min: 0,
 						max: 1,
 						display: false
+					},
+					y3: { // 🌙
+						type: 'linear',
+						position: 'left',
+						min: 0,
+						max: Math.round(Math.max(...$batteryHistory.voltage)),
+						display: false
+					}, // 🌙
+					y4: {
+						type: 'linear',
+						position: 'left',
+						min: 0,
+						max: Math.round(Math.max(...$batteryHistory.current)),
+						display: false
 					}
 				}
 			}
@@ -110,6 +140,8 @@
 		heapChart.data.labels = $batteryHistory.timestamp;
 		heapChart.data.datasets[0].data = $batteryHistory.soc;
 		heapChart.data.datasets[1].data = $batteryHistory.charging;
+		heapChart.data.datasets[2].data = $batteryHistory.voltage; // 🌙
+		heapChart.data.datasets[3].data = $batteryHistory.current; // 🌙
 		heapChart.update('none');
 	}
 
@@ -146,7 +178,7 @@
 		<Battery class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span>Battery History</span>
+		<span>Energy History</span>
 	{/snippet}
 
 	<div class="w-full overflow-x-auto">

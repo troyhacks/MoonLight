@@ -135,7 +135,7 @@
 </script>
 
 <svelte:head>
-	<title>{$telemetry.rssi.hostName}</title>
+	<title>{localStorage.getItem('telemetry.rssi.hostName')}</title>
 </svelte:head>
 
 {#if page.data.features.security && $user.bearer_token === ''}

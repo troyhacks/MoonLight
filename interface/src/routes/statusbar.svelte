@@ -12,6 +12,7 @@
 	import RssiIndicator from '$lib/components/RSSIIndicator.svelte';
 	import BatteryIndicator from '$lib/components/BatteryIndicator.svelte';
 	import UpdateIndicator from '$lib/components/UpdateIndicator.svelte';
+	import logo from '$lib/assets/logo.png';
 
 	async function postSleep() {
 		const response = await fetch('/rest/sleep', {
@@ -91,7 +92,8 @@
 		<label for="main-menu" class="btn btn-ghost btn-circle btn-sm drawer-button lg:hidden"
 			><Hamburger class="h-6 w-auto" /></label
 		>
-		<span class="px-2 text-xl font-bold lg:text-2xl">{$telemetry.rssi.hostName}</span> <!-- 🌙 -->
+		<img src={logo} alt="Logo" class="h-12 w-12 lg:hidden" /> <!-- 🌙 -->
+		<span class="px-2 text-xl font-bold lg:text-2xl">{localStorage.getItem('telemetry.rssi.hostName')}</span> <!-- 🌙 -->
 	</div>
 	<div class="indicator flex-none">
 		<UpdateIndicator />

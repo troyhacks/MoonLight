@@ -56,7 +56,8 @@ class DriverNode: public Node {
 
   void reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel);
 
-  void updateControl(JsonObject control) override;
+  //called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
+  void onUpdate(String &oldValue, JsonObject control) override;
 };
 
 #define ARTNET_CHANNELS_PER_PACKET 512
@@ -153,7 +154,7 @@ class FastLEDDriverMod: public Node {
 
   void addLayout() override;
 
-  void updateControl(JsonObject control) override;
+  void onUpdate(String &oldValue, JsonObject control) override;
 
 };
 
@@ -185,6 +186,8 @@ class PhysicalDriverMod: public DriverNode {
   void loop() override;
 
   void addLayout() override;
+
+  ~PhysicalDriverMod() override;
 };
 
 class VirtualDriverMod: public DriverNode {

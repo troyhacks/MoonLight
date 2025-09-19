@@ -289,12 +289,12 @@ class RotateNodifier: public Node {
       };
       uint8_t flags;
     };
-    uint8_t  midX;
-    uint8_t  midY;
+    // uint8_t  midX; //done in modifyXYZ as size might change due to other modifiers and we want the originalSize
+    // uint8_t  midY;
     uint16_t angle;
     int16_t  shearX;
     int16_t  shearY;
-    unsigned long lastUpdate; // last millis() update
+    // unsigned long lastUpdate; // last millis() update
   };
 
   public:
@@ -302,7 +302,7 @@ class RotateNodifier: public Node {
   RotateData data;
 
   uint8_t direction = 0;
-  uint8_t rotateSpeed = 128;
+  uint8_t rotateBPM = 15;
   bool expand = false;
 
   void setup() override {
@@ -315,10 +315,11 @@ class RotateNodifier: public Node {
     values.add("Counter-Clockwise");
     values.add("Alternate");
 
-    addControl(rotateSpeed, "rotateSpeed", "range"); 
+    addControl(rotateBPM, "rotateBPM", "range"); 
     addControl(expand, "expand", "checkbox");
-
   }
+
+  Coord3D originalSize;
 
   void modifySize() override {
 
@@ -330,16 +331,19 @@ class RotateNodifier: public Node {
       layerV->size = Coord3D{size, size, 1};
     }
 
-    data.midX = layerV->size.x / 2;
-    data.midY = layerV->size.y / 2;
+    // data.midX = layerV->size.x / 2;
+    // data.midY = layerV->size.y / 2;
+
+    originalSize = layerV->size;
+
   }
 
   void modifyPosition(Coord3D &position) override {
 
     if (expand) {
-      int size = MAX(layerV->size.x, MAX(layerV->size.y, layerV->size.z));
+      int size = MAX(originalSize.x, MAX(originalSize.y, originalSize.z));
       size = sqrt(size * size * 2) + 1;
-      Coord3D offset = Coord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
+      Coord3D offset = Coord3D((size - originalSize.x) / 2, (size - originalSize.y) / 2, 0);
 
       position.x += offset.x;
       position.y += offset.y;
@@ -347,21 +351,29 @@ class RotateNodifier: public Node {
     }
   }
 
-  void modifyXYZ(Coord3D &position) override {
+  int Fixed_Scale = 1 << 10;
+  uint8_t Scale_Shift = 10;
+  uint16_t prevAngle = UINT16_MAX;
+  uint16_t angle = UINT16_MAX;
 
-    constexpr int Fixed_Scale = 1 << 10;
+  void loop() override {
 
-    if ((millis() - data.lastUpdate > 1000 / (rotateSpeed + 1)) && rotateSpeed) { // Only update if the angle has changed
-      data.lastUpdate = millis();
+    //place in loop by by softhack007
+
+    angle = ::map(beat16(rotateBPM), 0, UINT16_MAX, 0, 360); //change to time independant 
+
+    if (angle != prevAngle) {
+    // if ((millis() - data.lastUpdate > 1000 / (rotateSpeed*100 + 1)) && rotateSpeed) { // Only update if the angle has changed
+    //   data.lastUpdate = millis();
 
       if (direction == 0) data.reverse = false;
       if (direction == 1) data.reverse = true;
       if (direction == 2) data.alternate = true; else data.alternate = false;
 
       // Increment the angle
-      data.angle = data.reverse ? (data.angle <= 0 ? 359 : data.angle - 1) : (data.angle >= 359 ? 0 : data.angle + 1);
+      data.angle = data.reverse ? 359-angle: angle;
       
-      if (data.alternate && (data.angle == 0)) data.reverse = !data.reverse;
+      if (data.alternate && (angle < prevAngle)) data.reverse = !data.reverse;
 
       data.flip = (data.angle > 90 && data.angle < 270);
 
@@ -370,12 +382,19 @@ class RotateNodifier: public Node {
 
       // Calculate shearX and shearY
       float angleRadians = radians(newAngle);
-      data.shearX = -tan(angleRadians / 2) * Fixed_Scale;
-      data.shearY =  sin(angleRadians)     * Fixed_Scale;
-    }
+      data.shearX = -tanf(angleRadians / 2) * Fixed_Scale; //f by softhack007
+      data.shearY =  sinf(angleRadians)     * Fixed_Scale; //f by softhack007
 
-    int maxX = layerV->size.x;
-    int maxY = layerV->size.y;
+      prevAngle = angle;
+    }
+  }
+
+  void modifyXYZ(Coord3D &position) override {
+
+    int maxX = originalSize.x;
+    int maxY = originalSize.y;
+    int midX = maxX/2; //done here now
+    int midY = maxY/2;
 
     if (data.flip) {
       // Reverse x and y values
@@ -384,17 +403,17 @@ class RotateNodifier: public Node {
     }
 
     // Translate position to origin
-    int dx = position.x - data.midX;
-    int dy = position.y - data.midY;
+    int dx = position.x - midX;
+    int dy = position.y - midY;
 
     // Apply the 3 shear transformations
-    int x1 = dx + data.shearX * dy / Fixed_Scale;
-    int y1 = dy + data.shearY * x1 / Fixed_Scale;
-    int x2 = x1 + data.shearX * y1 / Fixed_Scale;
+    int x1 = dx + ((data.shearX * dy + ( 1<<(Scale_Shift-1))) >> Scale_Shift);
+    int y1 = dy + ((data.shearY * x1 + ( 1<<(Scale_Shift-1))) >> Scale_Shift);
+    int x2 = x1 + ((data.shearX * y1 + ( 1<<(Scale_Shift-1))) >> Scale_Shift);
 
     // Translate position back and assign
-    position.x = x2 + data.midX;
-    position.y = y1 + data.midY;
+    position.x = x2 + midX;
+    position.y = y1 + midY;
     position.z = 0;
 
     // Clamp the position to the bounds

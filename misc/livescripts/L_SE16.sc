@@ -11,7 +11,7 @@ void addStrip( uint8_t xposition, uint8_t start_y,  uint8_t stop_y, uint8_t pin)
     }
   }
   else {
-    for (uint8_t y = start_y; y<=stop_y; y++) {
+    for (int y = start_y; y<=stop_y; y++) {
       addLight(xposition, y, 0);
     }
   }

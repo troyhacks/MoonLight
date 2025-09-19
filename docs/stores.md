@@ -61,6 +61,8 @@ It exposes the following properties you can subscribe to:
 | `$telemetry.rssi.connected`        | `Boolean` | Connection status of the WiFi               |
 | `$telemetry.battery.soc`           | `Number`  | Battery state of charge                     |
 | `$telemetry.battery.charging`      | `Boolean` | Is battery connected to charger             |
+| `$telemetry.battery.voltage`       | `Number`  | Energy voltage 🌙                           |
+| `$telemetry.battery.current`       | `Number`  | Energy current 🌙                           |
 | `$telemetry.download_ota.status`   | `String`  | Status of OTA                               |
 | `$telemetry.download_ota.progress` | `Number`  | Progress of OTA                             |
 | `$telemetry.download_ota.error`    | `String`  | Error Message of OTA                        |

@@ -279,17 +279,21 @@ void ESP32SvelteKit::_loop()
             _analyticsService.lps = lps; // 🌙
             lps = 0; // 🌙
             // 🌙 
-            #if FT_BATTERY && BATTERY_PIN && BATTERY_MV
-                float mV = analogReadMilliVolts(BATTERY_PIN) * 2.0;
-                float perc = (mV - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%
-                // ESP_LOGD("", "bat mV %f p:%f", mV, perc);
-                _batteryService.updateSOC(perc * 100);
-            #endif
-            #if FT_BATTERY && VOLTAGE_PIN //see esp32-s3-stephanelec-16p
-                float mV = analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
-                float perc = mV / 10000.0;
-                // ESP_LOGD("", "bat mV %f p:%f", mV, perc);
-                _batteryService.updateSOC(perc * 100.0);
+            #if FT_BATTERY
+                #if BATTERY_PIN && BATTERY_MV
+                    float mVB = analogReadMilliVolts(BATTERY_PIN) * 2.0;
+                    float perc = (mVB - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%
+                    // ESP_LOGD("", "bat mVB %f p:%f", mVB, perc);
+                    _batteryService.updateSOC(perc * 100);
+                #endif
+                #ifdef VOLTAGE_PIN //see esp32-s3-stephanelec-16p
+                    float mV = random(10);// analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
+                    _batteryService.updateVoltage(mV);
+                #endif
+                #ifdef CURRENT_PIN //see esp32-s3-stephanelec-16p
+                    float mC = random(10);//analogReadMilliVolts(CURRENT_PIN); //limpkin, ReadAmps doesn't exist ... what is the range of values? 0.. ?
+                    _batteryService.updateCurrent(mC);
+                #endif
             #endif
 #ifdef TELEPLOT_TASKS
             Serial.printf(">ESP32SveltekitTask:%i:%i\n", millis(), uxTaskGetStackHighWaterMark(NULL));
