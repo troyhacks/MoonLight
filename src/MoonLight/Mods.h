@@ -186,6 +186,8 @@ class PhysicalDriverMod: public DriverNode {
   void loop() override;
 
   void addLayout() override;
+
+  ~PhysicalDriverMod() override;
 };
 
 class VirtualDriverMod: public DriverNode {

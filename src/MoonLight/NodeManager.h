@@ -120,10 +120,10 @@ protected:
                     else
                         MB_LOGW(ML_TAG, "Nodeclass %s not found", updatedItem.value.as<String>().c_str());
 
-                    if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
-                        MB_LOGW(ML_TAG, "Restart needed");
-                        restartNeeded = true;
-                    }
+                    // if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
+                    //     MB_LOGW(ML_TAG, "Restart needed");
+                    //     restartNeeded = true;
+                    // }
                 }
 
                 //if a node existed and no new node in place, remove 

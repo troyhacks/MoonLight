@@ -2,22 +2,43 @@
 
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
-The Effects module allows you to define the tasks to run an **effect** (e.g. bouncing balls), to **modify** the effect (e.g mirror).
-Each task is defined as a node. A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager). A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
+## Overview
+
+The Effects module defines effects and modifiers. They run in a 'layer'. 
+
+* Effect 🔥: An animation running in a coordinate space, e.g. a graphical equalizer or game of life
+* Modifier 💎: An effect on an effect e.g. mirror, multiply or rotate
+* Layer: An area on a (LED) display. Effects and modifier run in this area. Each layer maps a coordinate space to the display
+
+!!! info
+
+    Until v0.6.0 there is only one layer, projected on the whole display. Multiple layers is planned after v0.6.0
+
+!!! tip
+
+    Livescripts... A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager).
+
+## Controls
 
 * Layer: Choose the layer - currently only one layer supported
     * Start, End and Brightness: read only for now, when multiple layers are implemented (>v0.6.0), these can be set per layer
 * Nodes: effects and modifiers will be shown as nodes with controls
     * Reorder: Nodes can be reordered, defining the order of executions (effects: which effect on top of the other effect. Modifiers: which modifier is done first, e.g. circle then multiply will yield to a different result than multiply then circle)
+    * Controls. A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
 
-Typically a node will define a layout (🚥), or an effect (🔥), or a modifier (💎) but can also combine these tasks (experimental at the moment). To avoid duplication it's in most cases recommended to keep them separated so an effect can run on multiple layouts and a modifier can modify any effect. 
+## Details
 
-* **Effect** 🔥: An effect runs in a virtual layer (see above about mapping to a physical layer). Historically there are 1D, 2D and 3D effects. A 1D effect only fills LEDs in x space, leaving y and z blank. 2D also the y space, 3D all spaces. Future goal is that all effects fill all spaces (example is bouncing balls which was a 1D effect but has been made 2D). See also Modifiers which can take a 1D effect and make a 2D or 3D effect out of it: e.g. a 1D effect can be presented as a circle, or sphere.
-    * An effect has a loop which is ran for each frame produced. In each loop, the lights in the virtual layer gets it's values using the setRGB function. For multichannel lights also functions as setWhite or (for Moving Heads) setPan, setTilt, setZoom etc. Also getRGB etc functions exists.
-    * Multiple effects can be defined, they all run during one frame. In the future each effect will have a start and end coordinate so they can also be displayed on parts of the fixture.
+* **Effect** 🔥: Effects can run in 1D, 2D or 3D coordinate spaces.
+
+!!! info
+
+    Traditionally effects where mostly 1D running on LED strips, when LED matrices became available 2D effects where created. More and more LED art installations have a 3D shape so also support for 3D is desirable. MoonLight is build from the ground to support 3D. Basic idea is that a 1D effect is 3D where y and z is 0, 2D has z is 0. This means modifiying an effect to run in 3D is possible. This can be done using modifiers, but also the source code of an effect can be changed to support more dimensions (see development).
 
 * **Modifier** 💎: a modifier is an effect on an effect. It can change the size of the virtual layer, it can map the pixels other then 1:1 (e.g. mirror, multiply them or a 1D line can become a 2D circle) and it can change each light set in an effect during a loop (e.g. rotate the effect)
-    * Multiple modifiers are allowed, e.g. to first rotate then mirror (or first mirror then rotate). The UI allows for reordering nodes.
+
+!!! tip
+
+    Multiple effects and modifiers can be defined per layer. MoonLight supports unlimited number of them per layer. They will all run after each other, this is useful for modifiers as you can combine them: e.g. rotate then multiply creates four (or more) rotating effects.
 
 ## Emoji coding:
 

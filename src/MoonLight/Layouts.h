@@ -273,7 +273,7 @@ class SingleLineLayout: public Node {
   static const char * tags() {return "";}
 
   uint8_t start_x = 0;
-  uint8_t width = 1;
+  uint8_t width = 30;
   uint16_t yposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
@@ -312,7 +312,7 @@ class SingleRowLayout: public Node {
   static const char * tags() {return "";}
 
   uint8_t start_y = 0;
-  uint8_t height = 1;
+  uint8_t height = 30;
   uint16_t xposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;

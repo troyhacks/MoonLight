@@ -35,12 +35,12 @@ public:
         property = root.add<JsonObject>(); property["name"] = "pins"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "GPIO"; property["type"] = "number"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "PinInfo"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "Valid"; property["type"] = "checkbox"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "Output"; property["type"] = "checkbox"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "RTC"; property["type"] = "checkbox"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "Level"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "DriveCap"; property["type"] = "text"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "PinInfo"; property["type"] = "text"; property["ro"] = true;
         }
     }
 

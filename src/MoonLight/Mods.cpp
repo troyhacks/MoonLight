@@ -162,8 +162,8 @@ void DriverNode::onUpdate(String &oldValue, JsonObject control) {
         
         // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
 
-        if (oldChannelsPerLight != header->channelsPerLight)
-          restartNeeded = true; //in case 
+        // if (oldChannelsPerLight != header->channelsPerLight)
+        //   restartNeeded = true; //in case 
       }
     #else //ESP32_LEDSDRIVER
       if (ledsDriver.initLedsDone) {
@@ -690,11 +690,11 @@ void ArtNetDriverMod::loop() {
             // i2sInit(); //not necessary, initled did it, no need to change
 
             //delete allocations done by physical driver if total channels changes (larger)
-            for (int i = 0; i < __NB_DMA_BUFFER + 1; i++)
+            for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
             {
+                heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
                 heap_caps_free(ledsDriver.DMABuffersTampon[i]);
             }
-            heap_caps_free(ledsDriver.DMABuffersTampon[__NB_DMA_BUFFER + 1]);
 
             ledsDriver.initDMABuffers(); //create them again
 
@@ -784,7 +784,19 @@ void ArtNetDriverMod::loop() {
       }
     #endif
   }
+  PhysicalDriverMod::~PhysicalDriverMod() {
+    MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
+    for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+    {
+        heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
+        heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+    }
+
+    //anything else to delete? I2S ...
+
+    // if recreating the Physical driver later, still initled cannot be done again ?
+  }
   void VirtualDriverMod::setup() {
     hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
     DriverNode::setup();

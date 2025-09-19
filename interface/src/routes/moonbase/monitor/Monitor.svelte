@@ -112,7 +112,7 @@
 		}
 		clearColors();
 		//max size supported is 255x255x255 (index < width * height * depth) ... todo: only any of the component < 255
-		for (let index = 0; index < nrOfLights * channelsPerLight && index < width * height * depth; index +=channelsPerLight) {
+		for (let index = 0; index < nrOfLights * channelsPerLight; index += channelsPerLight) { // && index < width * height * depth
 			// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
 			const r = channels[index + offsetRGB + 0] / 255;
 			const g = channels[index + offsetRGB + 1] / 255;
