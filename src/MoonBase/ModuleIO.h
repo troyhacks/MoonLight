@@ -69,8 +69,10 @@ const char* drive_cap_to_string(gpio_drive_cap_t cap) {
         JsonDocument root;
         root["pins"].to<JsonArray>();
 
-        Char<64> ledPins;
-        ledPins = LED_PINS;
+        #ifdef LED_PINS
+            Char<64> ledPins;
+            ledPins = LED_PINS;
+        #endif
 
         for (int gpio_num = 0; gpio_num < SOC_GPIO_PIN_COUNT; gpio_num++) {
             JsonObject task = root["pins"].as<JsonArray>().add<JsonObject>();
