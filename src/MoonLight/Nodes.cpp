@@ -16,6 +16,7 @@
 
 void Node::onUpdate(String &oldValue, JsonObject control) {
     // MB_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
+    if (oldValue == "") return; //newControl, value already set
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if control is removed in compareRecursive
         int pointer = control["p"];
         // MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);

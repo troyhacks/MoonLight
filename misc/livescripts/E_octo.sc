@@ -32,8 +32,8 @@ void setup()
 
 void loop() {
 
-  for (uint8_t x = 0; x < width; x++) {
-    for (uint8_t y = 0; y < height; y++) {
+  for (int x = 0; x < width; x++) {
+    for (int y = 0; y < height; y++) {
       uint8_t angle = rMapAngle[x*height+y];
       uint8_t radius = rMapRadius[x*height+y];
       uint16_t intensity = sin8(sin8((angle * 4 - radius*mapp) / 4 + t) + radius*mapp - 2*t + angle * branches);

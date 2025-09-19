@@ -104,9 +104,9 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::loopDrivers() {
-        if (prevSize != lights.header.size)
-            MB_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
         if (lights.header.isPositions == 0) { //otherwise lights is used for positions etc.
+            if (prevSize != lights.header.size)
+                MB_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
             for (Node *node: nodes) {
                 if (prevSize != lights.header.size)
                     node->onSizeChanged(prevSize);
@@ -149,13 +149,11 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
 
-    void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) {
-        uint32_t packed = ((position.x & 0x7FF) << 13) | ((position.y & 0xFF) << 5) | (position.z & 0x1F);
-        buf[0] = (packed >> 16) & 0xFF;
-        buf[1] = (packed >> 8) & 0xFF;
-        buf[2] = packed & 0xFF;
+    void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) { //max size supported is 255x255x255
+        buf[0] = MIN(position.x, 255);
+        buf[1] = MIN(position.y, 255);
+        buf[2] = MIN(position.z, 255);
     }
-
     void PhysicalLayer::addLight(Coord3D position) {
 
         if (safeModeMB && lights.header.nrOfLights > 1023) {

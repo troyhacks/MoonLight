@@ -56,6 +56,7 @@ class DriverNode: public Node {
 
   void reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel);
 
+  //called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
   void onUpdate(String &oldValue, JsonObject control) override;
 };
 

@@ -132,9 +132,15 @@ public:
     else
       MB_LOGE(ML_TAG, "type not supported yet %s", control["type"].as<String>().c_str());
 
+    if (newControl) {
+      String oldValue = "";
+      onUpdate(oldValue, control);
+    }
+
     return control;
   }
 
+  //called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
   virtual void onUpdate(String &oldValue, JsonObject control); // see Nodes.cpp for implementation
 
   void requestMappings() {

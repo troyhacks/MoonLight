@@ -283,7 +283,7 @@ class RotateNodifier: public Node {
   bool expand = false;
   bool flip, reverse, alternate;
   uint8_t direction = 0;
-  uint8_t rotateBPM = 60;
+  uint8_t rotateBPM = 15;
   uint16_t staticAngle = 0;
 
   void setup() override {

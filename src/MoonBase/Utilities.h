@@ -29,20 +29,19 @@
 
 struct Coord3D {
 
-    uint16_t x;
-    uint8_t y;
-    uint8_t z;
+    int x;
+    int y;
+    int z;
 
     // Coord3D() : x(0), y(0), z(0) {} // Default constructor
 
-    Coord3D () {
+    Coord3D() {
         this->x = 0;
         this->y = 0;
         this->z = 0;
     }
     
-    //x max 2^11 -> 2047, y max 2^8 -> 255, z max 2^5 -> 31
-    Coord3D (uint16_t x, uint8_t y = 0, uint8_t z = 0) {
+    Coord3D(int x, int y = 0, int z = 0) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -57,6 +56,10 @@ struct Coord3D {
     bool operator==(const Coord3D rhs) const {
         return x == rhs.x && y == rhs.y && z == rhs.z;
     }
+    bool operator<(const int rhs) const {
+        return x < rhs && y < rhs && z < rhs;
+    }
+
 
     //Minus / delta (abs)
     Coord3D operator-(const Coord3D rhs) const {
@@ -259,12 +262,17 @@ struct Char {
       return s;
     }
 
-    void split(const char * splitter, std::function<void(const char *)> callback) {
-        char *token = strtok(s, splitter);
+    void split(const char * splitter, std::function<void(const char *, uint8_t)> callback) {
+        char savedS[N];
+        strncpy(savedS, s, N); //save s
+        char *token = strtok(s, splitter); //eat s
+        uint8_t sequence = 0;
         while (token != nullptr ) {
-            callback(token);
+            callback(token, sequence);
+            sequence++;
             token = strtok(nullptr, splitter);
         }
+        strncpy(s, savedS, N); //restore s
     }
 
     void formatTime(time_t time, const char *format)
