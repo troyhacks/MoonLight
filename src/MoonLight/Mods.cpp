@@ -784,19 +784,23 @@ void ArtNetDriverMod::loop() {
       }
     #endif
   }
+
   PhysicalDriverMod::~PhysicalDriverMod() {
-    MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
+    #if HP_ALL_DRIVERS
+      MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
-    for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
-    {
-        heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
-        heap_caps_free(ledsDriver.DMABuffersTampon[i]);
-    }
+      for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+      {
+          heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
+          heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+      }
 
-    //anything else to delete? I2S ...
+      //anything else to delete? I2S ...
 
-    // if recreating the Physical driver later, still initled cannot be done again ?
+      // if recreating the Physical driver later, still initled cannot be done again ?
+    #endif
   }
+  
   void VirtualDriverMod::setup() {
     hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
     DriverNode::setup();
