@@ -149,77 +149,11 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
 
-    // void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) {
-    //     uint32_t packed = ((position.x & 0x7FF) << 13) | ((position.y & 0xFF) << 5) | (position.z & 0x1F);
-    //     buf[0] = (packed >> 16) & 0xFF;
-    //     buf[1] = (packed >> 8) & 0xFF;
-    //     buf[2] = packed & 0xFF;
-    // }
-    void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) {
-        // Clamp values to fit in the original bit ranges
-        uint32_t x_clamped = position.x & 0x7FF;  // 11 bits: 0 to 2047
-        uint32_t y_clamped = position.y & 0xFF;   // 8 bits: 0 to 255  
-        uint32_t z_clamped = position.z & 0x1F;   // 5 bits: 0 to 31
-        
-        uint32_t packed = (x_clamped << 13) | (y_clamped << 5) | z_clamped;
-        buf[0] = (packed >> 16) & 0xFF;
-        buf[1] = (packed >> 8) & 0xFF;
-        buf[2] = packed & 0xFF;
+    void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) { //max size supported is 255x255x255
+        buf[0] = MIN(position.x, 255);
+        buf[1] = MIN(position.y, 255);
+        buf[2] = MIN(position.z, 255);
     }
-
-    // Mode configuration constants
-    // #define MODE0_X_MAX 127    // 2^7 - 1
-    // #define MODE0_Y_MAX 127    // 2^7 - 1
-    // #define MODE0_Z_MAX 255    // 2^8 - 1
-
-    // #define MODE1_X_MAX 511    // 2^9 - 1
-    // #define MODE1_Y_MAX 1      // 2^1 - 1
-    // #define MODE1_Z_MAX 4095   // 2^12 - 1
-
-    // #define MODE2_X_MAX 1      // 2^1 - 1
-    // #define MODE2_Y_MAX 511    // 2^9 - 1
-    // #define MODE2_Z_MAX 4095   // 2^12 - 1
-
-    // #define MODE3_X_MAX 31     // 2^5 - 1
-    // #define MODE3_Y_MAX 31     // 2^5 - 1
-    // #define MODE3_Z_MAX 31     // 2^5 - 1
-
-    // void packCoord3DInto3Bytes(uint8_t *buf, int x, int y, int z) {
-    //     uint32_t packed = 0;
-    //     uint8_t mode = 0;
-        
-    //     // Determine the best mode based on value ranges
-    //     // Mode 0: x=7, y=7, z=8  (max: 127, 127, 255) - for 128x128x1
-    //     // Mode 1: x=9, y=1, z=12 (max: 511, 1, 4095) - for 300x1x1 and 1x1x300
-    //     // Mode 2: x=1, y=9, z=12 (max: 1, 511, 4095) - for 1x300x1
-    //     // Mode 3: x=5, y=5, z=5  (max: 31, 31, 31) - for 30x30x30
-        
-    //     if (x <= MODE3_X_MAX && y <= MODE3_Y_MAX && z <= MODE3_Z_MAX) {
-    //         // Mode 3: x=5, y=5, z=5 (max: 31, 31, 31) - for 30x30x30
-    //         mode = 3;
-    //         packed = (mode << 22) | ((x & 0x1F) << 17) | ((y & 0x1F) << 12) | ((z & 0x1F) << 7);
-    //     }
-    //     else if (x <= MODE2_X_MAX && y <= MODE2_Y_MAX) {
-    //         // Mode 2: x=1, y=9, z=12 (max: 1, 511, 4095) - for 1x300x1
-    //         mode = 2;
-    //         packed = (mode << 22) | ((x & 0x1) << 21) | ((y & 0x1FF) << 12) | (z & 0xFFF);
-    //     }
-    //     else if (y <= MODE1_Y_MAX) {
-    //         // Mode 1: x=9, y=1, z=12 (max: 511, 1, 4095) - for 300x1x1 and 1x1x300
-    //         mode = 1;
-    //         packed = (mode << 22) | ((x & 0x1FF) << 13) | ((y & 0x1) << 12) | (z & 0xFFF);
-    //     }
-    //     else {
-    //         // Mode 0: x=7, y=7, z=8 (max: 127, 127, 255) - for 128x128x1
-    //         mode = 0;
-    //         packed = (mode << 22) | ((x & 0x7F) << 15) | ((y & 0x7F) << 8) | (z & 0xFF);
-    //     }
-        
-    //     buf[0] = (packed >> 16) & 0xFF;
-    //     buf[1] = (packed >> 8) & 0xFF;
-    //     buf[2] = packed & 0xFF;
-    // }
-
     void PhysicalLayer::addLight(Coord3D position) {
 
         if (safeModeMB && lights.header.nrOfLights > 1023) {
@@ -231,7 +165,6 @@ PhysicalLayer::PhysicalLayer() {
             // MB_LOGD(ML_TAG, "%d,%d,%d", position.x, position.y, position.z);
             if (lights.header.nrOfLights < lights.nrOfChannels / 3) {
                 packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights*3], position);
-                // packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights*3], position.x, position.y, position.z);
             }
              
             lights.header.size = lights.header.size.maximum(position);

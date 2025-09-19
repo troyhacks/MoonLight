@@ -221,7 +221,7 @@
         style="width: {String(property.max || 255).length * 2}ch"
         class="input invalid:border-error invalid:border-2"
         min=0
-        max=2047
+        max=65536
         bind:value={value.x}
         on:change={onChange}
     />
@@ -230,7 +230,7 @@
         style="width: {String(property.max || 255).length * 2}ch"
         class="input invalid:border-error invalid:border-2"
         min=0
-        max=255
+        max=65536
         bind:value={value.y}
         on:change={onChange}
     />
@@ -239,7 +239,7 @@
         style="width: {String(property.max || 255).length * 2}ch"
         class="input invalid:border-error invalid:border-2"
         min=0
-        max=31
+        max=65536
         bind:value={value.z}
         on:change={onChange}
     />

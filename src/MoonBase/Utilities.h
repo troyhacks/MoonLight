@@ -41,7 +41,6 @@ struct Coord3D {
         this->z = 0;
     }
     
-    //x max 2^11 -> 2047, y max 2^8 -> 255, z max 2^5 -> 31
     Coord3D(int x, int y = 0, int z = 0) {
         this->x = x;
         this->y = y;
@@ -57,6 +56,10 @@ struct Coord3D {
     bool operator==(const Coord3D rhs) const {
         return x == rhs.x && y == rhs.y && z == rhs.z;
     }
+    bool operator<(const int rhs) const {
+        return x < rhs && y < rhs && z < rhs;
+    }
+
 
     //Minus / delta (abs)
     Coord3D operator-(const Coord3D rhs) const {

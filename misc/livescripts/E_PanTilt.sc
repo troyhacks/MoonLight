@@ -12,7 +12,7 @@ void setup() {
     addControl(&invert, "invert", "checkbox", false, true);
 }
 void loop() {
-  for (uint8_t x = 0; x < width; x++) {
+  for (int x = 0; x < width; x++) {
     setPan(x, beatsin8(bpm, pan-range, pan + range, 0,  (invert && x%2==0)?128:0));
     setTilt(x, beatsin8(bpm, tilt - range, tilt + range, 0,  (invert && x%2==0)?128:0));
   }
