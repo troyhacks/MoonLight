@@ -284,6 +284,7 @@ class RotateNodifier: public Node {
   bool flip, reverse, alternate;
   uint8_t direction = 0;
   uint8_t rotateBPM = 60;
+  uint16_t staticAngle = 0;
 
   void setup() override {
 
@@ -295,7 +296,8 @@ class RotateNodifier: public Node {
     values.add("Counter-Clockwise");
     values.add("Alternate");
 
-    addControl(rotateBPM, "rotateBPM", "range"); 
+    addControl(rotateBPM, "rotateBPM", "range");
+    addControl(staticAngle, "staticAngle (Set BPM to 0)", "range", 0, 359);
     addControl(expand, "expand", "checkbox");
   }
 
@@ -340,7 +342,9 @@ class RotateNodifier: public Node {
 
   void loop() override {
     //place in loop by by softhack007
-    angle = ::map(beat16(rotateBPM), 0, UINT16_MAX, 0, 360); //change to time independant 
+    if (rotateBPM == 0) angle = staticAngle;
+    else angle = ::map(beat16(rotateBPM), 0, UINT16_MAX, 0, 360); //change to time independant
+
     if (angle != prevAngle) {
       if (direction == 2) alternate = true; 
       else              { alternate = false; reverse = (direction == 1); }
@@ -363,7 +367,7 @@ class RotateNodifier: public Node {
   }
 
   void modifyXYZ(Coord3D &position) override {
-
+    if (angle == 0) return; // No rotation needed
     if (flip) {
       // Reverse x and y values
       position.x = maxX-1 - position.x;
