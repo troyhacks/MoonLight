@@ -86,7 +86,9 @@ public:
 
                 //trigger pass 1 mapping of layout
                 layerP.pass = 1; //(requestMapPhysical=1 physical rerun)
+                layerP.monitorPass = true;
                 layerP.mapLayout();
+                layerP.monitorPass = false;
 
                 PsychicJsonResponse response = PsychicJsonResponse(request, false);
                 return response.send();

@@ -179,7 +179,7 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::addPin(uint8_t pinNr) {
-        if (pass == 1) {
+        if (pass == 1 && !monitorPass) {
             MB_LOGD(ML_TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
 
             SortedPin previousPin;

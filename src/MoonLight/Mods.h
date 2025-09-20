@@ -180,6 +180,7 @@ class PhysicalDriverMod: public DriverNode {
 
   #if HP_ALL_DRIVERS
     char version[30] = HP_ALL_VERSION;
+    uint8_t dmaBuffer = 6; //test on D0...
   #endif
 
   void setup() override;
