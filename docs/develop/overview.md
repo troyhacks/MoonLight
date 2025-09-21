@@ -66,28 +66,28 @@ Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg
 Normally / Ideally this is not needed, but it can happen that not things are missing / not updated in a commit or merge (especially)
 
 * Set platform.json right
-  * cd /interface
-  * run npm install
+    * cd /interface
+    * run npm install
 * Set WWWData.h right
-  * Open platformIO new terminal (>_)
-  * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
-  * build the project (✔)
-  * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
+    * Open platformIO new terminal (>_)
+    * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
+    * build the project (✔)
+    * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
 * Deinstall platformio IDE and install pioarduino IDE (required for support of latest esp-idf 5.5)
 * Follow the steps 'In pictures' below.
 * Connect to your local WiFi network. Use the AP of the browser only to connect to your network.
-  * Don't use the device AP for further testing.
+    * Don't use the device AP for further testing.
 * Empty browser caches
-  * Check [how to hard refresh your browser and clear cache](https://fabricdigital.co.nz/blog/how-to-hard-refresh-your-browser-and-clear-cache)
-  * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
-  * Chrome: 
-    * Delete Browsing data / delete data
-    * Chrome on Mac: Command Shift R
-    * Chrome on Windows: Ctrl Shift R or Control Reload
-  * Safari: 
-    * Empty cache: Develop (enable if not done yet) / empty caches (Command Option E)
-    * Reload from Origin : Option Shift R
-  * After this not all UI elements might be immediately visible. Just wait a bit.
+    * Check [how to hard refresh your browser and clear cache](https://fabricdigital.co.nz/blog/how-to-hard-refresh-your-browser-and-clear-cache)
+    * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
+    * Chrome: 
+        * Delete Browsing data / delete data
+        * Chrome on Mac: Command Shift R
+        * Chrome on Windows: Ctrl Shift R or Control Reload
+    * Safari: 
+        * Empty cache: Develop (enable if not done yet) / empty caches (Command Option E)
+        * Reload from Origin : Option Shift R
+    * After this not all UI elements might be immediately visible. Just wait a bit.
 * Run everything from within VSCode, close any alternative / external tools which (potentially) access esp32 boards. They can claim resources or send commands to the board which interfere with what we trying to accomplish here.
   
 ## In pictures:
