@@ -14,10 +14,10 @@ let telemetry_data = {
 		hostName: '' // 🌙 to show in title and statusbar
 	},
 	battery: {
-		soc: 100,
+		soc: -1,
 		charging: false,
-		voltage: 0, // 🌙
-		current: 0, // 🌙
+		voltage: -1, // 🌙
+		current: -1, // 🌙
 	},
 	download_ota: {
 		status: 'none',

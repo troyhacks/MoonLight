@@ -297,7 +297,7 @@ class RotateNodifier: public Node {
     values.add("Alternate");
 
     addControl(rotateBPM, "rotateBPM", "range");
-    addControl(staticAngle, "staticAngle (Set BPM to 0)", "range", 0, 359);
+    addControl(staticAngle, "staticAngle", "number", 0, 359);
     addControl(expand, "expand", "checkbox");
   }
 
