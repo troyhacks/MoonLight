@@ -18,7 +18,6 @@ The Drivers module allows you to define a **layout** (e.g. a panel 16x16), to dr
 
 ## Details
 
-
 * **Layout** 🚥: a layout defines what lights are connected to MoonLight. It defines the coordinates of all lights (addLight) and assigns lights to the GPIO pins of the ESP32 (addPin) and how many channels each light has (normal LEDs 3: Red, Green and Blue). 
     * The **coordinates** of each light are defined in a 3D coordinate space where each coordinate range between 1 and 255. Currently a strip until 255 LEDs is supported, a panel until 128x96 LEDS and a cube max 20x20x20. 
         * Coordinates needs to be specified in the order the lights are wired so MoonLight knows which light is first, which is second etc.
@@ -41,6 +40,9 @@ The Drivers module allows you to define a **layout** (e.g. a panel 16x16), to dr
 
 ## Layout 🚥 Nodes
 🚧
+!!! danger
+
+    Set pins carefully. There is a check if a specific pin can be used for output / driving LEDs. See also the IO module. But not 100% garanteed. E.g pin 16 on esp32-d0-wrover crashes...
 
 ### PanelLayout 🚥
 

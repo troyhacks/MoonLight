@@ -28,7 +28,8 @@
 						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $batteryHistory.soc,
-						yAxisID: 'y1'
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.soc) < 0
 					},
 					{
 						label: 'Charging',
@@ -38,7 +39,8 @@
 						data: $batteryHistory.charging,
 						fill: true,
 						stepped: true,
-						yAxisID: 'y2'
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.soc) < 0
 					},
 					{
 						label: 'Voltage [V]', // 🌙
@@ -46,15 +48,17 @@
 						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $batteryHistory.voltage,
-						yAxisID: 'y2'
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.voltage) < 0
 					},
 					{
 						label: 'Current [A]', // 🌙
-						borderColor: daisyColor('--color-primary'),
-						backgroundColor: daisyColor('--color-primary', 50),
+						borderColor: daisyColor('--color-secondary'),
+						backgroundColor: daisyColor('--color-secondary', 50),
 						borderWidth: 2,
 						data: $batteryHistory.current,
-						yAxisID: 'y2'
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.current) < 0
 					},
 				]
 			},
@@ -86,7 +90,7 @@
 						},
 						display: true
 					},
-					y1: {
+					y: {
 						type: 'linear',
 						title: {
 							display: true,
@@ -99,34 +103,34 @@
 						},
 						position: 'left',
 						min: 0,
-						suggestedMax: 100,
+						max: Math.round(Math.max(Math.max(...$batteryHistory.voltage), Math.max(...$batteryHistory.current))),
 						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
 							color: daisyColor('--color-base-content')
 						},
 						border: { color: daisyColor('--color-base-content', 10) }
 					},
-					y2: {
-						type: 'linear',
-						position: 'right',
-						min: 0,
-						max: 1,
-						display: false
-					},
-					y3: { // 🌙
-						type: 'linear',
-						position: 'left',
-						min: 0,
-						max: Math.round(Math.max(...$batteryHistory.voltage)),
-						display: false
-					}, // 🌙
-					y4: {
-						type: 'linear',
-						position: 'left',
-						min: 0,
-						max: Math.round(Math.max(...$batteryHistory.current)),
-						display: false
-					}
+					// y2: {
+					// 	type: 'linear',
+					// 	position: 'right',
+					// 	min: 0,
+					// 	max: 1,
+					// 	display: false
+					// },
+					// y3: { // 🌙
+					// 	type: 'linear',
+					// 	position: 'left',
+					// 	min: 0,
+					// 	max: Math.round(Math.max(...$batteryHistory.voltage)),
+					// 	display: false
+					// }, // 🌙
+					// y4: {
+					// 	type: 'linear',
+					// 	position: 'left',
+					// 	min: 0,
+					// 	max: Math.round(Math.max(...$batteryHistory.current)),
+					// 	display: false
+					// }
 				}
 			}
 		});
@@ -143,6 +147,7 @@
 		heapChart.data.datasets[2].data = $batteryHistory.voltage; // 🌙
 		heapChart.data.datasets[3].data = $batteryHistory.current; // 🌙
 		heapChart.update('none');
+		heapChart.options.scales.y.max = Math.round(Math.max(Math.max(...$batteryHistory.voltage), Math.max(...$batteryHistory.current)));
 	}
 
 	function convertSeconds(seconds: number) {

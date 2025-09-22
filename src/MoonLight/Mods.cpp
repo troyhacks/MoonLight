@@ -322,6 +322,7 @@ void ArtNetDriverMod::loop() {
     addControl(chipSet, "chipSet", "text", 0, 20, true);
     addControl(colorOrder, "colorOrder", "text", 0, 20, true);
     addControl(usesI2S, "usesI2S", "checkbox", 0, 20, true);
+    addControl(usesRMT5, "usesRMT5", "checkbox", 0, 20, true);
   }
 
   void  FastLEDDriverMod::addLayout() {
@@ -351,6 +352,8 @@ void ArtNetDriverMod::loop() {
 
         CRGB *leds = (CRGB *)layerV->layerP->lights.channels;
 
+        if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
+ 
         switch (sortedPin.pin) {
         #if CONFIG_IDF_TARGET_ESP32
           case 0: FastLED.addLeds<ML_CHIPSET, 0 COLOR_ORDER_ARG>(leds, startLed, nrOfLights).setCorrection(TypicalLEDStrip) RGBW_CALL; break;
@@ -549,6 +552,8 @@ void ArtNetDriverMod::loop() {
 
         default: MB_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", sortedPin.pin);
         } //switch pinNr
+        }
+        else MB_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
 
       } //sortedPins    
     }
@@ -631,9 +636,12 @@ void ArtNetDriverMod::loop() {
         for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
           // MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
           if (nb_pins < NUMSTRIPS) {
-            pins[nb_pins] = sortedPin.pin;
-            lengths[nb_pins] = sortedPin.nrOfLights;
-            nb_pins++;
+            if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
+              pins[nb_pins] = sortedPin.pin;
+              lengths[nb_pins] = sortedPin.nrOfLights;
+              nb_pins++;
+            }
+            else MB_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
           }
         }
 

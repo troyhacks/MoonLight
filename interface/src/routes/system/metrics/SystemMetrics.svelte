@@ -65,10 +65,10 @@
 				scales: {
 					x: {
 						grid: {
-							color: daisyColor('--bc', 10)
+							color: daisyColor('--color-base-content', 10)
 						},
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
 						display: false
 					},
@@ -86,11 +86,11 @@
 						position: 'left',
 						min: 0,
 						max: Math.round(Math.max(...$analytics.lps)),
-						grid: { color: daisyColor('--bc', 10) },
+						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
-						border: { color: daisyColor('--bc', 10) }
+						border: { color: daisyColor('--color-base-content', 10) }
 					}
 				}
 			}

@@ -90,12 +90,14 @@
 	}
 
 	const handleOpen = () => {
-		notifications.success('Connection to device established', 5000);
+		// $telemetry.rssi.disconnected = false; // 🌙 
+		// notifications.success('Connection to device established', 5000);
 	};
 
 	const handleClose = () => {
-		if (!location.host.includes("captive.apple.com")) // 🌙 dirty workaround to not show this on macOS captive portal...
-			notifications.error('Connection to device lost', 5000);
+		// if (!location.host.includes("captive.apple.com")) // 🌙 dirty workaround to not show this on macOS captive portal...
+		// 	notifications.error('Connection to device lost', 5000);
+		// $telemetry.rssi.disconnected = true; // 🌙 
 		telemetry.setRSSI({ rssi: 0, ssid: '', safeMode: false, restartNeeded: false, saveNeeded: false , hostName: '' });
 	};
 

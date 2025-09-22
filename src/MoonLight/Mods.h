@@ -146,7 +146,12 @@ class FastLEDDriverMod: public Node {
   #if FASTLED_USES_ESP32S3_I2S
     bool usesI2S = true;
   #else
-    bool usesI2S = true;
+    bool usesI2S = false;
+  #endif
+  #if FASTLED_RMT5
+    bool usesRMT5 = true;
+  #else
+    bool usesRMT5 = false;
   #endif
 
   void setup() override;
