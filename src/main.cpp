@@ -217,9 +217,9 @@ void setup()
             xTaskCreateUniversal(
                 effectTask,              // task function
                 "AppEffectTask",            // name
-                6 * 1024,             // stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
+                psramFound()?6:3 * 1024,             // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
                 NULL,                  // parameter
-                2,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                3,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle
                 1                      // core (0 or 1)
             );
@@ -227,9 +227,9 @@ void setup()
             xTaskCreateUniversal(
                 driverTask,              // task function
                 "AppDriverTask",            // name
-                4 * 1024,             // stack size 
+                psramFound()?4:3 * 1024,             // d0-tuning... stack size
                 NULL,                  // parameter
-                2,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                3,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &driverTaskHandle,       // task handle
                 1                      // core (0 or 1)
             );
