@@ -20,7 +20,7 @@
 
 #define MAX_ESP_ANALYTICS_SIZE 1024
 #define EVENT_ANALYTICS "analytics"
-#define ANALYTICS_INTERVAL 2000
+#define ANALYTICS_INTERVAL 1000 // 🌙
 
 class AnalyticsService
 {

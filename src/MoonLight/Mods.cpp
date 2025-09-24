@@ -18,7 +18,6 @@
 #if HP_ALL_DRIVERS
   #define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
   // #define NUM_LEDS_PER_STRIP 256 not for non virtal... (only setting __delay when NO_WAIT)
-  #define __NB_DMA_BUFFER 75
   #include "I2SClocklessLedDriver.h"
   static I2SClocklessLedDriver ledsDriver;
 #else //ESP32_LEDSDRIVER  
@@ -323,16 +322,18 @@ void ArtNetDriverMod::loop() {
     addControl(chipSet, "chipSet", "text", 0, 20, true);
     addControl(colorOrder, "colorOrder", "text", 0, 20, true);
     addControl(usesI2S, "usesI2S", "checkbox", 0, 20, true);
+    addControl(usesRMT5, "usesRMT5", "checkbox", 0, 20, true);
   }
 
   void  FastLEDDriverMod::addLayout() {
-    if (layerV->layerP->sortedPins.size() == 0) return;
 
-    if (layerV->layerP->pass == 1) { //physical
+    if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
       // if (safeModeMB) {
       //     MB_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
       //     return;
       // }
+
+      if (layerV->layerP->sortedPins.size() == 0) return;
 
       MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
 
@@ -351,6 +352,8 @@ void ArtNetDriverMod::loop() {
 
         CRGB *leds = (CRGB *)layerV->layerP->lights.channels;
 
+        if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
+ 
         switch (sortedPin.pin) {
         #if CONFIG_IDF_TARGET_ESP32
           case 0: FastLED.addLeds<ML_CHIPSET, 0 COLOR_ORDER_ARG>(leds, startLed, nrOfLights).setCorrection(TypicalLEDStrip) RGBW_CALL; break;
@@ -549,6 +552,8 @@ void ArtNetDriverMod::loop() {
 
         default: MB_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", sortedPin.pin);
         } //switch pinNr
+        }
+        else MB_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
 
       } //sortedPins    
     }
@@ -604,18 +609,19 @@ void ArtNetDriverMod::loop() {
 
     DriverNode::setup();
     #if HP_ALL_DRIVERS
+      addControl(dmaBuffer, "dmaBuffer", "range", 1, 100);
       addControl(version, "Version", "text", 0, 30, true); //read only
     #endif
   }
 
   void PhysicalDriverMod::addLayout() {
     #if HP_ALL_DRIVERS
-      if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
-        MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layerV->layerP->sortedPins.size());
-        return;
-      }
+      if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
 
-      if (layerV->layerP->pass == 1) { //physical
+        if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
+          MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layerV->layerP->sortedPins.size());
+          return;
+        }
 
         MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
         if (safeModeMB) {
@@ -630,9 +636,12 @@ void ArtNetDriverMod::loop() {
         for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
           // MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
           if (nb_pins < NUMSTRIPS) {
-            pins[nb_pins] = sortedPin.pin;
-            lengths[nb_pins] = sortedPin.nrOfLights;
-            nb_pins++;
+            if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
+              pins[nb_pins] = sortedPin.pin;
+              lengths[nb_pins] = sortedPin.nrOfLights;
+              nb_pins++;
+            }
+            else MB_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
           }
         }
 
@@ -683,8 +692,6 @@ void ArtNetDriverMod::loop() {
             ledsDriver._defaultOffsetDisplay = ledsDriver._offsetDisplay;
             ledsDriver.linewidth = num_led_per_strip;
 
-            MB_LOGD(ML_TAG, "reinit physDriver %d x %d (%d)", ledsDriver.num_strips, num_led_per_strip, __NB_DMA_BUFFER);
-
             ledsDriver.setPins(pins); //if pins and lengths changed, set that right
 
             // i2sInit(); //not necessary, initled did it, no need to change
@@ -695,8 +702,13 @@ void ArtNetDriverMod::loop() {
                 heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
                 heap_caps_free(ledsDriver.DMABuffersTampon[i]);
             }
+            heap_caps_free(ledsDriver.DMABuffersTampon);
+
+            __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
 
             ledsDriver.initDMABuffers(); //create them again
+
+            MB_LOGD(ML_TAG, "reinit physDriver %d x %d (%d)", ledsDriver.num_strips, num_led_per_strip, __NB_DMA_BUFFER);
 
             return; //bye bye initled, we did it ourselves ;-)
           }
@@ -794,6 +806,7 @@ void ArtNetDriverMod::loop() {
           heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
           heap_caps_free(ledsDriver.DMABuffersTampon[i]);
       }
+      heap_caps_free(ledsDriver.DMABuffersTampon);
 
       //anything else to delete? I2S ...
 

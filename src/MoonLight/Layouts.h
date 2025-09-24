@@ -42,27 +42,27 @@ class HumanSizedCubeLayout: public Node {
 
     //front: z = 0
     for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, 0));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+    addNextPin(nextPin);
 
     //back: z = depth+1
     for (int x = 0; x<width; x++) for (int y = 0; y<height; y++) addLight(Coord3D(x+1, y+1, depth+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+    addNextPin(nextPin);
 
     //above: y = 0
     for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, 0, z+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+    addNextPin(nextPin);
 
     // //below: y = height+1
     // for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, height+1, z+1));
-    // while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+    // addNextPin(nextPin);
 
     //left: x = 0
     for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(Coord3D(0, y+1, z+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+    addNextPin(nextPin);
 
     //right: x = width+1
     for (int z = 0; z<depth; z++) for (int y = 0; y<height; y++) addLight(Coord3D(width+1, y+1, z+1));
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+    addNextPin(nextPin);
   }
 };
 
@@ -127,7 +127,7 @@ class PanelLayout: public Node {
       });
     });
 
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+    addNextPin(nextPin);
 
   }
 
@@ -191,7 +191,7 @@ class PanelsLayout: public Node {
           });
         });
 
-        while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+        addNextPin(nextPin);
 
       });
     });
@@ -258,7 +258,7 @@ class CubeLayout: public Node {
         });
       });
 
-      while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++; if (*nextPin) {int pin = strtol(nextPin, (char**)&nextPin, 10);addPin(pin);} //add next pin
+      addNextPin(nextPin);
     });
 
   }
@@ -316,7 +316,6 @@ class SingleRowLayout: public Node {
   uint16_t xposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
-
 
   void setup() override {
     hasLayout = true;
@@ -424,6 +423,7 @@ class WheelLayout: public Node {
         addLight(Coord3D(x + middle.x, y + middle.y, middle.z));
       }
     }
+    addPin(pin);
   }
 };
 

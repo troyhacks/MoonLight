@@ -2,14 +2,21 @@
 
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/965dd352-d7af-42a1-a72d-43da3b32a252" />
 
+## Overview
+
 The Drivers module allows you to define a **layout** (e.g. a panel 16x16), to drive LEDs (e.g. FastLED driver) and to run **supporting processes** (e.g. audiosync to run sound reactive effects and Art-Net to send light channels to an Art-Net controller).
 
-Each task is defined as a node. A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager). A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
+!!! tip
+
+    Livescripts... A node can be precompiled in the firmware or defined by a live script loaded onto the File System (See File Manager).
+
+## Controls
 
 * Nodes: layouts, drivers and utilities will be shown as nodes with controls
     * Reorder: Nodes can be reordered, defining the order of executions (layouts, which layout is first in the chain of lights. Drivers and utilities: no difference)
+    * Controls. A node can be switched on and off and has custom controls, which defines the parameters of the node
 
-Typically a node will define a modifier (💎) or a supporting process (☸️) but can also combine these tasks (experimental at the moment). To avoid duplication it's in most cases recommended to keep them separated so an effect can run on multiple layouts and a modifier can modify any effect. 
+## Details
 
 * **Layout** 🚥: a layout defines what lights are connected to MoonLight. It defines the coordinates of all lights (addLight) and assigns lights to the GPIO pins of the ESP32 (addPin) and how many channels each light has (normal LEDs 3: Red, Green and Blue). 
     * The **coordinates** of each light are defined in a 3D coordinate space where each coordinate range between 1 and 255. Currently a strip until 255 LEDs is supported, a panel until 128x96 LEDS and a cube max 20x20x20. 
@@ -33,6 +40,9 @@ Typically a node will define a modifier (💎) or a supporting process (☸️) 
 
 ## Layout 🚥 Nodes
 🚧
+!!! danger
+
+    Set pins carefully. There is a check if a specific pin can be used for output / driving LEDs. See also the IO module. But not 100% garanteed. E.g pin 16 on esp32-d0-wrover crashes...
 
 ### PanelLayout 🚥
 

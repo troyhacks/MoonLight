@@ -127,6 +127,7 @@ class PhysicalLayer {
     void mapLayout();
 
     uint8_t pass = 0; //'class global' so addLight/Pin functions know which pass it is in
+    bool monitorPass = false;
     void addLayoutPre();
     void addLight(Coord3D position);
     void addPin(uint8_t pinNr);

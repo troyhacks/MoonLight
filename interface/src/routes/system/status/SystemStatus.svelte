@@ -196,29 +196,35 @@
 					</div>
 				</div>
 
-				{#if page.data.features.battery}
+				{#if page.data.features.battery && ($telemetry.battery.soc>=0 || $telemetry.battery.voltage>=0 || $telemetry.battery.current>=0)}
 					<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 						<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
 							<Battery class="text-primary-content h-auto w-full scale-75" />
 						</div>
+						{#if $telemetry.battery.soc>=0}
 						<div>
 							<div class="font-bold">Battery</div>
 							<div class="text-sm opacity-75">
 								{$telemetry.battery.soc} %
 							</div>
 						</div>
+						{/if}
+						{#if $telemetry.battery.voltage>=0}
 						<div>
 							<div class="font-bold">Voltage</div>
 							<div class="text-sm opacity-75">
-								{$telemetry.battery.voltage} V <!-- // 🌙 -->
+								{$telemetry.battery.voltage.toFixed(1)} V <!-- // 🌙 -->
 							</div>
 						</div>
+						{/if}
+						{#if $telemetry.battery.current>=0}
 						<div>
 							<div class="font-bold">Current</div>
 							<div class="text-sm opacity-75">
-								{$telemetry.battery.current} A <!-- // 🌙 -->
+								{$telemetry.battery.current.toFixed(1)} A <!-- // 🌙 -->
 							</div>
 						</div>
+						{/if}
 					</div>
 				{/if}
 

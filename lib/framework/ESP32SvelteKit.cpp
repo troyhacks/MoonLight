@@ -287,11 +287,11 @@ void ESP32SvelteKit::_loop()
                     _batteryService.updateSOC(perc * 100);
                 #endif
                 #ifdef VOLTAGE_PIN //see esp32-s3-stephanelec-16p
-                    float mV = random(10);// analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
+                    float mV = random(100)/10.0;// analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
                     _batteryService.updateVoltage(mV);
                 #endif
                 #ifdef CURRENT_PIN //see esp32-s3-stephanelec-16p
-                    float mC = random(10);//analogReadMilliVolts(CURRENT_PIN); //limpkin, ReadAmps doesn't exist ... what is the range of values? 0.. ?
+                    float mC = random(100)/10.0;//analogReadMilliVolts(CURRENT_PIN); //limpkin, ReadAmps doesn't exist ... what is the range of values? 0.. ?
                     _batteryService.updateCurrent(mC);
                 #endif
             #endif

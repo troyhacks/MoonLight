@@ -40,9 +40,10 @@ public:
         property = root.add<JsonObject>(); property["name"] = "tasks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
             property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "state"; property["type"] = "text"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "cpu"; property["type"] = "text"; property["ro"] = true;
-            property = details.add<JsonObject>(); property["name"] = "prio"; property["type"] = "number"; property["ro"] = true;
+            property = details.add<JsonObject>(); property["name"] = "summary"; property["type"] = "text"; property["ro"] = true;
+            // property = details.add<JsonObject>(); property["name"] = "state"; property["type"] = "text"; property["ro"] = true;
+            // property = details.add<JsonObject>(); property["name"] = "cpu"; property["type"] = "text"; property["ro"] = true;
+            // property = details.add<JsonObject>(); property["name"] = "prio"; property["type"] = "number"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "stack"; property["type"] = "number"; property["ro"] = true; property["max"] = 65538;
             property = details.add<JsonObject>(); property["name"] = "runtime"; property["type"] = "text"; property["ro"] = true;
             property = details.add<JsonObject>(); property["name"] = "core"; property["type"] = "number"; property["ro"] = true;
@@ -86,21 +87,22 @@ public:
 
             const char *state;
             switch (ts->eCurrentState) {
-                case eRunning:   state = "Running"; break;
-                case eReady:     state = "Ready"; break;
-                case eBlocked:   state = "Blocked"; break;
-                case eSuspended: state = "Suspended"; break;
-                case eDeleted:   state = "Deleted"; break;
-                default:         state = "Unknown"; break;
+                case eRunning:   state = "🏃‍♂️"; break; //Running
+                case eReady:     state = "🧍‍♂️"; break; //Ready
+                case eBlocked:   state = "🚧"; break; //Blocked
+                case eSuspended: state = "⏸️"; break; //Suspended
+                case eDeleted:   state = "🗑️"; break; //Deleted
+                default:         state = "❓"; break; //Unknown
             }
 
-            Char<32> cpu_percent;
-            cpu_percent.format("%5.2f%%", totalRunTime ? (100.0f * ts->ulRunTimeCounter) / totalRunTime : 0.0f);
-
+            Char<32> summary;
+            summary.format("%s %5.0f%% @ P%d", state, totalRunTime ? (100.0f * ts->ulRunTimeCounter) / totalRunTime : 0.0f, ts->uxCurrentPriority);
+        
             task["name"] = ts->pcTaskName;
-            task["state"] = state;
-            task["cpu"] = cpu_percent.c_str();
-            task["prio"] = ts->uxCurrentPriority;
+            task["summary"] = summary.c_str();
+            // task["state"] = state;
+            // task["cpu"] = cpu_percent.c_str();
+            // task["prio"] = ts->uxCurrentPriority;
             task["stack"] = ts->usStackHighWaterMark;
             task["runtime"] = ts->ulRunTimeCounter;
             task["core"] = ts->xCoreID==tskNO_AFFINITY?-1:ts->xCoreID;

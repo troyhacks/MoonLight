@@ -170,6 +170,15 @@ public:
   void addPin(uint8_t pinNr) {
     layerV->layerP->addPin(pinNr);
   }
+  char * addNextPin(char * &nextPin) { //&: by reference to change the pointer to the next pin
+      while (*nextPin && !isdigit((unsigned char)*nextPin)) 
+        nextPin++; 
+      if (*nextPin) {
+        int pin = strtol(nextPin, (char**)&nextPin, 10);
+        addPin(pin);
+      } //add next pin
+      return nextPin;
+  }
 
   //modifier
   virtual void modifySize() {}

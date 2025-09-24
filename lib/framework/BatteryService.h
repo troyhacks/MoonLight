@@ -37,9 +37,9 @@ public:
 
 private:
     EventSocket *_socket;
-    int _lastSOC = 100;
-    float _lastVoltage = 0; // 🌙
-    float _lastCurrent = 0; // 🌙
+    int _lastSOC = -1; // 🌙
+    float _lastVoltage = -1; // 🌙
+    float _lastCurrent = -1; // 🌙
     boolean _isCharging = false;
 
     void batteryEvent();
