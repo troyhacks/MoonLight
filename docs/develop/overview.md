@@ -37,6 +37,29 @@ Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg
     *   ~~-D FT_SLEEP=1~~ enabled!
     *   ~~-D FT_BATTERY=1~~ enabled!
 
+## Windows install
+
+<img width="640" height="497" alt="Screenshot 2025-09-25 200617" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
+
+<img width="640" height="505" alt="Screenshot 2025-09-25 201555" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
+
+<img width="640" height="394" alt="Screenshot 2025-09-25 201934" src="https://github.com/user-attachments/assets/d91ab6b0-aeeb-42ed-8a85-d608b88c6103" />
+
+<img width="640" height="434" alt="Screenshot 2025-09-25 202626" src="https://github.com/user-attachments/assets/ea953f62-0d94-499c-92f0-491d31c2edff" />
+
+<img width="640" height="253" alt="Screenshot 2025-09-25 204324" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
+
+<img width="640" height="502" alt="Screenshot 2025-09-25 204533" src="https://github.com/user-attachments/assets/8d39c637-c7dc-4c34-b177-f8eb63d54863" />
+
+<img width="640" height="268" alt="Screenshot 2025-09-25 205255" src="https://github.com/user-attachments/assets/02aa87cc-a0b7-40cb-9d0e-99ea91d890ec" />
+
+<img width="640" height="344" alt="Screenshot 2025-09-25 205814" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
+
+<img width="640" height="363" alt="Screenshot 2025-09-25 210504" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
+
+<img width="640" height="348" alt="Screenshot 2025-09-25 210622" src="https://github.com/user-attachments/assets/a55b69a1-7732-4bb5-9afe-4e55518db651" />
+
+
 ## Installation - Developer
 
 * Open GitKraken (or any other GitHub client). Press + / New tab and select Clone a Repo (Or another git management tool)
