@@ -18,7 +18,7 @@ nav:
     - moonbase/filemanager.md
     - moonbase/module/devices.md
     - moonbase/module/tasks.md
-    - moonbase/module/pins.md
+    - moonbase/module/inputoutput.md
   - "Connections":
     - connections/mqtt.md
     - connections/ntp.md
@@ -31,6 +31,7 @@ nav:
     - system/update.md
   - "Develop":
     - develop/overview.md
+    - develop/installation.md
     - develop/customizingsveltekit.md
     - develop/pull-requests.md
     - develop/documentation.md
