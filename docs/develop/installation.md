@@ -1,5 +1,5 @@
 
-# Installation of Development environment
+# Installation
 
 The development environment consists of
 
@@ -7,6 +7,7 @@ The development environment consists of
     * Platformio IDE (or pioarduino IDE)
     * nodejs
     * git
+    * python
 
 * Github manager
     * GitKraken (recommended)
@@ -17,7 +18,9 @@ The development environment consists of
 * Download the MoonLight repository
     * Use [GitKraken](https://www.gitkraken.com/download) or GitHub Desktop (or manually)
         * Create a folder to download to: e.g. Developer/GitGub/MoonModules/MoonLight
-        * [MoonLight git](https://github.com/MoonModules/MoonLight.git)
+        * Press + / New tab and select Clone a Repo 
+        * Copy [MoonLight.git](https://github.com/MoonModules/MoonLight.git) and paste in the URL field of GitKraken
+        * Press clone the repo
 
     <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
@@ -28,12 +31,13 @@ The development environment consists of
     <img width="320" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
 
 * Install PlatformIO IDE (or pioarduino IDE)
+    * Open the  MoonLight repository folder created with GitKraken
     * PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
     * In VSCode, search for the extension
 
     <img width="320" src="https://github.com/user-attachments/assets/d91ab6b0-aeeb-42ed-8a85-d608b88c6103" />
 
-    * Install the extension and load the MoonLight repository. Please not it can take a while before Configuring project is finished. Don't change anything in the code yet. Drink a coffee.
+    * Install the extension. Please note it can take a while before Configuring project is finished. Don't change anything in the code yet. Drink a coffee.
 
     <img width="320" src="https://github.com/user-attachments/assets/ea953f62-0d94-499c-92f0-491d31c2edff" />
 
@@ -55,10 +59,18 @@ The development environment consists of
     <img width="640" height="363" alt="Screenshot 2025-09-25 210504" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
 
 * Upload MoonLight to an esp32-device
-    * Connect a board via USB and select the board using the (second) 🔌 icon in the staturbar
+    * Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar
+        * Select esp32dev for a normal ESP32
+        * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
+
+       <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
+
     * Press upload (➡️) in the status bar
 
     <img width="640" height="348" alt="Screenshot 2025-09-25 210622" src="https://github.com/user-attachments/assets/a55b69a1-7732-4bb5-9afe-4e55518db651" />
+
+    * The firmware is now flashed to your board, after flashing the board will reboot
+    * Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
 
 ## Changing MoonLight code
 
@@ -87,9 +99,9 @@ The development environment consists of
 
     <img width="640" height="688" alt="Screenshot 2025-09-25 214700" src="https://github.com/user-attachments/assets/b92ccba0-17e1-4434-929e-302ec8afd96e" />
 
-    * Remove node_modules and package-lock.json - run as administrator!
-    * rebuild node_modules and package-lock.json by opening a vscode shell using [>_] in the statusbar, going to the interface folder and press npm install
-    * if that give errors set exetution policies as follows:
+    * Remove node_modules and package-lock.json - run as administrator if the OS complains!
+    * Rebuild node_modules and package-lock.json by opening a vscode shell using [>_] in the statusbar, going to the interface folder and press npm install
+    * If that give errors set exetution policies as follows:
 
     <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
 
@@ -97,29 +109,10 @@ The development environment consists of
 
     <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
 
-## Installation - Developer
-
-* Open GitKraken (or any other GitHub client). Press + / New tab and select Clone a Repo (Or another git management tool)
-* Select the folder on your local drive where to copy to (e.g. /github/ewowi)
-* Copy [MoonLight.git](https://github.com/MoonModules/MoonLight.git) and paste in the URL field of GitKraken
-* Press clone the repo
-* Open VSCode
-* Install the PlatformIO IDE extension, if not already done so.
-* Open the folder created with GitKraken
-* Connect an ESP32 or an ESP32-S3 with USB to your computer
-* On the status bar select the env to flash and the board to flash to
-    * Select esp32dev for a normal ESP32
-    * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
-
-   <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
-
-* Press PlaformIO:Upload (->) on the statusbar
-* The firmware is now flashed to your board, after flashing the board will reboot
-* Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
-
-* Issues
-    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
-    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
+* Troubleshooting
+    * In general: first close and restart vscode and run ☑️ or ➡️ again.
+    * python > 3.10: install python (3.11.13) in the vscode shell (not in a normal os terminal)
+    * esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions
 
 ## Preconditions for succesful build/upload and browser access:
 
@@ -188,6 +181,10 @@ Normally / Ideally this is not needed, but it can happen that not things are mis
 
 	<img width="350" src="https://github.com/user-attachments/assets/67447f55-7a22-41ab-af8c-0a2e98462792" />
   
+* Issues
+    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
+    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
+
 ## Pull Requests
 
 * Want to make changes: fork the repo and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
