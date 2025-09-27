@@ -19,14 +19,14 @@
 
 * **Safe Mode**: MoonBase will jump into safe mode after a crash, see 🛡️ in the statusbar or [System Status](https://moonmodules.org/MoonLight/system/status/). In safe mode, MoonLight will disable the following features:
     * Add more then 1024 lights
+    * Start LED drivers
     * Execute a live script
 
-    This list is dynamic and will change over time if crash reasons change.
-    Clicking on the icon allows you to restart
+    Clicking on the 🛡️ icon allows you to restart. If the reason for crash has dissappeared the device will start normally (not in safe mode).
 
-* **Restart needed**: e.g. when drivers are changed, a restart might be needed, see 🔄 in the statusbar. Clicking on the icon allows you to restart ()- 🚧
+* **Restart needed**: e.g. when drivers are changed, a restart might be needed, see 🔄 in the statusbar. Clicking on the 🔄 icon allows you to restart
 
-* **Save** and **Cancel** Changes are only saved after pressing the save button 💾. To undo changes, press the cancel button 🚫.
+* **Save** and **Cancel** Changes are only saved after pressing the save button 💾. To undo changes, press the cancel button 🚫 and the last saved state will be restored.
 
 * **Wifi**: See ESP32-Sveltekit
 

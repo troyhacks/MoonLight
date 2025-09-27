@@ -13,6 +13,12 @@ The development environment consists of
     * GitKraken (recommended)
     * GitHub Desktop
 
+## Summary
+
+Install VSCode with the platformIO IDE extension (or pioarduino IDE). Make sure git and nodejs is installed. Download the MoonLight repo. Open it in VSCode and build or upload to an ESP32 device.
+
+Optionally you need to run npm install and make sure python > v3.10 in VSCode.
+
 ## Install Visual Studio Code
 
 * Download the MoonLight repository
@@ -60,17 +66,32 @@ The development environment consists of
 
 * Upload MoonLight to an esp32-device
     * Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar
-        * Select esp32dev for a normal ESP32
+        * Select esp32-d0 for a normal ESP32
         * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
 
        <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
+
+    * Erase the device if it is a new device or the device has not been used for MoonModules before 
+
+    	<img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
 
     * Press upload (➡️) in the status bar
 
     <img width="640" height="348" alt="Screenshot 2025-09-25 210622" src="https://github.com/user-attachments/assets/a55b69a1-7732-4bb5-9afe-4e55518db651" />
 
-    * The firmware is now flashed to your board, after flashing the board will reboot
+    * The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
     * Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
+
+## Connect MoonLight
+
+Before changing code, test if the current download of MoonLight is running fine.
+
+* See [Install MoonLight / Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation#Connect_MoonLight)
+
+    * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
+    * Advanced tip: Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
+
+* See [Install MoonLight / Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation#Setup_MoonLight)
 
 ## Changing MoonLight code
 
@@ -100,8 +121,10 @@ The development environment consists of
     <img width="640" height="688" alt="Screenshot 2025-09-25 214700" src="https://github.com/user-attachments/assets/b92ccba0-17e1-4434-929e-302ec8afd96e" />
 
     * Remove node_modules and package-lock.json - run as administrator if the OS complains!
-    * Rebuild node_modules and package-lock.json by opening a vscode shell using [>_] in the statusbar, going to the interface folder and press npm install
-    * If that give errors set exetution policies as follows:
+    * Rebuild node_modules and package-lock.json by opening a vscode shell using [>_] in the statusbar
+    * cd /interface 
+    * npm install
+    * If that give errors set execution policies as follows:
 
     <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
 
@@ -112,42 +135,17 @@ The development environment consists of
 * Troubleshooting
     * In general: first close and restart vscode and run ☑️ or ➡️ again.
     * python > 3.10: install python (3.11.13) in the vscode shell (not in a normal os terminal)
-    * esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions
+    * esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions (required for support of latest esp-idf 5.5)
+    * Run everything from within VSCode, close any alternative / external tools which (potentially) access esp32 devices. They can claim resources or send commands to the device which interfere with what we trying to accomplish here.
+    * Set WWWData.h right
+        * Open platformIO new terminal (>_)
+        * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
+        * build the project (✔)
+        * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
+    * If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (vscode 👽, Erase flash)
+    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
 
-## Preconditions for succesful build/upload and browser access:
-
-Normally / Ideally this is not needed, but it can happen that not things are missing / not updated in a commit or merge (especially)
-
-* Set platform.json right
-    * cd /interface
-    * run npm install
-* Set WWWData.h right
-    * Open platformIO new terminal (>_)
-    * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
-    * build the project (✔)
-    * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
-* Deinstall platformio IDE and install pioarduino IDE (required for support of latest esp-idf 5.5)
-* Follow the steps 'In pictures' below.
-* Connect to your local WiFi network. Use the AP of the browser only to connect to your network.
-    * Don't use the device AP for further testing.
-* Empty browser caches
-    * Check [how to hard refresh your browser and clear cache](https://fabricdigital.co.nz/blog/how-to-hard-refresh-your-browser-and-clear-cache)
-    * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
-    * Chrome: 
-        * Delete Browsing data / delete data
-        * Chrome on Mac: Command Shift R
-        * Chrome on Windows: Ctrl Shift R or Control Reload
-    * Safari: 
-        * Empty cache: Develop (enable if not done yet) / empty caches (Command Option E)
-        * Reload from Origin : Option Shift R
-    * After this not all UI elements might be immediately visible. Just wait a bit.
-* Run everything from within VSCode, close any alternative / external tools which (potentially) access esp32 boards. They can claim resources or send commands to the board which interfere with what we trying to accomplish here.
-  
 ## In pictures:
-
-* Step 1: Erase ESP32 device:
-  
-	<img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
 
 * Step 2: Flash to ESP32 device
   
@@ -165,26 +163,6 @@ Normally / Ideally this is not needed, but it can happen that not things are mis
 
 	<img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
   
-* Step 6: Change hostname and enter WiFi credentials
-
-	<img width="350" src="https://github.com/user-attachments/assets/81aab0c6-5d60-4ac9-8aee-54a7147be46e" />
-
-* Step 7: Add an effect
-
-	<img width="350" src="https://github.com/user-attachments/assets/6cc3749c-983a-4659-9c63-fab173b4750c" />
-
-* Step 8: Add a layout and set pin(s): Monitor shows effect
-
-	<img width="350" src="https://github.com/user-attachments/assets/d83277bd-4bc1-495c-ae21-85efe41ab8b1" />
-
-* Step 9: Add a driver: LEDs shows effect
-
-	<img width="350" src="https://github.com/user-attachments/assets/67447f55-7a22-41ab-af8c-0a2e98462792" />
-  
-* Issues
-    * If the board AP is not showing up in your WiFi list it might be helpful to fully erase the board before flashing (vscode 👽, Erase flash)
-    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
-
 ## Pull Requests
 
 * Want to make changes: fork the repo and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
@@ -223,7 +201,7 @@ There are 3 levels to add functionality:
 * [MoonLight Modules](https://moonmodules.org/MoonLight/moonbase/modules/) e.g. Lights Control, Effects, Info, Channels. They are subclasses of Modules.h/cpp and implement setupDefinition, onUpdate and optional loop. New modules need to be defined in main.cpp and added to menu.svelte. All further UI is generated by Module.svelte.
 * **MoonLight Nodes**: the easiest and recommended way. See Effects.h, Layouts.h, Modifiers.h and Mods.h for examples. They match closest WLED usermods. Each node has controls, a setup and a loop and can be switched on and off. For specific purposes hasLayout and hasModifier can be set.
 
-### Adding a Board Definition
+### Adding an ESP32 device Definition
 
 Before starting, ensure you have the datasheet of your particular chip and board confirmed and available. Many modules have near-identical markings that can hide varying hardware.
 

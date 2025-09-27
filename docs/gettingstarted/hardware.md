@@ -1,4 +1,4 @@
-# MoonLight Hardware
+# Hardware
 
 To get started the minimal you need is an esp32-board connected via USB to your computer and a LED-strip or panel connected via 3 wires to the vcc, ground and a gpio pin of the esp32.
 

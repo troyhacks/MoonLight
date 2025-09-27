@@ -1,4 +1,6 @@
-# MoonLight Installation
+# Installation
+
+## MoonLight Web installer
 
 Install Moonlight onto an ESP32 using the MoonLight Web installer
 
@@ -30,29 +32,61 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    You can see the serial logging of the board. In case you see nothing you can press reset board, now you should see the logging.
 
-* **Step 8**: Make a **WiFi connection** to the board, it should present itself in the list of WiFi access points.
+## Connect MoonLight
+
+* **Step 1**: Make a **WiFi connection** to the board, it should present itself in the list of WiFi access points.
   
    <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
 
-* **Step 9**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). You will see this screen, select WiFi Station.
+* **Step 2**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). You will see this screen, select WiFi Station.
   
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
 
-* **Step 10**: Enter your local **WiFi network credentials**:
+   * If you ran previous versions of MoonLight, the UI might not show up. In this case it is needed to reload the UI from the device:
+      * Chrome: Command Shift R (Mac) or Ctrl Shift R or Control Reload (Windows)
+      * Safari: Reload from Origin : Option Shift R
+      * After this not all UI elements might be immediately visible. If you see 'MoonLight loading ...' in the browser, just wait a bit. 
+      * Sometimes it migh be needed to clear the browser cache:
+         * Chrome: Delete Browsing data / delete data
+         * Safari: Empty cache: Develop (enable if not visible in the Safare Menu) / empty caches (Command Option E)
+         * More info: [how to hard refresh your browser and clear cache](https://fabricdigital.co.nz/blog/how-to-hard-refresh-your-browser-and-clear-cache)
+   * The device will show in 'Captive portal'. Alternatively you can close the captive portal and show it in a browser using http://4.3.2.1
 
-   <img width="400" alt="Screenshot 2025-06-07 at 20 59 34" src="https://github.com/user-attachments/assets/38f6cb86-e44c-478e-9910-1b0614c99292" />
+* **Step 3**: Enter your local **WiFi network credentials** and hostname:
 
-* **Step 11**: Press **Add Network** and apply settings. After connecting to your normal WiFi network you will see this screen showing the new IP address of your MoonLight board. You need the IP address to connect to tge board. If you don't know the IP address of your board anymore you can go to step 3 and 4 and step 7 and check the IP address in the Serial logging. Advanced tip: Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
+	<img width="400" src="https://github.com/user-attachments/assets/81aab0c6-5d60-4ac9-8aee-54a7147be46e" />
+
+   * The hostname will be used to access your device. E.g. if the hostname is ML-home you can access it using http://ml-home.local
+
+* **Step 4**: Press **Add Network** and apply settings. After connecting to your normal WiFi network you will see this screen showing the new IP address of your MoonLight board. 
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
 
-* **Step 12**: Go to your WiFi settings and connect to your local WiFi network and enter the IP address of your MoonLight board in a browser 
+* **Step 5**: Connect your computer to your local WiFi network and enter the hostname in a browser (e.g. http://ml-home.local)
 
-* **Step 13**: Go to **MoonLight Effects**. Add an effect node. The monitor and a connected strip to the configured pin(s) should now show the effect. Press save (💾)
+   * Alternatively you can use the IP address of the device to connect. 
 
-* **Step 14**: Go to **MoonLight Drivers**. Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to in Step 1. Add a driver node, FastLED driver is best to start with. Physical driver if you have more then 4 LED strips or panels.  Press save (💾)
+## Setup MoonLight
 
-* **Step 15**: In some cases restart the device to make layout changes effective is needed - 🚧.
+* Step 1: Add an effect
+
+	<img width="350" src="https://github.com/user-attachments/assets/6cc3749c-983a-4659-9c63-fab173b4750c" />
+
+* Step 2: Add a layout and set pin(s): Monitor shows effect
+
+	<img width="350" src="https://github.com/user-attachments/assets/d83277bd-4bc1-495c-ae21-85efe41ab8b1" />
+
+   * Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to. 
+   * The Monitor should now show the effect
+
+* Step 3: Add a driver: LEDs shows effect
+
+	<img width="350" src="https://github.com/user-attachments/assets/67447f55-7a22-41ab-af8c-0a2e98462792" />
+
+   * Add a driver node, FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...).
+   * In some cases restart the device to make layout changes effective is needed.
+  
+* **Step 4**: Press save (💾). Saves your setup to the file system, so if a device is restarted, your settings are still there.
 
    <img width="400" src="https://github.com/user-attachments/assets/17fe6f38-375b-4d96-923b-607897e7d4db" />
 
