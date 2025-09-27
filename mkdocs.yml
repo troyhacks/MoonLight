@@ -32,6 +32,7 @@ nav:
   - "Develop":
     - develop/overview.md
     - develop/installation.md
+    - develop/development.md
     - develop/customizingsveltekit.md
     - develop/pull-requests.md
     - develop/documentation.md

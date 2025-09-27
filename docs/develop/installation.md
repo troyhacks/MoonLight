@@ -77,21 +77,24 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     * Press upload (➡️) in the status bar
 
-    <img width="640" height="348" alt="Screenshot 2025-09-25 210622" src="https://github.com/user-attachments/assets/a55b69a1-7732-4bb5-9afe-4e55518db651" />
+	<img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
 
     * The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
     * Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
 
-## Connect MoonLight
+## Connect and setup MoonLight
 
 Before changing code, test if the current download of MoonLight is running fine.
 
-* See [Install MoonLight / Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation#Connect_MoonLight)
+* See [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight)
 
     * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
     * Advanced tip: Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
+    * Check AP settings
 
-* See [Install MoonLight / Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation#Setup_MoonLight)
+	<img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
+  
+* See [Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#setup-moonlight)
 
 ## Changing MoonLight code
 
@@ -132,6 +135,10 @@ Before changing code, test if the current download of MoonLight is running fine.
 
     <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
 
+    * Check serial output
+  
+	<img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
+
 * Troubleshooting
     * In general: first close and restart vscode and run ☑️ or ➡️ again.
     * python > 3.10: install python (3.11.13) in the vscode shell (not in a normal os terminal)
@@ -144,94 +151,3 @@ Before changing code, test if the current download of MoonLight is running fine.
         * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
     * If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (vscode 👽, Erase flash)
     * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
-
-## In pictures:
-
-* Step 2: Flash to ESP32 device
-  
-	<img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
-
-* Step 3: Check serial output
-  
-	<img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
-
-* Step 4: Connect to the WiFi AP of the ESP32 device: captive portal or via http://4.3.2.1
-  
-	<img width="350" src="https://github.com/user-attachments/assets/20b9f7fe-ab3d-4b8d-b20a-478129d79c6f" />
-
-* Step 5: Check AP settings
-
-	<img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
-  
-## Pull Requests
-
-* Want to make changes: fork the repo and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
-
-    * Login to your own github account
-    * Fork: go to [MoonModules/MoonLight](https://github.com/MoonModules/MoonLight/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonLight
-    * Press Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
-      
-      <img width="90" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
-
-    * Go to the file you want to change press edit and make the changes. E.g. change executable.execute("main") to executable.executeAsTask("main")
-    * Press Commit Changes..., enter a commit message and an extended description, Press Commit Changes
-    * Go back to the homepage of your fork [myfork/MoonLight](https://github.com/ewoudwijma/MoonLight). There is a message inviting to create a Pull Request. Press Compare & pull request.
-      
-      <img width="350" alt="Screenshot 2025-04-15 at 14 59 15" src="https://github.com/user-attachments/assets/410aa517-99eb-4907-b1a3-db7f38abb194" />
-  
-    * Add a title and Description to the Pull Request and press Create Pull Request
-  
-    * The upstream MoonLight repo can now process this PR
-
-## Adding functionality
-
-### UI
-🚧
-
-* nodejs
-* /interface folder
-* npm install and npm run dev
-* WWWData.h
-
-### Server
-
-There are 3 levels to add functionality:
-
-* **Standard ESP32-Sveltekit code**, e.g. Connections, Wifi and System. MoonBase files is also made using standard sveltekit as example but contains a few components used in MoonLight modules. Might be rewriteen as MoonLight Module in the future.
-* [MoonLight Modules](https://moonmodules.org/MoonLight/moonbase/modules/) e.g. Lights Control, Effects, Info, Channels. They are subclasses of Modules.h/cpp and implement setupDefinition, onUpdate and optional loop. New modules need to be defined in main.cpp and added to menu.svelte. All further UI is generated by Module.svelte.
-* **MoonLight Nodes**: the easiest and recommended way. See Effects.h, Layouts.h, Modifiers.h and Mods.h for examples. They match closest WLED usermods. Each node has controls, a setup and a loop and can be switched on and off. For specific purposes hasLayout and hasModifier can be set.
-
-### Adding an ESP32 device Definition
-
-Before starting, ensure you have the datasheet of your particular chip and board confirmed and available. Many modules have near-identical markings that can hide varying hardware.
-
-There are 3 files to consider when making a board definition.
-
-	boards/BOARD_NAME.csv
-	boards/BOARD_NAME.JSON
-	firmware/BOARD_TYPE_NAME.ini (e.g. esp32dev, esp32-s3), contains different boards
-
-### Technical notes
-
-#### Live Scripts
-
-* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
-    * To do: kill running scripts, e.g. when changing effects
-
-#### File Manager
-
-## Technical
-
-* filesState: all files on FS
-* folderList: all files in a folder
-* editableFile: current file
-* getState / postFilesState: get filesState and post changes to files (update, delete, new)
-* addFile / addFolder: create new items
-* breadcrumbs(String): folder path as string array and as string, stored in localStorage
-* folderListFromBreadCrumbs: create folderList of current folder
-* handleEdit: when edit button pressed: navigate back and forward through folders, edit current file
-* confirmDelete: when delete button pressed
-* socket files / handleFileState (->folderListFromBreadCrumbs)
-
-Using component FileEdit, see [Components](https://moonmodules.org/MoonLight/components/#fileedit)
-
