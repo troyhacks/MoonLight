@@ -139,7 +139,19 @@ Before changing code, test if the current download of MoonLight is running fine.
   
 	<img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
 
-* Troubleshooting
+## UI development server
+
+Vite provides a development web server on your computer which connects to a running esp32-device (see [development-server](https://moonmodules.org/MoonLight/gettingstarted/#development-server)).
+
+Activate it as follows:
+
+    * configure vite.config.ts: set ip address of a running esp32-device
+    * cd interface
+    * npm run dev (see [changing MoonLight code](https://moonmodules.org/MoonLight/develop/installation/#changing-moonlight-code) to install nodejs)
+    * A local webserver starts on [localhost](http://localhost:5173/). 
+    * UI changes will directly be shown via this webserver without needing to flash it on an esp32-device.
+
+## Troubleshooting
     * In general: first close and restart vscode and run ☑️ or ➡️ again.
     * python > 3.10: install python (3.11.13) in the vscode shell (not in a normal os terminal)
     * esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions (required for support of latest esp-idf 5.5)
