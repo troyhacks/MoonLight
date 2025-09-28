@@ -58,9 +58,14 @@ Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg
 ### Front End (UI)
 🚧
 
-* /interface folder
+* interface folder
 * see [Changing MoonLight code](https://moonmodules.org/MoonLight/develop/installation/#changing-moonlight-code) about nodejs, npm install
-* npm install and npm run dev
+
+```
+npm install
+npm run dev
+```
+
 * see [Troubleshooting](https://moonmodules.org/MoonLight/develop/installation/#troubleshooting) about WWWData.h
 
 ### Back End (Server)

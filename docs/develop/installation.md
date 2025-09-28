@@ -21,7 +21,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
 ## Install Visual Studio Code
 
-* Download the MoonLight repository
+** Step 1**: Download the MoonLight repository
     * Use [GitKraken](https://www.gitkraken.com/download) or GitHub Desktop (or manually)
         * Create a folder to download to: e.g. Developer/GitGub/MoonModules/MoonLight
         * Press + / New tab and select Clone a Repo 
@@ -30,14 +30,14 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
-* Download Visual Studio Code
+** Step 2**: Download Visual Studio Code
     * Windows: download from the Microsoft Store
     * MacOS: [Visual Studio download](https://code.visualstudio.com/download)
 
     <img width="320" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
 
-* Install PlatformIO IDE (or pioarduino IDE)
-    * Open the  MoonLight repository folder created with GitKraken
+** Step 3**: Install PlatformIO IDE (or pioarduino IDE)
+    * Open the MoonLight repository folder created in step 1
     * PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
     * In VSCode, search for the extension
 
@@ -47,7 +47,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="320" src="https://github.com/user-attachments/assets/ea953f62-0d94-499c-92f0-491d31c2edff" />
 
-* Build MoonLight
+** Step 4**: Build MoonLight
     * Press ☑️ in the bottom statusbar
 
     <img width="320" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
@@ -64,7 +64,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="640" height="363" alt="Screenshot 2025-09-25 210504" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
 
-* Upload MoonLight to an esp32-device
+** Step 5**: Upload MoonLight to an esp32-device
     * Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar
         * Select esp32-d0 for a normal ESP32
         * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
@@ -80,7 +80,9 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 	<img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
 
     * The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
-    * Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
+
+!!! tip Serial Monitor
+    Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
 
 ## Connect and setup MoonLight
 
@@ -125,8 +127,12 @@ Before changing code, test if the current download of MoonLight is running fine.
 
     * Remove node_modules and package-lock.json - run as administrator if the OS complains!
     * Rebuild node_modules and package-lock.json by opening a vscode shell using [>_] in the statusbar
-    * cd /interface 
-    * npm install
+
+``` 
+cd interface 
+npm install
+```
+
     * If that give errors set execution policies as follows:
 
     <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
@@ -145,21 +151,24 @@ Vite provides a development web server on your computer which connects to a runn
 
 Activate it as follows:
 
-    * configure vite.config.ts: set ip address of a running esp32-device
-    * cd interface
-    * npm run dev (see [changing MoonLight code](https://moonmodules.org/MoonLight/develop/installation/#changing-moonlight-code) to install nodejs)
-    * A local webserver starts on [localhost](http://localhost:5173/). 
-    * UI changes will directly be shown via this webserver without needing to flash it on an esp32-device.
+* configure vite.config.ts: set ip address of a running esp32-device
+```
+cd interface
+npm run dev
+```
+* (see [changing MoonLight code](https://moonmodules.org/MoonLight/develop/installation/#changing-moonlight-code) to install nodejs)
+* A local webserver starts on [localhost](http://localhost:5173/). 
+* UI changes will directly be shown via this webserver without needing to flash it on an esp32-device.
 
 ## Troubleshooting
-    * In general: first close and restart vscode and run ☑️ or ➡️ again.
-    * python > 3.10: install python (3.11.13) in the vscode shell (not in a normal os terminal)
-    * esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions (required for support of latest esp-idf 5.5)
-    * Run everything from within VSCode, close any alternative / external tools which (potentially) access esp32 devices. They can claim resources or send commands to the device which interfere with what we trying to accomplish here.
-    * Set WWWData.h right
-        * Open platformIO new terminal (>_)
-        * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
-        * build the project (✔)
-        * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
-    * If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (vscode 👽, Erase flash)
-    * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
+* In general: first close and restart vscode and run ☑️ or ➡️ again.
+* python > 3.10: install python (3.11.13) in the vscode shell (not in a normal os terminal)
+* esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions (required for support of latest esp-idf 5.5)
+* Run everything from within VSCode, close any alternative / external tools which (potentially) access esp32 devices. They can claim resources or send commands to the device which interfere with what we trying to accomplish here.
+* Set WWWData.h right
+    * Open platformIO new terminal (>_)
+    * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
+    * build the project (✔)
+    * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
+* If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (vscode 👽, Erase flash)
+* Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
