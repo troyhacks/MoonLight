@@ -21,7 +21,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
 ## Install Visual Studio Code
 
-** Step 1**: Download the MoonLight repository
+**Step 1**: Download the MoonLight repository
     * Use [GitKraken](https://www.gitkraken.com/download) or GitHub Desktop (or manually)
         * Create a folder to download to: e.g. Developer/GitGub/MoonModules/MoonLight
         * Press + / New tab and select Clone a Repo 
@@ -30,13 +30,13 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
-** Step 2**: Download Visual Studio Code
+**Step 2**: Download Visual Studio Code
     * Windows: download from the Microsoft Store
     * MacOS: [Visual Studio download](https://code.visualstudio.com/download)
 
     <img width="320" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
 
-** Step 3**: Install PlatformIO IDE (or pioarduino IDE)
+**Step 3**: Install PlatformIO IDE (or pioarduino IDE)
     * Open the MoonLight repository folder created in step 1
     * PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
     * In VSCode, search for the extension
@@ -47,7 +47,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="320" src="https://github.com/user-attachments/assets/ea953f62-0d94-499c-92f0-491d31c2edff" />
 
-** Step 4**: Build MoonLight
+**Step 4**: Build MoonLight
     * Press ☑️ in the bottom statusbar
 
     <img width="320" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
@@ -64,7 +64,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="640" height="363" alt="Screenshot 2025-09-25 210504" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
 
-** Step 5**: Upload MoonLight to an esp32-device
+**Step 5**: Upload MoonLight to an esp32-device
     * Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar
         * Select esp32-d0 for a normal ESP32
         * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
@@ -81,7 +81,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     * The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
 
-!!! tip Serial Monitor
+!!! tip "Serial Monitor"
     Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
 
 ## Connect and setup MoonLight
@@ -91,8 +91,10 @@ Before changing code, test if the current download of MoonLight is running fine.
 * See [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight)
 
     * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
-    * Advanced tip: Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
     * Check AP settings
+
+!!! tip "ESP32Devices"
+    Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
 
 	<img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
   
@@ -103,10 +105,10 @@ Before changing code, test if the current download of MoonLight is running fine.
 * Changing the backend (c/c++)
     * lib folder for Sveltekit 
     * src folder for MoonBase and MoonLight
-    * ☑️ and ➡️ to build and or upload, if frontend has not changed this will run succesfully
+    * ☑️ and ➡️ to build and or upload
 
 * Changing the frontend (UI)
-    * See the interface folder
+    * interface folder
     * on each file change, ☑️ or ➡️ will rebuild the UI using node.js
     * if node.js is not on your system you will get this error:
 
@@ -127,23 +129,21 @@ Before changing code, test if the current download of MoonLight is running fine.
 
     * Remove node_modules and package-lock.json - run as administrator if the OS complains!
     * Rebuild node_modules and package-lock.json by opening a vscode shell using [>_] in the statusbar
-
 ``` 
 cd interface 
 npm install
 ```
+  * If that give errors set execution policies as follows:
 
-    * If that give errors set execution policies as follows:
+  <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
 
-    <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
+  * Press run ☑️ or ➡️ again it should now complete succesfully
 
-    * Press run ☑️ or ➡️ again it should now complete succesfully
+  <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
 
-    <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
-
-    * Check serial output
+  * Check serial output
   
-	<img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
+  <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
 
 ## UI development server
 

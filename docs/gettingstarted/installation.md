@@ -10,7 +10,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 **Step 3**: Go to the [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). Select your ESP32-device, or if not listed, press others.
 
-!!! info Browser support
+!!! info "Browser support"
 
    The Web Installer works on Google Chrome or Microsoft Edge or similar browsers, not on Safari.
 
@@ -24,7 +24,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 **Step 6**: Choose to **erase** the ESP32-device first or not
 
-!!! tip Erase
+!!! tip "Erase"
 
    Erase if you have a new ESP32-device or want to start fresh. Do not erase if you want to update an existing MoonLight installation. Erase deletes all settings and requires to re-[connect to MoonLight](/#connect-moonlight).
 
@@ -40,7 +40,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
     <img width="350" alt="Screenshot 2025-06-07 at 20 57 54" src="https://github.com/user-attachments/assets/9ac753dc-93b7-4f79-9419-0c81d1a4bc26" />
 
-!!! tip Erase
+!!! tip "Logging"
     You can see the serial logging of the ESP32-device. In case you see nothing you can press reset device, now you should see the logging.
 
 ## Connect MoonLight
@@ -69,7 +69,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 	 <img width="400" src="https://github.com/user-attachments/assets/81aab0c6-5d60-4ac9-8aee-54a7147be46e" />
 
-!!! tip Hostname
+!!! tip "Hostname"
 
     The hostname will be used to access your device. E.g. if the hostname is ML-home you can access it using http://ml-home.local
 
@@ -79,10 +79,10 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 **Step 5**: When connected to youe local WiFi network, enter the hostname in a browser (e.g. http://ml-home.local)
 
-!!! tip IP address
+!!! tip "IP address"
     Alternatively you can use the IP address of the device to connect. 
 
-!!! warning
+!!! warning "reload UI"
     See step 2 if UI is not showing up: reload UI from ESP32-devices
 
 ## Setup MoonLight
@@ -97,7 +97,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
     * Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to. 
 
-!!! info Monitor
+!!! info "Monitor"
     The Monitor should now show the effect
 
 **Step 3**: Add a driver: LEDs shows effect
@@ -107,14 +107,14 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
     * Add a driver node
     * In some cases restart the device to make layout changes effective is needed.
     
-!!! tip Choose driver
+!!! tip "Choose driver"
     FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...).
   
 **Step 4**: Press save (💾). Saves your setup to the file system, so if a device is restarted, your settings are still there.
 
     <img width="400" src="https://github.com/user-attachments/assets/17fe6f38-375b-4d96-923b-607897e7d4db" />
 
-!!! info Next steps 
+!!! info "Next steps"
     * You can now change effect or add effects, modifiers, layouts and drivers
     * Go to [MoonLigh Overview](https://moonmodules.org/MoonLight/moonlight/overview/)
     * press the ? in MoonLight to go directly to the relevant page
@@ -123,7 +123,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 * The preferred way to update MoonLight is via [System update](https://moonmodules.org/MoonLight/system/update/)
 
-   <img width="350" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
+    <img width="350" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
 
     * Download from GitHub - Currently not working due to certificate issue... 🚧
     * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
