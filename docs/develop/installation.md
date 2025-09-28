@@ -22,64 +22,69 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 ## Install Visual Studio Code
 
 **Step 1**: Download the MoonLight repository
+
     * Use [GitKraken](https://www.gitkraken.com/download) or GitHub Desktop (or manually)
         * Create a folder to download to: e.g. Developer/GitGub/MoonModules/MoonLight
         * Press + / New tab and select Clone a Repo 
         * Copy [MoonLight.git](https://github.com/MoonModules/MoonLight.git) and paste in the URL field of GitKraken
         * Press clone the repo
 
-    <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
+<img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
 **Step 2**: Download Visual Studio Code
+
     * Windows: download from the Microsoft Store
     * MacOS: [Visual Studio download](https://code.visualstudio.com/download)
 
-    <img width="320" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
+<img width="320" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
 
 **Step 3**: Install PlatformIO IDE (or pioarduino IDE)
-    * Open the MoonLight repository folder created in step 1
-    * PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
-    * In VSCode, search for the extension
 
-    <img width="320" src="https://github.com/user-attachments/assets/d91ab6b0-aeeb-42ed-8a85-d608b88c6103" />
+* Open the MoonLight repository folder created in step 1
+* PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
+* In VSCode, search for the extension
 
-    * Install the extension. Please note it can take a while before Configuring project is finished. Don't change anything in the code yet. Drink a coffee.
+<img width="320" src="https://github.com/user-attachments/assets/d91ab6b0-aeeb-42ed-8a85-d608b88c6103" />
 
-    <img width="320" src="https://github.com/user-attachments/assets/ea953f62-0d94-499c-92f0-491d31c2edff" />
+* Install the extension. Please note it can take a while before Configuring project is finished. Don't change anything in the code yet. Drink a coffee.
+
+<img width="320" src="https://github.com/user-attachments/assets/ea953f62-0d94-499c-92f0-491d31c2edff" />
 
 **Step 4**: Build MoonLight
-    * Press ☑️ in the bottom statusbar
 
-    <img width="320" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
+* Press ☑️ in the bottom statusbar
 
-    * When git is not installed on your system, install it, restart vscode and press ☑️ again
+<img width="320" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
 
-    <img width="320" src="https://github.com/user-attachments/assets/8d39c637-c7dc-4c34-b177-f8eb63d54863" />
+* When git is not installed on your system, install it, restart vscode and press ☑️ again
 
-    * If you compile for the first time it take some time to finish
+<img width="320" src="https://github.com/user-attachments/assets/8d39c637-c7dc-4c34-b177-f8eb63d54863" />
 
-    <img width="640" height="268" alt="Screenshot 2025-09-25 205255" src="https://github.com/user-attachments/assets/02aa87cc-a0b7-40cb-9d0e-99ea91d890ec" />
+* If you compile for the first time it take some time to finish
 
-    <img width="640" height="344" alt="Screenshot 2025-09-25 205814" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
+<img width="640" height="268" alt="Screenshot 2025-09-25 205255" src="https://github.com/user-attachments/assets/02aa87cc-a0b7-40cb-9d0e-99ea91d890ec" />
 
-    <img width="640" height="363" alt="Screenshot 2025-09-25 210504" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
+<img width="640" height="344" alt="Screenshot 2025-09-25 205814" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
+
+<img width="640" height="363" alt="Screenshot 2025-09-25 210504" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
 
 **Step 5**: Upload MoonLight to an esp32-device
-    * Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar
-        * Select esp32-d0 for a normal ESP32
-        * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
 
-       <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
+* Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar
+    * Select esp32-d0 for a normal ESP32
+    * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
 
-    * Erase the device if it is a new device or the device has not been used for MoonModules before 
+    <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
 
-    	<img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
+* Erase the device if it is a new device or the device has not been used for MoonModules before 
 
-    * Press upload (➡️) in the status bar
+    <img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
 
-	<img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
+* Press upload (➡️) in the status bar
 
-    * The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
+<img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
+
+* The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
 
 !!! tip "Serial Monitor"
     Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
@@ -92,11 +97,10 @@ Before changing code, test if the current download of MoonLight is running fine.
 
     * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
     * Check AP settings
+    <img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
 
 !!! tip "ESP32Devices"
     Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
-
-	<img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
   
 * See [Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#setup-moonlight)
 
@@ -135,15 +139,15 @@ npm install
 ```
   * If that give errors set execution policies as follows:
 
-  <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
+    <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
 
   * Press run ☑️ or ➡️ again it should now complete succesfully
 
-  <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
+    <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
 
   * Check serial output
   
-  <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
+    <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
 
 ## UI development server
 
