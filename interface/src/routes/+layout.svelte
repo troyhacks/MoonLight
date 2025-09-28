@@ -134,6 +134,10 @@
 	const handleOAT = (data: DownloadOTA) => telemetry.setDownloadOTA(data);
 
 	let menuOpen = $state(false);
+
+	// 🌙
+	let loadMsg = document.getElementById("loadMsg");
+	if (loadMsg) loadMsg.hidden = true;
 </script>
 
 <svelte:head>

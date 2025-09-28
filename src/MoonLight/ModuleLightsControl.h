@@ -201,6 +201,7 @@ public:
         if (presetLoop && millis() - lastPresetTime > presetLoop * 1000) { // every presetLoop seconds
             lastPresetTime = millis();
 
+            std::lock_guard<std::mutex> lock(runInTask_mutex);
             runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
                 // load the xth preset from FS
                 JsonArray presets = _state.data["preset"]["list"];

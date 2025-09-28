@@ -99,7 +99,8 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
                 layerP.loop(); //run all the effects of all virtual layers (currently only one layer)
 
                 xSemaphoreGive(driverSemaphore);
-                    
+                
+                std::lock_guard<std::mutex> lock(runInTask_mutex);
                 while (!runInTask1.empty()) {
                     // MB_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
                     runInTask1.front()();
@@ -123,6 +124,7 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
 
                 xSemaphoreGive(effectSemaphore);
 
+                std::lock_guard<std::mutex> lock(runInTask_mutex);
                 while (!runInTask2.empty()) {
                     MB_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
                     runInTask2.front()();
