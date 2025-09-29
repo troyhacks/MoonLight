@@ -58,21 +58,54 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
 * When git is not installed on your system, install it, restart vscode and press ☑️ again
 
-    <img width="320" src="https://github.com/user-attachments/assets/8d39c637-c7dc-4c34-b177-f8eb63d54863" />
+   * Windows:
+
+   <img width="320" src="https://github.com/user-attachments/assets/8d39c637-c7dc-4c34-b177-f8eb63d54863" />
+    
+   * MacOS
+
+   <img width="320" src="https://github.com/user-attachments/assets/b6c27943-6046-4fd7-aab4-3c91544f761d" />
+
+!!! info "Install git on MacOS"
+   * Install [homebrew](https://brew.sh): will take a while: ☕️
+   * Install git using homebrow
+     
+   ```
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      echo >> /Users/ewoud/.zprofile
+      echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/ewoud/.zprofile
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      brew install git
+   ```
 
 * If you compile for the first time it take some time to finish
 
-    <img width="640" height="268" alt="Screenshot 2025-09-25 205255" src="https://github.com/user-attachments/assets/02aa87cc-a0b7-40cb-9d0e-99ea91d890ec" />
-    <img width="640" height="344" alt="Screenshot 2025-09-25 205814" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
-    <img width="640" height="363" alt="Screenshot 2025-09-25 210504" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
+    <img width="320" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
+    <img width="320" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
+
+!!! warning "Python and LZMA"
+   In some cases LZMA support must be installed
+   <img width="320" height="50" alt="Screenshot 2025-09-29 at 13 58 07" src="https://github.com/user-attachments/assets/2eef658f-f297-46cd-bbd5-4d769dbf9e56" />
+   * Run in vscode / pio shell ([>_]
+   ```
+   brew install xz
+
+   python -V
+   ```
+   * python -V should show a version > 3.10 (e.g. 3.11.7)
 
 **Step 5**: Upload MoonLight to an esp32-device
 
-* Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar
+* Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar.   
     * Select esp32-d0 for a normal ESP32
     * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
 
     <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
+
+!!! info "USB-to-serial chip drivers"
+   In some cases, ESP32-devices won't show connected. See USB-to-serial chip drivers at [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) 
 
 * Erase the device if it is a new device or the device has not been used for MoonModules before 
 
