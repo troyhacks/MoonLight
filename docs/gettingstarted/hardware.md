@@ -2,6 +2,10 @@
 
 To get started the minimal you need is an esp32-device connected via USB to your computer and a LED-strip or panel connected via 3 wires to the vcc, ground and a supported gpio pin of the esp32 (e.g. Pin 2). An ESP32-S3 is preferred as it has more memory to support large setups and Live Scripts. 
 
+!!! info "ESP32-D0"
+
+    Currently normal ESP32-devices (ESP32-D0, devices without PSRAM) are low on memory if MoonLight is installed. Therefor ESP32-D0-wrover or ESP32-S3 is recommended.
+
 ## Minimal hardware
 
 * One of the ESP32-devices show in [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). [ESP32-S3 N16R8](https://s.click.aliexpress.com/e/_DBAtJ2H) recommended. Optional [Expansion board 44pin](https://s.click.aliexpress.com/e/_EJhmlIE)

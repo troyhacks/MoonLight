@@ -2,11 +2,11 @@
 
 ## MoonLight Web installer
 
-Install Moonlight onto an ESP32 using the MoonLight Web installer
+Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installer
 
-**Step 1**: Get an **ESP32** and a **WS2812 LED-strip** or a [LED-panel](https://s.click.aliexpress.com/e/_EGx8Hhu). See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).
+**Step 1**: Get an **ESP32** and a **WS2812 LED-strip** or **LED-panel**. See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).
 
-**Step 2**: Connect an ESP32 via USB
+**Step 2**: Connect the ESP32 via USB
 
 **Step 3**: Go to the [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). Select your ESP32-device, or if not listed, press others.
 
@@ -45,7 +45,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 ## Connect MoonLight
 
-**Step 1**: Make a **WiFi connection** to the ESP32-device, it should present itself in the list of WiFi access points.
+**Step 1**: Make a **WiFi connection** to the ESP32-device, it should present itself in the list of WiFi access points of your computer, phone or tablet.
   
    <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
 
@@ -53,9 +53,11 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
   
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
 
+   * The device will show in 'Captive portal' mode. Alternatively you can close the captive portal and show it in a browser using [http://4.3.2.1](http://4.3.2.1)
+
 !!! warning "UI not showing when installing new version of MoonLight"
 
-    If you ran previous versions of MoonLight, the UI might not show up if it has been changed since then. In this case it is needed to reload the UI from the ESP32-device
+    If you ran previous versions of MoonLight, the UI might not show up if it has been changed since then. In this case it is needed to reload the UI from the ESP32-device (use [http://4.3.2.1](http://4.3.2.1))
 
     * Chrome: Command Shift R (Mac) or Ctrl Shift R or Control Reload (Windows)
     * Safari: Reload from Origin : Option Shift R
@@ -66,8 +68,6 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
         * Safari: Empty cache: Menu Develop (enable if not visible in the Safari Menu) / empty caches (Command Option E)
 
         * More info: [how to hard refresh your browser and clear cache](https://fabricdigital.co.nz/blog/how-to-hard-refresh-your-browser-and-clear-cache)
-
-   * The device will show in 'Captive portal' mode. Alternatively you can close the captive portal and show it in a browser using [http://4.3.2.1](http://4.3.2.1)
 
 **Step 3**: Enter your local **WiFi network credentials** and hostname:
 
@@ -87,7 +87,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
     Alternatively you can use the IP address of the device to connect. 
 
 !!! warning "reload UI"
-    See step 2 ⚠️ if UI is not showing up
+    See step 2 ⚠️ if UI is not showing up, use [http://ml-home.local](http://ml-home.local) (replace ml-home with the hostname) or the IP address.
 
 ## Setup MoonLight
 

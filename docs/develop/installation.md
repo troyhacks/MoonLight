@@ -35,6 +35,8 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 
     <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
+    * The main branch will be checked out per default. To run / test latest developments, switch to the dev branch
+
 **Step 2**: Download Visual Studio Code
 
 * Windows: download from the Microsoft Store
@@ -64,7 +66,7 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 
     <img width="320" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
 
-* When git is not installed on your system, install it, restart VSCode and press ☑️ again
+* When git is not installed on your system, [download git](https://git-scm.com/downloads) and install, restart VSCode and press ☑️ again
 
     * Windows:
 
@@ -77,13 +79,13 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 !!! info "Install git on MacOS"
 
     * Install [homebrew](https://brew.sh): will take a while: ☕️
-    * Install git using homebrew:
+    * Install git using homebrew (replace <user> with your user name):
      
     ```
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    echo >> /Users/ewoud/.zprofile
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/ewoud/.zprofile
+    echo >> /Users/<user>/.zprofile
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/<user>/.zprofile
     eval "$(/opt/homebrew/bin/brew shellenv)"
 
     brew install git
@@ -112,9 +114,7 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 
 **Step 5**: Upload MoonLight to an esp32-device
 
-* Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar.   
-    * Select esp32-d0 for a normal ESP32
-    * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
+* Connect an ESP32-device via USB and select the device using the (second) 🔌 icon in the staturbar. See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).   
 
 !!! info "USB-to-serial chip drivers"
 
@@ -143,7 +143,9 @@ Before changing code, test if the current download of MoonLight is running fine.
 
 !!! tip "ESP32Devices"
     IF you want to know which MoonLight (or WLED) devices run on your network, use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network
-  
+
+* MDNS...
+
 ## Prepare for development
 
 nodejs is needed if changes on the frontend (UI) are made (interface folder). On each file change, ☑️ or ➡️ will rebuild the UI using nodejs.
@@ -156,7 +158,7 @@ nodejs is needed if changes on the frontend (UI) are made (interface folder). On
 
     <img width="640" height="501" alt="Screenshot 2025-09-25 212842" src="https://github.com/user-attachments/assets/9945217f-7b4a-4b97-87df-3b35b61ccc0a" />
 
-    * in that case run an administrator command prompt and run the downloaded .msi file as follows:
+    * if this is the case, run an administrator command prompt and run the downloaded .msi file as follows:
 
     <img width="649" height="510" alt="Screenshot 2025-09-25 220442" src="https://github.com/user-attachments/assets/144cce1d-bc59-471c-ace3-aa38c52629e4" />
     <img width="640" height="498" alt="Screenshot 2025-09-25 214052" src="https://github.com/user-attachments/assets/affb20e8-785e-471d-98d9-855e5783ce5e" />
@@ -182,6 +184,8 @@ npm install
 * Check serial output
   
     <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
+
+* Go to [development](https://moonmodules.org/MoonLight/develop/development/) for further info on developing MoonBase / MoonLight functionality.
 
 ## UI development server
 

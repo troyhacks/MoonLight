@@ -89,6 +89,7 @@ hide:
         • LED strips (1D)<br>
         • Panels & matrices (2D)<br>
         • Cubes & sculptures (3D)
+        * DMX lights like PAR lights, Light Bars and Moving Heads
       </div>
     </div>
     
@@ -231,7 +232,7 @@ hide:
 !!! info "Current Status"
     **Version 0.5.9** - Developer preview available now
     
-    **Version 0.6.0** - **September 2025** - The user-friendly baseline release
+    **Version 0.6.0** - **October 2025** - The user-friendly baseline release
     
     ✨ **Coming in 0.6.0 - The Game Changer:**
     - **Plug & Play Experience** - True user-friendly installation
@@ -334,6 +335,6 @@ MoonLight is free. Help us continue building amazing tools for the creative comm
 
 ---
 
-**⚠️ Disclaimer:** While we strive for rock-solid reliability, we can't guarantee protection against spontaneous LED combustion, accidental disco parties, or the inevitable heat death of the universe! Use responsibly and have fun! 🔥🕺🌌
+**⚠️ Disclaimer:** Using this software is the sole user's responsibility as it is not bug free. Therefore, contributors of this repo are not liable for anything, including but not limited to spontaneous combustion of the entire LED strip, the house and the inevitable heat death of the universe 🔥🕺🌌
 
 *Ready to create something amazing?* **[Get started now!](gettingstarted/overview/)** 🌙✨

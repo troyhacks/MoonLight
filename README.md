@@ -51,4 +51,4 @@ https://github.com/sponsors/ewowi
 
 ## Disclaimer
 
-Using this software is the users responsibility as it is not bug free. Therefore contributors of this repo are not reliable for anything including but not limited to spontaneous combustion of the entire LED strip, the house and the inevitable heat death of the universe
+Using this software is the sole user's responsibility as it is not bug free. Therefore, contributors of this repo are not liable for anything, including but not limited to spontaneous combustion of the entire LED strip, the house and the inevitable heat death of the universe
