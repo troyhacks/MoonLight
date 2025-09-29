@@ -144,7 +144,7 @@ static int custom_vprintf(const char* fmt, va_list args)
     char buffer[256];
     int len = vsnprintf(buffer, sizeof(buffer), fmt, args);
 
-    Serial.printf("🌙"); //to test it works - 🚧 to send logging to UI
+    // Serial.printf("🌙"); //to test it works - 🚧 to send logging to UI
     
     // Send to custom output (e.g., external UART, network, file, etc.)
     // custom_uart_write(buffer, len);

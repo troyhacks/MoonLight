@@ -33,8 +33,8 @@ Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg
     🌙 and 💫 is also used in code comments of ESP32-SvelteKit to show where changes to upstream have been made.
 * The following ESP32-SvelteKit features have been switched off in the default builts (they can be switched on if you want to use them, see [features.ini](https://github.com/MoonModules/MoonLight/blob/main/features.ini))
     *   -D FT_SECURITY=0
-    *   ~~-D FT_SLEEP=1~~ enabled!
-    *   ~~-D FT_BATTERY=1~~ enabled!
+    *   -D FT_SLEEP=0
+    *   -D FT_BATTERY=0 (enabled in some firmwares e.g. esp32-s3-stephanelec-16p)
 
 ## Installation - Developer
 
