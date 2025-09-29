@@ -130,7 +130,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
 * The preferred way to update MoonLight is via [System update](https://moonmodules.org/MoonLight/system/update/)
 
-   <img width="350" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
+    <img width="350" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
 
     * Download from GitHub - Currently not working due to certificate issue... 🚧
     * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)

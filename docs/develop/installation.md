@@ -4,7 +4,7 @@
 The development environment consists of
 
 * VSCode
-    * Platformio IDE (or pioarduino IDE)
+    * Platformio IDE
     * nodejs
     * git
     * python
@@ -12,12 +12,16 @@ The development environment consists of
 * Github manager
     * GitKraken (recommended)
     * GitHub Desktop
+    * Github manager (not recommended)
 
 ## Summary
 
-Install VSCode with the platformIO IDE extension (or pioarduino IDE). Make sure git and nodejs is installed. Download the MoonLight repo. Open it in VSCode and build or upload to an ESP32 device.
+Install VSCode with the platformIO IDE extension. Download the MoonLight repo. Open it in VSCode and build or upload to an ESP32 device.
 
-Optionally you need to run npm install and make sure python > v3.10 in VSCode.
+!!! info "supporting tools"
+
+     * Optionally you need to install git and nodejs, run npm install and make sure python > v3.10 in VSCode.
+     * Instead of Platformio IDE, the pioarduino IDE extension might be needed in VSCode
 
 ## Install Visual Studio Code
 
@@ -38,10 +42,9 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="320" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
 
-**Step 3**: Install PlatformIO IDE (or pioarduino IDE)
+**Step 3**: Install PlatformIO IDE
 
 * Open the MoonLight repository folder created in step 1
-* PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
 * In VSCode, search for the extension
 
     <img width="320" src="https://github.com/user-attachments/assets/d91ab6b0-aeeb-42ed-8a85-d608b88c6103" />
@@ -50,13 +53,18 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="320" src="https://github.com/user-attachments/assets/ea953f62-0d94-499c-92f0-491d31c2edff" />
 
+!!! info "pioarduino IDE"
+
+     PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
+
+
 **Step 4**: Build MoonLight
 
 * Press ☑️ in the bottom statusbar
 
     <img width="320" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
 
-* When git is not installed on your system, install it, restart vscode and press ☑️ again
+* When git is not installed on your system, install it, restart VSCode and press ☑️ again
 
     * Windows:
 
@@ -81,7 +89,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
     brew install git
     ```
 
-* If you compile for the first time it take some time to finish
+* If you compile for the first time it take some time to finish (☕️)
 
     <img width="320" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
     <img width="320" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
@@ -92,7 +100,7 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     <img width="320" height="50" alt="Screenshot 2025-09-29 at 13 58 07" src="https://github.com/user-attachments/assets/2eef658f-f297-46cd-bbd5-4d769dbf9e56" />
 
-    * Run in vscode / pio shell ([>_])
+    * Run in VSCode / pio shell ([>_])
 
     ```
     brew install xz
@@ -140,38 +148,37 @@ Before changing code, test if the current download of MoonLight is running fine.
   
 ## Prepare for development
 
-
 * Changing the frontend (UI)
     * interface folder
     * on each file change, ☑️ or ➡️ will rebuild the UI using node.js
-    * if node.js is not on your system you will get this error:
+    * Windows: if nodejs is not on your system you will get this error:
 
     <img width="640" height="221" alt="Screenshot 2025-09-25 212255" src="https://github.com/user-attachments/assets/f05ca8d2-6485-4965-8b75-edd4b468ddf4" />
 
-    * download [nodejs](https://nodejs.org/en/download) if it is not run in admin mode you will get this:
+        * download [nodejs](https://nodejs.org/en/download) if it is not run in admin mode you will get this:
 
     <img width="640" height="501" alt="Screenshot 2025-09-25 212842" src="https://github.com/user-attachments/assets/9945217f-7b4a-4b97-87df-3b35b61ccc0a" />
 
-    * in that case run an administrator command prompt and run the downloaded .msi file as follows:
+        * in that case run an administrator command prompt and run the downloaded .msi file as follows:
 
     <img width="649" height="510" alt="Screenshot 2025-09-25 220442" src="https://github.com/user-attachments/assets/144cce1d-bc59-471c-ace3-aa38c52629e4" />
     <img width="640" height="498" alt="Screenshot 2025-09-25 214052" src="https://github.com/user-attachments/assets/affb20e8-785e-471d-98d9-855e5783ce5e" />
 
-    * after succesful install of nodejs run ☑️ or ➡️ again. It might be needed to rebuild node_modules and package-lock.json if you see this
+        * after succesful install of nodejs run ☑️ or ➡️ again. It might be needed to rebuild node_modules and package-lock.json if you see this
 
     <img width="640" height="688" alt="Screenshot 2025-09-25 214700" src="https://github.com/user-attachments/assets/b92ccba0-17e1-4434-929e-302ec8afd96e" />
 
-    * Remove node_modules and package-lock.json - run as administrator if the OS complains!
-    * Rebuild node_modules and package-lock.json by opening a vscode shell using [>_] in the statusbar
+        * Remove node_modules and package-lock.json - run as administrator if the OS complains!
+        * Rebuild node_modules and package-lock.json by opening a VSCode shell using [>_] in the statusbar
 ``` 
 cd interface 
 npm install
 ```
-  * If that give errors set execution policies as follows:
+      * If that give errors set execution policies as follows:
 
     <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
 
-  * Press run ☑️ or ➡️ again it should now complete succesfully
+      * Press run ☑️ or ➡️ again it should now complete succesfully
 
     <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
 
@@ -193,8 +200,8 @@ See [Setup Proxy for Development](https://moonmodules.org/MoonLight/gettingstart
 * A local webserver starts on [localhost:5173](http://localhost:5173/). 
 
 ## Troubleshooting
-* In general: first close and restart vscode and run ☑️ or ➡️ again.
-* python > 3.10: install python (3.11.13) in the vscode shell (not in a normal os terminal)
+* In general: first close and restart VSCode and run ☑️ or ➡️ again.
+* python > 3.10: install python (3.11.13) in the VSCode shell (not in a normal os terminal)
 * esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions (required for support of latest esp-idf 5.5)
 * Run everything from within VSCode, close any alternative / external tools which (potentially) access esp32 devices. They can claim resources or send commands to the device which interfere with what we trying to accomplish here.
 * Set WWWData.h right
@@ -202,5 +209,5 @@ See [Setup Proxy for Development](https://moonmodules.org/MoonLight/gettingstart
     * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
     * build the project (✔)
     * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
-* If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (vscode 👽, Erase flash)
+* If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (VSCode 👽, Erase flash)
 * Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
