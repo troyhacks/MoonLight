@@ -12,7 +12,7 @@ The development environment consists of
 * Github manager
     * GitKraken (recommended)
     * GitHub Desktop
-    * Github manager (not recommended)
+    * No Github manager (not recommended)
 
 ## Summary
 
@@ -38,9 +38,10 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 **Step 2**: Download Visual Studio Code
 
 * Windows: download from the Microsoft Store
-* MacOS: [Visual Studio download](https://code.visualstudio.com/download)
 
     <img width="320" src="https://github.com/user-attachments/assets/ff6be5d6-40b2-48ae-9f17-89fc5bcfd848" />
+
+* MacOS: [Visual Studio download](https://code.visualstudio.com/download)
 
 **Step 3**: Install PlatformIO IDE
 
@@ -55,8 +56,7 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 
 !!! info "pioarduino IDE"
 
-     PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails. For now, start with PlatformIO IDE (see later)
-
+     PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails.
 
 **Step 4**: Build MoonLight
 
@@ -94,7 +94,7 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
     <img width="320" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
     <img width="320" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
 
-!!! warning "Python and LZMA"
+!!! warning "MacOS: Python and LZMA"
 
     In some cases LZMA support must be installed
 
@@ -115,8 +115,6 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 * Connect an ESP32 device via USB (ESP32-S3 preferred) and select the device using the (second) 🔌 icon in the staturbar.   
     * Select esp32-d0 for a normal ESP32
     * Select esp32-s3-devkitc-1-n16r8v for an ESP32-S3 ([recommended](https://s.click.aliexpress.com/e/_DBAtJ2H) or similar)
-
-    <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
 
 !!! info "USB-to-serial chip drivers"
 
@@ -144,45 +142,44 @@ Before changing code, test if the current download of MoonLight is running fine.
     * If the UI has changed, reconnect to the same device might result in the UI not showing up. Emptying the browser cache and reloading the UI is required to see the (updated) UI.
 
 !!! tip "ESP32Devices"
-    Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
+    IF you want to know which MoonLight (or WLED) devices run on your network, use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network
   
 ## Prepare for development
 
-* Changing the frontend (UI)
-    * interface folder
-    * on each file change, ☑️ or ➡️ will rebuild the UI using node.js
-    * Windows: if nodejs is not on your system you will get this error:
+nodejs is needed if changes on the frontend (UI) are made (interface folder). On each file change, ☑️ or ➡️ will rebuild the UI using nodejs.
+
+* Windows: if nodejs is not on your system you will get this error:
 
     <img width="640" height="221" alt="Screenshot 2025-09-25 212255" src="https://github.com/user-attachments/assets/f05ca8d2-6485-4965-8b75-edd4b468ddf4" />
 
-        * download [nodejs](https://nodejs.org/en/download) if it is not run in admin mode you will get this:
+    * download [nodejs](https://nodejs.org/en/download) if it is not run in admin mode you will get this:
 
     <img width="640" height="501" alt="Screenshot 2025-09-25 212842" src="https://github.com/user-attachments/assets/9945217f-7b4a-4b97-87df-3b35b61ccc0a" />
 
-        * in that case run an administrator command prompt and run the downloaded .msi file as follows:
+    * in that case run an administrator command prompt and run the downloaded .msi file as follows:
 
     <img width="649" height="510" alt="Screenshot 2025-09-25 220442" src="https://github.com/user-attachments/assets/144cce1d-bc59-471c-ace3-aa38c52629e4" />
     <img width="640" height="498" alt="Screenshot 2025-09-25 214052" src="https://github.com/user-attachments/assets/affb20e8-785e-471d-98d9-855e5783ce5e" />
 
-        * after succesful install of nodejs run ☑️ or ➡️ again. It might be needed to rebuild node_modules and package-lock.json if you see this
+    * after succesful install of nodejs run ☑️ or ➡️ again. It might be needed to rebuild node_modules and package-lock.json if you see this
 
     <img width="640" height="688" alt="Screenshot 2025-09-25 214700" src="https://github.com/user-attachments/assets/b92ccba0-17e1-4434-929e-302ec8afd96e" />
 
-        * Remove node_modules and package-lock.json - run as administrator if the OS complains!
-        * Rebuild node_modules and package-lock.json by opening a VSCode shell using [>_] in the statusbar
+    * Remove node_modules and package-lock.json - run as administrator if the OS complains!
+    * Rebuild node_modules and package-lock.json by opening a VSCode shell using [>_] in the statusbar
 ``` 
 cd interface 
 npm install
 ```
-      * If that give errors set execution policies as follows:
+    * If that give errors set execution policies as follows:
 
     <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
 
-      * Press run ☑️ or ➡️ again it should now complete succesfully
+* Press run ☑️ or ➡️ again it should now complete succesfully
 
     <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
 
-  * Check serial output
+* Check serial output
   
     <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
 
@@ -195,9 +192,9 @@ This very much speeds up UI development as no flashing to ESP32 is required to t
 See [Setup Proxy for Development](https://moonmodules.org/MoonLight/gettingstarted/#setup-proxy-for-development) and [development-server](https://moonmodules.org/MoonLight/gettingstarted/#development-server) how to setup.
 
 !!! tip "nodejs" 
-     if nodejs is not on your computer: see [Prepare for development](https://moonmodules.org/MoonLight/develop/installation/#prepare-for-development) to install nodejs
+     if nodejs is not installed yet: see [Prepare for development](https://moonmodules.org/MoonLight/develop/installation/#prepare-for-development) to install nodejs
 
-* A local webserver starts on [localhost:5173](http://localhost:5173/). 
+After configuring the development server, a local webserver starts on [localhost:5173](http://localhost:5173/). 
 
 ## Troubleshooting
 * In general: first close and restart VSCode and run ☑️ or ➡️ again.
