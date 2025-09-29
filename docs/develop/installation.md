@@ -71,15 +71,15 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
     * Install [homebrew](https://brew.sh): will take a while: ☕️
     * Install git using homebrew:
      
-   ```
-      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-      echo >> /Users/ewoud/.zprofile
-      echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/ewoud/.zprofile
-      eval "$(/opt/homebrew/bin/brew shellenv)"
+    echo >> /Users/ewoud/.zprofile
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/ewoud/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 
-      brew install git
-   ```
+    brew install git
+    ```
 
 * If you compile for the first time it take some time to finish
 
@@ -94,11 +94,11 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
     * Run in vscode / pio shell ([>_])
 
-   ```
-   brew install xz
+    ```
+    brew install xz
 
-   python -V
-   ```
+    python -V
+    ```
 
     * python -V should show a version > 3.10 (e.g. 3.11.7)
 
@@ -187,8 +187,8 @@ This very much speeds up UI development as no flashing to ESP32 is required to t
 
 See [Setup Proxy for Development](https://moonmodules.org/MoonLight/gettingstarted/#setup-proxy-for-development) and [development-server](https://moonmodules.org/MoonLight/gettingstarted/#development-server) how to setup.
 
-!!! tip "install nodejs" 
-     see [Prepare for development](https://moonmodules.org/MoonLight/develop/installation/#prepare-for-development) to install nodejs
+!!! tip "nodejs" 
+     if nodejs is not on your computer: see [Prepare for development](https://moonmodules.org/MoonLight/develop/installation/#prepare-for-development) to install nodejs
 
 * A local webserver starts on [localhost:5173](http://localhost:5173/). 
 

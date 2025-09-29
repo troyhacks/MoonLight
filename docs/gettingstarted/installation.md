@@ -18,7 +18,7 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="350" alt="Screenshot 2025-06-07 at 20 54 17" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
 
-**Step 4**: Select **Install MoonLight**
+**Step 5**: Select **Install MoonLight**
 
    <img width="200" alt="Screenshot 2025-06-07 at 20 54 31" src="https://github.com/user-attachments/assets/a0a8d92c-dae2-4cfe-ac78-bc7cacb24724" />
 
@@ -81,13 +81,13 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
 
-**Step 5**: When connected to youe local WiFi network, enter the hostname in a browser (e.g. http://ml-home.local)
+**Step 5**: When connected to youe local WiFi network, enter the hostname in a browser (e.g. [http://ml-home.local](http://ml-home.local))
 
 !!! tip "IP address"
     Alternatively you can use the IP address of the device to connect. 
 
 !!! warning "reload UI"
-    See step 2 if UI is not showing up: reload UI from ESP32-devices
+    See step 2 ⚠️ if UI is not showing up
 
 ## Setup MoonLight
 
@@ -95,24 +95,27 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="350" src="https://github.com/user-attachments/assets/6cc3749c-983a-4659-9c63-fab173b4750c" />
 
-**Step 2**: Add a layout and set pin(s): Monitor shows effect
+**Step 2**: Add a layout and set pin(s)
 
    <img width="350" src="https://github.com/user-attachments/assets/d83277bd-4bc1-495c-ae21-85efe41ab8b1" />
 
-* Add a layout Node by pressing the blue + button and select Panel 🚥. Scroll down to the Pin Control field and enter the pin number you connected the strip or panel to. 
+* Add a layout Node by pressing the blue + button and select on off the 🚥 options (Panel 🚥 is a safe bet to start with). Scroll down to the Pin Control field and enter the pin number(s) you connected the strip or panel to. 
 
 !!! info "Monitor"
     The Monitor should now show the effect
 
-**Step 3**: Add a driver: LEDs shows effect
+**Step 3**: Add a driver
 
    <img width="350" src="https://github.com/user-attachments/assets/67447f55-7a22-41ab-af8c-0a2e98462792" />
 
-* Add a driver node
-* In some cases restart the device to make layout changes effective is needed.
+* Add a driver node by pressing the blue + button and select one of the ☸️ options.
     
+!!! info "Strip or panel"
+    The LEDs on your strip or panel should now show the effect
+
 !!! tip "Choose driver"
-    FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...).
+    FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...). Other drivers (Virtual, Hub,) not supported yet.
+    In some cases restart the device to make layout changes effective is needed.
   
 **Step 4**: Press save (💾). Saves your setup to the file system, so if a device is restarted, your settings are still there.
 
@@ -129,8 +132,8 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
 
    <img width="350" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
 
-   * Download from GitHub - Currently not working due to certificate issue... 🚧
-   * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
+    * Download from GitHub - Currently not working due to certificate issue... 🚧
+    * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
 
 * To install the latest release, you can also use the [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) (no need to erase the device if updating)
 * Upload directly from VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
