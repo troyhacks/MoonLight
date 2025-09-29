@@ -55,11 +55,19 @@ Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg
 
 ## Adding functionality
 
+* lib folder for Sveltekit back end
+* src folder for MoonBase and MoonLight back end
+* interface folder for front end development
+    * interface/src/routes/moonbase for MoonBase and MoonLight (modules)
+
+
+* ☑️ and ➡️ to build and or upload
+
 ### Front End (UI)
 🚧
 
 * interface folder
-* see [Changing MoonLight code](https://moonmodules.org/MoonLight/develop/installation/#changing-moonlight-code) about nodejs, npm install
+* see [Prepare for development](https://moonmodules.org/MoonLight/develop/installation/#prepare-for-development) about nodejs, npm install
 
 ```
 npm install

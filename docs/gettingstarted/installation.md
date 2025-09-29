@@ -53,15 +53,19 @@ Install Moonlight onto an ESP32 using the MoonLight Web installer
   
    <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
 
-!!! warning "If you ran previous versions of MoonLight, the UI might not show up if it has been changed since then. In this case it is needed to reload the UI from the ESP32-device"
+!!! warning "UI not showing when installing new version of MoonLight"
+
+    If you ran previous versions of MoonLight, the UI might not show up if it has been changed since then. In this case it is needed to reload the UI from the ESP32-device
 
     * Chrome: Command Shift R (Mac) or Ctrl Shift R or Control Reload (Windows)
     * Safari: Reload from Origin : Option Shift R
-    * After this not all UI elements might be immediately visible. If you see 'MoonLight loading ...' in the browser, just wait a bit. 
+    * After this not all UI elements might be immediately visible. If you see 'MoonLight loading ...' in the browser, just wait a bit (☕️)
+
     * Sometimes it migh be needed to clear the browser cache:
-      * Chrome: Delete Browsing data / delete data
-      * Safari: Empty cache: Develop (enable if not visible in the Safare Menu) / empty caches (Command Option E)
-      * More info: [how to hard refresh your browser and clear cache](https://fabricdigital.co.nz/blog/how-to-hard-refresh-your-browser-and-clear-cache)
+        * Chrome: Delete Browsing data / delete data (caching data)
+        * Safari: Empty cache: Menu Develop (enable if not visible in the Safari Menu) / empty caches (Command Option E)
+
+        * More info: [how to hard refresh your browser and clear cache](https://fabricdigital.co.nz/blog/how-to-hard-refresh-your-browser-and-clear-cache)
 
    * The device will show in 'Captive portal' mode. Alternatively you can close the captive portal and show it in a browser using [http://4.3.2.1](http://4.3.2.1)
 

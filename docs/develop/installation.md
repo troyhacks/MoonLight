@@ -58,17 +58,18 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
 * When git is not installed on your system, install it, restart vscode and press ☑️ again
 
-   * Windows:
+    * Windows:
 
-   <img width="320" src="https://github.com/user-attachments/assets/8d39c637-c7dc-4c34-b177-f8eb63d54863" />
+        <img width="320" src="https://github.com/user-attachments/assets/8d39c637-c7dc-4c34-b177-f8eb63d54863" />
     
-   * MacOS
+    * MacOS
 
-   <img width="320" src="https://github.com/user-attachments/assets/b6c27943-6046-4fd7-aab4-3c91544f761d" />
+        <img width="320" src="https://github.com/user-attachments/assets/b6c27943-6046-4fd7-aab4-3c91544f761d" />
 
 !!! info "Install git on MacOS"
-   * Install [homebrew](https://brew.sh): will take a while: ☕️
-   * Install git using homebrow
+
+    * Install [homebrew](https://brew.sh): will take a while: ☕️
+    * Install git using homebrew:
      
    ```
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -86,15 +87,20 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
     <img width="320" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
 
 !!! warning "Python and LZMA"
-   In some cases LZMA support must be installed
-   <img width="320" height="50" alt="Screenshot 2025-09-29 at 13 58 07" src="https://github.com/user-attachments/assets/2eef658f-f297-46cd-bbd5-4d769dbf9e56" />
-   * Run in vscode / pio shell ([>_]
+
+    In some cases LZMA support must be installed
+
+    <img width="320" height="50" alt="Screenshot 2025-09-29 at 13 58 07" src="https://github.com/user-attachments/assets/2eef658f-f297-46cd-bbd5-4d769dbf9e56" />
+
+    * Run in vscode / pio shell ([>_])
+
    ```
    brew install xz
 
    python -V
    ```
-   * python -V should show a version > 3.10 (e.g. 3.11.7)
+
+    * python -V should show a version > 3.10 (e.g. 3.11.7)
 
 **Step 5**: Upload MoonLight to an esp32-device
 
@@ -105,9 +111,10 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
     <img width="617" src="https://github.com/user-attachments/assets/349af246-30c7-45dd-92ed-4f2b3900557f" />
 
 !!! info "USB-to-serial chip drivers"
-   In some cases, ESP32-devices won't show connected. See USB-to-serial chip drivers at [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) 
 
-* Erase the device if it is a new device or the device has not been used for MoonModules before 
+    In some cases, ESP32-devices won't show connected. See USB-to-serial chip drivers at [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) 
+
+* Erase the device if it is a new device or the device has not been used for MoonModules before: go to 👽 in the left menu and select Erase Flash
 
     <img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
 
@@ -122,25 +129,17 @@ Optionally you need to run npm install and make sure python > v3.10 in VSCode.
 
 ## Connect and setup MoonLight
 
-Before changing code, test if the current download of MoonLight is running fine.
+Before changing code, test if the current download of MoonLight is running fine. Follow the instructions in [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight) and [Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#setup-moonlight)
 
-* See [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight)
-
-    * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
-    * Check AP settings
-    <img width="350" src="https://github.com/user-attachments/assets/a8d89d7a-d4e6-4443-b2c2-997c0ac89381" />
+* MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
+    * First time connect to an ESP32-device is generally smoothly
+    * If the UI has changed, reconnect to the same device might result in the UI not showing up. Emptying the browser cache and reloading the UI is required to see the (updated) UI.
 
 !!! tip "ESP32Devices"
     Use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network (using nodeJS and html)
   
-* See [Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#setup-moonlight)
+## Prepare for development
 
-## Changing MoonLight code
-
-* Changing the backend (c/c++)
-    * lib folder for Sveltekit 
-    * src folder for MoonBase and MoonLight
-    * ☑️ and ➡️ to build and or upload
 
 * Changing the frontend (UI)
     * interface folder
@@ -182,18 +181,16 @@ npm install
 
 ## UI development server
 
-Vite provides a development web server on your computer which connects to a running esp32-device (see [development-server](https://moonmodules.org/MoonLight/gettingstarted/#development-server)).
+To ease the frontend development you can deploy the back end code on an ESP32 board and pass the websocket and REST API calls through the development server's proxy running on your computer.
 
-Activate it as follows:
+This very much speeds up UI development as no flashing to ESP32 is required to test updated UI. Svaing an UI file is enough to see the results!!!
 
-* configure vite.config.ts: set ip address of a running esp32-device
-```
-cd interface
-npm run dev
-```
-* (see [changing MoonLight code](https://moonmodules.org/MoonLight/develop/installation/#changing-moonlight-code) to install nodejs)
-* A local webserver starts on [localhost](http://localhost:5173/). 
-* UI changes will directly be shown via this webserver without needing to flash it on an esp32-device.
+See [Setup Proxy for Development](https://moonmodules.org/MoonLight/gettingstarted/#setup-proxy-for-development) and [development-server](https://moonmodules.org/MoonLight/gettingstarted/#development-server) how to setup.
+
+!!! tip "install nodejs" 
+     see [Prepare for development](https://moonmodules.org/MoonLight/develop/installation/#prepare-for-development) to install nodejs
+
+* A local webserver starts on [localhost:5173](http://localhost:5173/). 
 
 ## Troubleshooting
 * In general: first close and restart vscode and run ☑️ or ➡️ again.
