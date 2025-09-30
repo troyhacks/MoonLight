@@ -11,7 +11,7 @@
       "name": "esp32-d0",
       "image": "./images/esp32-d0.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-d0_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-d0_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     }
   ]

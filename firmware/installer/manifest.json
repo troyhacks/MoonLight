@@ -1,6 +1,6 @@
 {
   "name": "MoonLight",
-  "version": "0.5.9",
+  "version": "0.5.9.1",
   "home_assistant_domain": "esphome",
   "funding_url": "https://esphome.io/guides/supporters.html",
   "new_install_prompt_erase": true,
@@ -11,7 +11,7 @@
       "name": "esp32-d0",
       "image": "./images/esp32-d0.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-d0_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-d0_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -19,7 +19,7 @@
       "name": "esp32-d0-16MB",
       "image": "./images/esp32-d0.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-d0-16MB_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-d0-16MB_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -27,7 +27,7 @@
       "name": "esp32-d0-wrover",
       "image": "./images/esp32-d0-wrover.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-d0-wrover_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-d0-wrover_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -35,7 +35,7 @@
       "name": "esp32-s3-devkitc-1-n8r8v",
       "image": "./images/esp32-s3-devkitc-1-n8r8v.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-s3-devkitc-1-n8r8v_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-s3-devkitc-1-n8r8v_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -43,7 +43,7 @@
       "name": "esp32-s3-devkitc-1-n16r8v",
       "image": "./images/esp32-s3-devkitc-1-n16r8v.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -51,7 +51,7 @@
       "name": "esp32-s3-zero-n4r2",
       "image": "./images/esp32-s3-zero-n4r2.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-s3-zero-n4r2_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-s3-zero-n4r2_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -59,7 +59,7 @@
       "name": "esp32-c3-supermini",
       "image": "./images/esp32-c3-supermini.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-c3-supermini_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-c3-supermini_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -67,7 +67,7 @@
       "name": "esp32-p4-nano",
       "image": "./images/esp32-p4-nano.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-p4-nano_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-p4-nano_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     },
     {
@@ -75,7 +75,7 @@
       "name": "esp32-p4- olimex",
       "image": "./images/esp32-p4-olimex.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-p4-olimex_0-5-9_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-p4-olimex_0-5-9-1_webflash.bin", "offset": 0 }
       ]
     }
   ]
