@@ -97,7 +97,7 @@ PhysicalLayer::PhysicalLayer() {
             }    
 
             if (lights.header.isPositions == 3) {
-                MB_LOGD(ML_TAG, "pos from 3 to 0");
+                MB_LOGD(ML_TAG, "positions done (3 -> 0)");
                 lights.header.isPositions = 0; //now driver can show again
             }
         }
@@ -133,7 +133,7 @@ PhysicalLayer::PhysicalLayer() {
         if (pass == 1) {
             lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
             lights.header.size = {0,0,0};
-            MB_LOGD(ML_TAG, "pos from x(%d) to 1", lights.header.isPositions);
+            MB_LOGD(ML_TAG, "positions in progress (%d -> 1)", lights.header.isPositions);
             lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects
             //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
@@ -213,7 +213,7 @@ PhysicalLayer::PhysicalLayer() {
             lights.header.size += Coord3D{1,1,1};
             MB_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
             //send the positions to the UI _socket_emit
-            MB_LOGD(ML_TAG, "pos from x(%d) to %d", lights.header.isPositions, lights.header.nrOfLights?2:3);
+            MB_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights?2:3);
             lights.header.isPositions = lights.header.nrOfLights?2:3; //filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
 
             // initLightsToBlend();

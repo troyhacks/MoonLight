@@ -201,6 +201,7 @@ public:
         if (presetLoop && millis() - lastPresetTime > presetLoop * 1000) { // every presetLoop seconds
             lastPresetTime = millis();
 
+            std::lock_guard<std::mutex> lock(runInTask_mutex);
             runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
                 // load the xth preset from FS
                 JsonArray presets = _state.data["preset"]["list"];
@@ -243,8 +244,8 @@ public:
                         _socket->emitEvent("monitor", (char *)&layerP.lights.header, 37);//sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above 32 to avoid monitor data to be seen as header
                         _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.nrOfChannels)); //*3 is for 3 bytes position
                     }
-                    MB_LOGD(ML_TAG, "pos from 2 to 3 (noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.nrOfChannels);
                     memset(layerP.lights.channels, 0, layerP.lights.nrOfChannels); // set all the channels to 0 //cleaning the positions
+                    MB_LOGD(ML_TAG, "positions sent to monitor (2 -> 3, noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.nrOfChannels);
                     layerP.lights.header.isPositions = 3;
                 });
             } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) { //send to UI

@@ -27,13 +27,12 @@ class Modifier; //Forward as PhysicalLayer refers back to Modifier
 struct LightsHeader {
   Coord3D size = Coord3D(16,16,1); //0 max position of light, counted by addLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint16_t nrOfLights = 256; //12 nr of physical lights, counted by addLight
-  struct {                 //condensed rgb
-    uint8_t isPositions: 2 = 0;
+  struct {                 //14 condensed rgb
+    uint8_t isPositions: 2 = 0; //is the lights.positions array filled with positions
     uint8_t offsetRed:2 = 1; //GRB is default
     uint8_t offsetGreen:2 = 0;
     uint8_t offsetBlue:2 = 2;
   }; //8 bits
-  // uint8_t isPositions = 0; //6 is the lights.positions array filled with positions
   uint8_t brightness; //15 brightness set by light control (sent to LEDs driver normally)
   uint8_t red = 255; //16 brightness set by light control (sent to LEDs driver normally)
   uint8_t green = 255; //17 brightness set by light control (sent to LEDs driver normally)

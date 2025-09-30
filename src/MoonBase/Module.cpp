@@ -67,11 +67,13 @@ void ModuleState::read(ModuleState &state, JsonObject &root)
 
 void ModuleState::execOnReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {
     if (onUpdateRunInTask == 1) { //if set to 0, run in main loopTask
+        std::lock_guard<std::mutex> lock(runInTask_mutex);
         runInTask1.push_back([&, stateIndex, newIndex]() {
             onReOrderSwap(stateIndex, newIndex);
         });
     }
     else if (onUpdateRunInTask == 2) { //if set to 0, run in main loopTask
+        std::lock_guard<std::mutex> lock(runInTask_mutex);
         runInTask2.push_back([&, stateIndex, newIndex]() {
             onReOrderSwap(stateIndex, newIndex);
         });
@@ -134,11 +136,13 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
 void ModuleState::execOnUpdate(UpdatedItem &updatedItem) {
     if (onUpdate) {
         if (onUpdateRunInTask == 1) { //if set to 0, run in main loopTask
+            std::lock_guard<std::mutex> lock(runInTask_mutex);
             runInTask1.push_back([&, updatedItem]() mutable { //mutable as updatedItem is called by reference (&)
                 onUpdate(updatedItem);
             });
         }
         else if (onUpdateRunInTask == 2) { //if set to 0, run in main loopTask
+            std::lock_guard<std::mutex> lock(runInTask_mutex);
             runInTask2.push_back([&, updatedItem]() mutable { //mutable as updatedItem is called by reference (&)
                 onUpdate(updatedItem);
             });

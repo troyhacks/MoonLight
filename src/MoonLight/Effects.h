@@ -87,9 +87,9 @@ class FixedRectangleEffect: public Node {
     alternate = false;
     layerV->fadeToBlackBy(10); //cleanup old leds if changing
     Coord3D pos = {0,0,0};
-    for (pos.z = z; pos.z < z+depth; pos.z++) {
-      for (pos.y = y; pos.y < y+height; pos.y++) {
-        for (pos.x = x; pos.x < x+width; pos.x++) {
+    for (pos.z = z; pos.z < MIN(z+depth, layerV->size.z); pos.z++) {
+      for (pos.y = y; pos.y < MIN(y+height, layerV->size.y); pos.y++) {
+        for (pos.x = x; pos.x < MIN(x+width, layerV->size.x); pos.x++) {
           if (alternateWhite && alternate)
             layerV->setRGB(pos, CRGB::White);
           else
