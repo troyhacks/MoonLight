@@ -131,20 +131,25 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 * The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
 
 !!! tip "Serial Monitor"
-    Recommended: Press PlatformIO:Serial Monitor to see the debug information produced
+    Recommended: Press PlatformIO:Serial Monitor to see the debug information produced (the first 🔌 on the VSCode statusbar)
+
+    <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
 
 ## Connect and setup MoonLight
 
 Before changing code, test if the current download of MoonLight is running fine. Follow the instructions in [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight) and [Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#setup-moonlight)
 
+Technical info:
+
 * MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
+
     * First time connect to an ESP32-device is generally smoothly
-    * If the UI has changed, reconnect to the same device might result in the UI not showing up. Emptying the browser cache and reloading the UI is required to see the (updated) UI.
+    * If the UI has changed, reconnect to the same device might result in the UI not showing up. See the instructions 'UI not showing when installing new version of MoonLight' in [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight)
+
+* A MoonLight device can be accessed via it's IP address or via [http://ml-home.local](http://ml-home.local). The latter uses MDNS.
 
 !!! tip "ESP32Devices"
     IF you want to know which MoonLight (or WLED) devices run on your network, use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network
-
-* MDNS...
 
 ## Prepare for development
 
@@ -200,6 +205,22 @@ See [Setup Proxy for Development](https://moonmodules.org/MoonLight/gettingstart
 
 After configuring the development server, a local webserver starts on [localhost:5173](http://localhost:5173/). 
 
+## Release and merged firmware binaries
+
+Firmware binaries come in 2 flavours: including boot and partition (merged) and MoonLight code only (release). They are stored in the build folder of the MoonLight repo and updated each time a build or upload (☑️ or ➡️) is done. Subfolder merged contains the first type, release the second type.
+
+* Merged bins are used by the web installer, release bins by the [System update](https://moonmodules.org/MoonLight/system/update/) module (OTA). System update uses the bins stored in [GitHub releases](https://github.com/MoonModules/MoonLight/releases).
+* Merged bins starts flashing on address 0x0, release bins on address 0x10000.
+* All MoonLight partition schemes have a firmware size of 3MB. Smaller devices (e.g. ESP32-D0) have no OTA partition. System update is possible in this situation, but there is no fallback if update fails (need to flash using USB in that case) 🚧
+
+!!! tip "flash firmware using esptool"
+     * [>_] in the statusbar of vscode
+     ```
+     esptool --port /dev/cu.usbmodem11201 write-flash 0x0 ./build/merged/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9_webflash.bin
+     ```
+     * optionally add erase-flash before write-flash
+     * use ./build/release/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9.bin and address 0x10000 to flash only the MoonLight partition
+
 ## Troubleshooting
 * In general: first close and restart VSCode and run ☑️ or ➡️ again.
 * python > 3.10: install python (3.11.13) in the VSCode shell (not in a normal os terminal)
@@ -211,4 +232,4 @@ After configuring the development server, a local webserver starts on [localhost
     * build the project (✔)
     * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
 * If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (VSCode 👽, Erase flash)
-* Sometimes the Serial log may show: [  5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.
+* Sometimes the Serial log may show: [5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.

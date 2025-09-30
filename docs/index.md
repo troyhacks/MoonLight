@@ -89,7 +89,7 @@ hide:
         • LED strips (1D)<br>
         • Panels & matrices (2D)<br>
         • Cubes & sculptures (3D)
-        * DMX lights like PAR lights, Light Bars and Moving Heads
+        • DMX lights like PAR lights, Light Bars and Moving Heads
       </div>
     </div>
     
@@ -234,7 +234,7 @@ hide:
     
     **Version 0.6.0** - **October 2025** - The user-friendly baseline release
     
-    ✨ **Coming in 0.6.0 - The Game Changer:**
+    ✨ **Coming in 0.6.0
     - **Plug & Play Experience** - True user-friendly installation
     - **Preset Controller** - Quick effect selection and management
     - **Enhanced Web Installer** - One-click device flashing
