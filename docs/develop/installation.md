@@ -182,9 +182,25 @@ npm install
 
     <img width="640" height="398" alt="Screenshot 2025-09-25 215039" src="https://github.com/user-attachments/assets/629bc8de-d1ce-4d2d-9a92-e08bc9d31d4b" />
 
-* Press run ☑️ or ➡️ again it should now complete succesfully
+    * Press run ☑️ or ➡️ again it should now complete succesfully
 
     <img width="640" height="571" alt="Screenshot 2025-09-25 220023" src="https://github.com/user-attachments/assets/cd6754f4-d6df-446a-94fe-c3d7f491be59" />
+
+* MacOS
+
+    * Go to [nodejs download](https://nodejs.org/en/download)
+    * Get a prebuilt Node.js® for macOS running a ARM64 architecture (for modern Mx MacBooks)
+    * Choose maxOS Installer (.pkg)
+    * Next Next Finish Done
+    * Press run ☑️ or ➡️ again it should now complete succesfully (if needed restart VSCode)
+    * If still errors, Remove node_modules and package-lock.json, cd interface, npm install and repeat previous step
+
+!!! info "Ignore DragDropList error"
+    This error will show up in the logging
+    ```
+    node_modules/svelte-dnd-list/DragDropList.svelte (595:3): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+    ```
+    Just ignore it.
 
 * Check serial output
   
