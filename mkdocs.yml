@@ -18,7 +18,7 @@ nav:
     - moonbase/filemanager.md
     - moonbase/module/devices.md
     - moonbase/module/tasks.md
-    - moonbase/module/pins.md
+    - moonbase/module/inputoutput.md
   - "Connections":
     - connections/mqtt.md
     - connections/ntp.md
@@ -31,6 +31,8 @@ nav:
     - system/update.md
   - "Develop":
     - develop/overview.md
+    - develop/installation.md
+    - develop/development.md
     - develop/customizingsveltekit.md
     - develop/pull-requests.md
     - develop/documentation.md
@@ -66,20 +68,28 @@ theme:
   icon:
     repo: fontawesome/brands/github
   palette:
-    # Palette toggle for light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-      primary: deep purple
-      accent: pink
-    # Palette toggle for dark mode  
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+   # Dark mode (default)
+    - scheme: slate
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
+      primary: deep purple
+      accent: pink
+
+    # Light mode
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to system preference
+      primary: deep purple
+      accent: pink
+
+    # Auto (system preference)
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to dark mode
       primary: deep purple
       accent: pink
   features:

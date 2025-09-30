@@ -711,24 +711,27 @@ void ArtNetDriverMod::loop() {
             MB_LOGD(ML_TAG, "reinit physDriver %d x %d (%d)", ledsDriver.num_strips, num_led_per_strip, __NB_DMA_BUFFER);
 
             return; //bye bye initled, we did it ourselves ;-)
+          } else {
+            __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
+
+            uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
+
+            ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
+
+            //overwrite what initled has done
+            ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
+            ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
+            ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
+            ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+
+            ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
+
+            #if ML_LIVE_MAPPING
+              ledsDriver.setMapLed(&mapLed);
+            #endif
+
+            initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
           }
-
-          uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
-
-          ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
-
-          ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
-          ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
-          ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
-          ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
-
-          ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
-
-          #if ML_LIVE_MAPPING
-            ledsDriver.setMapLed(&mapLed);
-          #endif
-
-          initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
         }
       }
     #else //ESP32_LEDSDRIVER
