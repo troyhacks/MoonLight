@@ -31,9 +31,9 @@ It is perfactly usable to drive Art-Net. To drive LEDs a few more components are
 
 Currently it is DIY to make it:
 
-<img height="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90" />
-<img height="100" src="https://github.com/user-attachments/assets/adca881f-23d9-4aea-ab41-c02ae9005da1" />
-<img height="100" src="https://github.com/user-attachments/assets/9308d655-1ab9-477d-a7f3-b510df44e9d6" />
+<img width="140" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90" />
+<img width="120" src="https://github.com/user-attachments/assets/adca881f-23d9-4aea-ab41-c02ae9005da1" />
+<img width="100" src="https://github.com/user-attachments/assets/9308d655-1ab9-477d-a7f3-b510df44e9d6" />
 
 Work in progress to make this available as pre-assembled board ([Contact](https://discord.gg/TC8NSUSCdV) us if you want to help manufactering this).
 
