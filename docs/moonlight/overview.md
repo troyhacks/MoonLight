@@ -1,6 +1,6 @@
 # MoonLight Overview
 
-<img width="163" height="283" alt="moonlight" src="https://github.com/user-attachments/assets/1afd0d4b-f846-4d5b-8cc9-8fa8586c405b" />
+<img width="163" src="https://github.com/user-attachments/assets/1afd0d4b-f846-4d5b-8cc9-8fa8586c405b" />
 
 * [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
 * [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/)
@@ -8,8 +8,6 @@
 * [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/)
 * [Channels](https://moonmodules.org/MoonLight/moonbase/module/channels/)
 * [MoonLight info](https://moonmodules.org/MoonLight/moonbase/module/moonLightInfo/)
-
-🚨: These docs are updated also after a release has been published preparing for the next release. This means some functionality might be described while not in the latest release. The 🆕 is a sign for this. If you want to try latest, see [Installation Developer](https://moonmodules.org/MoonLight/develop/overview/#installation-developer)
 
 ## Status Bar
 
