@@ -1,6 +1,6 @@
 # Channels
 
-<img width="250" alt="image" src="https://github.com/user-attachments/assets/dff9c74d-a93b-425c-9bd4-7ca74c0d9520" />
+<img width="320" src="https://github.com/user-attachments/assets/ca4c8fe4-c78f-4fb0-b224-310b292133db" />
 
 Shows each channel within the light array. e.g. for a LED strip or panel each light is 3 (or 4 in case of RGBW) channels. For multichannel lights like Moving heads.
 If you hover over a channel, that channel will output a value - by this you can reverse engineer positions of existing lights, e.g. when you output to an unknown DMX setup.
