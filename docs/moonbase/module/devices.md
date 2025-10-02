@@ -1,6 +1,6 @@
 # Devices module
 
-<img width="522" alt="image" src="https://github.com/user-attachments/assets/68cbbef1-bcd7-4333-a4d9-904d3e08b243" />
+<img width="320" src="https://github.com/user-attachments/assets/dacd1527-b771-4d57-8528-5d42d89e3cac" />
 
 Sends and receives UDP messages over the network to see which other devices are there (WLED compatible). 
 
