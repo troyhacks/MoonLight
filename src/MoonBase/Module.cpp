@@ -49,7 +49,7 @@ void ModuleState::setupData() {
         setDefaults(doc.to<JsonObject>(), definition.as<JsonArray>());
             
         //assign the new defaults to state and run onUpdate
-        data = this->doc->to<JsonObject>(); //clear data
+        data.clear();//->to<JsonObject>(); //clear data
         UpdatedItem updatedItem;
         compareRecursive("", data, doc.as<JsonObject>(), updatedItem); //fill data with doc
 }

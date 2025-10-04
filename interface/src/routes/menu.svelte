@@ -83,7 +83,7 @@
 					title: 'Live Scripts',
 					icon: BulbIcon,
 					href: '/moonbase/module?module=liveScripts',
-					feature: page.data.features.moonlight,
+					feature: page.data.features.livescript,
 				},
 				{
 					title: 'Info',

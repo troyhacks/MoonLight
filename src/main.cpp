@@ -177,20 +177,20 @@ void setup()
     //check sizes ...
     // sizeof(esp32sveltekit);
     // sizeof(WiFiSettingsService);
-
     // sizeof(fileManager);
-
     // sizeof(Module);
     // sizeof(moduleDevices);
     // sizeof(moduleIO);
-    // sizeof(moduleEffects);
-    // sizeof(moduleDrivers);
-    // sizeof(moduleLightsControl);
-    // sizeof(moduleChannels);
-    // sizeof(moduleLightsControl);
-    // sizeof(moduleMoonLightInfo);
-    // sizeof(layerP.lights);
-    // sizeof(layerP.lights.header);
+    // #if FT_ENABLED(FT_MOONLIGHT)
+    //     sizeof(moduleEffects);
+    //     sizeof(moduleDrivers);
+    //     sizeof(moduleLightsControl);
+    //     sizeof(moduleLightsControl);
+    //     sizeof(moduleChannels);
+    //     sizeof(moduleMoonLightInfo);
+    //     sizeof(layerP.lights);
+    //     sizeof(layerP.lights.header);
+    // #endif
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
@@ -219,7 +219,7 @@ void setup()
             xTaskCreateUniversal(
                 effectTask,              // task function
                 "AppEffectTask",            // name
-                (psramFound()?6:3) * 1024,             // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
+                (psramFound()?6:4) * 1024,             // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
                 NULL,                  // parameter
                 3,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle
