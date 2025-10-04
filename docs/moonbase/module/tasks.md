@@ -17,3 +17,22 @@ Shows system tasks info.
     * stack: stack left
     * runtime: amount of cpu cycles consumed
     * core: allocated core, not necessarily used core (see above)
+
+## Default stack sizes
+
+| Task name (runtime) | Kconfig option | Default stack size (words → bytes) | Notes |
+|----------------------|----------------|------------------------------------:|-------|
+| AppEffectTask ||(psramFound()?6:4) * 1024||
+| AppDriverTask ||(psramFound()?4:3) * 1024||
+| **wifi** (Wi-Fi driver) | `CONFIG_ESP_WIFI_TASK_STACK_SIZE` | 3072 words → 12288 bytes → 12 KB | Handles Wi-Fi MAC/driver. Needs extra headroom. |
+| **tiT** (TCP/IP / lwIP task) | `CONFIG_TCPIP_TASK_STACK_SIZE` | 3072 words → 12288 bytes → 12 KB | All socket callbacks, DHCP, etc. |
+| **event** (ESP event loop) | `CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE` (older) / `CONFIG_ESP_EVENT_LOOP_TASK_STACK_SIZE` (newer) | 2048 words → 8192 bytes → 8 KB | Dispatches Wi-Fi/IP/BLE events. |
+| **esp_timer** (high-res timers) | `CONFIG_ESP_TIMER_TASK_STACK_SIZE` | 1024 words → 4096 bytes → 4 KB | Runs high-resolution callback handlers (timers/timeouts). |
+| **ipc0 / ipc1** (cross-core IPC) | `CONFIG_ESP_IPC_TASK_STACK_SIZE` | 1024 words → 4096 bytes → 4 KB | Used for cross-CPU calls / IPC. |
+| **main** (`app_main`) | `CONFIG_ESP_MAIN_TASK_STACK_SIZE` | 3584 words → 14336 bytes → 14 KB | Your entry point task. |
+| **Idle tasks** | *(fixed)* | ~768 bytes each (per CPU) | System FreeRTOS idle tasks. |
+| **Timer service task** | `CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH` | 2048 words → 8192 bytes → 8 KB | FreeRTOS software timers (xTimer). |
+| **Arduino loop task** (if using Arduino core) | `CONFIG_ARDUINO_LOOP_STACK_SIZE` | 8192 bytes → 8 KB | Present when Arduino core is used as a component. |
+| **btc_task** (classic BT) | `CONFIG_BT_BTC_TASK_STACK_SIZE` | 3072 words → 12288 bytes → 12 KB | Only if Bluetooth Classic enabled. |
+| **btu_task** (BT controller) | `CONFIG_BT_BTU_TASK_STACK_SIZE` | 4096 words → 16384 bytes → 16 KB | Heaviest Bluetooth controller task (if BT enabled). |
+| **BLE host task** | `CONFIG_BT_BLE_HOST_TASK_STACK_SIZE` | 3072 words → 12288 bytes → 12 KB | Only if BLE enabled. |

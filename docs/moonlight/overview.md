@@ -46,4 +46,57 @@ This is a personal overview by me (ewowi). It’s not meant to burn down WLED, q
 
 ## Current status
 
-🚧
+As of fall 2025, MoonLight can best be described as having its foundation solidly in place.
+
+Earlier releases involved major structural changes that often required fresh installs or renaming. Future updates should generally work seamlessly without erasing existing settings, though major version upgrades might still include exceptions.
+
+MoonBase now serves as a flexible foundation for any IoT project, while MoonLight provides a ready-to-use, plug-and-play application built on top of it.
+
+That doesn’t mean the work is done, quite the opposite. This is just the beginning. MoonLight began as a solo project, but it’s open for collaboration. You’re warmly invited to help shape its future; check out the [Develop](https://moonmodules.org/MoonLight/develop/) pages to learn how to get started.
+
+### What has been done so far
+
+MoonBase
+
+* ESP32-SvelteKit foundation (Svelte framework, PhysicsHttp, Stateful service, Event Sockets, Restful API, MDNS, MQTT)
+* [Modules](https://moonmodules.org/MoonLight/develop/modules/): Generic building block to create server and UI functionality which can be activated through the menu by means of a json definition.
+* [Nodes](https://moonmodules.org/MoonLight/develop/nodes/)🥜: Generic building block to setup and run specific code and shows controls in the UI.
+* Utilities (System logging, 3D coordinate system, String Management, Memory Management)
+* Functionality, See [MoonBase](https://moonmodules.org/MoonLight/moonbase/) overview
+    * Sveltekit: Connections, WiFi, System. 
+    * MoonBase: Files, Tasks, Devices, IO.
+
+MoonLight 
+
+* [Layers](https://moonmodules.org/MoonLight/develop/layers/): Physical and Virtual layers. Physical layer manages the real physical Lights or LEDs (using Layouts and Drivers). Multiple (currently 1) virtual layers (effects & modifiers) are mapped to the physical layer.
+* Functionality, See [MoonLight](https://moonmodules.org/MoonLight/moonlight/) overview
+    * Control, Channels and Info
+    * Effects & Modifiers
+    * Layouts & Drivers.
+        * DMX / Art-Net out
+        * WLED Audio Sync
+
+### Looking ahead
+
+MoonBase
+
+* ESP32-P4 support
+* MIDI support (light control desks) 
+* Live Scripts, see [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/), included in MoonLight but needs refactoring 🥜
+* SuperSync 🥜: See above: development basically stopped in 2023 but the ideas are still there.
+* HA / MQTT
+* UI enrichments: help needed
+
+MoonLight 
+
+* Multiple Layers
+* DMX / Art-Net in
+* Virtual driver
+* Effects: Limited nr of effects but easy to add (tutorial)
+    * Help needed!
+    * FastLED
+    * Animartrix
+    * Physics
+    * Live Scripts
+
+🥜: MoonBase functionality which is specific for MoonLight but will be refactored to generic MoonLight functionality
