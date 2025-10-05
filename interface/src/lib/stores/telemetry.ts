@@ -11,7 +11,7 @@ let telemetry_data = {
 		restartNeeded: false, // 🌙 restartNeeded Indicates if the system needs to be restarted
 		safeMode: false, // 🌙 safeMode Indicates if the system is in safe mode
 		saveNeeded: false, // 🌙 saveNeeded Indicates that changes has been made which need to be saved (or canceled)
-		hostName: '' // 🌙 to show in title and statusbar
+		hostName: "MoonLight" // 🌙 to show in title and statusbar
 	},
 	battery: {
 		soc: -1,

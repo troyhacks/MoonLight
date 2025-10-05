@@ -14,30 +14,32 @@
 
  #include <Arduino.h>
 
-// Threshold (bytes) above which allocations go into PSRAM
-constexpr size_t PSRAM_THRESHOLD = 0;  //87K free, works fine until now
-// constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
-// constexpr size_t PSRAM_THRESHOLD = 64;  //65K free, fallback if 0 gives problems?
+#ifdef BOARD_HAS_PSRAM
+    // Threshold (bytes) above which allocations go into PSRAM
+    constexpr size_t PSRAM_THRESHOLD = 0;  //87K free, works fine until now
+    // constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
+    // constexpr size_t PSRAM_THRESHOLD = 64;  //65K free, fallback if 0 gives problems?
 
-// Override global new/delete
-void* operator new(size_t size) {
-    void *ptr = nullptr;
-    if (size > PSRAM_THRESHOLD) {
-        // Serial.printf("new %d\n", size);
-        // Try PSRAM first
-        ptr = heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-        if (ptr) return ptr;  // success
+    // Override global new/delete
+    void* operator new(size_t size) {
+        void *ptr = nullptr;
+        if (size > PSRAM_THRESHOLD) {
+            // Serial.printf("new %d\n", size);
+            // Try PSRAM first
+            ptr = heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+            if (ptr) return ptr;  // success
+        }
+        // 
+        Serial.printf("new Fallback: internal RAM %d\n", size);
+        ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+        return ptr;
     }
-    // 
-    Serial.printf("new Fallback: internal RAM %d\n", size);
-    ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-    return ptr;
-}
 
-void operator delete(void* ptr) noexcept {
-    // Serial.printf("delete\n");
-    heap_caps_free(ptr);
-}
+    void operator delete(void* ptr) noexcept {
+        // Serial.printf("delete\n");
+        heap_caps_free(ptr);
+    }
+#endif
 
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
@@ -279,10 +281,6 @@ void setup()
         });
 
     #endif //FT_MOONBASE
-
-    // #if CONFIG_IDF_TARGET_ESP32
-    //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
-    // #endif
 
     #if USE_M5UNIFIED
         auto cfg = M5.config();

@@ -185,7 +185,7 @@ class PhysicalDriverMod: public DriverNode {
 
   #if HP_ALL_DRIVERS
     char version[30] = HP_ALL_VERSION;
-    #ifdef CONFIG_IDF_TARGET_ESP32    
+    #ifndef BOARD_HAS_PSRAM
       uint8_t dmaBuffer = 6;
     #else
       uint8_t dmaBuffer = 75;
