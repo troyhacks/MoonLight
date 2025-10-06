@@ -42,15 +42,35 @@ struct UpdatedItem {
 
 typedef std::function<void(JsonObject data)> ReadHook;
 
+static JsonDocument *doc = nullptr; //shared document for all modules, to save RAM
+
 class ModuleState
 {
 public:
-    JsonDocument *doc;
     JsonObject data;
 
     ModuleState() {
-        doc = new JsonDocument(JsonRAMAllocator::instance());
-        data = doc->to<JsonObject>();
+        MB_LOGD(MB_TAG, "ModuleState constructor");
+        if (!doc) {
+            MB_LOGD(MB_TAG, "Creating doc");
+            doc = new JsonDocument(JsonRAMAllocator::instance());
+        }
+        // doc = new JsonDocument();
+        data = doc->add<JsonObject>();
+        // data = doc->to<JsonObject>();
+    }
+    ~ModuleState() {
+        MB_LOGD(MB_TAG, "ModuleState destructor");
+        //delete data from doc
+        JsonArray arr = doc->as<JsonArray>();
+        for (size_t i = 0; i < arr.size(); i++) {
+            JsonObject obj = arr[i];
+            if (obj == data) {  // same object (identity check)
+                MB_LOGD(MB_TAG, "Deleting data from doc");
+                arr.remove(i);
+                break; // optional, if only one match
+            }
+        }
     }
 
     uint8_t onUpdateRunInTask = UINT8_MAX; //if set to UINT8_MAX, runInTask1 is not called, otherwise it is called with this value as index
@@ -100,8 +120,14 @@ public:
 
 protected:
     EventSocket *_socket;
-    void readFromFS() {
+    void readFromFS() { //used in ModuleEffects, for live scripts...
          _fsPersistence.readFromFS(); //overwrites the default settings in state
+        //  sizeof(StatefulService<ModuleState>);
+        //  sizeof(_httpEndpoint);
+        //  sizeof(_eventEndpoint);
+        //  sizeof(_webSocketServer);
+        //  sizeof(_fsPersistence);
+        //  sizeof(_server);
     }
 
 private:

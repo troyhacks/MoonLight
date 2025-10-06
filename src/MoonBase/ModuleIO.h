@@ -23,7 +23,13 @@ public:
     ModuleIO(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
         ) : Module("inputoutput", server, sveltekit) {
-            MB_LOGV(MB_TAG, "constructor");
+        MB_LOGV(MB_TAG, "constructor");
+        
+        // #if CONFIG_IDF_TARGET_ESP32
+        //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
+        // #endif
+
+
     }
 
     void setupDefinition(JsonArray root) override{

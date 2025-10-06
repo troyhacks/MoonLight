@@ -32,13 +32,13 @@ PhysicalLayer::PhysicalLayer() {
                 MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.nrOfChannels, isInPSRAM(lights.channels)?"PSRAM":"RAM" );
         }
         if (!lights.channels) {
-            lights.nrOfChannels = 4096 * 3;
+            lights.nrOfChannels = 1024 * 3; //esp32-d0: max 1024 Leds ATM
             lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_DEFAULT, MALLOC_CAP_8BIT);//heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
             if (lights.channels)
                 MB_LOGD(ML_TAG, "allocated %d bytes of RAM", lights.nrOfChannels );
         }
         if (!lights.channels) {
-            MB_LOGD(ML_TAG, "failed to allocated RAM or PSRAM" );
+            MB_LOGE(ML_TAG, "failed to allocated RAM or PSRAM" );
             lights.nrOfChannels = 0;
         }
 

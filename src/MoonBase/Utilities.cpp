@@ -94,6 +94,7 @@ bool copyFile(const char* srcPath, const char* dstPath) {
 }
 
 bool isInPSRAM(void* ptr) {
+    if (!psramFound() || !ptr) return false;
     uintptr_t addr = (uintptr_t)ptr;
     #if CONFIG_IDF_TARGET_ESP32
         return (addr >= 0x3F800000 && addr < 0x40000000);
@@ -163,3 +164,5 @@ std::mutex runInTask_mutex; // see .h
 #if USE_M5UNIFIED
     #include "moonmanpng.h"
 #endif
+
+int totalAllocatedMB = 0;

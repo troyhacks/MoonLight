@@ -14,30 +14,32 @@
 
  #include <Arduino.h>
 
-// Threshold (bytes) above which allocations go into PSRAM
-constexpr size_t PSRAM_THRESHOLD = 0;  //87K free, works fine until now
-// constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
-// constexpr size_t PSRAM_THRESHOLD = 64;  //65K free, fallback if 0 gives problems?
+#ifdef BOARD_HAS_PSRAM
+    // Threshold (bytes) above which allocations go into PSRAM
+    constexpr size_t PSRAM_THRESHOLD = 0;  //87K free, works fine until now
+    // constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
+    // constexpr size_t PSRAM_THRESHOLD = 64;  //65K free, fallback if 0 gives problems?
 
-// Override global new/delete
-void* operator new(size_t size) {
-    void *ptr = nullptr;
-    if (size > PSRAM_THRESHOLD) {
-        // Serial.printf("new %d\n", size);
-        // Try PSRAM first
-        ptr = heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-        if (ptr) return ptr;  // success
+    // Override global new/delete
+    void* operator new(size_t size) {
+        void *ptr = nullptr;
+        if (size > PSRAM_THRESHOLD) {
+            // Serial.printf("new %d\n", size);
+            // Try PSRAM first
+            ptr = heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+            if (ptr) return ptr;  // success
+        }
+        // 
+        Serial.printf("new Fallback: internal RAM %d\n", size);
+        ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+        return ptr;
     }
-    // 
-    Serial.printf("new Fallback: internal RAM %d\n", size);
-    ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-    return ptr;
-}
 
-void operator delete(void* ptr) noexcept {
-    // Serial.printf("delete\n");
-    heap_caps_free(ptr);
-}
+    void operator delete(void* ptr) noexcept {
+        // Serial.printf("delete\n");
+        heap_caps_free(ptr);
+    }
+#endif
 
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
@@ -177,20 +179,20 @@ void setup()
     //check sizes ...
     // sizeof(esp32sveltekit);
     // sizeof(WiFiSettingsService);
-
     // sizeof(fileManager);
-
     // sizeof(Module);
     // sizeof(moduleDevices);
     // sizeof(moduleIO);
-    // sizeof(moduleEffects);
-    // sizeof(moduleDrivers);
-    // sizeof(moduleLightsControl);
-    // sizeof(moduleChannels);
-    // sizeof(moduleLightsControl);
-    // sizeof(moduleMoonLightInfo);
-    // sizeof(layerP.lights);
-    // sizeof(layerP.lights.header);
+    // #if FT_ENABLED(FT_MOONLIGHT)
+    //     sizeof(moduleEffects);
+    //     sizeof(moduleDrivers);
+    //     sizeof(moduleLightsControl);
+    //     sizeof(moduleLightsControl);
+    //     sizeof(moduleChannels);
+    //     sizeof(moduleMoonLightInfo);
+    //     sizeof(layerP.lights);
+    //     sizeof(layerP.lights.header);
+    // #endif
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
@@ -219,7 +221,7 @@ void setup()
             xTaskCreateUniversal(
                 effectTask,              // task function
                 "AppEffectTask",            // name
-                (psramFound()?6:3) * 1024,             // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
+                (psramFound()?6:4) * 1024,             // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
                 NULL,                  // parameter
                 3,                     // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                 &effectTaskHandle,       // task handle
@@ -279,10 +281,6 @@ void setup()
         });
 
     #endif //FT_MOONBASE
-
-    // #if CONFIG_IDF_TARGET_ESP32
-    //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
-    // #endif
 
     #if USE_M5UNIFIED
         auto cfg = M5.config();

@@ -18,11 +18,11 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x) //e.g. for pio.ini settings (see ML_CHIPSET)
 
-#define MB_LOGE(tag, fmt, ...) ESP_LOGE(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define MB_LOGW(tag, fmt, ...) ESP_LOGW(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define MB_LOGI(tag, fmt, ...) ESP_LOGI(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
 #define MB_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-#define MB_LOGV(tag, fmt, ...) ESP_LOGV(tag, "[%s:%d] %s: " fmt, pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define MB_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
 #define MB_TAG "🌙"
 #define ML_TAG "💫"
@@ -330,12 +330,15 @@ void setBitValue(uint8_t* byteArray, size_t n, bool value);
 
 bool isInPSRAM(void* ptr);
 
+extern int totalAllocatedMB;
+
 //allocate, try PSRAM, else default, use calloc: zero-initialized (all bytes = 0)
 template<typename T>
-T* allocMB(size_t n) {
+T* allocMB(size_t n, const char *name = nullptr) {
     T* res = (T*)heap_caps_calloc_prefer(n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
     if (res) {
-        // MB_LOGI(MB_TAG, "Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
+        totalAllocatedMB += heap_caps_get_allocated_size(res);
+        // MB_LOGD(MB_TAG, "Allocated %s: %d x %d bytes in %s s:%d (tot:%d)", name?name:"", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res), totalAllocatedMB);
     }
     else 
         MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
@@ -343,10 +346,10 @@ T* allocMB(size_t n) {
 }
 
 template<typename T>
-T* reallocMB(T* p, size_t n) {
+T* reallocMB(T* p, size_t n, const char *name = nullptr) {
     T* res = (T*)heap_caps_realloc_prefer(p, n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
     if (res) {
-        // MB_LOGI(MB_TAG, "Re-Allocated %d x %d bytes in %s s:%d", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
+        // MB_LOGD(MB_TAG, "Re-Allocated %s: %d x %d bytes in %s s:%d", name?name:"", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
     }
     else 
         MB_LOGE(MB_TAG, "heap_caps_malloc of %d x %d not succeeded", n, sizeof(T));
@@ -355,9 +358,10 @@ T* reallocMB(T* p, size_t n) {
 
 //free memory
 template<typename T>
-void freeMB(T* p) {
+void freeMB(T* p, const char *name = nullptr) {
     if (p) {
-        // MB_LOGD(MB_TAG, "free x x %d bytes in %s, s:%d", sizeof(T), isInPSRAM(p)?"PSRAM":"RAM", heap_caps_get_allocated_size(p));
+        totalAllocatedMB -= heap_caps_get_allocated_size(p);
+        // MB_LOGD(MB_TAG, "free %s: x x %d bytes in %s, s:%d (tot:%d)", name?name:"", sizeof(T), isInPSRAM(p)?"PSRAM":"RAM", heap_caps_get_allocated_size(p), totalAllocatedMB);
         heap_caps_free(p);
         p = nullptr;
     }
@@ -371,14 +375,14 @@ struct VectorRAMAllocator {
     using value_type = T;
     
     T* allocate(size_t n) {
-        return allocMB<T>(n);
+        return allocMB<T>(n, "vector");
     }
     
     void deallocate(T* p, size_t n) {
-        freeMB(p);
+        freeMB(p, "vector");
     }
     T* reallocate(T* p, size_t n)  {
-        return reallocMB<T>(p, n);
+        return reallocMB<T>(p, n, "vector");
     }
 };
 
@@ -386,13 +390,13 @@ struct VectorRAMAllocator {
 struct JsonRAMAllocator: ArduinoJson::Allocator {
     //(uint8_t*): simulate 1 byte
   void* allocate(size_t n) override {
-    return allocMB<uint8_t>(n);
+    return allocMB<uint8_t>(n, "json");
   }
   void deallocate(void* p) override {
-    freeMB<uint8_t>((uint8_t*)p);
+    freeMB<uint8_t>((uint8_t*)p, "json");
   }
   void* reallocate(void* p, size_t n) override {
-    return reallocMB<uint8_t>((uint8_t*)p, n);
+    return reallocMB<uint8_t>((uint8_t*)p, n, "json");
   }
   static Allocator* instance() {
     static JsonRAMAllocator allocator;
@@ -403,7 +407,7 @@ struct JsonRAMAllocator: ArduinoJson::Allocator {
 //allocate object
 template<typename T, typename... Args>
 T* allocMBObject(Args&&... args) {
-    void* mem = allocMB<T>(1);
+    void* mem = allocMB<T>(1, "object");
     if (mem) {
         return new(mem) T(std::forward<Args>(args)...);
     } else {
@@ -414,7 +418,7 @@ T* allocMBObject(Args&&... args) {
 //free object
 template<typename T>
 void freeMBObject(T* obj) {
-    freeMB(obj);
+    freeMB(obj, "object");
 }
 
 extern std::vector<std::function<void()>, VectorRAMAllocator<std::function<void()>>> runInTask1, runInTask2; // functions to be called in main loopTask (to avoid https to run out of stack space)
