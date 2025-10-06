@@ -241,7 +241,7 @@ Add the following `build_flags` and adjust to your app, if needed:
 ```ini
     -D BUILD_TARGET=\"$PIOENV\"
     -D APP_NAME=\"ESP32-Sveltekit\" ; Must only contain characters from [a-zA-Z0-9-_] as this is converted into a filename
-    -D APP_VERSION=\"0.5.9\" ; semver compatible version string
+    -D APP_VERSION=\"0.5.9.2\" ; semver compatible version string
     -D EMBED_WWW
 ```
 

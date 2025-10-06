@@ -5,15 +5,17 @@
 This module supports Over the Air Updates (OTA).
 There are 2 ways to update the firmware in this module:
 
-<img width="362" src="https://github.com/user-attachments/assets/cf72875f-02cf-4c78-97a0-56b2a1723d71" />
 * Using GitHub releases
 
-    * List of firmware releases is showed here
-    * Select one of the releases to install. In general it is advised to install the most recent version.
-    * If there is a new release, the app will notify it's availability.
-    * See here for details on releases: [releases](https://github.com/MoonModules/MoonLight/releases)
+     * List of firmware releases is showed here
+     * Select one of the releases to install. In general it is advised to install the most recent version.
+     * If there is a new release, the app will notify it's availability.
+     * See here for details on releases: [releases](https://github.com/MoonModules/MoonLight/releases)
+
+     <img width="362" src="https://github.com/user-attachments/assets/cf72875f-02cf-4c78-97a0-56b2a1723d71" />
 
 * Manually via Upload
+
     * Select choose file, Press Upload if asked for Are you sure?. 
 
 When starting the update, a progress indicator is shown, upon completion the device will restart with the new firmware.
