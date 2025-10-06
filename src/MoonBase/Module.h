@@ -120,8 +120,14 @@ public:
 
 protected:
     EventSocket *_socket;
-    void readFromFS() {
+    void readFromFS() { //used in ModuleEffects, for live scripts...
          _fsPersistence.readFromFS(); //overwrites the default settings in state
+        //  sizeof(StatefulService<ModuleState>);
+        //  sizeof(_httpEndpoint);
+        //  sizeof(_eventEndpoint);
+        //  sizeof(_webSocketServer);
+        //  sizeof(_fsPersistence);
+        //  sizeof(_server);
     }
 
 private:
