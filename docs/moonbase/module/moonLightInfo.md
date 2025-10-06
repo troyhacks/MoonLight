@@ -1,6 +1,6 @@
-# MoonLight info
 
-<img width="350" src="https://github.com/user-attachments/assets/f0023a22-ed53-43f6-98bf-6a0869b59db1" />
+# MoonLight info
+<img width="320" src="https://github.com/user-attachments/assets/cdc7ec72-0c50-4369-ad8d-f1fd0900e074" />
 
 Shows info about the physical and virtual layer
 
@@ -8,6 +8,7 @@ Shows info about the physical and virtual layer
 * **Channels per light**: e.g. normal RGB strip/panel is 3 channels per light
 * **Max channels**: Max channels availeble (61440x3 for boards with PSRAM (120 pins x 512 LEDs), 4096x3 for other boards -> 12288 / 4096 RGB LEDs)
 * **Size**: the outer bounds of the fixture, e.g. for a 16x16 panel it is 16x16x1
+* **Nodes**: the total number of effects, modifiers, layouts and drivers
 * **Layers**: The virtual layers defined (currently only 1)
     * **NrOfLights and size**: virtual layer can differ from the physical layer (.e.g when mirroring it is only half)
     * **Mapping table#**: nr of entries in the mapping table, is the same is nr of virtual pixels

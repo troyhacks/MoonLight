@@ -1,5 +1,5 @@
 {
-  "name": "MoonLight on esp32-s3-zero-n4r2",
+  "name": "MoonLight on esp32-s3-stephanelec-16p",
   "version": "0.5.9.2",
   "home_assistant_domain": "esphome",
   "funding_url": "https://esphome.io/guides/supporters.html",
@@ -8,10 +8,10 @@
   "builds": [
     {
       "chipFamily": "ESP32-S3",
-      "name": "esp32-s3-zero-n4r2",
-      "image": "./images/esp32-s3-zero-n4r2.jpg",
+      "name": "esp32-s3-devkitc-1-n8r8v",
+      "image": "./images/esp32-s3-stephanelec-16p.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-s3-zero-n4r2_0-5-9-2_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-s3-stephanelec-16p_0-5-9-2_webflash.bin", "offset": 0 }
       ]
     }
   ]

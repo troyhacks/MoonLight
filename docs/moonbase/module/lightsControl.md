@@ -1,6 +1,6 @@
 # Lights Control module
 
-<img width="399" src="https://github.com/user-attachments/assets/7f6406cf-b9b1-4f66-8b49-8b220d5370a5" />
+<img width="320" src="https://github.com/user-attachments/assets/8ca3e8a4-8025-43a4-8746-336ef72fa81d" />
 
 Controls:
 

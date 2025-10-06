@@ -1,6 +1,6 @@
 # System Status
 
-<img width="350" src="https://github.com/user-attachments/assets/9e27494a-284a-4d9e-ba55-c52786cb0374" />
+<img width="320" src="https://github.com/user-attachments/assets/ebbe9723-de0b-4fcf-a527-b660b508bb6e" />
 
 * 🌙 **Performance**: loops per second: nr of times main loop is executed
 * 🌙 **Safe Mode**: After a crash, the device will start in Safe Mode disabling possible causes of crashes. See also [MoonLight](https://moonmodules.org/MoonLight/moonlight/overview/). In case of safe mode, the statusbar will show a shield: 🛡️. Try to find the reason of the crash and correct and restart the device. If no crash, it will go out of safe mode.

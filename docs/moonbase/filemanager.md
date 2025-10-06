@@ -1,6 +1,6 @@
 # File Manager
 
-<img width="516" src="https://github.com/user-attachments/assets/477622e5-6d8e-4a85-a0ac-cd61b475b317" />
+<img width="320" src="https://github.com/user-attachments/assets/81b1de45-fd9d-4f1f-b1b3-63c427cf1df0" />
 
 * Navigate through folders
 * create files and folders

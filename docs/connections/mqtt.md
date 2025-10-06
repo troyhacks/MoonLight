@@ -1,3 +1,3 @@
 # MQTT
 
-<img width="350" src="https://github.com/user-attachments/assets/16399331-bda0-4f30-9547-0d91f70635e3" />
+<img width="320" src="https://github.com/user-attachments/assets/51e336fe-4935-4135-a9f8-bf469c67de8e" />

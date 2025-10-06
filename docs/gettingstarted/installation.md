@@ -16,7 +16,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 **Step 4**: Connect to the ESP32-device
 
-   <img width="350" alt="Screenshot 2025-06-07 at 20 54 17" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
+   <img width="350" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
 
 **Step 5**: Select **Install MoonLight**
 
@@ -28,13 +28,13 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
     Erase if you have a new ESP32-device or want to start fresh. Do not erase if you want to update an existing MoonLight installation. Erase deletes all settings and requires to re-[connect to MoonLight](/#connect-moonlight).
 
-   <img width="250" alt="Screenshot 2025-06-07 at 20 54 42" src="https://github.com/user-attachments/assets/35045317-520d-427c-894e-418693877831" />
+   <img width="250" src="https://github.com/user-attachments/assets/35045317-520d-427c-894e-418693877831" />
 
 **Step 7**: Confirm and **install**
   
-   <img width="200" alt="Screenshot 2025-06-07 at 20 54 51" src="https://github.com/user-attachments/assets/25c05a6c-d2ef-41cb-b83c-fc40a60c6ccc" />
-   <img width="200" alt="Screenshot 2025-06-07 at 20 55 00" src="https://github.com/user-attachments/assets/b2391752-51c4-400e-b95c-4fa865e93595" />
-   <img width="200" alt="Screenshot 2025-06-07 at 20 57 30" src="https://github.com/user-attachments/assets/5e2ceefd-4c31-4b72-a228-f29373b677ac" />
+   <img width="200" src="https://github.com/user-attachments/assets/25c05a6c-d2ef-41cb-b83c-fc40a60c6ccc" />
+   <img width="200" src="https://github.com/user-attachments/assets/b2391752-51c4-400e-b95c-4fa865e93595" />
+   <img width="200" src="https://github.com/user-attachments/assets/5e2ceefd-4c31-4b72-a228-f29373b677ac" />
 
 **Step 8**: Optionally Press **Logs and Console**
 
@@ -46,12 +46,12 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 ## Connect MoonLight
 
 **Step 1**: Make a **WiFi connection** to the ESP32-device, it should present itself in the list of WiFi access points of your computer, phone or tablet.
-  
-   <img width="200" alt="Screenshot 2025-06-07 at 20 58 22" src="https://github.com/user-attachments/assets/08894be5-e4ed-4ed8-b2ae-86a6ce5c9ef6" />
+
+   <img width="200" src="https://github.com/user-attachments/assets/9a146e3c-1a53-4906-ad2a-d70215efcf4b" />
 
 **Step 2**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). You will see this screen, select WiFi Station.
-  
-   <img width="400" alt="Screenshot 2025-06-07 at 20 59 19" src="https://github.com/user-attachments/assets/3d8bddfb-9f95-4317-891c-be8b90880541" />
+
+   <img width="400" src="https://github.com/user-attachments/assets/f480356d-bf56-4a6b-b6f2-0be49fa27db3" />
 
    * The device will show in 'Captive portal' mode. Alternatively you can close the captive portal and show it in a browser using [http://4.3.2.1](http://4.3.2.1)
 
@@ -71,7 +71,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 **Step 3**: Enter your local **WiFi network credentials** and hostname:
 
-   <img width="400" src="https://github.com/user-attachments/assets/81aab0c6-5d60-4ac9-8aee-54a7147be46e" />
+   <img width="400" src="https://github.com/user-attachments/assets/fef84240-9d9d-4a4f-acba-16e6e179305e" />
 
 !!! tip "Hostname"
 
@@ -79,12 +79,13 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 **Step 4**: Press **Add Network** and apply settings. After connecting to your normal WiFi network you will see this screen showing the new IP address of your MoonLight ESP32-device. 
 
-   <img width="400" alt="Screenshot 2025-06-07 at 20 59 55" src="https://github.com/user-attachments/assets/3696f3b0-70f7-4be8-a310-948b003450b7" />
+   <img width="400" src="https://github.com/user-attachments/assets/e924ebe0-49a1-47f6-84f7-786cdadc4d19" />
 
-**Step 5**: When connected to youe local WiFi network, enter the hostname in a browser (e.g. [http://ml-home.local](http://ml-home.local))
+**Step 5**: When connected to your local WiFi network, enter the IP address of the new device. Alternatively enter the hostname.
 
-!!! tip "IP address"
-    Alternatively you can use the IP address of the device to connect. 
+!!! info "Using hostname"
+    * Restart the device to make the hostname known to your network (go to system status, scroll down and press restart)
+    * Enter the hostname in your browser e.g. [http://ml-home.local](http://ml-home.local)
 
 !!! warning "reload UI"
     See step 2 ⚠️ if UI is not showing up, use [http://ml-home.local](http://ml-home.local) (replace ml-home with the hostname) or the IP address.
@@ -93,11 +94,11 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 **Step 1**: Add an effect
 
-   <img width="350" src="https://github.com/user-attachments/assets/6cc3749c-983a-4659-9c63-fab173b4750c" />
+   <img width="350" src="https://github.com/user-attachments/assets/2c8a8b75-c429-4038-a5af-adc82b11c9de" />
 
 **Step 2**: Add a layout and set pin(s)
 
-   <img width="350" src="https://github.com/user-attachments/assets/d83277bd-4bc1-495c-ae21-85efe41ab8b1" />
+   <img width="350" src="https://github.com/user-attachments/assets/8d8b9c2d-bed3-439e-a145-2bb204639c6c" />
 
 * Add a layout Node by pressing the blue + button and select on off the 🚥 options (Panel 🚥 is a safe bet to start with). Scroll down to the Pin Control field and enter the pin number(s) you connected the strip or panel to. 
 
@@ -106,7 +107,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 **Step 3**: Add a driver
 
-   <img width="350" src="https://github.com/user-attachments/assets/67447f55-7a22-41ab-af8c-0a2e98462792" />
+   <img width="350" src="https://github.com/user-attachments/assets/e7fab24f-3803-4aa5-8638-459cca8a9caf" />
 
 * Add a driver node by pressing the blue + button and select one of the ☸️ options.
     
@@ -119,8 +120,6 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
   
 **Step 4**: Press save (💾). Saves your setup to the file system, so if a device is restarted, your settings are still there.
 
-   <img width="400" src="https://github.com/user-attachments/assets/17fe6f38-375b-4d96-923b-607897e7d4db" />
-
 !!! info "Next steps"
     * You can now change effect or add effects, modifiers, layouts and drivers
     * Go to [MoonLigh Overview](https://moonmodules.org/MoonLight/moonlight/overview/)
@@ -130,7 +129,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 * The preferred way to update MoonLight is via [System update](https://moonmodules.org/MoonLight/system/update/)
 
-    <img width="350" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
+    <img width="350" src="https://github.com/user-attachments/assets/523ea32f-88f8-4994-8d23-9541dce67ba1" />
 
     * Download from GitHub - Currently not working due to certificate issue... 🚧
     * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)

@@ -11,6 +11,8 @@ The core node functionality supports the following
     * Warning: type of controls
 * Firmware or live scripts
 
+Nodes are inspired by WLED usermods, further developed in StarBase and now in MoonLight (using the ESP32-Sveltekit infrastructure)
+
 MoonLight specific
 
 * Node types: it is recommended that a node is one of the 4 types as described above. However each node could perform functionality of all types. To recognize what a node does the emojis 🚥, 🔥, 💎 and ☸️ are used in the name. The variables hasLayout and hasModifier indicate the specific functionality the node supports. They control when a physical to virtual mapping is recalculated
@@ -27,148 +29,58 @@ MoonLight specific
     * Effect nodes **set light**: Currently setRGB, setWhite, setBrightness, setPan, setTilt, setZoom, setRotate, setGobo, setRGB1, setRGB2, setRGB3, setBrightness2 is supported. In the background MoonLight calculates which channel need to be filled with values using the offsets (using the setLight function).
     * If offsetBrightness is defined, the RGB values will not be corrected for brightness in [ArtNed](https://moonmodules.org/MoonLight/moonlight/nodes/#art-net/).
 
-    ## Archive
-    
-    This page is 🚧, text below will be rewritten.
-    
-    ## Q&A
-    
-    Collecting questions and answers (from [Discord](https://discord.com/channels/700041398778331156/1203994211301728296))
-    🚧 !!
-    
-    * I'm therefore wondering if esplive only supports xtensa ASM and not RISCV? we're actually not supposed to enable esplivescript on anything else than the s3. For the moment it’s esp32 , esp32 s2 esp32s3. I am revamping the compiler for it to be more compact and less memory hungry. Once that is done I will work on creating risc assembly language so it can be used with the esp32 C family and also I want to do arm for the pi pico.
-    * Technically live scripts works on normal esp32, but MoonLight with live scripts is 103% flash size. I didn’t look into other partitioning (preferably keeping Ota working): note use esp32 16MB!!
-    * why do some animations allow me to specifiy the LED strip pin but not others?
-    * is there a wiki page I can read for me to understand pin mapping and LED strip physical format?  there are layout nodes 🚥 (defining how the lights layed out in a matrix, cube etc. There you can define pins) effect nodes 🔥 (obviously) and modifier nodes 💎(modify an effect)
-    * how does the lights control module interact with the animations module?
-    * what does "snake" mean for a moving head configuration?
-    * how do i specify which solid color i want? Added!
-    * getting a few "Software reset due to exception/panic" depending on the effects i set 😄 but that might be my PSU
-    * how I can specify the color order.... I see the define I want in fastled.h, i'm guessing it's passed somehow to the template through maybe the ML_CHIPSET define? oh.... it seems to require a modification of void LedsDriver::init
-    sorry for the spam.... it also looks to me that even with the ML_CHIPSET=SK6812 define there's no support for RGBW as on a small LED strip, setting a solid color of red for example, i see green & white - blue - red - green & white - blue - red (eg: it's forgetting to send 4x 8b per LED)
-    * is the monitor only available with the s3? I enabled "Monitor On" in the control tab oh that's interesting, the platform booted full white (when configured in solid animation) but went back to what was supposed to be when I started moving the control sliders. should be working on all platforms
-    * not sure if this has been flagged, but when changing a selected node type, the parameters of the previous node will stay displayed and when switching node types, I did manage to get LEDs frozen (impossible to get them ot update again)
-    it takes a platform reboot, and changing the movinghead number of LEDs in my case. it looks like some refresh isn't happening. even the platform reboot trick sometimes isn't happening... looking at the console output i'm seeing that my actions on the user interface aren't registered
-    * how complex would it be to map several LED strips on several IOs to a virtual 2d matrix? I'm currently looking at the code, more particularly void mapLayout() and it seems the layout is reset every time that function is called, so it is not possible to increase the display size
-    * [single line and row layouts](https://github.com/MoonModules/MoonLight/pull/19)
-    * personally i'd make 2 different menus in the esp32 GUI.. a layout is more something you set and forget about as it is tied to a physical install
-    * one layout to define all the lights is definitely a blocker for me (and I imagine more people) as physical installs have their own constraints. let me know what you think. I will add that possibility , I see ‘some’ usage, but I don’t understand why it is a blocker as in general the whole setup is a number of lights which you know in advance so then it is most clear to define that in one go ?
-    
-    
-    ## Technical
-    
-    * Nodes
-        * See Nodes.h: class Node
-            * name(): name of the node
-            * hasFunctions: enables features of the Node (Layout, Modifier)
-            * on: (de)activates the node
-            * constructor: sets the corresponding layer
-            * setup: if layout sets channelsPerLight and request map
-        * Nodes manipulate the LEDs / channels array and the virtual to physical layer mappings.
-        * specify which functions (layout, effect, modifier): One node in general implements one, but can also implement all three (e.g. Moving Head...  wip...)
-            * layout
-            * effect
-            * modifier
-        * Live scripts
-            * See Nodes.h / nodes.cpp
-        * Lights
-            * Regular patterns (CRGB as default but also others like Moving Head ...)
-    
-    * See [Modules](../modules.md)
-    * Upon changing a pin, driver.init will rerun (FastLED.addLeds, PD and VD driver.init)
-    * Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
-        * To do: kill running scripts, e.g. when changing effects
-    * [Nodes.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): class Node (constructor, destructor, setup, loop, hasFunctions, map, modify, addControl(s), onUpdate)
-    * [Nodes.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): implement LiveScriptNode
-    
-        * An effect has a loop which is ran for each frame produced. In each loop, the lights in the virtual layer gets it's values using the setRGB function. For multichannel lights also functions as setWhite or (for Moving Heads) setPan, setTilt, setZoom etc. Also getRGB etc functions exists.
+## Archive
 
-    ### Mapping model (🚧)
-    
-    <img width="500" src="https://github.com/user-attachments/assets/6f76a2d6-fce1-4c72-9ade-ee5fbd056c88" />
-    
-    * Multiple Nodes can be created (1)
-        * Each node can have controls (compare controls in WLED / StarLight) ✅
-        * Each node can run precompile code or Live scripts (with or without loop) ✅
-        * Each node has a type:
-            * Layout: tell where each light is in a 1D/2D/3D physical coordinate space (based on StarLight fixtures) ✅
-            * Effect: 
-                * run an effect in a virtual coordinate space ✅
-                * in the physical space if you want to run at highest performance, e.g. a random effect doesn't need to go through mappings ✅
-            * Modifier: Mirror, rotate, etc, multiple modfiers allowed (projection in StarLight) 🚧
-                * A modifier can also map lights dimensions to effect dimensions: change the lights to a 1D/2D/3D virtual coordinate space
-                    * e.g. if the light is a globe, you can map that to 2D using mercator projection mapping
-                    * if the light is 200x200 you can map it to 50x50
-                    * if the light is 2D, a 1D effect can be shown as a circle or a bar (as WLED expand1D)
-            * Driver show: show the result on Leds (using FastLED, hpwit drivers), Art-Net, DDP, ...
-    * Future situation: Nodes and noodles (2)
-        * Replace the nodes table (1) by a graphical view (2)
-    * Virtual Layer (MappingTable) (3)
-        * Array of arrays. Outer array is virtual lights, inner array is physical lights. ✅
-        * Implemented efficiently using the StarLight PhysMap struct ✅
-        * e.g. [[],[0],[1,2],[3,4,5],[6,7,8,9]] ✅
-            * first virtual light is not mapped to a physical light
-            * second virtual light is mapped to physical light 0
-            * third virtual light is mapped to physical lights 1 and 2
-            * and so on
-        * Virtual lights can be 1D, 2D or 3D. Physical lights also, in any combination
-            * Using x + y * sizeX + z * sizeX * sizeY 🚧
-        * set/getLightColor functions used in effects using the MappingTable ✅
-        * Nodes manipulate the MappingTable and/or interfere in the effects loop 🚧
-        * A Virtual Layer mapping gets updated if a layout, mapping or dimensions change 🚧
-        * An effect uses a virtual layer. One Virtual layer can have multiple effects. ✅
-    * Physical layer
-        * Lights.header and Lights.channels. CRGB leds[] is using lights.channels (acting like leds[] in FASTLED) ✅
-        * A Physical layer has one or more virtual layers and a virtual layer has one or more effects using it. ✅
-    * Presets/playlist: change (part of) the nodes model
-    
-    ✅: Done
-    
-    ### Example
+This page is 🚧, text below will be rewritten.
 
-    ```json
-    {
-  "nodes": [
-    {
-      "name": "Lissajous 🔥🎨💡",
-      "on": true,
-      "controls": [
-        {
-          "name": "xFrequency",
-          "type": "range",
-          "default": 64,
-          "p": 1065414703,
-          "value": 64
-        },
-        {
-          "name": "fadeRate",
-          "type": "range",
-          "default": 128,
-          "p": 1065414704,
-          "value": 128
-        },
-        {
-          "name": "speed",
-          "type": "range",
-          "default": 128,
-          "p": 1065414705,
-          "value": 128
-        }
-      ]
-    },
-    {
-      "name": "Random 🔥",
-      "on": true,
-      "controls": [
-        {
-          "name": "speed",
-          "type": "range",
-          "default": 128,
-          "p": 1065405731,
-          "value": 128
-        }
-      ]
-    }
-  ]
-}
-```
+## Q&A
+
+Collecting questions and answers (from [Discord](https://discord.com/channels/700041398778331156/1203994211301728296))
+🚧 !!
+
+* I'm therefore wondering if esplive only supports xtensa ASM and not RISCV? we're actually not supposed to enable esplivescript on anything else than the s3. For the moment it’s esp32 , esp32 s2 esp32s3. I am revamping the compiler for it to be more compact and less memory hungry. Once that is done I will work on creating risc assembly language so it can be used with the esp32 C family and also I want to do arm for the pi pico.
+* Technically live scripts works on normal esp32, but MoonLight with live scripts is 103% flash size. I didn’t look into other partitioning (preferably keeping Ota working): note use esp32 16MB!!
+* why do some animations allow me to specifiy the LED strip pin but not others?
+* is there a wiki page I can read for me to understand pin mapping and LED strip physical format?  there are layout nodes 🚥 (defining how the lights layed out in a matrix, cube etc. There you can define pins) effect nodes 🔥 (obviously) and modifier nodes 💎(modify an effect)
+* how does the lights control module interact with the animations module?
+* what does "snake" mean for a moving head configuration?
+* how do i specify which solid color i want? Added!
+* getting a few "Software reset due to exception/panic" depending on the effects i set 😄 but that might be my PSU
+* how I can specify the color order.... I see the define I want in fastled.h, i'm guessing it's passed somehow to the template through maybe the ML_CHIPSET define? oh.... it seems to require a modification of void LedsDriver::init
+sorry for the spam.... it also looks to me that even with the ML_CHIPSET=SK6812 define there's no support for RGBW as on a small LED strip, setting a solid color of red for example, i see green & white - blue - red - green & white - blue - red (eg: it's forgetting to send 4x 8b per LED)
+* is the monitor only available with the s3? I enabled "Monitor On" in the control tab oh that's interesting, the platform booted full white (when configured in solid animation) but went back to what was supposed to be when I started moving the control sliders. should be working on all platforms
+* not sure if this has been flagged, but when changing a selected node type, the parameters of the previous node will stay displayed and when switching node types, I did manage to get LEDs frozen (impossible to get them ot update again)
+it takes a platform reboot, and changing the movinghead number of LEDs in my case. it looks like some refresh isn't happening. even the platform reboot trick sometimes isn't happening... looking at the console output i'm seeing that my actions on the user interface aren't registered
+* how complex would it be to map several LED strips on several IOs to a virtual 2d matrix? I'm currently looking at the code, more particularly void mapLayout() and it seems the layout is reset every time that function is called, so it is not possible to increase the display size
+* [single line and row layouts](https://github.com/MoonModules/MoonLight/pull/19)
+* personally i'd make 2 different menus in the esp32 GUI.. a layout is more something you set and forget about as it is tied to a physical install
+* one layout to define all the lights is definitely a blocker for me (and I imagine more people) as physical installs have their own constraints. let me know what you think. I will add that possibility , I see ‘some’ usage, but I don’t understand why it is a blocker as in general the whole setup is a number of lights which you know in advance so then it is most clear to define that in one go ?
+
+
+## Technical
+
+* Nodes
+    * See Nodes.h: class Node
+        * name(): name of the node
+        * hasFunctions: enables features of the Node (Layout, Modifier)
+        * on: (de)activates the node
+        * constructor: sets the corresponding layer
+        * setup: if layout sets channelsPerLight and request map
+    * Nodes manipulate the LEDs / channels array and the virtual to physical layer mappings.
+    * specify which functions (layout, effect, modifier): One node in general implements one, but can also implement all three (e.g. Moving Head...  wip...)
+        * layout
+        * effect
+        * modifier
+    * Live scripts
+        * See Nodes.h / nodes.cpp
+    * Lights
+        * Regular patterns (CRGB as default but also others like Moving Head ...)
+
+* See [Modules](../modules.md)
+* Upon changing a pin, driver.init will rerun (FastLED.addLeds, PD and VD driver.init)
+* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
+    * To do: kill running scripts, e.g. when changing effects
+* [Nodes.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): class Node (constructor, destructor, setup, loop, hasFunctions, map, modify, addControl(s), onUpdate)
+* [Nodes.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): implement LiveScriptNode
+
+    * An effect has a loop which is ran for each frame produced. In each loop, the lights in the virtual layer gets it's values using the setRGB function. For multichannel lights also functions as setWhite or (for Moving Heads) setPan, setTilt, setZoom etc. Also getRGB etc functions exists.
