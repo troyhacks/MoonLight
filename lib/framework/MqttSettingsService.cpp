@@ -36,6 +36,8 @@ static char* retainCstr(const char* cstr, char** ptr) {
 
     // return reference to pointer for convenience
     return *ptr;
+  } else {
+    return nullptr;
   }
 }
 
