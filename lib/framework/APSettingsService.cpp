@@ -68,17 +68,11 @@ void APSettingsService::loop()
 void APSettingsService::manageAP()
 {
     WiFiMode_t currentWiFiMode = WiFi.getMode();
-    if (_state.provisionMode == AP_MODE_ALWAYS ||
-        (_state.provisionMode == AP_MODE_DISCONNECTED && WiFi.status() != WL_CONNECTED) || _recoveryMode)
-    {
-        if (_reconfigureAp || currentWiFiMode == WIFI_OFF || currentWiFiMode == WIFI_STA)
-        {
+    if (_state.provisionMode == AP_MODE_ALWAYS || (_state.provisionMode == AP_MODE_DISCONNECTED && WiFi.status() != WL_CONNECTED) || _recoveryMode) {
+        if (_reconfigureAp || currentWiFiMode == WIFI_OFF || currentWiFiMode == WIFI_STA) {
             startAP();
         }
-    }
-    else if ((currentWiFiMode == WIFI_AP || currentWiFiMode == WIFI_AP_STA) &&
-             (_reconfigureAp || !WiFi.softAPgetStationNum()))
-    {
+    } else if ((currentWiFiMode == WIFI_MODE_AP || currentWiFiMode == WIFI_AP_STA) && (_reconfigureAp || !WiFi.softAPgetStationNum())) {
         stopAP();
     }
     _reconfigureAp = false;

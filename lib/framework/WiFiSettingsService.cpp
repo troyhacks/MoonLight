@@ -93,7 +93,7 @@ void WiFiSettingsService::reconfigureWiFiConnection()
 {
     // reset last connection attempt to force loop to reconnect immediately
     _lastConnectionAttempt = 0;
-    // return; // TroyHacks
+
     String connectionMode;
 
     switch (_state.staConnectionMode)
