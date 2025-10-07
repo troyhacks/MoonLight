@@ -47,7 +47,7 @@ public:
         Char<32> instanceName;
         instanceName = "MoonLight-";
         uint8_t mac[6];
-        esp_read_mac(mac, ESP_MAC_WIFI_STA);
+        esp_err_t err = esp_base_mac_addr_get(mac);
         char macStr[5] = {0};
         sprintf(macStr, "%02x%02x", mac[4], mac[5]);
         // instanceName += WiFi.macAddress().substring(12);//localIP().toString().c_str();
