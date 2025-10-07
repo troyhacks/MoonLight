@@ -15,7 +15,7 @@
 
 //alphabetically from here
 
-#include "../../Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
+#include "../Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
 
 class DriverNode: public Node {
   uint16_t maxPower = 10;

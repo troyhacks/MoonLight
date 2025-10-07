@@ -16,7 +16,7 @@
 
 #include "FastLED.h"
 // #include "../MoonBase/Module.h"
-#include "NodeManager.h"
+#include "Nodes/NodeManager.h"
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 

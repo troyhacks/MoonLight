@@ -13,7 +13,7 @@
 
 #if FT_MOONLIGHT
 
-#include "VirtualLayer.h" //VirtualLayer.h will include PhysicalLayer.h
+#include "../Layers/VirtualLayer.h" //VirtualLayer.h will include PhysicalLayer.h
 
 #include <ESPFS.h>
 
@@ -251,14 +251,14 @@ static struct SharedData {
   size_t clientListSize;
 } sharedData;
 
-#include "Nodes/Drivers/Drivers.h"
-#include "Nodes/Drivers/AudioSync.h"
+#include "Drivers/Drivers.h"
+#include "Drivers/AudioSync.h"
 
-#include "Nodes/Layouts/Layouts.h"
+#include "Layouts/Layouts.h"
 
-#include "Nodes/Effects/Effects.h"
+#include "Effects/Effects.h"
 // #include "EffectsFastLED.h"
 
-#include "Nodes/Modifiers/Modifiers.h"
+#include "Modifiers/Modifiers.h"
 
 #endif //FT_MOONLIGHT

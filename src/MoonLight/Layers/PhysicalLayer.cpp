@@ -15,11 +15,11 @@
 
 #include "VirtualLayer.h"
 
-#include "Nodes.h"
+#include "../Nodes/Nodes.h"
 
 #include <ESP32SvelteKit.h> //for safeModeMB
 
-#include "../MoonBase/Utilities.h"
+#include "../../MoonBase/Utilities.h"
 
 PhysicalLayer::PhysicalLayer() {
         MB_LOGD(ML_TAG, "constructor");
