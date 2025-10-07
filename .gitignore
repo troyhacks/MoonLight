@@ -20,3 +20,5 @@ lib/framework/WWWData.h
 ssl_certs/cacert.pem
 /logs
 .DS_Store
+*.bin
+platformio_override.ini
