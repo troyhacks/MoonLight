@@ -239,13 +239,26 @@ inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
         return (255 - ((beat - 128) * 2)); // falling edge
 }
 
-#include "Mods.h"
+//data shared between nodes
+static struct SharedData {
+  uint8_t bands[16]= {0}; // Our calculated freq. channel result table to be used by effects
+  float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
+  int16_t volumeRaw; 
+  float majorPeak; // FFT: strongest (peak) frequency
+  uint16_t fps;
+  uint8_t connectionStatus;
+  size_t connectedClients;
+  size_t clientListSize;
+} sharedData;
 
-#include "Layouts.h"
+#include "Nodes/Drivers/Drivers.h"
+#include "Nodes/Drivers/AudioSync.h"
 
-#include "Effects.h"
+#include "Nodes/Layouts/Layouts.h"
+
+#include "Nodes/Effects/Effects.h"
 // #include "EffectsFastLED.h"
 
-#include "Modifiers.h"
+#include "Nodes/Modifiers/Modifiers.h"
 
 #endif //FT_MOONLIGHT

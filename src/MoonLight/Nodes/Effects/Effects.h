@@ -515,19 +515,19 @@ class GEQ3DEffect: public Node {
 
     CRGB ledColorTemp;
     const int NUM_BANDS = numBands;
-    uint_fast8_t split  = map(projector,0,cols,0,(NUM_BANDS - 1));
+    uint_fast8_t split  = ::map(projector,0,cols,0,(NUM_BANDS - 1));
 
     uint8_t heights[NUM_GEQ_CHANNELS] = { 0 };
     const uint8_t maxHeight = roundf(float(rows) * ((rows<18) ? 0.75f : 0.85f));           // slightly reduce bar height on small panels 
     for (int i=0; i<NUM_BANDS; i++) {
       unsigned band = i;
-      if (NUM_BANDS < NUM_GEQ_CHANNELS) band = map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS); // always use full range.
+      if (NUM_BANDS < NUM_GEQ_CHANNELS) band = ::map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS); // always use full range.
       heights[i] = map8(sharedData.bands[band],0,maxHeight); // cache sharedData.bands[] as data might be updated in parallel by the audioreactive core
     }
 
 
     for (int i=0; i<=split; i++) { // paint right vertical faces and top - LEFT to RIGHT
-      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols, 0, 256);
+      uint16_t colorIndex = ::map(cols/NUM_BANDS*i, 0, cols, 0, 256);
       CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
       int linex = i*(cols/NUM_BANDS);
 
@@ -552,7 +552,7 @@ class GEQ3DEffect: public Node {
 
 
     for (int i=(NUM_BANDS - 1); i>split; i--) { // paint left vertical faces and top - RIGHT to LEFT
-      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
+      uint16_t colorIndex = ::map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
       CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
       int linex = i*(cols/NUM_BANDS);
       int pPos = max(0, linex+(cols/NUM_BANDS)-1);
@@ -577,7 +577,7 @@ class GEQ3DEffect: public Node {
 
 
     for (int i=0; i<NUM_BANDS; i++) {
-      uint16_t colorIndex = map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
+      uint16_t colorIndex = ::map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
       CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
       int linex = i*(cols/NUM_BANDS);
       int pPos  = linex+(cols/NUM_BANDS)-1;
@@ -731,7 +731,7 @@ class NoiseMeterEffect: public Node {
     layerV->fadeToBlackBy(fadeRate);
 
     float tmpSound2 = sharedData.volumeRaw * 2.0 * (float)width / 255.0;
-    int maxLen = map(tmpSound2, 0, 255, 0, layerV->size.x); // map to pixels availeable in current segment              // Still a bit too sensitive.
+    int maxLen = ::map(tmpSound2, 0, 255, 0, layerV->size.x); // map to pixels availeable in current segment              // Still a bit too sensitive.
     // if (maxLen <0) maxLen = 0;
     // if (maxLen >layerV->size.x) maxLen = layerV->size.x;
 
@@ -1226,10 +1226,10 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
 
       Coord3D pos = Coord3D(sx, sy);
       if (!pos.isOutofBounds(layerV->size)) {
-        if (usePalette) layerV->setRGB(Coord3D(sx, sy), ColorFromPalette(layerV->layerP->palette, stars[i].colorIndex, map(stars[i].z, 0, layerV->size.x, 255, 150)));
+        if (usePalette) layerV->setRGB(Coord3D(sx, sy), ColorFromPalette(layerV->layerP->palette, stars[i].colorIndex, ::map(stars[i].z, 0, layerV->size.x, 255, 150)));
         else {
-          uint8_t color = map(stars[i].colorIndex, 0, 255, 120, 255);
-          int brightness = map(stars[i].z, 0, layerV->size.x, 7, 10);
+          uint8_t color = ::map(stars[i].colorIndex, 0, 255, 120, 255);
+          int brightness = ::map(stars[i].z, 0, layerV->size.x, 7, 10);
           color *= brightness/10.0;
           layerV->setRGB(Coord3D(sx, sy), CRGB(color, color, color));
         }
@@ -1334,7 +1334,7 @@ class WaverlyEffect: public Node {
       uint16_t thisMax = min(map(thisVal, 0, 512, 0, layerV->size.y), (long)layerV->size.y);
 
       for (pos.y = 0; pos.y < thisMax; pos.y++) {
-        CRGB color = ColorFromPalette(layerV->layerP->palette, map(pos.y, 0, thisMax, 250, 0));
+        CRGB color = ColorFromPalette(layerV->layerP->palette, ::map(pos.y, 0, thisMax, 250, 0));
         if (!noClouds)
           layerV->addRGB(pos, color);
         layerV->addRGB(Coord3D((layerV->size.x - 1) - pos.x, (layerV->size.y - 1) - pos.y), color);
@@ -1746,15 +1746,15 @@ class AmbientMoveEffect: public Node {
 
     for (int x = 0; x<layerV->size.x; x++) { //x-axis (column)
 
-      uint8_t band = map(x, 0, layerV->size.x-1, 2, NUM_GEQ_CHANNELS-3); //the frequency band applicable for the column, skip the lowest and the highest
+      uint8_t band = ::map(x, 0, layerV->size.x-1, 2, NUM_GEQ_CHANNELS-3); //the frequency band applicable for the column, skip the lowest and the highest
       uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
 
       bandSpeed[band] = constrain(bandSpeed[band] + (volume * increaser) - decreaser * 10, 0, UINT16_MAX); // each band has a speed, increased by the volume and also decreased by decreaser. The decreaser should cause a delay
 
-      uint8_t tilt = map(bandSpeed[band], 0, UINT16_MAX, tiltMin, tiltMax); //the higher the band speed, the higher the tilt
+      uint8_t tilt = ::map(bandSpeed[band], 0, UINT16_MAX, tiltMin, tiltMax); //the higher the band speed, the higher the tilt
 
-      uint8_t pan = map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0, 0, 255, 0, (invert && x%2==0)?128:0), 0, 255, panMin, panMax); //expect a bit of volume before panning
-      uint8_t tilt2 = map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0, 0, 255, 0, 64), 0, 255, panMin, panMax); //this is beatcos8, so pan and tilt draw a circle
+      uint8_t pan = ::map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0, 0, 255, 0, (invert && x%2==0)?128:0), 0, 255, panMin, panMax); //expect a bit of volume before panning
+      uint8_t tilt2 = ::map(beatsin8((bandSpeed[band] > UINT16_MAX/4)?panBPM:0, 0, 255, 0, 64), 0, 255, panMin, panMax); //this is beatcos8, so pan and tilt draw a circle
 
       layerV->setTilt(x, (tilt+tilt2)/2);
       layerV->setPan(x, pan);
@@ -1809,7 +1809,7 @@ public:
     lastTime = currentTime;
 
     for (int x = 0; x<layerV->size.x; x++) { //x-axis (column)
-      uint8_t band = map(x, 0, layerV->size.x, 0, NUM_GEQ_CHANNELS); //the frequency band applicable for the column, skip the lowest and the highest
+      uint8_t band = ::map(x, 0, layerV->size.x, 0, NUM_GEQ_CHANNELS); //the frequency band applicable for the column, skip the lowest and the highest
       uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
       // Target speed based on current volume
       uint16_t targetSpeed = (volume * increaser * 257);
@@ -1829,10 +1829,10 @@ public:
       }
 
       if (bandSpeed[band] > 1 || keepOn) { // for some reason bandSpeed[band] doesn't reach 0 ... WIP
-        uint8_t bpm = map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
+        uint8_t bpm = ::map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
         uint8_t y;
         if (method == 0) { //chaos
-          y = map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+          y = ::map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
         } else if (method == 1) { //chaos corrected
           // Maintain phase continuity when BPM changes
           if (bpm != lastBpm[band]) {
@@ -1841,16 +1841,16 @@ public:
             phaseOffset[band] = currentPos - newPos;
             lastBpm[band] = bpm;
           }
-          y = map(beat8(bpm) + phaseOffset[band], 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+          y = ::map(beat8(bpm) + phaseOffset[band], 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
         } else if (method == 2) { //bandphases
           // Time-based phase increment - 1 complete cycle per second at 60 BPM
           uint32_t phaseIncrement = (bpm * deltaMs * 65536UL) / (60UL * 1000UL);
           phaseIncrement /= 2; // Make it 8x faster - adjust this multiplier as needed
           bandPhase[band] += phaseIncrement;
-          y = map(bandPhase[band] >> 8, 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+          y = ::map(bandPhase[band] >> 8, 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
         }
         //y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
-        layerV->setRGB(Coord3D(x, (invert && x%2==0)?layerV->size.y - 1 - y:y), ColorFromPalette(layerV->layerP->palette, map(x, 0, layerV->size.x-1, 0, 255)));
+        layerV->setRGB(Coord3D(x, (invert && x%2==0)?layerV->size.y - 1 - y:y), ColorFromPalette(layerV->layerP->palette, ::map(x, 0, layerV->size.x-1, 0, 255)));
       }
     }
   }
@@ -3379,7 +3379,7 @@ class MoonManEffect: public Node {
 //         remaining--; //consume remaining
 
 //         int hue = sharedData.bands[map(band, 0, num_bands-1, 0, NUM_GEQ_CHANNELS-1)];
-//         int v = map(hue, 0, 255, 10, 255);
+//         int v = ::map(hue, 0, 255, 10, 255);
 //         leds.setPixelColor(posx, 0, CHSV(hue, 255, v));
 //       }
 
@@ -3862,7 +3862,7 @@ class MoonManEffect: public Node {
 //     }
 
 //     for (int i = 0; i < leds.size.x; i++) {
-//       leds.setPixelColor(i, ColorFromPalette(leds.palette, map(i, 0, leds.size.x, 0, 255), 255 - (*bri_lower >> 8)));
+//       leds.setPixelColor(i, ColorFromPalette(leds.palette, ::map(i, 0, leds.size.x, 0, 255), 255 - (*bri_lower >> 8)));
 //     }
 //   }
 // }; // HeartBeatEffect
@@ -3885,7 +3885,7 @@ class MoonManEffect: public Node {
 
 //     for (int i = 0; i < nrOfRings; i++) {
 
-//       uint8_t band = map(i, 0, nrOfRings-1, 0, NUM_GEQ_CHANNELS-1);
+//       uint8_t band = ::map(i, 0, nrOfRings-1, 0, NUM_GEQ_CHANNELS-1);
 
 //       byte val;
 //       if (inWards) {
@@ -3975,7 +3975,7 @@ class MoonManEffect: public Node {
 //       //if (color.getLuma() > 12) color.maximizeBrightness();          // for testing
 
 //       //leds.setPixelColor(mid, color.fadeToBlackBy(map(sharedData.bands[4], 0, 255, 255, 4)));     // 0.13.x  fade -> 180hz-260hz
-//       uint8_t fadeVal = map(sharedData.bands[3], 0, 255, 255, 4);                                      // 0.14.x  fade -> 216hz-301hz
+//       uint8_t fadeVal = ::map(sharedData.bands[3], 0, 255, 255, 4);                                      // 0.14.x  fade -> 216hz-301hz
 //       if (candyFactory) fadeVal = constrain(fadeVal, 0, 176);  // "candy factory" mode - avoid complete fade-out
 //       leds.setPixelColor(mid, color.fadeToBlackBy(fadeVal));
 
@@ -4022,7 +4022,7 @@ class MoonManEffect: public Node {
 // uint16_t mode_dancing_shadows(void)
 // {
 //   if (SEGLEN == 1) return mode_static();
-//   uint8_t numSpotlights = map(SEGMENT.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
+//   uint8_t numSpotlights = ::map(SEGMENT.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
 //   bool initialize = aux0 != numSpotlights;
 //   aux0 = numSpotlights;
 
@@ -4101,7 +4101,7 @@ class MoonManEffect: public Node {
 //         case SPOT_TYPE_2X_GRADIENT:
 //           for (size_t j = 0; j < spotlights[i].width; j++) {
 //             if ((start + j) >= 0 && (start + j) < SEGLEN) {
-//               SEGMENT.blendColor(start + j, color, cubicwave8(2 * map(j, 0, spotlights[i].width - 1, 0, 255)));
+//               SEGMENT.blendColor(start + j, color, cubicwave8(2 * ::map(j, 0, spotlights[i].width - 1, 0, 255)));
 //             }
 //           }
 //         break;

@@ -55,7 +55,7 @@ The Effects module defines effects and modifiers. They run in a 'layer'.
 
 ## Effect 🔥 Nodes
 🚧
-Precompiled effects can be found in [effects](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Effects.h)
+Precompiled effects can be found in [effects](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes/Effects/Effects.h)
 
 ### Solid 🔥💡
 
