@@ -178,7 +178,7 @@ esp_err_t httpd_req_async_handler_begin(httpd_req_t *r, httpd_req_t **out)
     }
 
     // alloc async req
-    httpd_req_t *async = (httpd_req_t *)malloc(sizeof(httpd_req_t));
+    httpd_req_t* async = (httpd_req_t*)heap_caps_malloc_prefer(sizeof(httpd_req_t), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL);
     if (async == NULL)
     {
         return ESP_ERR_NO_MEM;
@@ -186,10 +186,10 @@ esp_err_t httpd_req_async_handler_begin(httpd_req_t *r, httpd_req_t **out)
     memcpy((void *)async, (void *)r, sizeof(httpd_req_t));
 
     // alloc async aux
-    async->aux = (httpd_req_aux *)malloc(sizeof(struct httpd_req_aux));
+    async->aux = (httpd_req_aux*)heap_caps_malloc_prefer(sizeof(struct httpd_req_aux), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL);
     if (async->aux == NULL)
     {
-        free(async);
+      heap_caps_free(async);
         return ESP_ERR_NO_MEM;
     }
     memcpy(async->aux, r->aux, sizeof(struct httpd_req_aux));
@@ -215,8 +215,8 @@ esp_err_t httpd_req_async_handler_complete(httpd_req_t *r)
     // struct httpd_req_aux *ra = (httpd_req_aux *)r->aux;
     // ra->sd->for_async_req = false;
 
-    free(r->aux);
-    free(r);
+    heap_caps_free(r->aux);
+    heap_caps_free(r);
 
     return ESP_OK;
 }

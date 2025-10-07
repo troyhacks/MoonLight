@@ -267,7 +267,7 @@ public:
     addControl(colorBars, "colorBars", "checkbox");
     addControl(smoothBars, "smoothBars", "checkbox");
 
-    previousBarHeight = (uint16_t*)malloc(layerV->size.x * sizeof(uint16_t));
+    previousBarHeight = (uint16_t*)heap_caps_malloc_prefer(layerV->size.x * sizeof(uint16_t), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL);
     if (!previousBarHeight) {
       ESP_LOGE(TAG, "malloc failed for previousBarHeight");
       return;
@@ -279,7 +279,7 @@ public:
   ~GEQEffect() {
     ESP_LOGI(TAG, "free previousBarHeight");
     if (previousBarHeight) {
-      free(previousBarHeight);
+      heap_caps_free(previousBarHeight);
       previousBarHeight = nullptr;
     }
   }
