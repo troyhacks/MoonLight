@@ -28,6 +28,8 @@ ESP32SvelteKit::ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEnd
                                                                                           _wifiStatus(server, &_securitySettingsService),
                                                                                           _apSettingsService(server, &ESPFS, &_securitySettingsService),
                                                                                           _apStatus(server, &_securitySettingsService, &_apSettingsService),
+                                                                                          _ethernetSettingsService(server, &ESPFS, &_securitySettingsService),
+                                                                                          _ethernetStatus(server, &_securitySettingsService, &_ethernetSettingsService),
                                                                                           _socket(server, &_securitySettingsService, AuthenticationPredicates::IS_AUTHENTICATED),
                                                                                           _notificationService(&_socket),
 #if FT_ENABLED(FT_NTP)
@@ -155,6 +157,8 @@ void ESP32SvelteKit::begin()
     _wifiSettingsService.begin();
     _wifiScanner.begin();
     _wifiStatus.begin();
+    _ethernetSettingsService.begin();
+    _ethernetStatus.begin();
 
 #if FT_ENABLED(FT_COREDUMP)
     _coreDump.begin();
@@ -233,6 +237,7 @@ void ESP32SvelteKit::_loop()
     {
         _wifiSettingsService.loop(); // 30 seconds
         _apSettingsService.loop();   // 10 seconds
+        _ethernetSettingsService.loop();   // 10 seconds
 #if FT_ENABLED(FT_MQTT)
         _mqttSettingsService.loop(); // 5 seconds
 #endif

@@ -165,5 +165,24 @@ class VirtualDriverMod: public DriverNode {
 
   void addLayout() override;
 };
+class ParlioDriverMod: public DriverNode {
+  public:
+
+  static const char * name() {return "Parallel IO Driver ☸️🚧";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  void setup() override;
+
+  void addLayout() override;
+
+  void onUpdate(String &oldValue, JsonObject control) override;
+
+  void loop() override;
+
+  ~ParlioDriverMod() override;
+  
+};
+
 
 #endif

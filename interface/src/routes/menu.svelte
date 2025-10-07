@@ -8,6 +8,7 @@
 	import Health from '~icons/tabler/stethoscope';
 	import Update from '~icons/tabler/refresh-alert';
 	import WiFi from '~icons/tabler/wifi';
+	import Network from '~icons/tabler/network';
 	import Router from '~icons/tabler/router';
 	import AP from '~icons/tabler/access-point';
 	import Remote from '~icons/tabler/network';
@@ -125,27 +126,8 @@
 			]
 		},
 		{
-			title: 'Connections',
-			icon: Remote,
-			feature: page.data.features.mqtt || page.data.features.ntp,
-			submenu: [
-				{
-					title: 'MQTT',
-					icon: MQTT,
-					href: '/connections/mqtt',
-					feature: page.data.features.mqtt
-				},
-				{
-					title: 'NTP',
-					icon: NTP,
-					href: '/connections/ntp',
-					feature: page.data.features.ntp
-				}
-			]
-		},
-		{
-			title: 'WiFi',
-			icon: WiFi,
+			title: 'Network',
+			icon: Network,
 			feature: true,
 			submenu: [
 				{
@@ -157,8 +139,26 @@
 				{
 					title: 'Access Point',
 					icon: AP,
-					href: '/wifi/ap',
+					href: '/wifi/ap', 
 					feature: true
+				},
+				{
+					title: 'Ethernet',
+					icon: Router,
+					href: '/wifi/ethernet',
+					feature: page.data.features.ethernet
+				},
+				{
+					title: 'MQTT',
+					icon: MQTT,
+					href: '/connections/mqtt',
+					feature: page.data.features.mqtt
+				},
+				{
+					title: 'NTP',
+					icon: NTP,
+					href: '/connections/ntp',
+					feature: page.data.features.ntp
 				}
 			]
 		},

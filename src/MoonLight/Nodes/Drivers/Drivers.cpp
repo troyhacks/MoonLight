@@ -28,7 +28,7 @@
   #elif CONFIG_IDF_TARGET_ESP32
     static PhysicalDriverESP32D0 ledsDriver; //    sizeof(driver) = 1080K !
   #else
-    static LedsDriver ledsDriver; //   only the core driver, for setBirghtness and setColorCorrection and LUT
+    static LedsDriver ledsDriver; //   only the core driver, for setBrightness and setColorCorrection and LUT
   #endif
 #endif
 
@@ -696,13 +696,17 @@ void ArtNetDriverMod::loop() {
 
             // i2sInit(); //not necessary, initled did it, no need to change
 
-            //delete allocations done by physical driver if total channels changes (larger)
-            for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
-            {
-                heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
-                heap_caps_free(ledsDriver.DMABuffersTampon[i]);
-            }
-            heap_caps_free(ledsDriver.DMABuffersTampon);
+            //P4 for PhysicalDriver not supported yet
+
+            #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
+              //delete allocations done by physical driver if total channels changes (larger)
+              for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+              {
+                  heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
+                  heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+              }
+              heap_caps_free(ledsDriver.DMABuffersTampon);
+            #endif
 
             __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
 
@@ -804,13 +808,15 @@ void ArtNetDriverMod::loop() {
     #if HP_ALL_DRIVERS
       MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
-      for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
-      {
-          heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
-          heap_caps_free(ledsDriver.DMABuffersTampon[i]);
-      }
-      heap_caps_free(ledsDriver.DMABuffersTampon);
-
+      //P4 for PhysicalDriver not supported yet
+      #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
+            for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+            {
+                heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
+                heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+            }
+            heap_caps_free(ledsDriver.DMABuffersTampon);
+      #endif
       //anything else to delete? I2S ...
 
       // if recreating the Physical driver later, still initled cannot be done again ?
@@ -825,6 +831,85 @@ void ArtNetDriverMod::loop() {
   }
   void VirtualDriverMod::loop() {
     DriverNode::loop();
+  }
+
+  void ParlioDriverMod::setup() {
+    hasLayout = true; //so addLayout is called if needed 
+
+    DriverNode::setup(); //adds maxPower and lights preset (rgb, rgbw, etc) control
+
+    // add additional controls using addControl()
+
+  }
+
+  void ParlioDriverMod::onUpdate(String &oldValue, JsonObject control) {
+    Node::onUpdate(oldValue, control);
+
+    if (control["name"] == "whatever") {
+        //something changed
+    }
+  }
+
+  void ParlioDriverMod::addLayout() {
+    if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
+
+      if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
+        MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layerV->layerP->sortedPins.size());
+        return;
+      }
+
+      MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+      if (safeModeMB) {
+        MB_LOGW(ML_TAG, "Safe mode enabled, not adding driver");
+        return;
+      }
+
+      for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
+        // collect the definied pins 
+      }
+
+      if (layerV->layerP->sortedPins.size() > 0) {
+
+        //from lightPresetSaved, prepare LUT arrays:
+        ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
+        ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
+        ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
+        ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+
+        if (initDone) {
+
+          // do things after the driver has been initialized
+          // eg change the pin assignment if needed
+
+        } else {
+
+          // init the driver for the first time, using pins, leds per pin etc.
+          
+          // set brightness again after initled
+
+          // ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
+
+          // ledsDriver.setBrightness(ledsDriver._brightness); //(initLed sets it to 255 and thats not what we want)
+
+          initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
+        }
+      }
+    }
+  }
+
+  void ParlioDriverMod::loop() {
+    DriverNode::loop(); //checks for changes in brightness and rgb color corrections and update the lut tables, also using maxPower.
+
+    //driver.show();     // process layerV->layerP->lights.channels (pka leds array) using LUT
+    layerV->layerP->lights.channels;
+    ledsDriver.__red_map[0];
+    ledsDriver.__green_map[0];
+    ledsDriver.__blue_map[0];
+    ledsDriver.__white_map[0];
+  }
+
+  ParlioDriverMod::~ParlioDriverMod() {
+    // driver is deleted,so delete whatever was allocated
   }
 
 #endif
