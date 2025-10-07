@@ -14,7 +14,7 @@ void NotificationService::begin()
 
 void NotificationService::pushNotification(String message, pushType event)
 {
-    if (!_eventSocket->getConnectedClients()) return; 
+    if (!_eventSocket->getConnectedClients()) return;  // 🌙 No need for UI tasks
     
     JsonDocument doc;
     doc["type"] = pushTypeStrings[event];

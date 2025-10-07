@@ -5,7 +5,7 @@
    @Authors   https://github.com/MoonModules/MoonLight/commits/main
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 
    Not w-full!
 -->
@@ -55,7 +55,7 @@
         hoverTimeout = setTimeout(async () => {
             if (!property.hoverToServer && savedPreset) {
                 //open the file with cell
-                const response = await fetch(`/rest/file/config/.editor/preset${cell.toString().padStart(2, '0')}.json`);
+                const response = await fetch(`/rest/file/.config/presets/preset${cell.toString().padStart(2, '0')}.json`);
                 if (response.ok) {
                     fileContent = await response.json();
                     console.log(fileContent);
@@ -68,7 +68,8 @@
             popupX = event.clientX + 16;
             popupY = event.clientY + 16;
 
-        }, 1000); // 2 seconds
+        }, 1000); 
+        // 2 seconds
     }
 
     function handleMouseLeave() {
@@ -82,17 +83,26 @@
     let preventClick = false;
 </script>
 
+<div>
+
 <label class="label cursor-pointer" for={property.name}>
-    <!-- <span class="label-text text-md">{initCap(property.name)}</span> -->
-    <span class="mr-4">{initCap(property.name)}</span>
+    <!-- <span class="text-md">{initCap(property.name)}</span> -->
+    <span class="mr-4">{initCap(property.name)}</span>  
 </label>
 
-{#if property.ro && false}
+{#if property.ro}
     {#if property.type == "ip"}
         <a 
             href="http://{value}"
             target ="_blank"
         >{value}</a>
+    {:else if property.type == "mdnsName"}
+        <a 
+            href="http://{value}.local"
+            target ="_blank"
+        >{value}</a>
+    {:else if property.type == "coord3D" && value != null} <!-- value not null otherwise value.x etc can cause errors-->
+        <span>{value.x}, {value.y}, {value.z}</span> 
     {:else}
         <span>{value}</span> 
     {/if}
@@ -102,7 +112,7 @@
     <select 
         bind:value={value}
         on:change={onChange}
-        class="select select-bordered">
+        class="select">
         <slot></slot>
         {#each property.values as value, index}
             <option value={property.type == "selectFile"?value:index}>
@@ -125,17 +135,19 @@
     />
 {:else if property.type == "range"}
     <div class="flex-row flex items-center space-x-2">
-        <!-- range colors: https://daisyui.com/components/range/ -->
+        <!-- range colors: https://daisyui.com/components/range/ 
+         on:input: direct response to server
+         -->
         <input 
             type="range"
             min={property.min?property.min:0} 
             max={property.max?property.max:255}
             step={step}
-            class={"range " + (disabled == false ? (property.color=="Red"?"range-error":(property.color=="Green"?"range-success":"range-primary")) : "range-secondary")}
+            class={"w-full range " + (disabled == false ? (property.color=="Red"?"range-error":(property.color=="Green"?"range-success":"range-primary")) : "range-secondary")}
             {disabled}
             title={property.default}
             bind:value={value}
-            on:change={onChange}
+            on:input={onChange}
         />
         {#if hasNumber}
             <input 
@@ -143,7 +155,7 @@
                 min={property.min?property.min:0} 
                 max={property.max?property.max:255}
                 step={step}
-                class="input input-bordered"
+                class="input"
                 style="height: 2rem; width: 5rem"
                 {disabled}
                 bind:value={value}
@@ -153,7 +165,7 @@
 </div>
 {:else if property.type == "textarea"}
     <textarea rows="10" cols="61"
-        class="textarea textarea-bordered"
+        class="w-full textarea"
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
     >{value}</textarea>
@@ -165,9 +177,10 @@
 {:else if property.type == "number"}
     <input 
         type="number"
+        style="width: {String(property.max || 255).length  + 4}ch"
         min={property.min?property.min:0}
         max={property.max?property.max:255}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class='input invalid:border-error invalid:border-2'
         bind:value={value}
         on:change={onChange}
         on:input={(event:any) => {if (changeOnInput) onChange(event)}}
@@ -175,7 +188,7 @@
 {:else if property.type == "text"}
     <input 
         type={property.type}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class="input invalid:border-error invalid:border-2"
         minlength={property.min?property.min:0}
         maxlength={property.max?property.max:255}
         bind:value={value}
@@ -187,7 +200,7 @@
 {:else if property.type == "ip"}
     <input 
         type={property.type}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class="input invalid:border-error invalid:border-2"
         minlength=3
         maxlength=15
         bind:value={value}
@@ -205,25 +218,28 @@
 {:else if property.type == "coord3D"}
     <input 
         type=number
-        class="input input-bordered invalid:border-error invalid:border-2"
+        style="width: {String(property.max || 255).length * 2}ch"
+        class="input invalid:border-error invalid:border-2"
         min=0
-        max=255
+        max=65536
         bind:value={value.x}
         on:change={onChange}
     />
     <input 
         type=number
-        class="input input-bordered invalid:border-error invalid:border-2"
+        style="width: {String(property.max || 255).length * 2}ch"
+        class="input invalid:border-error invalid:border-2"
         min=0
-        max=255
+        max=65536
         bind:value={value.y}
         on:change={onChange}
     />
     <input 
         type=number
-        class="input input-bordered invalid:border-error invalid:border-2"
+        style="width: {String(property.max || 255).length * 2}ch"
+        class="input invalid:border-error invalid:border-2"
         min=0
-        max=255
+        max=65536
         bind:value={value.z}
         on:change={onChange}
     />
@@ -251,13 +267,14 @@
                                         value.action = "click";
                                         onChange(event);
                                     }
-                                }, 250); // 250ms is a typical double-click threshold
+                                }, 250); 
+                                // 250ms is a typical double-click threshold
                             }}
                             on:dblclick={(event:any) => {
                                 preventClick = true;
                                 clearTimeout(clickTimeout);
                                 value.select = x + y * property.width;
-                                console.log("delete", y, x, value.select);
+                                console.log("dblclick", y, x, value.select);
                                 value.action = "dblclick";
                                 onChange(event)
                             }}
@@ -288,8 +305,8 @@
                                     <!-- Popup for {cell} -->
                                     {#if fileContent && fileContent.nodes}
                                         {#each fileContent.nodes as node}
-                                            {console.log("node.nodeName", node.nodeName)}
-                                            <p>{node.nodeName} {node.on?"on":"off"}</p>
+                                            {console.log("node.name", node.name)}
+                                            <p>{node.name} {node.on?"on":"off"}</p>
                                         {/each}
                                     {/if}
                                 </div>
@@ -307,9 +324,11 @@ Adjust space-x-2 and space-y-2 for spacing. -->
 {:else}
     <input 
         type={property.type}
-        class="input input-bordered invalid:border-error invalid:border-2"
+        class="input invalid:border-error invalid:border-2"
         bind:value={value}
         on:change={onChange}
     />
 {/if}
 {/if}
+
+</div>

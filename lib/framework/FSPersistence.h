@@ -9,7 +9,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -17,6 +17,8 @@
 
 #include <StatefulService.h>
 #include <FS.h>
+
+inline std::vector<std::function<void(char)>> delayedWrites; // 🌙 Global vector to store delayed write functions (not in FSPersistence as it has to be used for all T types)
 
 template <class T>
 class FSPersistence
@@ -26,12 +28,15 @@ public:
                   JsonStateUpdater<T> stateUpdater,
                   StatefulService<T> *statefulService,
                   FS *fs,
-                  const char *filePath) : _stateReader(stateReader),
+                  const char *filePath,
+                  bool delayedWriting = false) // 🌙
+                                        : _stateReader(stateReader),
                                           _stateUpdater(stateUpdater),
                                           _statefulService(statefulService),
                                           _fs(fs),
                                           _filePath(filePath),
-                                          _updateHandlerId(0)
+                                          _updateHandlerId(0),
+                                          _delayedWriting(delayedWriting) // 🌙
     {
         enableUpdateHandler();
     }
@@ -61,7 +66,7 @@ public:
         writeToFS();
     }
 
-    bool writeToFS()
+    bool writeToFSNow() // 🌙
     {
         // create and populate a new json object
         JsonDocument jsonDocument;
@@ -84,6 +89,42 @@ public:
         serializeJson(jsonDocument, settingsFile);
         settingsFile.close();
         return true;
+    }
+
+    bool writeToFS() { // 🌙
+        if (_delayedWriting) {
+            if (!_hasDelayedWrite) {
+                ESP_LOGD(SVK_TAG, "delayedWrites: Add %s", _filePath.c_str());
+                delayedWrites.push_back([this](char writeOrCancel) {
+                    ESP_LOGD(SVK_TAG, "delayedWrites: %c %s", writeOrCancel, this->_filePath.c_str());
+                    if (writeOrCancel == 'W')
+                        this->writeToFSNow(); 
+                    else {
+                        //write is cancelled, read the old situation back from FS
+                        this->readFromFS();
+                        // update state to UI
+                        _statefulService->update([&](T &state) {
+                            return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+                        }, "server");
+                    }
+                    this->_hasDelayedWrite = false;
+                });
+                _hasDelayedWrite = true;
+            }
+            return true;
+        } else {
+            return writeToFSNow();
+        }
+    }
+
+    static void writeToFSDelayed(char writeOrCancel) { // 🌙
+        ESP_LOGD(SVK_TAG, "calling %d writeFuncs from delayedWrites", delayedWrites.size());
+        for (auto& writeFunc : delayedWrites)
+        {
+            writeFunc(writeOrCancel);
+        }
+        delayedWrites.clear();
+        // saveNeeded = false;
     }
 
     void disableUpdateHandler()
@@ -111,6 +152,8 @@ private:
     FS *_fs;
     String _filePath;
     update_handler_id_t _updateHandlerId;
+    bool _delayedWriting; // 🌙
+    bool _hasDelayedWrite = false; // 🌙
 
     // We assume we have a _filePath with format "/directory1/directory2/filename"
     // We create a directory for each missing parent

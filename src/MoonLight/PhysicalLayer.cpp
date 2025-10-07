@@ -3,10 +3,10 @@
     @file      PhysicalLayer.cpp
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/general/utilities/
+    @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
 #if FT_MOONLIGHT
@@ -19,10 +19,43 @@
 
 #include <ESP32SvelteKit.h> //for safeModeMB
 
-PhysicalLayer::PhysicalLayer() {
-        ESP_LOGD(TAG, "constructor");
+#include "../MoonBase/Utilities.h"
 
-        lights.header.resetOffsets(); //reset the offsets to default
+PhysicalLayer::PhysicalLayer() {
+        MB_LOGD(ML_TAG, "constructor");
+
+        if (psramFound()) {
+            lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 61440*3); //fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
+            // lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_SPIRAM);
+            lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+            if (lights.channels)
+                MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.nrOfChannels, isInPSRAM(lights.channels)?"PSRAM":"RAM" );
+        }
+        if (!lights.channels) {
+            lights.nrOfChannels = 1024 * 3; //esp32-d0: max 1024 Leds ATM
+            lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_DEFAULT, MALLOC_CAP_8BIT);//heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+            if (lights.channels)
+                MB_LOGD(ML_TAG, "allocated %d bytes of RAM", lights.nrOfChannels );
+        }
+        if (!lights.channels) {
+            MB_LOGE(ML_TAG, "failed to allocated RAM or PSRAM" );
+            lights.nrOfChannels = 0;
+        }
+
+        //for some reason this says 
+        // E (1431) 🌙: [Utilities.h:332] allocMB: heap_caps_malloc of 184320 x 1 not succeeded
+        // E (1431) 💫: [PhysicalLayer.cpp:55] PhysicalLayer: failed to allocated RAM or PSRAM for 184320 channels
+        // if (psramFound())
+        //     lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 61440*3); //fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
+        // else
+        //     lights.nrOfChannels = 4096 * 3;
+
+        // lights.channels = allocMB<uint8_t>(lights.nrOfChannels); //including  memset(lights.channels, 0, lights.nrOfChannels); // set all the channels to 0
+            
+        // if (!lights.channels)
+        //     MB_LOGE(ML_TAG, "failed to allocated RAM or PSRAM for %d channels", lights.nrOfChannels);
+        //     lights.nrOfChannels = 0;
+        // }
 
         // initLightsToBlend();
 
@@ -36,26 +69,79 @@ PhysicalLayer::PhysicalLayer() {
             layer->setup();
         }
     }
-
-    //run one loop of an effect
+    
     void PhysicalLayer::loop() {
-        //runs the loop of all effects / nodes in the layer
-        for (VirtualLayer * layer: layerV) {
-            if (layer) layer->loop(); //if (layer) needed when deleting rows ...
+        if (lights.header.isPositions == 0 || lights.header.isPositions == 3) {//otherwise lights is used for positions etc.
+
+            //runs the loop of all effects / nodes in the layer
+            for (VirtualLayer * layer: layerV) {
+                if (layer) layer->loop(); //if (layer) needed when deleting rows ...
+            }
+
+            if (requestMapPhysical) {
+                MB_LOGD(ML_TAG, "mapLayout physical requested");
+                
+                pass = 1;
+                mapLayout();
+
+                requestMapPhysical = false;
+            }
+
+            if (requestMapVirtual) {
+                MB_LOGD(ML_TAG, "mapLayout virtual requested");
+
+                pass = 2;
+                mapLayout();
+                
+                requestMapVirtual = false;
+            }    
+
+            if (lights.header.isPositions == 3) {
+                MB_LOGD(ML_TAG, "positions done (3 -> 0)");
+                lights.header.isPositions = 0; //now driver can show again
+            }
         }
     }
-    
-    void PhysicalLayer::addLayoutPre() {
-        lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
-        ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
 
+    void PhysicalLayer::loopDrivers() {
+        if (lights.header.isPositions == 0) { //otherwise lights is used for positions etc.
+            if (prevSize != lights.header.size)
+                MB_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
+            for (Node *node: nodes) {
+                if (prevSize != lights.header.size)
+                    node->onSizeChanged(prevSize);
+                if (node->on)
+                    node->loop();
+            }
+            prevSize = lights.header.size;
+        }
+    }
+
+    void PhysicalLayer::mapLayout() {
+        addLayoutPre();
+        for (Node *node: nodes) {
+            if (node->on && node->hasLayout) {
+                node->addLayout();
+            }
+        }
+        addLayoutPost();
+    }
+
+    void PhysicalLayer::addLayoutPre() {
+        MB_LOGD(ML_TAG, "pass %d", pass);
+        
         if (pass == 1) {
+            lights.header.nrOfLights = 0; // for pass1 and pass2 as in pass2 virtual layer needs it
             lights.header.size = {0,0,0};
+            MB_LOGD(ML_TAG, "positions in progress (%d -> 1)", lights.header.isPositions);
             lights.header.isPositions = 1; //in progress...
             delay(100); //wait to stop effects
+            //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
+            memset(lights.channels, 0, lights.nrOfChannels); // set all the channels to 0
             //dealloc pins
             sortedPins.clear(); //clear the added pins for the next pass
         } else if (pass == 2) {
+            indexP = 0;
             for (VirtualLayer * layer: layerV) {
                 //add the lights in the virtual layer
                 layer->addLayoutPre();
@@ -63,40 +149,44 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
 
+    void packCoord3DInto3Bytes(uint8_t *buf, Coord3D position) { //max size supported is 255x255x255
+        buf[0] = MIN(position.x, 255);
+        buf[1] = MIN(position.y, 255);
+        buf[2] = MIN(position.z, 255);
+    }
     void PhysicalLayer::addLight(Coord3D position) {
 
         if (safeModeMB && lights.header.nrOfLights > 1023) {
-            // ESP_LOGW(TAG, "Safe mode enabled, not adding lights > 1023");
+            // MB_LOGW(ML_TAG, "Safe mode enabled, not adding lights > 1023");
             return;
         }
 
         if (pass == 1) {
-            // ESP_LOGD(TAG, "%d,%d,%d", position.x, position.y, position.z);
-            if (lights.header.nrOfLights >= MAX_CHANNELS / sizeof(Coord3D)) {
-                //send the positions to the UI _socket_emit
-                //reset the index and continue...
-            } else
-                lights.positions[lights.header.nrOfLights] = {position.x, position.y, position.z};
-            
+            // MB_LOGD(ML_TAG, "%d,%d,%d", position.x, position.y, position.z);
+            if (lights.header.nrOfLights < lights.nrOfChannels / 3) {
+                packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights*3], position);
+            }
+             
             lights.header.size = lights.header.size.maximum(position);
+            lights.header.nrOfLights++;
         } else {
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
                 layer->addLight(position);
             }
+            indexP++;
         }
-        lights.header.nrOfLights++;
     }
 
     void PhysicalLayer::addPin(uint8_t pinNr) {
-        if (pass == 1) {
-            ESP_LOGD(TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
+        if (pass == 1 && !monitorPass) {
+            MB_LOGD(ML_TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
 
             SortedPin previousPin;
             if (!sortedPins.empty()) {
                 previousPin = sortedPins.back(); //get the last added pin
-                if (previousPin.pin == pinNr) { //if the same pin, just increase the number of leds
-                    previousPin.nrOfLights += lights.header.nrOfLights - previousPin.startLed;
+                if (previousPin.pin == pinNr) { //if the same pin, just increase the number of LEDs
+                    previousPin.nrOfLights = lights.header.nrOfLights - previousPin.startLed;
                     sortedPins.back() = previousPin; //update the last added pin
                     return; //no need to add a new pin
                 }
@@ -121,9 +211,10 @@ PhysicalLayer::PhysicalLayer() {
     void PhysicalLayer::addLayoutPost() {
         if (pass == 1) {
             lights.header.size += Coord3D{1,1,1};
-            ESP_LOGD(TAG, "pass %d #:%d s:%d,%d,%d (%d=%d+%d)", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z, sizeof(Lights), sizeof(LightsHeader), sizeof(lights.leds));
+            MB_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
             //send the positions to the UI _socket_emit
-            lights.header.isPositions = 10; //filled with positions, set back to ct_Leds in ModuleEditor
+            MB_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights?2:3);
+            lights.header.isPositions = lights.header.nrOfLights?2:3; //filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
 
             // initLightsToBlend();
 
@@ -133,89 +224,18 @@ PhysicalLayer::PhysicalLayer() {
                 //sort the vector by the starLed
                 std::sort(sortedPins.begin(), sortedPins.end(), [](const SortedPin &a, const SortedPin &b) {return a.startLed < b.startLed;});
 
-                ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
+                // ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
 
             } //pins defined
         } else if (pass == 2) {
-            ESP_LOGD(TAG, "pass %d %d", pass, lights.header.nrOfLights);
+            MB_LOGD(ML_TAG, "pass %d %d", pass, indexP);
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
                 layer->addLayoutPost();
             }
         }
     }
-
     // an effect is using a virtual layer: tell the effect in which layer to run...
-
-    //run one loop of an effect
-    Node* PhysicalLayer::addNode(const uint8_t index, const char * name, const JsonArray controls) {
-
-        Node *node = nullptr;
-        if (equal(name, SolidEffect::name())) node = new SolidEffect();
-        //alphabetically from here
-        else if (equal(name, BouncingBallsEffect::name())) node = new BouncingBallsEffect();
-        else if (equal(name, DistortionWavesEffect::name())) node = new DistortionWavesEffect();
-        else if (equal(name, FreqMatrixEffect::name())) node = new FreqMatrixEffect();
-        else if (equal(name, GEQEffect::name())) node = new GEQEffect();
-        else if (equal(name, LinesEffect::name())) node = new LinesEffect();
-        else if (equal(name, LissajousEffect::name())) node = new LissajousEffect();
-        else if (equal(name, PaintBrushEffect::name())) node = new PaintBrushEffect();
-        else if (equal(name, RainbowEffect::name())) node = new RainbowEffect();
-        else if (equal(name, RandomEffect::name())) node = new RandomEffect();
-        else if (equal(name, RipplesEffect::name())) node = new RipplesEffect();
-        else if (equal(name, RGBWParEffect::name())) node = new RGBWParEffect();
-        else if (equal(name, SinusEffect::name())) node = new SinusEffect();
-        else if (equal(name, SphereMoveEffect::name())) node = new SphereMoveEffect();
-        else if (equal(name, WaveEffect::name())) node = new WaveEffect();
-        else if (equal(name, MHTroy15Effect::name())) node = new MHTroy15Effect();
-        else if (equal(name, MHTroy32Effect::name())) node = new MHTroy32Effect();
-        else if (equal(name, MHWowiEffect::name())) node = new MHWowiEffect();
-
-        else if (equal(name, HumanSizedCubeLayout::name())) node = new HumanSizedCubeLayout();
-        else if (equal(name, PanelLayout::name())) node = new PanelLayout();
-        else if (equal(name, RingsLayout::name())) node = new RingsLayout();
-        else if (equal(name, MHTroy15Layout::name())) node = new MHTroy15Layout();
-        else if (equal(name, MHTroy32Layout::name())) node = new MHTroy32Layout();
-        else if (equal(name, MHWowi24Layout::name())) node = new MHWowi24Layout();
-
-        else if (equal(name, CircleModifier::name())) node = new CircleModifier();
-        else if (equal(name, MirrorModifier::name())) node = new MirrorModifier();
-        else if (equal(name, MultiplyModifier::name())) node = new MultiplyModifier();
-        else if (equal(name, PinwheelModifier::name())) node = new PinwheelModifier();
-        else if (equal(name, RotateNodifier::name())) node = new RotateNodifier();
-        
-        else if (equal(name, AudioSyncMod::name())) node = new AudioSyncMod();
-        #if FT_LIVESCRIPT
-            else {
-                LiveScriptNode *liveScriptNode = new LiveScriptNode();
-                liveScriptNode->animation = name; //set the (file)name of the script
-                node = liveScriptNode;
-            }
-        #endif
-
-        if (node) {
-            node->constructor(layerV[0], controls); //pass the layer to the node
-            node->setup(); //run the setup of the effect
-            // layerV[0]->nodes.reserve(index+1);
-            if (index >= layerV[0]->nodes.size())
-                layerV[0]->nodes.push_back(node);
-            else
-                layerV[0]->nodes[index] = node; //add the node to the layer
-        }
-
-        ESP_LOGD(TAG, "%s (s:%d p:%p)", name, layerV[0]->nodes.size(), node);
-
-        return node;
-    }
-
-    void PhysicalLayer::removeNode(Node *node) {
-        ESP_LOGD(TAG, "remove node (s:%d p:%p)", layerV[0]->nodes.size(), node);
-        // node->destructor(); //now ˜destructor is called in Node destructor
-        // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
-        // //can cause a crash if it has addControl ...  (e.g. panel layout)
-        
-        // layerV[0]->nodes[index] = nullptr;
-    }
 
     // // to be called in setup, if more then one effect
     // void PhysicalLayer::initLightsToBlend() {

@@ -1,13 +1,3 @@
 # MQTT
 
-## Functional
-
-## Technical
-
-### Server
-
-[SystemStatus.h](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/SystemStatus.h) and [SystemStatus.cpp](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/SystemStatus.cpp)
-
-### UI
-
-[SystemStatus.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/system/status/SystemStatus.svelte)
+<img width="320" src="https://github.com/user-attachments/assets/51e336fe-4935-4135-a9f8-bf469c67de8e" />

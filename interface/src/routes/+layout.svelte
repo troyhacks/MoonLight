@@ -90,12 +90,15 @@
 	}
 
 	const handleOpen = () => {
-		notifications.success('Connection to device established', 5000);
+		// $telemetry.rssi.disconnected = false; // 🌙 
+		// notifications.success('Connection to device established', 5000);
 	};
 
 	const handleClose = () => {
-		notifications.error('Connection to device lost', 5000);
-		telemetry.setRSSI({ rssi: 0, ssid: '' });
+		// if (!location.host.includes("captive.apple.com")) // 🌙 dirty workaround to not show this on macOS captive portal...
+		// 	notifications.error('Connection to device lost', 5000);
+		// $telemetry.rssi.disconnected = true; // 🌙 
+		telemetry.setRSSI({ rssi: 0, ssid: '', safeMode: false, restartNeeded: false, saveNeeded: false , hostName: 'MoonLight' }); // 🌙 add safeMode etc
 	};
 
 	const handleError = (data: any) => console.error(data);
@@ -131,10 +134,14 @@
 	const handleOAT = (data: DownloadOTA) => telemetry.setDownloadOTA(data);
 
 	let menuOpen = $state(false);
+
+	// 🌙
+	let loadMsg = document.getElementById("loadMsg");
+	if (loadMsg) loadMsg.hidden = true;
 </script>
 
 <svelte:head>
-	<title>{page.data.instances.instanceName}</title>
+	<title>{localStorage.getItem('telemetry.rssi.hostName')}</title>
 </svelte:head>
 
 {#if page.data.features.security && $user.bearer_token === ''}
@@ -146,8 +153,8 @@
 			<!-- Status bar content here -->
 			<Statusbar />
 
-			<!-- 🌙 Show Monitor Don't show if captive portal -->
-			{#if (!window.location.href.includes("192.168.4.1") && page.data.features.monitor)}
+			<!-- 🌙 Show Monitor (only if moon screen) -->
+			{#if (page.data.features.monitor && page.url.pathname.includes("moon"))}
 				<br>
 				<Monitor />
 			{/if}
@@ -171,7 +178,7 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	{#snippet backdrop({ close })}
 		<div
-			class="fixed inset-0 z-40 max-h-full max-w-full bg-black/20 backdrop-blur"
+			class="fixed inset-0 z-40 max-h-full max-w-full bg-black/20 backdrop-blur-sm"
 			transition:fade|global
 			onclick={() => close()}
 			role="button"

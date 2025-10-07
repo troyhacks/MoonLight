@@ -25,18 +25,11 @@ PsychicHttpServer::PsychicHttpServer() :
   config.global_user_ctx = this;
   config.global_user_ctx_free_fn = destroy;
   config.max_uri_handlers = 20;
+  //🌙
   #ifdef HTTPD_STACK_SIZE
     config.stack_size = HTTPD_STACK_SIZE;
-  #endif
-
-  #ifdef ENABLE_ASYNC
-    // It is advisable that httpd_config_t->max_open_sockets > MAX_ASYNC_REQUESTS
-    // Why? This leaves at least one socket still available to handle
-    // quick synchronous requests. Otherwise, all the sockets will
-    // get taken by the long async handlers, and your server will no
-    // longer be responsive.
-    config.max_open_sockets = ASYNC_WORKER_COUNT + 1;
-    config.lru_purge_enable = true;
+  #else
+    config.stack_size = 4096;
   #endif
 }
 
@@ -73,11 +66,6 @@ esp_err_t PsychicHttpServer::listen(uint16_t port)
 esp_err_t PsychicHttpServer::_start()
 {
   esp_err_t ret;
-
-  #ifdef ENABLE_ASYNC
-    // start workers
-    start_async_req_workers();
-  #endif
 
   //fire it up.
   ret = _startServer();

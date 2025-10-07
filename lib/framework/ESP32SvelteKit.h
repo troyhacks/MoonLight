@@ -9,7 +9,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -84,8 +84,10 @@ enum class ConnectionStatus
     STA_MQTT
 };
 
-extern std::vector<std::function<void()>> runInLoopTask; // 🌙 functions to be called in main loopTask (to avoid https to run out of stack space)
+//🌙 added to telemetry
 extern bool safeModeMB; // 🌙 true when the ESP32 is in safe mode, false when it is not
+extern bool restartNeeded; // 🌙 
+extern bool saveNeeded; // 🌙 saveNeeded Indicates that changes has been made which need to be saved (or canceled)
 
 class ESP32SvelteKit
 {
@@ -186,6 +188,12 @@ public:
         return &_restartService;
     }
 
+    // 🌙 needed to get lps 
+    AnalyticsService *getAnalyticsService()
+    {
+        return &_analyticsService;
+    }
+
     void factoryReset()
     {
         _factoryResetService.factoryReset();
@@ -208,6 +216,7 @@ public:
 
 private:
     PsychicHttpServer *_server;
+    TaskHandle_t _loopTaskHandle;
     unsigned int _numberEndpoints;
     FeaturesService _featureService;
     SecuritySettingsService _securitySettingsService;

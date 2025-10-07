@@ -7,7 +7,7 @@
  *   with responsive Sveltekit front-end built with TailwindCSS and DaisyUI.
  *   https://github.com/theelims/ESP32-sveltekit
  *
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -20,12 +20,12 @@
 
 #define MAX_ESP_ANALYTICS_SIZE 1024
 #define EVENT_ANALYTICS "analytics"
-#define ANALYTICS_INTERVAL 2000
+#define ANALYTICS_INTERVAL 1000 // 🌙
 
 class AnalyticsService
 {
 public:
-    uint16_t lps = 0;
+    uint16_t lps = 0; // 🌙
 
     AnalyticsService(EventSocket *socket) : _socket(socket) {};
 
@@ -36,7 +36,7 @@ public:
 
     void loop()
     {
-        if (!_socket->getConnectedClients()) return; 
+        if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
 
         if (millis() - lastMillis > ANALYTICS_INTERVAL)
         {
@@ -51,8 +51,9 @@ public:
             doc["fs_used"] = ESPFS.usedBytes();
             doc["fs_total"] = ESPFS.totalBytes();
             doc["core_temp"] = temperatureRead();
-            doc["lps"] = lps;
-            if (psramFound()) {
+            doc["lps"] = lps; // 🌙
+            if (psramFound())
+            {
                 doc["free_psram"] = ESP.getFreePsram();
                 doc["used_psram"] = ESP.getPsramSize() - ESP.getFreePsram();
                 doc["psram_size"] = ESP.getPsramSize();

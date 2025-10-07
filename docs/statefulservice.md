@@ -207,7 +207,7 @@ The code below demonstrates how to extend the LightStateService class to provide
 class LightStateService : public StatefulService<LightState> {
  public:
   LightStateService(ESP32SvelteKit *sveltekit) :
-      _fsPersistence(LightState::read, LightState::update, this, sveltekit->getFS(), "/config/lightState.json") {
+      _fsPersistence(LightState::read, LightState::update, this, sveltekit->getFS(), "/.config/lightState.json") { // 🌙 use /.config (hidden folder)
   }
 
  private:
@@ -403,11 +403,11 @@ In case of a websocket connection the JWT token is supplied as a search paramete
 
 Various settings support placeholder substitution, indicated by comments in [factory_settings.ini](https://github.com/theelims/ESP32-sveltekit/blob/main/factory_settings.ini). This can be particularly useful where settings need to be unique, such as the Access Point SSID or MQTT client id. Strings must be properly escaped in the ini-file. The following placeholders are supported:
 
-| Placeholder  | Substituted value                                                     |
-| ------------ | --------------------------------------------------------------------- |
-| #{platform}  | The microcontroller platform, e.g. "esp32" or "esp32c3"               |
-| #{unique_id} | A unique identifier derived from the MAC address, e.g. "0b0a859d6816" |
-| #{random}    | A random number encoded as a hex string, e.g. "55722f94"              |
+| Placeholder  | Substituted value                                                            |
+| ------------ | ---------------------------------------------------------------------------- |
+| #{platform}  | The microcontroller platform, e.g. "esp32" or "esp32c3"                      |
+| #{unique_id} | A unique identifier derived from the MAC address, e.g. "~~0b0a859d~~6816" 🌙 |
+| #{random}    | A random number encoded as a hex string, e.g. "55722f94"                     |
 
 You may use SettingValue::format in your own code if you require the use of these placeholders. This is demonstrated in the demo project:
 
@@ -601,7 +601,7 @@ By enabling `FT_DOWNLOAD_FIRMWARE=1` in [features.ini](https://github.com/theeli
 ```ini
     -D BUILD_TARGET="$PIOENV"
     -D APP_NAME=\"ESP32-Sveltekit\" ; Must only contain characters from [a-zA-Z0-9-_] as this is converted into a filename
-    -D APP_VERSION=\"0.5.6.1\" ; semver compatible version string
+    -D APP_VERSION=\"0.5.9.2\" ; semver compatible version string
 ```
 
 A build script copies the firmware binary files for all build environment to `build/firmware`. It renames them into `{APP_NAME}_{$PIOENV}_{APP_VERSION}.bin`. It also creates a MD5 checksum file for verification during the OTA process. These files can be used as attachment on the GitHub release pages.

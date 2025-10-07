@@ -3,10 +3,10 @@
     @file      Nodes.cpp
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/general/utilities/
+    @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
 #if FT_MOONLIGHT
@@ -14,44 +14,38 @@
 
 #include <ESP32SvelteKit.h> //for safeModeMB
 
-void Node::updateControl(JsonObject control) {
-    // ESP_LOGD(TAG, "updateControl %s", control["name"].as<String>().c_str());
-    if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if controll is removed in compareRecursive
+void Node::onUpdate(String &oldValue, JsonObject control) {
+    // MB_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
+    if (oldValue == "") return; //newControl, value already set
+    if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if control is removed in compareRecursive
         int pointer = control["p"];
-        ESP_LOGD(TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
+        // MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
-        if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
-            uint8_t *valuePointer = (uint8_t *)pointer;
-            *valuePointer = control["value"];
-            // ESP_LOGD(TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+            if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
+                uint8_t *valuePointer = (uint8_t *)pointer;
+                *valuePointer = control["value"];
+                // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+            }
+            else if (control["type"] == "selectFile" || control["type"] == "text") {
+                char *valuePointer = (char *)pointer;
+                strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
+            }
+            else if (control["type"] == "number") {
+                uint16_t *valuePointer = (uint16_t *)pointer;
+                *valuePointer = control["value"];
+            }
+            else if (control["type"] == "checkbox") {
+                bool *valuePointer = (bool *)pointer;
+                *valuePointer = control["value"].as<bool>();
+            }
+            else if (control["type"] == "coord3D") {
+                Coord3D *valuePointer = (Coord3D *)pointer;
+                *valuePointer = control["value"].as<Coord3D>();
+            }
+            else
+                MB_LOGE(ML_TAG, "type not supported yet %s", control["type"].as<String>().c_str());
         }
-        else if (control["type"] == "selectFile") {
-            char *valuePointer = (char *)pointer;
-            strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
-        }
-        else if (control["type"] == "number") {
-            uint16_t *valuePointer = (uint16_t *)pointer;
-            *valuePointer = control["value"];
-        }
-        else if (control["type"] == "checkbox") {
-            bool *valuePointer = (bool *)pointer;
-            *valuePointer = control["value"].as<bool>();
-        }
-        else if (control["type"] == "coord3D") {
-          Coord3D *valuePointer = (Coord3D *)pointer;
-          *valuePointer = control["value"].as<Coord3D>();
-        }
-        else
-            ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
-        }
-    }
-
-    //if changed run map
-    if (hasLayout) {
-      ESP_LOGD(TAG, "layout control changed -> remap layout %s", name());
-      layerV->requestMapPhysical = true;
-      layerV->requestMapVirtual = true;
     }
 };
 
@@ -62,7 +56,7 @@ void Node::updateControl(JsonObject control) {
 
 Node *gNode = nullptr;
 
-static void _addControl(uint8_t *var, char *name, char* type, uint8_t min = 0, uint8_t max = UINT8_MAX) {ESP_LOGD(TAG, "%s %s %d (%d-%d)", name, type, var, min, max);gNode->addControl(*var, name, type, min, max);}
+static void _addControl(uint8_t *var, char *name, char* type, uint8_t min = 0, uint8_t max = UINT8_MAX) {MB_LOGV(ML_TAG, "%s %s %d (%d-%d)", name, type, var, min, max);gNode->addControl(*var, name, type, min, max);}
 static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
 static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layerV->layerP->addLight({x, y, z});}
 
@@ -76,13 +70,6 @@ static void _setRGBPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNo
 static void _setPan(uint16_t indexV, uint8_t value) {gNode->layerV->setPan(indexV, value);}
 static void _setTilt(uint16_t indexV, uint8_t value) {gNode->layerV->setTilt(indexV, value);}
 
-static float _time(float j) {
-    float myVal = millis();
-    myVal = myVal / 65535 / j;           // PixelBlaze uses 1000/65535 = .015259. 
-    myVal = fmod(myVal, 1.0);               // ewowi: with 0.015 as input, you get fmod(millis/1000,1.0), which has a period of 1 second, sounds right
-    return myVal;
-}
-
 volatile xSemaphoreHandle WaitAnimationSync = xSemaphoreCreateBinary();
 
 void sync() {
@@ -90,7 +77,11 @@ void sync() {
     frameCounter++;
     delay(1); //feed the watchdog, otherwise watchdog will reset the ESP
     // Serial.print("s");
-    xSemaphoreTake(WaitAnimationSync, portMAX_DELAY);
+    // 🌙 adding semaphore wait too long logging
+    if (xSemaphoreTake(WaitAnimationSync, pdMS_TO_TICKS(100))==pdFALSE) {
+        MB_LOGW(ML_TAG, "WaitAnimationSync wait too long");
+        xSemaphoreTake(WaitAnimationSync, portMAX_DELAY);
+    }
 }
 
 void addExternal(string definition, void * ptr) {
@@ -121,7 +112,7 @@ void addExternal(string definition, void * ptr) {
         }
     }
     if (!success) {
-        ESP_LOGE(TAG, "Failed to parse function definition: %s", definition.c_str());
+        MB_LOGE(ML_TAG, "Failed to parse function definition: %s", definition.c_str());
     }
 }
   
@@ -129,7 +120,7 @@ Parser parser = Parser();
 
 void LiveScriptNode::setup() {
     
-  // ESP_LOGD(TAG, "animation %s", animation);
+  // MB_LOGV(ML_TAG, "animation %s", animation);
 
   if (animation[0] != '/') { //no sc script
       return;
@@ -154,7 +145,7 @@ void LiveScriptNode::setup() {
   addExternal( "uint8_t inoise8(uint16_t,uint16_t,uint16_t)", (void *)(uint8_t (*)(uint16_t,uint16_t,uint16_t))inoise8);
   addExternal( "uint8_t beatsin8(uint16_t,uint8_t,uint8_t,uint32_t,uint8_t)", (void *)beatsin8);
   addExternal(   "float hypot(float,float)", (void*)(float (*)(float,float))hypot);
-  addExternal(   "float time(float)", (void *)_time);
+  addExternal(   "float beat8(uint8_t,uint32_t)", (void *)beat8); //saw wave
   addExternal( "uint8_t triangle8(uint8_t)", (void *)triangle8);
 
   //MoonLight functions
@@ -168,14 +159,14 @@ void LiveScriptNode::setup() {
 
   //MoonLight physical and virtual driver vars
   //  but keep enabled to avoid compile errors when used in non virtual context
-  addExternal( "uint8_t colorOrder", &layerV->layerP->ledsDriver.colorOrder);
-  addExternal( "uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
-  addExternal( "uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
-  addExternal( "uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
-  addExternal( "uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
+//   addExternal( "uint8_t colorOrder", &layerV->layerP->ledsDriver.colorOrder);
+//   addExternal( "uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
+//   addExternal( "uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
+//   addExternal( "uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
+//   addExternal( "uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
-  addExternal(   "CRGB* leds", (void *)layerV->layerP->lights.leds);
+  addExternal(   "CRGB* leds", (void *)(CRGB *)layerV->layerP->lights.channels);
   addExternal(    "void setRGB(uint16_t,CRGB)", (void *)_setRGB);
   addExternal(    "void setRGBPal(uint16_t,uint8_t,uint8_t)", (void *)_setRGBPal);
   addExternal(    "void setPan(uint16_t,uint8_t)", (void *)_setPan);
@@ -185,11 +176,12 @@ void LiveScriptNode::setup() {
   addExternal( "uint8_t depth", &layerV->size.z);
   addExternal(    "bool on", &on);
 
-  for (asm_external el: external_links) {
-      ESP_LOGD(TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
-  }
+//   for (asm_external el: external_links) {
+//       MB_LOGV(ML_TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
+//   }
 
-  runningPrograms.setPrekill(layerV->layerP->ledsDriver.preKill, layerV->layerP->ledsDriver.postKill); //for clockless driver...
+
+//   runningPrograms.setPrekill(layerV->layerP->ledsDriver.preKill, layerV->layerP->ledsDriver.postKill); //for clockless driver...
   runningPrograms.setFunctionToSync(sync);
 
   compileAndRun();
@@ -203,12 +195,13 @@ void LiveScriptNode::loop() {
 
 void LiveScriptNode::addLayout() {
     if (hasLayout) {
+        MB_LOGV(ML_TAG, "%s", animation);
         scriptRuntime.execute(animation, "addLayout"); 
     }
 }
 
 LiveScriptNode::~LiveScriptNode() {
-    ESP_LOGD(TAG, "%s", animation);
+    MB_LOGV(ML_TAG, "%s", animation);
     scriptRuntime.kill(animation);
 }
 
@@ -218,8 +211,9 @@ void LiveScriptNode::compileAndRun() {
   //send UI spinner
 
   //run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-  // runInLoopTask.push_back([&, animation, type, error] {
-      ESP_LOGD(TAG, "%s", animation);
+  // std::lock_guard<std::mutex> lock(runInTask_mutex);
+  // runInTask1.push_back([&, animation, type, error] {
+      MB_LOGV(ML_TAG, "%s", animation);
       File file = ESPFS.open(animation);
       if (file) {
         Char<32> pre;
@@ -241,25 +235,22 @@ void LiveScriptNode::compileAndRun() {
           if (hasLoop) scScript += "while(true){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
           scScript += "}";
 
-          ESP_LOGD(TAG, "script \n%s", scScript.c_str());
+          MB_LOGV(ML_TAG, "script \n%s", scScript.c_str());
 
-          TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
-          ESP_LOGI(TAG, "task %s %d", pcTaskGetName(currentTask), uxTaskGetStackHighWaterMark(currentTask));
-  
-          // ESP_LOGD(TAG, "parsing %s", scScript.c_str());
+          // MB_LOGV(ML_TAG, "parsing %s", scScript.c_str());
 
           Executable executable = parser.parseScript(&scScript); // note that this class will be deleted after the function call !!!
           executable.name = animation;
-          ESP_LOGD(TAG, "parsing %s done", animation);
+          MB_LOGV(ML_TAG, "parsing %s done", animation);
           scriptRuntime.addExe(executable); //if already exists, delete it first
-          ESP_LOGD(TAG, "addExe success %s", executable.exeExist?"true":"false");
+          MB_LOGV(ML_TAG, "addExe success %s", executable.exeExist?"true":"false");
 
           gNode = this; //todo: this is not working well with multiple scripts running!!!
 
           if (executable.exeExist) {
             execute();
           } else
-              ESP_LOGD(TAG, "error %s", executable.error.error_message.c_str());
+              MB_LOGV(ML_TAG, "error %s", executable.error.error_message.c_str());
 
           //send error to client ... not working yet
           // error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
@@ -273,45 +264,40 @@ void LiveScriptNode::compileAndRun() {
 void LiveScriptNode::execute() {
 
     if (safeModeMB) {
-        ESP_LOGW(TAG, "Safe mode enabled, not executing script %s", animation);
+        MB_LOGW(ML_TAG, "Safe mode enabled, not executing script %s", animation);
         return;
     }
-    ESP_LOGD(TAG, "%s", animation);
+    MB_LOGV(ML_TAG, "%s", animation);
 
-    if (hasLayout) {
-        layerV->requestMapPhysical = true;
-        layerV->requestMapVirtual = true;
-    }
-
-    // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
+    requestMappings(); // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
 
     if (hasLoop) {
         // setup : create controls
         // executable.execute("setup"); 
         // send controls to UI
         // executable.executeAsTask("main"); //background task (async - vs sync)
-        ESP_LOGD(TAG, "%s executeAsTask main", animation);
+        MB_LOGV(ML_TAG, "%s executeAsTask main", animation);
         scriptRuntime.executeAsTask(animation, "main"); //background task (async - vs sync)
         //assert failed: xEventGroupSync event_groups.c:228 (uxBitsToWaitFor != 0)
     } else {
-        ESP_LOGD(TAG, "%s execute main", animation);
+        MB_LOGV(ML_TAG, "%s execute main", animation);
         scriptRuntime.execute(animation, "main");
     }
-    ESP_LOGD(TAG, "%s execute started", animation);
+    MB_LOGV(ML_TAG, "%s execute started", animation);
 }
 
 void LiveScriptNode::kill() {
-    ESP_LOGD(TAG, "%s", animation);
+    MB_LOGV(ML_TAG, "%s", animation);
     scriptRuntime.kill(animation);
 }
 
 void LiveScriptNode::free() {
-    ESP_LOGD(TAG, "%s", animation);
+    MB_LOGV(ML_TAG, "%s", animation);
     scriptRuntime.free(animation);
 }
 
 void LiveScriptNode::killAndDelete() {
-    ESP_LOGD(TAG, "%s", animation);
+    MB_LOGV(ML_TAG, "%s", animation);
     scriptRuntime.kill(animation);
     // scriptRuntime.free(animation);
     scriptRuntime.deleteExe(animation);
@@ -333,7 +319,7 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
         object["free"] = 0;
         object["delete"] = 0;
         object["execute"] = 0;
-        // ESP_LOGD(TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
+        // MB_LOGV(ML_TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size, exeInfo.data_size, exeInfo.total_size);
     }
 }
 

@@ -23,23 +23,43 @@
 				labels: $batteryHistory.timestamp,
 				datasets: [
 					{
-						label: 'SOC',
-						borderColor: daisyColor('--p'),
-						backgroundColor: daisyColor('--p', 50),
+						label: 'SOC [%]',
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $batteryHistory.soc,
-						yAxisID: 'y1'
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.soc) < 0
 					},
 					{
 						label: 'Charging',
-						borderColor: daisyColor('--s', 25),
-						backgroundColor: daisyColor('--s', 25),
+						borderColor: daisyColor('--color-secondary', 25),
+						backgroundColor: daisyColor('--color-secondary', 25),
 						borderWidth: 0,
 						data: $batteryHistory.charging,
 						fill: true,
 						stepped: true,
-						yAxisID: 'y2'
-					}
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.soc) < 0
+					},
+					{
+						label: 'Voltage [V]', // 🌙
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
+						borderWidth: 2,
+						data: $batteryHistory.voltage,
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.voltage) < 0
+					},
+					{
+						label: 'Current [A]', // 🌙
+						borderColor: daisyColor('--color-secondary'),
+						backgroundColor: daisyColor('--color-secondary', 50),
+						borderWidth: 2,
+						data: $batteryHistory.current,
+						yAxisID: 'y',
+						// hidden: Math.max(...$batteryHistory.current) < 0
+					},
 				]
 			},
 			options: {
@@ -63,19 +83,19 @@
 					x: {
 						type: 'time',
 						grid: {
-							color: daisyColor('--bc', 10)
+							color: daisyColor('--color-base-content', 10)
 						},
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
 						display: true
 					},
-					y1: {
+					y: {
 						type: 'linear',
 						title: {
 							display: true,
-							text: 'State of Charge [%]',
-							color: daisyColor('--bc'),
+							text: 'Energy', // 🌙
+							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
 								weight: 'bold'
@@ -83,20 +103,34 @@
 						},
 						position: 'left',
 						min: 0,
-						suggestedMax: 100,
-						grid: { color: daisyColor('--bc', 10) },
+						max: Math.round(Math.max(Math.max(...$batteryHistory.voltage), Math.max(...$batteryHistory.current))),
+						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
-						border: { color: daisyColor('--bc', 10) }
+						border: { color: daisyColor('--color-base-content', 10) }
 					},
-					y2: {
-						type: 'linear',
-						position: 'right',
-						min: 0,
-						max: 1,
-						display: false
-					}
+					// y2: {
+					// 	type: 'linear',
+					// 	position: 'right',
+					// 	min: 0,
+					// 	max: 1,
+					// 	display: false
+					// },
+					// y3: { // 🌙
+					// 	type: 'linear',
+					// 	position: 'left',
+					// 	min: 0,
+					// 	max: Math.round(Math.max(...$batteryHistory.voltage)),
+					// 	display: false
+					// }, // 🌙
+					// y4: {
+					// 	type: 'linear',
+					// 	position: 'left',
+					// 	min: 0,
+					// 	max: Math.round(Math.max(...$batteryHistory.current)),
+					// 	display: false
+					// }
 				}
 			}
 		});
@@ -110,7 +144,10 @@
 		heapChart.data.labels = $batteryHistory.timestamp;
 		heapChart.data.datasets[0].data = $batteryHistory.soc;
 		heapChart.data.datasets[1].data = $batteryHistory.charging;
+		heapChart.data.datasets[2].data = $batteryHistory.voltage; // 🌙
+		heapChart.data.datasets[3].data = $batteryHistory.current; // 🌙
 		heapChart.update('none');
+		heapChart.options.scales.y.max = Math.round(Math.max(Math.max(...$batteryHistory.voltage), Math.max(...$batteryHistory.current)));
 	}
 
 	function convertSeconds(seconds: number) {
@@ -143,10 +180,10 @@
 
 <SettingsCard collapsible={false}>
 	{#snippet icon()}
-		<Battery  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
+		<Battery class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span >Battery History</span>
+		<span>Energy History</span>
 	{/snippet}
 
 	<div class="w-full overflow-x-auto">

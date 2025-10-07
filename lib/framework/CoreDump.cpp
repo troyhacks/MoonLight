@@ -6,7 +6,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -63,7 +63,7 @@ esp_err_t CoreDump::coreDump(PsychicRequest *request)
     httpd_resp_set_status(request->request(), "200 OK");
     PsychicResponse response(request);
     response.setCode(200);
-    response.setContentType("text/plain");
+    response.setContentType("application/octet-stream");
     response.sendHeaders();
     for (size_t offset = 0; offset < coredump_size; offset += chunk_len)
     {

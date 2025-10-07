@@ -5,7 +5,7 @@
  *   with responsive Sveltekit front-end built with TailwindCSS and DaisyUI.
  *   https://github.com/theelims/ESP32-sveltekit
  *
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -13,10 +13,11 @@
 
 #include <DownloadFirmwareService.h>
 
-extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
-extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
+// 🌙 Temporarily skip cert validation !!!!
+// extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
+// extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
 
-static EventSocket *_socket = nullptr;
+static EventSocket *_socket2 = nullptr; //🌙 _socket2
 static int previousProgress = 0;
 JsonDocument doc;
 
@@ -25,7 +26,7 @@ void update_started()
     String output;
     doc["status"] = "preparing";
     JsonObject jsonObject = doc.as<JsonObject>();
-    _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+    _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
 }
 
 void update_progress(int currentBytes, int totalBytes)
@@ -36,8 +37,8 @@ void update_progress(int currentBytes, int totalBytes)
     {
         doc["progress"] = progress;
         JsonObject jsonObject = doc.as<JsonObject>();
-        _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
-        ESP_LOGV(SVK_TAG, "HTTP update process at %d of %d bytes... (%d %%)", currentBytes, totalBytes, progress);
+        _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+        ESP_LOGD(SVK_TAG, "HTTP update process at %d of %d bytes... (%d %%)", currentBytes, totalBytes, progress);
     }
     previousProgress = progress;
 }
@@ -46,7 +47,7 @@ void update_finished()
 {
     doc["status"] = "finished";
     JsonObject jsonObject = doc.as<JsonObject>();
-    _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+    _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
 
     // delay to allow the event to be sent out
     vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -56,11 +57,13 @@ void updateTask(void *param)
 {
     WiFiClientSecure client;
 
-#if ESP_ARDUINO_VERSION_MAJOR == 3
-    client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
-#else
-    client.setCACertBundle(rootca_crt_bundle_start);
-#endif
+    // 🌙 Temporarily skip cert validation !!!!
+    client.setInsecure(); 
+    // #if ESP_ARDUINO_VERSION_MAJOR == 3
+    //     client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
+    // #else
+    //     client.setCACertBundle(rootca_crt_bundle_start);
+    // #endif
 
     client.setTimeout(10);
 
@@ -69,9 +72,9 @@ void updateTask(void *param)
 
     String url = *((String *)param);
     String output;
-    // httpUpdate.onStart(update_started);
-    // httpUpdate.onProgress(update_progress);
-    // httpUpdate.onEnd(update_finished);
+    httpUpdate.onStart(update_started);
+    httpUpdate.onProgress(update_progress);
+    httpUpdate.onEnd(update_finished);
 
     t_httpUpdate_return ret = httpUpdate.update(client, url.c_str());
     JsonObject jsonObject;
@@ -83,7 +86,7 @@ void updateTask(void *param)
         doc["status"] = "error";
         doc["error"] = httpUpdate.getLastErrorString().c_str();
         jsonObject = doc.as<JsonObject>();
-        _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+        _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
 
         ESP_LOGE(SVK_TAG, "HTTP Update failed with error (%d): %s", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
 #ifdef SERIAL_INFO
@@ -95,7 +98,7 @@ void updateTask(void *param)
         doc["status"] = "error";
         doc["error"] = "Update failed, has same firmware version";
         jsonObject = doc.as<JsonObject>();
-        _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+        _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
 
         ESP_LOGE(SVK_TAG, "HTTP Update failed, has same firmware version");
 #ifdef SERIAL_INFO
@@ -109,6 +112,7 @@ void updateTask(void *param)
 #endif
         break;
     }
+
     vTaskDelete(NULL);
 }
 
@@ -130,7 +134,7 @@ void DownloadFirmwareService::begin()
                     std::bind(&DownloadFirmwareService::downloadUpdate, this, std::placeholders::_1, std::placeholders::_2),
                     AuthenticationPredicates::IS_ADMIN));
 
-    ESP_LOGV(SVK_TAG, "Registered POST endpoint: %s", GITHUB_FIRMWARE_PATH);
+    ESP_LOGD(SVK_TAG, "Registered POST endpoint: %s", GITHUB_FIRMWARE_PATH);
 }
 
 esp_err_t DownloadFirmwareService::downloadUpdate(PsychicRequest *request, JsonVariant &json)
@@ -152,6 +156,8 @@ esp_err_t DownloadFirmwareService::downloadUpdate(PsychicRequest *request, JsonV
 
     JsonObject jsonObject = doc.as<JsonObject>();
     _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+
+    _socket2 = _socket;
 
     if (xTaskCreatePinnedToCore(
             &updateTask,                // Function that should be called

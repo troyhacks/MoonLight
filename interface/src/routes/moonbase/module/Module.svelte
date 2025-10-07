@@ -6,7 +6,7 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Router from '~icons/tabler/router';
 	import Help from '~icons/tabler/help';
-	import Cancel from '~icons/tabler/x';
+	// import Cancel from '~icons/tabler/x';
 	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 	import { socket } from '$lib/stores/socket';
 	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
@@ -132,14 +132,15 @@
 					if (!oldData[key]) oldData[key] = []; //create an empty array
 					for (let i = 0; i < Math.max(oldData[key].length, newData[key].length); i++) {
 						if (oldData[key][i] == undefined) {
+							// console.log("add row", key, i, newData[key][i]);
 							oldData[key][i] = newData[key][i]; //create new row if not existed, trigger reactiveness
 						} else if (newData[key][i] == undefined) {
-							console.log("remove row", key, i);
-							//remove row if not existing anymore
-							oldData[key].splice(i, 1);
-							// oldData[key] = [...oldData[key]]; //Trigger reactivity ???
-						} else
+							// console.log("remove remaining rows", key, i, oldData[key][i]);
+							oldData[key].splice(i);
+						} else {
+							// console.log("change row", key, i, oldData[key][i], newData[key][i]);
 							updateRecursive(oldData[key][i], newData[key][i]);
+						}
 					}
 				} else {
 					if (newData[key] != oldData[key]) {
@@ -149,6 +150,12 @@
 
 				}
 			// }
+		}
+		//remove properties that are not in newData (e.g. control min and max)
+		for (let key in oldData) {
+			if (newData[key] == null) {
+				delete oldData[key]; //remove property if not in newData
+			}
 		}
 	}
 
@@ -196,6 +203,7 @@
 								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
 						{:else if property.type == "array"}
+						    <!-- e.g. definition: [name:"nodes", n: [name: ,,, name:"on", name:"controls", n:[]]]] -->
 							<ObjectArray property={property} bind:data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></ObjectArray>
 						{/if}
 					{/each}

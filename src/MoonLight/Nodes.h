@@ -3,19 +3,15 @@
     @file      Nodes.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/general/utilities/
+    @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
 #pragma once
 
 #if FT_MOONLIGHT
-
-#define _1D 1
-#define _2D 2
-#define _3D 3
 
 #include "VirtualLayer.h" //VirtualLayer.h will include PhysicalLayer.h
 
@@ -37,26 +33,19 @@ public:
 
   bool on = false; //onUpdate will set it on
 
-  //C++ constructor is not inherited, so declare it as normal functions
+  //C++ constructors are not inherited, so declare it as normal functions
   virtual void constructor(VirtualLayer *layerV, JsonArray controls) {
     this->layerV = layerV;
     this->controls = controls;
   }
 
   //effect and layout
-  virtual void setup() {
-    if (hasLayout) {
-      layerV->layerP->lights.header.resetOffsets(); //reset offsets to default
-      layerV->resetLights(); //all channels to 0
-      layerV->requestMapPhysical = true;
-      layerV->requestMapVirtual = true;
-    }
-  };
+  virtual void setup() {};
 
   //effect, layout and modifier
 
   template <class ControlType>
-  JsonObject addControl(ControlType &variable, const char *name, const char *type, int min = 0, int max = UINT8_MAX) {
+  JsonObject addControl(ControlType &variable, const char *name, const char *type, int min = 0, int max = UINT8_MAX, bool ro = false) {
     uint32_t pointer = (uint32_t)&variable;
 
     bool newControl = false; //flag to check if control is new or already exists
@@ -64,7 +53,7 @@ public:
     JsonObject control;
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
-        ESP_LOGD(TAG, "update control %s t:%s d:%d p:%p ps:%d", name, type, variable, pointer, sizeof(ControlType));
+        // MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
         control1["p"] = pointer;
         control = control1; //set control to the found one
         break;
@@ -76,71 +65,98 @@ public:
       control["name"] = name;
       control["type"] = type;
       control["default"] = variable;
+
       control["p"] = pointer;
-      if (min != 0) control["min"] = min;
-      if (max != UINT8_MAX) control["max"] = max;
+
+      if (ro) control["ro"] = true; //else if (!control["ro"].isNull()) control.remove("ro");
+      if (min != 0) control["min"] = min; //else if (!control["min"].isNull()) control.remove("min");
+      if (max != UINT8_MAX) control["max"] = max; //else if (!control["max"].isNull()) control.remove("max");
+
       newControl = true; //set flag to true, as control is new
     }
 
-    ESP_LOGD(TAG, "%s t:%s d:%d p:%p ps:%d", name, type, variable, pointer, sizeof(ControlType));
+    // MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+
     //setValue
     if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
       if (sizeof(ControlType) != 1) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        uint8_t * valuePointer = (uint8_t *)pointer;
-        *valuePointer = variable;
-        control["value"] = *valuePointer;
+        // uint8_t * valuePointer = (uint8_t *)pointer;
+        // *valuePointer = variable;
+        // control["value"] = *valuePointer;
+        control["value"] = variable;
       }
     }
-    else if (control["type"] == "selectFile") {
-      if (sizeof(ControlType) != 4) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
-      } else if (newControl) {
-        char *valuePointer = (char *)pointer;
-        *valuePointer = variable;
-        control["value"] = valuePointer;
+    else if (control["type"] == "selectFile" || control["type"] == "text") {
+      // if (sizeof(ControlType) != 4) {
+      //   MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
+      // } else 
+      if (newControl) {
+        // char *valuePointer = (char *)pointer;
+        // *valuePointer = variable;
+        // control["value"] = valuePointer;
+        control["value"] = variable;
       }
     }
     else if (control["type"] == "number") {
       if (sizeof(ControlType) != 2) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        uint16_t *valuePointer = (uint16_t *)pointer;
-        *valuePointer = variable;
-        control["value"] = *valuePointer;
+        // uint16_t *valuePointer = (uint16_t *)pointer;
+        // *valuePointer = variable;
+        // control["value"] = *valuePointer;
+        control["value"] = variable;
       }
     }
     else if (control["type"] == "checkbox") {
       if (sizeof(ControlType) != 1) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        bool *valuePointer = (bool *)pointer;
+        // bool *valuePointer = (bool *)pointer;
+        // control["value"] = variable;
+        // *valuePointer = control["value"];
         control["value"] = variable;
-        *valuePointer = control["value"];
       }
-      // *valuePointer = variable;
-      // control["value"] = *valuePointer;
     }
     else if (control["type"] == "coord3D") {
       if (sizeof(ControlType) != sizeof(Coord3D)) {
-        ESP_LOGE(TAG, "sizeof mismatch for %s", name);
+        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       } else if (newControl) {
-        Coord3D *valuePointer = (Coord3D *)pointer;
+        // Coord3D *valuePointer = (Coord3D *)pointer;
+        // control["value"] = variable;
+        // *valuePointer = control["value"];
         control["value"] = variable;
-        *valuePointer = control["value"];
       }
     }
     else
-      ESP_LOGE(TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+      MB_LOGE(ML_TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+
+    if (newControl) {
+      String oldValue = "";
+      onUpdate(oldValue, control);
+    }
 
     return control;
   }
 
-  virtual void updateControl(JsonObject control); // see Nodes.cpp for implementation
+  //called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
+  virtual void onUpdate(String &oldValue, JsonObject control); // see Nodes.cpp for implementation
+
+  void requestMappings() {
+    if (hasModifier || hasLayout) {
+        // MB_LOGD(ML_TAG, "hasLayout or Modifier -> requestMapVirtual");
+        layerV->layerP->requestMapVirtual = true;
+    }
+    if (hasLayout) {
+        // MB_LOGD(ML_TAG, "hasLayout -> requestMapPhysical");
+        layerV->layerP->requestMapPhysical = true;
+    }
+  }
 
   //effect, layout and modifier (?)
   virtual void loop() {}
+  virtual void onSizeChanged(Coord3D oldSize) {} //virtual/effect nodes: virtual size, physical/driver nodes: physical size
 
   //layout
   virtual void addLayout() {} //the definition of the layout, called by mapLayout()
@@ -154,6 +170,15 @@ public:
   void addPin(uint8_t pinNr) {
     layerV->layerP->addPin(pinNr);
   }
+  char * addNextPin(char * &nextPin) { //&: by reference to change the pointer to the next pin
+      while (*nextPin && !isdigit((unsigned char)*nextPin)) 
+        nextPin++; 
+      if (*nextPin) {
+        int pin = strtol(nextPin, (char**)&nextPin, 10);
+        addPin(pin);
+      } //add next pin
+      return nextPin;
+  }
 
   //modifier
   virtual void modifySize() {}
@@ -163,12 +188,11 @@ public:
   virtual ~Node() {
     //delete any allocated memory
 
-    ESP_LOGD(TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
+    MB_LOGD(ML_TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
 
   }
 
 };
-  
 
 #if FT_LIVESCRIPT
 class LiveScriptNode: public Node {
@@ -205,6 +229,15 @@ class LiveScriptNode: public Node {
 };
 
 #endif
+
+// Helper function to generate a triangle wave similar to beat16
+inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
+    uint8_t beat = beat8(bpm, timebase);
+    if (beat < 128)
+        return beat * 2; // rising edge
+    else
+        return (255 - ((beat - 128) * 2)); // falling edge
+}
 
 #include "Mods.h"
 

@@ -21,7 +21,7 @@
 #endif
 
 #ifndef MAX_UPLOAD_SIZE
-#define MAX_UPLOAD_SIZE (2048 * 1024) // 2MB
+#define MAX_UPLOAD_SIZE 0x300000 // 2MB 🌙 3MB (see partition table)
 #endif
 
 #ifndef MAX_REQUEST_BODY_SIZE

@@ -1,13 +1,3 @@
 # NTP
 
-## Functional
-
-## Technical
-
-### Server
-
-[SystemStatus.h](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/SystemStatus.h) and [SystemStatus.cpp](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/SystemStatus.cpp)
-
-### UI
-
-[SystemStatus.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/system/status/SystemStatus.svelte)
+<img width="320" src="https://github.com/user-attachments/assets/94d40083-3bbc-4b58-8c60-87d70dca643c" />

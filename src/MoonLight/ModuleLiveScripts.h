@@ -3,10 +3,10 @@
     @file      moduleLiveScripts.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/modules/module/liveScripts/
+    @Doc       https://moonmodules.org/MoonLight/moonbase/module/liveScripts/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
 #ifndef moduleLiveScripts_h
@@ -15,34 +15,72 @@
 #if FT_MOONLIGHT
 #if FT_LIVESCRIPT
 
-#undef TAG
-#define TAG "💫"
-
 #include "../MoonBase/Module.h"
 
-#include "ModuleEditor.h"
+#include "ModuleEffects.h"
 
 class ModuleLiveScripts : public Module
 {
 public:
 
     PsychicHttpServer *_server;
+    FileManager *_fileManager;
+    ModuleEffects *_moduleEffects;
 
     ModuleLiveScripts(PsychicHttpServer *server,
         ESP32SvelteKit *sveltekit,
-        FilesService *filesService
-    ) : Module("liveScripts", server, sveltekit, filesService) {
-        ESP_LOGD(TAG, "constructor");
+        FileManager *fileManager,
+        ModuleEffects *moduleEffects
+    ) : Module("liveScripts", server, sveltekit) {
+        MB_LOGV(ML_TAG, "constructor");
         _server = server;
+        _fileManager = fileManager;
+        _moduleEffects = moduleEffects;
     }
 
     void begin() {
         Module::begin();
+        #if FT_ENABLED(FT_LIVESCRIPT)
+            //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
+            _fileManager->addUpdateHandler([&](const String &originId)
+            { 
+                MB_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
+                //read the file state (read all files and folders on FS and collect changes)
+                _fileManager->read([&](FilesState &filesState) {
+                    // loop over all changed files (normally only one)
+                    for (auto updatedItem : filesState.updatedItems) {
+                        //if file is the current live script, recompile it (to do: multiple live effects)
+                        uint8_t index = 0;
+                        _moduleEffects->read([&](ModuleState &effectsState) {
+                            for (JsonObject nodeState: effectsState.data["nodes"].as<JsonArray>()) {
+                                String name = nodeState["name"];
+
+                                if (updatedItem == name) {
+                                    MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
+                                    if (liveScriptNode) {
+                                        liveScriptNode->compileAndRun();
+
+                                        //wait until setup has been executed?
+
+                                        _moduleEffects->requestUIUpdate = true; //update the Effects UI
+                                    }
+
+                                    MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+                                }
+                                index++;
+                            }
+                        });
+                        //todo also for moduleDrivers
+                    }
+                });
+            });
+        #endif
     }
 
     //define the data model
     void setupDefinition(JsonArray root) override {
-        ESP_LOGD(TAG, "");
+        MB_LOGV(ML_TAG, "");
         JsonObject property; // state.data has one or more properties
         JsonArray details = root; // if a property is an array, this is the details of the array
         JsonArray values; // if a property is a select, this is the values of the select
@@ -71,7 +109,7 @@ public:
         //scripts
         if (updatedItem.parent[0] == "scripts") {    
             JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
-            ESP_LOGD(TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            MB_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue != "null") {//do not run at boot!
                 LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(scriptState["name"]);
                 if (liveScriptNode) {
@@ -84,11 +122,11 @@ public:
                     if (updatedItem.name == "delete")
                         liveScriptNode->killAndDelete();
                     // updatedItem.value = 0;
-                } else ESP_LOGW(TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
+                } else MB_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
             }
         } 
         // else
-        // ESP_LOGD(TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0], updatedItem.index[0], updatedItem.parent[1], updatedItem.index[1], updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        // MB_LOGV(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 
     //update scripts / read only values in the UI
@@ -117,7 +155,7 @@ public:
         // if (_state.data["scripts"] != newData["scripts"]) {
         //     update([&](ModuleState &state) {
 
-        //         ESP_LOGD(TAG, "update scripts");
+        //         MB_LOGV(ML_TAG, "update scripts");
 
         //         UpdatedItem updatedItem;
         //         ; //compare and update
@@ -129,7 +167,7 @@ public:
 
         // char buffer[256];
         // serializeJson(doc, buffer, sizeof(buffer));
-        // ESP_LOGD(TAG, "livescripts %s", buffer);
+        // MB_LOGV(ML_TAG, "livescripts %s", buffer);
     }
 
 }; // class ModuleLiveScripts

@@ -9,7 +9,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -43,10 +43,10 @@
 #define FACTORY_WIFI_RSSI_THRESHOLD -80
 #endif
 
-#define WIFI_SETTINGS_FILE "/config/wifiSettings.json"
+#define WIFI_SETTINGS_FILE "/.config/wifiSettings.json" // 🌙 use /.config (hidden folder)
 #define WIFI_SETTINGS_SERVICE_PATH "/rest/wifiSettings"
 
-#define WIFI_RECONNECTION_DELAY 1000 * 30
+#define WIFI_RECONNECTION_DELAY 1000 * 10 // 10 seconds
 #define RSSI_EVENT_DELAY 500
 
 #define EVENT_RSSI "rssi"
@@ -80,12 +80,16 @@ public:
     // core wifi configuration
     String hostname;
     u_int8_t staConnectionMode;
+    u_int8_t txPower;
+    u_int8_t txPowerMeasured;
     std::vector<wifi_settings_t> wifiSettings;
 
     static void read(WiFiSettings &settings, JsonObject &root)
     {
         root["hostname"] = settings.hostname;
         root["connection_mode"] = settings.staConnectionMode;
+        root["txPower"] = settings.txPower;//(uint8_t )WiFi.getTxPower();
+        root["txPowerMeasured"] = abs(WiFi.getTxPower());
 
         // create JSON array from root
         JsonArray wifiNetworks = root["wifi_networks"].to<JsonArray>();
@@ -115,7 +119,14 @@ public:
     static StateUpdateResult update(JsonObject &root, WiFiSettings &settings)
     {
         settings.hostname = root["hostname"] | SettingValue::format(FACTORY_WIFI_HOSTNAME);
-        settings.staConnectionMode = root["connection_mode"] | 1;
+        settings.staConnectionMode = root["connection_mode"] | 1; // default to STRENGTH
+
+        // 🌙
+        #if CONFIG_IDF_TARGET_ESP32C3 | LOLIN_WIFI_FIX
+            settings.txPower = root["txPower"] | 34; // default to 8.5dBm
+        #else 
+            settings.txPower = root["txPower"] | 0; // default (do not set the power)
+        #endif
 
         settings.wifiSettings.clear();
 

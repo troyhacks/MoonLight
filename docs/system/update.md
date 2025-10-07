@@ -1,20 +1,24 @@
 # System Update
 
-<img width="522" alt="image" src="https://github.com/user-attachments/assets/9d6452fc-9bcd-4efa-8839-30b3fd015276" />
+<img width="320" src="https://github.com/user-attachments/assets/d7f76c8a-5290-4723-b286-704c574d6beb" />
 
-## Functional
+This module supports Over the Air Updates (OTA).
+There are 2 ways to update the firmware in this module:
 
-New firmware releases are published on github. They are listed here.
-If there is a new release, the app will notify it's availability.
+* Using GitHub releases
 
-Select one of the releases to install. In general it is advised to install the most recent version.
+     * List of firmware releases is showed here
+     * Select one of the releases to install. In general it is advised to install the most recent version.
+     * If there is a new release, the app will notify it's availability.
+     * See here for details on releases: [releases](https://github.com/MoonModules/MoonLight/releases)
 
-## Technical
+     <img width="362" src="https://github.com/user-attachments/assets/cf72875f-02cf-4c78-97a0-56b2a1723d71" />
 
-### Server
+* Manually via Upload
 
-[SystemUpdate.h](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/SystemUpdate.h) and [SystemUpdate.cpp](https://github.com/MoonModules/MoonLight/blob/main/lib/framework/SystemUpdate.cpp)
+    * Select choose file, Press Upload if asked for Are you sure?. 
 
-### UI
+When starting the update, a progress indicator is shown, upon completion the device will restart with the new firmware.
 
-[SystemUpdate.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/system/status/SystemUpdate.svelte)
+!!! warning "Uptate on small devices not possible"
+    On some devices firmware update using above methods is not possible (yet) due to a limited amount of file size or memory (ESP32-D0 devices). Use the [Installer](https://moonmodules.org/MoonLight/gettingstarted/installation/) procedure instead (without erasing the device)

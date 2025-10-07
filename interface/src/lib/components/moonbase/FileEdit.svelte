@@ -6,10 +6,10 @@
    @Doc       https://moonmodules.org/MoonLight/components/#fileedit
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 
    known issues
-   - showEditor does collapse in Files module, but not in Editor and Module
+   - showEditor does collapse in Files module, but not in Virtual and Physical Module
 -->
 
 <script lang="ts">
@@ -40,13 +40,14 @@
 		files: [],
 		fs_total: 0,
 		fs_used: 0,
+		showHidden: false,
 	});
 
 	let changed: boolean = $state(false);
 
     async function postFilesState(data: any) { //export needed to call from other components
 		try {
-			const response = await fetch('/rest/filesState', {
+			const response = await fetch('/rest/FileManager', {
 				method: 'POST',
 				headers: {
 					Authorization: page.data.features.security ? 'Bearer ' + $user.bearer_token : 'Basic',
@@ -171,7 +172,7 @@
 </script>
 
 {#if path[0] === '/'}
-	<Collapsible open={showEditor} class="shadow-lg">
+	<Collapsible open={showEditor} class="shadow-lg" icon={null} opened={() => {}} closed={() => {}}>
 		{#snippet title()}
 			<span>{newItem ? 'Add ' + (isFile?"file":"folder") : 'Edit ' + editableFile.name}</span>
 		{/snippet}
@@ -184,7 +185,7 @@
 				}}>
 			</MultiInput>
 			<label class="label" for="name">
-				<span class="label-text-alt text-error {formErrors.name ? '' : 'hidden'}"
+				<span class="text-error {formErrors.name ? '' : 'hidden'}"
 					>Name must be between 3 and 32 characters long</span
 				>
 			</label>
@@ -207,7 +208,7 @@
 				</MultiInput>
 			</div>
 		{/if}
-		<div class="mx-4 mb-4 flex flex-wrap justify-end gap-2">
+		<div class="flex flex-wrap justify-end gap-2">
 			<button
 				class="btn btn-primary"
 				onclick={() => {

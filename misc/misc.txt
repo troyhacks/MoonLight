@@ -1,3 +1,16 @@
+flash using esptool
+===================
+[>_] in the statusbar of vscode
+esptool --port /dev/cu.usbmodem11201 write-flash 0x0 ./build/merged/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9-2_webflash.bin
+optionally add erase-flash before write-flash
+
+Copy changes to ESP32-LedDrivers
+================================
+
+cp .pio/libdeps/esp32dev/ESP32-LedsDriver/src/* ../../ewowi/ESP32-LedsDriver/src
+cp .pio/libdeps/esp32-s3-devkitc-1-n16r8v/ESP32-LedsDriver/src/* ../../ewowi/ESP32-LedsDriver/src
+
+
 Release steps 
 - update dates in files
 - check all lib_deps on right version
@@ -82,7 +95,7 @@ ls -tU
 remove sound
 for f in (I*.mov|sort -d) ; do ffmpeg -i $PWD/$f -c copy -an $PWD/$f.nosound.mov; done
 
-Update instances
+Update devices
 
 for i in 107 239 143 111 154 177 208 129 157
 do 

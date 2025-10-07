@@ -6,7 +6,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -46,7 +46,25 @@ void FeaturesService::addFeature(String feature, bool enabled)
     newFeature.feature = feature;
     newFeature.enabled = enabled;
 
-    userFeatures.push_back(newFeature);
+    bool featureExists = false;
+
+    // Check if the feature already exists
+    for (auto &existingFeature : userFeatures)
+    {
+        if (existingFeature.feature == feature)
+        {
+            // Update the existing feature
+            existingFeature.enabled = enabled;
+            featureExists = true;
+            break;
+        }
+    }
+
+    if (!featureExists)
+    {
+        // If the feature does not exist, add it
+        userFeatures.push_back(newFeature);
+    }
 
     JsonDocument doc;
     JsonObject root = doc.as<JsonObject>();
@@ -96,6 +114,11 @@ void FeaturesService::createJSON(JsonObject &root)
     root["analytics"] = true;
 #else
     root["analytics"] = false;
+#endif
+#if FT_ENABLED(FT_COREDUMP)
+    root["coredump"] = true;
+#else
+    root["coredump"] = false;
 #endif
 
 #if FT_ENABLED(EVENT_USE_JSON)

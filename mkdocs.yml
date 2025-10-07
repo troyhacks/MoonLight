@@ -1,53 +1,62 @@
 site_name: MoonLight
-
 nav:
   - Home: index.md
-  - General:
-      - general/gettingstarted.md
-      - general/installation.md
-      - general/development.md
-      - general/hardware.md
-      - general/customizingsveltekit.md
-      - general/pull-requests.md
+  - "Getting Started":
+    - gettingstarted/overview.md
+    - gettingstarted/installation.md
+    - gettingstarted/hardware.md
   - "MoonLight":
-      - moonlight/general.md
-      - moonbase/module/lightsControl.md
-      - moonbase/module/editor.md
-      - moonbase/module/liveScripts.md
-      - moonbase/module/artnet.md
-      - moonbase/module/ChannelView.md
-      - moonbase/module/MoonLightInfo.md
+    - moonlight/overview.md
+    - moonbase/module/lightsControl.md
+    - moonbase/module/effects.md
+    - moonbase/module/drivers.md
+    - moonbase/module/channels.md
+    - moonbase/module/liveScripts.md
+    - moonbase/module/moonLightInfo.md
   - "MoonBase":
-      - moonbase/modules.md
-      - moonbase/files.md
-      - moonbase/module/instances.md
+    - moonbase/overview.md
+    - moonbase/filemanager.md
+    - moonbase/module/devices.md
+    - moonbase/module/tasks.md
+    - moonbase/module/inputoutput.md
   - "Connections":
-      - connections/mqtt.md
-      - connections/ntp.md
+    - connections/mqtt.md
+    - connections/ntp.md
   - "WiFi":
-      - wifi/sta.md
-      - wifi/ap.md
+    - wifi/sta.md
+    - wifi/ap.md
   - "System":
-      - system/status.md
-      - system/metrics.md
-      - system/update.md
-  - "ESP32 SvelteKit": 
-      - esp32sveltekit.md
+    - system/status.md
+    - system/metrics.md
+    - system/update.md
+  - "Develop":
+    - develop/overview.md
+    - develop/installation.md
+    - develop/development.md
+    - develop/customizingsveltekit.md
+    - develop/pull-requests.md
+    - develop/documentation.md
+    - develop/modules.md
+    - develop/nodes.md
+    - develop/layers.md
+    - develop/drivers.md
+  - "ESP32 SvelteKit":
+    - esp32sveltekit.md
   - "Build Tools":
-      - gettingstarted.md
-      - buildprocess.md
+    - gettingstarted.md
+    - buildprocess.md
   - "Front End":
-      - sveltekit.md
-      - structure.md
-      - stores.md
-      - components.md
+    - sveltekit.md
+    - structure.md
+    - stores.md
+    - components.md
   - "Back End":
-      - statefulservice.md
-      - restfulapi.md
+    - statefulservice.md
+    - restfulapi.md
 
 site_author: ewowi
 site_description: >-
-  MoonLight is a fork of ESP32-SvelteKit and add Files, Modules, Light control and much more, ready to flash on ESP32 devices. This is a MoonModules.org project.
+  Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs. Scales from small installations to large displays.
 
 # Repository
 repo_name: MoonModules/MoonLight
@@ -60,24 +69,30 @@ theme:
   icon:
     repo: fontawesome/brands/github
   palette:
-    # Palette toggle for light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-      primary: blue
-      accent: blue
-
-    # Palette toggle for dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+   # Dark mode (default)
+    - scheme: slate
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
-      primary: indigo
-      accent: indigo
+      primary: deep purple
+      accent: pink
 
+    # Light mode
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to system preference
+      primary: deep purple
+      accent: pink
+
+    # Auto (system preference)
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to dark mode
+      primary: deep purple
+      accent: pink
   features:
     - navigation.instant
     - navigation.tracking
@@ -89,6 +104,16 @@ theme:
     - toc.integrate
     - navigation.top
     - content.code.copy
+    - search.highlight
+    - search.share
+
+# Add custom CSS for MoonLight styling
+extra_css:
+  - stylesheets/moonlight.css
+
+# Add this section to your existing mkdocs.yml
+extra_javascript:
+  - javascripts/moonlight.js
 
 markdown_extensions:
   - attr_list
@@ -104,11 +129,22 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
 
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/ewowi/
+      link: https://github.com/MoonModules/MoonLight
+      name: GitHub Repository
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/TC8NSUSCdV
+      name: Discord Community
+    - icon: fontawesome/brands/reddit
+      link: https://reddit.com/r/moonmodules
+      name: Reddit Community
   consent:
     title: Cookie consent
     description: >-
@@ -128,7 +164,7 @@ plugins:
       separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
 
 copyright: |
-  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/MoonModules"  target="_blank" rel="noopener">MoonModules</a> -
-  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/ewowi"  target="_blank" rel="noopener">ewowi</a> -
-  Copyright &copy; 2024 by <a href="https://github.com/theelims"  target="_blank" rel="noopener">elims</a> -
+  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/MoonModules" target="_blank" rel="noopener">MoonModules</a> -
+  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/ewowi" target="_blank" rel="noopener">ewowi</a> -
+  Copyright &copy; 2025 by <a href="https://github.com/theelims" target="_blank" rel="noopener">elims</a> -
   <a href="#__consent">Change cookie settings</a>

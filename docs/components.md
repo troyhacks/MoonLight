@@ -163,6 +163,8 @@ This modal is based on [svelte-modals](https://svelte-modals.mattjennings.io/) w
 
 ### MultiInput
 
+Support for html input widgets including text, number, range, checkbox and pad (multiple buttons in 2D array layout)
+
 ### Array
 
 * Show an array of objects

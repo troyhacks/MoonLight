@@ -9,7 +9,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -24,6 +24,7 @@
 #include <DNSServer.h>
 #include <IPAddress.h>
 
+//🌙 redundant as all set in factory_settings.ini
 #ifndef FACTORY_AP_PROVISION_MODE
 #define FACTORY_AP_PROVISION_MODE AP_MODE_DISCONNECTED
 #endif
@@ -60,7 +61,7 @@
 #define FACTORY_AP_MAX_CLIENTS 4
 #endif
 
-#define AP_SETTINGS_FILE "/config/apSettings.json"
+#define AP_SETTINGS_FILE "/.config/apSettings.json" // 🌙 use /.config (hidden folder)
 #define AP_SETTINGS_SERVICE_PATH "/rest/apSettings"
 
 #define AP_MODE_ALWAYS 0

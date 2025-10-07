@@ -6,15 +6,13 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
  **/
 
 #include <SystemStatus.h>
-
-#include <ESP32SvelteKit.h> // 🌙 safeMode
 
 #include <esp32-hal.h>
 
@@ -33,7 +31,7 @@
 #elif CONFIG_IDF_TARGET_ESP32C6
 #include "esp32c6/rom/rtc.h"
 #define ESP_PLATFORM "ESP32-C6";
-#elif CONFIG_IDF_TARGET_ESP32P4
+#elif CONFIG_IDF_TARGET_ESP32P4 // 🌙
 #include "esp32p4/rom/rtc.h"
 #define ESP_PLATFORM "ESP32-P4";
 #else
@@ -85,31 +83,32 @@ String verbosePrintResetReason(int reason)
     case ESP_RST_SDIO:
         return ("Reset over SDIO");
         break;
-#ifdef ESP_RST_USB
+// 🌙 looks like this exists in all the boards we use, and ifdef ESP_RST_USB is not returning true for some reason ...
+// #ifdef ESP_RST_USB
     case ESP_RST_USB:
         return ("Reset by USB peripheral");
         break;
-#endif
-#ifdef ESP_RST_JSVK_TAG
-    case ESP_RST_JSVK_TAG:
+// #endif
+// #ifdef ESP_RST_JSVK_TAG
+    case ESP_RST_JTAG:
         return ("Reset by JSVK_TAG");
         break;
-#endif
-#ifdef ESP_RST_EFUSE
+// #endif
+// #ifdef ESP_RST_EFUSE
     case ESP_RST_EFUSE:
         return ("Reset due to efuse error");
         break;
-#endif
-#ifdef ESP_RST_PWR_GLITCH
+// #endif
+// #ifdef ESP_RST_PWR_GLITCH
     case ESP_RST_PWR_GLITCH:
         return ("Reset due to power glitch detected");
         break;
-#endif
-#ifdef ESP_RST_CPU_LOCKUP
+// #endif
+// #ifdef ESP_RST_CPU_LOCKUP
     case ESP_RST_CPU_LOCKUP:
         return ("Reset due to CPU lock up (double exception)");
         break;
-#endif
+// #endif
     default:
         char buffer[50];
         snprintf(buffer, sizeof(buffer), "Unknown reset reason (%d)", reason);
@@ -141,6 +140,9 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
 
     root["esp_platform"] = ESP_PLATFORM;
     root["firmware_version"] = APP_VERSION;
+    root["firmware_date"] = APP_DATE; // 🌙
+    root["firmware_target"] = BUILD_TARGET; // 🌙
+    root["platform_version"] = PLATFORM_VERSION; // 🌙
     root["max_alloc_heap"] = ESP.getMaxAllocHeap();
     if (psramFound())
     {
@@ -167,7 +169,6 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
     root["core_temp"] = temperatureRead();
     root["cpu_reset_reason"] = verbosePrintResetReason(esp_reset_reason());
     root["uptime"] = millis() / 1000;
-    root["safeMode"] = safeModeMB; // 🌙 safeMode
 
     return response.send();
 }

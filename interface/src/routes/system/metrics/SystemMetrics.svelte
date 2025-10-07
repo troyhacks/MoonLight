@@ -10,8 +10,9 @@
 	import { daisyColor } from '$lib/DaisyUiHelper';
 	import { analytics } from '$lib/stores/analytics';
 
-	Chart.register(...registerables); 
+	Chart.register(...registerables);
 
+	// 🌙
 	let lpsChartElement: HTMLCanvasElement = $state();
 	let lpsChart: Chart;
 
@@ -28,6 +29,7 @@
 	let temperatureChart: Chart;
 
 	onMount(() => {
+		// 🌙
 		lpsChart = new Chart(lpsChartElement, {
 			type: 'line',
 			data: {
@@ -35,8 +37,8 @@
 				datasets: [
 					{
 						label: 'Loops/s',
-						borderColor: daisyColor('--p'),
-						backgroundColor: daisyColor('--p', 50),
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $analytics.lps,
 						yAxisID: 'y'
@@ -63,10 +65,10 @@
 				scales: {
 					x: {
 						grid: {
-							color: daisyColor('--bc', 10)
+							color: daisyColor('--color-base-content', 10)
 						},
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
 						display: false
 					},
@@ -75,7 +77,7 @@
 						title: {
 							display: true,
 							text: 'Performance',
-							color: daisyColor('--bc'),
+							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
 								weight: 'bold'
@@ -84,11 +86,11 @@
 						position: 'left',
 						min: 0,
 						max: Math.round(Math.max(...$analytics.lps)),
-						grid: { color: daisyColor('--bc', 10) },
+						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
-						border: { color: daisyColor('--bc', 10) }
+						border: { color: daisyColor('--color-base-content', 10) }
 					}
 				}
 			}
@@ -100,16 +102,16 @@
 				datasets: [
 					{
 						label: 'Used',
-						borderColor: daisyColor('--p'),
-						backgroundColor: daisyColor('--p', 50),
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $analytics.used_heap,
 						yAxisID: 'y'
 					},
 					{
 						label: 'Max Alloc',
-						borderColor: daisyColor('--s'),
-						backgroundColor: daisyColor('--s', 50),
+						borderColor: daisyColor('--color-secondary'),
+						backgroundColor: daisyColor('--color-secondary', 50),
 						borderWidth: 2,
 						data: $analytics.max_alloc_heap,
 						yAxisID: 'y'
@@ -136,10 +138,10 @@
 				scales: {
 					x: {
 						grid: {
-							color: daisyColor('--bc', 10)
+							color: daisyColor('--color-base-content', 10)
 						},
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
 						display: false
 					},
@@ -148,7 +150,7 @@
 						title: {
 							display: true,
 							text: 'Memory [KB]',
-							color: daisyColor('--bc'),
+							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
 								weight: 'bold'
@@ -157,11 +159,11 @@
 						position: 'left',
 						min: 0,
 						max: Math.round(Math.max(...$analytics.total_heap)),
-						grid: { color: daisyColor('--bc', 10) },
+						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
-						border: { color: daisyColor('--bc', 10) }
+						border: { color: daisyColor('--color-base-content', 10) }
 					}
 				}
 			}
@@ -173,8 +175,8 @@
 				datasets: [
 					{
 						label: 'Used',
-						borderColor: daisyColor('--p'),
-						backgroundColor: daisyColor('--p', 50),
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $analytics.free_psram,
 						yAxisID: 'y'
@@ -201,10 +203,10 @@
 				scales: {
 					x: {
 						grid: {
-							color: daisyColor('--bc', 10)
+							color: daisyColor('--color-base-content', 10)
 						},
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
 						display: false
 					},
@@ -213,7 +215,7 @@
 						title: {
 							display: true,
 							text: 'PSRAM [KB]',
-							color: daisyColor('--bc'),
+							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
 								weight: 'bold'
@@ -222,11 +224,11 @@
 						position: 'left',
 						min: 0,
 						max: Math.round(Math.max(...$analytics.psram_size)),
-						grid: { color: daisyColor('--bc', 10) },
+						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
-						border: { color: daisyColor('--bc', 10) }
+						border: { color: daisyColor('--color-base-content', 10) }
 					}
 				}
 			}
@@ -238,8 +240,8 @@
 				datasets: [
 					{
 						label: 'Used',
-						borderColor: daisyColor('--p'),
-						backgroundColor: daisyColor('--p', 50),
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $analytics.fs_used,
 						yAxisID: 'y'
@@ -266,10 +268,10 @@
 				scales: {
 					x: {
 						grid: {
-							color: daisyColor('--bc', 10)
+							color: daisyColor('--color-base-content', 10)
 						},
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
 						display: false
 					},
@@ -278,7 +280,7 @@
 						title: {
 							display: true,
 							text: 'File System [KB]',
-							color: daisyColor('--bc'),
+							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
 								weight: 'bold'
@@ -287,11 +289,11 @@
 						position: 'left',
 						min: 0,
 						max: Math.round(Math.max(...$analytics.fs_total)),
-						grid: { color: daisyColor('--bc', 10) },
+						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
-						border: { color: daisyColor('--bc', 10) }
+						border: { color: daisyColor('--color-base-content', 10) }
 					}
 				}
 			}
@@ -303,8 +305,8 @@
 				datasets: [
 					{
 						label: 'Core Temperature',
-						borderColor: daisyColor('--p'),
-						backgroundColor: daisyColor('--p', 50),
+						borderColor: daisyColor('--color-primary'),
+						backgroundColor: daisyColor('--color-primary', 50),
 						borderWidth: 2,
 						data: $analytics.core_temp,
 						yAxisID: 'y'
@@ -331,10 +333,10 @@
 				scales: {
 					x: {
 						grid: {
-							color: daisyColor('--bc', 10)
+							color: daisyColor('--color-base-content', 10)
 						},
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
 						display: false
 					},
@@ -343,7 +345,7 @@
 						title: {
 							display: true,
 							text: 'Core Temperature [°C]',
-							color: daisyColor('--bc'),
+							color: daisyColor('--color-base-content'),
 							font: {
 								size: 16,
 								weight: 'bold'
@@ -352,11 +354,11 @@
 						position: 'left',
 						suggestedMin: 20,
 						suggestedMax: 100,
-						grid: { color: daisyColor('--bc', 10) },
+						grid: { color: daisyColor('--color-base-content', 10) },
 						ticks: {
-							color: daisyColor('--bc')
+							color: daisyColor('--color-base-content')
 						},
-						border: { color: daisyColor('--bc', 10) }
+						border: { color: daisyColor('--color-base-content', 10) }
 					}
 				}
 			}
@@ -367,6 +369,7 @@
 	});
 
 	function updateData() {
+		// 🌙
 		lpsChart.data.labels = $analytics.uptime;
 		lpsChart.data.datasets[0].data = $analytics.lps;
 		lpsChart.update('none');
@@ -425,10 +428,10 @@
 
 <SettingsCard collapsible={false}>
 	{#snippet icon()}
-		<Metrics  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
+		<Metrics class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span >System Metrics</span>
+		<span>System Metrics</span>
 		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div> <!-- 🌙 link to docs -->
 	{/snippet}
 
@@ -437,7 +440,7 @@
 			class="flex w-full flex-col space-y-1 h-60"
 			transition:slide|local={{ duration: 300, easing: cubicOut }}
 		>
-			<canvas bind:this={lpsChartElement}></canvas>
+			<canvas bind:this={lpsChartElement}></canvas> <!-- 🌙 -->
 		</div>
 	</div>
 	<div class="w-full overflow-x-auto">
@@ -448,7 +451,7 @@
 			<canvas bind:this={heapChartElement}></canvas>
 		</div>
 	</div>
-	{#if (Math.max(...$analytics.psram_size))}
+	{#if Math.max(...$analytics.psram_size)}
 		<div class="w-full overflow-x-auto">
 			<div
 				class="flex w-full flex-col space-y-1 h-60"

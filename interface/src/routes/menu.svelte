@@ -11,13 +11,14 @@
 	import Router from '~icons/tabler/router';
 	import AP from '~icons/tabler/access-point';
 	import Remote from '~icons/tabler/network';
-	import Control from '~icons/tabler/adjustments';
+	// import Control from '~icons/tabler/adjustments';
 	import Avatar from '~icons/tabler/user-circle';
 	import Logout from '~icons/tabler/logout';
 	import Copyright from '~icons/tabler/copyright';
 	import MQTT from '~icons/tabler/topology-star-3';
 	import NTP from '~icons/tabler/clock-check';
 	import Metrics from '~icons/tabler/report-analytics';
+	import Bug from '~icons/tabler/bug';
 	import { page } from '$app/state';
 	import { user } from '$lib/stores/user';
 	import StarIcon from '~icons/tabler/star';
@@ -61,34 +62,34 @@
 					feature: page.data.features.moonlight,
 				},
 				{
-					title: 'Editor',
+					title: 'Effects',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=editor',
+					href: '/moonbase/module?module=effects',
+					feature: page.data.features.moonlight,
+				},
+				{
+					title: 'Drivers',
+					icon: BulbIcon,
+					href: '/moonbase/module?module=drivers',
+					feature: page.data.features.moonlight,
+				},
+				{
+					title: 'Channels',
+					icon: BulbIcon,
+					href: '/moonbase/module?module=channels',
 					feature: page.data.features.moonlight,
 				},
 				{
 					title: 'Live Scripts',
 					icon: BulbIcon,
 					href: '/moonbase/module?module=liveScripts',
-					feature: page.data.features.moonlight,
-				},
-				{
-					title: 'Artnet',
-					icon: BulbIcon,
-					href: '/moonbase/module?module=artnet',
-					feature: page.data.features.moonlight,
-				},
-				{
-					title: 'Channel View',
-					icon: BulbIcon,
-					href: '/moonbase/module?module=ChannelView',
-					feature: page.data.features.moonlight,
+					feature: page.data.features.livescript,
 				},
 				{
 					title: 'Info',
 					icon: CPU,
-					href: '/moonbase/module?module=MoonLightInfo',
-					feature: page.data.features.moonbase,
+					href: '/moonbase/module?module=moonLightInfo',
+					feature: page.data.features.moonlight,
 				},
 			]
 		},
@@ -98,15 +99,27 @@
 			feature: page.data.features.moonbase,
 			submenu: [
 				{
-					title: 'File Manager',
+					title: 'Files',
 					icon: FilesIcon,
-					href: '/moonbase/files',
+					href: '/moonbase/filemanager',
 					feature: page.data.features.moonbase,
 				},
 				{
-					title: 'Instances',
+					title: 'Devices',
 					icon: CPU,
-					href: '/moonbase/module?module=instances',
+					href: '/moonbase/module?module=devices',
+					feature: page.data.features.moonbase,
+				},
+				{
+					title: 'Tasks',
+					icon: CPU,
+					href: '/moonbase/module?module=tasks',
+					feature: page.data.features.moonbase,
+				},
+				{
+					title: 'IO',
+					icon: CPU,
+					href: '/moonbase/module?module=inputoutput',
 					feature: page.data.features.moonbase,
 				},
 			]
@@ -173,6 +186,12 @@
 					feature: page.data.features.analytics
 				},
 				{
+					title: 'Core Dump',
+					icon: Bug,
+					href: '/system/coredump',
+					feature: page.data.features.coredump
+				},
+				{
 					title: 'Firmware Update',
 					icon: Update,
 					href: '/system/update',
@@ -211,7 +230,7 @@
 		<img src={logo} alt="Logo" class="h-12 w-12" />
 		<h1 class="px-4 text-2xl font-bold">{page.data.appName}</h1>
 	</a>
-	<ul class="menu rounded-box menu-vertical flex-nowrap overflow-y-auto">
+	<ul class="menu w-full rounded-box menu-vertical flex-nowrap overflow-y-auto">
 		{#each menuItems as menuItem, i (menuItem.title)}
 			{#if menuItem.feature}
 				<li>
@@ -254,12 +273,12 @@
 	</ul>
 
 	<div class="flex-col"></div>
-	<div class="flex-grow"></div>
+	<div class="grow"></div>
 
 	{#if page.data.features.security}
 		<div class="flex items-center">
 			<Avatar class="h-8 w-8" />
-			<span class="flex-grow px-4 text-xl font-bold">{$user.username}</span>
+			<span class="grow px-4 text-xl font-bold">{$user.username}</span>
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
@@ -285,7 +304,7 @@
 				><Discord class="h-5 w-5" /></a
 			>
 		{/if}
-		<div class="inline-flex flex-grow items-center justify-end text-sm">
+		<div class="inline-flex grow items-center justify-end text-sm">
 			<Copyright class="h-4 w-4" /><span class="px-2">{page.data.copyright}</span>
 		</div>
 	</div>

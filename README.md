@@ -1,5 +1,3 @@
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/MoonModules/MoonLight?utm_source=oss&utm_medium=github&utm_campaign=ewowi%2FMoonBase&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
-
 # MoonLight
 
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/2dee317b-70d0-4e25-be6a-779ff5fa94f0" />
@@ -11,15 +9,15 @@ MoonLight's core functionality is called MoonBase, Lighting specific functionali
 
 Examples of Moonbase functionality are monitor and manage a device, manage WiFi, Firmware updates, System Status and Restart. On top of that there is a file manager and an instance manager.
 
-MoonLight functionality is aimed at running effects on multiple lights. It's primarely focused on LED strips or LED panels but also DMX lights can be controlled via ArtNet. Depending on the type of ESP32 used and the amount of memory available, the number of LEDs can go up to 12288 at 120 FPS! Even more LEDs are possible, upon 65K at lower framerates. Also a large number of DMX lights can be controlled. MoonLight works with virtual and physical layers of lights and contains a node based model where nodes can be light layouts, effects and modifiers and run effects on a virtual layer and map the effect onto physical lights. 
+MoonLight functionality is aimed at running effects on multiple lights. It's primarely focused on LED strips or LED panels but also DMX lights can be controlled via Art-Net. Depending on the type of ESP32 used and the amount of memory available, the number of LEDs can go up to 12288 at 120 FPS! Even more LEDs are possible, upon 61440 (120x512) at lower framerates. Also a large number of DMX lights can be controlled. MoonLight works with virtual and physical layers of lights and contains a node based model where nodes can be light layouts, effects and modifiers and run effects on a virtual layer and map the effect onto physical lights. 
 
 <img width="400" src="https://github.com/user-attachments/assets/09143feb-1356-463c-bc23-6982ef3eeb42"/>
 
 MoonLight is a [MoonModules.org](https://moonmodules.org) project. MoonModules is a group of lighting enthusiasts who also made WLED MM and contribute to WLED. Where WLED (MM) is aimed at 1D and 2D effects and LED setups, MoonLight is build to support 2D and 3D effects and multiple light setups. MoonLight has been built from scratch using the experience gained working on WLED (MM).
 
-* Latest release can be found [here](https://github.com/MoonModules/MoonLight/releases). Release v0.5.6 is a developer release and works towards MoonLight 0.6.0 which is aimed at end users and is expected in September 2025. Containing presets controller pad, user friendly installer, physical and virtual driver for large displays, WLED audio sync and more.
+* Latest release can be found [here](https://github.com/MoonModules/MoonLight/releases). Release v0.5.9.2 is a developer release and works towards MoonLight 0.6.0 which is aimed at end users and is expected in September 2025. Containing presets controller pad, user friendly installer, physical and virtual driver for large displays, WLED audio sync and more.
 * Progress can be tracked in the [Kanban board](https://github.com/users/MoonModules/projects/2/)
-* Get started [here](https://moonmodules.org/MoonLight/general/gettingstarted/)
+* Get started [here](https://moonmodules.org/MoonLight/gettingstarted/overview/)
 * Follow us on [Discord/MoonLight](https://discord.gg/TC8NSUSCdV) or [Reddit](https://reddit.com/r/moonmodules).
 * See [Star-Mod-Base-Light-Moon-Svelte-Live](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live) how MoonLight evolved from StarMod, StarBase, StarLight, MoonBase. 
 * Documentation see [MoonLightDocs](https://moonmodules.org/MoonLight/).
@@ -34,10 +32,10 @@ MoonLight uses the following repositories:
 * [hoeken/PsychicHttp](https://github.com/hoeken/PsychicHttp): PsychicHttp is a webserver library for ESP32 + Arduino framework which uses the ESP-IDF HTTP Server library under the hood.
 * [theelims/PsychicMqttClient](https://github.com/theelims/PsychicMqttClient): Fully featured async MQTT 3.1.1 client for ESP32 with support for SSL/TLS and MQTT over WS. Uses the ESP-IDF MQTT client library under the hood and adds a powerful but easy to use API on top of it. Supports MQTT over TCP, SSL with mbedtls, MQTT over Websocket and MQTT over Websocket Secure.
 * [bblanchon/ArduinoJson](https://github.com/bblanchon/ArduinoJson): ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
-* [FastLED/FastLED](https://github.com/FastLED/FastLED): FastLED is a robust and massively parallel-led driver. Due to it's incredibly small compile size, high end devices can drive upto ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering means you can respond to user input while the leds render.
+* [FastLED/FastLED](https://github.com/FastLED/FastLED): FastLED is a robust and massively parallel-led driver. Due to it's incredibly small compile size, high end devices can drive upto ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering means you can respond to user input while the LEDs render.
 * [hpwit/ESPLiveScript](https://github.com/hpwit/ESPLiveScript): execute programs on the esp32 without having to load the code via any IDE (Arduino, VSCode)
-* [hpwit/I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver): This library is a new take on driving ws2812 leds with I2S on an esp32. It allows to drive up to 16 LED strips in parallel
-* [/hpwit/I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver): This library is a new take on driving ws2812 leds with I2S on an esp32. It allows to drive up to 120 LED strips !!! in parallel
+* [hpwit/I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver): This library is a new take on driving ws2812 LEDs with I2S on an esp32. It allows to drive up to 16 LED strips in parallel
+* [/hpwit/I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver): This library is a new take on driving ws2812 LEDs with I2S on an esp32. It allows to drive up to 120 LED strips !!! in parallel
 * [netmindz/WLED-sync](https://github.com/netmindz/WLED-sync): Library to create WLED compatible projects that sync their audio
 
 <img src="https://github.com/user-attachments/assets/c655d610-53eb-4dd3-8e9e-0cfa23b97bb4"/>
@@ -53,4 +51,4 @@ https://github.com/sponsors/ewowi
 
 ## Disclaimer
 
-Using this software is the users responsibility as it is not bug free. Therefore contributors of this repo are not reliable for anything including but not limited to spontaneous combustion of the entire led strip, the house and the inevitable heat death of the universe
+Using this software is the sole user's responsibility as it is not bug free. Therefore, contributors of this repo are not liable for anything, including but not limited to spontaneous combustion of the entire LED strip, the house and the inevitable heat death of the universe

@@ -28,7 +28,7 @@ def merge_bin(source, target, env):
     if not os.path.isdir(OUTPUT_DIR):
         os.mkdir(OUTPUT_DIR)
 
-    MERGED_BIN = "$PROJECT_DIR{}{}{}_{}_{}.bin".format(os.path.sep, OUTPUT_DIR, readFlag("APP_NAME"), env.get('PIOENV'), readFlag("APP_VERSION").replace(".", "-"))
+    MERGED_BIN = "$PROJECT_DIR{}{}{}_{}_{}_webflash.bin".format(os.path.sep, OUTPUT_DIR, readFlag("APP_NAME"), env.get('PIOENV'), readFlag("APP_VERSION").replace(".", "-"))
 
     # The list contains all extra images (bootloader, partitions, eboot) and
     # the final application binary
@@ -53,14 +53,14 @@ def merge_bin(source, target, env):
                 "$OBJCOPY",
                 "--chip",
                 BOARD_CONFIG.get("build.mcu", "esp32"),
-                "merge_bin",
+                "merge-bin", # 🌙 _ to -
                 "-o",
                 MERGED_BIN,
-                "--flash_mode",
+                "--flash-mode", # 🌙 _ to -
                 flash_mode,
-                "--flash_freq",
+                "--flash-freq", # 🌙 _ to -
                 flash_freq,
-                "--flash_size",
+                "--flash-size", # 🌙 _ to -
                 flash_size    
             ]
             + flash_images

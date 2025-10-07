@@ -6,7 +6,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2024 theelims
+ *   Copyright (C) 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -14,8 +14,10 @@
 
 #include <ESP32SvelteKit.h>
 
-std::vector<std::function<void()>> runInLoopTask; // 🌙 see .h
+//🌙 added to telemetry
 bool safeModeMB = false; // 🌙 see .h
+bool restartNeeded = false; // 🌙 see .h
+bool saveNeeded = false; // 🌙 see.h
 
 ESP32SvelteKit::ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEndpoints) : _server(server),
                                                                                           _numberEndpoints(numberEndpoints),
@@ -33,7 +35,7 @@ ESP32SvelteKit::ESP32SvelteKit(PsychicHttpServer *server, unsigned int numberEnd
                                                                                           _ntpStatus(server, &_securitySettingsService),
 #endif
 #if FT_ENABLED(FT_UPLOAD_FIRMWARE)
-                                                                                          _uploadFirmwareService(server, &_securitySettingsService),
+                                                                                          _uploadFirmwareService(server, &_securitySettingsService, &_socket),
 #endif
 #if FT_ENABLED(FT_DOWNLOAD_FIRMWARE)
                                                                                           _downloadFirmwareService(server, &_securitySettingsService, &_socket),
@@ -87,7 +89,7 @@ void ESP32SvelteKit::begin()
                 response.setCode(200);
                 response.setContentType(contentType.c_str());
                 response.addHeader("Content-Encoding", "gzip");
-                // response.addHeader("Cache-Control", "public, immutable, max-age=31536000"); // 🌙 commented as during dev changes a lot
+                response.addHeader("Cache-Control", "public, immutable, max-age=31536000"); // 🌙 this is original, still tweaking for best results...
                 response.setContent(content, len);
                 return response.send();
             };
@@ -118,9 +120,9 @@ void ESP32SvelteKit::begin()
         } });
 #endif
 
-    // Serve static resources from /config/ if set by platformio.ini
+    // Serve static resources from /.config/ if set by platformio.ini
 #if SERVE_CONFIG_FILES
-    _server->serveStatic("/config/", ESPFS, "/config/");
+    _server->serveStatic("/.config/", ESPFS, "/.config/"); // 🌙 use /.config (hidden folder)
 #endif
 
 #if defined(ENABLE_CORS)
@@ -157,30 +159,50 @@ void ESP32SvelteKit::begin()
 #if FT_ENABLED(FT_COREDUMP)
     _coreDump.begin();
 #endif
+
 #if FT_ENABLED(FT_UPLOAD_FIRMWARE)
     _uploadFirmwareService.begin();
 #endif
+
 #if FT_ENABLED(FT_DOWNLOAD_FIRMWARE)
     _downloadFirmwareService.begin();
 #endif
+
 #if FT_ENABLED(FT_NTP)
     _ntpSettingsService.begin();
     _ntpStatus.begin();
 #endif
+
 #if FT_ENABLED(FT_MQTT)
     _mqttSettingsService.begin();
     _mqttStatus.begin();
 #endif
+
 #if FT_ENABLED(FT_SECURITY)
     _authenticationService.begin();
     _securitySettingsService.begin();
 #endif
+
 #if FT_ENABLED(FT_SLEEP)
     _sleepService.begin();
+    _sleepService.attachOnSleepCallback([&]()
+                                        {   ESP_LOGI(SVK_TAG, "Attempting to stop server");
+                                            for (auto client : _server->getClientList())
+                                            {
+                                                client->close();
+                                            }
+                                            vTaskDelete(_loopTaskHandle);
+                                            ESP_LOGI(SVK_TAG, "Server stopped"); });
+#if FT_ENABLED(FT_MQTT)
+    _sleepService.attachOnSleepCallback([&]()
+                                        { _mqttSettingsService.disconnect(); });
 #endif
+#endif
+
 #if FT_ENABLED(FT_BATTERY)
     _batteryService.begin();
 #endif
+
 #if FT_ENABLED(FT_ANALYTICS)
     _analyticsService.begin();
 #endif
@@ -190,10 +212,10 @@ void ESP32SvelteKit::begin()
     xTaskCreatePinnedToCore(
         this->_loopImpl,            // Function that should be called
         "ESP32 SvelteKit Loop",     // Name of the task (for debugging)
-        4096,                       // Stack size (bytes)
+        6144,                       // Stack size (bytes) 🌙4096 to 6144
         this,                       // Pass reference to this class instance
         (tskIDLE_PRIORITY + 2),     // task priority
-        NULL,                       // Task handle
+        &_loopTaskHandle,           // Task handle
         ESP32SVELTEKIT_RUNNING_CORE // Pin to application core
     );
 }
@@ -256,16 +278,28 @@ void ESP32SvelteKit::_loop()
             lastTime = millis();
             _analyticsService.lps = lps; // 🌙
             lps = 0; // 🌙
-            #if FT_BATTERY && BATTERY_PIN && BATTERY_MV
-                float mV = analogReadMilliVolts(BATTERY_PIN) * 2.0;
-                float perc = (mV - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%
-                // ESP_LOGD("", "bat mV %f p:%f", mV, perc);
-                _batteryService.updateSOC(perc * 100);
+            // 🌙 
+            #if FT_BATTERY
+                #if BATTERY_PIN && BATTERY_MV
+                    float mVB = analogReadMilliVolts(BATTERY_PIN) * 2.0;
+                    float perc = (mVB - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%
+                    // ESP_LOGD("", "bat mVB %f p:%f", mVB, perc);
+                    _batteryService.updateSOC(perc * 100);
+                #endif
+                #ifdef VOLTAGE_PIN //see esp32-s3-stephanelec-16p
+                    float mV = random(100)/10.0;// analogReadMilliVolts(VOLTAGE_PIN) * 2.0; //don't remember why * 2
+                    _batteryService.updateVoltage(mV);
+                #endif
+                #ifdef CURRENT_PIN //see esp32-s3-stephanelec-16p
+                    float mC = random(100)/10.0;//analogReadMilliVolts(CURRENT_PIN); //limpkin, ReadAmps doesn't exist ... what is the range of values? 0.. ?
+                    _batteryService.updateCurrent(mC);
+                #endif
             #endif
 #ifdef TELEPLOT_TASKS
             Serial.printf(">ESP32SveltekitTask:%i:%i\n", millis(), uxTaskGetStackHighWaterMark(NULL));
 #endif
         }
         vTaskDelayUntil(&xLastWakeTime, ESP32SVELTEKIT_LOOP_INTERVAL / portTICK_PERIOD_MS);
+        vTaskDelay(1); //🌙 just to be sure 
     }
 }

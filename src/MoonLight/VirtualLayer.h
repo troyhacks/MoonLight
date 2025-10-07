@@ -3,10 +3,10 @@
     @file      VirtualLayer.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/general/utilities/
+           https://moonmodules.org/MoonLight/moonlight/overview/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
 #pragma once
@@ -20,28 +20,32 @@
 #include "PhysicalLayer.h"
 
 enum mapType {
-    m_color,
+    m_zeroLights,
     m_oneLight,
     m_moreLights,
     m_count //keep as last entry
   };
   
 struct PhysMap {
-    union {
-      struct {                 //condensed rgb
-        uint16_t rgb14: 14;    //14 bits (554 RGB)
-        uint8_t mapType:2;        //2 bits (4)
-      }; //16 bits
-      uint16_t indexP: 14;   //16384 one physical light (type==1) index to ledsP array
-      uint16_t indexes:14;  //16384 multiple physical lights (type==2) index in std::vector<std::vector<uint16_t>> mappingTableIndexes;
-    }; // 2 bytes  
-    
-    PhysMap() {
-      // ESP_LOGD(TAG, "Constructor");
-      mapType = m_color; // the default until indexP is added
-      rgb14 = 0;
-    }
-  };
+  union {
+    struct {                 //condensed rgb
+      uint16_t rgb14: 14;    //14 bits (554 RGB)
+      uint8_t mapType:2;        //2 bits (4)
+    }; //16 bits
+    uint16_t indexP: 14;   //16384 one physical light (type==1) index to ledsP array
+    uint16_t indexes:14;  //16384 multiple physical lights (type==2) index in std::vector<std::vector<uint16_t>> mappingTableIndexes;
+  }; // 2 bytes  
+  
+  PhysMap() {
+    // MB_LOGV(ML_TAG, "Constructor");
+    mapType = m_zeroLights; // the default until indexP is added
+    rgb14 = 0;
+  }
+};
+
+#define _1D 1
+#define _2D 2
+#define _3D 3
 
 class VirtualLayer {
 
@@ -49,24 +53,26 @@ class VirtualLayer {
 
   uint16_t nrOfLights = 256;
   Coord3D size = {16,16,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
-  Coord3D middle = {8,8,1}; //not 0,0,0 to prevent div0 eg in Octopus2D
+  Coord3D start = {0,0,0}, middle = size/2, end = size-1;//{UINT16_MAX,UINT16_MAX,UINT16_MAX}; //default
 
   //they will be reused to avoid fragmentation
-  std::vector<PhysMap> mappingTable;
-  std::vector<std::vector<uint16_t>> mappingTableIndexes;
+  std::vector<PhysMap, VectorRAMAllocator<PhysMap>> mappingTable;
+  std::vector<std::vector<uint16_t>, VectorRAMAllocator<std::vector<uint16_t>>> mappingTableIndexes;
   uint16_t mappingTableSizeUsed = 0; 
   uint16_t mappingTableIndexesSizeUsed = 0; 
 
-  PhysicalLayer *layerP; //physical leds the virtual leds are mapped to
-  std::vector<Node *> nodes;
+  PhysicalLayer *layerP; //physical LEDs the virtual LEDs are mapped to
+  std::vector<Node *, VectorRAMAllocator<Node *>> nodes;
 
   uint8_t fadeMin;
 
-  uint8_t requestMapPhysical = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
-  uint8_t requestMapVirtual = false; //collect requests to map as it is requested by setup and updateControl and only need to be done once
+  uint8_t effectDimension = _3D; //assuming 3D for the moment
+  uint8_t layerDimension = UINT8_MAX;
+
+  Coord3D prevSize; //to calculate size change
 
   VirtualLayer() {
-    ESP_LOGD(TAG, "constructor");
+    MB_LOGV(ML_TAG, "constructor");
   }
   
   ~VirtualLayer();
@@ -74,9 +80,9 @@ class VirtualLayer {
   void setup();
   void loop();
 
-  void resetMapping();
   void addIndexP(PhysMap &physMap, uint16_t indexP);
 
+  //position is by reference as within XYZ, the position can be modified, for efficiency reasons, don't declare an extra variable for that in XYZ
   uint16_t XYZ(Coord3D &position);
   
   uint16_t XYZUnModified(const Coord3D &position) const {
@@ -84,7 +90,16 @@ class VirtualLayer {
   }
 
   void setRGB(const uint16_t indexV, CRGB color) {
-    setLight(indexV, color.raw, layerP->lights.header.offsetRGB, sizeof(color));
+    if (layerP->lights.header.offsetWhite != UINT8_MAX && layerP->lights.header.offsetWhite == layerP->lights.header.offsetRGB + 3) { //RGBW adjacent
+      uint8_t rgbw[4];
+      rgbw[3] = MIN(MIN(color.r, color.g), color.b) * 0.8;// >> 1; //calc white channel, only do half of the minimum as not to turn off one of RGB completely (to be tweaked)
+      rgbw[0] = color.red - rgbw[3]; //subtract from other channels
+      rgbw[1] = color.green - rgbw[3];
+      rgbw[2] = color.blue - rgbw[3];
+      setLight(indexV, rgbw, layerP->lights.header.offsetRGB, sizeof(rgbw));
+    }
+    else 
+      setLight(indexV, color.raw, layerP->lights.header.offsetRGB, sizeof(color));
   }
   void setRGB(Coord3D pos, CRGB color) { setRGB(XYZ(pos), color); }
 
@@ -94,7 +109,8 @@ class VirtualLayer {
   }
   void setWhite(Coord3D pos, const uint8_t value) { setWhite(XYZ(pos), value); }
 
-  void setBrightness(const uint16_t indexV, const uint8_t value) {
+  void setBrightness(const uint16_t indexV, uint8_t value) {
+    value = (value * layerP->lights.header.brightness) / 255;
     if (layerP->lights.header.offsetBrightness != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness, sizeof(value));
   }
@@ -148,216 +164,154 @@ class VirtualLayer {
   }
   void setRGB3(Coord3D pos, CRGB color) { setRGB3(XYZ(pos), color); }
 
-  void setBrightness2(const uint16_t indexV, const uint8_t value) {
+  void setBrightness2(const uint16_t indexV, uint8_t value) {
+    value = (value * layerP->lights.header.brightness) / 255;
     if (layerP->lights.header.offsetBrightness2 != UINT8_MAX)
       setLight(indexV, &value, layerP->lights.header.offsetBrightness2, sizeof(value));
   }
   void setBrightness2(Coord3D pos, const uint8_t value) { setBrightness2(XYZ(pos), value); }
 
-
   void setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length);
 
   CRGB getRGB(const uint16_t indexV) {
-    return getLight(indexV, layerP->lights.header.offsetRGB);
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB);
   }
   CRGB getRGB(Coord3D pos) { return getRGB(XYZ(pos)); }
 
-  CRGB getLight(const uint16_t indexV, uint8_t offset) const;
+  void addRGB(const Coord3D &position, const CRGB &color) {setRGB(position, getRGB(position) + color);}
+
+  void blendColor(const uint16_t indexV, const CRGB& color, uint8_t blendAmount) {
+    setRGB(indexV, blend(color, getRGB(indexV), blendAmount));
+  }
+  void blendColor(Coord3D &position, const CRGB& color, const uint8_t blendAmount) {blendColor(XYZ(position), color, blendAmount);}
+
+  uint8_t getWhite(const uint16_t indexV) {
+    return getLight<uint8_t>(indexV, layerP->lights.header.offsetWhite);
+  }
+  uint8_t getWhite(Coord3D pos) { return getWhite(XYZ(pos)); }
+
+  CRGB getRGB1(const uint16_t indexV) {
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB1);
+  }
+  CRGB getRGB1(Coord3D pos) { return getRGB1(XYZ(pos)); }
+
+  CRGB getRGB2(const uint16_t indexV) {
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB2);
+  }
+  CRGB getRGB2(Coord3D pos) { return getRGB2(XYZ(pos)); }
+
+  CRGB getRGB3(const uint16_t indexV) {
+    return getLight<CRGB>(indexV, layerP->lights.header.offsetRGB3);
+  }
+  CRGB getRGB3(Coord3D pos) { return getRGB3(XYZ(pos)); }
+
+  template <typename T>
+  T getLight(const uint16_t indexV, uint8_t offset) const;
 
   //to be called in loop, if more then one effect
-  // void setLightsToBlend(); //uses leds
+  // void setLightsToBlend(); //uses LEDs
 
-  void fadeToBlackBy(const uint8_t fadeBy);
+  void fadeToBlackBy(const uint8_t fadeBy = 255);
   void fadeToBlackMin();
-
-  //set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
-  void resetLights();
 
   void fill_solid(const CRGB& color);
   void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
 
-  //mapLayout calls addLayoutPre, addLayout for each node and addLayoutPost and expects pass to be set (1 or 2)
-  void mapLayout();
   void addLayoutPre();
   void addLayoutPost();
   
   //addLight is called by addLayout for each light in the layout
   void addLight(Coord3D position);
 
-  void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) {
+    //checks if a virtual light is mapped to a physical light (use with XY() or XYZ() to get the indexV)
+  bool isMapped(int indexV) const {
+    return indexV < mappingTableSizeUsed && (mappingTable[indexV].mapType == m_oneLight || mappingTable[indexV].mapType == m_moreLights);
+  }
 
-    // WLEDMM shorten line according to depth
-    if (depth < UINT8_MAX) {
-      if (depth == 0) return;         // nothing to paint
-      if (depth<2) {x1 = x0; y1=y0; } // single pixel
-      else {                          // shorten line
-        x0 *=2; y0 *=2; // we do everything "*2" for better rounding
-        int dx1 = ((int(2*x1) - int(x0)) * int(depth)) / 255;  // X distance, scaled down by depth 
-        int dy1 = ((int(2*y1) - int(y0)) * int(depth)) / 255;  // Y distance, scaled down by depth
-        x1 = (x0 + dx1 +1) / 2;
-        y1 = (y0 + dy1 +1) / 2;
-        x0 /=2; y0 /=2;
-      }
-    }
-
-    const int16_t dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
-    const int16_t dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
-
-    // single pixel (line length == 0)
-    if (dx+dy == 0) {
-      setRGB({x0, y0, 0}, color);
-      return;
-    }
-
-    if (soft) {
-      // Xiaolin Wu’s algorithm
-      const bool steep = dy > dx;
-      if (steep) {
-        // we need to go along longest dimension
-        std::swap(x0,y0);
-        std::swap(x1,y1);
-      }
-      if (x0 > x1) {
-        // we need to go in increasing fashion
-        std::swap(x0,x1);
-        std::swap(y0,y1);
-      }
-      float gradient = x1-x0 == 0 ? 1.0f : float(y1-y0) / float(x1-x0);
-      float intersectY = y0;
-      for (uint8_t x = x0; x <= x1; x++) {
-        unsigned keep = float(0xFFFF) * (intersectY-int(intersectY)); // how much color to keep
-        unsigned seep = 0xFFFF - keep; // how much background to keep
-        uint8_t y = uint8_t(intersectY);
-        if (steep) std::swap(x,y);  // temporarily swap if steep
-        // pixel coverage is determined by fractional part of y co-ordinate
-        // WLEDMM added out-of-bounds check: "unsigned(x) < cols" catches negative numbers _and_ too large values
-        setRGB({x, y, 0}, blend(color, getRGB({x, y, 0}), keep));
-        uint8_t xx = x+uint8_t(steep);
-        uint8_t yy = y+uint8_t(!steep);
-        setRGB({xx, yy, 0}, blend(color, getRGB({xx, yy, 0}), seep));
-      
-        intersectY += gradient;
-        if (steep) std::swap(x,y);  // restore if steep
-      }
-    } else {
-      // Bresenham's algorithm
-      int err = (dx>dy ? dx : -dy)/2;   // error direction
-      for (;;) {
-        // if (x0 >= cols || y0 >= rows) break; // WLEDMM we hit the edge - should never happen
-        setRGB({x0, y0, 0}, color);
-        if (x0==x1 && y0==y1) break;
-        int e2 = err;
-        if (e2 >-dx) { err -= dy; x0 += sx; }
-        if (e2 < dy) { err += dx; y0 += sy; }
-      }
+  void blur1d(fract8 blur_amount)
+  {
+    // todo: check updated in wled-MM
+    const uint8_t keep = 255 - blur_amount;
+    const uint8_t seep = blur_amount >> 1;
+    CRGB carryover = CRGB::Black;
+    for( uint16_t i = 0; i < size.x; ++i) {
+        CRGB cur = getRGB(i);
+        CRGB part = cur;
+        part.nscale8( seep);
+        cur.nscale8( keep);
+        cur += carryover;
+        if( i) addRGB(i-1, part);
+        setRGB(i, cur);
+        carryover = part;
     }
   }
+
+  void blur2d(fract8 blur_amount)
+  {
+      blurRows(size.x, size.y, blur_amount);
+      blurColumns(size.x, size.y, blur_amount);
+  }
+
+  void blurRows(uint16_t width, uint16_t height, fract8 blur_amount)
+  {
+  /*    for (uint16_t row = 0; row < height; row++) {
+          CRGB* rowbase = leds + (row * width);
+          blur1d( rowbase, width, blur_amount);
+      }
+  */
+      // blur rows same as columns, for irregular matrix
+      uint8_t keep = 255 - blur_amount;
+      uint8_t seep = blur_amount >> 1;
+      for (uint16_t row = 0; row < height; row++) {
+          CRGB carryover = CRGB::Black;
+          for (uint16_t i = 0; i < width; i++) {
+              CRGB cur = getRGB(Coord3D(i, row));
+              CRGB part = cur;
+              part.nscale8( seep);
+              cur.nscale8( keep);
+              cur += carryover;
+              if( i) addRGB(Coord3D(i-1, row), part);
+              setRGB(Coord3D(i, row), cur);
+              carryover = part;
+          }
+      }
+  }
+
+  // blurColumns: perform a blur1d on each column of a rectangular matrix
+  void blurColumns(uint16_t width, uint16_t height, fract8 blur_amount)
+  {
+      // blur columns
+      uint8_t keep = 255 - blur_amount;
+      uint8_t seep = blur_amount >> 1;
+      for (uint16_t col = 0; col < width; ++col) {
+          CRGB carryover = CRGB::Black;
+          for (uint16_t i = 0; i < height; ++i) {
+              CRGB cur = getRGB(Coord3D(col, i));
+              CRGB part = cur;
+              part.nscale8( seep);
+              cur.nscale8( keep);
+              cur += carryover;
+              if( i) addRGB(Coord3D(col, i-1), part);
+              setRGB(Coord3D(col, i), cur);
+              carryover = part;
+          }
+      }
+  }
+
+  void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX);
 
   void drawLine3D(Coord3D a, Coord3D b, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) {
     drawLine3D(a.x, a.y, a.z, b.x, b.y, b.z, color, soft, depth);
   }
   //to do: merge with drawLine to support 2D and 3D
-  void drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX)
-  {
-        // WLEDMM shorten line according to depth
-    if (depth < UINT8_MAX) {
-      if (depth == 0) return;         // nothing to paint
-      if (depth<2) {x2 = x1; y2=y1; z2=z1;} // single pixel
-      else {                          // shorten line
-        x1 *=2; y1 *=2; z1 *=2; // we do everything "*2" for better rounding
-        int dx1 = ((int(2*x2) - int(x1)) * int(depth)) / 255;  // X distance, scaled down by depth 
-        int dy1 = ((int(2*y2) - int(y1)) * int(depth)) / 255;  // Y distance, scaled down by depth
-        int dz1 = ((int(2*z2) - int(z1)) * int(depth)) / 255;  // Y distance, scaled down by depth
-        x1 = (x1 + dx1 +1) / 2;
-        y1 = (y1 + dy1 +1) / 2;
-        z1 = (z1 + dz1 +1) / 2;
-        x1 /=2; y1 /=2; z1 /=2;
-      }
-    }
+  void drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX);
 
-    //to do implement soft
+  void drawCircle(int cx, int cy, uint8_t radius, CRGB col, bool soft);
 
-    //Bresenham
-    setRGB({x1, y1, z1}, color);
-    int dx = abs(x2 - x1);
-    int dy = abs(y2 - y1);
-    int dz = abs(z2 - z1);
-    int xs;
-    int ys;
-    int zs;
-    if (x2 > x1)
-      xs = 1;
-    else
-      xs = -1;
-    if (y2 > y1)
-      ys = 1;
-    else
-      ys = -1;
-    if (z2 > z1)
-      zs = 1;
-    else
-      zs = -1;
-  
-    // Driving axis is X-axis"
-    if (dx >= dy && dx >= dz) {
-      int p1 = 2 * dy - dx;
-      int p2 = 2 * dz - dx;
-      while (x1 != x2) {
-        x1 += xs;
-        if (p1 >= 0) {
-          y1 += ys;
-          p1 -= 2 * dx;
-        }
-        if (p2 >= 0) {
-          z1 += zs;
-          p2 -= 2 * dx;
-        }
-        p1 += 2 * dy;
-        p2 += 2 * dz;
-        setRGB({x1, y1, z1}, color);
-      }
-  
-      // Driving axis is Y-axis"
-    }
-    else if (dy >= dx && dy >= dz) {
-      int p1 = 2 * dx - dy;
-      int p2 = 2 * dz - dy;
-      while (y1 != y2) {
-        y1 += ys;
-        if (p1 >= 0) {
-          x1 += xs;
-          p1 -= 2 * dy;
-        }
-        if (p2 >= 0) {
-          z1 += zs;
-          p2 -= 2 * dy;
-        }
-        p1 += 2 * dx;
-        p2 += 2 * dz;
-        setRGB({x1, y1, z1}, color);
-      }
-  
-      // Driving axis is Z-axis"
-    }
-    else {
-      int p1 = 2 * dy - dz;
-      int p2 = 2 * dx - dz;
-      while (z1 != z2) {
-        z1 += zs;
-        if (p1 >= 0) {
-          y1 += ys;
-          p1 -= 2 * dz;
-        }
-        if (p2 >= 0) {
-          x1 += xs;
-          p2 -= 2 * dz;
-        }
-        p1 += 2 * dy;
-        p2 += 2 * dx;
-        setRGB({x1, y1, z1}, color);
-      }
-    }
-  }
+  //shift is used by drawText indicating which letter it is drawing
+  void drawCharacter(unsigned char chr, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0, uint16_t shiftChr = 0);
+
+  void drawText(const char * text, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0);
 
   Node *findLiveScriptNode(const char *animation);
 

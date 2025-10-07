@@ -9,7 +9,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -41,7 +41,7 @@
 #define FACTORY_GUEST_PASSWORD "guest"
 #endif
 
-#define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
+#define SECURITY_SETTINGS_FILE "/.config/securitySettings.json" // 🌙 use /.config (hidden folder)
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
 #define GENERATE_TOKEN_PATH "/rest/generateToken"

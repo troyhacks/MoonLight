@@ -5,7 +5,7 @@
    @Authors   https://github.com/MoonModules/MoonLight/commits/main
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact moonmodules@icloud.com
+   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 
    Not w-full!
 -->
@@ -25,7 +25,6 @@
 	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
     import {initCap, getTimeAgo} from '$lib/stores/moonbase_utilities';
-	import { fromJSON } from 'postcss';
 
     let { property, data = $bindable(), definition, onChange, changeOnInput} = $props();
 
@@ -107,7 +106,7 @@
 
 	function deleteItem(propertyName: string, index: number) {
 		// Check if item is currently been edited and delete as well
-		if (data[propertyName][index].nodeName === dataEditable.nodeName) { //todo: remove nodeName here...
+		if (data[propertyName][index].name === dataEditable.name) { //todo: remove name here...
 			addItem(propertyName);
 		}
 		// Remove item from array
@@ -189,7 +188,7 @@
                         {/if}
                     {/each}
                     {#if !page.data.features.security || $user.admin}
-                        <div class="flex-grow"></div>
+                        <div class="grow"></div>
                         <div class="space-x-0 px-0 mx-0">
                             <button
                                 class="btn btn-ghost btn-sm"
@@ -221,6 +220,7 @@
                 <ObjectArray property={propertyN} bind:data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
             {:else if propertyN.type == "controls"}
                 {#each dataEditable[propertyN.name] as control}
+                    <!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"range","default":64,"p":1070417419,"value":64} -->
                     <MultiInput property={control} bind:value={control.value} onChange={onChange} changeOnInput={changeOnInput}></MultiInput>
                 {/each}
             {:else}

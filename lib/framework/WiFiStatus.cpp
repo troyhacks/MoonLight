@@ -6,7 +6,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2024 theelims
+ *   Copyright (C) 2023 - 2025 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -45,7 +45,7 @@ void WiFiStatus::onStationModeConnected(WiFiEvent_t event, WiFiEventInfo_t info)
 
 void WiFiStatus::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
-    ESP_LOGI(SVK_TAG, "WiFi Disconnected. Reason code=%d", info.wifi_sta_disconnected.reason);
+    ESP_LOGI(SVK_TAG, "WiFi Disconnected. Reason code=%d%s", info.wifi_sta_disconnected.reason, info.wifi_sta_disconnected.reason==WIFI_REASON_NO_AP_FOUND?" (NO_AP_FOUND)":info.wifi_sta_disconnected.reason==WIFI_REASON_ASSOC_LEAVE?" (ASSOC_LEAVE)":""); //🌙 add tekst
 
 #ifdef SERIAL_INFO
     Serial.print("WiFi Disconnected. Reason code=");
@@ -55,7 +55,7 @@ void WiFiStatus::onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t in
 
 void WiFiStatus::onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
 {
-    ESP_LOGI(SVK_TAG, "WiFi Got IP. localIP=%s, hostName=%s", WiFi.localIP().toString().c_str(), WiFi.getHostname());
+    ESP_LOGI(SVK_TAG, "WiFi Got IP. localIP=http://%s, hostName=http://%s.local", WiFi.localIP().toString().c_str(), WiFi.getHostname()); //🌙make it clickable
 #ifdef SERIAL_INFO
     Serial.printf("WiFi Got IP. localIP=%s, hostName=%s\r\n", WiFi.localIP().toString().c_str(), WiFi.getHostname());
 #endif

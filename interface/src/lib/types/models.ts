@@ -15,6 +15,8 @@ export type WifiStatus = {
 export type WifiSettings = {
 	hostname: string;
 	connection_mode: number;
+	txPower: number; // 🌙
+	txPowerMeasured: number; // 🌙
 	wifi_networks: KnownNetworkItem[];
 };
 
@@ -64,6 +66,7 @@ export type BrokerSettings = {
 	mqtt_path: string;
 	name: string;
 	unique_id: string;
+	status_topic: string;
 };
 
 export type NTPStatus = {
@@ -94,18 +97,23 @@ export type Analytics = {
 	fs_total: number;
 	fs_used: number;
 	uptime: number;
-	lps: number;
+	lps: number; // 🌙
 };
 
 export type RSSI = {
 	rssi: number;
 	ssid: string;
 	safeMode: boolean; // 🌙 safeMode Indicates if the system is in safe mode
+	restartNeeded: boolean; // 🌙 restartNeeded Indicates if the system needs to be restarted
+	saveNeeded: boolean; // 🌙 saveNeeded Indicates that changes has been made which need to be saved (or canceled)
+	hostName: string; // 🌙 to show in title and statusbar
 };
 
 export type Battery = {
 	soc: number;
 	charging: boolean;
+	voltage: number; // 🌙
+	current: number; // 🌙
 };
 
 export type DownloadOTA = {
@@ -117,6 +125,9 @@ export type DownloadOTA = {
 export type StaticSystemInformation = {
 	esp_platform: string;
 	firmware_version: string;
+	firmware_target: string; // 🌙
+	firmware_date: string; // 🌙
+	platform_version: string; // 🌙
 	cpu_freq_mhz: number;
 	cpu_type: string;
 	cpu_rev: number;
@@ -128,7 +139,6 @@ export type StaticSystemInformation = {
 	flash_chip_size: number;
 	flash_chip_speed: number;
 	cpu_reset_reason: string;
-	safeMode: boolean; // 🌙 safeMode Indicates if the system is in safe mode
 };
 
 export type SystemInformation = Analytics & StaticSystemInformation;
@@ -148,4 +158,5 @@ export type MQTTSettings = {
 	client_id: string;
 	keep_alive: number;
 	clean_session: boolean;
+	message_interval_ms: number;
 };

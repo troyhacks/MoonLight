@@ -28,6 +28,7 @@
 	import type { SystemInformation, Analytics } from '$lib/types/models';
 	import { socket } from '$lib/stores/socket';
 	import { telemetry } from '$lib/stores/telemetry';
+	import Battery from '~icons/tabler/battery-automotive';
 
 	let systemInformation: SystemInformation = $state();
 
@@ -156,10 +157,10 @@
 
 <SettingsCard collapsible={false}>
 	{#snippet icon()}
-		<Health  class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
+		<Health class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
 	{/snippet}
 	{#snippet title()}
-		<span >System Status</span>
+		<span>System Status</span>
 		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div> <!-- 🌙 link to docs -->
 	{/snippet}
 
@@ -190,22 +191,40 @@
 					<div>
 						<div class="font-bold">Performance</div>
 						<div class="text-sm opacity-75">
-							{systemInformation.lps} loops/s
+							{systemInformation.lps} loops/s  <!-- 🌙 -->
 						</div>
 					</div>
 				</div>
 
-				{#if page.data.features.battery}
+				{#if page.data.features.battery && ($telemetry.battery.soc>=0 || $telemetry.battery.voltage>=0 || $telemetry.battery.current>=0)}
 					<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 						<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
-							<Power class="text-primary-content h-auto w-full scale-75" />
+							<Battery class="text-primary-content h-auto w-full scale-75" />
 						</div>
+						{#if $telemetry.battery.soc>=0}
 						<div>
 							<div class="font-bold">Battery</div>
 							<div class="text-sm opacity-75">
 								{$telemetry.battery.soc} %
 							</div>
 						</div>
+						{/if}
+						{#if $telemetry.battery.voltage>=0}
+						<div>
+							<div class="font-bold">Voltage</div>
+							<div class="text-sm opacity-75">
+								{$telemetry.battery.voltage.toFixed(1)} V <!-- // 🌙 -->
+							</div>
+						</div>
+						{/if}
+						{#if $telemetry.battery.current>=0}
+						<div>
+							<div class="font-bold">Current</div>
+							<div class="text-sm opacity-75">
+								{$telemetry.battery.current.toFixed(1)} A <!-- // 🌙 -->
+							</div>
+						</div>
+						{/if}
 					</div>
 				{/if}
 
@@ -216,13 +235,22 @@
 					<div>
 						<div class="font-bold">Memory</div>
 						<div class="text-sm opacity-75">
-							{(((systemInformation.total_heap-systemInformation.free_heap) / systemInformation.total_heap) * 100).toFixed(1)} % of {Math.round(systemInformation.total_heap / 1000).toLocaleString('en-US')} KB
-							<span>({Math.round(systemInformation.free_heap / 1000).toLocaleString('en-US')} KB free, Max alloc {Math.round(systemInformation.max_alloc_heap/1000).toLocaleString('en-US')} KB)</span>
+							{(
+								((systemInformation.total_heap - systemInformation.free_heap) /
+									systemInformation.total_heap) *
+								100
+							).toFixed(1)} % of {Math.round(systemInformation.total_heap / 1000).toLocaleString(
+								'en-US'
+							)} KB
+							<span
+								>({Math.round(systemInformation.free_heap / 1000).toLocaleString('en-US')} KB free, Max
+								alloc {Math.round(systemInformation.max_alloc_heap / 1000).toLocaleString('en-US')} KB)</span
+							>
 						</div>
 					</div>
 				</div>
 
-				{#if (systemInformation.psram_size)}
+				{#if systemInformation.psram_size}
 					<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 						<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
 							<Pyramid class="text-primary-content h-auto w-full scale-75" />
@@ -230,8 +258,11 @@
 						<div>
 							<div class="font-bold">PSRAM</div>
 							<div class="text-sm opacity-75">
-								{(((systemInformation.used_psram) / systemInformation.psram_size) * 100).toFixed(1)} % of {Math.round(systemInformation.psram_size / 1000).toLocaleString('en-US')} KB
-								<span>({Math.round(systemInformation.free_psram / 1000).toLocaleString('en-US')} KB free)</span>
+								{((systemInformation.used_psram / systemInformation.psram_size) * 100).toFixed(1)} %
+								of {Math.round(systemInformation.psram_size / 1000).toLocaleString('en-US')} KB
+								<span
+									>({Math.round(systemInformation.free_psram / 1000).toLocaleString('en-US')} KB free)</span
+								>
 							</div>
 						</div>
 					</div>
@@ -252,8 +283,7 @@
 
 							<span
 								>({Math.round(
-									(systemInformation.fs_total - systemInformation.fs_used) /
-									1000
+									(systemInformation.fs_total - systemInformation.fs_used) / 1000
 								).toLocaleString('en-US')}
 								KB free)</span
 							>
@@ -289,22 +319,10 @@
 
 				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
-						<Power class="text-primary-content h-auto w-full scale-75" />
-					</div>
-					<div>
-						<div class="font-bold">Safe mode</div>
-						<div class="text-sm opacity-75">
-							{systemInformation.safeMode}
-						</div>
-					</div>
-				</div>
-
-				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
-					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
 						<Sketch class="text-primary-content h-auto w-full scale-75" />
 					</div>
 					<div>
-						<div class="font-bold">Sketch</div>
+						<div class="font-bold">Firmware Size</div> <!-- 🌙 -->
 						<div class="flex flex-wrap justify-start gap-1 text-sm opacity-75">
 							<span>
 								{(
@@ -316,10 +334,22 @@
 
 							<span>
 								({Math.round(
-									(systemInformation.free_sketch_space - systemInformation.sketch_size) /
-									1000
+									(systemInformation.free_sketch_space - systemInformation.sketch_size) / 1000
 								).toLocaleString('en-US')} KB free)
 							</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- 🌙 -->
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<CPP class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">Firmware Target</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.firmware_target}
 						</div>
 					</div>
 				</div>
@@ -336,14 +366,28 @@
 					</div>
 				</div>
 
+				<!-- 🌙 -->
 				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
-						<CPU class="text-primary-content h-auto w-full scale-75" />
+						<CPP class="text-primary-content h-auto w-full scale-75" />
 					</div>
 					<div>
-						<div class="font-bold">Chip</div>
+						<div class="font-bold">Firmware Date</div>
 						<div class="text-sm opacity-75">
-							{systemInformation.cpu_type} Rev {systemInformation.cpu_rev}
+							{systemInformation.firmware_date}
+						</div>
+					</div>
+				</div>
+
+				<!-- 🌙 -->
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<CPP class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">Platform Version</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.platform_version}
 						</div>
 					</div>
 				</div>
@@ -356,6 +400,18 @@
 						<div class="font-bold">SDK Version</div>
 						<div class="text-sm opacity-75">
 							ESP-IDF {systemInformation.sdk_version} / Arduino {systemInformation.arduino_version}
+						</div>
+					</div>
+				</div>
+
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<CPU class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">Chip</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.cpu_type} Rev {systemInformation.cpu_rev}
 						</div>
 					</div>
 				</div>
@@ -387,7 +443,6 @@
 						</div>
 					</div>
 				</div>
-
 			</div>
 		{/await}
 	</div>
