@@ -28,7 +28,7 @@ static char* retainCstr(const char* cstr, char** ptr) {
   if (cstr != nullptr) {
 
     size_t size = strlen(cstr) + 1;
-    *ptr = (char*)heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    *ptr = (char*)heap_caps_malloc_prefer(size, 2,MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL);
 
     if (*ptr) {
       strcpy(*ptr, cstr);
