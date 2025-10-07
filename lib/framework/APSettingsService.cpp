@@ -95,13 +95,13 @@ void APSettingsService::startAP()
     // if (WiFi.getMode() != WIFI_OFF) WiFi.mode(WIFI_OFF);
     // delay(100); // Allow time for the radio to shut down.
 
-    // WiFi.mode(WIFI_MODE_AP);
+    WiFi.mode(WIFI_MODE_AP);
     delay(100); // Allow time for the radio to start up.
 
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str(), _state.channel, _state.ssidHidden, _state.maxClients);
     delay(100); // 🌙 give some time for the AP to start
-#if CONFIG_IDF_TARGET_ESP32C3 | LOLIN_WIFI_FIX // 🌙
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(LOLIN_WIFI_FIX) // 🌙
     WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
 #endif
     if (!_dnsServer)
