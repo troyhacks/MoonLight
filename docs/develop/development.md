@@ -33,7 +33,7 @@
 * CI automation (Generate daily builds in Github and use by installer)
 * Palettes: more, custom, audio reactive
 
-Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg/4rSTthvKHe)
+Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg/TC8NSUSCdV)
 
 ## Pull Requests
 
