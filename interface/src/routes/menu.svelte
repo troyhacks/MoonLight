@@ -133,31 +133,31 @@
 				{
 					title: 'WiFi Station',
 					icon: Router,
-					href: '/wifi/sta',
+					href: '/network/sta',
 					feature: true
 				},
 				{
 					title: 'Access Point',
 					icon: AP,
-					href: '/wifi/ap', 
+					href: '/network/ap', 
 					feature: true
 				},
 				{
 					title: 'Ethernet',
 					icon: Router,
-					href: '/wifi/ethernet',
+					href: '/network/ethernet',
 					feature: page.data.features.ethernet
 				},
 				{
 					title: 'MQTT',
 					icon: MQTT,
-					href: '/connections/mqtt',
+					href: '/network/mqtt',
 					feature: page.data.features.mqtt
 				},
 				{
 					title: 'NTP',
 					icon: NTP,
-					href: '/connections/ntp',
+					href: '/network/ntp',
 					feature: page.data.features.ntp
 				}
 			]
