@@ -19,15 +19,9 @@ The Drivers module defines layers and drivers.
     * Reorder: Nodes can be reordered, defining the order of executions (layouts, which layout is first in the chain of lights. Drivers and utilities: no difference)
     * Controls. A node can be switched on and off and has custom controls, which defines the parameters of the node
 
-## Emoji coding:
-
-* ☸️ Driver
-* ♫ Audio reactive FFT based
-* ♪ Audio reactive volume based
-
 ## Driver ☸️ nodes
 
-| Name | Controls | Preview | Remarks
+| Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
 | ArtNet | | | |
 | FastLED Driver | | | Sends LED output to ESP32 gpio pins |

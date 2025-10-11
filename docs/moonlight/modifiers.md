@@ -11,13 +11,13 @@ A modifier (💎) is an effect on an effect. It can change the size of the virtu
 
 Modifier
 
-| Name | Controls | Preview | Remarks
+| Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
 | Checkerboard | | | |
 | Circle | | | |
 | Mirror | | | |
 | Multiply | | | |
-| RippleYZ | shrink: shrinks the original size to towardsY and Z, towardsY: copies X into Y, towardsZ: copies XY into Z | | Takes lights of an effect and copies them to other lights. E.g. 1D effect will be rippled to 2D, 2D effect will be rippled to 3D |
-| Pinwheel | **Swirl**: option to bend the pinwheel., **Reverse** option., **Rotation Symmetry**: Controls the rotational symmetry of the pattern., **Petals** option to adjust the number of petals., **Ztwist** option for 3D fixtures to twist the pattern along the z-axis. | | Projects 1D/2D effects onto 2D/3D fixtures in a pinwheel pattern. The virtual layer width is the number of petals. The height is the distance from center to corner |
+| RippleYZ | | shrink: shrinks the original size to towardsY and Z, towardsY: copies X into Y, towardsZ: copies XY into Z | Takes lights of an effect and copies them to other lights. E.g. 1D effect will be rippled to 2D, 2D effect will be rippled to 3D |
+| Pinwheel | | **Swirl**: option to bend the pinwheel., **Reverse** option., **Rotation Symmetry**: Controls the rotational symmetry of the pattern., **Petals** option to adjust the number of petals., **Ztwist** option for 3D fixtures to twist the pattern along the z-axis. | Projects 1D/2D effects onto 2D/3D fixtures in a pinwheel pattern. The virtual layer width is the number of petals. The height is the distance from center to corner |
 | Rotate | | | |
 | Transpose | | | |

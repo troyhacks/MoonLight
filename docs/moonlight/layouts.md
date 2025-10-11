@@ -16,11 +16,11 @@ A layout (🚥) defines what lights are connected to MoonLight. It defines the c
 
     Set pins carefully. There is a check if a specific pin can be used for output / driving LEDs. See also the IO module. But not 100% garanteed. E.g pin 16 on esp32-d0-wrover crashes...
 
-| Name | Controls | Preview | Remarks
+| Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| Panel | pin: to do add more pins | | Defines a 2D panel with width and height |
+| Panel | | pin: to do add more pins | Defines a 2D panel with width and height |
 | Panels | | | |
-| Cube | pin: to do add more pins | | Panel layout + depth |
+| Cube | | pin: to do add more pins | Panel layout + depth |
 | Rings | | | |
 | Wheel | | | |
 | HumanSizedCube | | | |

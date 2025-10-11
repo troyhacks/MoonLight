@@ -30,57 +30,58 @@ The Effects module defines effects and modifiers. They run in a 'layer'.
     * Reorder: Nodes can be reordered, defining the order of executions (effects: which effect on top of the other effect. Modifiers: which modifier is done first, e.g. circle then multiply will yield to a different result than multiply then circle)
     * Controls. A node can be switched on and off and has custom controls, which defines the parameters of the node (e.g. effect speed).
 
-## Emoji coding:
-
-* 🔥 Effect
-* 🚨 Moving head color effect
-* 🗼 Moving head move effect
-* 💎 Modifier
-* 🎨 Using palette
-* 💡 WLED origin
-* 💫 MoonLight origin
-* ♫ Audio reactive FFT based
-* ♪ Audio reactive volume based
-* 🧊 also works on 3D
-
 ## Effect 🔥 Nodes
 🚧
 Precompiled effects can be found in [effects](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes/Effects/Effects.h)
 
-| Name | Controls | Preview | Remarks
+### MoonLight effects
+
+| Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| Solid | <img width="320" src="https://github.com/user-attachments/assets/844bdbf1-b42b-4b5c-94f9-d1334bce2b10" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_000.gif) | Sends a solid RGB to all lights. Can be used as background to other effects, order it before other effects |
-| BouncingBalls | <img width="320" src="https://github.com/user-attachments/assets/30aa2614-d891-4d39-a789-72026f7ab036" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_091.gif) | |
-| Blurz | <img width="320" src="https://github.com/user-attachments/assets/b8f4111d-1f78-4ac0-a0f9-17909ad78599" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM163.gif) | |
-| DistortionWaves | <img width="320" src="" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_124.gif) | |
-| FreqMatrix | <img width="320" src="" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_138.gif) | |
-| GameOfLife | <img width="320" src="https://github.com/user-attachments/assets/18498c30-b249-4390-bfdf-084deedbfc49" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_172.gif) | |
-| GEQ | <img width="320" src="https://github.com/user-attachments/assets/ca485d1e-e6e4-4b4a-910f-eed7fde7a21f" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM139.gif) | |
-| GEQ3D | | | |
-| FreqSaws | <img width="320" src="https://github.com/user-attachments/assets/78828181-c1b3-4d0f-85dc-356ced10fcd9"/> | | |
 | Lines | | | |
-| Lissajous | <img width="320" src="https://github.com/user-attachments/assets/a28c19a7-012a-49bf-aff1-6b414c9d08dd" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM176.gif) | |
 | MoonMan | | | if USE_M5UNIFIED |
-| Noise2D | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_146.gif) | |
-| NoiseMeter | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_136.gif) | |
-| PaintBrush | | | |
 | Particles | | | |
-| PopCorn | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_095.gif) | |
 | Rainbow | | | |
 | Random | | | |
 | Ripples | | | |
 | RubiksCube | | | |
-| ScrollingText | Speed: scrolling speed if the text is wider then the display width, Font: Different font sizes, Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC) | | Shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended) |
+| ScrollingText | | Speed: scrolling speed if the text is wider then the display width, Font: Different font sizes, Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC) | Shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended) |
 | Sinus | | | |
 | SphereMove | | | |
 | StarField | | | |
 | Praxis | | | |
-| Waverly | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM165.gif) | |
 | Wave | | | |
 | FixedRectangle | | | |
 
+### MoonModules effects
+
+| Name | Preview | Controls | Remarks
+| ---- | ----- | ---- | ---- |
+| GEQ3D | | | |
+| PaintBrush | | | |
+| GameOfLife | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_172.gif) | <img width="320" src="https://github.com/user-attachments/assets/18498c30-b249-4390-bfdf-084deedbfc49" /> | |
+
+
+### WLED effects
+
+| Name | Preview | Controls | Remarks
+| ---- | ----- | ---- | ---- |
+| Solid | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_000.gif) | <img width="320" src="https://github.com/user-attachments/assets/844bdbf1-b42b-4b5c-94f9-d1334bce2b10" /> | Sends a solid RGB to all lights. Can be used as background to other effects, order it before other effects |
+| BouncingBalls | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_091.gif) | <img width="320" src="https://github.com/user-attachments/assets/30aa2614-d891-4d39-a789-72026f7ab036" /> | |
+| Blurz | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM163.gif) | <img width="320" src="https://github.com/user-attachments/assets/b8f4111d-1f78-4ac0-a0f9-17909ad78599" /> | |
+| DistortionWaves | | <img width="320" src="" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_124.gif) |
+| FreqMatrix | | <img width="320" src="" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_138.gif) |
+| GEQ | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM139.gif) | <img width="320" src="https://github.com/user-attachments/assets/ca485d1e-e6e4-4b4a-910f-eed7fde7a21f" /> | |
+| FreqSaws | | <img width="320" src="https://github.com/user-attachments/assets/78828181-c1b3-4d0f-85dc-356ced10fcd9"/> | |
+| Lissajous | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM176.gif) | <img width="320" src="https://github.com/user-attachments/assets/a28c19a7-012a-49bf-aff1-6b414c9d08dd" /> | |
+| Noise2D | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_146.gif) | | |
+| NoiseMeter | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_136.gif) | | |
+| PopCorn | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_095.gif) | | |
+| Waverly | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM165.gif) | | |
+
 ### Moving head effects
-| Name | Controls | Preview | Remarks
+
+| Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
 | Troy1Color | | | |
 | Troy1Move | | | |

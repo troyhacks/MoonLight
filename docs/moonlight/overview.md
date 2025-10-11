@@ -100,3 +100,21 @@ MoonLight
     * Live Scripts
 
 🥜: MoonBase functionality which is specific for MoonLight but will be refactored to generic MoonLight functionality
+
+## Emoji coding
+
+Effects, Modifiers, Layouts and drivers use emoji's to visualize their usage. See below for an overview:
+
+* 🔥 Effect
+    * 🎨 Using palette
+    * 💡 WLED origin
+    * 💫 MoonLight origin
+    * 🚨 Moving head color effect
+    * 🗼 Moving head move effect
+* 💎 Modifier
+* 🚥 Layout
+* ☸️ Driver
+
+* ♫ Audio reactive FFT based
+* ♪ Audio reactive volume based
+* 🧊 3D supported (goals is that everything is 3D supported but it is 🚧)
