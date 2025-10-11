@@ -53,7 +53,7 @@ static const uint8_t ART_NET_HEADER[] = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00
 //11: Low byte of the Art-Net protocol revision number. Current value 14
 #include <AsyncUDP.h>
 
-class ArtNetDriverMod: public DriverNode {
+class ArtNetDriver: public DriverNode {
   public:
 
   static const char * name() {return "Art-Net Driver ☸️";}
@@ -85,7 +85,7 @@ class ArtNetDriverMod: public DriverNode {
   void loop() override;
 };
 
-class FastLEDDriverMod: public Node {
+class FastLEDDriver: public Node {
   public:
 
   static const char * name() {return "FastLED Driver ☸️";}
@@ -116,7 +116,7 @@ class FastLEDDriverMod: public Node {
 
 };
 
-class HUB75DriverMod: public Node {
+class HUB75Driver: public Node {
   public:
 
   static const char * name() {return "HUB75 Driver ☸️🚧";}
@@ -129,7 +129,7 @@ class HUB75DriverMod: public Node {
   void addLayout() override;
 };
 
-class PhysicalDriverMod: public DriverNode {
+class PhysicalDriver: public DriverNode {
   public:
 
   static const char * name() {return "Physical Driver ☸️";}
@@ -150,10 +150,10 @@ class PhysicalDriverMod: public DriverNode {
 
   void addLayout() override;
 
-  ~PhysicalDriverMod() override;
+  ~PhysicalDriver() override;
 };
 
-class VirtualDriverMod: public DriverNode {
+class VirtualDriver: public DriverNode {
   public:
 
   static const char * name() {return "Virtual Driver ☸️🚧";}
@@ -165,7 +165,7 @@ class VirtualDriverMod: public DriverNode {
 
   void addLayout() override;
 };
-class ParlioDriverMod: public DriverNode {
+class ParlioDriver: public DriverNode {
   public:
 
   static const char * name() {return "Parallel IO Driver ☸️🚧";}
@@ -180,7 +180,7 @@ class ParlioDriverMod: public DriverNode {
 
   void loop() override;
 
-  ~ParlioDriverMod() override;
+  ~ParlioDriver() override;
   
 };
 

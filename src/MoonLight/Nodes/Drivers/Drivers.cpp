@@ -189,7 +189,7 @@ inline void DriverNode::reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *li
     packetRGBChannel[layerV->layerP->lights.header.offsetWhite] = ledsDriver.__white_map[lightsRGBChannel[3]];
 }
 
-void ArtNetDriverMod::setup() {
+void ArtNetDriver::setup() {
 
   DriverNode::setup();
 
@@ -203,7 +203,7 @@ void ArtNetDriverMod::setup() {
   memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER)); // copy in the Art-Net header.
 }
 
-bool ArtNetDriverMod::writePackage() {
+bool ArtNetDriver::writePackage() {
   // for (int i=0; i< 18+packetSize;i++) Serial.printf(" %d", packet_buffer[i]);Serial.println();
   // set the parts of the Art-Net packet header that change:
   packet_buffer[14] = universe; //The low byte of the 15 bit Port-Address to which this packet is destined
@@ -222,7 +222,7 @@ bool ArtNetDriverMod::writePackage() {
   return true;
 }
 
-void ArtNetDriverMod::loop() {
+void ArtNetDriver::loop() {
 
   DriverNode::loop();
 
@@ -314,7 +314,7 @@ void ArtNetDriverMod::loop() {
   #define RGBW_CALL
 #endif
 
-  void  FastLEDDriverMod::setup() {
+  void  FastLEDDriver::setup() {
     hasLayout = true; //so addLayout is called if layout changes (works for FASTLED)
 
     addControl(maxPower, "maxPower", "number", 0, 100);
@@ -325,7 +325,7 @@ void ArtNetDriverMod::loop() {
     addControl(usesRMT5, "usesRMT5", "checkbox", 0, 20, true);
   }
 
-  void  FastLEDDriverMod::addLayout() {
+  void  FastLEDDriver::addLayout() {
 
     if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
       // if (safeModeMB) {
@@ -562,7 +562,7 @@ void ArtNetDriverMod::loop() {
 
   }
 
-  void  FastLEDDriverMod::loop() {
+  void  FastLEDDriver::loop() {
     if (FastLED.count()) {
       if (FastLED.getBrightness() != layerV->layerP->lights.header.brightness) {
         MB_LOGD(ML_TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
@@ -586,7 +586,7 @@ void ArtNetDriverMod::loop() {
     }
   }
 
-  void FastLEDDriverMod::onUpdate(String &oldValue, JsonObject control) {
+  void FastLEDDriver::onUpdate(String &oldValue, JsonObject control) {
     Node::onUpdate(oldValue, control);
 
     if (control["name"] == "maxPower") {
@@ -595,15 +595,15 @@ void ArtNetDriverMod::loop() {
     }
   }
 
-  void HUB75DriverMod::setup() {
+  void HUB75Driver::setup() {
     hasLayout = true; //so addLayout is called if needed
   }
-  void HUB75DriverMod::addLayout() {
+  void HUB75Driver::addLayout() {
   }
-  void HUB75DriverMod::loop() {
+  void HUB75Driver::loop() {
   }
 
-  void  PhysicalDriverMod::setup() {
+  void  PhysicalDriver::setup() {
 
     hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
 
@@ -614,7 +614,7 @@ void ArtNetDriverMod::loop() {
     #endif
   }
 
-  void PhysicalDriverMod::addLayout() {
+  void PhysicalDriver::addLayout() {
     #if HP_ALL_DRIVERS
       if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
 
@@ -780,7 +780,7 @@ void ArtNetDriverMod::loop() {
     #endif
   }
 
-  void PhysicalDriverMod::loop() {
+  void PhysicalDriver::loop() {
     #if HP_ALL_DRIVERS
       if (!initDone) return;
 
@@ -804,7 +804,7 @@ void ArtNetDriverMod::loop() {
     #endif
   }
 
-  PhysicalDriverMod::~PhysicalDriverMod() {
+  PhysicalDriver::~PhysicalDriver() {
     #if HP_ALL_DRIVERS
       MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
@@ -823,17 +823,17 @@ void ArtNetDriverMod::loop() {
     #endif
   }
   
-  void VirtualDriverMod::setup() {
+  void VirtualDriver::setup() {
     hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
     DriverNode::setup();
   }
-  void VirtualDriverMod::addLayout() {
+  void VirtualDriver::addLayout() {
   }
-  void VirtualDriverMod::loop() {
+  void VirtualDriver::loop() {
     DriverNode::loop();
   }
 
-  void ParlioDriverMod::setup() {
+  void ParlioDriver::setup() {
     hasLayout = true; //so addLayout is called if needed 
 
     DriverNode::setup(); //adds maxPower and lights preset (rgb, rgbw, etc) control
@@ -842,7 +842,7 @@ void ArtNetDriverMod::loop() {
 
   }
 
-  void ParlioDriverMod::onUpdate(String &oldValue, JsonObject control) {
+  void ParlioDriver::onUpdate(String &oldValue, JsonObject control) {
     Node::onUpdate(oldValue, control);
 
     if (control["name"] == "whatever") {
@@ -850,7 +850,7 @@ void ArtNetDriverMod::loop() {
     }
   }
 
-  void ParlioDriverMod::addLayout() {
+  void ParlioDriver::addLayout() {
     if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
 
       if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
@@ -897,7 +897,7 @@ void ArtNetDriverMod::loop() {
     }
   }
 
-  void ParlioDriverMod::loop() {
+  void ParlioDriver::loop() {
     DriverNode::loop(); //checks for changes in brightness and rgb color corrections and update the lut tables, also using maxPower.
 
     //driver.show();     // process layerV->layerP->lights.channels (pka leds array) using LUT
@@ -908,7 +908,7 @@ void ArtNetDriverMod::loop() {
     ledsDriver.__white_map[0];
   }
 
-  ParlioDriverMod::~ParlioDriverMod() {
+  ParlioDriver::~ParlioDriver() {
     // driver is deleted,so delete whatever was allocated
   }
 

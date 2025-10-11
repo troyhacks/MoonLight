@@ -14,7 +14,7 @@
 #include <WLED-sync.h> // https://github.com/netmindz/WLED-sync
 #include <WiFi.h>
 
-class AudioSyncMod: public Node {
+class AudioSyncDriver: public Node {
   public:
 
   static const char * name() {return "AudioSync ☸️ ♫";}
@@ -43,6 +43,6 @@ class AudioSyncMod: public Node {
   }
 };
 
-static AudioSyncMod *audioNode;
+static AudioSyncDriver *audioNode;
 
 #endif
