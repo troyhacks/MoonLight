@@ -80,6 +80,11 @@ void FeaturesService::createJSON(JsonObject &root)
 #else
     root["security"] = false;
 #endif
+#if FT_ENABLED(FT_ETHERNET)
+    root["ethernet"] = true;
+#else
+    root["ethernet"] = false;
+#endif
 #if FT_ENABLED(FT_MQTT)
     root["mqtt"] = true;
 #else

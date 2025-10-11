@@ -15,6 +15,7 @@
  #include <Arduino.h>
 
 #ifdef BOARD_HAS_PSRAM
+
     // Threshold (bytes) above which allocations go into PSRAM
     constexpr size_t PSRAM_THRESHOLD = 0;  //87K free, works fine until now
     // constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
@@ -26,18 +27,47 @@
         if (size > PSRAM_THRESHOLD) {
             // Serial.printf("new %d\n", size);
             // Try PSRAM first
-            ptr = heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
+            ptr = heap_caps_malloc_prefer(size, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL);
             if (ptr) return ptr;  // success
         }
         // 
-        Serial.printf("new Fallback: internal RAM %d\n", size);
-        ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+        Serial.printf("'new' Fallback to internal RAM %d\n", size);
+        ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL);
+
+        if (!ptr) {
+            // Standard requires throwing std::bad_alloc on failure
+            Serial.printf("new: CRITICAL - failed to allocate %d bytes\n", size);
+            throw std::bad_alloc();
+        }
+
         return ptr;
     }
 
     void operator delete(void* ptr) noexcept {
-        // Serial.printf("delete\n");
+        // Serial.printf("'delete' using allocMB\n");
         heap_caps_free(ptr);
+    }
+
+    //sized delete overloads (C++14/17 compatibility)
+    void operator delete(void* ptr, size_t size) noexcept {
+        // Serial.printf("'delete' sized %d using allocMB\n", size);
+        heap_caps_free(ptr);
+    }
+
+    void* operator new[](size_t size) {
+        // Serial.printf("'new[]' using allocMB %d\n", size);
+        return operator new(size); // Reuse logic
+    }
+
+    void operator delete[](void* ptr) noexcept {
+        // Serial.printf("'delete[]' using allocMB\n");
+        operator delete(ptr); // Reuse logic
+    }
+
+    //sized delete overloads (C++14/17 compatibility)
+    void operator delete[](void* ptr, size_t size) noexcept {
+        // Serial.printf("'delete[]' sized %d using allocMB\n", size);
+        operator delete(ptr);
     }
 #endif
 

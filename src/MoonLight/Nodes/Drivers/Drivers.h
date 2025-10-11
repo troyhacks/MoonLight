@@ -13,24 +13,9 @@
 
 #if FT_MOONLIGHT
 
-#include <WLED-sync.h> // https://github.com/netmindz/WLED-sync
-#include <WiFi.h>
-
 //alphabetically from here
 
-//data shared between nodes
-static struct SharedData {
-  uint8_t bands[16]= {0}; // Our calculated freq. channel result table to be used by effects
-  float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
-  int16_t volumeRaw; 
-  float majorPeak; // FFT: strongest (peak) frequency
-  uint16_t fps;
-  uint8_t connectionStatus;
-  size_t connectedClients;
-  size_t clientListSize;
-} sharedData;
-
-#include "Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
+#include "../Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
 
 class DriverNode: public Node {
   uint16_t maxPower = 10;
@@ -99,38 +84,6 @@ class ArtNetDriverMod: public DriverNode {
   bool writePackage();
   void loop() override;
 };
-
-class AudioSyncMod: public Node {
-  public:
-
-  static const char * name() {return "AudioSync ☸️ ♫";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
-
-  WLEDSync sync;
-  bool init = false;
-
-  void loop() override {
-    if (!WiFi.localIP()) return;
-    if (!init) {
-      sync.begin();
-      init = true;
-      MB_LOGV(ML_TAG, "AudioSync: Initialized");
-    }
-    if (sync.read()) {
-      memcpy(sharedData.bands, sync.fftResult, NUM_GEQ_CHANNELS);
-      sharedData.volume = sync.volumeSmth;
-      sharedData.volumeRaw = sync.volumeRaw;
-      sharedData.majorPeak = sync.FFT_MajorPeak;
-      // if (audio.bands[0] > 0) {
-      //   MB_LOGV(ML_TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);
-      // }
-    }
-  }
-};
-
-static AudioSyncMod *audioNode;
-
 
 class FastLEDDriverMod: public Node {
   public:
@@ -212,5 +165,24 @@ class VirtualDriverMod: public DriverNode {
 
   void addLayout() override;
 };
+class ParlioDriverMod: public DriverNode {
+  public:
+
+  static const char * name() {return "Parallel IO Driver ☸️🚧";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "";}
+
+  void setup() override;
+
+  void addLayout() override;
+
+  void onUpdate(String &oldValue, JsonObject control) override;
+
+  void loop() override;
+
+  ~ParlioDriverMod() override;
+  
+};
+
 
 #endif

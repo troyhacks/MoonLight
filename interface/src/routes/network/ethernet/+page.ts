@@ -2,6 +2,6 @@ import type { PageLoad } from './$types';
 
 export const load = (async () => {
 	return {
-		title: 'Access Point'
+		title: 'Ethernet'
 	};
 }) satisfies PageLoad;

@@ -39,6 +39,18 @@ export type NetworkItem = {
 	encryption_type: number;
 };
 
+export type EthernetStatus = {
+	status: number;
+	ip_address: string;
+	mac_address: string;
+};
+
+export type EthernetSettings = {
+	local_ip: string;
+	gateway_ip: string;
+	subnet_mask: string;
+};
+
 export type ApStatus = {
 	status: number;
 	ip_address: string;

@@ -1,3 +1,11 @@
+Youtube export
+==============
+https://ytdown.io/en2/
+
+Image scaling
+=============
+https://www.iloveimg.com/resize-image
+
 flash using esptool
 ===================
 [>_] in the statusbar of vscode

@@ -1,4 +1,4 @@
-# WiFi - Station
+# Network - WiFi Station
 
 <img width="320" src="https://github.com/user-attachments/assets/f9967bac-eb73-4bf1-bb34-690f4ff4b28c" />
 

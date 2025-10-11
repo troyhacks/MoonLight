@@ -23,6 +23,8 @@
 #include <FeaturesService.h>
 #include <APSettingsService.h>
 #include <APStatus.h>
+#include <EthernetSettingsService.h>
+#include <EthernetStatus.h>
 #include <AuthenticationService.h>
 #include <BatteryService.h>
 #include <FactoryResetService.h>
@@ -140,6 +142,11 @@ public:
         return &_apSettingsService;
     }
 
+    EthernetSettingsService *getEthernetSettingsService()
+    {
+        return &_ethernetSettingsService;
+    }
+
     NotificationService *getNotificationService()
     {
         return &_notificationService;
@@ -225,6 +232,8 @@ private:
     WiFiStatus _wifiStatus;
     APSettingsService _apSettingsService;
     APStatus _apStatus;
+    EthernetSettingsService _ethernetSettingsService;
+    EthernetStatus _ethernetStatus;
     EventSocket _socket;
     NotificationService _notificationService;
 #if FT_ENABLED(FT_NTP)

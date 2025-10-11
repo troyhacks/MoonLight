@@ -16,7 +16,7 @@
 
 #include "FastLED.h"
 // #include "../MoonBase/Module.h"
-#include "NodeManager.h"
+#include "Nodes/NodeManager.h"
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
@@ -55,10 +55,11 @@ public:
 
         values.add(ArtNetDriverMod::name());
         values.add(FastLEDDriverMod::name());
-        values.add(HUB75DriverMod::name());
         values.add(PhysicalDriverMod::name());
-        values.add(VirtualDriverMod::name());
         values.add(AudioSyncMod::name());
+        values.add(HUB75DriverMod::name());
+        values.add(VirtualDriverMod::name());
+        values.add(ParlioDriverMod::name());
     }
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
@@ -79,10 +80,11 @@ public:
 
         else if (equal(name, ArtNetDriverMod::name())) node = allocMBObject<ArtNetDriverMod>();
         else if (equal(name, FastLEDDriverMod::name())) node = allocMBObject<FastLEDDriverMod>();
-        else if (equal(name, HUB75DriverMod::name())) node = allocMBObject<HUB75DriverMod>();
         else if (equal(name, PhysicalDriverMod::name())) node = allocMBObject<PhysicalDriverMod>();
-        else if (equal(name, VirtualDriverMod::name())) node = allocMBObject<VirtualDriverMod>();
         else if (equal(name, AudioSyncMod::name())) node = allocMBObject<AudioSyncMod>();
+        else if (equal(name, HUB75DriverMod::name())) node = allocMBObject<HUB75DriverMod>();
+        else if (equal(name, VirtualDriverMod::name())) node = allocMBObject<VirtualDriverMod>();
+        else if (equal(name, ParlioDriverMod::name())) node = allocMBObject<ParlioDriverMod>();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = allocMBObject<LiveScriptNode>();

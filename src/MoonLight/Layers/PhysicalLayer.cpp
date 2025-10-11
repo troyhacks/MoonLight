@@ -15,30 +15,29 @@
 
 #include "VirtualLayer.h"
 
-#include "Nodes.h"
+#include "../Nodes/Nodes.h"
 
 #include <ESP32SvelteKit.h> //for safeModeMB
 
-#include "../MoonBase/Utilities.h"
+#include "../../MoonBase/Utilities.h"
 
 PhysicalLayer::PhysicalLayer() {
         MB_LOGD(ML_TAG, "constructor");
 
         if (psramFound()) {
             lights.nrOfChannels = MIN(ESP.getPsramSize() / 2, 61440*3); //fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
-            // lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_SPIRAM);
-            lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);
-            if (lights.channels)
-                MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.nrOfChannels, isInPSRAM(lights.channels)?"PSRAM":"RAM" );
+            lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL);
         }
+
         if (!lights.channels) {
             lights.nrOfChannels = 1024 * 3; //esp32-d0: max 1024 Leds ATM
-            lights.channels = (uint8_t *)heap_caps_malloc_prefer(lights.nrOfChannels, 2, MALLOC_CAP_DEFAULT, MALLOC_CAP_8BIT);//heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-            if (lights.channels)
-                MB_LOGD(ML_TAG, "allocated %d bytes of RAM", lights.nrOfChannels );
+            lights.channels = (uint8_t *)heap_caps_malloc(lights.nrOfChannels, MALLOC_CAP_INTERNAL);
         }
-        if (!lights.channels) {
-            MB_LOGE(ML_TAG, "failed to allocated RAM or PSRAM" );
+
+        if (lights.channels) {
+            MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.nrOfChannels, isInPSRAM(lights.channels)?"PSRAM":"RAM" );
+        } else {
+            MB_LOGE(ML_TAG, "failed to allocated %d bytes of RAM or PSRAM", lights.nrOfChannels);
             lights.nrOfChannels = 0;
         }
 

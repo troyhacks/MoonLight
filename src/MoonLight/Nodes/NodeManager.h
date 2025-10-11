@@ -14,7 +14,7 @@
 
 #if FT_MOONLIGHT
 
-#include "../MoonBase/Module.h"
+#include "../../MoonBase/Module.h"
 
 #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 

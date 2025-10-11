@@ -19,12 +19,12 @@ nav:
     - moonbase/module/devices.md
     - moonbase/module/tasks.md
     - moonbase/module/inputoutput.md
-  - "Connections":
-    - connections/mqtt.md
-    - connections/ntp.md
-  - "WiFi":
-    - wifi/sta.md
-    - wifi/ap.md
+  - "Network":
+    - network/sta.md
+    - network/ap.md
+    - network/ethernet.md
+    - network/mqtt.md
+    - network/ntp.md
   - "System":
     - system/status.md
     - system/metrics.md
