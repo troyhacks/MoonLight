@@ -1,3 +1,3 @@
-# Network - Ethernet
+# Ethernet
 
 🚧
