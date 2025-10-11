@@ -70,9 +70,7 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 | Random | | | |
 | Ripples | | | |
 | RubiksCube | | | |
-| ScrollingText | Speed: scrolling speed if the text is wider then the display width
-    * Font: Different font sizes
-    * Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC) | | Shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended) |
+| ScrollingText | Speed: scrolling speed if the text is wider then the display width, Font: Different font sizes, Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC) | | Shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended) |
 | Sinus | | | |
 | SphereMove | | | |
 | StarField | | | |
@@ -82,6 +80,8 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 | FixedRectangle | | | |
 
 ### Moving head effects
+| Name | Controls | Preview | Remarks
+| ---- | ----- | ---- | ---- |
 | Troy1Color | | | |
 | Troy1Move | | | |
 | Troy2Color | | | |
