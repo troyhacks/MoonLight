@@ -9,7 +9,9 @@ nav:
     - moonlight/overview.md
     - moonbase/module/lightsControl.md
     - moonbase/module/effects.md
+    - moonlight/modifiers.md
     - moonbase/module/drivers.md
+    - moonlight/layouts.md
     - moonbase/module/channels.md
     - moonbase/module/liveScripts.md
     - moonbase/module/moonLightInfo.md
