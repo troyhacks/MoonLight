@@ -49,23 +49,23 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 
 | Name | Controls | Preview | Remarks
 | ---- | ----- | ---- | ---- |
-| Solid | Red, Green, Blue, Brightness | | Sends a solid RGB to all lights. Can be used as background to other effects, order it before other effects |
-| BouncingBalls | | | |
-| Blurz | | | |
-| DistortionWaves | | | |
-| FreqMatrix | | | |
-| GameOfLife | | | |
-| GEQ | | | |
+| Solid | <img width="320" src="https://github.com/user-attachments/assets/844bdbf1-b42b-4b5c-94f9-d1334bce2b10" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_000.gif) | Sends a solid RGB to all lights. Can be used as background to other effects, order it before other effects |
+| BouncingBalls | <img width="320" src="https://github.com/user-attachments/assets/30aa2614-d891-4d39-a789-72026f7ab036" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_091.gif) | |
+| Blurz | <img width="320" src="https://github.com/user-attachments/assets/b8f4111d-1f78-4ac0-a0f9-17909ad78599" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM163.gif) | |
+| DistortionWaves | <img width="320" src="" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_124.gif) | |
+| FreqMatrix | <img width="320" src="" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_138.gif) | |
+| GameOfLife | <img width="320" src="https://github.com/user-attachments/assets/18498c30-b249-4390-bfdf-084deedbfc49" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_172.gif) | |
+| GEQ | <img width="320" src="https://github.com/user-attachments/assets/ca485d1e-e6e4-4b4a-910f-eed7fde7a21f" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM139.gif) | |
 | GEQ3D | | | |
-| FreqSaws | | | |
+| FreqSaws | <img width="320" src="https://github.com/user-attachments/assets/78828181-c1b3-4d0f-85dc-356ced10fcd9"/> | | |
 | Lines | | | |
-| Lissajous | | | |
+| Lissajous | <img width="320" src="https://github.com/user-attachments/assets/a28c19a7-012a-49bf-aff1-6b414c9d08dd" /> | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM176.gif) | |
 | MoonMan | | | if USE_M5UNIFIED |
-| Noise2D | | | |
-| NoiseMeter | | | |
+| Noise2D | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_146.gif) | |
+| NoiseMeter | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_136.gif) | |
 | PaintBrush | | | |
 | Particles | | | |
-| PopCorn | | | |
+| PopCorn | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_095.gif) | |
 | Rainbow | | | |
 | Random | | | |
 | Ripples | | | |
@@ -75,7 +75,7 @@ Precompiled effects can be found in [effects](https://github.com/MoonModules/Moo
 | SphereMove | | | |
 | StarField | | | |
 | Praxis | | | |
-| Waverly | | | |
+| Waverly | | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM165.gif) | |
 | Wave | | | |
 | FixedRectangle | | | |
 
