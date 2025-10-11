@@ -47,27 +47,48 @@ The Effects module defines effects and modifiers. They run in a 'layer'.
 🚧
 Precompiled effects can be found in [effects](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes/Effects/Effects.h)
 
-### Solid 🔥💡
-
-* Sends a solid RGB to all lights
-* Controls: Red, Green, Blue, Brightness
-* Usage: Can be used as background to other effects, order it before other effects
-
-### Scrolling text 🔥
-
-* 🚧: Currently shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended). Later custom texts will be possible
-* Controls:
-    * Speed: scrolling speed if the text is wider then the display width
+| Name | Controls | Preview | Remarks
+| ---- | ----- | ---- | ---- |
+| Solid | Red, Green, Blue, Brightness | | Sends a solid RGB to all lights. Can be used as background to other effects, order it before other effects |
+| BouncingBalls | | | |
+| Blurz | | | |
+| DistortionWaves | | | |
+| FreqMatrix | | | |
+| GameOfLife | | | |
+| GEQ | | | |
+| GEQ3D | | | |
+| FreqSaws | | | |
+| Lines | | | |
+| Lissajous | | | |
+| MoonMan | | | if USE_M5UNIFIED |
+| Noise2D | | | |
+| NoiseMeter | | | |
+| PaintBrush | | | |
+| Particles | | | |
+| PopCorn | | | |
+| Rainbow | | | |
+| Random | | | |
+| Ripples | | | |
+| RubiksCube | | | |
+| ScrollingText | Speed: scrolling speed if the text is wider then the display width
     * Font: Different font sizes
-    * Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC)
+    * Preset: one of the following: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC) | | Shows system info on leds. You need at least 16*6 pixels for that (Panel 16x16 recommended) |
+| Sinus | | | |
+| SphereMove | | | |
+| StarField | | | |
+| Praxis | | | |
+| Waverly | | | |
+| Wave | | | |
+| FixedRectangle | | | |
 
-### PanTilt script
-
-* Sends a beatsin to Pan and Tilt which can be sent to Moving Heads (add a Moving head layout node to configure the MHs)
-* Controls: BPM, Middle Pan and Tilt, Range and invert
-* Usage: Add this effect if moving heads are configured. RGB effects can be added separately e.g. wave to light up the moving heads in wave patterns
-* See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
-* Run script see [How to run a live script](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/#how-to-run-a-live-script)
+### Moving head effects
+| Troy1Color | | | |
+| Troy1Move | | | |
+| Troy2Color | | | |
+| Troy2Move | | | |
+| FreqColors | | | |
+| WowiMove | | | |
+| AmbientMove | | | |
 
 🚨: some effects already do this theirselves e.g. FreqMatrix runs on 1D but copies to 2D and 3D if size allows.
 
