@@ -83,11 +83,85 @@ void WiFiSettingsService::reconfigureWiFiConnection()
 
     ESP_LOGI(SVK_TAG, "Reconfiguring WiFi TxPower to: %d", _state.txPower); // 🌙
 
+    ESP_LOGI(SVK_TAG, "Hostname: %s", _state.hostname.c_str()); // 🌙
+
     // disconnect and de-configure wifi
-    if (WiFi.disconnect(true))
-    {
-        _stopping = true;
-    }
+    // 🌙 add different behavior for P4
+    #ifndef CONFIG_IDF_TARGET_ESP32P4
+        //default ESP32-Sveltekit
+        if (WiFi.disconnect(true))
+        {
+            _stopping = true;
+        }
+        //logging: 
+        // [0;32mI (5079) 🐼: Reconfiguring WiFi connection to: STRENGTH
+        // I (5079) 🐼: Reconfiguring WiFi TxPower to: 34
+        // [0;32mI (5079) 🐼: Hostname: ML-you35
+        // ...
+        // [0;32mI (16438) 🐼: 20 networks found.
+        // [0;32mI (16439) 🐼: Connecting to strongest network: ewtr, BSSID: 92:5a:9e:0e:cc:e4 
+        // D (16440) 🐼: Connecting to SSID: ewtr, Channel: 11, BSSID: 92:5a:9e:0e:cc:e4, Hostname: ML-you35
+        // [0;32mI (16451) 🐼: WiFi setTxPower to: 34
+        // [0;32mI (16612) 🐼: WiFi Connected.
+        // ...
+        // [0;32mI (18124) 🐼: WiFi Got IP. localIP=http://192.168.1.105, hostName=http://ML-you35.local
+
+    #else
+        //by @troyhacks, needed to make P4 networking work (AP and STA)
+        //no clue why? this only disconnects when WiFi is connected, the other always disconnects.
+        if (WiFi.isConnected() == true)
+        {
+            WiFi.disconnect(true);
+            _stopping = true;
+        }
+        //logging
+        // Version on Host is NEWER than version on co-processor
+        // E (7253) system_api: 0 mac type is incorrect (not found)
+        // mI (7254) 🐼: Reconfiguring WiFi connection to: STRENGTH
+        // [0;32mI (7254) 🐼: Reconfiguring WiFi TxPower to: 0
+        // 32mI (7259) 🐼: Hostname: ML-P4
+        // ...
+        // [0;32mI (19737) 🐼: WiFi Connected.
+        // [0;32mI (20761) 🐼: WiFi Got IP. localIP=http://192.168.1.188, hostName=http://esp32p4-E1E3E7.local
+
+        // findings: 
+        // mac type is incorrect ??? No 20 networks found. ???, wrong hostname displayed (but the hostname ML-P4.local works!)
+        // deleting the Saved network: it still connects (still stored on the C5 chip???)
+        // erase flash: Wifi still connects!!
+
+        // other messages seen when changing the network settings (but gone after restart - using settings from the C5 chip again?):
+
+        // [0;31mE (53310) ARDUINO: Could not set mode! 0xffffffff: ESP_FAIL
+        // E (53310) ARDUINO: AP enable failed!
+        // E (53310) ARDUINO: Could not set mode! 0xffffffff: ESP_FAIL
+        // E (53315) ARDUINO: AP enable failed!
+        // [0;31mE (56840) ARDUINO: STA was enabled, but netif is NULL???[0m
+        // E (56840) ARDUINO: Could not set hostname! 0x102: ESP_ERR_INVALID_ARG
+        // E (56842) 🐼: WiFi scan failed.[0m
+        // [0;31mE (63310) ARDUINO: Could not set mode! 0xffffffff: ESP_FAIL
+        // E (63310) ARDUINO: AP enable failed!
+        // E (63310) ARDUINO: Could not set mode! 0xffffffff: ESP_FAIL
+        // E (63315) ARDUINO: AP enable failed!
+        // [0;31mE (66840) ARDUINO: STA was enabled, but netif is NULL???[0m
+        // E (66840) ARDUINO: Could not set hostname! 0x102: ESP_ERR_INVALID_ARG
+        // E (66842) 🐼: WiFi scan failed.
+
+        //Shutting down WiFi - AP is initiatalized 🎉
+
+        // [0;32mI (5317) 🐼: WiFi Disconnected. Reason code=201 (NO_AP_FOUND)
+        // [0;31mE (14628) 🐼: WiFi scan failed.
+        // [0;32mI (17504) 🐼: WiFi Disconnected. Reason code=201 (NO_AP_FOUND)
+        // [0;31mE (24628) 🐼: WiFi scan failed.
+        // [0;32mI (27504) 🐼: WiFi Disconnected. Reason code=201 (NO_AP_FOUND)
+        // [0;31mE (34636) 🐼: WiFi scan failed.
+        // [0;32mI (37513) 🐼: WiFi Disconnected. Reason code=201 (NO_AP_FOUND)
+        // [0;31mE (44645) 🐼: WiFi scan failed.
+        // [0;32mI (47522) 🐼: WiFi Disconnected. Reason code=201 (NO_AP_FOUND)
+        // [0;31mE (54644) 🐼: WiFi scan failed.
+        // [0;32mI (57521) 🐼: WiFi Disconnected. Reason code=201 (NO_AP_FOUND)
+        // [0;31mE (64653) 🐼: WiFi scan failed.
+
+    #endif
 }
 
 void WiFiSettingsService::loop()
@@ -240,6 +314,8 @@ void WiFiSettingsService::configureNetwork(wifi_settings_t &network)
         // configure for DHCP
         WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
     }
+
+    ESP_LOGD(SVK_TAG, "Connecting to SSID: %s, Channel: %d, BSSID: " MACSTR ", Hostname: %s", network.ssid.c_str(), network.channel, MAC2STR(network.bssid), _state.hostname.c_str());
     WiFi.setHostname(_state.hostname.c_str());
 
     // attempt to connect to the network
