@@ -110,7 +110,8 @@ class FastLEDDriver: public Node {
   void setup() override;
   void loop() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 
   void onUpdate(String &oldValue, JsonObject control) override;
 
@@ -126,7 +127,8 @@ class HUB75Driver: public Node {
   void setup() override;
   void loop() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 };
 
 class PhysicalDriver: public DriverNode {
@@ -148,7 +150,8 @@ class PhysicalDriver: public DriverNode {
   void setup() override;
   void loop() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 
   ~PhysicalDriver() override;
 };
@@ -163,7 +166,8 @@ class VirtualDriver: public DriverNode {
   void setup() override;
   void loop() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 };
 class ParlioDriver: public DriverNode {
   public:
@@ -174,7 +178,8 @@ class ParlioDriver: public DriverNode {
 
   void setup() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 
   void onUpdate(String &oldValue, JsonObject control) override;
 

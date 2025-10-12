@@ -170,7 +170,7 @@ public:
         values.add(MultiplyModifier::name());
         values.add(RippleYZModifier::name());
         values.add(PinwheelModifier::name());
-        values.add(RotateNodifier::name());
+        values.add(RotateModifier::name());
         values.add(TransposeModifier::name());
 
         //find all the .sc files on FS
@@ -232,7 +232,7 @@ public:
         else if (equal(name, MultiplyModifier::name())) node = allocMBObject<MultiplyModifier>();
         else if (equal(name, RippleYZModifier::name())) node = allocMBObject<RippleYZModifier>();
         else if (equal(name, PinwheelModifier::name())) node = allocMBObject<PinwheelModifier>();
-        else if (equal(name, RotateNodifier::name())) node = allocMBObject<RotateNodifier>();
+        else if (equal(name, RotateModifier::name())) node = allocMBObject<RotateModifier>();
         else if (equal(name, TransposeModifier::name())) node = allocMBObject<TransposeModifier>();
         
         #if FT_LIVESCRIPT

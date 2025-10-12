@@ -175,7 +175,7 @@ protected:
                     Node *nodeClass = (*nodes)[updatedItem.index[0]];
                     if (nodeClass != nullptr) {
                         nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
-                        MB_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasLayout, nodeClass->hasModifier);
+                        MB_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasLayout(), nodeClass->hasModifier());
 
                         nodeClass->requestMappings();
                     }

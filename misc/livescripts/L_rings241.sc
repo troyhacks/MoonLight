@@ -16,7 +16,7 @@ void add(int leds, int radius) {
   }
 }
 
-void addLayout() {
+void onLayout() {
 
   add(1, 0);
   add(8, 13);

@@ -26,10 +26,9 @@ public:
   VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
   JsonArray controls;
 
-  bool hasLayout = false; //run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2) 
-  bool hasModifier = false; //modifier new Node, on/off, control changed: run layout.requestMapLayout. addLayoutPre: modifySize, addLight: modifyPosition XYZ: modifyXYZ
-
   virtual bool isLiveScriptNode() const { return false; }
+  virtual bool hasLayout() const { return false; } //run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2) 
+  virtual bool hasModifier() const { return false; } //modifier new Node, on/off, control changed: run layout.requestMapLayout. onLayoutPre: modifySize, addLight: modifyPosition XYZ: modifyXYZ
 
   bool on = false; //onUpdate will set it on
 
@@ -144,11 +143,11 @@ public:
   virtual void onUpdate(String &oldValue, JsonObject control); // see Nodes.cpp for implementation
 
   void requestMappings() {
-    if (hasModifier || hasLayout) {
+    if (hasModifier() || hasLayout()) {
         // MB_LOGD(ML_TAG, "hasLayout or Modifier -> requestMapVirtual");
         layerV->layerP->requestMapVirtual = true;
     }
-    if (hasLayout) {
+    if (hasLayout()) {
         // MB_LOGD(ML_TAG, "hasLayout -> requestMapPhysical");
         layerV->layerP->requestMapPhysical = true;
     }
@@ -159,7 +158,7 @@ public:
   virtual void onSizeChanged(Coord3D oldSize) {} //virtual/effect nodes: virtual size, physical/driver nodes: physical size
 
   //layout
-  virtual void addLayout() {} //the definition of the layout, called by mapLayout()
+  virtual void onLayout() {} //the definition of the layout, called by mapLayout()
 
   //convenience functions to add a light
   void addLight(Coord3D position) {
@@ -188,8 +187,7 @@ public:
   virtual ~Node() {
     //delete any allocated memory
 
-    MB_LOGD(ML_TAG, "Node destructor 🚥:%d 💎:%d", hasLayout, hasModifier);
-
+    MB_LOGD(ML_TAG, "Node destructor 🚥:%d 💎:%d", hasLayout(), hasModifier());
   }
 
 };
@@ -205,7 +203,11 @@ class LiveScriptNode: public Node {
   bool hasSetup = false;
   bool hasLoop = false;
   bool hasAddControl = false;
+  bool hasModifyPosition = false;
+  bool hasOnLayout = false;
   bool isLiveScriptNode() const override { return true; }
+  bool hasModifier() const override { return hasModifyPosition; }
+  bool hasLayout() const override { return hasOnLayout; }
 
   const char *animation = nullptr; //which animation (file) to run
 
@@ -214,7 +216,7 @@ class LiveScriptNode: public Node {
   void loop() override; //call Node.loop to process requestMapLayout. todo: sync with script...
 
   //layout
-  void addLayout() override; // call map in LiveScript
+  void onLayout() override; // call map in LiveScript
   
   ~LiveScriptNode(); 
 

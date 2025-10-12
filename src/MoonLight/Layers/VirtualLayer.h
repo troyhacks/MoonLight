@@ -217,10 +217,10 @@ class VirtualLayer {
   void fill_solid(const CRGB& color);
   void fill_rainbow(const uint8_t initialhue, const uint8_t deltahue);
 
-  void addLayoutPre();
-  void addLayoutPost();
+  void onLayoutPre();
+  void onLayoutPost();
   
-  //addLight is called by addLayout for each light in the layout
+  //addLight is called by onLayout for each light in the layout
   void addLight(Coord3D position);
 
     //checks if a virtual light is mapped to a physical light (use with XY() or XYZ() to get the indexV)

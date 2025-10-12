@@ -314,9 +314,7 @@ void ArtNetDriver::loop() {
   #define RGBW_CALL
 #endif
 
-  void  FastLEDDriver::setup() {
-    hasLayout = true; //so addLayout is called if layout changes (works for FASTLED)
-
+  void FastLEDDriver::setup() {
     addControl(maxPower, "maxPower", "number", 0, 100);
     addControl(version, "Version", "text", 0, 20, true);
     addControl(chipSet, "chipSet", "text", 0, 20, true);
@@ -325,7 +323,7 @@ void ArtNetDriver::loop() {
     addControl(usesRMT5, "usesRMT5", "checkbox", 0, 20, true);
   }
 
-  void  FastLEDDriver::addLayout() {
+  void FastLEDDriver::onLayout() {
 
     if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
       // if (safeModeMB) {
@@ -562,7 +560,7 @@ void ArtNetDriver::loop() {
 
   }
 
-  void  FastLEDDriver::loop() {
+  void FastLEDDriver::loop() {
     if (FastLED.count()) {
       if (FastLED.getBrightness() != layerV->layerP->lights.header.brightness) {
         MB_LOGD(ML_TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
@@ -596,17 +594,13 @@ void ArtNetDriver::loop() {
   }
 
   void HUB75Driver::setup() {
-    hasLayout = true; //so addLayout is called if needed
   }
-  void HUB75Driver::addLayout() {
+  void HUB75Driver::onLayout() {
   }
   void HUB75Driver::loop() {
   }
 
-  void  PhysicalDriver::setup() {
-
-    hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
-
+  void PhysicalDriver::setup() {
     DriverNode::setup();
     #if HP_ALL_DRIVERS
       addControl(dmaBuffer, "dmaBuffer", "range", 1, 100);
@@ -614,7 +608,7 @@ void ArtNetDriver::loop() {
     #endif
   }
 
-  void PhysicalDriver::addLayout() {
+  void PhysicalDriver::onLayout() {
     #if HP_ALL_DRIVERS
       if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
 
@@ -824,22 +818,18 @@ void ArtNetDriver::loop() {
   }
   
   void VirtualDriver::setup() {
-    hasLayout = true; //so addLayout is called if needed (not working yet, will work if reverse of initLeds is implemented)
     DriverNode::setup();
   }
-  void VirtualDriver::addLayout() {
+  void VirtualDriver::onLayout() {
   }
   void VirtualDriver::loop() {
     DriverNode::loop();
   }
 
   void ParlioDriver::setup() {
-    hasLayout = true; //so addLayout is called if needed 
-
     DriverNode::setup(); //adds maxPower and lights preset (rgb, rgbw, etc) control
 
     // add additional controls using addControl()
-
   }
 
   void ParlioDriver::onUpdate(String &oldValue, JsonObject control) {
@@ -850,7 +840,7 @@ void ArtNetDriver::loop() {
     }
   }
 
-  void ParlioDriver::addLayout() {
+  void ParlioDriver::onLayout() {
     if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
 
       if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...

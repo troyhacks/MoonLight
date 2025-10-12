@@ -117,16 +117,16 @@ PhysicalLayer::PhysicalLayer() {
     }
 
     void PhysicalLayer::mapLayout() {
-        addLayoutPre();
+        onLayoutPre();
         for (Node *node: nodes) {
-            if (node->on && node->hasLayout) {
-                node->addLayout();
+            if (node->on) { // && node->hasLayout
+                node->onLayout();
             }
         }
-        addLayoutPost();
+        onLayoutPost();
     }
 
-    void PhysicalLayer::addLayoutPre() {
+    void PhysicalLayer::onLayoutPre() {
         MB_LOGD(ML_TAG, "pass %d", pass);
         
         if (pass == 1) {
@@ -143,7 +143,7 @@ PhysicalLayer::PhysicalLayer() {
             indexP = 0;
             for (VirtualLayer * layer: layerV) {
                 //add the lights in the virtual layer
-                layer->addLayoutPre();
+                layer->onLayoutPre();
             }
         }
     }
@@ -207,7 +207,7 @@ PhysicalLayer::PhysicalLayer() {
         }
     }
 
-    void PhysicalLayer::addLayoutPost() {
+    void PhysicalLayer::onLayoutPost() {
         if (pass == 1) {
             lights.header.size += Coord3D{1,1,1};
             MB_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
@@ -230,7 +230,7 @@ PhysicalLayer::PhysicalLayer() {
             MB_LOGD(ML_TAG, "pass %d %d", pass, indexP);
             for (VirtualLayer * layer: layerV) {
                 //add the position in the virtual layer
-                layer->addLayoutPost();
+                layer->onLayoutPost();
             }
         }
     }

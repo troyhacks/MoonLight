@@ -18,7 +18,7 @@ void addStrip( uint8_t xposition, uint8_t start_y,  uint8_t stop_y, uint8_t pin)
   addPin(pin);
 }
 
-void addLayout() {
+void onLayout() {
   addStrip(7, height, 2*height-1, 47); addStrip(7, height-1, 0, 48);
   addStrip(6, height, 2*height-1, 21); addStrip(6, height-1, 0, 38);
   addStrip(5, height, 2*height-1, 14); addStrip(5, height-1, 0, 39);
