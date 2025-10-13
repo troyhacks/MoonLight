@@ -89,6 +89,11 @@ void APSettingsService::startAP()
 #ifdef SERIAL_INFO
     Serial.printf("Starting software access point %s (%d %d %d) (%s %s %s)\n", _state.ssid.c_str(), _state.channel, _state.ssidHidden, _state.maxClients, _state.localIP.toString().c_str(), _state.gatewayIP.toString().c_str(), _state.subnetMask.toString().c_str()); // 🌙
 #endif
+    #ifdef CONFIG_IDF_TARGET_ESP32P4
+        WiFi.mode(WIFI_AP); //WIFI_MODE_AP
+        delay(100); // Allow time for the radio to start up.
+    #endif
+
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str(), _state.channel, _state.ssidHidden, _state.maxClients);
     delay(100); // 🌙 give some time for the AP to start

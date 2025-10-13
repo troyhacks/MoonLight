@@ -36,7 +36,11 @@ void WiFiSettingsService::initWiFi()
     WiFi.mode(WIFI_MODE_STA); // this is the default.
 
     // Disable WiFi config persistance and auto reconnect
-    WiFi.persistent(false);
+    #ifndef CONFIG_IDF_TARGET_ESP32P4
+        WiFi.persistent(false);
+    #else
+        WiFi.persistent(true);
+    #endif
     WiFi.setAutoReconnect(false);
 
     WiFi.onEvent(
@@ -111,7 +115,10 @@ void WiFiSettingsService::reconfigureWiFiConnection()
         //no clue why? this only disconnects when WiFi is connected, the other always disconnects.
         if (WiFi.isConnected() == true)
         {
-            WiFi.disconnect(true);
+            if (!WiFi.disconnect(true))
+                ESP_LOGW(SVK_TAG, "Failed to disconnect WiFi");
+            else
+                ESP_LOGD(SVK_TAG, "Successfully disconnect WiFi");
             _stopping = true;
         }
         //logging
