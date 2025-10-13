@@ -7,17 +7,16 @@ A modifier (💎) is an effect on an effect. It can change the size of the virtu
     Multiple effects and modifiers can be defined per layer. MoonLight supports unlimited number of them per layer. They will all run after each other, this is useful for modifiers as you can combine them: e.g. rotate then multiply creates four (or more) rotating effects.
 
 ## Modifier 💎 Nodes
-🚧
 
 Modifier
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| Checkerboard | | | |
-| Circle | | | |
+| Checkerboard | ![Checkerboard](https://github.com/user-attachments/assets/54970267-35af-406c-9558-c1f4219a71c0) | | |
+| Circle | ![Circle](https://github.com/user-attachments/assets/c5308217-0bd4-49ad-adf8-f17b7062671f) | | |
 | Mirror | | | |
-| Multiply | | | |
-| RippleYZ | | shrink: shrinks the original size to towardsY and Z, towardsY: copies X into Y, towardsZ: copies XY into Z | Takes lights of an effect and copies them to other lights. E.g. 1D effect will be rippled to 2D, 2D effect will be rippled to 3D |
-| Pinwheel | | **Swirl**: option to bend the pinwheel., **Reverse** option., **Rotation Symmetry**: Controls the rotational symmetry of the pattern., **Petals** option to adjust the number of petals., **Ztwist** option for 3D fixtures to twist the pattern along the z-axis. | Projects 1D/2D effects onto 2D/3D fixtures in a pinwheel pattern. The virtual layer width is the number of petals. The height is the distance from center to corner |
-| Rotate | | | |
-| Transpose | | | |
+| Multiply | ![Multiply](https://github.com/user-attachments/assets/fcb3e4a7-2c28-4f68-b216-5ca004d46c53) | | |
+| RippleYZ | ![RippleYZ](https://github.com/user-attachments/assets/0918efac-6367-420f-b0e3-d796d9551953) | shrink: shrinks the original size to towardsY and Z, towardsY: copies X into Y, towardsZ: copies XY into Z | Takes lights of an effect and copies them to other lights. E.g. 1D effect will be rippled to 2D, 2D effect will be rippled to 3D |
+| Pinwheel | ![PinWheel](https://github.com/user-attachments/assets/e5dbadbe-eeb1-41e5-b197-ec4bd5366aea) | **Swirl**: option to bend the pinwheel., **Reverse** option., **Rotation Symmetry**: Controls the rotational symmetry of the pattern., **Petals** option to adjust the number of petals., **Ztwist** option for 3D fixtures to twist the pattern along the z-axis. | Projects 1D/2D effects onto 2D/3D fixtures in a pinwheel pattern. The virtual layer width is the number of petals. The height is the distance from center to corner |
+| Rotate | ![Rotate](https://github.com/user-attachments/assets/c622a9df-318a-4f83-81c0-f5a5c7bafb7b) | | |
+| Transpose | ![Transpose](https://github.com/user-attachments/assets/5a8c74d0-3ce9-407a-8076-4ba708558b9b) | | |
