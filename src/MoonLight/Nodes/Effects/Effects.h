@@ -29,21 +29,21 @@ class SolidEffect: public Node {
   uint8_t red = 182;
   uint8_t green = 15;
   uint8_t blue = 98;
-  uint8_t white = 0;
+  // uint8_t white = 0;
   uint8_t brightness = 255;
 
   void setup() override {
     addControl(red, "red", "range");
     addControl(green, "green", "range");
     addControl(blue, "blue", "range");
-    addControl(white, "white", "range");
+    // addControl(white, "white", "range");
     addControl(brightness, "brightness", "range");
   }
 
   void loop() override {
       layerV->fill_solid(CRGB(red * brightness/255, green * brightness/255, blue * brightness/255));
-      if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX)
-        for (int index; index < layerV->nrOfLights; index++) layerV->setWhite(index, white * brightness/255);
+      // if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX)
+      //   for (int index; index < layerV->nrOfLights; index++) layerV->setWhite(index, white * brightness/255);
   }
 };
 
@@ -58,7 +58,7 @@ class FixedRectangleEffect: public Node {
   uint8_t red = 182;
   uint8_t green = 15;
   uint8_t blue = 98;
-  uint8_t white = 0;
+  // uint8_t white = 0;
   uint8_t width = 1;
   uint8_t x = 0;
   uint8_t height = 1;
@@ -71,7 +71,7 @@ class FixedRectangleEffect: public Node {
     addControl(red, "red", "range");
     addControl(green, "green", "range");
     addControl(blue, "blue", "range");
-    addControl(white, "white", "range");
+    // addControl(white, "white", "range");
     addControl(x, "X position", "range", 0);
     addControl(y, "Y position", "range", 0);
     addControl(z, "Z position", "range", 0);
@@ -94,7 +94,7 @@ class FixedRectangleEffect: public Node {
             layerV->setRGB(pos, CRGB::White);
           else
             layerV->setRGB(pos, CRGB(red, green, blue));
-          layerV->setWhite(pos, white);
+          // layerV->setWhite(pos, white);
           if (height < width)
             alternate = !alternate;
         }
