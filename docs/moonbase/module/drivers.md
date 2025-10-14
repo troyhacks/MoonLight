@@ -23,10 +23,10 @@ The Drivers module defines layers and drivers.
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| ArtNet | | | |
-| FastLED Driver | | | Sends LED output to ESP32 gpio pins |
-| Physical Driver | | | Sends led signals to the pins / outputs as defined in the layout nodes. |
-| AudioSync | | listens to audio sent over the local network by WLED-AC or WLED-MM and allows sound reactive effects (♫) to use audio data (volume and bands (FFT)) |
+| ArtNet | | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | See below |
+| FastLED Driver | | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | See below |
+| Physical Driver | | <img width="320" alt="Physical" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | See below |
+| AudioSync | | No controls | listens to audio sent over the local network by WLED-AC or WLED-MM and allows sound reactive effects (♫) to use audio data (volume and bands (FFT)) |
 | HUB75 | | | Not implemented yet |
 | Virtual driver | | | The virtual driver is another beast and with the help of shift registers allows for driving 48 panels of 256 LEDs each at 100 FPS!. Not implemented yet |
 | Parlio | | | Not implemented yet |
@@ -48,7 +48,7 @@ The Drivers module defines layers and drivers.
 
 ### FastLED Driver ☸️
 
-sends LED output to ESP32 gpio pins.
+Sends LED output to ESP32 gpio pins.
 
 * Switch off to see the effect framerate in System Status/Metrics
 * Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 LEDs, 24 bits is 130 fps theoretically - 120 practically)
