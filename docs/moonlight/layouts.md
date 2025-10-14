@@ -1,32 +1,31 @@
 # Layouts
 
-A layout (🚥) defines what lights are connected to MoonLight. It defines the coordinates of all lights (addLight) and assigns lights to the GPIO pins of the ESP32 (addPin) and how many channels each light has (normal LEDs 3: Red, Green and Blue). 
+A layout (🚥) defines the coordinates of all lights connected to a MoonLight device and also assign groups of LEDs to esp32 gpio pins.
 
-* The **coordinates** of each light are defined in a 3D coordinate space where each coordinate range between 1 and 255. Currently a strip until 255 LEDs is supported, a panel until 128x96 LEDS and a cube max 20x20x20. 
+* The **coordinates** of each light are defined in a 3D coordinate space 
     * Coordinates needs to be specified in the order the lights are wired so MoonLight knows which light is first, which is second etc.
-    * If a 1D strip is longer, you can address more LEDs by pretending it is a 2D fixture, e.g. 32x32 to address a strip of 1024 LEDs. 
-    * In the future we might look at redefining Coord3D where width is 12 bytes, height is 7 bytes and depth is 5 bytes allowing for max 4096 x 128 x 32 ...
-* Currently **pins** are by default driven by FastLED.show. FastLED needs all LEDs specifications be defined at compile time, e.g. LED type, color order, etc. Normally also the pin(s) need to be defined beforehand but all pins are predefined in the code to avoid this (at a cost of larger firmware). As we want to be able to define all LED specs in the UI instead of during compile, we need to see how / if this can be done.
-* **Multiple layout nodes** can be defined which will execute one after the other
-* MoonLight will use the layout definition to generate a **mapping** of a virtual coordinate space to a physical coordinate space. Most simple example is a panel which has a snake layout. The mapping will create a virtual layer where the snake layout is hidden.
+    * For lights in a straight line (1D, e.g. LED strips or a LED bar), specify coordinates as [x,0,0] 
+    * For lights in a flat area (2D, e.g. LED matrix), specify coordinates as [x,y,0] 
+* **Multiple layout nodes** can be defined which will be mapped in the order of the layouts
+* MoonLight will use the layout definition to generate a **mapping** of the effects to a real world light layout. Most simple example is a panel which has a snake layout. The mapping will create a layer for effects where the snake layout is hidden.
 
 ## Layout 🚥 Nodes
-🚧
-!!! danger
-
-    Set pins carefully. There is a check if a specific pin can be used for output / driving LEDs. See also the IO module. But not 100% garanteed. E.g pin 16 on esp32-d0-wrover crashes...
-
+    
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| Panel | | pin: to do add more pins | Defines a 2D panel with width and height |
-| Panels | | | |
-| Cube | | pin: to do add more pins | Panel layout + depth |
-| Rings | | | |
-| Wheel | | | |
-| HumanSizedCube | | | |
-| SingleLine | | | |
-| SingleRow | | | |
-| SE16 | | | Layout(s) for Stephan Electronics 16-Pin ESP32-S3 board, using the pins used on the board |
+| Panel | ![Panel](https://github.com/user-attachments/assets/1a69758a-81e3-4f1f-a47e-a242de105c93)| <img width="320" alt="Panel" src="https://github.com/user-attachments/assets/60e6ba73-8956-45bc-9706-581faa17ba16" /> | Defines a 2D panel with width and height |
+| Panels | ![Panels](https://github.com/user-attachments/assets/422b5842-773b-4173-99c5-7b25cd39b176) | <img width="320" alt="Panels" src="https://github.com/user-attachments/assets/ad5a15ea-f3f9-42b9-b8cf-196e7db92249" /> | |
+| Cube | ![Cube](https://github.com/user-attachments/assets/3ece6f28-519e-4ebf-b174-ea75c30e9fbe) | <img width="320" alt="Cube" src="https://github.com/user-attachments/assets/56393baa-3cc3-4c15-b0b2-dc72f25d36d1" /> | Panel layout + depth |
+| Rings | ![Ring](https://github.com/user-attachments/assets/7f60871d-30aa-4ad4-8966-cdc9c035c034) | <img width="320" alt="Rings" src="https://github.com/user-attachments/assets/ee2165aa-cf01-48cd-9310-9cfde871ac33" /> | 241 LEDs in 9 rings |
+| Wheel | ![Wheel](https://github.com/user-attachments/assets/52a63203-f955-4345-a97b-edb0b8691fe1) | <img width="320" alt="Wheel" src="https://github.com/user-attachments/assets/7b83e30b-e2e1-49e6-ad80-5b6925b23018" /> | |
+| Human Sized Cube | ![HCS](https://github.com/user-attachments/assets/8e475f9d-ab7a-4b5c-835a-e0b4ddc28f0f) | <img width="320" alt="HCS" src="https://github.com/user-attachments/assets/de1eb424-6838-4af4-8652-89a54929bb03" /> | |
+| Single Line | ![Single line](https://github.com/user-attachments/assets/4ba5a3ac-9312-4bac-876d-cfa3dce41215) | <img width="320" alt="Single line" src="https://github.com/user-attachments/assets/70455279-646c-467d-b8e5-492b1aeae0fa" /> | |
+| Single Row | ![Single row](https://github.com/user-attachments/assets/a88cea0f-9227-4da4-9a43-b944fd8bef97) | <img width="320" alt="Single row" src="https://github.com/user-attachments/assets/9f9918b9-e1ee-43a8-a02d-7f1ee182888b" /> | |
+| SE16 | ![SE16](https://github.com/user-attachments/assets/45c7bec7-2386-4c42-8f24-5a57b87f0df9) | <img width="320" alt="SE16" src="https://github.com/user-attachments/assets/0efe941a-acf5-4a2c-a7d6-bdfa91574d1a" /> | Layout(s) for Stephan Electronics 16-Pin ESP32-S3 board, using the pins used on the board |
+
+!!! warning "Chosing pins"
+
+    Choose the right pins with care. See also the IO module to see which pins can in general be used for LEDs (💡). But depending on a specific boards some pins might also be in use already. 
 
 ### Panels and cubes
 
@@ -36,6 +35,11 @@ A layout (🚥) defines what lights are connected to MoonLight. It defines the c
 
 ### SE16
 
-* ledsPerPin: the number of LEDs connected to one pin
-* pinsAreColumns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)
-* mirroredPins: If set it is assumed that LEDs are connected with increasing positions on 8 pins on one side of the board and decreasing positions on the 8 pins of the other side of the board. The resulting size will have a width of 8 and the height (or width) will be 2 * ledsPerPin. If not set, the width will be 16 and the height (or width) = ledsPerPin
+16 channel LED strip driver by Stephane Electronics
+
+<img width="320" alt="SE16" src="https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/images/esp32-s3-stephanelec-16p.jpg"/>
+
+* Leds Per Pin: the number of LEDs connected to one pin
+* Pins Are Columns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)
+* Mirrored Pins: If set it is assumed that LEDs are connected with increasing positions on 8 pins on one side of the board and decreasing positions on the 8 pins of the other side of the board. The resulting size will have a width of 8 and the height (or width) will be 2 * ledsPerPin. If not set, the width will be 16 and the height (or width) = ledsPerPin
+* Pins: 47,48,21,38,14,39,13,40,12,41,11,42,10,2,3,1
