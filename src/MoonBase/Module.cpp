@@ -160,6 +160,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
         }
     }
 
+    //loop over all properties in stateData
     for (JsonPair stateProperty : stateData.as<JsonObject>()) {
         JsonString key = stateProperty.key();
         JsonVariant stateValue = stateData[key.c_str()];
@@ -170,7 +171,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 updatedItem.parent[depth] = parent.c_str();
                 updatedItem.index[depth] = index;
             }
-            for (int i = uint8_t(depth + 1); i < 2; i++) { // reset deeper levels when coming back from recursion
+            for (uint8_t i = depth + 1; i < 2; i++) { // reset deeper levels when coming back from recursion
                 updatedItem.parent[i] = "";
                 updatedItem.index[i] = UINT8_MAX;
             }
@@ -180,31 +181,35 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 JsonArray stateArray = stateValue.as<JsonArray>();
                 JsonArray newArray = newValue.as<JsonArray>();
 
-                // MB_LOGV(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
+                MB_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
                 
                 for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) { //compare each item in the array
+                    // MB_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateArray[i].as<String>().c_str(), newArray[i].as<String>().c_str());
                     if (i >= stateArray.size()) { //newArray has added a row
-                        MB_LOGV(MB_TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        MB_LOGD(MB_TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
                         stateArray.add<JsonObject>(); //add new row
                         changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                     } else if (i >= newArray.size()) { //newArray has deleted a row
-                        MB_LOGV(MB_TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        MB_LOGD(MB_TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
                         // newArray.add<JsonObject>(); //add dummy row
                         changed = true; //compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
+
                         //set all the values to null
                         // UpdatedItem updatedItem; //create local updatedItem
+                        updatedItem.parent[1] = ""; // reset deeper levels when coming back from recursion (repeat in loop)
+                        updatedItem.index[1] = UINT8_MAX;
                         updatedItem.parent[(uint8_t)(depth+1)] = key.c_str();
                         updatedItem.index[(uint8_t)(depth+1)] = i;
                         for (JsonPair property : stateArray[i].as<JsonObject>()) {
-                            // MB_LOGV(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
+                            // MB_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
                             // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
                             updatedItem.name = property.key().c_str();
                             updatedItem.oldValue = property.value().as<String>();
                             updatedItem.value = JsonVariant(); // Assign an empty JsonVariant
                             stateArray[i].remove(property.key()); //remove the property from the state row so onUpdate see it as empty
                             execOnUpdate(updatedItem);
-
                         }
+
                         stateArray.remove(i); //remove the state row entirely
                     } else //row already exists
                         changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
@@ -218,10 +223,9 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                     updatedItem.value = stateData[updatedItem.name]; //store the stateData item (convenience)
 
                     execOnUpdate(updatedItem);
-
                 } 
                 // else {
-                //     MB_LOGV(MB_TAG, "do not update %s", key.c_str());
+                //     MB_LOGD(MB_TAG, "do not update %s", key.c_str());
                 // }
             }
         }
@@ -242,7 +246,9 @@ StateUpdateResult ModuleState::update(JsonObject &root, ModuleState &state)
 
             bool changed = state.checkReOrderSwap("", state.data, root, updatedItem);
 
+            // MB_LOGD(ML_TAG, "update isNew %d changed %d", isNew, changed);
             // serializeJson(state.data, Serial);Serial.println();
+            // serializeJson(root, Serial);Serial.println();
 
             if (state.compareRecursive("", state.data, root, updatedItem)) {
                 if (changed)
@@ -327,7 +333,7 @@ void Module::begin()
 
         // char buffer[2048];
         // serializeJson(root, buffer, sizeof(buffer));
-        // MB_LOGV(MB_TAG, "server->on %s moduleDef %s", request->url().c_str(), buffer);
+        // MB_LOGD(MB_TAG, "server->on %s moduleDef %s", request->url().c_str(), buffer);
     
         return response.send();
     });

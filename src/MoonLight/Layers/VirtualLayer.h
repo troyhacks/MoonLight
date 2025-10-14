@@ -90,10 +90,10 @@ class VirtualLayer {
   }
 
   void setRGB(const uint16_t indexV, CRGB color) {
-    if (layerP->lights.header.offsetWhite != UINT8_MAX && layerP->lights.header.offsetWhite == layerP->lights.header.offsetRGB + 3) { //RGBW adjacent
-      // MB_LOGD(ML_TAG, "setRGB indexV %d color %d %d %d", indexV, color.r, color.g, color.b);
+    if (layerP->lights.header.offsetWhite != UINT8_MAX && layerP->lights.header.offsetWhite == layerP->lights.header.offsetRGB + 3) { //W set and after RGB
+      //using the simple algorithm of taking the minimum of RGB as white channel, this is good enough and fastest algorithm - we need speed 🔥
       uint8_t rgbw[4];
-      rgbw[3] = MIN(MIN(color.r, color.g), color.b) * 0.5;// >> 1; //calc white channel, only do half of the minimum as not to turn off one of RGB completely (to be tweaked)
+      rgbw[3] = MIN(MIN(color.r, color.g), color.b);
       rgbw[0] = color.red - rgbw[3]; //subtract from other channels
       rgbw[1] = color.green - rgbw[3];
       rgbw[2] = color.blue - rgbw[3];
