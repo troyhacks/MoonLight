@@ -207,10 +207,6 @@ class BouncingBallsEffect: public Node {
 };
 
 //DistortionWaves inspired by WLED, ldirko and blazoncek, https://editor.soulmatelights.com/gallery/1089-distorsion-waves
-static uint8_t gamma8(uint8_t b) { //we do nothing with gamma for now
-  return b;
-}
-
 class DistortionWavesEffect: public Node {
 public:
   static const char * name() {return "Distortion Waves 🔥💡";}
@@ -258,9 +254,9 @@ public:
         uint8_t  valueG = gdistort+ w*  (a2-( ((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1))>>7 ));
         uint8_t  valueB = bdistort+ w*  (a3-( ((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2))>>7 ));
 
-        valueR = gamma8(cos8(valueR));
-        valueG = gamma8(cos8(valueG));
-        valueB = gamma8(cos8(valueB));
+        valueR = layerV->layerP->gamma8(cos8(valueR));
+        valueG = layerV->layerP->gamma8(cos8(valueG));
+        valueB = layerV->layerP->gamma8(cos8(valueB));
 
         layerV->setRGB(pos, CRGB(valueR, valueG, valueB));
       }

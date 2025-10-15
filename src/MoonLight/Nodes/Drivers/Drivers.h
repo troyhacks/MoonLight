@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      Mods.h
+    @file      Drivers.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
@@ -15,7 +15,7 @@
 
 //alphabetically from here
 
-#include "../Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
+#include "../Nodes.h" //needed here because of Driver.cpp includes Driver.h, otherwise Node unknown
 
 class DriverNode: public Node {
   uint16_t maxPower = 10;
@@ -131,12 +131,18 @@ class HUB75Driver: public Node {
   void onLayout() override;
 };
 
+#define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
+
 class PhysicalDriver: public DriverNode {
   public:
 
   static const char * name() {return "Physical Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
+
+  uint8_t pins[NUMSTRIPS]; //max 16 pins
+  int lengths[NUMSTRIPS];
+  int nb_pins=0;
 
   #if HP_ALL_DRIVERS
     char version[30] = HP_ALL_VERSION;

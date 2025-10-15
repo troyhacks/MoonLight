@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      Mods.cpp
+    @file      Driver.cpp
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
@@ -16,7 +16,6 @@
 #include <ESP32SvelteKit.h> // for safeModeMB and restartNeeded
 
 #if HP_ALL_DRIVERS
-  #define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
   // #define NUM_LEDS_PER_STRIP 256 not for non virtal... (only setting __delay when NO_WAIT)
   #include "I2SClocklessLedDriver.h"
   static I2SClocklessLedDriver ledsDriver;
@@ -151,12 +150,12 @@ void DriverNode::onUpdate(String &oldValue, JsonObject control) {
         break;
     }
 
-
     MB_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
     
     // FASTLED_ASSERT(true, "oki");
     
     #if HP_ALL_DRIVERS
+      #ifndef CONFIG_IDF_TARGET_ESP32P4
       if (initDone) {
         
         // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
@@ -164,6 +163,11 @@ void DriverNode::onUpdate(String &oldValue, JsonObject control) {
         // if (oldChannelsPerLight != header->channelsPerLight)
         //   restartNeeded = true; //in case 
       }
+      #else
+        //P4: init is done as soon as the offsets are set
+        initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
+      #endif
+
     #else //ESP32_LEDSDRIVER
       if (ledsDriver.initLedsDone) {
         
@@ -608,6 +612,10 @@ void ArtNetDriver::loop() {
     #endif
   }
 
+  #ifdef CONFIG_IDF_TARGET_ESP32P4
+    #include "parlio.h"
+  #endif
+
   void PhysicalDriver::onLayout() {
     #if HP_ALL_DRIVERS
       if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
@@ -622,10 +630,6 @@ void ArtNetDriver::loop() {
           MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
           return;
         }
-
-        int pins[NUMSTRIPS]; //max 16 pins
-        int lengths[NUMSTRIPS];
-        int nb_pins=0;
 
         for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
           // MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
@@ -655,81 +659,86 @@ void ArtNetDriver::loop() {
 
         if (nb_pins > 0) {
 
-          if (initDone) {
-            //don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
+          #ifndef CONFIG_IDF_TARGET_ESP32P4 // Non P4: Yves driver
+            if (initDone) {
+              //don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
-            //so do what ledsDriver.initled is doing:
+              //so do what ledsDriver.initled is doing:
 
-            //from lightPresetSaved
-            ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
-            ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
-            ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
-            ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+              //from lightPresetSaved
+              ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
+              ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
+              ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
+              ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
 
-            //from initled
-            ledsDriver.num_strips = nb_pins;
-            ledsDriver.total_leds = 0;
-            for (int i = 0; i < ledsDriver.num_strips; i++)
-            {
-                ledsDriver.stripSize[i] = lengths[i];
-                ledsDriver.total_leds += lengths[i];
-            }
-            int num_led_per_strip = ledsDriver.maxLength(lengths, ledsDriver.num_strips);
-
-            //from __initled:
-
-            ledsDriver.num_led_per_strip = num_led_per_strip;
-            ledsDriver._offsetDisplay.offsetx = 0;
-            ledsDriver._offsetDisplay.offsety = 0;
-            ledsDriver._offsetDisplay.panel_width = num_led_per_strip;
-            ledsDriver._offsetDisplay.panel_height = 9999;
-            ledsDriver._defaultOffsetDisplay = ledsDriver._offsetDisplay;
-            ledsDriver.linewidth = num_led_per_strip;
-
-            ledsDriver.setPins(pins); //if pins and lengths changed, set that right
-
-            // i2sInit(); //not necessary, initled did it, no need to change
-
-            //P4 for PhysicalDriver not supported yet
-
-            #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
-              //delete allocations done by physical driver if total channels changes (larger)
-              for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+              //from initled
+              ledsDriver.num_strips = nb_pins;
+              ledsDriver.total_leds = 0;
+              for (int i = 0; i < ledsDriver.num_strips; i++)
               {
-                  heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
-                  heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+                  ledsDriver.stripSize[i] = lengths[i];
+                  ledsDriver.total_leds += lengths[i];
               }
-              heap_caps_free(ledsDriver.DMABuffersTampon);
-            #endif
+              int num_led_per_strip = ledsDriver.maxLength(lengths, ledsDriver.num_strips);
 
-            __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
+              //from __initled:
 
-            ledsDriver.initDMABuffers(); //create them again
+              ledsDriver.num_led_per_strip = num_led_per_strip;
+              ledsDriver._offsetDisplay.offsetx = 0;
+              ledsDriver._offsetDisplay.offsety = 0;
+              ledsDriver._offsetDisplay.panel_width = num_led_per_strip;
+              ledsDriver._offsetDisplay.panel_height = 9999;
+              ledsDriver._defaultOffsetDisplay = ledsDriver._offsetDisplay;
+              ledsDriver.linewidth = num_led_per_strip;
 
-            MB_LOGD(ML_TAG, "reinit physDriver %d x %d (%d)", ledsDriver.num_strips, num_led_per_strip, __NB_DMA_BUFFER);
+              ledsDriver.setPins((int *)pins); //if pins and lengths changed, set that right
 
-            return; //bye bye initled, we did it ourselves ;-)
-          } else {
-            __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
+              // i2sInit(); //not necessary, initled did it, no need to change
 
-            uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
+              //P4 for PhysicalDriver not supported yet
 
-            ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
+              #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
+                //delete allocations done by physical driver if total channels changes (larger)
+                for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
+                {
+                    heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
+                    heap_caps_free(ledsDriver.DMABuffersTampon[i]);
+                }
+                heap_caps_free(ledsDriver.DMABuffersTampon);
+              #endif
 
-            //overwrite what initled has done
-            ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
-            ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
-            ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
-            ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+              __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
 
-            ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
+              ledsDriver.initDMABuffers(); //create them again
 
-            #if ML_LIVE_MAPPING
-              ledsDriver.setMapLed(&mapLed);
-            #endif
+              MB_LOGD(ML_TAG, "reinit physDriver %d x %d (%d)", ledsDriver.num_strips, num_led_per_strip, __NB_DMA_BUFFER);
 
-            initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
-          }
+              return; //bye bye initled, we did it ourselves ;-)
+            } else {
+              __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
+
+              uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
+
+              ledsDriver.initled(layerV->layerP->lights.channels, (int *)pins, lengths, nb_pins);
+
+              //overwrite what initled has done
+              ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
+              ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
+              ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
+              ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+
+              ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
+
+              #if ML_LIVE_MAPPING
+                ledsDriver.setMapLed(&mapLed);
+              #endif
+
+              initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
+            }
+          #else // P4: Parlio Troy Driver
+            // initDone set when lightpreset is set
+            // initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
+          #endif
         }
       }
     #else //ESP32_LEDSDRIVER
@@ -782,9 +791,16 @@ void ArtNetDriver::loop() {
 
         DriverNode::loop();
 
-        if (ledsDriver.total_leds > 0)
-          ledsDriver.showPixels(WAIT);
-        // #endif
+        #ifndef CONFIG_IDF_TARGET_ESP32P4
+          if (ledsDriver.total_leds > 0)
+            ledsDriver.showPixels(WAIT);
+        #else
+          show_parlio(pins, layerV->layerP->lights.header.nrOfLights, layerV->layerP->lights.channels
+                      , ledsDriver._brightness, layerV->layerP->lights.header.channelsPerLight == 4, nb_pins, lengths[0]
+                      , layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue
+                    );
+        #endif
+
     }
     #else //ESP32_LEDSDRIVER
       if (!ledsDriver.initLedsDone) return;

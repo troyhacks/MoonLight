@@ -139,6 +139,10 @@ class PhysicalLayer {
     // to be called in setup, if more then one effect
     // void initLightsToBlend();
 
+    uint8_t gamma8(uint8_t b) { //we do nothing with gamma for now
+      return b;
+    }
+
 };
 
 #endif //FT_MOONLIGHT
