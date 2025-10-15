@@ -94,39 +94,47 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
             JsonArray stateArray = stateData[newProperty.key()];
             //check each row with each row of stateArray and check if same row found
 
-            uint8_t parkedAtIndex;
-            uint8_t parkedFromIndex = UINT8_MAX;
+            //only pure swaps, no add or remove of rows
+            if (newArray.size() == stateArray.size()) {
 
-            size_t minSize = min(stateArray.size(), newArray.size());
-            for (uint8_t stateIndex = 0; stateIndex < minSize; stateIndex++) {//} JsonObject stateObject : stateArray) {
-                for (uint8_t newIndex = 0; newIndex < minSize; newIndex++) {//} JsonObject newObject : newArray) {
-                    if (stateIndex != newIndex && stateArray[stateIndex] == newArray[newIndex]) {
-                        //if the old value found somewhere else, it has been moved so we can overwrite the current value
-                        stateArray[stateIndex].set(newArray[stateIndex]); //copies the value to the state array
-                        MB_LOGD(ML_TAG, "%d <- %d", stateIndex, newIndex);
-                        changed = true;
+                uint8_t parkedAtIndex;
+                uint8_t parkedFromIndex = UINT8_MAX;
 
-                        //calculate swap indexes
-                        //eg 0 to 1 take 0 and store in 1. old 1 is parked in 0
-                        //.  1 to 2 take the 1 parked in 0 store old 2 in 0 
-                        //.  2 to 0 take the 2 parked in 0 . it is already in 0 so we are done!!!
+                // size_t minSize = min(stateArray.size(), newArray.size());
+                for (uint8_t stateIndex = 0; stateIndex < stateArray.size(); stateIndex++) {//} JsonObject stateObject : stateArray) {
+                    for (uint8_t newIndex = 0; newIndex < stateArray.size(); newIndex++) {//} JsonObject newObject : newArray) {
+                        if (stateIndex != newIndex && stateArray[stateIndex] == newArray[newIndex]) {
+                            //if the old value found somewhere else, it has been moved so we can overwrite the current value
+                            stateArray[stateIndex].set(newArray[stateIndex]); //copies the value to the state array
+                            MB_LOGD(ML_TAG, "(%d @ %d) %d -> %d", parkedFromIndex, parkedAtIndex, stateIndex, newIndex);
+                            changed = true;
 
-                        //temp = newindex; newindex = oldindex; oldindex = temp (storage)!
+                            //calculate swap indexes
+                            //eg 0 to 1 take 0 and store in 1. old 1 is parked in 0
+                            //.  1 to 2 take the 1 parked in 0 store old 2 in 0 
+                            //.  2 to 0 take the 2 parked in 0 . it is already in 0 so we are done!!!
 
-                        //for each map which maps to another row, call onReOrderSwap
+                            //temp = newindex; newindex = oldindex; oldindex = temp (storage)!
 
-                        //check if stateindex is stored somewhere else
-                        //if stateIndex refers to an index which is parked, use the parking spot.
-                        if (stateIndex == parkedFromIndex) //e.g. parkedFromIndex ==1
-                            stateIndex = parkedAtIndex; //e.g. 1 is stored in 0
+                            //for each map which maps to another row, call onReOrderSwap
 
-                        execOnReOrderSwap(stateIndex, newIndex);
+                            //check if stateindex is stored somewhere else
+                            //if stateIndex refers to an index which is parked, use the parking spot.
 
-                        parkedAtIndex = stateIndex; //the parking spot created
-                        parkedFromIndex = newIndex; //the index of value in the array stored in the parking spot
+                            uint8_t newStateIndex = stateIndex;
+                            if (stateIndex == parkedFromIndex) //e.g. parkedFromIndex ==1
+                                newStateIndex = parkedAtIndex; //e.g. 1 is stored in 0
+
+                            if (newStateIndex != newIndex)
+                                execOnReOrderSwap(newStateIndex, newIndex);
+
+                            if (parkedFromIndex == UINT8_MAX)
+                                parkedFromIndex = newIndex; //the index of value in the array stored in the parking spot
+                            parkedAtIndex = newStateIndex; //the parking spot created
+                        }
                     }
                 }
-            }
+            } //equal size
         }
     }
     return changed;
@@ -181,16 +189,16 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
                 JsonArray stateArray = stateValue.as<JsonArray>();
                 JsonArray newArray = newValue.as<JsonArray>();
 
-                MB_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
+                // MB_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
                 
                 for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) { //compare each item in the array
                     // MB_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateArray[i].as<String>().c_str(), newArray[i].as<String>().c_str());
                     if (i >= stateArray.size()) { //newArray has added a row
-                        MB_LOGD(MB_TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        // MB_LOGD(MB_TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
                         stateArray.add<JsonObject>(); //add new row
                         changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
                     } else if (i >= newArray.size()) { //newArray has deleted a row
-                        MB_LOGD(MB_TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+                        // MB_LOGD(MB_TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
                         // newArray.add<JsonObject>(); //add dummy row
                         changed = true; //compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
 

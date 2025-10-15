@@ -173,14 +173,14 @@ public:
         values.add(AmbientMoveEffect::name());
 
         //Modifiers
-        values.add(CheckerboardModifier::name());
-        values.add(CircleModifier::name());
-        values.add(MirrorModifier::name());
         values.add(MultiplyModifier::name());
-        values.add(RippleYZModifier::name());
-        values.add(PinwheelModifier::name());
-        values.add(RotateModifier::name());
+        values.add(MirrorModifier::name());
         values.add(TransposeModifier::name());
+        values.add(CircleModifier::name());
+        values.add(RotateModifier::name());
+        values.add(CheckerboardModifier::name());
+        values.add(PinwheelModifier::name());
+        values.add(RippleYZModifier::name());
 
         //find all the .sc files on FS
         File rootFolder = ESPFS.open("/");

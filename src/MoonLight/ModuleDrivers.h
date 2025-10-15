@@ -44,22 +44,21 @@ public:
         values.add(PanelLayout::name());
         values.add(PanelsLayout::name());
         values.add(CubeLayout::name());
+        values.add(HumanSizedCubeLayout::name());
         values.add(RingsLayout::name());
         values.add(WheelLayout::name());
-        values.add(HumanSizedCubeLayout::name());
         values.add(SingleLineLayout::name());
         values.add(SingleRowLayout::name());
-
         //custom
         values.add(SE16Layout::name());
 
-        values.add(ArtNetDriver::name());
-        values.add(FastLEDDriver::name());
         values.add(PhysicalDriver::name());
+        values.add(FastLEDDriver::name());
+        values.add(ArtNetDriver::name());
         values.add(AudioSyncDriver::name());
-        values.add(HUB75Driver::name());
         values.add(VirtualDriver::name());
         values.add(ParlioDriver::name());
+        values.add(HUB75Driver::name());
     }
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
