@@ -33,7 +33,7 @@ The Effects module defines Effects and Modifiers. They run in a 'layer'.
 ## Effect 🔥 Nodes
 
 Below is a list of effects in MoonLight.
-Want to add an effect to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime effects (🚧)
+Want to add an effect to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime effects.
 
 ### MoonLight effects
 
@@ -48,11 +48,11 @@ These effects have first been created in MoonLight:
 | Particles 🧊 | ![Particles](https://github.com/user-attachments/assets/c2df7f6b-3b5a-4836-8e21-127de3eb3364) | <img width="320" alt="Particles" src="https://github.com/user-attachments/assets/415d746a-5b9d-4936-9cf7-343661ac86b5" /> | Supports Gyro 🚧 |
 | Rainbow | ![Rainbow](https://github.com/user-attachments/assets/d74832fa-0e77-481c-9823-588042751f87) | <img width="320" alt="Rainbow" src="https://github.com/user-attachments/assets/ca28f78f-dc54-4999-a0ee-700390b24f97" /> | |
 | Random | ![Random](https://github.com/user-attachments/assets/b7874741-7a30-4ad1-9a8b-db0093da1297) | <img width="320" alt="Speed" src="https://github.com/user-attachments/assets/b99aa9cb-161f-4ade-8d93-bc5343214ac7" /> | |
-| Ripples 🧊 | ![Ripples](https://github.com/user-attachments/assets/ad1d96d9-60fc-4301-8f17-239e45de8d38) | <img width="320" alt="Ripples" src="https://github.com/user-attachments/assets/d9c83988-d60a-4eed-9e04-ea7ddbfc37ab" /> | also 3D |
-| Rubiks Cube | ![Rubik](https://github.com/user-attachments/assets/a9f9b0f7-d9e9-48a2-8b02-e602593e21f6) | <img width="320" alt="Rubik" src="https://github.com/user-attachments/assets/a1b2ee8d-3445-408c-bd53-1721eb6bc249" /> | also 3D |
+| Ripples 🧊 | ![Ripples](https://github.com/user-attachments/assets/ad1d96d9-60fc-4301-8f17-239e45de8d38) | <img width="320" alt="Ripples" src="https://github.com/user-attachments/assets/d9c83988-d60a-4eed-9e04-ea7ddbfc37ab" /> | |
+| Rubiks Cube 🧊 | ![Rubik](https://github.com/user-attachments/assets/a9f9b0f7-d9e9-48a2-8b02-e602593e21f6) | <img width="320" alt="Rubik" src="https://github.com/user-attachments/assets/a1b2ee8d-3445-408c-bd53-1721eb6bc249" /> | |
 | Scrolling Text | ![ScrollingText](https://github.com/user-attachments/assets/9ebcc5eb-2b4a-4eff-993c-7836fc07dcea) | <img width="320" alt="ScrollingText" src="https://github.com/user-attachments/assets/b32c2b4b-2774-42a9-8174-77602d1bc547" /> | Preset: Auto, IP (.ddd), FPS (ddds), Time (HHMM), Uptime (s/m/h), Status 🛜 (AP/STA), Clients 🛜 (dC), Connected 🛜 (dCC) |
 | Sinus | ![Sinus](https://github.com/user-attachments/assets/ad42f5f1-3670-4238-a9e7-d9d1388760d4) | <img width="320" alt="Speed" src="https://github.com/user-attachments/assets/b99aa9cb-161f-4ade-8d93-bc5343214ac7" /> | |
-| Sphere Move 🧊 | ![SphereMove](https://github.com/user-attachments/assets/f02013a4-9aca-4831-9bae-79db8e421008) | <img width="320" alt="Speed" src="https://github.com/user-attachments/assets/b99aa9cb-161f-4ade-8d93-bc5343214ac7" /> | also 3D |
+| Sphere Move 🧊 | ![SphereMove](https://github.com/user-attachments/assets/f02013a4-9aca-4831-9bae-79db8e421008) | <img width="320" alt="Speed" src="https://github.com/user-attachments/assets/b99aa9cb-161f-4ade-8d93-bc5343214ac7" /> | |
 | StarField | ![StarField](https://github.com/user-attachments/assets/a5fcc733-0365-4109-bdcf-f353aa2cf3c0) | <img width="320" alt="StarField" src="https://github.com/user-attachments/assets/20afd6a8-df4c-4532-b640-92e84c1c6849" /> | |
 | Praxis | ![Praxis](https://github.com/user-attachments/assets/f9271d1c-bcd1-4a79-bc1a-cac951758195) | <img width="320" alt="Praxis" src="https://github.com/user-attachments/assets/536ab4c8-5c90-4b76-9f80-2aaed4170901" />| |
 | Wave | ![Wave](https://github.com/user-attachments/assets/a699f3a6-c981-4159-a96e-85d43c9a853c) | <img width="320" alt="Wave" src="https://github.com/user-attachments/assets/2e8408e8-4610-45dd-af36-8560fe5ec024" /> | Type: Saw, Triangle, Sinus, Square, Sin3, Noise |
@@ -65,8 +65,8 @@ The following effects are created by the MoonModules team, mostly first in WLED-
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
 | GEQ 3D ♫ | ![GEQ3D](https://github.com/user-attachments/assets/decb902d-1ecf-4be5-a83d-dff0a83cc65f) | <img width="320" alt="GEQ3D" src="https://github.com/user-attachments/assets/5ee5fcdf-86a4-4e88-a59e-b84166be91e2" /> | 2D effect |
-| PaintBrush ♫ 🧊 | ![PaintBrush](https://github.com/user-attachments/assets/213629af-eb8b-4c7b-9768-c0f1f2be3ed5) | <img width="320" alt="PaintBrush" src="https://github.com/user-attachments/assets/de1f9379-9984-4d9e-a95a-954df1ba69f4" /> | also 3D |
-| Game Of Life 🧊 | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_172.gif) | <img width="320" src="https://github.com/user-attachments/assets/18498c30-b249-4390-bfdf-084deedbfc49" /> | also 3D |
+| PaintBrush ♫ 🧊 | ![PaintBrush](https://github.com/user-attachments/assets/213629af-eb8b-4c7b-9768-c0f1f2be3ed5) | <img width="320" alt="PaintBrush" src="https://github.com/user-attachments/assets/de1f9379-9984-4d9e-a95a-954df1ba69f4" /> | |
+| Game Of Life 🧊 | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_172.gif) | <img width="320" src="https://github.com/user-attachments/assets/18498c30-b249-4390-bfdf-084deedbfc49" /> | |
 
 
 ### WLED effects
@@ -88,7 +88,9 @@ The following effects originated from WLED, most have been enhanced in WLED-MM a
 
 ### Moving head effects
 
-The following effects are created in MoonLight, supporting driving Moving Heads over Art-Net:
+The following effects are created in MoonLight, supporting driving Moving Heads over [Art-Net](https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net):
+
+Select Moving heads in light presets, see [Light presets](https://moonmodules.org/MoonLight/moonbase/module/drivers/#max-power-and-light-preset)
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |

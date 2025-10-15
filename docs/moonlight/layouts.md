@@ -12,7 +12,7 @@ A layout (🚥) defines the coordinates of all lights connected to a MoonLight d
 ## Layout 🚥 Nodes
 
 Below is a list of Layouts in MoonLight. 
-Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime effects (🚧)
+Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime effects.
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
