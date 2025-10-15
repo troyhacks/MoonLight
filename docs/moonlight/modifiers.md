@@ -9,14 +9,14 @@ A modifier (💎) is an effect on an effect. It can change the size of the effec
 ## Modifier 💎 Nodes
 
 Below is a list of Modifiers in MoonLight. 
-Want to add a Modifier to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime Modifiers (🚧)
+Want to add a Modifier to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime Modifiers.
 
 The following Modifiers are defined in MoonLight. Some found there origin in WLED and WLED-MM (Expand1D):
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
 | Multiply 🧊 | ![Multiply](https://github.com/user-attachments/assets/fcb3e4a7-2c28-4f68-b216-5ca004d46c53) | <img width="320" alt="Multiply" src="https://github.com/user-attachments/assets/26606bca-ed3d-41a4-b34e-b40e48d1f524" /> | |
-| Mirror 🧊 | | | |
+| Mirror 🧊 | ![Mirror](https://github.com/user-attachments/assets/f0f7dfa8-cc4d-4aa9-9c93-bd430d24f6df) | <img width="320" alt="Mirror" src="https://github.com/user-attachments/assets/896fccab-55e2-4083-93d5-a8ffa3cd0c75" /> | |
 | Transpose 🧊 | ![Transpose](https://github.com/user-attachments/assets/5a8c74d0-3ce9-407a-8076-4ba708558b9b) | <img width="320" alt="Transpose" src="https://github.com/user-attachments/assets/fdb8e88d-6578-4a3d-a65c-8defbe5e3453" /> | |
 | Circle | ![Circle](https://github.com/user-attachments/assets/c5308217-0bd4-49ad-adf8-f17b7062671f) | | |
 | Rotate | ![Rotate](https://github.com/user-attachments/assets/c622a9df-318a-4f83-81c0-f5a5c7bafb7b) | <img width="320" alt="Rotate" src="https://github.com/user-attachments/assets/7273a625-5e14-4814-92e8-8f7f65cfc02e" /> | |
