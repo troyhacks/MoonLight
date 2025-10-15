@@ -44,7 +44,7 @@ These effects have first been created in MoonLight:
 | Solid | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_000.gif) | <img width="320" src="https://github.com/user-attachments/assets/844bdbf1-b42b-4b5c-94f9-d1334bce2b10" /> | Can be used as background to other effects when ordered before other effects |
 | Lines | ![lines](https://github.com/user-attachments/assets/6ddd0d7b-bbb2-4b44-8858-c4f444268321) | <img width="320" alt="Speed" src="https://github.com/user-attachments/assets/b99aa9cb-161f-4ade-8d93-bc5343214ac7" /> | To test a layout |
 | Frequency Saws ♫ | ![FreqSaws](https://github.com/user-attachments/assets/9e0f1f22-eba9-470e-850e-bd0e2f7c787f) | <img width="320" src="https://github.com/user-attachments/assets/78828181-c1b3-4d0f-85dc-356ced10fcd9"/> | |
-| Moon Man | ![]() | | only on devices supporting M5 library, e.g. AtomS3R |
+| Moon Man | <img width="100" alt="MoonMan" src="https://github.com/user-attachments/assets/cd3acd08-2725-4d2c-b809-37a61314d620" /> | No controls | only on devices supporting M5 library, e.g. AtomS3R |
 | Particles 🧊 | ![Particles](https://github.com/user-attachments/assets/c2df7f6b-3b5a-4836-8e21-127de3eb3364) | <img width="320" alt="Particles" src="https://github.com/user-attachments/assets/415d746a-5b9d-4936-9cf7-343661ac86b5" /> | Supports Gyro 🚧 |
 | Rainbow | ![Rainbow](https://github.com/user-attachments/assets/d74832fa-0e77-481c-9823-588042751f87) | <img width="320" alt="Rainbow" src="https://github.com/user-attachments/assets/ca28f78f-dc54-4999-a0ee-700390b24f97" /> | |
 | Random | ![Random](https://github.com/user-attachments/assets/b7874741-7a30-4ad1-9a8b-db0093da1297) | <img width="320" alt="Speed" src="https://github.com/user-attachments/assets/b99aa9cb-161f-4ade-8d93-bc5343214ac7" /> | |
@@ -87,6 +87,8 @@ The following effects originated from WLED, most have been enhanced in WLED-MM a
 | Waverly ♪ | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM165.gif) | <img width="320" alt="Waverly" src="https://github.com/user-attachments/assets/feb2f380-c173-456b-9abf-eebb9f765ab0" /> | |
 
 ### Moving head effects
+
+<img width="320" src="https://github.com/user-attachments/assets/6e61c41f-e128-4adc-b9c1-6239fe4736dc"/>
 
 The following effects are created in MoonLight, supporting driving Moving Heads over [Art-Net](https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net):
 
