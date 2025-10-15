@@ -98,6 +98,10 @@ There are 3 files to consider when making a ESP32-device definition.
 
 ### Technical notes
 
+#### LED drivers
+* Switch off to see the effect framerate in System Status/Metrics
+* Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 LEDs, 24 bits is 130 fps theoretically - 120 practically)
+
 #### Live Scripts
 
 * Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen

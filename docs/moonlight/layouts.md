@@ -10,7 +10,10 @@ A layout (🚥) defines the coordinates of all lights connected to a MoonLight d
 * MoonLight will use the layout definition to generate a **mapping** of the effects to a real world light layout. Most simple example is a panel which has a snake layout. The mapping will create a layer for effects where the snake layout is hidden.
 
 ## Layout 🚥 Nodes
-    
+
+Below is a list of Layouts in MoonLight. 
+Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime effects (🚧)
+
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
 | Panel | ![Panel](https://github.com/user-attachments/assets/1a69758a-81e3-4f1f-a47e-a242de105c93)| <img width="320" alt="Panel" src="https://github.com/user-attachments/assets/60e6ba73-8956-45bc-9706-581faa17ba16" /> | Defines a 2D panel with width and height |
