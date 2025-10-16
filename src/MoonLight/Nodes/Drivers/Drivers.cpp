@@ -631,6 +631,8 @@ void ArtNetDriver::loop() {
           return;
         }
 
+        nb_pins = 0;
+
         for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
           // MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
           if (nb_pins < NUMSTRIPS) {
