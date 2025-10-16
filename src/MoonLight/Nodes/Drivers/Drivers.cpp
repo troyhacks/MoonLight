@@ -691,7 +691,7 @@ void ArtNetDriver::loop() {
               ledsDriver._defaultOffsetDisplay = ledsDriver._offsetDisplay;
               ledsDriver.linewidth = num_led_per_strip;
 
-              ledsDriver.setPins((int *)pins); //if pins and lengths changed, set that right
+              ledsDriver.setPins(pins); //if pins and lengths changed, set that right
 
               // i2sInit(); //not necessary, initled did it, no need to change
 
@@ -719,7 +719,7 @@ void ArtNetDriver::loop() {
 
               uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
 
-              ledsDriver.initled(layerV->layerP->lights.channels, (int *)pins, lengths, nb_pins);
+              ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
 
               //overwrite what initled has done
               ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
