@@ -32,6 +32,11 @@ except ImportError:
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives import serialization
 
+import warnings
+from cryptography.utils import CryptographyDeprecationWarning
+
+warnings.filterwarnings("ignore", category=CryptographyDeprecationWarning)
+
 
 ca_bundle_bin_file = 'x509_crt_bundle.bin'
 mozilla_cacert_url = 'https://curl.se/ca/cacert.pem'
@@ -126,7 +131,8 @@ class CertificateBundle:
         crt = ''
         count = 0
         start = False
-
+        skipped = 0
+        
         for strg in crt_str.splitlines(True):
             if strg == '-----BEGIN CERTIFICATE-----\n' and start is False:
                 crt = ''
@@ -139,9 +145,11 @@ class CertificateBundle:
                     cert = x509.load_pem_x509_certificate(crt.encode(), default_backend())
                     # Check serial number
                     if cert.serial_number <= 0:
-                        status(f'Warning: Certificate {cert} has invalid serial number: {cert.serial_number}')
-                    self.certificates.append(cert)
-                    count += 1
+                        # status(f'Warning: Certificate {cert} has invalid serial number: {cert.serial_number}')
+                        skipped += 1
+                    else:
+                      self.certificates.append(cert)
+                      count += 1
                 except Exception as e:
                     status(f'Failed to load certificate: {e}')
             if start is True:
@@ -151,6 +159,9 @@ class CertificateBundle:
             raise InputError('No certificate found')
 
         status('Successfully added %d certificates' % count)
+
+        if skipped > 0:
+            status('Skipped %d certificates with bad serial numbers' % skipped)
 
     def add_from_der(self, crt_str):
         self.certificates.append(x509.load_der_x509_certificate(crt_str, default_backend()))
