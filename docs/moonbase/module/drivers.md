@@ -26,46 +26,40 @@ Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLig
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| Physical Driver | <img width="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90"/> | <img width="320" alt="Physical" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | See below |
-| FastLED Driver | | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | See below |
-| ArtNet | <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | See below |
-| AudioSync | | No controls | Listens to audio sent over the local network by WLED-AC or WLED-MM and allows audio reactive effects (♪ & ♫) to use audio data (volume and bands (FFT)) |
-| Virtual driver | <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/> | | Driving max 120! panels of 256 LEDs each at 100 FPS using shift registers. Not implemented yet |
-| HUB75 | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | | Not implemented yet |
+| Physical LED Driver | <img width="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90"/> | <img width="320" alt="Physical" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | Drive multiple LED types, all devices including ESP32-P4(-nano) supported<br>Max Power and Light preset: See below<br>DMA buffer: set higher when LEDs flicker |
+| FastLED Driver | <img width="100" src="https://avatars.githubusercontent.com/u/5899270?s=48&v=4"/> | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | Drive WS2812 lights.<br>Max Power: See below |
+| ArtNet | <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | Drive lights over the network. See below |
+| AudioSync | <img width="100" src="https://github.com/user-attachments/assets/bfedf80b-6596-41e7-a563-ba7dd58cc476"/> | No controls | Listens to audio sent over the local network by WLED-AC or WLED-MM and allows audio reactive effects (♪ & ♫) to use audio data (volume and bands (FFT)) |
+| Virtual LED Driver | <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/> | <img width="100" src="https://github.com/user-attachments/assets/c81d2f56-00d1-4424-a716-8e3c30e76636"/> | Driving max 120! panels of 256 LEDs each at 100 FPS using shift registers<br>Not implemented yet |
+| HUB75 Driver | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | <img width="100" src="https://github.com/user-attachments/assets/4d386045-9526-4a5a-aa31-638058b31f32"/> | Drive HUB75 panels<br>Not implemented yet |
 
-### Physical driver ☸️
+### Max Power and Light Preset
 
-Sends LED data to the pins / outputs as defined in the layout nodes using I2S (see [Develop / Drivers](https://moonmodules.org/MoonLight/develop/drivers/))
-This is the recommended driver at the moment for LEDs as it is the most flexible as it supports multiple type of LEDs (light preset).
+* **Max Power**: max amount of power in watts to send to LEDs. Default 10: 5V * 2A = 10W (so it runs fine on USB)
 
-!!! info "ESP32-P4"
+* **Light preset**: Defines the channels per light and color order
 
-    This driver also supports ESP32-P4 devices using the parallel IO interface, the ESP32-P4-nano to begin with. 🚧
+    <img width="183" alt="Light preset" src="https://github.com/user-attachments/assets/532265d5-b375-425c-8e29-cf8fa60b4f2c" />
 
-#### Controls
+!!! warning "Same Light preset"
+    Currently, if using multiple drivers, all drivers need the same Light preset !!
 
-* **Max Power** and **Light preset**: See below. 
-* DMA buffer: Set as low as possible. Too low will result in LED flickering, higher needs more memory. Recommended for ESP32-D0: 6, ESP32-S3: 75
+* RGB to BGR: 3 lights per channel, RGB lights, GRB is default
+* GRBW: LEDs with white channel like SK6812.
+* RGBW: for Par/DMX Lights
+* GRB6: for LED curtains with 6 channels per light (only rgb used)
+* RGBWYP: Compatible with [DMX 18x12W LED RGBW/RGBWUAV](https://s.click.aliexpress.com/e/_EJQoRlM) (RGBW is 4x18=72 channels, RGBWUAV is 6x18=104 channels). Currently setup to have the first 36 lights 4 channel RGBW, after that 6 channel RGBWYP ! Used for 18 channel light bars
+* MH*: Moving Heads lights
+    * MHBeTopper19x15W-32: [BeTopper / Big Dipper](https://betopperdj.com/products/betopper-19x15w-rgbw-with-light-strip-effect-moving-head-light)
+    * MHBeeEyes150W-15: [Bee eyes](https://a.co/d/bkTY4DX)
+    * MH19x15W-24: [19x15W Zoom Wash Lights RGBW Beam Moving Head](https://s.click.aliexpress.com/e/_EwBfFYw)
 
-### FastLED Driver ☸️
-
-Sends LED data to the pins / outputs as defined in the layout nodes using RMT(5) (see [Develop / Drivers](https://moonmodules.org/MoonLight/develop/drivers/))
-This is the most popular driver for LEDs out there. In MoonLight it currently supports WS2812 LEDs only. ESP32-P4 devices not supported at the moment.
-
-!!! warning "Flickering on some boards"
-    Due to recent changes in the ESP32 operating system (esp-idf) LEDs on some boards (e.g. esp32-s3) are flickering. This is expected to be resolved. Use the Physical driver if you encounter this.
-
-#### Controls
-
-* **Max Power**: See below
-* **Chipset**: FastLED chipset defined (for FastLED WS2812 is hardcoded in the firmware)
-* **FastLED**: FastLED version used (e.g. 301001 is 3.10.1)
-* **FastLED I2S**: Is the I2S driver used: Default RMT5 is used
-* **Color order**: FastLED color order (for FastLED hardcoded in the firmware)
+!!! info "Custom setup"
+    These are predefined presets. In a future release custom presets will be possible.
 
 ### Art-Net ☸️
 
-Sends the content of the Lights array in Art-Net compatible packages to an Art-Net controller specified by the IP address provided.
+Sends Lights in Art-Net compatible packages to an Art-Net controller specified by the IP address provided.
 
 #### Controls
 
@@ -113,27 +107,3 @@ Each color in a LED is one channel: For RGB max 170 LEDs is 510 channels per uni
     Set channels per universe to 510 for RGB and 512 for RGBW (no proof yet it makes a difference ...) on the controller. 
 
 The real number of channels per output can be less then the amount of universes available. e.g. if each output drives one 256 LED RGB panel, channels per output is 768. One package (= one universe) sends 170 LEDs (510 channels) and the second 86 LEDs / 256 channels. The next package for the next panel on the next output will then be in the first universe for that output (so unused universes for a channel will be skipped)
-
-### Max Power and Light Preset
-
-* **Max Power**: max amount of power in watts to send to LEDs. Default 10: 5V * 2A = 10W (so it runs fine on USB)
-
-* **Light preset**: Defines the channels per light and color order
-
-    <img width="183" alt="Light preset" src="https://github.com/user-attachments/assets/532265d5-b375-425c-8e29-cf8fa60b4f2c" />
-
-!!! warning "Same Light preset"
-    Currently, if using multiple drivers, all drivers need the same Light preset !!
-
-* RGB to BGR: 3 lights per channel, RGB lights, GRB is default
-* GRBW: LEDs with white channel like SK6812.
-* RGBW: for Par/DMX Lights
-* GRB6: for LED curtains with 6 channels per light (only rgb used)
-* RGBWYP: Compatible with [DMX 18x12W LED RGBW/RGBWUAV](https://s.click.aliexpress.com/e/_EJQoRlM) (RGBW is 4x18=72 channels, RGBWUAV is 6x18=104 channels). Currently setup to have the first 36 lights 4 channel RGBW, after that 6 channel RGBWYP ! Used for 18 channel light bars
-* MH*: Moving Heads lights
-    * MHBeTopper19x15W-32: [BeTopper / Big Dipper](https://betopperdj.com/products/betopper-19x15w-rgbw-with-light-strip-effect-moving-head-light)
-    * MHBeeEyes150W-15: [Bee eyes](https://a.co/d/bkTY4DX)
-    * MH19x15W-24: [19x15W Zoom Wash Lights RGBW Beam Moving Head](https://s.click.aliexpress.com/e/_EwBfFYw)
-
-!!! info "Custom setup"
-    These are predefined presets. In a future release custom presets will be possible.
