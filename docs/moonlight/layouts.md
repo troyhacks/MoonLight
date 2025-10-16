@@ -26,9 +26,12 @@ Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonL
 | Single Row | ![Single row](https://github.com/user-attachments/assets/a88cea0f-9227-4da4-9a43-b944fd8bef97) | <img width="320" alt="Single row" src="https://github.com/user-attachments/assets/9f9918b9-e1ee-43a8-a02d-7f1ee182888b" /> | |
 | SE16 | ![SE16](https://github.com/user-attachments/assets/45c7bec7-2386-4c42-8f24-5a57b87f0df9) | <img width="320" alt="SE16" src="https://github.com/user-attachments/assets/0efe941a-acf5-4a2c-a7d6-bdfa91574d1a" /> | Layout(s) including pins for Stephan Electronics 16-Pin ESP32-S3 board<br>see below |
 
-!!! warning "Chosing pins"
+!!! warning "Choosing pins"
 
     Choose the right pins with care. See also the IO module to see which pins can in general be used for LEDs (💡). But depending on a specific boards some pins might also be in use already. 
+
+!!! tip "Multiple layouts"
+    Single line, single row or panel are suitable layouts to combine into a larger fixture.
 
 ### SE16
 

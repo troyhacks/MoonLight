@@ -88,6 +88,8 @@ The following effects originated from WLED, most have been enhanced in WLED-MM a
 
 ### Moving head effects
 
+<img width="320" src="https://github.com/user-attachments/assets/6e61c41f-e128-4adc-b9c1-6239fe4736dc"/>
+
 The following effects are created in MoonLight, supporting driving Moving Heads over [Art-Net](https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net):
 
 Select Moving heads in light presets, see [Light presets](https://moonmodules.org/MoonLight/moonbase/module/drivers/#max-power-and-light-preset)

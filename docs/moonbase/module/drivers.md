@@ -26,18 +26,21 @@ Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLig
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| Physical Driver | | <img width="320" alt="Physical" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | See below |
+| Physical Driver | <img width="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90"/> | <img width="320" alt="Physical" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | See below |
 | FastLED Driver | | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | See below |
-| ArtNet | | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | See below |
+| ArtNet | <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | See below |
 | AudioSync | | No controls | Listens to audio sent over the local network by WLED-AC or WLED-MM and allows audio reactive effects (♪ & ♫) to use audio data (volume and bands (FFT)) |
-| Virtual driver | | | Sriving max 120! panels of 256 LEDs each at 100 FPS using shift registers. Not implemented yet |
-| Parlio | | | ESP32-P4 parallel IO driven LEDs. Not implemented yet |
-| HUB75 | | | Not implemented yet |
+| Virtual driver | <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/> | | Driving max 120! panels of 256 LEDs each at 100 FPS using shift registers. Not implemented yet |
+| HUB75 | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | | Not implemented yet |
 
 ### Physical driver ☸️
 
 Sends LED data to the pins / outputs as defined in the layout nodes using I2S (see [Develop / Drivers](https://moonmodules.org/MoonLight/develop/drivers/))
 This is the recommended driver at the moment for LEDs as it is the most flexible as it supports multiple type of LEDs (light preset).
+
+!!! info "ESP32-P4"
+
+    This driver also supports ESP32-P4 devices using the parallel IO interface, the ESP32-P4-nano to begin with. 🚧
 
 #### Controls
 
@@ -47,7 +50,7 @@ This is the recommended driver at the moment for LEDs as it is the most flexible
 ### FastLED Driver ☸️
 
 Sends LED data to the pins / outputs as defined in the layout nodes using RMT(5) (see [Develop / Drivers](https://moonmodules.org/MoonLight/develop/drivers/))
-This is the most popular driver for LEDs out there. In MoonLight it currently supports WS2812 LEDs only. 
+This is the most popular driver for LEDs out there. In MoonLight it currently supports WS2812 LEDs only. ESP32-P4 devices not supported at the moment.
 
 !!! warning "Flickering on some boards"
     Due to recent changes in the ESP32 operating system (esp-idf) LEDs on some boards (e.g. esp32-s3) are flickering. This is expected to be resolved. Use the Physical driver if you encounter this.
@@ -119,7 +122,7 @@ The real number of channels per output can be less then the amount of universes 
 
     <img width="183" alt="Light preset" src="https://github.com/user-attachments/assets/532265d5-b375-425c-8e29-cf8fa60b4f2c" />
 
-!!! warning "same Light preset"
+!!! warning "Same Light preset"
     Currently, if using multiple drivers, all drivers need the same Light preset !!
 
 * RGB to BGR: 3 lights per channel, RGB lights, GRB is default
