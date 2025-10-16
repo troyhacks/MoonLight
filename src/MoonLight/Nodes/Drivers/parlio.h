@@ -35,7 +35,7 @@ inline void transpose_32_slices(
     for (uint32_t pin = 0; pin < num_active_pins; ++pin) {
         const uint32_t pixel_idx = (pin * pixels_per_pin) + pixel_in_pin;
         const uint32_t component_idx = (pixel_idx * COMPONENTS_PER_PIXEL) + component_in_pixel;
-        const uint8_t data_byte = brightness_cache[input_buffer[component_idx]];
+        const uint8_t data_byte = brightness_cache[input_buffer[component_idx]]; // replace by rgbw lut tables!
         const uint32_t waveform = waveform_cache[data_byte];
         const uint32_t pin_bit = (1 << pin);
 
@@ -349,9 +349,11 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
   }
 #else
   parallel_buffer_remapped = buffer_in;
-  offSetR = 0;
-  offsetG = 1;
-  offsetB = 2;
+  //why should it be resetted here?
+  // color_order = COL_ORDER_RGB; // This isn't actually changing the color order - we're already there from the BusNetwork doing the right thing pixel-by-pixel.
+  // offSetR = 0;
+  // offsetG = 1;
+  // offsetB = 2;
 #endif
 
   create_transposed_led_output_optimized(parallel_buffer_remapped, parallel_buffer_repacked, leds_per_output, outputs, isRGBW, bri, offSetR, offsetG, offsetB);

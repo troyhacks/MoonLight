@@ -834,21 +834,12 @@ void ArtNetDriver::loop() {
   }
   
   void VirtualDriver::setup() {
-    DriverNode::setup();
-  }
-  void VirtualDriver::onLayout() {
-  }
-  void VirtualDriver::loop() {
-    DriverNode::loop();
-  }
-
-  void ParlioDriver::setup() {
     DriverNode::setup(); //adds maxPower and lights preset (rgb, rgbw, etc) control
 
     // add additional controls using addControl()
   }
 
-  void ParlioDriver::onUpdate(String &oldValue, JsonObject control) {
+  void VirtualDriver::onUpdate(String &oldValue, JsonObject control) {
     Node::onUpdate(oldValue, control);
 
     if (control["name"] == "whatever") {
@@ -856,7 +847,7 @@ void ArtNetDriver::loop() {
     }
   }
 
-  void ParlioDriver::onLayout() {
+  void VirtualDriver::onLayout() {
     if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
 
       if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
@@ -903,7 +894,7 @@ void ArtNetDriver::loop() {
     }
   }
 
-  void ParlioDriver::loop() {
+  void VirtualDriver::loop() {
     DriverNode::loop(); //checks for changes in brightness and rgb color corrections and update the lut tables, also using maxPower.
 
     //driver.show();     // process layerV->layerP->lights.channels (pka leds array) using LUT
@@ -914,7 +905,7 @@ void ArtNetDriver::loop() {
     ledsDriver.__white_map[0];
   }
 
-  ParlioDriver::~ParlioDriver() {
+  VirtualDriver::~VirtualDriver() {
     // driver is deleted,so delete whatever was allocated
   }
 

@@ -170,19 +170,6 @@ class VirtualDriver: public DriverNode {
   static const char * tags() {return "";}
 
   void setup() override;
-  void loop() override;
-
-  bool hasLayout() const override { return true; }
-  void onLayout() override;
-};
-class ParlioDriver: public DriverNode {
-  public:
-
-  static const char * name() {return "Parallel IO Driver ☸️🚧";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
-
-  void setup() override;
 
   bool hasLayout() const override { return true; }
   void onLayout() override;
@@ -191,7 +178,7 @@ class ParlioDriver: public DriverNode {
 
   void loop() override;
 
-  ~ParlioDriver() override;
+  ~VirtualDriver() override;
   
 };
 

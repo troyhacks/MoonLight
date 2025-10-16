@@ -57,7 +57,6 @@ public:
         values.add(ArtNetDriver::name());
         values.add(AudioSyncDriver::name());
         values.add(VirtualDriver::name());
-        values.add(ParlioDriver::name());
         values.add(HUB75Driver::name());
     }
 
@@ -83,7 +82,6 @@ public:
         else if (equal(name, AudioSyncDriver::name())) node = allocMBObject<AudioSyncDriver>();
         else if (equal(name, HUB75Driver::name())) node = allocMBObject<HUB75Driver>();
         else if (equal(name, VirtualDriver::name())) node = allocMBObject<VirtualDriver>();
-        else if (equal(name, ParlioDriver::name())) node = allocMBObject<ParlioDriver>();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = allocMBObject<LiveScriptNode>();
