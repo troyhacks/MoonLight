@@ -53,11 +53,19 @@ public:
         MB_LOGD(MB_TAG, "ModuleState constructor");
         if (!doc) {
             MB_LOGD(MB_TAG, "Creating doc");
-            doc = new JsonDocument(JsonRAMAllocator::instance());
+            if (psramFound())
+                doc = new JsonDocument(JsonRAMAllocator::instance()); //crashed on non psram esp32-d0
+            else
+                doc = new JsonDocument();
         }
-        // doc = new JsonDocument();
-        data = doc->add<JsonObject>();
-        // data = doc->to<JsonObject>();
+        if (doc) {
+            // doc = new JsonDocument();
+            data = doc->add<JsonObject>();
+            // data = doc->to<JsonObject>();
+        }
+        else {
+            MB_LOGE(MB_TAG, "Failed to create doc");
+        }
     }
     ~ModuleState() {
         MB_LOGD(MB_TAG, "ModuleState destructor");

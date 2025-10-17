@@ -156,16 +156,13 @@ void DriverNode::onUpdate(String &oldValue, JsonObject control) {
     
     #if HP_ALL_DRIVERS
       #ifndef CONFIG_IDF_TARGET_ESP32P4
-      if (initDone) {
-        
-        // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+        if (initDone) {
+          
+          // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
 
-        // if (oldChannelsPerLight != header->channelsPerLight)
-        //   restartNeeded = true; //in case 
-      }
-      #else
-        //P4: init is done as soon as the offsets are set
-        initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
+          // if (oldChannelsPerLight != header->channelsPerLight)
+          //   restartNeeded = true; //in case 
+        }
       #endif
 
     #else //ESP32_LEDSDRIVER
@@ -738,8 +735,7 @@ void ArtNetDriver::loop() {
               initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
             }
           #else // P4: Parlio Troy Driver
-            // initDone set when lightpreset is set
-            // initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
+            initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
           #endif
         }
       }
