@@ -58,7 +58,7 @@ public:
             //this should be updated each time the UI queries for it ... (now only at boot)
             data["nrOfLights"] = layerP.lights.header.nrOfLights;
             data["channelsPerLight"] = layerP.lights.header.channelsPerLight;
-            data["maxChannels"] = layerP.lights.nrOfChannels;
+            data["maxChannels"] = layerP.lights.maxChannels;
             data["size"]["x"] = layerP.lights.header.size.x;
             data["size"]["y"] = layerP.lights.header.size.y;
             data["size"]["z"] = layerP.lights.header.size.z;

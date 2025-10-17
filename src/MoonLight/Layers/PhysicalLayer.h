@@ -82,7 +82,7 @@ struct LightsHeader {
 struct Lights {
   LightsHeader header;
   uint8_t *channels = nullptr; // //pka leds, created in constructor
-  size_t nrOfChannels = 0;
+  size_t maxChannels = 0;
 
   // std::vector<size_t> universes; //tells at which byte the universe starts
 };

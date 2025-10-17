@@ -299,7 +299,7 @@
                         >
                             {x + y * property.width}
                             {#if popupCell === x + y * property.width}
-                                <div class="fixed z-50 bg-base-200 p-6 rounded shadow-lg mt-2 min-h-0 text-left inline-block min-w-0"
+                                <div class="fixed z-50 bg-neutral-100 p-6 rounded shadow-lg mt-2 min-h-0 text-left inline-block min-w-0"
                                     style="left: {popupX}px; top: {popupY}px;"
                                 >
                                     <!-- Popup for {cell} -->
