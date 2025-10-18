@@ -7,7 +7,7 @@
   "new_install_immediately": false,
   "builds": [
     {
-      "chipFamily": "ESP32-P4-nano",
+      "chipFamily": "ESP32-P4",
       "name": "esp32-p4-nano",
       "image": "./images/esp32-p4-nano.jpg",
       "parts": [
