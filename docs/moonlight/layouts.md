@@ -1,6 +1,6 @@
 # Layouts
 
-A layout (🚥) defines the coordinates of all lights connected to a MoonLight device and also assign groups of LEDs to esp32 gpio pins.
+A layout (🚥) defines the positions of lights connected to a MoonLight device.
 
 * The **coordinates** of each light are defined in a 3D coordinate space 
     * Coordinates needs to be specified in the order the lights are wired so MoonLight knows which light is first, which is second etc.
@@ -8,6 +8,7 @@ A layout (🚥) defines the coordinates of all lights connected to a MoonLight d
     * For lights in a flat area (2D, e.g. LED matrix), specify coordinates as [x,y,0] 
 * **Multiple layout nodes** can be defined which will be mapped in the order of the layouts
 * MoonLight will use the layout definition to generate a **mapping** of the effects to a real world light layout. Most simple example is a panel which has a snake layout. The mapping will create a layer for effects where the snake layout is hidden.
+* Layouts also assign groups of LEDs to esp32 GPIO pins.
 
 ## Layout 🚥 Nodes
 

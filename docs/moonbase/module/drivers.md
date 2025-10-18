@@ -6,8 +6,12 @@
 
 The Drivers module defines layers and drivers.
 
-* Layout 🚥: define a **layout** (e.g. a panel 16x16), of your LEDs or lights. See [Layouts](https://moonmodules.org/MoonLight/layouts/)
-* Driver ☸️: A driver sends light data to output, e.g. gpio pins (e.g. FastLED, Virtual and Physical driver) or over the network (e.g. Art-Net) or receives (light) data (e.g. audiosync to run audio reactive effects).
+* Layout 🚥: A layout (🚥) defines the positions of the lights to control. See [Layouts](https://moonmodules.org/MoonLight/moonlight/layouts/)
+* Driver ☸️: A driver is a link between MoonLight to hardware or the network. Drivers can both input data or output data. Examples:
+    * LED drivers (FastLED, Physical and Virtual drivers, hub75 panels)
+    * Light driver (Art-Net / DMX)
+    * Audio driver
+    * Sensor drivers (microphone, gyro, MIDI controller)
 
 ## Controls
 
@@ -27,10 +31,10 @@ Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLig
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
 | Physical LED Driver | <img width="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90"/> | <img width="320" alt="Physical" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | Drive multiple LED types, all devices including ESP32-P4(-nano) supported<br>Max Power and Light preset: See below<br>DMA buffer: set higher when LEDs flicker |
-| FastLED Driver | <img width="100" src="https://avatars.githubusercontent.com/u/5899270?s=48&v=4"/> | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | Drive WS2812 lights.<br>Max Power: See below |
-| ArtNet | <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | Drive lights over the network. See below |
+| FastLED Driver | <img width="100" src="https://avatars.githubusercontent.com/u/5899270?s=48&v=4"/> | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | Most used LED driver. Drive WS2812 lights.<br>Max Power: See below |
+| Art-Net | <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | Drive lights over the network. See below |
 | AudioSync | <img width="100" src="https://github.com/user-attachments/assets/bfedf80b-6596-41e7-a563-ba7dd58cc476"/> | No controls | Listens to audio sent over the local network by WLED-AC or WLED-MM and allows audio reactive effects (♪ & ♫) to use audio data (volume and bands (FFT)) |
-| Virtual LED Driver | <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/> | <img width="100" src="https://github.com/user-attachments/assets/c81d2f56-00d1-4424-a716-8e3c30e76636"/> | Driving max 120! panels of 256 LEDs each at 100 FPS using shift registers<br>Not implemented yet |
+| Virtual LED Driver | <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/> | <img width="100" src="https://github.com/user-attachments/assets/c81d2f56-00d1-4424-a716-8e3c30e76636"/> | Driving max 120! outputs. E.g. 48 panels of 256 LEDs each run at 50-100 FPS using shift registers<br>Not implemented yet |
 | HUB75 Driver | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | <img width="100" src="https://github.com/user-attachments/assets/4d386045-9526-4a5a-aa31-638058b31f32"/> | Drive HUB75 panels<br>Not implemented yet |
 
 ### Max Power and Light Preset

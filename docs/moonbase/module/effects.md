@@ -7,7 +7,7 @@
 The Effects module defines Effects and Modifiers. They run in a 'layer'. 
 
 * Effect 🔥: An animation running in a layer, see below for am overview of effects. Effects can run in 1D, 2D or 3D coordinate spaces.
-* Modifier 💎: An effect on an effect e.g. mirror, multiply or rotate. See [Modifiers](https://moonmodules.org/MoonLight/modifiers/)
+* Modifier 💎: An effect on an effect e.g. mirror, multiply or rotate. See [Modifiers](https://moonmodules.org/MoonLight/moonlight/modifiers/)
 * Layer: An area on a (LED) display. Effects and modifier run in this area. Each layer maps a coordinate space to the display
 
 !!! info "One layer"

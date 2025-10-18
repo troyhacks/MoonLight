@@ -1,6 +1,6 @@
 # Hardware
 
-To get started the minimal you need is an esp32-device connected via USB to your computer and a LED-strip or panel connected via 3 wires to the vcc, ground and a supported gpio pin of the esp32 (e.g. Pin 2). An ESP32-S3 is preferred as it has more memory to support large setups and Live Scripts. 
+To get started the minimal you need is an esp32-device connected via USB to your computer and a LED-strip or panel connected via 3 wires to the vcc, ground and a supported GPIO pin of the esp32 (e.g. Pin 2). An ESP32-S3 is preferred as it has more memory to support large setups and Live Scripts. 
 
 !!! info "ESP32-D0"
 
