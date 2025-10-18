@@ -125,25 +125,15 @@ public:
 
     void addNodes(JsonArray values) override {
         values.add(SolidEffect::name());
-        //alphabetically from here
-        values.add(BouncingBallsEffect::name());
-        values.add(BlurzEffect::name());
-        values.add(DistortionWavesEffect::name());
-        values.add(FreqMatrixEffect::name());
-        values.add(GameOfLifeEffect::name());
-        values.add(GEQEffect::name());
-        values.add(GEQ3DEffect::name());
-        values.add(FreqSawsEffect::name());
+        //alphabetically per category, keep the order the same as in https://moonmodules.org/MoonLight/moonbase/module/effects
+
+        // MoonLight effects
         values.add(LinesEffect::name());
-        values.add(LissajousEffect::name());
+        values.add(FreqSawsEffect::name());
         #if USE_M5UNIFIED
             values.add(MoonManEffect::name());
         #endif
-        values.add(Noise2DEffect::name());
-        values.add(NoiseMeterEffect::name());
-        values.add(PaintBrushEffect::name());
         values.add(ParticlesEffect::name());
-        values.add(PopCornEffect::name());
         values.add(RainbowEffect::name());
         values.add(RandomEffect::name());
         values.add(RipplesEffect::name());
@@ -153,9 +143,27 @@ public:
         values.add(SphereMoveEffect::name());
         values.add(StarFieldEffect::name());
         values.add(PraxisEffect::name());
-        values.add(WaverlyEffect::name());
         values.add(WaveEffect::name());
         values.add(FixedRectangleEffect::name());
+
+        //MoonModules effects
+        values.add(GameOfLifeEffect::name());
+        values.add(GEQ3DEffect::name());
+        values.add(PaintBrushEffect::name());
+
+        //WLED effects
+        values.add(BouncingBallsEffect::name());
+        values.add(BlurzEffect::name());
+        values.add(DistortionWavesEffect::name());
+        values.add(FreqMatrixEffect::name());
+        values.add(GEQEffect::name());
+        values.add(LissajousEffect::name());
+        values.add(Noise2DEffect::name());
+        values.add(NoiseMeterEffect::name());
+        values.add(PopCornEffect::name());
+        values.add(WaverlyEffect::name());
+
+        // Moving head effects
         values.add(Troy1ColorEffect::name());
         values.add(Troy1MoveEffect::name());
         values.add(Troy2ColorEffect::name());
@@ -164,14 +172,15 @@ public:
         values.add(WowiMoveEffect::name());
         values.add(AmbientMoveEffect::name());
 
-        values.add(CheckerboardModifier::name());
-        values.add(CircleModifier::name());
-        values.add(MirrorModifier::name());
+        //Modifiers
         values.add(MultiplyModifier::name());
-        values.add(RippleYZModifier::name());
-        values.add(PinwheelModifier::name());
-        values.add(RotateNodifier::name());
+        values.add(MirrorModifier::name());
         values.add(TransposeModifier::name());
+        values.add(CircleModifier::name());
+        values.add(RotateModifier::name());
+        values.add(CheckerboardModifier::name());
+        values.add(PinwheelModifier::name());
+        values.add(RippleYZModifier::name());
 
         //find all the .sc files on FS
         File rootFolder = ESPFS.open("/");
@@ -232,7 +241,7 @@ public:
         else if (equal(name, MultiplyModifier::name())) node = allocMBObject<MultiplyModifier>();
         else if (equal(name, RippleYZModifier::name())) node = allocMBObject<RippleYZModifier>();
         else if (equal(name, PinwheelModifier::name())) node = allocMBObject<PinwheelModifier>();
-        else if (equal(name, RotateNodifier::name())) node = allocMBObject<RotateNodifier>();
+        else if (equal(name, RotateModifier::name())) node = allocMBObject<RotateModifier>();
         else if (equal(name, TransposeModifier::name())) node = allocMBObject<TransposeModifier>();
         
         #if FT_LIVESCRIPT

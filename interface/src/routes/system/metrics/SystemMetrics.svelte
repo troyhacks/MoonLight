@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
@@ -8,7 +9,7 @@
 	import Metrics from '~icons/tabler/report-analytics';
 	import { daisyColor } from '$lib/DaisyUiHelper';
 	import { analytics } from '$lib/stores/analytics';
-
+	
 	Chart.register(...registerables);
 
 	// 🌙

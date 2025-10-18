@@ -44,22 +44,20 @@ public:
         values.add(PanelLayout::name());
         values.add(PanelsLayout::name());
         values.add(CubeLayout::name());
+        values.add(HumanSizedCubeLayout::name());
         values.add(RingsLayout::name());
         values.add(WheelLayout::name());
-        values.add(HumanSizedCubeLayout::name());
         values.add(SingleLineLayout::name());
         values.add(SingleRowLayout::name());
-
         //custom
         values.add(SE16Layout::name());
 
-        values.add(ArtNetDriverMod::name());
-        values.add(FastLEDDriverMod::name());
-        values.add(PhysicalDriverMod::name());
-        values.add(AudioSyncMod::name());
-        values.add(HUB75DriverMod::name());
-        values.add(VirtualDriverMod::name());
-        values.add(ParlioDriverMod::name());
+        values.add(PhysicalDriver::name());
+        values.add(FastLEDDriver::name());
+        values.add(ArtNetDriver::name());
+        values.add(AudioSyncDriver::name());
+        values.add(VirtualDriver::name());
+        values.add(HUB75Driver::name());
     }
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
@@ -78,13 +76,12 @@ public:
         //custom
         else if (equal(name, SE16Layout::name())) node = allocMBObject<SE16Layout>();
 
-        else if (equal(name, ArtNetDriverMod::name())) node = allocMBObject<ArtNetDriverMod>();
-        else if (equal(name, FastLEDDriverMod::name())) node = allocMBObject<FastLEDDriverMod>();
-        else if (equal(name, PhysicalDriverMod::name())) node = allocMBObject<PhysicalDriverMod>();
-        else if (equal(name, AudioSyncMod::name())) node = allocMBObject<AudioSyncMod>();
-        else if (equal(name, HUB75DriverMod::name())) node = allocMBObject<HUB75DriverMod>();
-        else if (equal(name, VirtualDriverMod::name())) node = allocMBObject<VirtualDriverMod>();
-        else if (equal(name, ParlioDriverMod::name())) node = allocMBObject<ParlioDriverMod>();
+        else if (equal(name, ArtNetDriver::name())) node = allocMBObject<ArtNetDriver>();
+        else if (equal(name, FastLEDDriver::name())) node = allocMBObject<FastLEDDriver>();
+        else if (equal(name, PhysicalDriver::name())) node = allocMBObject<PhysicalDriver>();
+        else if (equal(name, AudioSyncDriver::name())) node = allocMBObject<AudioSyncDriver>();
+        else if (equal(name, HUB75Driver::name())) node = allocMBObject<HUB75Driver>();
+        else if (equal(name, VirtualDriver::name())) node = allocMBObject<VirtualDriver>();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = allocMBObject<LiveScriptNode>();

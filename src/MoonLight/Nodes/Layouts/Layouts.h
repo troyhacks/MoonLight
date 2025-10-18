@@ -27,8 +27,6 @@ class HumanSizedCubeLayout: public Node {
   char pins[20] = "12,13,14,15,16"; //minimal 5, 1 for each side.
 
   void setup() override {
-    hasLayout = true;
-    
     addControl(width, "width", "range", 1, 20);
     addControl(height, "height", "range", 1, 20);
     addControl(depth, "depth", "range", 1, 20);
@@ -36,7 +34,8 @@ class HumanSizedCubeLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  void addLayout() override {
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
 
     char *nextPin = pins;
 
@@ -92,10 +91,9 @@ class PanelLayout: public Node {
 
   Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
 
-  char pins[20] = "16";
+  uint8_t  pin = 16;
 
   void setup() override {
-    hasLayout = true;
     JsonObject property;
     JsonArray values;
 
@@ -105,12 +103,11 @@ class PanelLayout: public Node {
     addControl(panel.inc[0], "X++", "checkbox"); addControl(panel.inc[1], "Y++", "checkbox"); 
     addControl(panel.snake[1], "snake", "checkbox");
 
-    addControl(pins, "pins", "text", 1, sizeof(pins));
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  void addLayout() override {
-
-    char *nextPin = pins;
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
 
     uint8_t axisOrders[2][2] = {
       {1, 0}, // Y(1) outer loop, X(0) inner loop
@@ -127,8 +124,7 @@ class PanelLayout: public Node {
       });
     });
 
-    addNextPin(nextPin);
-
+    addPin(pin);
   }
 
 };
@@ -143,10 +139,14 @@ class PanelsLayout: public Node {
   Wiring panels = {{2,2,1}, 1, {true,true,true}, {false,true,false}}; // 2x2 panels, increasing over the axis, snake on the Y-axis
   Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
 
-  char pins[80] = "47,48,21,38,14,39,16,13,40,12,41,11,42,10,2,3";//,1"; //add 16 in the middle
+  #if CONFIG_IDF_TARGET_ESP32
+    // char pins[80] = "22,21,14,18,5,4,2,15,13,12"; //Cube202020 (D0)
+    char pins[80] = "2,3,4,16,17,18,19,21,22,23,25,26,27,32,33"; //(D0), more pins possible. to do: complete list.
+  #else
+    char pins[80] = "47,48,21,38,14,39,1,13,40,12,41,11,42,10,2,3"; //SE16 pins (S3)
+  #endif
 
   void setup() override {
-    hasLayout = true;
     JsonObject property;
     JsonArray values;
 
@@ -165,7 +165,8 @@ class PanelsLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  void addLayout() override {
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
 
     char *nextPin = pins;
 
@@ -211,8 +212,6 @@ class CubeLayout: public Node {
   char pins[20] = "12,13,14,15,16,17";
 
   void setup() override {
-    hasLayout = true;
-    
     addControl(panels.size[0], "width", "number", 1, 128);
     addControl(panels.size[1], "height", "number", 1, 128);
     addControl(panels.size[2], "depth", "number", 1, 128);
@@ -235,7 +234,8 @@ class CubeLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  void addLayout() override {
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
     uint8_t axisOrders[6][3] = {
       {2, 1, 0}, // Z (outer), Y (middle), X (inner) -- X fastest
       {2, 0, 1}, // Z, X, Y
@@ -279,16 +279,15 @@ class SingleLineLayout: public Node {
   bool reversed_order = false;
 
   void setup() override {
-    hasLayout = true;
-
     addControl(start_x, "starting X", "range", 0, 255);
     addControl(width, "width", "range", 1, 255);
     addControl(yposition, "Y position", "number", 0, 255); 
     addControl(reversed_order, "reversed order", "checkbox");
-    addControl(pin, "pin", "pin", 1, 48);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  void addLayout() override {
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
     if (reversed_order){
       for (int x = start_x+width-1; x>=start_x; x--) {
         addLight(Coord3D(x, yposition, 0));
@@ -318,15 +317,15 @@ class SingleRowLayout: public Node {
   bool reversed_order = false;
 
   void setup() override {
-    hasLayout = true;
     addControl(start_y, "starting Y", "range", 0, 255);
     addControl(height, "height", "range", 1, 255);
     addControl(xposition, "X position", "number", 0, 255); 
     addControl(reversed_order, "reversed order", "checkbox");
-    addControl(pin, "pin", "pin", 1, 48);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  void addLayout() override {
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
     if (reversed_order){
       for (int y = start_y+height-1; y>=start_y; y--) {
         addLight(Coord3D(xposition, y, 0));
@@ -354,9 +353,7 @@ class RingsLayout: public Node {
   uint8_t height = 16;
   
   void setup() override {
-    hasLayout = true;
-
-    addControl(pin, "pin", "pin", 1, 48);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
   void add(int leds, int radius) {
@@ -372,7 +369,8 @@ class RingsLayout: public Node {
     }
   }
 
-  void addLayout() override{
+  bool hasLayout() const override { return true; }
+  void onLayout() override{
     
     add(1, 0);
     add(8, 13);
@@ -401,14 +399,13 @@ class WheelLayout: public Node {
   uint8_t ledsPerSpoke = 16;
   
   void setup() override {
-    hasLayout = true;
-
     addControl(nrOfSpokes, "nrOfSpokes", "range", 1, 48);
     addControl(ledsPerSpoke, "ledsPerSpoke", "range", 1, 255);
-    addControl(pin, "pin", "pin", 1, 48);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  void addLayout() override {
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
     // uint16_t size = ledsPerSpoke * 2;
     Coord3D middle;
     middle.x = ledsPerSpoke;
@@ -443,8 +440,6 @@ class SE16Layout: public Node {
   char pins[80] = "47,48,21,38,14,39,13,40,12,41,11,42,10,2,3,1"; //SE16 pin layout
 
   void setup() override {
-    hasLayout = true;
-    
     addControl(mirroredPins, "mirroredPins", "checkbox");
     addControl(pinsAreColumns, "pinsAreColumns", "checkbox");
     addControl(ledsPerPin, "ledsPerPin", "number", 1, 2047);
@@ -466,7 +461,8 @@ class SE16Layout: public Node {
     addNextPin(nextPin);
   }
 
-  void addLayout() override {
+  bool hasLayout() const override { return true; }
+  void onLayout() override {
 
     //pin layout of the board
     // 47-48

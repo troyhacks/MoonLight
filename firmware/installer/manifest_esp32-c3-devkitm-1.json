@@ -1,5 +1,5 @@
 {
-  "name": "MoonLight on esp32-d0",
+  "name": "MoonLight on esp32-c3-devkitm-1",
   "version": "0.5.9.2",
   "home_assistant_domain": "esphome",
   "funding_url": "https://esphome.io/guides/supporters.html",
@@ -7,11 +7,11 @@
   "new_install_immediately": false,
   "builds": [
     {
-      "chipFamily": "ESP32",
-      "name": "esp32-d0",
-      "image": "./images/esp32-d0.jpg",
+      "chipFamily": "ESP32-C3",
+      "name": "esp32-c3-devkitm-1",
+      "image": "./images/esp32-c3-devkitm-1.jpg",
       "parts": [
-        { "path": "./MoonLight_esp32-d0_0-5-9-2_webflash.bin", "offset": 0 }
+        { "path": "./MoonLight_esp32-c3-devkitm-1_0-5-9-2_webflash.bin", "offset": 0 }
       ]
     }
   ]

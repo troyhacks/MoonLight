@@ -8,7 +8,7 @@ void setup() {
   addControl(&pin, "pin", "pin", 1, 48);
 }
 
-void addLayout() {
+void onLayout() {
   for (int x = 0; x<width; x++)
     for (int y=0; y<height; y++)
       addLight(x,(x%2)?y:height - 1 - y,0);

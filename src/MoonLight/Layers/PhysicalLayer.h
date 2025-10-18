@@ -25,7 +25,7 @@ class Node; //Forward as PhysicalLayer refers back to Node
 class Modifier; //Forward as PhysicalLayer refers back to Modifier
 
 struct LightsHeader {
-  Coord3D size = Coord3D(16,16,1); //0 max position of light, counted by addLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
+  Coord3D size = Coord3D(16,16,1); //0 max position of light, counted by onLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint16_t nrOfLights = 256; //12 nr of physical lights, counted by addLight
   struct {                 //14 condensed rgb
     uint8_t isPositions: 2 = 0; //is the lights.positions array filled with positions
@@ -82,7 +82,7 @@ struct LightsHeader {
 struct Lights {
   LightsHeader header;
   uint8_t *channels = nullptr; // //pka leds, created in constructor
-  size_t nrOfChannels = 0;
+  size_t maxChannels = 0;
 
   // std::vector<size_t> universes; //tells at which byte the universe starts
 };
@@ -122,15 +122,15 @@ class PhysicalLayer {
     void loop();
     void loopDrivers();
 
-    //mapLayout calls addLayoutPre, addLayout for each node and addLayoutPost and expects pass to be set (1 or 2)
+    //mapLayout calls onLayoutPre, onLayout for each node and onLayoutPost and expects pass to be set (1 or 2)
     void mapLayout();
 
     uint8_t pass = 0; //'class global' so addLight/Pin functions know which pass it is in
     bool monitorPass = false;
-    void addLayoutPre();
+    void onLayoutPre();
     void addLight(Coord3D position);
     void addPin(uint8_t pinNr);
-    void addLayoutPost();
+    void onLayoutPost();
     
     std::vector<SortedPin> sortedPins;
 
@@ -138,6 +138,10 @@ class PhysicalLayer {
 
     // to be called in setup, if more then one effect
     // void initLightsToBlend();
+
+    uint8_t gamma8(uint8_t b) { //we do nothing with gamma for now
+      return b;
+    }
 
 };
 

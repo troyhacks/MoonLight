@@ -13,8 +13,9 @@
 
 #include <DownloadFirmwareService.h>
 
-extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
-extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
+// 🌙 Temporarily skip cert validation !!!!
+// extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
+// extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
 
 static EventSocket *_socket2 = nullptr; //🌙 _socket2
 static int previousProgress = 0;
@@ -56,13 +57,13 @@ void updateTask(void *param)
 {
     WiFiClientSecure client;
 
-    // client.setInsecure();     // 🌙 Temporarily skip cert validation !!!!
+    client.setInsecure();     // 🌙 Temporarily skip cert validation !!!!
     
-    #if ESP_ARDUINO_VERSION_MAJOR == 3
-        client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
-    #else
-        client.setCACertBundle(rootca_crt_bundle_start);
-    #endif
+    // #if ESP_ARDUINO_VERSION_MAJOR == 3
+    //     client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
+    // #else
+    //     client.setCACertBundle(rootca_crt_bundle_start);
+    // #endif
 
     client.setTimeout(10);
 

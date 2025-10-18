@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      Mods.h
+    @file      Drivers.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
@@ -15,7 +15,7 @@
 
 //alphabetically from here
 
-#include "../Nodes.h" //needed here because of Mods.cpp includes Mods.h, otherwise Node unknown
+#include "../Nodes.h" //needed here because of Driver.cpp includes Driver.h, otherwise Node unknown
 
 class DriverNode: public Node {
   uint16_t maxPower = 10;
@@ -53,7 +53,7 @@ static const uint8_t ART_NET_HEADER[] = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00
 //11: Low byte of the Art-Net protocol revision number. Current value 14
 #include <AsyncUDP.h>
 
-class ArtNetDriverMod: public DriverNode {
+class ArtNetDriver: public DriverNode {
   public:
 
   static const char * name() {return "Art-Net Driver ☸️";}
@@ -85,7 +85,7 @@ class ArtNetDriverMod: public DriverNode {
   void loop() override;
 };
 
-class FastLEDDriverMod: public Node {
+class FastLEDDriver: public Node {
   public:
 
   static const char * name() {return "FastLED Driver ☸️";}
@@ -110,13 +110,14 @@ class FastLEDDriverMod: public Node {
   void setup() override;
   void loop() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 
   void onUpdate(String &oldValue, JsonObject control) override;
 
 };
 
-class HUB75DriverMod: public Node {
+class HUB75Driver: public Node {
   public:
 
   static const char * name() {return "HUB75 Driver ☸️🚧";}
@@ -126,15 +127,22 @@ class HUB75DriverMod: public Node {
   void setup() override;
   void loop() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 };
 
-class PhysicalDriverMod: public DriverNode {
+#define NUMSTRIPS 16 //not needed for non virtal... (see transpose...)
+
+class PhysicalDriver: public DriverNode {
   public:
 
   static const char * name() {return "Physical Driver ☸️";}
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
+
+  uint8_t pins[NUMSTRIPS]; //max 16 pins
+  int lengths[NUMSTRIPS];
+  int nb_pins=0;
 
   #if HP_ALL_DRIVERS
     char version[30] = HP_ALL_VERSION;
@@ -148,12 +156,13 @@ class PhysicalDriverMod: public DriverNode {
   void setup() override;
   void loop() override;
 
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 
-  ~PhysicalDriverMod() override;
+  ~PhysicalDriver() override;
 };
 
-class VirtualDriverMod: public DriverNode {
+class VirtualDriver: public DriverNode {
   public:
 
   static const char * name() {return "Virtual Driver ☸️🚧";}
@@ -161,26 +170,15 @@ class VirtualDriverMod: public DriverNode {
   static const char * tags() {return "";}
 
   void setup() override;
-  void loop() override;
 
-  void addLayout() override;
-};
-class ParlioDriverMod: public DriverNode {
-  public:
-
-  static const char * name() {return "Parallel IO Driver ☸️🚧";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
-
-  void setup() override;
-
-  void addLayout() override;
+  bool hasLayout() const override { return true; }
+  void onLayout() override;
 
   void onUpdate(String &oldValue, JsonObject control) override;
 
   void loop() override;
 
-  ~ParlioDriverMod() override;
+  ~VirtualDriver() override;
   
 };
 

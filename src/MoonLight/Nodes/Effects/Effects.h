@@ -42,7 +42,7 @@ class SolidEffect: public Node {
 
   void loop() override {
       layerV->fill_solid(CRGB(red * brightness/255, green * brightness/255, blue * brightness/255));
-      if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX)
+      if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX && white > 0)
         for (int index; index < layerV->nrOfLights; index++) layerV->setWhite(index, white * brightness/255);
   }
 };
@@ -94,7 +94,8 @@ class FixedRectangleEffect: public Node {
             layerV->setRGB(pos, CRGB::White);
           else
             layerV->setRGB(pos, CRGB(red, green, blue));
-          layerV->setWhite(pos, white);
+          if (white > 0)
+            layerV->setWhite(pos, white);
           if (height < width)
             alternate = !alternate;
         }
@@ -206,10 +207,6 @@ class BouncingBallsEffect: public Node {
 };
 
 //DistortionWaves inspired by WLED, ldirko and blazoncek, https://editor.soulmatelights.com/gallery/1089-distorsion-waves
-static uint8_t gamma8(uint8_t b) { //we do nothing with gamma for now
-  return b;
-}
-
 class DistortionWavesEffect: public Node {
 public:
   static const char * name() {return "Distortion Waves 🔥💡";}
@@ -257,9 +254,9 @@ public:
         uint8_t  valueG = gdistort+ w*  (a2-( ((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1))>>7 ));
         uint8_t  valueB = bdistort+ w*  (a3-( ((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2))>>7 ));
 
-        valueR = gamma8(cos8(valueR));
-        valueG = gamma8(cos8(valueG));
-        valueB = gamma8(cos8(valueB));
+        valueR = layerV->layerP->gamma8(cos8(valueR));
+        valueG = layerV->layerP->gamma8(cos8(valueG));
+        valueB = layerV->layerP->gamma8(cos8(valueB));
 
         layerV->setRGB(pos, CRGB(valueR, valueG, valueB));
       }

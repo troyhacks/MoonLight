@@ -14,7 +14,7 @@ void setup() {
   addControl(&pin, "pin", "pin", 1, 48);
 }
 
-void addLayout() {
+void onLayout() {
 
   for (int panelY = verticalPanels - 1; panelY >=0; panelY--) {
 

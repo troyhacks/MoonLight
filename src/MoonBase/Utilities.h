@@ -335,7 +335,7 @@ extern int totalAllocatedMB;
 //allocate, try PSRAM, else default, use calloc: zero-initialized (all bytes = 0)
 template<typename T>
 T* allocMB(size_t n, const char *name = nullptr) {
-    T* res = (T*)heap_caps_calloc_prefer(n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL); //calloc is malloc + memset(0);
+    T* res = (T*)heap_caps_calloc_prefer(n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
     if (res) {
         totalAllocatedMB += heap_caps_get_allocated_size(res);
         // MB_LOGD(MB_TAG, "Allocated %s: %d x %d bytes in %s s:%d (tot:%d)", name?name:"", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res), totalAllocatedMB);
@@ -347,7 +347,7 @@ T* allocMB(size_t n, const char *name = nullptr) {
 
 template<typename T>
 T* reallocMB(T* p, size_t n, const char *name = nullptr) {
-    T* res = (T*)heap_caps_realloc_prefer(p, n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_INTERNAL); //calloc is malloc + memset(0);
+    T* res = (T*)heap_caps_realloc_prefer(p, n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT); //calloc is malloc + memset(0);
     if (res) {
         // MB_LOGD(MB_TAG, "Re-Allocated %s: %d x %d bytes in %s s:%d", name?name:"", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
     }

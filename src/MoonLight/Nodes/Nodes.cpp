@@ -193,10 +193,10 @@ void LiveScriptNode::loop() {
     xSemaphoreGive(WaitAnimationSync);
 }
 
-void LiveScriptNode::addLayout() {
-    if (hasLayout) {
+void LiveScriptNode::onLayout() {
+    if (hasLayout()) {
         MB_LOGV(ML_TAG, "%s", animation);
-        scriptRuntime.execute(animation, "addLayout"); 
+        scriptRuntime.execute(animation, "onLayout"); 
     }
 }
 
@@ -225,8 +225,8 @@ void LiveScriptNode::compileAndRun() {
 
           if (scScript.find("setup()") != std::string::npos) hasSetup = true;
           if (scScript.find("loop()") != std::string::npos) hasLoop = true;
-          if (scScript.find("addLayout()") != std::string::npos) hasLayout = true;
-          if (scScript.find("modifyPosition(") != std::string::npos) hasModifier = true;
+          if (scScript.find("onLayout()") != std::string::npos) hasOnLayout = true;
+          if (scScript.find("modifyPosition(") != std::string::npos) hasModifyPosition = true;
         //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
           //add main function
@@ -269,7 +269,7 @@ void LiveScriptNode::execute() {
     }
     MB_LOGV(ML_TAG, "%s", animation);
 
-    requestMappings(); // requestMapPhysical and requestMapVirtual will call the script addLayout function (check if this can be done in case the script also has loop running !!!)
+    requestMappings(); // requestMapPhysical and requestMapVirtual will call the script onLayout function (check if this can be done in case the script also has loop running !!!)
 
     if (hasLoop) {
         // setup : create controls

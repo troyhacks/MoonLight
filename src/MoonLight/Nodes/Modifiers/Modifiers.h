@@ -21,11 +21,9 @@ class CircleModifier: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  void setup() override {
-    hasModifier = true;
-  }
-
   Coord3D originalSize;
+
+  bool hasModifier() const override { return true; }
 
   void modifySize() override {
     originalSize = layerV->size;
@@ -65,7 +63,6 @@ class MirrorModifier: public Node {
   bool mirrorZ = false;
   
   void setup() override {
-    hasModifier = true;
     addControl(mirrorX, "mirrorX", "checkbox");
     addControl(mirrorY, "mirrorY", "checkbox");
     addControl(mirrorZ, "mirrorZ", "checkbox");
@@ -73,6 +70,8 @@ class MirrorModifier: public Node {
 
   Coord3D originalSize;
   
+  bool hasModifier() const override { return true; }
+
   void modifySize() override {
     if (mirrorX) layerV->size.x = (layerV->size.x + 1) / 2;
     if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
@@ -100,9 +99,10 @@ class MultiplyModifier: public Node {
   Coord3D originalSize;
 
   void setup() override {
-    hasModifier = true;
     addControl(proMulti, "multipliers", "coord3D");
   }
+
+  bool hasModifier() const override { return true; }
 
   void modifySize() override {
     layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
@@ -139,7 +139,6 @@ class PinwheelModifier: public Node {
   Coord3D originalSize;
 
   void setup() override {
-    hasModifier = true;
     addControl(petals, "petals", "range");
     addControl(swirlVal, "swirlVal", "range");
     addControl(reverse, "reverse", "checkbox");
@@ -147,6 +146,8 @@ class PinwheelModifier: public Node {
     addControl(zTwist, "zTwist", "range");
   }
   
+  bool hasModifier() const override { return true; }
+
   void modifySize() override {
     if (layerV->layerDimension > _1D && layerV->effectDimension > _1D) {
       layerV->size.y = sqrt(sq(max<uint8_t>(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
@@ -211,13 +212,12 @@ class RippleYZModifier: public Node {
   bool towardsZ = false;
 
   void setup() override {
-
-    hasModifier = true;
-
     addControl(shrink, "shrink", "checkbox");
     addControl(towardsY, "towardsY", "checkbox");
     addControl(towardsZ, "towardsZ", "checkbox");
   }
+
+  bool hasModifier() const override { return true; }
 
   void modifySize() override {
     // modifyPosition(layerV->size);
@@ -270,11 +270,11 @@ class RippleYZModifier: public Node {
   }
 }; //RippleYZ
 
-// RotateNodifier rotates the light position around the center of the layout.
+// RotateModifier rotates the light position around the center of the layout.
 // It can flip the x and y coordinates, reverse the rotation direction, and alternate the rotation
 // direction every full rotation. It also supports shear transformations to create a more dynamic effect.
 // by WildCats08 / @Brandon502
-class RotateNodifier: public Node {
+class RotateModifier: public Node {
   public:
 
   static const char * name() {return "Rotate 💎💫";}
@@ -287,9 +287,6 @@ class RotateNodifier: public Node {
   uint16_t staticAngle = 0;
 
   void setup() override {
-
-    hasModifier = true;
-
     JsonObject property = addControl(direction, "direction", "select");
     JsonArray values = property["values"].to<JsonArray>();
     values.add("Clockwise");
@@ -304,6 +301,9 @@ class RotateNodifier: public Node {
   Coord3D originalSize;
   int midX, midY;
   int maxX, maxY;
+
+  bool hasModifier() const override { return true; }
+
   void modifySize() override {
 
     if (expand) {
@@ -395,7 +395,7 @@ class RotateNodifier: public Node {
     // position.y = y1 + midY;
     // position.z = 0;
   }
-}; //RotateNodifier
+}; //RotateModifier
 
 class TransposeModifier: public Node {
   public:
@@ -409,7 +409,6 @@ class TransposeModifier: public Node {
   bool transposeYZ = false;
   
   void setup() override {
-    hasModifier = true;
     addControl(transposeXY, "XY", "checkbox");
     addControl(transposeXZ, "XZ", "checkbox");
     addControl(transposeYZ, "YZ", "checkbox");
@@ -417,6 +416,8 @@ class TransposeModifier: public Node {
 
   Coord3D originalSize;
   
+  bool hasModifier() const override { return true; }
+
   void modifySize() override {
     if (transposeXY) { int temp = layerV->size.x; layerV->size.x = layerV->size.y; layerV->size.y = temp; }
     if (transposeXZ) { int temp = layerV->size.x; layerV->size.x = layerV->size.z; layerV->size.z = temp; }
@@ -443,7 +444,6 @@ class CheckerboardModifier: public Node {
   bool group  = false;
 
   void setup() override {
-    hasModifier = true;
     addControl(size, "squareSize", "coord3D", 1, 100);
     addControl(invert, "invert", "checkbox");
     addControl(group, "group", "checkbox");
@@ -451,6 +451,8 @@ class CheckerboardModifier: public Node {
 
   Coord3D originalSize;
   
+  bool hasModifier() const override { return true; }
+
   void modifySize() override {
 
     if (group) { layerV->middle /= size; layerV->size = (layerV->size + (size - Coord3D{1,1,1})) / size; }

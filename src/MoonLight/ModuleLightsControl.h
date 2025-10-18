@@ -42,7 +42,7 @@ public:
 
         MB_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
-        MB_LOGI(ML_TAG, "isInPSRAM mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layerV[0]->mappingTable), isInPSRAM(&layerP.layerV[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
+        MB_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layerV[0]->mappingTable), isInPSRAM(&layerP.layerV[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
 
         setPresetsFromFolder(); //set the right values during boot
         
@@ -242,17 +242,17 @@ public:
                 read([&](ModuleState& _state) {
                     if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
                         _socket->emitEvent("monitor", (char *)&layerP.lights.header, 37);//sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above 32 to avoid monitor data to be seen as header
-                        _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.nrOfChannels)); //*3 is for 3 bytes position
+                        _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.maxChannels)); //*3 is for 3 bytes position
                     }
-                    memset(layerP.lights.channels, 0, layerP.lights.nrOfChannels); // set all the channels to 0 //cleaning the positions
-                    MB_LOGD(ML_TAG, "positions sent to monitor (2 -> 3, noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.nrOfChannels);
+                    memset(layerP.lights.channels, 0, layerP.lights.maxChannels); // set all the channels to 0 //cleaning the positions
+                    MB_LOGD(ML_TAG, "positions sent to monitor (2 -> 3, noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.maxChannels);
                     layerP.lights.header.isPositions = 3;
                 });
             } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) { //send to UI
                 EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
                     read([&](ModuleState& _state) {
                         if (_socket->getConnectedClients() && _state.data["monitorOn"])
-                            _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.nrOfChannels));
+                            _socket->emitEvent("monitor", (char *)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.maxChannels));
                     });
                 }
             }
