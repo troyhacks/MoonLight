@@ -133,13 +133,13 @@
 				{
 					title: 'WiFi Station',
 					icon: Router,
-					href: '/network/sta',
+					href: '/wifi/sta',
 					feature: true
 				},
 				{
 					title: 'Access Point',
 					icon: AP,
-					href: '/network/ap', 
+					href: '/wifi/ap', 
 					feature: true
 				},
 				{
@@ -151,13 +151,13 @@
 				{
 					title: 'MQTT',
 					icon: MQTT,
-					href: '/network/mqtt',
+					href: '/connections/mqtt',
 					feature: page.data.features.mqtt
 				},
 				{
 					title: 'NTP',
 					icon: NTP,
-					href: '/network/ntp',
+					href: '/connections/ntp',
 					feature: page.data.features.ntp
 				}
 			]
