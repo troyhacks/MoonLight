@@ -25,7 +25,7 @@
 
 * **Theme**: Light, Dark, Auto
 
-* **Energy**: Show charging status (voltage and current 🚧)
+* **Energy**: Show charging status (voltage and current), only enabled at some boards (e.g. SE16)
 
 * **New firmware**: New firmware available.
   

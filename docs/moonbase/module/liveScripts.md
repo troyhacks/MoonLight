@@ -34,3 +34,12 @@ This module shows all running live scripts
 
 **Step 6**: An overview of running live scripts can be found in [MoonLight / LiveScripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts) 
 
+## examples
+
+### PanTilt script
+
+* Sends a beatsin to Pan and Tilt which can be sent to Moving Heads (add a Moving head layout node to configure the MHs)
+* Controls: BPM, Middle Pan and Tilt, Range and invert
+* Usage: Add this effect if moving heads are configured. RGB effects can be added separately e.g. wave to light up the moving heads in wave patterns
+* See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
+* Run script see [How to run a live script](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/#how-to-run-a-live-script)

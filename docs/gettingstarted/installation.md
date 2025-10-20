@@ -131,7 +131,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
     <img width="350" src="https://github.com/user-attachments/assets/523ea32f-88f8-4994-8d23-9541dce67ba1" />
 
-    * Download from GitHub - Currently not working due to certificate issue... 🚧
+    * Download from GitHub
     * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
 
 * To install the latest release, you can also use the [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) (no need to erase the device if updating)

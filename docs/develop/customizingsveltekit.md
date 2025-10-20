@@ -15,7 +15,7 @@ This is a checklist, More info on most of the items can be found in the ESP32-Sv
     * FACTORY_NTP_TIME_ZONE_LABEL=\"Europe/Berlin\"
 * package.json
     * name = "{custom}"
-    * version: "0.5.9.2",
+    * version: "0.5.9.3",
 * intrerface/source/lib/assets/logo.png
     * replace logo
 * interface/source/routes/+layout.ts

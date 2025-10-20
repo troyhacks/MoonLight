@@ -1,8 +1,6 @@
 
 # Development
 
-🚧
-
 ## Developing
 
 * Read the [ESP32 Sveltekit docs](https://moonmodules.org/MoonLight/esp32sveltekit/)
@@ -97,6 +95,10 @@ There are 3 files to consider when making a ESP32-device definition.
 	firmware/BOARD_TYPE_NAME.ini (e.g. esp32dev, esp32-s3), contains different boards
 
 ### Technical notes
+
+#### LED drivers
+* Switch off to see the effect framerate in System Status/Metrics
+* Switch on to see the effect framerate throttled by a LED driver in System Status/Metrics (800KHz, 256 LEDs, 24 bits is 130 fps theoretically - 120 practically)
 
 #### Live Scripts
 
