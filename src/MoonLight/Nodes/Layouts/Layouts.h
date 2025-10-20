@@ -11,8 +11,6 @@
 
 #if FT_MOONLIGHT
 
-//alphabetically from here, Custom Nodes at the end
-
 class HumanSizedCubeLayout: public Node {
   public:
 

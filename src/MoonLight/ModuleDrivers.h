@@ -62,7 +62,6 @@ public:
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
         Node *node = nullptr;
-        //alphabetically from here
 
         if (equal(name, PanelLayout::name())) node = allocMBObject<PanelLayout>();
         else if (equal(name, PanelsLayout::name())) node = allocMBObject<PanelsLayout>();

@@ -106,8 +106,6 @@ class FixedRectangleEffect: public Node {
   }
 };
 
-//alphabetically from here, Custom Nodes at the end
-
 //BouncingBalls inspired by WLED
 #define maxNumBalls 16
 //each needs 12 bytes

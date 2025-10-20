@@ -196,7 +196,6 @@ public:
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
         Node *node = nullptr;
         if (equal(name, SolidEffect::name())) node = allocMBObject<SolidEffect>();
-        //alphabetically from here
         else if (equal(name, BouncingBallsEffect::name())) node = allocMBObject<BouncingBallsEffect>();
         else if (equal(name, BlurzEffect::name())) node = allocMBObject<BlurzEffect>();
         else if (equal(name, DistortionWavesEffect::name())) node = allocMBObject<DistortionWavesEffect>();

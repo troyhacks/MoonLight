@@ -129,7 +129,7 @@ public:
       }
     }
     else
-      MB_LOGE(ML_TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+      MB_LOGE(ML_TAG, "type of %s not supported yet: %s", control["name"].as<String>().c_str(), control["type"].as<String>().c_str());
 
     if (newControl) {
       String oldValue = "";
@@ -232,6 +232,50 @@ class LiveScriptNode: public Node {
 
 #endif
 
+#if HP_ALL_DRIVERS
+  // #define NUM_LEDS_PER_STRIP 256 not for non virtal... (only setting __delay when NO_WAIT)
+  #include "I2SClocklessLedDriver.h"
+  extern I2SClocklessLedDriver ledsDriver; //defined in Nodes.cpp
+#else //ESP32_LEDSDRIVER  
+  #include "ESP32-LedsDriver.h"
+  #define MAX_PINS 20 // this is also defined in ESP32-LedsDriver.h...
+  #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2
+    static PhysicalDriverESP32S3 ledsDriver; //    sizeof(driver) = 1080K !
+  #elif CONFIG_IDF_TARGET_ESP32
+    static PhysicalDriverESP32D0 ledsDriver; //    sizeof(driver) = 1080K !
+  #else
+    static LedsDriver ledsDriver; //   only the core driver, for setBrightness and setColorCorrection and LUT
+  #endif
+#endif
+
+class DriverNode: public Node {
+  uint16_t maxPower = 10;
+  uint8_t brightnessSaved = UINT8_MAX;
+  
+  protected:
+  
+  bool lightPresetSaved = false; //initLeds can only start if this has been saved
+
+  #if HP_ALL_DRIVERS
+    CRGB savedColorCorrection;
+    bool initDone = false;
+  #endif
+
+  protected:
+  uint8_t lightPreset = 2; //GRB
+
+  public:
+
+  void setup() override;
+
+  void loop() override;
+
+  void reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel);
+
+  //called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
+  void onUpdate(String &oldValue, JsonObject control) override;
+};
+
 // Helper function to generate a triangle wave similar to beat16
 inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
     uint8_t beat = beat8(bpm, timebase);
@@ -253,8 +297,12 @@ static struct SharedData {
   size_t clientListSize;
 } sharedData;
 
-#include "Drivers/Drivers.h"
-#include "Drivers/AudioSync.h"
+#include "Drivers/D_PhysicalDriver.h"
+#include "Drivers/D_FastLED.h"
+#include "Drivers/D_Artnet.h"
+#include "Drivers/D_AudioSync.h"
+#include "Drivers/D_VirtualDriver.h"
+#include "Drivers/D_Hub75.h"
 
 #include "Layouts/Layouts.h"
 
