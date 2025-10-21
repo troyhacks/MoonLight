@@ -19,7 +19,7 @@
   #include "parlio.h"
 #endif
 
-#define NUMSTRIPS 16 //max 16 strips for physical driver
+#define NUMSTRIPS 20 //max strips for physical driver
 
 class PhysicalDriver: public DriverNode {
   public:
@@ -28,8 +28,8 @@ class PhysicalDriver: public DriverNode {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  uint8_t pins[NUMSTRIPS]; //max 16 pins
-  int lengths[NUMSTRIPS];
+  uint8_t pins[NUMSTRIPS];
+  uint16_t lengths[NUMSTRIPS];
   int nb_pins = 0;
 
   #if HP_ALL_DRIVERS
@@ -127,76 +127,12 @@ class PhysicalDriver: public DriverNode {
         if (nb_pins > 0) {
 
           #ifndef CONFIG_IDF_TARGET_ESP32P4 // Non P4: Yves driver
-            if (initDone) {
-              //don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
-
-              //so do what ledsDriver.initled is doing:
-
-              //from lightPresetSaved
-              ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
-              ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
-              ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
-              ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
-
-              //from initled
-              ledsDriver.num_strips = nb_pins;
-              ledsDriver.total_leds = 0;
-              for (int i = 0; i < ledsDriver.num_strips; i++)
-              {
-                  ledsDriver.stripSize[i] = lengths[i];
-                  ledsDriver.total_leds += lengths[i];
-              }
-              int num_led_per_strip = ledsDriver.maxLength(lengths, ledsDriver.num_strips);
-
-              //from __initled:
-
-              ledsDriver.num_led_per_strip = num_led_per_strip;
-              ledsDriver._offsetDisplay.offsetx = 0;
-              ledsDriver._offsetDisplay.offsety = 0;
-              ledsDriver._offsetDisplay.panel_width = num_led_per_strip;
-              ledsDriver._offsetDisplay.panel_height = 9999;
-              ledsDriver._defaultOffsetDisplay = ledsDriver._offsetDisplay;
-              ledsDriver.linewidth = num_led_per_strip;
-
-              // ledsDriver.setShowDelay(num_led_per_strip);
-              ledsDriver.setShowDelay();
-              ledsDriver.setGlobalNumStrips();
-
-              ledsDriver.setPins(pins); //if pins and lengths changed, set that right
-
-              // i2sInit(); //not necessary, initled did it, no need to change
-
-              //P4 for PhysicalDriver not supported yet
-
-              #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
-                //delete allocations done by physical driver if total channels changes (larger)
-                for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
-                {
-                    heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
-                    heap_caps_free(ledsDriver.DMABuffersTampon[i]);
-                }
-                heap_caps_free(ledsDriver.DMABuffersTampon);
-              #endif
-
-              __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
-
-              ledsDriver.initDMABuffers(); //create them again
-
-              MB_LOGD(ML_TAG, "reinit physDriver %d x %d (%d)", ledsDriver.num_strips, num_led_per_strip, __NB_DMA_BUFFER);
-
-              return; //bye bye initled, we did it ourselves ;-)
-            } else {
-              __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable now 🥳
+            if (!initDone) {
+              __NB_DMA_BUFFER = dmaBuffer; // __NB_DMA_BUFFER is a variable
 
               uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
 
               ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
-
-              //overwrite what initled has done as we don't use colorarrangment but assign offsets directly
-              ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
-              ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
-              ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
-              ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
 
               ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
 
@@ -205,7 +141,19 @@ class PhysicalDriver: public DriverNode {
               #endif
 
               initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
+            } else {
+              //don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
+
+              ledsDriver.updateDriver(pins, lengths, nb_pins, dmaBuffer);
             }
+
+            //from lightPresetSaved
+            //overwrite what initled has done as we don't use colorarrangment but assign offsets directly
+            ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
+            ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
+            ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
+            ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+
           #else // P4: Parlio Troy Driver
             initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
           #endif
@@ -257,16 +205,7 @@ class PhysicalDriver: public DriverNode {
     #if HP_ALL_DRIVERS
       MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
-      //P4 for PhysicalDriver not supported yet
-      #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
-            for (int i = 0; i < __NB_DMA_BUFFER + 2; i++)
-            {
-                heap_caps_free(ledsDriver.DMABuffersTampon[i]->buffer);
-                heap_caps_free(ledsDriver.DMABuffersTampon[i]);
-            }
-            heap_caps_free(ledsDriver.DMABuffersTampon);
-      #endif
-      //anything else to delete? I2S ...
+      ledsDriver.deleteDriver();
 
       // if recreating the Physical driver later, still initled cannot be done again ?
     #endif

@@ -297,6 +297,14 @@ static struct SharedData {
   size_t clientListSize;
 } sharedData;
 
+/**
+ * Nodes Guidelines:
+ * 
+ * 1) Don't use String type class variables but char[x] as can crash when node is destructed (node in PSRAM, string in heap)
+ * 2) no static variables in node classes as we can run multiple instances of the same node which should not share data -> class variables.
+ */
+
+//Drivers first as used by others
 #include "Drivers/D_PhysicalDriver.h"
 #include "Drivers/D_FastLED.h"
 #include "Drivers/D_Artnet.h"
@@ -304,11 +312,16 @@ static struct SharedData {
 #include "Drivers/D_VirtualDriver.h"
 #include "Drivers/D_Hub75.h"
 
-#include "Layouts/Layouts.h"
+#include "Layouts/L_MoonLight.h"
+#include "Layouts/L_SE16.h"
 
-#include "Effects/Effects.h"
-// #include "EffectsFastLED.h"
+#include "Effects/E_MoonLight.h"
+#include "Effects/E_MoonModules.h"
+#include "Effects/E_WLED.h"
+#include "Effects/E_MovingHeads.h"
+#include "Effects/E_FastLED.h"
+#include "Effects/E_SoulmateLights.h"
 
-#include "Modifiers/Modifiers.h"
+#include "Modifiers/M_MoonLight.h"
 
 #endif //FT_MOONLIGHT
