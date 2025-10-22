@@ -15,7 +15,9 @@
 class Troy1ColorEffect: public Node {
   public:
 
-  static const char * name() {return "Troy1 Color 🚨♫🐺";}
+  static const char * name() {return "Troy1 Color";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🚨♫🐺";}
 
   bool audioReactive = true;
 
@@ -40,7 +42,9 @@ class Troy1ColorEffect: public Node {
 class Troy1MoveEffect: public Node {
   public:
 
-  static const char * name() {return "Troy1 Move 🗼♫🐺";}
+  static const char * name() {return "Troy1 Move";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🗼♫🐺";}
 
   //set default values here
   uint8_t bpm = 30;
@@ -135,7 +139,9 @@ class Troy1MoveEffect: public Node {
 class Troy2ColorEffect: public Node {
   public:
 
-  static const char * name() {return "Troy2 Color 🚨♫🐺";}
+  static const char * name() {return "Troy2 Color";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🚨♫🐺";}
 
   uint8_t cutin = 200;
   
@@ -170,7 +176,9 @@ class Troy2ColorEffect: public Node {
 class Troy2MoveEffect: public Node {
   public:
 
-  static const char * name() {return "Troy2 Move 🗼♫🐺";}
+  static const char * name() {return "Troy2 Move";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🗼♫🐺";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
@@ -252,6 +260,8 @@ class FreqColorsEffect: public Node {
   public:
 
   static const char * name() {return "Freq Colors 🚨♫";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🚨♫🐺";}
 
   uint8_t bpm = 30;
   bool audioReactive = true;
@@ -291,7 +301,9 @@ class FreqColorsEffect: public Node {
 class WowiMoveEffect: public Node {
   public:
 
-  static const char * name() {return "Wowi Move 🗼♫";}
+  static const char * name() {return "Wowi Move";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🗼♫";}
 
   uint8_t bpm = 30;
   uint8_t pan = 175;
@@ -325,7 +337,9 @@ class WowiMoveEffect: public Node {
 class AmbientMoveEffect: public Node {
   public:
 
-  static const char * name() {return "Ambient Move 🗼♫";}
+  static const char * name() {return "Ambient Move";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🗼♫";}
 
   uint8_t increaser = 255;
   uint8_t decreaser = 8;

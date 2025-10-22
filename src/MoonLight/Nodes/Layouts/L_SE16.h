@@ -11,13 +11,15 @@
 
 #if FT_MOONLIGHT
 
+#ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+
 //SE16 board
 class SE16Layout: public Node {
   public:
 
-  static const char * name() {return "SE16 🚥";}
+  static const char * name() {return "SE16";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   bool mirroredPins = false;
   bool pinsAreColumns = false;
@@ -82,5 +84,6 @@ class SE16Layout: public Node {
     }
   }
 };
+#endif
 
 #endif //FT_MOONLIGHT

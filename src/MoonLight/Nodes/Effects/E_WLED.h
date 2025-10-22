@@ -15,9 +15,9 @@
 class BouncingBallsEffect: public Node {
   public:
 
-  static const char * name() {return "Bouncing Balls 🔥🎨💡";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Bouncing Balls";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥🎨💡";}
 
   uint8_t grav = 128;
   uint8_t numBalls = 8;
@@ -106,9 +106,9 @@ class BouncingBallsEffect: public Node {
 #define MAX_FREQ_LOG10  4.04238f       // log10(MAX_FREQUENCY)
 class BlurzEffect: public Node {
   public:
-  static const char * name() {return "Blurz 🔥🎵🎨☾";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Blurz";}
+  static uint8_t dim() {return _3D;} //test...
+  static const char * tags() {return "🔥🎵🎨☾";}
   
   // static const char _data_FX_MODE_BLURZ[] PROGMEM = "Blurz Plus ☾@Fade rate,Blur,,,,FreqMap ☾,GEQ Scanner ☾,;!,Color mix;!;01f;sx=48,ix=127,m12=7,si=0"; // Pinwheel, Beatsin
 
@@ -179,9 +179,9 @@ class BlurzEffect: public Node {
 //DistortionWaves inspired by WLED, ldirko and blazoncek, https://editor.soulmatelights.com/gallery/1089-distorsion-waves
 class DistortionWavesEffect: public Node {
 public:
-  static const char * name() {return "Distortion Waves 🔥💡";}
+  static const char * name() {return "Distortion Waves";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥💡";}
 
   uint8_t speed = 4;
   uint8_t scale = 4; 
@@ -238,9 +238,9 @@ public:
 class FreqMatrixEffect: public Node {
 public:
 
-  static const char * name() {return "Freq Matrix 🔥♪💡";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Freq Matrix";}
+  static uint8_t dim() {return _1D;} //2D/3D-ish?
+  static const char * tags() {return "🔥♪💡";}
 
   uint8_t speed = 255;
   uint8_t fx = 128;
@@ -316,9 +316,9 @@ public:
 class GEQEffect: public Node {
 public:
 
-  static const char * name() {return "GEQ 🔥🎨♫💡";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "GEQ";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥🎨♫💡";}
 
   uint8_t fadeOut = 255;
   uint8_t ripple = 128;
@@ -434,9 +434,9 @@ public:
 class LissajousEffect: public Node {
 public:
 
-  static const char * name() {return "Lissajous 🔥🎨💡";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Lissajous";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥🎨💡";}
 
   uint8_t xFrequency = 64;
   uint8_t fadeRate = 128;
@@ -465,9 +465,9 @@ public:
 
 class Noise2DEffect: public Node {
   public:
-  static const char * name() {return "Noise2D 🔥🎨💡";}
+  static const char * name() {return "Noise2D";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥🎨💡";}
   
   uint8_t speed = 8;
   uint8_t scale = 64;
@@ -490,9 +490,9 @@ class Noise2DEffect: public Node {
 
 class NoiseMeterEffect: public Node {
   public:
-  static const char * name() {return "Noise Meter ♪💡🎨";}
+  static const char * name() {return "Noise Meter";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "♪💡🎨";}
   
   uint8_t fadeRate = 248;
   uint8_t width = 128;
@@ -539,9 +539,9 @@ struct Spark {
 
 class PopCornEffect: public Node {
   public:
-  static const char * name() {return "PopCorn ♪🎨💡";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "PopCorn";}
+  static uint8_t dim() {return _1D;} //2D-ish? check latest in WLED...
+  static const char * tags() {return "♪🎨💡";}
   
   uint8_t speed = 128;
   uint8_t numPopcorn = maxNumPopcorn/2;
@@ -617,9 +617,9 @@ class PopCornEffect: public Node {
 
 class WaverlyEffect: public Node {
   public:
-  static const char * name() {return "Waverly 🔥♪🎨💡";}
+  static const char * name() {return "Waverly";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥♪🎨💡";}
   
   uint8_t fadeRate = 128;
   uint8_t amplification = 30;

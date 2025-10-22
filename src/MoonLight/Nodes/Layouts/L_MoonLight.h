@@ -14,9 +14,9 @@
 class HumanSizedCubeLayout: public Node {
   public:
 
-  static const char * name() {return "Human Sized Cube 🚥🧊💫";}
+  static const char * name() {return "Human Sized Cube";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥💫";}
 
   uint8_t width = 10;
   uint8_t height = 10;
@@ -83,9 +83,9 @@ struct Wiring {
 class PanelLayout: public Node {
   public:
 
-  static const char * name() {return "Panel 🚥";}
+  static const char * name() {return "Panel";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
 
@@ -130,9 +130,9 @@ class PanelLayout: public Node {
 class PanelsLayout: public Node {
   public:
 
-  static const char * name() {return "Panels 🚥";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Panels";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🚥";}
 
   Wiring panels = {{2,2,1}, 1, {true,true,true}, {false,true,false}}; // 2x2 panels, increasing over the axis, snake on the Y-axis
   Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
@@ -201,9 +201,9 @@ class PanelsLayout: public Node {
 class CubeLayout: public Node {
   public:
 
-  static const char * name() {return "Cube 🚥🧊";}
+  static const char * name() {return "Cube";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   Wiring panels = {{10,10,10}, 3, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
 
@@ -266,9 +266,9 @@ class CubeLayout: public Node {
 class SingleLineLayout: public Node {
   public:
 
-  static const char * name() {return "Single Line 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Single Line";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🚥";}
 
   uint8_t start_x = 0;
   uint8_t width = 30;
@@ -304,9 +304,9 @@ class SingleLineLayout: public Node {
 class SingleRowLayout: public Node {
   public:
 
-  static const char * name() {return "Single Row 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Single Row";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🚥";}
 
   uint8_t start_y = 0;
   uint8_t height = 30;
@@ -341,9 +341,9 @@ class SingleRowLayout: public Node {
 class RingsLayout: public Node {
   public:
 
-  static const char * name() {return "Rings 🚥";}
+  static const char * name() {return "Rings";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   uint8_t pin = 16;
 
@@ -387,9 +387,9 @@ class RingsLayout: public Node {
 class WheelLayout: public Node {
   public:
 
-  static const char * name() {return "Wheel 🚥";}
+  static const char * name() {return "Wheel";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   uint8_t pin = 16;
 

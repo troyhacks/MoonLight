@@ -15,9 +15,9 @@
 class CircleModifier: public Node {
   public:
 
-  static const char * name() {return "Circle 💎💡";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Circle";}
+  static uint8_t dim() {return _2D;} //1D to 2D ...
+  static const char * tags() {return "💎💡";}
 
   Coord3D modifierSize;
 
@@ -52,9 +52,9 @@ class CircleModifier: public Node {
 class MirrorModifier: public Node {
   public:
 
-  static const char * name() {return "Mirror 💎💡";}
+  static const char * name() {return "Mirror";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "💎💡";}
 
   bool mirrorX = true;
   bool mirrorY = false;
@@ -88,9 +88,9 @@ class MirrorModifier: public Node {
 class MultiplyModifier: public Node {
   public:
 
-  static const char * name() {return "Multiply 💎💡";}
+  static const char * name() {return "Multiply";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "💎💡";}
 
   Coord3D proMulti = {2,2,2};
   bool    mirror = false;
@@ -123,9 +123,9 @@ class MultiplyModifier: public Node {
 class PinwheelModifier: public Node {
   public:
 
-  static const char * name() {return "Pinwheel 💎💡";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Pinwheel";}
+  static uint8_t dim() {return _3D;} //test zTwist...
+  static const char * tags() {return "💎💡";}
 
   uint8_t petals = 60;
   uint8_t swirlVal = 30;
@@ -202,8 +202,9 @@ class PinwheelModifier: public Node {
 class RippleYZModifier: public Node {
   public:
 
-  static const char * name() {return "RippleYZ 💎💡💫";}
-  static const char * tags() {return "";}
+  static const char * name() {return "RippleYZ";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "💎💡💫";}
 
   bool shrink = true;
   bool towardsY = true;
@@ -275,8 +276,9 @@ class RippleYZModifier: public Node {
 class RotateModifier: public Node {
   public:
 
-  static const char * name() {return "Rotate 💎💫";}
-  static const char * tags() {return "";}
+  static const char * name() {return "Rotate";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "💎💫";}
 
   bool expand = false;
   bool flip, reverse, alternate;

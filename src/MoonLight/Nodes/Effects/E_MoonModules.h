@@ -17,9 +17,9 @@
 // todo: ewowi check with wildcats08: can background color be removed as it is now easy to add solid as background color (blending ...?)
 class GameOfLifeEffect: public Node {
   public:
-  static const char * name() {return "Game Of Life 🔥💫🎨🧊";}
+  static const char * name() {return "Game Of Life";}
   static uint8_t dim() {return _3D;} //supports 3D but also 2D (1D as well?)
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥💫🎨";}
 
   void placePentomino(uint8_t  *futureCells, bool colorByAge) {
     uint8_t  pattern[5][2] = {{1, 0}, {0, 1}, {1, 1}, {2, 1}, {2, 2}}; // R-pentomino
@@ -321,9 +321,9 @@ class GameOfLifeEffect: public Node {
 // @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 class GEQ3DEffect: public Node {
   public:
-  static const char * name() {return "GEQ 3D 🔥♫🐺";}
+  static const char * name() {return "GEQ 3D";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥♫🐺";}
 
   uint8_t speed = 2;
   uint8_t frontFill = 228;
@@ -472,9 +472,9 @@ class GEQ3DEffect: public Node {
 class PaintBrushEffect: public Node {
 public:
 
-  static const char * name() {return "Paintbrush 🔥🎨♫🧊🐺";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Paintbrush";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "🔥🎨♫🐺";}
 
   uint8_t oscillatorOffset = 6 * 160 / 255;
   uint8_t numLines = 255;

@@ -117,4 +117,7 @@ Effects, Modifiers, Layouts and drivers use emoji's to visualize their usage. Se
 
 * ♫ Audio reactive FFT based
 * ♪ Audio reactive volume based
-* 🧊 3D supported (goals is to have all nodes support 3D 🚧)
+* ⭕ supports up to 0D
+* 📏 supports up to 1D
+* 🟦 supports up to 2D
+* 🧊 supports up to 3D

@@ -15,9 +15,9 @@
 class SolidEffect: public Node {
   public:
 
-  static const char * name() {return "Solid 🔥💡";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Solid";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "🔥💡";}
 
   uint8_t red = 182;
   uint8_t green = 15;
@@ -44,9 +44,9 @@ class SolidEffect: public Node {
 class FixedRectangleEffect: public Node {
   public:
 
-  static const char * name() {return "Fixed Rectangle 🔥";}
+  static const char * name() {return "Fixed Rectangle";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥";}
 
   uint8_t red = 182;
   uint8_t green = 15;
@@ -111,9 +111,9 @@ struct Ball {
 class LinesEffect: public Node {
 public:
 
-  static const char * name() {return "Lines 🔥";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Lines";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥";}
 
   uint8_t bpm = 120;
 
@@ -147,9 +147,9 @@ public:
 class RainbowEffect: public Node {
 public:
 
-  static const char * name() {return "Rainbow 🔥";}
+  static const char * name() {return "Rainbow";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥";}
 
   uint8_t deltaHue = 7;
   uint8_t speed = 8; //default 8*32 = 256 / 256 = 1 = hue++
@@ -169,9 +169,9 @@ public:
 class RandomEffect: public Node {
   public:
 
-  static const char * name() {return "Random 🔥";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Random";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "🔥";}
 
   uint8_t speed=128;
   void setup() {
@@ -186,9 +186,9 @@ class RandomEffect: public Node {
 class RipplesEffect: public Node {
   public:
 
-  static const char * name() {return "Ripples 🔥🧊";}
+  static const char * name() {return "Ripples";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥";}
   
   uint8_t speed = 50;
   uint8_t interval = 128;
@@ -224,9 +224,9 @@ class RipplesEffect: public Node {
 
 class ScrollingTextEffect: public Node {
 public:
-  static const char * name() {return "Scrolling Text 🔥";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Scrolling Text";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥";}
 
   char textIn[32];
   Char<32> text;// = Char<32>("MoonLight");
@@ -329,9 +329,9 @@ public:
 class SinusEffect: public Node {
   public:
 
-  static const char * name() {return "Sinus 🔥";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Sinus";}
+  static uint8_t dim() {return _3D;}
+  static const char * tags() {return "🔥";}
 
   uint8_t speed = 5;
 
@@ -363,9 +363,9 @@ class SinusEffect: public Node {
 class SphereMoveEffect: public Node {
   public:
 
-  static const char * name() {return "Sphere Move 🔥🧊";}
+  static const char * name() {return "Sphere Move";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥";}
 
   uint8_t speed = 50;
   
@@ -406,7 +406,7 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
   public:
   static const char * name() {return "StarField 🔥🎨";}
   static uint8_t     dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥🎨";}
 
   struct Star {
     int x, y, z;
@@ -480,9 +480,9 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
  // BY MONSOONO / @Flavourdynamics 
 class PraxisEffect: public Node {
 public:
-  static const char * name() {return "Praxis 🔥🎨";}
+  static const char * name() {return "Praxis";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥🎨";}
 
   uint8_t macroMutatorFreq = 3;
   uint8_t macroMutatorMin = 250;
@@ -530,9 +530,9 @@ public:
 class WaveEffect: public Node {
 public:
 
-  static const char * name() {return "Wave 🔥";}
-  static uint8_t dim() {return _1D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Wave";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥";}
 
   uint8_t bpm = 60;
   uint8_t fade = 20;
@@ -589,7 +589,10 @@ public:
 
 class FreqSawsEffect: public Node {
 public:
-  static const char * name() {return "Frequency Saws 🔥♫🎨🪚";}
+  static const char * name() {return "Frequency Saws";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥♫🎨🪚";}
+
   uint8_t fade = 4;
   uint8_t increaser = 255;
   uint8_t decreaser = 255;
@@ -689,9 +692,9 @@ public:
 //by WildCats08 / @Brandon502
 class RubiksCubeEffect: public Node {
   public:
-  static const char * name() {return "Rubik's Cube 🔥💫🧊";}
+  static const char * name() {return "Rubik's Cube";}
   static uint8_t     dim() {return _3D;}
-  static const char * tags() {return "💫";}
+  static const char * tags() {return "🔥💫";}
 
   struct Cube {
       uint8_t SIZE;
@@ -982,9 +985,9 @@ class RubiksCubeEffect: public Node {
 //by WildCats08 / @Brandon502
 class ParticlesEffect: public Node {
   public:
-  static const char * name() {return "Particles 🔥💫🧭🎨🧊";}
+  static const char * name() {return "Particles";}
   static uint8_t      dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🔥💫🧭🎨";}
   
   struct Particle {
     float x, y, z;
@@ -1218,9 +1221,9 @@ class ParticlesEffect: public Node {
 
 class MoonManEffect: public Node {
   public:
-  static const char * name() {return "Moon Man 🔥🎵🎨☾";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Moon Man";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥🎵🎨☾";}
   
   // Create an M5Canvas for PNG processing
   M5Canvas *canvas;//(&M5.Display);

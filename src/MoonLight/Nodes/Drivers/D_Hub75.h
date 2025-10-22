@@ -16,9 +16,9 @@
 class HUB75Driver: public Node {
   public:
 
-  static const char * name() {return "HUB75 Driver ☸️🚧";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "HUB75 Driver";}
+  static uint8_t dim() {return _NoD;}
+  static const char * tags() {return "☸️🚧";}
 
   void setup() override {}
   void loop() override {};

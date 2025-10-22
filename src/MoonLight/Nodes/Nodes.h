@@ -17,11 +17,33 @@
 
 #include <ESPFS.h>
 
+#define NODE_METADATA_VIRTUALS() \
+    const char* getName() const override { return name(); } \
+    uint8_t getDim() const override { return dim(); } \
+    const char* getTags() const override { return tags(); }
+
+template<typename T>
+String getNameAndTags() {
+    String result = T::name();
+
+    uint8_t dim = T::dim();
+    if (dim == _0D) result += " ⭕";
+    else if (dim == _1D) result += " 📏";
+    else if (dim == _2D) result += " 🟦";
+    else if (dim == _3D) result += " 🧊";
+
+    result += " ";
+    result += T::tags();
+
+    return result;
+}
+
+
 class Node {
 public:
   static const char * name() {return "noname";}
   static const char * tags() {return "";}
-  static uint8_t dim() {return _1D;};
+  static uint8_t dim() {return _NoD;};
 
   VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
   JsonArray controls;
@@ -303,7 +325,9 @@ static struct SharedData {
 #include "Drivers/D__Sandbox.h"
 
 #include "Layouts/L_MoonLight.h"
-#include "Layouts/L_SE16.h"
+#ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+  #include "Layouts/L_SE16.h"
+#endif
 #include "Layouts/L__Sandbox.h"
 
 #include "Effects/E_MoonLight.h"

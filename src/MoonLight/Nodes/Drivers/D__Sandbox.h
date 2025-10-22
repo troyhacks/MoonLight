@@ -17,9 +17,9 @@
 class NewDriver: public Node {
   public:
 
-  static const char * name() {return "New Driver ☸️";} // ☸️ for drivers
-  static uint8_t dim() {return _3D;} // not relevant for drivers? 🚧
-  static const char * tags() {return "";} // tags for search, comma separated, no spaces 🚧
+  static const char * name() {return "New Driver";}
+  static uint8_t dim() {return _NoD;} // Dimensions not relevant for drivers?
+  static const char * tags() {return "☸️";} // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
   uint8_t pin = 16;
 
