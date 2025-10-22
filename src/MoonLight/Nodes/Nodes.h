@@ -27,7 +27,7 @@ public:
   JsonArray controls;
 
   virtual bool isLiveScriptNode() const { return false; }
-  virtual bool hasLayout() const { return false; } //run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2) 
+  virtual bool hasOnLayout() const { return false; } //run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2) 
   virtual bool hasModifier() const { return false; } //modifier new Node, on/off, control changed: run layout.requestMapLayout. onLayoutPre: modifySize, addLight: modifyPosition XYZ: modifyXYZ
 
   bool on = false; //onUpdate will set it on
@@ -76,79 +76,69 @@ public:
 
     // MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
 
-    //setValue
-    if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
-      if (sizeof(ControlType) != 1) {
-        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
-      } else if (newControl) {
-        // uint8_t * valuePointer = (uint8_t *)pointer;
-        // *valuePointer = variable;
-        // control["value"] = *valuePointer;
-        control["value"] = variable;
+    if (newControl) 
+      control["value"] = variable; // set default
+
+    // setValue
+    if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
+      if (std::is_same<ControlType, uint8_t>::value) {
+        control["size"] = 8;
+      }
+      else if (std::is_same<ControlType, uint16_t>::value) {
+        control["size"] = 16;
+      }
+      else if (std::is_same<ControlType, int>::value) {
+        control["size"] = 32;
+      }
+      else if (std::is_same<ControlType, float>::value) {
+        control["size"] = 33; // trick to indicate float (which is 32 bits)
+      }
+      else {
+        MB_LOGE(ML_TAG, "size %d mismatch for %s", sizeof(ControlType), name);
       }
     }
     else if (control["type"] == "selectFile" || control["type"] == "text") {
       // if (sizeof(ControlType) != 4) {
       //   MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       // } else 
-      if (newControl) {
-        // char *valuePointer = (char *)pointer;
-        // *valuePointer = variable;
-        // control["value"] = valuePointer;
-        control["value"] = variable;
-      }
-    }
-    else if (control["type"] == "number") {
-      if (sizeof(ControlType) != 2) {
-        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
-      } else if (newControl) {
-        // uint16_t *valuePointer = (uint16_t *)pointer;
-        // *valuePointer = variable;
-        // control["value"] = *valuePointer;
-        control["value"] = variable;
-      }
+      control["size"] = sizeof(variable);
     }
     else if (control["type"] == "checkbox") {
-      if (sizeof(ControlType) != 1) {
-        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
-      } else if (newControl) {
-        // bool *valuePointer = (bool *)pointer;
-        // control["value"] = variable;
-        // *valuePointer = control["value"];
-        control["value"] = variable;
-      }
+      if (!std::is_same<ControlType, bool>::value) {
+        MB_LOGE(ML_TAG, "type for %s is not bool", name);
+      } else
+        control["size"] = sizeof(bool);
     }
     else if (control["type"] == "coord3D") {
-      if (sizeof(ControlType) != sizeof(Coord3D)) {
-        MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
-      } else if (newControl) {
-        // Coord3D *valuePointer = (Coord3D *)pointer;
-        // control["value"] = variable;
-        // *valuePointer = control["value"];
-        control["value"] = variable;
-      }
+      if (!sizeof(!std::is_same<ControlType, Coord3D>::value)) {
+        MB_LOGE(ML_TAG, "type for %s is not Coord3D", name);
+      } else
+        control["size"] = sizeof(Coord3D);
     }
     else
-      MB_LOGE(ML_TAG, "type of %s not supported yet: %s", control["name"].as<String>().c_str(), control["type"].as<String>().c_str());
+      MB_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
 
     if (newControl) {
       String oldValue = "";
-      onUpdate(oldValue, control);
+      updateControl(oldValue, control);
+      onUpdate(oldValue, control); //custom onUpdate for the node
     }
 
     return control;
   }
 
   //called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  virtual void onUpdate(String &oldValue, JsonObject control); // see Nodes.cpp for implementation
+  virtual void updateControl(String &oldValue, JsonObject control); // see Nodes.cpp for implementation
+
+  virtual void onUpdate(String &oldValue, JsonObject control) {}
 
   void requestMappings() {
-    if (hasModifier() || hasLayout()) {
-        // MB_LOGD(ML_TAG, "hasLayout or Modifier -> requestMapVirtual");
+    if (hasModifier() || hasOnLayout()) {
+        // MB_LOGD(ML_TAG, "hasOnLayout or Modifier -> requestMapVirtual");
         layerV->layerP->requestMapVirtual = true;
     }
-    if (hasLayout()) {
-        // MB_LOGD(ML_TAG, "hasLayout -> requestMapPhysical");
+    if (hasOnLayout()) {
+        // MB_LOGD(ML_TAG, "hasOnLayout -> requestMapPhysical");
         layerV->layerP->requestMapPhysical = true;
     }
   }
@@ -184,11 +174,7 @@ public:
   virtual void modifyPosition(Coord3D &position) {} //not const as position is changed
   virtual void modifyXYZ(Coord3D &position) {}
 
-  virtual ~Node() {
-    //delete any allocated memory
-
-    MB_LOGD(ML_TAG, "Node destructor 🚥:%d 💎:%d", hasLayout(), hasModifier());
-  }
+  virtual ~Node() {} //delete any allocated memory
 
 };
 
@@ -200,14 +186,14 @@ class LiveScriptNode: public Node {
   static uint8_t dim() {return _2D;}
   static const char * tags() {return "";}
 
-  bool hasSetup = false;
-  bool hasLoop = false;
-  bool hasAddControl = false;
-  bool hasModifyPosition = false;
-  bool hasOnLayout = false;
+  bool hasSetupFunction = false;
+  bool hasLoopFunction = false;
+  // bool hasAddControlFunction = false;
+  bool hasModifyFunction = false;
+  bool hasOnLayoutFunction = false;
   bool isLiveScriptNode() const override { return true; }
-  bool hasModifier() const override { return hasModifyPosition; }
-  bool hasLayout() const override { return hasOnLayout; }
+  bool hasModifier() const override { return hasModifyFunction; }
+  bool hasOnLayout() const override { return hasOnLayoutFunction; }
 
   const char *animation = nullptr; //which animation (file) to run
 
@@ -287,10 +273,13 @@ inline uint8_t triangle8(uint8_t bpm, uint32_t timebase = 0) {
 
 //data shared between nodes
 static struct SharedData {
+  //audio sync
   uint8_t bands[16]= {0}; // Our calculated freq. channel result table to be used by effects
   float volume; // either sampleAvg or sampleAgc depending on soundAgc; smoothed sample
   int16_t volumeRaw; 
   float majorPeak; // FFT: strongest (peak) frequency
+
+  //used in scrollingtext
   uint16_t fps;
   uint8_t connectionStatus;
   size_t connectedClients;
@@ -311,9 +300,11 @@ static struct SharedData {
 #include "Drivers/D_AudioSync.h"
 #include "Drivers/D_VirtualDriver.h"
 #include "Drivers/D_Hub75.h"
+#include "Drivers/D__Sandbox.h"
 
 #include "Layouts/L_MoonLight.h"
 #include "Layouts/L_SE16.h"
+#include "Layouts/L__Sandbox.h"
 
 #include "Effects/E_MoonLight.h"
 #include "Effects/E_MoonModules.h"
@@ -321,7 +312,9 @@ static struct SharedData {
 #include "Effects/E_MovingHeads.h"
 #include "Effects/E_FastLED.h"
 #include "Effects/E_SoulmateLights.h"
+#include "Effects/E__Sandbox.h"
 
 #include "Modifiers/M_MoonLight.h"
+#include "Modifiers/M__Sandbox.h"
 
 #endif //FT_MOONLIGHT

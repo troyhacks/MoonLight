@@ -32,7 +32,7 @@ class HumanSizedCubeLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     char *nextPin = pins;
@@ -104,7 +104,7 @@ class PanelLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     uint8_t axisOrders[2][2] = {
@@ -148,8 +148,8 @@ class PanelsLayout: public Node {
     JsonObject property;
     JsonArray values;
 
-    addControl(panels.size[0], "horizontalPanels", "number", 1, 8);
-    addControl(panels.size[1], "verticalPanels", "number", 1, 6);
+    addControl(panels.size[0], "horizontalPanels", "number", 1, 32);
+    addControl(panels.size[1], "verticalPanels", "number", 1, 32);
     property = addControl(panels.wiringOrder, "wiringOrderP", "select"); values = property["values"].to<JsonArray>(); values.add("XY"); values.add("YX");
     addControl(panels.inc[0], "X++P", "checkbox"); addControl(panels.inc[1], "Y++P", "checkbox"); 
     addControl(panels.snake[1], "snakeP", "checkbox");
@@ -163,7 +163,7 @@ class PanelsLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     char *nextPin = pins;
@@ -232,7 +232,7 @@ class CubeLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     uint8_t axisOrders[6][3] = {
       {2, 1, 0}, // Z (outer), Y (middle), X (inner) -- X fastest
@@ -284,7 +284,7 @@ class SingleLineLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     if (reversed_order){
       for (int x = start_x+width-1; x>=start_x; x--) {
@@ -322,7 +322,7 @@ class SingleRowLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     if (reversed_order){
       for (int y = start_y+height-1; y>=start_y; y--) {
@@ -367,7 +367,7 @@ class RingsLayout: public Node {
     }
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override{
     
     add(1, 0);
@@ -402,7 +402,7 @@ class WheelLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     // uint16_t size = ledsPerSpoke * 2;
     Coord3D middle;

@@ -23,7 +23,7 @@ class HUB75Driver: public Node {
   void setup() override {}
   void loop() override {};
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {};
 };
 

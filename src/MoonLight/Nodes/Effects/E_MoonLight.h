@@ -914,7 +914,6 @@ class RubiksCubeEffect: public Node {
 
   bool doInit = false;
   void onUpdate(String &oldValue, JsonObject control) override {
-    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "cubeSize" || control["name"] == "randomTurning") {
       doInit = true;
@@ -1115,7 +1114,6 @@ class ParticlesEffect: public Node {
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {
-    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "number of Particles" || control["name"] == "barriers") {
       settingUpParticles();

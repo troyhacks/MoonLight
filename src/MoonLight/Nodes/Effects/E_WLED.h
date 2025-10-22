@@ -30,10 +30,8 @@ class BouncingBallsEffect: public Node {
   //binding of loop persistent values (pointers)
   Ball (*balls)[maxNumBalls] = nullptr ;//[maxColumns][maxNumBalls];
 
-  ~BouncingBallsEffect() {
+  ~BouncingBallsEffect() override{
     freeMB(balls);
-
-    Node::~Node();
   }
 
   void onSizeChanged(Coord3D prevSize) override {
@@ -194,7 +192,6 @@ public:
   }
 
   void loop() override {
-    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
 
     uint8_t  w = 2;
 
@@ -481,7 +478,6 @@ class Noise2DEffect: public Node {
   }
 
   void loop() override {
-    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
 
     for (int y = 0; y < layerV->size.y; y++) {
       for (int x = 0; x < layerV->size.x; x++) {
@@ -639,7 +635,6 @@ class WaverlyEffect: public Node {
   }
 
   void loop() override {
-    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
     // bool soundPressure = layerV->effectData.read<bool>();
     // bool agcDebug = layerV->effectData.read<bool>();
 

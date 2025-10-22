@@ -82,7 +82,7 @@ class FastLEDDriver: public Node {
     }
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
@@ -321,7 +321,6 @@ class FastLEDDriver: public Node {
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {
-    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "maxPower") {
         MB_LOGD(ML_TAG, "setMaxPowerInMilliWatts %d", maxPower);

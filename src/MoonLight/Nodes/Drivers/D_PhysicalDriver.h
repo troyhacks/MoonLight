@@ -80,7 +80,7 @@ class PhysicalDriver: public DriverNode {
     #endif
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     #if HP_ALL_DRIVERS
       if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical

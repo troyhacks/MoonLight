@@ -19,12 +19,12 @@ class CircleModifier: public Node {
   static uint8_t dim() {return _3D;}
   static const char * tags() {return "";}
 
-  Coord3D originalSize;
+  Coord3D modifierSize;
 
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    originalSize = layerV->size;
+    modifierSize = layerV->size;
 
     modifyPosition(layerV->size); //modify the virtual size as x, 0, 0
 
@@ -36,9 +36,9 @@ class CircleModifier: public Node {
 
   void modifyPosition(Coord3D &position) override {
     //calculate the distance from the center
-    int dx = position.x - originalSize.x / 2;
-    int dy = position.y - originalSize.y / 2;
-    int dz = position.z - originalSize.z / 2; 
+    int dx = position.x - modifierSize.x / 2;
+    int dy = position.y - modifierSize.y / 2;
+    int dz = position.z - modifierSize.z / 2; 
 
     // Calculate the distance from the center
     float distance = sqrt(dx * dx + dy * dy + dz * dz);
@@ -66,7 +66,7 @@ class MirrorModifier: public Node {
     addControl(mirrorZ, "mirrorZ", "checkbox");
   }
 
-  Coord3D originalSize;
+  Coord3D modifierSize;
   
   bool hasModifier() const override { return true; }
 
@@ -74,14 +74,14 @@ class MirrorModifier: public Node {
     if (mirrorX) layerV->size.x = (layerV->size.x + 1) / 2;
     if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
     if (mirrorZ) layerV->size.z = (layerV->size.z + 1) / 2;
-    originalSize = layerV->size;
+    modifierSize = layerV->size;
     MB_LOGV(ML_TAG, "mirror %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
-    if (mirrorX && position.x >= originalSize.x) position.x = originalSize.x * 2 - 1 - position.x;
-    if (mirrorY && position.y >= originalSize.y) position.y = originalSize.y * 2 - 1 - position.y;
-    if (mirrorZ && position.z >= originalSize.z) position.z = originalSize.z * 2 - 1 - position.z;
+    if (mirrorX && position.x >= modifierSize.x) position.x = modifierSize.x * 2 - 1 - position.x;
+    if (mirrorY && position.y >= modifierSize.y) position.y = modifierSize.y * 2 - 1 - position.y;
+    if (mirrorZ && position.z >= modifierSize.z) position.z = modifierSize.z * 2 - 1 - position.z;
   }
 };
 
@@ -94,7 +94,7 @@ class MultiplyModifier: public Node {
 
   Coord3D proMulti = {2,2,2};
   bool    mirror = false;
-  Coord3D originalSize;
+  Coord3D modifierSize;
 
   void setup() override {
     addControl(proMulti, "multipliers", "coord3D");
@@ -104,19 +104,19 @@ class MultiplyModifier: public Node {
 
   void modifySize() override {
     layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
-    originalSize = layerV->size;
+    modifierSize = layerV->size;
     MB_LOGV(ML_TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
     if (mirror) {
-      Coord3D mirrors = position / originalSize; // Place the light in the right quadrant
-      position = position % originalSize;
-      if (mirrors.x %2 != 0) position.x = originalSize.x - 1 - position.x;
-      if (mirrors.y %2 != 0) position.y = originalSize.y - 1 - position.y;
-      if (mirrors.z %2 != 0) position.z = originalSize.z - 1 - position.z;
+      Coord3D mirrors = position / modifierSize; // Place the light in the right quadrant
+      position = position % modifierSize;
+      if (mirrors.x %2 != 0) position.x = modifierSize.x - 1 - position.x;
+      if (mirrors.y %2 != 0) position.y = modifierSize.y - 1 - position.y;
+      if (mirrors.z %2 != 0) position.z = modifierSize.z - 1 - position.z;
     }
-    else position = position % originalSize;
+    else position = position % modifierSize;
   }
 };
 
@@ -134,7 +134,7 @@ class PinwheelModifier: public Node {
   uint8_t zTwist = 0;
   float petalWidth = 6.0;
 
-  Coord3D originalSize;
+  Coord3D modifierSize;
 
   void setup() override {
     addControl(petals, "petals", "range");
@@ -166,7 +166,7 @@ class PinwheelModifier: public Node {
     else factor = 360; // Default to 360 if symmetry is <= 0
     petalWidth = factor / float(petals);
 
-    originalSize = layerV->size;
+    modifierSize = layerV->size;
     MB_LOGD(ML_TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
@@ -296,7 +296,7 @@ class RotateModifier: public Node {
     addControl(expand, "expand", "checkbox");
   }
 
-  Coord3D originalSize;
+  Coord3D modifierSize;
   int midX, midY;
   int maxX, maxY;
 
@@ -312,7 +312,7 @@ class RotateModifier: public Node {
       layerV->size = Coord3D{size, size, 1};
     }
 
-    originalSize = layerV->size;
+    modifierSize = layerV->size;
     midX = layerV->size.x / 2;
     midY = layerV->size.y / 2;
     maxX = layerV->size.x;
@@ -323,9 +323,9 @@ class RotateModifier: public Node {
   void modifyPosition(Coord3D &position) override {
 
     if (expand) {
-      int size = MAX(originalSize.x, MAX(originalSize.y, originalSize.z));
+      int size = MAX(modifierSize.x, MAX(modifierSize.y, modifierSize.z));
       size = sqrt(size * size * 2) + 1;
-      Coord3D offset = Coord3D((size - originalSize.x) / 2, (size - originalSize.y) / 2, 0);
+      Coord3D offset = Coord3D((size - modifierSize.x) / 2, (size - modifierSize.y) / 2, 0);
       position += offset;
     }
   }
@@ -412,7 +412,7 @@ class TransposeModifier: public Node {
     addControl(transposeYZ, "YZ", "checkbox");
   }
 
-  Coord3D originalSize;
+  Coord3D modifierSize;
   
   bool hasModifier() const override { return true; }
 
@@ -420,7 +420,7 @@ class TransposeModifier: public Node {
     if (transposeXY) { int temp = layerV->size.x; layerV->size.x = layerV->size.y; layerV->size.y = temp; }
     if (transposeXZ) { int temp = layerV->size.x; layerV->size.x = layerV->size.z; layerV->size.z = temp; }
     if (transposeYZ) { int temp = layerV->size.y; layerV->size.y = layerV->size.z; layerV->size.z = temp; }
-    originalSize = layerV->size;
+    modifierSize = layerV->size;
     MB_LOGV(ML_TAG, "transpose %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
   }
 
@@ -447,14 +447,14 @@ class CheckerboardModifier: public Node {
     addControl(group, "group", "checkbox");
   }
 
-  Coord3D originalSize;
+  Coord3D modifierSize;
   
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
 
     if (group) { layerV->middle /= size; layerV->size = (layerV->size + (size - Coord3D{1,1,1})) / size; }
-    originalSize = layerV->size;
+    modifierSize = layerV->size;
   }
 
   void modifyPosition(Coord3D &position) override {

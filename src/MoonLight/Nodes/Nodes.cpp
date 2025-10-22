@@ -14,7 +14,7 @@
 
 #include <ESP32SvelteKit.h> //for safeModeMB
 
-void Node::onUpdate(String &oldValue, JsonObject control) {
+void Node::updateControl(String &oldValue, JsonObject control) {
     // MB_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
     if (oldValue == "") return; //newControl, value already set
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if control is removed in compareRecursive
@@ -22,29 +22,45 @@ void Node::onUpdate(String &oldValue, JsonObject control) {
         // MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
-            if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
-                uint8_t *valuePointer = (uint8_t *)pointer;
-                *valuePointer = control["value"];
-                // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+            if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
+                if (control["size"] == 8) {
+                    uint8_t *valuePointer = (uint8_t *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else if (control["size"] == 16) {
+                    uint16_t *valuePointer = (uint16_t *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else if (control["size"] == 32) {
+                    int *valuePointer = (int *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else if (control["size"] == 33) {
+                    float *valuePointer = (float *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else {
+                    MB_LOGW(ML_TAG, "size not supported or not set for %s: %d", control["name"].as<String>().c_str(), control["size"].as<int>());
+                }
             }
             else if (control["type"] == "selectFile" || control["type"] == "text") {
                 char *valuePointer = (char *)pointer;
                 strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
             }
-            else if (control["type"] == "number") {
-                uint16_t *valuePointer = (uint16_t *)pointer;
-                *valuePointer = control["value"];
-            }
-            else if (control["type"] == "checkbox") {
+            else if (control["type"] == "checkbox" && control["size"] == sizeof(bool)) {
                 bool *valuePointer = (bool *)pointer;
                 *valuePointer = control["value"].as<bool>();
             }
-            else if (control["type"] == "coord3D") {
+            else if (control["type"] == "coord3D" && control["size"] == sizeof(Coord3D)) {
                 Coord3D *valuePointer = (Coord3D *)pointer;
                 *valuePointer = control["value"].as<Coord3D>();
             }
             else
-                MB_LOGE(ML_TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+                MB_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
         }
     }
 };
@@ -194,7 +210,7 @@ void LiveScriptNode::loop() {
 }
 
 void LiveScriptNode::onLayout() {
-    if (hasLayout()) {
+    if (hasOnLayout()) {
         MB_LOGV(ML_TAG, "%s", animation);
         scriptRuntime.execute(animation, "onLayout"); 
     }
@@ -223,16 +239,16 @@ void LiveScriptNode::compileAndRun() {
           scScript += file.readString().c_str();
           file.close();
 
-          if (scScript.find("setup()") != std::string::npos) hasSetup = true;
-          if (scScript.find("loop()") != std::string::npos) hasLoop = true;
-          if (scScript.find("onLayout()") != std::string::npos) hasOnLayout = true;
-          if (scScript.find("modifyPosition(") != std::string::npos) hasModifyPosition = true;
+          if (scScript.find("setup()") != std::string::npos) hasSetupFunction = true;
+          if (scScript.find("loop()") != std::string::npos) hasLoopFunction = true;
+          if (scScript.find("onLayout()") != std::string::npos) hasOnLayoutFunction = true;
+          if (scScript.find("modifyPosition(") != std::string::npos) hasModifyFunction = true;
         //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
           //add main function
           scScript += "void main(){";
-          if (hasSetup) scScript += "setup();";
-          if (hasLoop) scScript += "while(true){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
+          if (hasSetupFunction) scScript += "setup();";
+          if (hasLoopFunction) scScript += "while(true){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
           scScript += "}";
 
           MB_LOGV(ML_TAG, "script \n%s", scScript.c_str());
@@ -271,7 +287,7 @@ void LiveScriptNode::execute() {
 
     requestMappings(); // requestMapPhysical and requestMapVirtual will call the script onLayout function (check if this can be done in case the script also has loop running !!!)
 
-    if (hasLoop) {
+    if (hasLoopFunction) {
         // setup : create controls
         // executable.execute("setup"); 
         // send controls to UI
@@ -384,7 +400,6 @@ void DriverNode::loop() {
 }
 
 void DriverNode::onUpdate(String &oldValue, JsonObject control) {
-  Node::onUpdate(oldValue, control);
 
   LightsHeader *header = &layerV->layerP->lights.header;
 

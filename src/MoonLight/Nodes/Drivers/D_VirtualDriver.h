@@ -28,7 +28,7 @@ class VirtualDriver: public DriverNode {
     // add additional controls using addControl()
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
 
@@ -77,7 +77,6 @@ class VirtualDriver: public DriverNode {
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {
-    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "whatever") {
         //something changed

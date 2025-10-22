@@ -108,7 +108,6 @@ class GameOfLifeEffect: public Node {
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {
-    Node::onUpdate(oldValue, control);
 
     if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
       setBirthAndSurvive();
@@ -162,13 +161,10 @@ class GameOfLifeEffect: public Node {
 
   int dataSize = 0;
 
-  ~GameOfLifeEffect() {
+  ~GameOfLifeEffect() override{
     freeMB(cells);
     freeMB(futureCells);
     freeMB(cellColors);
-
-    //destructor
-    Node::~Node();
   }
 
   void onSizeChanged(Coord3D prevSize) override {
@@ -356,7 +352,6 @@ class GEQ3DEffect: public Node {
   uint32_t counter;
 
   void loop() override {
-    //Binding of controls. Keep before binding of vars and keep in same order as in setup()
 
     if (numBands == 0) return; //init Effect
 

@@ -104,7 +104,7 @@ void PhysicalLayer::loopDrivers() {
 void PhysicalLayer::mapLayout() {
     onLayoutPre();
     for (Node *node: nodes) {
-        if (node->on) { // && node->hasLayout
+        if (node->on) { // && node->hasOnLayout
             node->onLayout();
         }
     }

@@ -46,7 +46,7 @@ class SE16Layout: public Node {
     addNextPin(nextPin);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     //pin layout of the board
