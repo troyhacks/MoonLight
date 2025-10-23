@@ -3,8 +3,9 @@
 
 * [Install Development environment](https://moonmodules.org/MoonLight/develop/installation/)
 * [Development](https://moonmodules.org/MoonLight/develop/development/)
-* MoonBase architecture
-* MoonLight architecture
-* [Sveltekit](https://moonmodules.org/MoonLight/develop/customizingsveltekit/)
-    * [ESP32 Sveltekit](https://moonmodules.org/MoonLight/esp32sveltekit/)
+* [Nodes](https://moonmodules.org/MoonLight/develop/development/)
+* [Modules](https://moonmodules.org/MoonLight/develop/development/)
+* [Layers](https://moonmodules.org/MoonLight/develop/development/)
+* [Layers](https://moonmodules.org/MoonLight/develop/development/)
+* [Sveltekit](https://moonmodules.org/MoonLight/develop/sveltekit/)
 

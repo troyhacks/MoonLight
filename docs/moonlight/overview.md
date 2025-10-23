@@ -120,7 +120,7 @@ Effects, Modifiers, Layouts and drivers use emoji's to visualize their usage. Se
 
 * 🔥 Effect
     * 🎨 Using palette
-    * 💡 WLED origin
+    * 🐙 WLED origin
     * 💫 MoonLight origin
     * 🚨 Moving head color effect
     * 🗼 Moving head move effect
@@ -130,7 +130,7 @@ Effects, Modifiers, Layouts and drivers use emoji's to visualize their usage. Se
 
 * ♫ Audio reactive FFT based
 * ♪ Audio reactive volume based
-* ⭕ supports up to 0D
+* 💡 supports up to 0D
 * 📏 supports up to 1D
 * 🟦 supports up to 2D
 * 🧊 supports up to 3D

@@ -35,13 +35,11 @@ nav:
     - develop/overview.md
     - develop/installation.md
     - develop/development.md
-    - develop/customizingsveltekit.md
-    - develop/pull-requests.md
-    - develop/documentation.md
-    - develop/modules.md
     - develop/nodes.md
+    - develop/modules.md
     - develop/layers.md
-    - develop/drivers.md
+    - develop/sveltekit.md
+    # - develop/documentation.md
   - "ESP32 SvelteKit":
     - esp32sveltekit.md
   - "Build Tools":
