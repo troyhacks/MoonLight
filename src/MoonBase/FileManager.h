@@ -9,6 +9,20 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
+
+// * filesState: all files on FS
+// * folderList: all files in a folder
+// * editableFile: current file
+// * getState / postFilesState: get filesState and post changes to files (update, delete, new)
+// * addFile / addFolder: create new items
+// * breadcrumbs(String): folder path as string array and as string, stored in localStorage
+// * folderListFromBreadCrumbs: create folderList of current folder
+// * handleEdit: when edit button pressed: navigate back and forward through folders, edit current file
+// * confirmDelete: when delete button pressed
+// * socket files / handleFileState (->folderListFromBreadCrumbs)
+// Using component FileEdit, see [Components](https://moonmodules.org/MoonLight/components/#fileedit)
+
+
 #ifndef FileManager_h
 #define FileManager_h
 

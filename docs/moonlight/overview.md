@@ -82,10 +82,12 @@ MoonBase
 
 * ESP32-P4 support
 * MIDI support (light control desks) 
-* Live Scripts, see [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/), included in MoonLight but needs refactoring 🥜
-* SuperSync 🥜: See above: development basically stopped in 2023 but the ideas are still there.
+* Ethernet
+* Live Scripts, see [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/), included in MoonLight
+* SuperSync 🥜: See above: development basically stopped in 2023 but the ideas are still there: device groups, sync effects, distributed effects.
 * HA / MQTT
-* UI enrichments: help needed
+* UI enrichments
+* Specific board profiles, E.g. see [Premade boards](https://moonmodules.org/MoonLight/gettingstarted/hardware/#premade-boards)
 
 MoonLight 
 
@@ -99,7 +101,18 @@ MoonLight
     * Physics
     * Live Scripts
 
-🥜: MoonBase functionality which is specific for MoonLight but will be refactored to generic MoonLight functionality
+### Where you can help
+
+* Add more effects (FastLED, WLED, Particle system, Animartrix, Soulmate lights, ...), modifiers, layouts and drivers
+* Improve the web installer
+* Improve the UI (Svelte 5, DaisyUI 5, TailWind 4)
+  * e.g. File Manager, Multi row layout, Monitor (WebGL)
+* Tune FastLED, add FastLED 2D effects
+* CI automation (Generate daily builds in Github and use by installer)
+* Palettes: more, custom, audio reactive
+* ...
+
+Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg/TC8NSUSCdV)
 
 ## Emoji coding
 
