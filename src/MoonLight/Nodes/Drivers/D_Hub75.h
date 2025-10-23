@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      parlio.h
+    @file      Hub75.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
@@ -10,10 +10,21 @@
 **/
 
 #pragma once
-#include <Arduino.h>
 
 #if FT_MOONLIGHT
 
-uint8_t show_parlio(uint8_t* parallelPins, uint32_t length, uint8_t* buffer_in, uint8_t bri, bool isRGBW, uint8_t outputs, uint16_t leds_per_output, uint8_t offSetR, uint8_t offsetG, uint8_t offsetB);
+class HUB75Driver: public Node {
+  public:
+
+  static const char * name() {return "HUB75 Driver";}
+  static uint8_t dim() {return _NoD;}
+  static const char * tags() {return "☸️🚧";}
+
+  void setup() override {}
+  void loop() override {};
+
+  bool hasOnLayout() const override { return true; }
+  void onLayout() override {};
+};
 
 #endif

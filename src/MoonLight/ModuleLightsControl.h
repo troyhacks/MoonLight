@@ -201,8 +201,9 @@ public:
         if (presetLoop && millis() - lastPresetTime > presetLoop * 1000) { // every presetLoop seconds
             lastPresetTime = millis();
 
-            std::lock_guard<std::mutex> lock(runInTask_mutex);
-            runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
+            //bugfix; 
+            // std::lock_guard<std::mutex> lock(runInTask_mutex);
+            // runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
                 // load the xth preset from FS
                 JsonArray presets = _state.data["preset"]["list"];
 
@@ -229,12 +230,13 @@ public:
                     //trigger file manager notification of update of effects.json
                     _fileManager->update([&](FilesState &state) {
                         state.updatedItems.push_back("/.config/effects.json");
+                        // MB_LOGD(ML_TAG, "   preset files %d %s", lastPresetLooped, presetFile.c_str());
                         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
                     }, "server");
 
                     lastPresetLooped++; //next
                 }
-            });
+            // });
         }
 
         #if FT_ENABLED(FT_MONITOR)

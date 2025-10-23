@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      Layouts.h
+    @file      L_MoonLight.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
@@ -11,14 +11,12 @@
 
 #if FT_MOONLIGHT
 
-//alphabetically from here, Custom Nodes at the end
-
 class HumanSizedCubeLayout: public Node {
   public:
 
-  static const char * name() {return "Human Sized Cube 🚥🧊💫";}
+  static const char * name() {return "Human Sized Cube";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥💫";}
 
   uint8_t width = 10;
   uint8_t height = 10;
@@ -34,7 +32,7 @@ class HumanSizedCubeLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     char *nextPin = pins;
@@ -85,9 +83,9 @@ struct Wiring {
 class PanelLayout: public Node {
   public:
 
-  static const char * name() {return "Panel 🚥";}
+  static const char * name() {return "Panel";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
 
@@ -106,7 +104,7 @@ class PanelLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     uint8_t axisOrders[2][2] = {
@@ -132,9 +130,9 @@ class PanelLayout: public Node {
 class PanelsLayout: public Node {
   public:
 
-  static const char * name() {return "Panels 🚥";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Panels";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🚥";}
 
   Wiring panels = {{2,2,1}, 1, {true,true,true}, {false,true,false}}; // 2x2 panels, increasing over the axis, snake on the Y-axis
   Wiring panel = {{16,16,1}, 1, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
@@ -150,8 +148,8 @@ class PanelsLayout: public Node {
     JsonObject property;
     JsonArray values;
 
-    addControl(panels.size[0], "horizontalPanels", "number", 1, 8);
-    addControl(panels.size[1], "verticalPanels", "number", 1, 6);
+    addControl(panels.size[0], "horizontalPanels", "number", 1, 32);
+    addControl(panels.size[1], "verticalPanels", "number", 1, 32);
     property = addControl(panels.wiringOrder, "wiringOrderP", "select"); values = property["values"].to<JsonArray>(); values.add("XY"); values.add("YX");
     addControl(panels.inc[0], "X++P", "checkbox"); addControl(panels.inc[1], "Y++P", "checkbox"); 
     addControl(panels.snake[1], "snakeP", "checkbox");
@@ -165,7 +163,7 @@ class PanelsLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
     char *nextPin = pins;
@@ -203,9 +201,9 @@ class PanelsLayout: public Node {
 class CubeLayout: public Node {
   public:
 
-  static const char * name() {return "Cube 🚥🧊";}
+  static const char * name() {return "Cube";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   Wiring panels = {{10,10,10}, 3, {true,true,true}, {false,true,false}};; // 16x16 panel, increasing over the axis, snake on the Y-axis
 
@@ -234,7 +232,7 @@ class CubeLayout: public Node {
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     uint8_t axisOrders[6][3] = {
       {2, 1, 0}, // Z (outer), Y (middle), X (inner) -- X fastest
@@ -268,9 +266,9 @@ class CubeLayout: public Node {
 class SingleLineLayout: public Node {
   public:
 
-  static const char * name() {return "Single Line 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Single Line";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🚥";}
 
   uint8_t start_x = 0;
   uint8_t width = 30;
@@ -286,7 +284,7 @@ class SingleLineLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     if (reversed_order){
       for (int x = start_x+width-1; x>=start_x; x--) {
@@ -306,9 +304,9 @@ class SingleLineLayout: public Node {
 class SingleRowLayout: public Node {
   public:
 
-  static const char * name() {return "Single Row 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * name() {return "Single Row";}
+  static uint8_t dim() {return _1D;}
+  static const char * tags() {return "🚥";}
 
   uint8_t start_y = 0;
   uint8_t height = 30;
@@ -324,7 +322,7 @@ class SingleRowLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     if (reversed_order){
       for (int y = start_y+height-1; y>=start_y; y--) {
@@ -343,9 +341,9 @@ class SingleRowLayout: public Node {
 class RingsLayout: public Node {
   public:
 
-  static const char * name() {return "Rings 🚥";}
+  static const char * name() {return "Rings";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   uint8_t pin = 16;
 
@@ -369,7 +367,7 @@ class RingsLayout: public Node {
     }
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override{
     
     add(1, 0);
@@ -389,9 +387,9 @@ class RingsLayout: public Node {
 class WheelLayout: public Node {
   public:
 
-  static const char * name() {return "Wheel 🚥";}
+  static const char * name() {return "Wheel";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
+  static const char * tags() {return "🚥";}
 
   uint8_t pin = 16;
 
@@ -404,7 +402,7 @@ class WheelLayout: public Node {
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
-  bool hasLayout() const override { return true; }
+  bool hasOnLayout() const override { return true; }
   void onLayout() override {
     // uint16_t size = ledsPerSpoke * 2;
     Coord3D middle;
@@ -421,80 +419,6 @@ class WheelLayout: public Node {
       }
     }
     addPin(pin);
-  }
-};
-
-//custom layouts
-
-//SE16 board
-class SE16Layout: public Node {
-  public:
-
-  static const char * name() {return "SE16 🚥";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "";}
-
-  bool mirroredPins = false;
-  bool pinsAreColumns = false;
-  uint16_t ledsPerPin = 10;
-  char pins[80] = "47,48,21,38,14,39,13,40,12,41,11,42,10,2,3,1"; //SE16 pin layout
-
-  void setup() override {
-    addControl(mirroredPins, "mirroredPins", "checkbox");
-    addControl(pinsAreColumns, "pinsAreColumns", "checkbox");
-    addControl(ledsPerPin, "ledsPerPin", "number", 1, 2047);
-    addControl(pins, "pins", "text", 1, sizeof(pins));
-  }
-
-  char *nextPin = pins;
-
-  void addStrip( uint16_t xposition, uint16_t start_y,  uint16_t stop_y) {
-
-    bool increasing = start_y < stop_y;
-    for (int y = start_y; increasing ? (y <= stop_y) : (y >= stop_y); y += increasing?1:-1) {
-      if (pinsAreColumns)
-        addLight(Coord3D(xposition, y, 0)); //limpkin
-      else
-        addLight(Coord3D(y, xposition, 0)); //ewowi
-    }
-
-    addNextPin(nextPin);
-  }
-
-  bool hasLayout() const override { return true; }
-  void onLayout() override {
-
-    //pin layout of the board
-    // 47-48
-    // 21-38
-    // 14-39
-    // 13-40
-    // 12-41
-    // 11-42
-    // 10-02
-    // 03-01
-
-    nextPin = pins;
-
-    if (mirroredPins) { //limpkin
-      addStrip(7, ledsPerPin, 2*ledsPerPin-1); addStrip(7, ledsPerPin-1, 0);
-      addStrip(6, ledsPerPin, 2*ledsPerPin-1); addStrip(6, ledsPerPin-1, 0);
-      addStrip(5, ledsPerPin, 2*ledsPerPin-1); addStrip(5, ledsPerPin-1, 0);
-      addStrip(4, ledsPerPin, 2*ledsPerPin-1); addStrip(4, ledsPerPin-1, 0);
-      addStrip(3, ledsPerPin, 2*ledsPerPin-1); addStrip(3, ledsPerPin-1, 0);
-      addStrip(2, ledsPerPin, 2*ledsPerPin-1); addStrip(2, ledsPerPin-1, 0);
-      addStrip(1, ledsPerPin, 2*ledsPerPin-1); addStrip(1, ledsPerPin-1, 0);
-      addStrip(0, ledsPerPin, 2*ledsPerPin-1);  addStrip(0, ledsPerPin-1, 0);
-    } else { //ewowi
-      addStrip(14, 0, ledsPerPin-1); addStrip(15, 0, ledsPerPin-1);
-      addStrip(12, 0, ledsPerPin-1); addStrip(13, 0, ledsPerPin-1);
-      addStrip(10, 0, ledsPerPin-1); addStrip(11, 0, ledsPerPin-1);
-      addStrip(8, 0, ledsPerPin-1); addStrip(9, 0, ledsPerPin-1);
-      addStrip(6, 0, ledsPerPin-1); addStrip(7, 0, ledsPerPin-1);
-      addStrip(4, 0, ledsPerPin-1); addStrip(5, 0, ledsPerPin-1);
-      addStrip(2, 0, ledsPerPin-1); addStrip(3, 0, ledsPerPin-1);
-      addStrip(0, 0, ledsPerPin-1);  addStrip(1, 0, ledsPerPin-1);
-    }
   }
 };
 

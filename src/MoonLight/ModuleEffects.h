@@ -124,63 +124,63 @@ public:
     }
 
     void addNodes(JsonArray values) override {
-        values.add(SolidEffect::name());
+        values.add(getNameAndTags<SolidEffect>());
         //alphabetically per category, keep the order the same as in https://moonmodules.org/MoonLight/moonbase/module/effects
 
         // MoonLight effects
-        values.add(LinesEffect::name());
-        values.add(FreqSawsEffect::name());
+        values.add(getNameAndTags<LinesEffect>());
+        values.add(getNameAndTags<FreqSawsEffect>());
         #if USE_M5UNIFIED
-            values.add(MoonManEffect::name());
+            values.add(getNameAndTags<MoonManEffect>());
         #endif
-        values.add(ParticlesEffect::name());
-        values.add(RainbowEffect::name());
-        values.add(RandomEffect::name());
-        values.add(RipplesEffect::name());
-        values.add(RubiksCubeEffect::name());
-        values.add(ScrollingTextEffect::name());
-        values.add(SinusEffect::name());
-        values.add(SphereMoveEffect::name());
-        values.add(StarFieldEffect::name());
-        values.add(PraxisEffect::name());
-        values.add(WaveEffect::name());
-        values.add(FixedRectangleEffect::name());
+        values.add(getNameAndTags<ParticlesEffect>());
+        values.add(getNameAndTags<RainbowEffect>());
+        values.add(getNameAndTags<RandomEffect>());
+        values.add(getNameAndTags<RipplesEffect>());
+        values.add(getNameAndTags<RubiksCubeEffect>());
+        values.add(getNameAndTags<ScrollingTextEffect>());
+        values.add(getNameAndTags<SinusEffect>());
+        values.add(getNameAndTags<SphereMoveEffect>());
+        values.add(getNameAndTags<StarFieldEffect>());
+        values.add(getNameAndTags<PraxisEffect>());
+        values.add(getNameAndTags<WaveEffect>());
+        values.add(getNameAndTags<FixedRectangleEffect>());
 
         //MoonModules effects
-        values.add(GameOfLifeEffect::name());
-        values.add(GEQ3DEffect::name());
-        values.add(PaintBrushEffect::name());
+        values.add(getNameAndTags<GameOfLifeEffect>());
+        values.add(getNameAndTags<GEQ3DEffect>());
+        values.add(getNameAndTags<PaintBrushEffect>());
 
         //WLED effects
-        values.add(BouncingBallsEffect::name());
-        values.add(BlurzEffect::name());
-        values.add(DistortionWavesEffect::name());
-        values.add(FreqMatrixEffect::name());
-        values.add(GEQEffect::name());
-        values.add(LissajousEffect::name());
-        values.add(Noise2DEffect::name());
-        values.add(NoiseMeterEffect::name());
-        values.add(PopCornEffect::name());
-        values.add(WaverlyEffect::name());
+        values.add(getNameAndTags<BouncingBallsEffect>());
+        values.add(getNameAndTags<BlurzEffect>());
+        values.add(getNameAndTags<DistortionWavesEffect>());
+        values.add(getNameAndTags<FreqMatrixEffect>());
+        values.add(getNameAndTags<GEQEffect>());
+        values.add(getNameAndTags<LissajousEffect>());
+        values.add(getNameAndTags<Noise2DEffect>());
+        values.add(getNameAndTags<NoiseMeterEffect>());
+        values.add(getNameAndTags<PopCornEffect>());
+        values.add(getNameAndTags<WaverlyEffect>());
 
         // Moving head effects
-        values.add(Troy1ColorEffect::name());
-        values.add(Troy1MoveEffect::name());
-        values.add(Troy2ColorEffect::name());
-        values.add(Troy2MoveEffect::name());
-        values.add(FreqColorsEffect::name());
-        values.add(WowiMoveEffect::name());
-        values.add(AmbientMoveEffect::name());
+        values.add(getNameAndTags<Troy1ColorEffect>());
+        values.add(getNameAndTags<Troy1MoveEffect>());
+        values.add(getNameAndTags<Troy2ColorEffect>());
+        values.add(getNameAndTags<Troy2MoveEffect>());
+        values.add(getNameAndTags<FreqColorsEffect>());
+        values.add(getNameAndTags<WowiMoveEffect>());
+        values.add(getNameAndTags<AmbientMoveEffect>());
 
         //Modifiers
-        values.add(MultiplyModifier::name());
-        values.add(MirrorModifier::name());
-        values.add(TransposeModifier::name());
-        values.add(CircleModifier::name());
-        values.add(RotateModifier::name());
-        values.add(CheckerboardModifier::name());
-        values.add(PinwheelModifier::name());
-        values.add(RippleYZModifier::name());
+        values.add(getNameAndTags<MultiplyModifier>());
+        values.add(getNameAndTags<MirrorModifier>());
+        values.add(getNameAndTags<TransposeModifier>());
+        values.add(getNameAndTags<CircleModifier>());
+        values.add(getNameAndTags<RotateModifier>());
+        values.add(getNameAndTags<CheckerboardModifier>());
+        values.add(getNameAndTags<PinwheelModifier>());
+        values.add(getNameAndTags<RippleYZModifier>());
 
         //find all the .sc files on FS
         File rootFolder = ESPFS.open("/");
@@ -195,54 +195,53 @@ public:
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
         Node *node = nullptr;
-        if (equal(name, SolidEffect::name())) node = allocMBObject<SolidEffect>();
-        //alphabetically from here
-        else if (equal(name, BouncingBallsEffect::name())) node = allocMBObject<BouncingBallsEffect>();
-        else if (equal(name, BlurzEffect::name())) node = allocMBObject<BlurzEffect>();
-        else if (equal(name, DistortionWavesEffect::name())) node = allocMBObject<DistortionWavesEffect>();
-        else if (equal(name, FreqMatrixEffect::name())) node = allocMBObject<FreqMatrixEffect>();
-        else if (equal(name, GameOfLifeEffect::name())) node = allocMBObject<GameOfLifeEffect>();
-        else if (equal(name, GEQEffect::name())) node = allocMBObject<GEQEffect>();
-        else if (equal(name, GEQ3DEffect::name())) node = allocMBObject<GEQ3DEffect>();
-        else if (equal(name, FreqSawsEffect::name())) node = allocMBObject<FreqSawsEffect>();
-        else if (equal(name, LinesEffect::name())) node = allocMBObject<LinesEffect>();
-        else if (equal(name, LissajousEffect::name())) node = allocMBObject<LissajousEffect>();
+        if (contains(name, SolidEffect::name())) node = allocMBObject<SolidEffect>();
+        else if (contains(name, BouncingBallsEffect::name())) node = allocMBObject<BouncingBallsEffect>();
+        else if (contains(name, BlurzEffect::name())) node = allocMBObject<BlurzEffect>();
+        else if (contains(name, DistortionWavesEffect::name())) node = allocMBObject<DistortionWavesEffect>();
+        else if (contains(name, FreqMatrixEffect::name())) node = allocMBObject<FreqMatrixEffect>();
+        else if (contains(name, GameOfLifeEffect::name())) node = allocMBObject<GameOfLifeEffect>();
+        else if (contains(name, GEQEffect::name())) node = allocMBObject<GEQEffect>();
+        else if (contains(name, GEQ3DEffect::name())) node = allocMBObject<GEQ3DEffect>();
+        else if (contains(name, FreqSawsEffect::name())) node = allocMBObject<FreqSawsEffect>();
+        else if (contains(name, LinesEffect::name())) node = allocMBObject<LinesEffect>();
+        else if (contains(name, LissajousEffect::name())) node = allocMBObject<LissajousEffect>();
         #if USE_M5UNIFIED
-            else if (equal(name, MoonManEffect::name())) node = allocMBObject<MoonManEffect>();
+            else if (contains(name, MoonManEffect::name())) node = allocMBObject<MoonManEffect>();
         #endif
-        else if (equal(name, Noise2DEffect::name())) node = allocMBObject<Noise2DEffect>();
-        else if (equal(name, NoiseMeterEffect::name())) node = allocMBObject<NoiseMeterEffect>();
-        else if (equal(name, PaintBrushEffect::name())) node = allocMBObject<PaintBrushEffect>();
-        else if (equal(name, ParticlesEffect::name())) node = allocMBObject<ParticlesEffect>();
-        else if (equal(name, PopCornEffect::name())) node = allocMBObject<PopCornEffect>();
-        else if (equal(name, RainbowEffect::name())) node = allocMBObject<RainbowEffect>();
-        else if (equal(name, RandomEffect::name())) node = allocMBObject<RandomEffect>();
-        else if (equal(name, RipplesEffect::name())) node = allocMBObject<RipplesEffect>();
-        else if (equal(name, RubiksCubeEffect::name())) node = allocMBObject<RubiksCubeEffect>();
-        else if (equal(name, ScrollingTextEffect::name())) node = allocMBObject<ScrollingTextEffect>();
-        else if (equal(name, SinusEffect::name())) node = allocMBObject<SinusEffect>();
-        else if (equal(name, SphereMoveEffect::name())) node = allocMBObject<SphereMoveEffect>();
-        else if (equal(name, StarFieldEffect::name())) node = allocMBObject<StarFieldEffect>();
-        else if (equal(name, PraxisEffect::name())) node = allocMBObject<PraxisEffect>();
-        else if (equal(name, WaverlyEffect::name())) node = allocMBObject<WaverlyEffect>();
-        else if (equal(name, FixedRectangleEffect::name())) node = allocMBObject<FixedRectangleEffect>();
-        else if (equal(name, WaveEffect::name())) node = allocMBObject<WaveEffect>();
-        else if (equal(name, Troy1ColorEffect::name())) node = allocMBObject<Troy1ColorEffect>();
-        else if (equal(name, Troy1MoveEffect::name())) node = allocMBObject<Troy1MoveEffect>();
-        else if (equal(name, Troy2ColorEffect::name())) node = allocMBObject<Troy2ColorEffect>();
-        else if (equal(name, Troy2MoveEffect::name())) node = allocMBObject<Troy2MoveEffect>();
-        else if (equal(name, FreqColorsEffect::name())) node = allocMBObject<FreqColorsEffect>();
-        else if (equal(name, WowiMoveEffect::name())) node = allocMBObject<WowiMoveEffect>();
-        else if (equal(name, AmbientMoveEffect::name())) node = allocMBObject<AmbientMoveEffect>();
+        else if (contains(name, Noise2DEffect::name())) node = allocMBObject<Noise2DEffect>();
+        else if (contains(name, NoiseMeterEffect::name())) node = allocMBObject<NoiseMeterEffect>();
+        else if (contains(name, PaintBrushEffect::name())) node = allocMBObject<PaintBrushEffect>();
+        else if (contains(name, ParticlesEffect::name())) node = allocMBObject<ParticlesEffect>();
+        else if (contains(name, PopCornEffect::name())) node = allocMBObject<PopCornEffect>();
+        else if (contains(name, RainbowEffect::name())) node = allocMBObject<RainbowEffect>();
+        else if (contains(name, RandomEffect::name())) node = allocMBObject<RandomEffect>();
+        else if (contains(name, RipplesEffect::name())) node = allocMBObject<RipplesEffect>();
+        else if (contains(name, RubiksCubeEffect::name())) node = allocMBObject<RubiksCubeEffect>();
+        else if (contains(name, ScrollingTextEffect::name())) node = allocMBObject<ScrollingTextEffect>();
+        else if (contains(name, SinusEffect::name())) node = allocMBObject<SinusEffect>();
+        else if (contains(name, SphereMoveEffect::name())) node = allocMBObject<SphereMoveEffect>();
+        else if (contains(name, StarFieldEffect::name())) node = allocMBObject<StarFieldEffect>();
+        else if (contains(name, PraxisEffect::name())) node = allocMBObject<PraxisEffect>();
+        else if (contains(name, WaverlyEffect::name())) node = allocMBObject<WaverlyEffect>();
+        else if (contains(name, FixedRectangleEffect::name())) node = allocMBObject<FixedRectangleEffect>();
+        else if (contains(name, WaveEffect::name())) node = allocMBObject<WaveEffect>();
+        else if (contains(name, Troy1ColorEffect::name())) node = allocMBObject<Troy1ColorEffect>();
+        else if (contains(name, Troy1MoveEffect::name())) node = allocMBObject<Troy1MoveEffect>();
+        else if (contains(name, Troy2ColorEffect::name())) node = allocMBObject<Troy2ColorEffect>();
+        else if (contains(name, Troy2MoveEffect::name())) node = allocMBObject<Troy2MoveEffect>();
+        else if (contains(name, FreqColorsEffect::name())) node = allocMBObject<FreqColorsEffect>();
+        else if (contains(name, WowiMoveEffect::name())) node = allocMBObject<WowiMoveEffect>();
+        else if (contains(name, AmbientMoveEffect::name())) node = allocMBObject<AmbientMoveEffect>();
 
-        else if (equal(name, CheckerboardModifier::name())) node = allocMBObject<CheckerboardModifier>();
-        else if (equal(name, CircleModifier::name())) node = allocMBObject<CircleModifier>();
-        else if (equal(name, MirrorModifier::name())) node = allocMBObject<MirrorModifier>();
-        else if (equal(name, MultiplyModifier::name())) node = allocMBObject<MultiplyModifier>();
-        else if (equal(name, RippleYZModifier::name())) node = allocMBObject<RippleYZModifier>();
-        else if (equal(name, PinwheelModifier::name())) node = allocMBObject<PinwheelModifier>();
-        else if (equal(name, RotateModifier::name())) node = allocMBObject<RotateModifier>();
-        else if (equal(name, TransposeModifier::name())) node = allocMBObject<TransposeModifier>();
+        else if (contains(name, CheckerboardModifier::name())) node = allocMBObject<CheckerboardModifier>();
+        else if (contains(name, CircleModifier::name())) node = allocMBObject<CircleModifier>();
+        else if (contains(name, MirrorModifier::name())) node = allocMBObject<MirrorModifier>();
+        else if (contains(name, MultiplyModifier::name())) node = allocMBObject<MultiplyModifier>();
+        else if (contains(name, RippleYZModifier::name())) node = allocMBObject<RippleYZModifier>();
+        else if (contains(name, PinwheelModifier::name())) node = allocMBObject<PinwheelModifier>();
+        else if (contains(name, RotateModifier::name())) node = allocMBObject<RotateModifier>();
+        else if (contains(name, TransposeModifier::name())) node = allocMBObject<TransposeModifier>();
         
         #if FT_LIVESCRIPT
             else {

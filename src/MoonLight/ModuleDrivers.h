@@ -41,47 +41,51 @@ public:
 
     void addNodes(JsonArray values) override {
 
-        values.add(PanelLayout::name());
-        values.add(PanelsLayout::name());
-        values.add(CubeLayout::name());
-        values.add(HumanSizedCubeLayout::name());
-        values.add(RingsLayout::name());
-        values.add(WheelLayout::name());
-        values.add(SingleLineLayout::name());
-        values.add(SingleRowLayout::name());
-        //custom
-        values.add(SE16Layout::name());
+        values.add(getNameAndTags<PanelLayout>());
+        values.add(getNameAndTags<PanelsLayout>());
+        values.add(getNameAndTags<CubeLayout>());
+        values.add(getNameAndTags<HumanSizedCubeLayout>());
+        values.add(getNameAndTags<RingsLayout>());
+        values.add(getNameAndTags<WheelLayout>());
+        values.add(getNameAndTags<SingleLineLayout>());
+        values.add(getNameAndTags<SingleRowLayout>());
 
-        values.add(PhysicalDriver::name());
-        values.add(FastLEDDriver::name());
-        values.add(ArtNetDriver::name());
-        values.add(AudioSyncDriver::name());
-        values.add(VirtualDriver::name());
-        values.add(HUB75Driver::name());
+        //custom
+        #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+            values.add(getNameAndTags<SE16Layout>());
+        #endif
+
+        values.add(getNameAndTags<PhysicalDriver>());
+        values.add(getNameAndTags<FastLEDDriver>());
+        values.add(getNameAndTags<ArtNetDriver>());
+        values.add(getNameAndTags<AudioSyncDriver>());
+        values.add(getNameAndTags<VirtualDriver>());
+        values.add(getNameAndTags<HUB75Driver>());
     }
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
         Node *node = nullptr;
-        //alphabetically from here
 
-        if (equal(name, PanelLayout::name())) node = allocMBObject<PanelLayout>();
-        else if (equal(name, PanelsLayout::name())) node = allocMBObject<PanelsLayout>();
-        else if (equal(name, CubeLayout::name())) node = allocMBObject<CubeLayout>();
-        else if (equal(name, RingsLayout::name())) node = allocMBObject<RingsLayout>();
-        else if (equal(name, WheelLayout::name())) node = allocMBObject<WheelLayout>();
-        else if (equal(name, HumanSizedCubeLayout::name())) node = allocMBObject<HumanSizedCubeLayout>();
-        else if (equal(name, SingleLineLayout::name())) node = allocMBObject<SingleLineLayout>();
-        else if (equal(name, SingleRowLayout::name())) node = allocMBObject<SingleRowLayout>();
+        if (contains(name, PanelLayout::name())) node = allocMBObject<PanelLayout>();
+        else if (contains(name, PanelsLayout::name())) node = allocMBObject<PanelsLayout>();
+        else if (contains(name, CubeLayout::name())) node = allocMBObject<CubeLayout>();
+        else if (contains(name, RingsLayout::name())) node = allocMBObject<RingsLayout>();
+        else if (contains(name, WheelLayout::name())) node = allocMBObject<WheelLayout>();
+        else if (contains(name, HumanSizedCubeLayout::name())) node = allocMBObject<HumanSizedCubeLayout>();
+        else if (contains(name, SingleLineLayout::name())) node = allocMBObject<SingleLineLayout>();
+        else if (contains(name, SingleRowLayout::name())) node = allocMBObject<SingleRowLayout>();
 
         //custom
-        else if (equal(name, SE16Layout::name())) node = allocMBObject<SE16Layout>();
+        #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+            else if (contains(name, SE16Layout::name())) node = allocMBObject<SE16Layout>();
+        #endif
 
-        else if (equal(name, ArtNetDriver::name())) node = allocMBObject<ArtNetDriver>();
-        else if (equal(name, FastLEDDriver::name())) node = allocMBObject<FastLEDDriver>();
-        else if (equal(name, PhysicalDriver::name())) node = allocMBObject<PhysicalDriver>();
-        else if (equal(name, AudioSyncDriver::name())) node = allocMBObject<AudioSyncDriver>();
-        else if (equal(name, HUB75Driver::name())) node = allocMBObject<HUB75Driver>();
-        else if (equal(name, VirtualDriver::name())) node = allocMBObject<VirtualDriver>();
+        else if (contains(name, ArtNetDriver::name())) node = allocMBObject<ArtNetDriver>();
+        else if (contains(name, FastLEDDriver::name())) node = allocMBObject<FastLEDDriver>();
+        else if (contains(name, PhysicalDriver::name())) node = allocMBObject<PhysicalDriver>();
+        else if (contains(name, AudioSyncDriver::name())) node = allocMBObject<AudioSyncDriver>();
+        else if (contains(name, HUB75Driver::name())) node = allocMBObject<HUB75Driver>();
+        else if (contains(name, VirtualDriver::name())) node = allocMBObject<VirtualDriver>();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = allocMBObject<LiveScriptNode>();

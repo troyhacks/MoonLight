@@ -14,7 +14,7 @@
 
 #include <ESP32SvelteKit.h> //for safeModeMB
 
-void Node::onUpdate(String &oldValue, JsonObject control) {
+void Node::updateControl(String &oldValue, JsonObject control) {
     // MB_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
     if (oldValue == "") return; //newControl, value already set
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if control is removed in compareRecursive
@@ -22,29 +22,45 @@ void Node::onUpdate(String &oldValue, JsonObject control) {
         // MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
-            if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin") {
-                uint8_t *valuePointer = (uint8_t *)pointer;
-                *valuePointer = control["value"];
-                // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+            if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
+                if (control["size"] == 8) {
+                    uint8_t *valuePointer = (uint8_t *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else if (control["size"] == 16) {
+                    uint16_t *valuePointer = (uint16_t *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else if (control["size"] == 32) {
+                    int *valuePointer = (int *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else if (control["size"] == 33) {
+                    float *valuePointer = (float *)pointer;
+                    *valuePointer = control["value"];
+                    // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+                }
+                else {
+                    MB_LOGW(ML_TAG, "size not supported or not set for %s: %d", control["name"].as<String>().c_str(), control["size"].as<int>());
+                }
             }
             else if (control["type"] == "selectFile" || control["type"] == "text") {
                 char *valuePointer = (char *)pointer;
                 strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull()?32:control["max"]);
             }
-            else if (control["type"] == "number") {
-                uint16_t *valuePointer = (uint16_t *)pointer;
-                *valuePointer = control["value"];
-            }
-            else if (control["type"] == "checkbox") {
+            else if (control["type"] == "checkbox" && control["size"] == sizeof(bool)) {
                 bool *valuePointer = (bool *)pointer;
                 *valuePointer = control["value"].as<bool>();
             }
-            else if (control["type"] == "coord3D") {
+            else if (control["type"] == "coord3D" && control["size"] == sizeof(Coord3D)) {
                 Coord3D *valuePointer = (Coord3D *)pointer;
                 *valuePointer = control["value"].as<Coord3D>();
             }
             else
-                MB_LOGE(ML_TAG, "type not supported yet %s", control["type"].as<String>().c_str());
+                MB_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
         }
     }
 };
@@ -194,7 +210,7 @@ void LiveScriptNode::loop() {
 }
 
 void LiveScriptNode::onLayout() {
-    if (hasLayout()) {
+    if (hasOnLayout()) {
         MB_LOGV(ML_TAG, "%s", animation);
         scriptRuntime.execute(animation, "onLayout"); 
     }
@@ -223,16 +239,16 @@ void LiveScriptNode::compileAndRun() {
           scScript += file.readString().c_str();
           file.close();
 
-          if (scScript.find("setup()") != std::string::npos) hasSetup = true;
-          if (scScript.find("loop()") != std::string::npos) hasLoop = true;
-          if (scScript.find("onLayout()") != std::string::npos) hasOnLayout = true;
-          if (scScript.find("modifyPosition(") != std::string::npos) hasModifyPosition = true;
+          if (scScript.find("setup()") != std::string::npos) hasSetupFunction = true;
+          if (scScript.find("loop()") != std::string::npos) hasLoopFunction = true;
+          if (scScript.find("onLayout()") != std::string::npos) hasOnLayoutFunction = true;
+          if (scScript.find("modifyPosition(") != std::string::npos) hasModifyFunction = true;
         //   if (scScript.find("modifyXYZ(") != std::string::npos) hasModifier = true;
 
           //add main function
           scScript += "void main(){";
-          if (hasSetup) scScript += "setup();";
-          if (hasLoop) scScript += "while(true){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
+          if (hasSetupFunction) scScript += "setup();";
+          if (hasLoopFunction) scScript += "while(true){if(on){loop();sync();}else delay(1);}"; //loop must pauze when layout changes pass == 1! delay to avoid idle
           scScript += "}";
 
           MB_LOGV(ML_TAG, "script \n%s", scScript.c_str());
@@ -271,7 +287,7 @@ void LiveScriptNode::execute() {
 
     requestMappings(); // requestMapPhysical and requestMapVirtual will call the script onLayout function (check if this can be done in case the script also has loop running !!!)
 
-    if (hasLoop) {
+    if (hasLoopFunction) {
         // setup : create controls
         // executable.execute("setup"); 
         // send controls to UI
@@ -324,5 +340,167 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
 }
 
 #endif //FT_LIVESCRIPT
+
+#if HP_ALL_DRIVERS
+  I2SClocklessLedDriver ledsDriver;
+#endif
+
+void DriverNode::setup() {
+  addControl(maxPower, "maxPower", "number", 0, 100);
+  JsonObject property = addControl(lightPreset, "lightPreset", "select"); 
+  JsonArray values = property["values"].to<JsonArray>();
+  values.add("RGB");
+  values.add("RBG");
+  values.add("GRB"); //default WS2812
+  values.add("GBR");
+  values.add("BRG");
+  values.add("BGR");
+  values.add("RGBW"); //e.g. 4 channel par/dmx light
+  values.add("GRBW"); //rgbw LED eg. sk6812
+  values.add("GRB6"); //some LED curtains
+  values.add("RGBWYP"); //6 channel par/dmx light with UV etc
+  values.add("MHBeeEyes150W-15 🐺"); //15 channels moving head, see https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net
+  values.add("MHBeTopper19x15W-32 🐺"); //32 channels moving head
+  values.add("MH19x15W-24"); //24 channels moving heads
+}
+
+void DriverNode::loop() {
+
+  LightsHeader *header = &layerV->layerP->lights.header;
+
+  //use ledsDriver LUT for super efficient leds dimming 🔥 (used by reOrderAndDimRGBW)
+
+  uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
+
+  if (brightness != brightnessSaved) {
+    //Use FastLED for setMaxPowerInMilliWatts stuff
+    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    // MB_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
+    ledsDriver.setBrightness(correctedBrightness);
+    brightnessSaved = brightness;
+  }
+
+  #if HP_ALL_DRIVERS
+    if (savedColorCorrection.red != layerV->layerP->lights.header.red || savedColorCorrection.green != layerV->layerP->lights.header.green || savedColorCorrection.blue != layerV->layerP->lights.header.blue) {
+      ledsDriver.setGamma(layerV->layerP->lights.header.red/255.0, layerV->layerP->lights.header.blue/255.0, layerV->layerP->lights.header.green/255.0, 1.0);
+      // MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, savedColorCorrection.red, savedColorCorrection.green, savedColorCorrection.blue);
+      savedColorCorrection.red = layerV->layerP->lights.header.red;
+      savedColorCorrection.green = layerV->layerP->lights.header.green;
+      savedColorCorrection.blue = layerV->layerP->lights.header.blue;
+    }
+  #else //ESP32_LEDSDRIVER
+    CRGB correction;
+    uint8_t white;
+    ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
+    if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
+      MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
+      ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
+    }
+  #endif
+}
+
+void DriverNode::onUpdate(String &oldValue, JsonObject control) {
+
+  LightsHeader *header = &layerV->layerP->lights.header;
+
+  MB_LOGD(ML_TAG, "%s: %s ", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+
+  if (control["name"] == "maxPower") {
+    uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
+    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    MB_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
+    ledsDriver.setBrightness(correctedBrightness);
+  }
+  else if (control["name"] == "lightPreset") {
+    uint8_t oldChannelsPerLight = header->channelsPerLight;
+
+    header->resetOffsets();
+
+    switch (lightPreset) {
+      case 0: header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; break; //RGB
+      case 1: header->channelsPerLight = 3; header->offsetRed = 0; header->offsetGreen = 2; header->offsetBlue = 1; break; //RBG
+      case 2: header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRB
+      case 3: header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 0; header->offsetBlue = 1; break; //GBR
+      case 4: header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 2; header->offsetBlue = 0; break; //BRG
+      case 5: header->channelsPerLight = 3; header->offsetRed = 2; header->offsetGreen = 1; header->offsetBlue = 0; break; //BGR
+      case 6: header->channelsPerLight = 4; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBW - Par Lights
+      case 7: header->channelsPerLight = 4; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; header->offsetWhite = 3; break; //GRBW - RGBW Leds
+      case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRB6
+      case 9: header->channelsPerLight = 6; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBWYP - 6 channel Par/DMX Lights with UV etc
+      case 10: //MHBeTopper19x15W-32
+        layerV->layerP->lights.header.channelsPerLight = 32;
+        header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
+        layerV->layerP->lights.header.offsetRGB = 9;
+        layerV->layerP->lights.header.offsetRGB1 = 13;
+        layerV->layerP->lights.header.offsetRGB2 = 17;
+        layerV->layerP->lights.header.offsetRGB3 = 24;
+        layerV->layerP->lights.header.offsetPan = 0;
+        layerV->layerP->lights.header.offsetTilt = 2;
+        layerV->layerP->lights.header.offsetZoom = 5;
+        layerV->layerP->lights.header.offsetBrightness = 6;
+        break;
+      case 11: //MHBeeEyes150W-15
+        layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
+        header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
+        layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
+        layerV->layerP->lights.header.offsetPan = 0;
+        layerV->layerP->lights.header.offsetTilt = 1;
+        layerV->layerP->lights.header.offsetZoom = 7;
+        layerV->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
+        layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
+        layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
+        break;
+      case 12: //MH19x15W-24
+        layerV->layerP->lights.header.channelsPerLight = 24;
+        header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
+        layerV->layerP->lights.header.offsetPan = 0;
+        layerV->layerP->lights.header.offsetTilt = 1;
+        layerV->layerP->lights.header.offsetBrightness = 3;
+        layerV->layerP->lights.header.offsetRGB = 4;
+        layerV->layerP->lights.header.offsetRGB1 = 8;
+        layerV->layerP->lights.header.offsetRGB2 = 12;
+        layerV->layerP->lights.header.offsetZoom = 17;
+        break;
+    }
+
+    MB_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
+    
+    // FASTLED_ASSERT(true, "oki");
+    
+    #if HP_ALL_DRIVERS
+      #ifndef CONFIG_IDF_TARGET_ESP32P4
+        if (initDone) {
+          
+          // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+
+          // if (oldChannelsPerLight != header->channelsPerLight)
+          //   restartNeeded = true; //in case 
+        }
+      #endif
+
+    #else //ESP32_LEDSDRIVER
+      if (ledsDriver.initLedsDone) {
+        
+        ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+
+        if (oldChannelsPerLight != header->channelsPerLight)
+          restartNeeded = true; //in case 
+      }
+    #endif
+
+    lightPresetSaved = true;
+  }
+}
+
+void DriverNode::reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *lightsRGBChannel) {
+  //use ledsDriver.__rbg_map[0]; for super fast brightness and gamma correction! see secondPixel in ESP32-LedDriver!
+  //apply the LUT to the RGB channels !
+  
+  packetRGBChannel[layerV->layerP->lights.header.offsetRed] = ledsDriver.__red_map[lightsRGBChannel[0]];
+  packetRGBChannel[layerV->layerP->lights.header.offsetGreen] = ledsDriver.__green_map[lightsRGBChannel[1]];
+  packetRGBChannel[layerV->layerP->lights.header.offsetBlue] = ledsDriver.__blue_map[lightsRGBChannel[2]];
+  if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX)
+    packetRGBChannel[layerV->layerP->lights.header.offsetWhite] = ledsDriver.__white_map[lightsRGBChannel[3]];
+}
 
 #endif //FT_MOONLIGHT

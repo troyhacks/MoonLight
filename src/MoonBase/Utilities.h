@@ -157,7 +157,7 @@ static bool contains(const char *a, const char *b) {
     if (a == nullptr || b == nullptr) {
         return false;
     }
-    return strnstr(a, b, sizeof(a)) != nullptr;
+    return strstr(a, b) != nullptr;
 }
 
 

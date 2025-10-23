@@ -1,6 +1,6 @@
 {
 	"name": "moonlight",
-	"version": "0.5.9.3",
+	"version": "0.6.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
