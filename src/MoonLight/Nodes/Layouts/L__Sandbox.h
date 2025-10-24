@@ -19,7 +19,7 @@ class NewLayout: public Node {
 
   static const char * name() {return "New Layout";}
   static uint8_t dim() {return _3D;} // dimensions supported
-  static const char * tags() {return "🚥";} // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, 🚥 for layout
+  static const char * tags() {return "🚥⏳";} // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, 🚥 for layout
 
   uint8_t width = 12;
   uint8_t height = 12;

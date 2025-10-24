@@ -76,7 +76,7 @@ it takes a platform reboot, and changing the movinghead number of LEDs in my cas
     * Lights
         * Regular patterns (CRGB as default but also others like Moving Head ...)
 
-* See [Modules](../modules.md)
+* See [Modules](../modules)
 * Upon changing a pin, driver.init will rerun (FastLED.addLeds, PD and VD driver.init)
 * Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
     * To do: kill running scripts, e.g. when changing effects

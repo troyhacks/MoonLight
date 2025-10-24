@@ -15,7 +15,7 @@ Below lists are ordered in terms of likelyhood to be accepted:
     * ⚠️ [EventSocket emitEvent: use String type](https://github.com/theelims/ESP32-sveltekit/commit/54c4a44eb95be2fe344bb78f022c8afcbbd8c731)
 * ⚠️ [no-emit-no-clients](https://github.com/MoonModules/MoonLight/commit/c024c2ff656511c67625b3dce3642d6560724482)
 * 💡 [system-status-metrics](https://github.com/theelims/ESP32-sveltekit/commit/352cfe3e376b25f7470ad4f764cdf54f7069c645): use max instead of first
-* 💡 [help-to-docs](https://github.com/theelims/ESP32-sveltekit/commit/2c2d2fae5c37b220bc61dfb1ba6655485de6547f): Help link to github.io docs e.g. [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl)
+* 💡 [help-to-docs](https://github.com/theelims/ESP32-sveltekit/commit/2c2d2fae5c37b220bc61dfb1ba6655485de6547f): Help link to github.io docs e.g. [Lights control](https://moonmodules.org/MoonLight/moonlight/lightscontrol)
 * 💡 [System metrics](https://moonmodules.org/MoonLight/system/metrics/)
     * Loops per second (performance)
 * 💡 [System status](https://moonmodules.org/MoonLight/system/status/)
@@ -26,8 +26,8 @@ Below lists are ordered in terms of likelyhood to be accepted:
 ## Pending - 🚧
 
 * [File Manager](https://moonmodules.org/MoonLight/moonbase/files/)
-* [Devices](https://moonmodules.org/MoonLight/moonbase/module/devices/)
-* [MoonBase-Modules](https://moonmodules.org/MoonLight/moonbase/modules/)
+* [Devices](https://moonmodules.org/MoonLight/moonbase/devices/)
+* [MoonBase-Modules](https://moonmodules.org/MoonLight/develop/modules/)
 
 ## Submitted
 

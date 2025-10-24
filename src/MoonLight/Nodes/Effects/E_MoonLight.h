@@ -17,7 +17,7 @@ class SolidEffect: public Node {
 
   static const char * name() {return "Solid";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "🔥💡";}
+  static const char * tags() {return "🔥";}
 
   uint8_t red = 182;
   uint8_t green = 15;

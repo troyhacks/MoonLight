@@ -359,7 +359,7 @@ void DriverNode::setup() {
   values.add("GRBW"); //rgbw LED eg. sk6812
   values.add("GRB6"); //some LED curtains
   values.add("RGBWYP"); //6 channel par/dmx light with UV etc
-  values.add("MHBeeEyes150W-15 🐺"); //15 channels moving head, see https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net
+  values.add("MHBeeEyes150W-15 🐺"); //15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
   values.add("MHBeTopper19x15W-32 🐺"); //32 channels moving head
   values.add("MH19x15W-24"); //24 channels moving heads
 }

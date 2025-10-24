@@ -33,7 +33,7 @@ The Effects module defines Effects and Modifiers. They run in a 'layer'.
 ## Effect 🔥 Nodes
 
 Below is a list of effects in MoonLight.
-Want to add an effect to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime effects.
+Want to add an effect to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonlight/livescripts/) to add runtime effects.
 
 ### MoonLight effects
 
@@ -90,9 +90,9 @@ The following effects originated from WLED, most have been enhanced in WLED-MM a
 
 <img width="320" src="https://github.com/user-attachments/assets/6e61c41f-e128-4adc-b9c1-6239fe4736dc"/>
 
-The following effects are created in MoonLight, supporting driving Moving Heads over [Art-Net](https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net):
+The following effects are created in MoonLight, supporting driving Moving Heads over [Art-Net](https://moonmodules.org/MoonLight/moonlight/drivers/#art-net):
 
-Select Moving heads in light presets, see [Light presets](https://moonmodules.org/MoonLight/moonbase/module/drivers/#max-power-and-light-preset)
+Select Moving heads in light presets, see [Light presets](https://moonmodules.org/MoonLight/moonlight/drivers/#max-power-and-light-preset)
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |

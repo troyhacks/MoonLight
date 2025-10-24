@@ -3,7 +3,7 @@
     @file      ModuleMoonLightInfo.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
-    @Doc       https://moonmodules.org/MoonLight/moonbase/module/MoonLightInfo/
+    @Doc       https://moonmodules.org/MoonLight/moonlight/moonlightinfo/
     @Copyright © 2025 Github MoonLight Commit Authors
     @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
@@ -21,7 +21,7 @@ public:
 
     ModuleMoonLightInfo(PsychicHttpServer *server,
             ESP32SvelteKit *sveltekit
-        ) : Module("moonLightInfo", server, sveltekit) {
+        ) : Module("moonlightinfo", server, sveltekit) {
             MB_LOGV(ML_TAG, "constructor");
     }
 

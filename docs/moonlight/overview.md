@@ -8,12 +8,12 @@ Drive lots of lights or thousands of LEDs with stunning effects running on ESP32
 
 MoonLight consist of the following modules:
 
-* [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
-* [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/)
-* [Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/)
-* [Channels](https://moonmodules.org/MoonLight/moonbase/module/channels/)
-* [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/)
-* [MoonLight info](https://moonmodules.org/MoonLight/moonbase/module/moonLightInfo/)
+* [Lights control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
+* [Effects](https://moonmodules.org/MoonLight/moonlight/effects/)
+* [Drivers](https://moonmodules.org/MoonLight/moonlight/drivers/)
+* [Channels](https://moonmodules.org/MoonLight/moonlight/channels/)
+* [Live Scripts](https://moonmodules.org/MoonLight/moonlight/livescripts/)
+* [MoonLight info](https://moonmodules.org/MoonLight/moonlight/moonlightinfo/)
 
 ## MoonLight by MoonModules
 
@@ -82,7 +82,7 @@ MoonBase
 
 * ESP32-P4 support
 * MIDI support (light control desks) 
-* Live Scripts, see [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/), included in MoonLight but needs refactoring 🥜
+* Live Scripts, see [Live Scripts](https://moonmodules.org/MoonLight/moonlight/livescripts/), included in MoonLight but needs refactoring 🥜
 * SuperSync 🥜: See above: development basically stopped in 2023 but the ideas are still there.
 * HA / MQTT
 * UI enrichments: help needed
@@ -107,7 +107,7 @@ Effects, Modifiers, Layouts and drivers use emoji's to visualize their usage. Se
 
 * 🔥 Effect
     * 🎨 Using palette
-    * 💡 WLED origin
+    * 🐙 WLED origin
     * 💫 MoonLight origin
     * 🚨 Moving head color effect
     * 🗼 Moving head move effect

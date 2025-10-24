@@ -4,7 +4,7 @@
 
 A module is a generic building block to create server and UI functionality which can be activated through the menu.
 
-See [Lights Control](module/lightsControl.md) or [Devices](module/devices.md) for examples
+See [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol.md) or [Devices](https://moonmodules.org/MoonLight/moonbase/devices.md) for examples
 
 Press the ? on any module to go to the documentation.
 
@@ -121,7 +121,7 @@ submenu: [
    {
       title: 'Module Demo',
       icon: BulbIcon,
-      href: '/moonbase/module?module=demo',
+      href: '/moonbase/module?group=moon&module=demo',
       feature: page.data.features.moonlight,
    },
 ]

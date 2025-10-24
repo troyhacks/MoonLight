@@ -26,7 +26,7 @@ The Drivers module defines layers and drivers.
 ## Driver ☸️ nodes
 
 Below is a list of Drivers in MoonLight. 
-Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/) to add runtime drivers.
+Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLight/develop/overview/). See also [Live scripts](https://moonmodules.org/MoonLight/moonlight/livescripts/) to add runtime drivers.
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |

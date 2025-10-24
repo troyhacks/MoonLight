@@ -187,7 +187,7 @@
 	{/snippet}
 	{#snippet title()}
 		<span>{initCap(page.url.searchParams.get('module') || '')}</span>
-		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname + '/' + page.url.searchParams.get('module')}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div> <!-- 🌙 link to docs -->
+		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}/{page.url.searchParams.get('group') + '/' + page.url.searchParams.get('module')}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div> <!-- 🌙 link to docs -->
 	{/snippet}
 
 	{#if !page.data.features.security || $user.admin}
