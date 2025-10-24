@@ -47,7 +47,7 @@
 {
   "nodes": [
     {
-      "name": "Lissajous 🔥🎨💡",
+      "name": "Lissajous 🔥🎨🐙",
       "on": true,
       "controls": [
         {

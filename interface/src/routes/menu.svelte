@@ -59,37 +59,37 @@
 				{
 					title: 'Control',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=lightsControl',
+					href: '/moonbase/module?group=moonlight&module=lightscontrol',
 					feature: page.data.features.moonlight,
 				},
 				{
 					title: 'Effects',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=effects',
+					href: '/moonbase/module?group=moonlight&module=effects',
 					feature: page.data.features.moonlight,
 				},
 				{
 					title: 'Drivers',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=drivers',
+					href: '/moonbase/module?group=moonlight&module=drivers',
 					feature: page.data.features.moonlight,
 				},
 				{
 					title: 'Channels',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=channels',
+					href: '/moonbase/module?group=moonlight&module=channels',
 					feature: page.data.features.moonlight,
 				},
 				{
 					title: 'Live Scripts',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=liveScripts',
+					href: '/moonbase/module?group=moonlight&module=livescripts',
 					feature: page.data.features.livescript,
 				},
 				{
 					title: 'Info',
 					icon: CPU,
-					href: '/moonbase/module?module=moonLightInfo',
+					href: '/moonbase/module?group=moonlight&module=moonlightinfo',
 					feature: page.data.features.moonlight,
 				},
 			]
@@ -108,19 +108,19 @@
 				{
 					title: 'Devices',
 					icon: CPU,
-					href: '/moonbase/module?module=devices',
+					href: '/moonbase/module?group=moonbase&module=devices',
 					feature: page.data.features.moonbase,
 				},
 				{
 					title: 'Tasks',
 					icon: CPU,
-					href: '/moonbase/module?module=tasks',
+					href: '/moonbase/module?group=moonbase&module=tasks',
 					feature: page.data.features.moonbase,
 				},
 				{
 					title: 'IO',
 					icon: CPU,
-					href: '/moonbase/module?module=inputoutput',
+					href: '/moonbase/module?group=moonbase&module=inputoutput',
 					feature: page.data.features.moonbase,
 				},
 			]

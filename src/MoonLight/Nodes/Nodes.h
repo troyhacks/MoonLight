@@ -27,9 +27,9 @@ String getNameAndTags() {
     String result = T::name();
 
     uint8_t dim = T::dim();
-    if (dim == _0D) result += " ⭕";
+    if (dim == _0D) result += " 💡";
     else if (dim == _1D) result += " 📏";
-    else if (dim == _2D) result += " 🟦";
+    else if (dim == _2D) result += " ⏹️";
     else if (dim == _3D) result += " 🧊";
 
     result += " ";

@@ -8,12 +8,12 @@ Drive lots of lights or thousands of LEDs with stunning effects running on ESP32
 
 MoonLight consist of the following modules:
 
-* [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
-* [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/)
-* [Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/)
-* [Channels](https://moonmodules.org/MoonLight/moonbase/module/channels/)
-* [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/)
-* [MoonLight info](https://moonmodules.org/MoonLight/moonbase/module/moonLightInfo/)
+* [Lights control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
+* [Effects](https://moonmodules.org/MoonLight/moonlight/effects/)
+* [Drivers](https://moonmodules.org/MoonLight/moonlight/drivers/)
+* [Channels](https://moonmodules.org/MoonLight/moonlight/channels/)
+* [Live Scripts](https://moonmodules.org/MoonLight/moonlight/livescripts/)
+* [MoonLight info](https://moonmodules.org/MoonLight/moonlight/moonlightinfo/)
 
 ## MoonLight by MoonModules
 

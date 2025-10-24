@@ -12,14 +12,15 @@
 
 #if FT_MOONLIGHT
 
-// example template, do not remove
-// add effects in ModuleDrivers::addNodes()
-class NewDriver: public Node {
+// example template, do not remove!
+// add this class in /src/MoonLight/ModuleDrivers::addNodes()
+// add documentation in /docs/moonlight/drivers.md
+class ExampleDriver: public Node {
   public:
 
-  static const char * name() {return "New Driver";}
+  static const char * name() {return "Example Driver";}
   static uint8_t dim() {return _NoD;} // Dimensions not relevant for drivers?
-  static const char * tags() {return "☸️";} // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
+  static const char * tags() {return "☸️⏳";} // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
   uint8_t pin = 16;
 
@@ -46,7 +47,7 @@ class NewDriver: public Node {
     sharedData; // write value to shared data if needed, add sharedData if needed, use in other nodes (e.g. effects)
   };
 
-  ~NewDriver() override {}; // e.g. to free allocated memory
+  ~ExampleDriver() override {}; // e.g. to free allocated memory
 };
 
 

@@ -2,7 +2,7 @@
 
 <img width="396" alt="image" src="https://github.com/user-attachments/assets/953346f2-780d-4c61-8e73-7ba7bd228041" />
 
-MoonLight is based on nodes (see [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/) and [Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/)) where each node can run precompiled layouts, effects or modifiers but alternatively, each node can also run a live script, uploaded on the esp32 file system (.sc files).
+MoonLight is based on nodes (see [Effects](https://moonmodules.org/MoonLight/moonlight/effects/) and [Drivers](https://moonmodules.org/MoonLight/moonlight/drivers/)) where each node can run precompiled layouts, effects or modifiers but alternatively, each node can also run a live script, uploaded on the esp32 file system (.sc files).
 Currently this only works on esp32-S3 boards as normal esp32 boards do not have enough memory to flash MoonLight with the Live Scripts option.
 
 This module shows all running live scripts
@@ -20,7 +20,7 @@ This module shows all running live scripts
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/3b7eca3c-ae57-43f6-910e-3fc03f6fa380" />
 
-**Step 3**: Select [MoonLight / Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/) or [MoonLight / Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/) from the menu. Create a new effect node (🔥) by pressing the + button or update an existing effect node (🔥) by pressing the ✐-button. Open the drop down and scroll to the bottom where live script files are shown
+**Step 3**: Select [MoonLight / Effects](https://moonmodules.org/MoonLight/moonlight/effects/) or [MoonLight / Drivers](https://moonmodules.org/MoonLight/moonlight/drivers/) from the menu. Create a new effect node (🔥) by pressing the + button or update an existing effect node (🔥) by pressing the ✐-button. Open the drop down and scroll to the bottom where live script files are shown
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/60f99421-aa74-4aa7-805d-05125cc5f222" />
 
@@ -32,7 +32,7 @@ This module shows all running live scripts
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/4552d564-85ea-454f-a6c4-5265146cdcfc" />
 
-**Step 6**: An overview of running live scripts can be found in [MoonLight / LiveScripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts) 
+**Step 6**: An overview of running live scripts can be found in [MoonLight / LiveScripts](https://moonmodules.org/MoonLight/moonlight/livescripts) 
 
 ## examples
 
@@ -42,4 +42,4 @@ This module shows all running live scripts
 * Controls: BPM, Middle Pan and Tilt, Range and invert
 * Usage: Add this effect if moving heads are configured. RGB effects can be added separately e.g. wave to light up the moving heads in wave patterns
 * See [E_PanTilt](https://github.com/MoonModules/MoonLight/blob/main/misc/livescripts/E_PanTilt.sc)
-* Run script see [How to run a live script](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/#how-to-run-a-live-script)
+* Run script see [How to run a live script](https://moonmodules.org/MoonLight/moonlight/livescripts/#how-to-run-a-live-script)

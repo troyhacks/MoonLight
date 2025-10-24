@@ -7,20 +7,20 @@ nav:
     - gettingstarted/hardware.md
   - "MoonLight":
     - moonlight/overview.md
-    - moonbase/module/lightsControl.md
-    - moonbase/module/effects.md
+    - moonlight/lightscontrol.md
+    - moonlight/effects.md
     - moonlight/modifiers.md
-    - moonbase/module/drivers.md
+    - moonlight/drivers.md
     - moonlight/layouts.md
-    - moonbase/module/channels.md
-    - moonbase/module/liveScripts.md
-    - moonbase/module/moonLightInfo.md
+    - moonlight/channels.md
+    - moonlight/livescripts.md
+    - moonlight/moonlightinfo.md
   - "MoonBase":
     - moonbase/overview.md
     - moonbase/filemanager.md
-    - moonbase/module/devices.md
-    - moonbase/module/tasks.md
-    - moonbase/module/inputoutput.md
+    - moonbase/devices.md
+    - moonbase/tasks.md
+    - moonbase/inputoutput.md
   - "Network":
     - network/sta.md
     - network/ap.md

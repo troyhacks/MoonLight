@@ -17,7 +17,7 @@ class BouncingBallsEffect: public Node {
 
   static const char * name() {return "Bouncing Balls";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "🔥🎨💡";}
+  static const char * tags() {return "🔥🎨🐙";}
 
   uint8_t grav = 128;
   uint8_t numBalls = 8;
@@ -181,7 +181,7 @@ class DistortionWavesEffect: public Node {
 public:
   static const char * name() {return "Distortion Waves";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "🔥💡";}
+  static const char * tags() {return "🔥🐙";}
 
   uint8_t speed = 4;
   uint8_t scale = 4; 
@@ -240,7 +240,7 @@ public:
 
   static const char * name() {return "Freq Matrix";}
   static uint8_t dim() {return _1D;} //2D/3D-ish?
-  static const char * tags() {return "🔥♪💡";}
+  static const char * tags() {return "🔥♪🐙";}
 
   uint8_t speed = 255;
   uint8_t fx = 128;
@@ -318,7 +318,7 @@ public:
 
   static const char * name() {return "GEQ";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "🔥🎨♫💡";}
+  static const char * tags() {return "🔥🎨♫🐙";}
 
   uint8_t fadeOut = 255;
   uint8_t ripple = 128;
@@ -436,7 +436,7 @@ public:
 
   static const char * name() {return "Lissajous";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "🔥🎨💡";}
+  static const char * tags() {return "🔥🎨🐙";}
 
   uint8_t xFrequency = 64;
   uint8_t fadeRate = 128;
@@ -467,7 +467,7 @@ class Noise2DEffect: public Node {
   public:
   static const char * name() {return "Noise2D";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "🔥🎨💡";}
+  static const char * tags() {return "🔥🎨🐙";}
   
   uint8_t speed = 8;
   uint8_t scale = 64;
@@ -492,7 +492,7 @@ class NoiseMeterEffect: public Node {
   public:
   static const char * name() {return "Noise Meter";}
   static uint8_t dim() {return _1D;}
-  static const char * tags() {return "♪💡🎨";}
+  static const char * tags() {return "♪🐙🎨";}
   
   uint8_t fadeRate = 248;
   uint8_t width = 128;
@@ -541,7 +541,7 @@ class PopCornEffect: public Node {
   public:
   static const char * name() {return "PopCorn";}
   static uint8_t dim() {return _1D;} //2D-ish? check latest in WLED...
-  static const char * tags() {return "♪🎨💡";}
+  static const char * tags() {return "♪🎨🐙";}
   
   uint8_t speed = 128;
   uint8_t numPopcorn = maxNumPopcorn/2;
@@ -619,7 +619,7 @@ class WaverlyEffect: public Node {
   public:
   static const char * name() {return "Waverly";}
   static uint8_t dim() {return _2D;}
-  static const char * tags() {return "🔥♪🎨💡";}
+  static const char * tags() {return "🔥♪🎨🐙";}
   
   uint8_t fadeRate = 128;
   uint8_t amplification = 30;
@@ -676,7 +676,7 @@ class WaverlyEffect: public Node {
 // class BlackHoleEffect: public Node {
 //   static const char * name() {return "BlackHole";}
 //   static uint8_t dim() {return _2D;}
-//   static const char * tags() {return "💡";}
+//   static const char * tags() {return "🐙";}
   
 //   void setup() override {
 //     ui->initSlider(parentVar, "fade", leds.effectData.write<uint8_t>(16), 0, 32);
@@ -723,7 +723,7 @@ class WaverlyEffect: public Node {
 // class DNAEffect: public Node {
 //   const char * name() override {return "DNA";}
 //   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "💡💫";}
+//   const char * tags() override {return "🐙💫";}
   
 //   void setup() override {
 //     Effect::setup(leds, parentVar);
@@ -779,7 +779,7 @@ class WaverlyEffect: public Node {
 // class OctopusEffect: public Node {
 //   const char * name() override {return "Octopus";}
 //   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "💡";}
+//   const char * tags() override {return "🐙";}
 
 //   struct Map_t {
 //     uint8_t angle;
@@ -993,7 +993,7 @@ class WaverlyEffect: public Node {
 // class FrizzlesEffect: public Node {
 //   const char * name() override {return "Frizzles";}
 //   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "💡";}
+//   const char * tags() override {return "🐙";}
 
 //   void setup() override {
 //     Effect::setup(leds, parentVar);
@@ -1030,7 +1030,7 @@ class WaverlyEffect: public Node {
 // class FireworksEffect: public Node {
 //   const char * name() override {return "Fireworks";}
 //   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "💡";}
+//   const char * tags() override {return "🐙";}
 
 //   void setup() override {
 //     leds.fadeToBlackBy(16);
@@ -1169,7 +1169,7 @@ class WaverlyEffect: public Node {
 // class FunkyPlankEffect: public Node {
 //   const char * name() override {return "Funky Plank";}
 //   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "♫💡💫";}
+//   const char * tags() override {return "♫🐙💫";}
 
 //   void setup() override {
 //     leds.fill_solid(CRGB::Black);
@@ -1361,7 +1361,7 @@ class WaverlyEffect: public Node {
 // class FlowEffect: public Node {
 //   const char * name() override {return "Flow";}
 //   uint8_t      dim()  override {return _1D;}
-//   const char * tags() override {return "💡";} //💡 means wled origin
+//   const char * tags() override {return "🐙";} //🐙 means wled origin
   
 //   void setup() override {
 //     Effect::setup(leds, parentVar);
@@ -1494,7 +1494,7 @@ class WaverlyEffect: public Node {
 // class RainEffect: public Node {
 //   const char * name() override {return "Rain";}
 //   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "💡";}
+//   const char * tags() override {return "🐙";}
   
 //   void setup() override {
 //     Effect::setup(leds, parentVar);
@@ -1558,7 +1558,7 @@ class WaverlyEffect: public Node {
 // class DripEffect: public Node {
 //   const char * name() override {return "Drip";}
 //   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "💡💫";}
+//   const char * tags() override {return "🐙💫";}
   
 //   void setup() override {
 //     Effect::setup(leds, parentVar);
@@ -1644,7 +1644,7 @@ class WaverlyEffect: public Node {
 // class HeartBeatEffect: public Node {
 //   const char * name() override {return "HeartBeat";}
 //   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "💡💫♥";}
+//   const char * tags() override {return "🐙💫♥";}
   
 //   void setup() override {
 //     Effect::setup(leds, parentVar);
@@ -1738,7 +1738,7 @@ class WaverlyEffect: public Node {
 // class DJLightEffect: public Node {
 //   const char * name() override {return "DJLight";}
 //   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "♫💡";}
+//   const char * tags() override {return "♫🐙";}
 
 //   void setup() override {
 //     leds.fill_solid(CRGB::Black);

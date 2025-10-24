@@ -16,7 +16,7 @@ class HumanSizedCubeLayout: public Node {
 
   static const char * name() {return "Human Sized Cube";}
   static uint8_t dim() {return _3D;}
-  static const char * tags() {return "🚥💫";}
+  static const char * tags() {return "🚥";}
 
   uint8_t width = 10;
   uint8_t height = 10;
