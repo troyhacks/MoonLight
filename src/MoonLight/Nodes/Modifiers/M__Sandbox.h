@@ -12,12 +12,13 @@
 
 #if FT_MOONLIGHT
 
-// example template, do not remove
-// add effects in ModuleEffects::addNodes()
-class NewModifier: public Node {
+// example template, do not remove!
+// add this class in /src/MoonLight/ModuleDrivers::addNodes()
+// add documentation in /docs/moonlight/modifiers.md
+class ExampleModifier: public Node {
   public:
 
-  static const char * name() {return "New Modifier";}
+  static const char * name() {return "Example Modifier";}
   static uint8_t dim() {return _3D;} // for which effect dimension this modifier can be used, preferably 3D
   static const char * tags() {return "💎⏳";} // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, 💎 for modifier
 
