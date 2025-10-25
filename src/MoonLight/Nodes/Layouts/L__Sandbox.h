@@ -30,9 +30,9 @@ class ExampleLayout: public Node {
   void setup() override {
     // controls will show in the UI
     // for different type of controls see other Nodes
-    addControl(width, "width", "range");
-    addControl(height, "height", "range");
-    addControl(depth, "depth", "range");
+    addControl(width, "width", "slider");
+    addControl(height, "height", "slider");
+    addControl(depth, "depth", "slider");
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 

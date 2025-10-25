@@ -102,7 +102,7 @@ public:
       control["value"] = variable; // set default
 
     // setValue
-    if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
+    if (control["type"] == "slider" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
       if (std::is_same<ControlType, uint8_t>::value) {
         control["size"] = 8;
       }

@@ -44,7 +44,7 @@ class PhysicalDriver: public DriverNode {
   void setup() override {
     DriverNode::setup();
     #if HP_ALL_DRIVERS
-      addControl(dmaBuffer, "dmaBuffer", "range", 1, 100);
+      addControl(dmaBuffer, "dmaBuffer", "slider", 1, 100);
       addControl(version, "Version", "text", 0, 30, true); //read only
     #endif
   }

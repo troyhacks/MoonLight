@@ -52,21 +52,21 @@
       "controls": [
         {
           "name": "xFrequency",
-          "type": "range",
+          "type": "slider",
           "default": 64,
           "p": 1065414703,
           "value": 64
         },
         {
           "name": "fadeRate",
-          "type": "range",
+          "type": "slider",
           "default": 128,
           "p": 1065414704,
           "value": 128
         },
         {
           "name": "speed",
-          "type": "range",
+          "type": "slider",
           "default": 128,
           "p": 1065414705,
           "value": 128
@@ -79,7 +79,7 @@
       "controls": [
         {
           "name": "speed",
-          "type": "range",
+          "type": "slider",
           "default": 128,
           "p": 1065405731,
           "value": 128

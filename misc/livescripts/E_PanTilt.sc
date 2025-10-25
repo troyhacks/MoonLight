@@ -5,10 +5,10 @@ uint8_t range = 20;
 bool invert = false;
 
 void setup() {
-    addControl(&bpm, "bpm", "range", 1, 255);
-    addControl(&pan, "pan", "range", 0, 255);
-    addControl(&tilt, "tilt", "range", 0, 255);
-    addControl(&range, "range", "range", 0, 255);
+    addControl(&bpm, "bpm", "slider", 1, 255);
+    addControl(&pan, "pan", "slider", 0, 255);
+    addControl(&tilt, "tilt", "slider", 0, 255);
+    addControl(&range, "range", "slider", 0, 255);
     addControl(&invert, "invert", "checkbox", false, true);
 }
 void loop() {

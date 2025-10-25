@@ -137,11 +137,11 @@ class PinwheelModifier: public Node {
   Coord3D modifierSize;
 
   void setup() override {
-    addControl(petals, "petals", "range");
-    addControl(swirlVal, "swirlVal", "range");
+    addControl(petals, "petals", "slider");
+    addControl(swirlVal, "swirlVal", "slider");
     addControl(reverse, "reverse", "checkbox");
-    addControl(symmetry, "symmetry", "range");
-    addControl(zTwist, "zTwist", "range");
+    addControl(symmetry, "symmetry", "slider");
+    addControl(zTwist, "zTwist", "slider");
   }
   
   bool hasModifier() const override { return true; }
@@ -293,7 +293,7 @@ class RotateModifier: public Node {
     values.add("Counter-Clockwise");
     values.add("Alternate");
 
-    addControl(rotateBPM, "rotateBPM", "range");
+    addControl(rotateBPM, "rotateBPM", "slider");
     addControl(staticAngle, "staticAngle", "number", 0, 359);
     addControl(expand, "expand", "checkbox");
   }

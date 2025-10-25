@@ -97,14 +97,14 @@ class GameOfLifeEffect: public Node {
 
     addControl(customRuleString, "customRuleString", "text", 0, 32);
 
-    addControl(speed, "GameSpeed (FPS)", "range", 0, 100);
-    addControl(lifeChance, "startingLifeDensity", "range", 10, 90);
-    addControl(mutation, "mutationChance", "range", 0, 100);
+    addControl(speed, "GameSpeed (FPS)", "slider", 0, 100);
+    addControl(lifeChance, "startingLifeDensity", "slider", 10, 90);
+    addControl(mutation, "mutationChance", "slider", 0, 100);
     addControl(wrap, "wrap", "checkbox");
     addControl(disablePause, "disablePause", "checkbox");
     addControl(colorByAge, "colorByAge", "checkbox");
     addControl(infinite, "infinite", "checkbox");
-    addControl(blur, "blur", "range", 0, 255);
+    addControl(blur, "blur", "slider", 0, 255);
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {
@@ -336,11 +336,11 @@ class GEQ3DEffect: public Node {
   void setup() override {
     layer->fadeToBlackBy(16);
 
-    addControl(speed, "speed", "range", 1, 10);
-    addControl(frontFill, "frontFill", "range");
-    addControl(horizon, "horizon", "range", 0, layer->size.x-1); //layer->size.x-1 is not always set here
-    addControl(depth, "depth", "range");
-    addControl(numBands, "numBands", "range", 2, 16);
+    addControl(speed, "speed", "slider", 1, 10);
+    addControl(frontFill, "frontFill", "slider");
+    addControl(horizon, "horizon", "slider", 0, layer->size.x-1); //layer->size.x-1 is not always set here
+    addControl(depth, "depth", "slider");
+    addControl(numBands, "numBands", "slider", 2, 16);
     addControl(borders, "borders", "checkbox");
     addControl(softHack, "softHack", "checkbox");
 
@@ -485,10 +485,10 @@ public:
   bool phase_chaos = false;
   
   void setup() override {
-    addControl(oscillatorOffset, "oscillatorOffset", "range", 0, 16);
-    addControl(numLines, "numLines", "range", 2, 255);
-    addControl(fadeRate, "fadeRate", "range", 0, 128);
-    addControl(minLength, "minLength", "range");
+    addControl(oscillatorOffset, "oscillatorOffset", "slider", 0, 16);
+    addControl(numLines, "numLines", "slider", 2, 255);
+    addControl(fadeRate, "fadeRate", "slider", 0, 128);
+    addControl(minLength, "minLength", "slider");
     addControl(color_chaos, "color_chaos", "checkbox");
     addControl(soft, "soft", "checkbox");
     addControl(phase_chaos, "phase_chaos", "checkbox");

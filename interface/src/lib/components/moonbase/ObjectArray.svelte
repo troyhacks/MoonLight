@@ -220,7 +220,7 @@
                 <ObjectArray property={propertyN} bind:data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
             {:else if propertyN.type == "controls"}
                 {#each dataEditable[propertyN.name] as control}
-                    <!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"range","default":64,"p":1070417419,"value":64} -->
+                    <!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"slider","default":64,"p":1070417419,"value":64} -->
                     <MultiInput property={control} bind:value={control.value} onChange={onChange} changeOnInput={changeOnInput}></MultiInput>
                 {/each}
             {:else}

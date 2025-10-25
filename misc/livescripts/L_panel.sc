@@ -3,8 +3,8 @@ uint8_t height = 16;
 uint8_t pin = 16;
 
 void setup() {
-  addControl(&width, "width", "range", 1, 32);
-  addControl(&height, "height", "range", 1, 32);
+  addControl(&width, "width", "slider", 1, 32);
+  addControl(&height, "height", "slider", 1, 32);
   addControl(&pin, "pin", "pin", 1, 48);
 }
 

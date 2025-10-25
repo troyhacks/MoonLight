@@ -28,8 +28,8 @@ class ExampleEffect: public Node {
   void setup() override {
     // controls will show in the UI
     // for different type of controls see other Nodes
-    addControl(bpm, "bpm", "range");
-    addControl(intensity, "intensity", "range");
+    addControl(bpm, "bpm", "slider");
+    addControl(intensity, "intensity", "slider");
   }
 
   void onSizeChanged(Coord3D prevSize) override {} // e.g. realloc variables
@@ -77,12 +77,12 @@ class BlackholeEffect: public Node {
   uint8_t blur = 16; //check3
 
   void setup() override {
-    addControl(fadeRate, "fadeRate", "range");
-    addControl(outerYfreq, "outerYfreq", "range");
-    addControl(outerXfreq, "outerXfreq", "range");
-    addControl(innerXfreq, "innerXfreq", "range");
-    addControl(innerYfreq, "innerYfreq", "range");
-    addControl(blur, "blur", "range");
+    addControl(fadeRate, "fadeRate", "slider");
+    addControl(outerYfreq, "outerYfreq", "slider");
+    addControl(outerXfreq, "outerXfreq", "slider");
+    addControl(innerXfreq, "innerXfreq", "slider");
+    addControl(innerYfreq, "innerYfreq", "slider");
+    addControl(blur, "blur", "slider");
   }
 
   void loop() override {
