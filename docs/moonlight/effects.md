@@ -75,6 +75,7 @@ The following effects originated from WLED, most have been enhanced in WLED-MM a
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
+| Blackhole | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_183.gif) | | |
 | Bouncing Balls | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_091.gif) | <img width="320" src="https://github.com/user-attachments/assets/30aa2614-d891-4d39-a789-72026f7ab036" /> | |
 | Blurz ♫ | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_MM163.gif) | <img width="320" alt="Blurz" src="https://github.com/user-attachments/assets/bf50662f-6be1-44b2-9970-89a5cd003450" /> | |
 | Distortion Waves | ![](https://raw.githubusercontent.com/scottrbailey/WLED-Utils/master/gifs/FX_124.gif) | <img width="320" src="https://github.com/user-attachments/assets/b8f4111d-1f78-4ac0-a0f9-17909ad78599" /> | |
