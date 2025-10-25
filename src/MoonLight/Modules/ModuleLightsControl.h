@@ -15,11 +15,11 @@
 #if FT_MOONLIGHT
 
 #include "FastLED.h"
-#include "../MoonBase/Module.h"
+#include "MoonBase/Module.h"
 
 #include "ModuleEffects.h"
 
-#include "../MoonBase/Utilities.h" //for isInPSRAM
+#include "MoonBase/Utilities.h" //for isInPSRAM
 
 class ModuleLightsControl : public Module
 {

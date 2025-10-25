@@ -14,7 +14,8 @@
 
 #if FT_MOONLIGHT == 1
 
-#include "../MoonBase/Module.h"
+#include "MoonBase/Module.h"
+
 class ModuleChannels : public Module
 {
 public:

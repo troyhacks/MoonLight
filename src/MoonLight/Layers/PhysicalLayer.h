@@ -16,7 +16,7 @@
 #include <Arduino.h>
 #include <vector>
 #include "FastLED.h"
-#include "../../MoonBase/Utilities.h"
+#include "MoonBase/Utilities.h"
 
 // #include "VirtualLayer.h"
 
@@ -144,5 +144,7 @@ class PhysicalLayer {
     }
 
 };
+
+extern PhysicalLayer layerP; //global declaration of the physical layer
 
 #endif //FT_MOONLIGHT

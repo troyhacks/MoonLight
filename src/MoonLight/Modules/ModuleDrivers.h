@@ -15,8 +15,8 @@
 #if FT_MOONLIGHT
 
 #include "FastLED.h"
-// #include "../MoonBase/Module.h"
-#include "Nodes/NodeManager.h"
+// #include "MoonBase/Module.h"
+#include "MoonLight/Nodes/NodeManager.h"
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 

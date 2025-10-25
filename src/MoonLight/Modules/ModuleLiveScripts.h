@@ -15,7 +15,7 @@
 #if FT_MOONLIGHT
 #if FT_LIVESCRIPT
 
-#include "../MoonBase/Module.h"
+#include "MoonBase/Module.h"
 
 #include "ModuleEffects.h"
 

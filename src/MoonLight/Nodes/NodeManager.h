@@ -14,11 +14,9 @@
 
 #if FT_MOONLIGHT
 
-#include "../../MoonBase/Module.h"
+#include "MoonBase/Module.h"
 
 #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
-
-PhysicalLayer layerP; //global declaration of the physical layer
 
 class NodeManager : public Module {
 public: 
@@ -143,7 +141,6 @@ protected:
 
                     oldNode->requestMappings();
 
-                    // layerP.removeNode(oldNode);
                     MB_LOGD(ML_TAG, "remove oldNode: %d p:%p", nodes->size(), oldNode);
                     // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
                     // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
@@ -208,7 +205,6 @@ protected:
     }
 
     void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) override {
-        //reorder in layerP.nodes.
         MB_LOGD(ML_TAG, "%d %d %d", nodes->size(), stateIndex, newIndex);
         //swap nodes
         Node *nodeS = (*nodes)[stateIndex];
@@ -219,7 +215,6 @@ protected:
         //modifiers and layouts trigger remaps
         nodeS->requestMappings();
         nodeN->requestMappings();
-
     }
 
     void loop() {

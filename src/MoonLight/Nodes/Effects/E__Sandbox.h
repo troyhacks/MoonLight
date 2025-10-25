@@ -12,8 +12,6 @@
 
 #if FT_MOONLIGHT
 
-// #include "../Nodes.h"
-
 // example template, do not remove!
 // add this class in /src/MoonLight/ModuleEffects::addNodes()
 // add documentation in /docs/moonlight/effects.md
@@ -90,7 +88,7 @@ class BlackholeEffect: public Node {
   void loop() override {
 
     const int cols = layerV->size.x;
-    const int rows = layerV->size.x;
+    const int rows = layerV->size.y;
     int x, y;
 
     layerV->fadeToBlackBy(16 + (fadeRate>>3)); // create fading trails

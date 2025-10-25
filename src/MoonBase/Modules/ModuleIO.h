@@ -14,7 +14,7 @@
 
 #if FT_MOONBASE == 1
 
-#include "Module.h"
+#include "MoonBase/Module.h"
 
 class ModuleIO : public Module
 {

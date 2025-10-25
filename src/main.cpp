@@ -83,10 +83,10 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
-    #include "MoonBase/FileManager.h"
-    #include "MoonBase/ModuleDevices.h"
-    #include "MoonBase/ModuleTasks.h"
-    #include "MoonBase/ModuleIO.h"
+    #include "MoonBase/Modules/FileManager.h"
+    #include "MoonBase/Modules/ModuleDevices.h"
+    #include "MoonBase/Modules/ModuleTasks.h"
+    #include "MoonBase/Modules/ModuleIO.h"
 
     FileManager fileManager = FileManager(&server, &esp32sveltekit);
     ModuleDevices moduleDevices = ModuleDevices(&server, &esp32sveltekit);
@@ -95,16 +95,16 @@ ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS); //🌙 pio variable
 
     // 💫
     #if FT_ENABLED(FT_MOONLIGHT)
-        #include "MoonLight/ModuleLightsControl.h"
-        #include "MoonLight/ModuleEffects.h"
-        #include "MoonLight/ModuleDrivers.h"
-        #include "MoonLight/ModuleChannels.h"
-        #include "MoonLight/ModuleMoonLightInfo.h"
+        #include "MoonLight/Modules/ModuleLightsControl.h"
+        #include "MoonLight/Modules/ModuleEffects.h"
+        #include "MoonLight/Modules/ModuleDrivers.h"
+        #include "MoonLight/Modules/ModuleChannels.h"
+        #include "MoonLight/Modules/ModuleMoonLightInfo.h"
         ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
         ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);
         ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit);
         #if FT_ENABLED(FT_LIVESCRIPT)
-            #include "MoonLight/ModuleLiveScripts.h"
+            #include "MoonLight/Modules/ModuleLiveScripts.h"
             ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects);
         #endif
         ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
