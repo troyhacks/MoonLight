@@ -132,7 +132,8 @@ class PhysicalDriver: public DriverNode {
 
               uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
 
-              ledsDriver.initled(layer->layerP->lights.channels, pins, lengths, nb_pins);
+              MB_LOGD(ML_TAG, "init Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+              ledsDriver.initled(layer->layerP->lights.channels, pins, lengths, nb_pins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
 
               ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
 
@@ -144,15 +145,10 @@ class PhysicalDriver: public DriverNode {
             } else {
               //don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
-              ledsDriver.updateDriver(pins, lengths, nb_pins, dmaBuffer);
+              MB_LOGD(ML_TAG, "update Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+              ledsDriver.updateDriver(pins, lengths, nb_pins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
             }
 
-            //from lightPresetSaved
-            //overwrite what initled has done as we don't use colorarrangment but assign offsets directly
-            ledsDriver.nb_components = layer->layerP->lights.header.channelsPerLight;
-            ledsDriver.p_r = layer->layerP->lights.header.offsetRed;
-            ledsDriver.p_g = layer->layerP->lights.header.offsetGreen;
-            ledsDriver.p_b = layer->layerP->lights.header.offsetBlue;
 
           #else // P4: Parlio Troy Driver
             initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
