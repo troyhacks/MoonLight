@@ -162,6 +162,7 @@ public:
         values.add(getNameAndTags<NoiseMeterEffect>());
         values.add(getNameAndTags<PopCornEffect>());
         values.add(getNameAndTags<WaverlyEffect>());
+        values.add(getNameAndTags<BlackholeEffect>());
 
         // Moving head effects
         values.add(getNameAndTags<Troy1ColorEffect>());
@@ -206,6 +207,7 @@ public:
         else if (contains(name, FreqSawsEffect::name())) node = allocMBObject<FreqSawsEffect>();
         else if (contains(name, LinesEffect::name())) node = allocMBObject<LinesEffect>();
         else if (contains(name, LissajousEffect::name())) node = allocMBObject<LissajousEffect>();
+        else if (contains(name, BlackholeEffect::name())) node = allocMBObject<BlackholeEffect>();
         #if USE_M5UNIFIED
             else if (contains(name, MoonManEffect::name())) node = allocMBObject<MoonManEffect>();
         #endif

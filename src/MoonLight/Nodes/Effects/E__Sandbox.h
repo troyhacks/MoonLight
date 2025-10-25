@@ -64,4 +64,55 @@ class ExampleEffect: public Node {
   ~ExampleEffect() override {}; //e,g, to free allocated memory
 };
 
+class BlackholeEffect: public Node {
+  public:
+
+  static const char * name() {return "Blackhole";}
+  static uint8_t dim() {return _2D;}
+  static const char * tags() {return "🔥🎨⏳🐙";}
+
+  uint8_t fadeRate = 128; //speed
+  uint8_t outerYfreq = 128; //intensity
+  uint8_t outerXfreq = 128; //custom1
+  uint8_t innerXfreq = 128;//custom2
+  uint8_t innerYfreq = 128; //custom3
+  uint8_t blur = 16; //check3
+
+  void setup() override {
+    addControl(fadeRate, "fadeRate", "range");
+    addControl(outerYfreq, "outerYfreq", "range");
+    addControl(outerXfreq, "outerXfreq", "range");
+    addControl(innerXfreq, "innerXfreq", "range");
+    addControl(innerYfreq, "innerYfreq", "range");
+    addControl(blur, "blur", "range");
+  }
+
+  void loop() override {
+
+    const int cols = layerV->size.x;
+    const int rows = layerV->size.x;
+    int x, y;
+
+    layerV->fadeToBlackBy(16 + (fadeRate>>3)); // create fading trails
+    unsigned long t = millis()/128;                 // timebase
+    // outer stars
+    for (size_t i = 0; i < 8; i++) {
+      x = beatsin8(outerXfreq>>3,   0, cols - 1, 0, ((i % 2) ? 128 : 0) + t * i);
+      y = beatsin8(outerYfreq>>3, 0, rows - 1, 0, ((i % 2) ? 192 : 64) + t * i);
+      layerV->addRGB(Coord3D(x, y), ColorFromPalette(layerV->layerP->palette, i*32));
+    }
+    // inner stars
+    for (size_t i = 0; i < 4; i++) {
+      x = beatsin8(innerXfreq>>3, cols/4, cols - 1 - cols/4, 0, ((i % 2) ? 128 : 0) + t * i);
+      y = beatsin8(innerYfreq>>3   , rows/4, rows - 1 - rows/4, 0, ((i % 2) ? 192 : 64) + t * i);
+      layerV->addRGB(Coord3D(x, y), ColorFromPalette(layerV->layerP->palette, 255-i*64));
+    }
+    // central white dot
+    layerV->setRGB(Coord3D(cols/2, rows/2), CRGB::White);
+    // blur everything a bit
+    if (blur) layerV->blur2d(blur);
+  }
+};
+
+
 #endif
