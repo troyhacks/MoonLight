@@ -24,23 +24,23 @@ class GameOfLifeEffect: public Node {
   void placePentomino(uint8_t  *futureCells, bool colorByAge) {
     uint8_t  pattern[5][2] = {{1, 0}, {0, 1}, {1, 1}, {2, 1}, {2, 2}}; // R-pentomino
     if (!random8(5)) pattern[0][1] = 3; // 1/5 chance to use glider
-    CRGB color = ColorFromPalette(layerV->layerP->palette, random8());
+    CRGB color = ColorFromPalette(layer->layerP->palette, random8());
     for (int attempts = 0; attempts < 100; attempts++) {
-      int x = random8(1, layerV->size.x - 3);
-      int y = random8(1, layerV->size.y - 5);
-      int z = random8(2) * (layerV->size.z - 1);
+      int x = random8(1, layer->size.x - 3);
+      int y = random8(1, layer->size.y - 5);
+      int z = random8(2) * (layer->size.z - 1);
       bool canPlace = true;
       for (int i = 0; i < 5; i++) {
         int nx = x + pattern[i][0];
         int ny = y + pattern[i][1];
-        if (getBitValue(futureCells, layerV->XYZUnModified(Coord3D(nx, ny, z)))) {canPlace = false; break;}
+        if (getBitValue(futureCells, layer->XYZUnModified(Coord3D(nx, ny, z)))) {canPlace = false; break;}
       }
       if (canPlace || attempts == 99) {
         for (int i = 0; i < 5; i++) {
           int nx = x + pattern[i][0];
           int ny = y + pattern[i][1];
-          setBitValue(futureCells, layerV->XYZUnModified(Coord3D(nx, ny, z)), true);
-          layerV->setRGB(Coord3D(nx, ny, z), colorByAge ? CRGB::Green : color);
+          setBitValue(futureCells, layer->XYZUnModified(Coord3D(nx, ny, z)), true);
+          layer->setRGB(Coord3D(nx, ny, z), colorByAge ? CRGB::Green : color);
         }
         return;
       }
@@ -131,22 +131,22 @@ class GameOfLifeEffect: public Node {
 
   void startNewGameOfLife() {
     // MB_LOGD(ML_TAG, "startNewGameOfLife");
-    prevPalette  = ColorFromPalette(layerV->layerP->palette, 0);
+    prevPalette  = ColorFromPalette(layer->layerP->palette, 0);
     generation = 1;
     disablePause ? step = millis() : step = millis() + 1500;
 
     // Setup Grid
     memset(cells, 0, dataSize);
-    memset(cellColors, 0, layerV->size.x * layerV->size.y * layerV->size.z);
+    memset(cellColors, 0, layer->size.x * layer->size.y * layer->size.z);
 
-    for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++){
-      if (layerV->layerDimension == _3D && !layerV->isMapped(layerV->XYZUnModified(Coord3D(x,y,z)))) continue;
+    for (int x = 0; x < layer->size.x; x++) for (int y = 0; y < layer->size.y; y++) for (int z = 0; z < layer->size.z; z++){
+      if (layer->layerDimension == _3D && !layer->isMapped(layer->XYZUnModified(Coord3D(x,y,z)))) continue;
       if (random8(100) < lifeChance) {
-        int index = layerV->XYZUnModified(Coord3D(x,y,z));
+        int index = layer->XYZUnModified(Coord3D(x,y,z));
         setBitValue(cells, index, true);
         cellColors[index] = random8(1, 255);
-        layerV->setRGB(Coord3D(x,y,z), colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, cellColors[index]));
-        // layerV->setRGB(Coord3D(x,y,z), bgColor); // Color set in redraw loop
+        layer->setRGB(Coord3D(x,y,z), colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, cellColors[index]));
+        // layer->setRGB(Coord3D(x,y,z), bgColor); // Color set in redraw loop
       }
     }
     memcpy(futureCells, cells, dataSize);
@@ -155,7 +155,7 @@ class GameOfLifeEffect: public Node {
     // Change CRCs
     uint16_t crc = crc16((const unsigned char*)cells, dataSize);
     oscillatorCRC = crc, spaceshipCRC = crc, cubeGliderCRC = crc;
-    gliderLength  = lcm(layerV->size.y, layerV->size.x) * 4;
+    gliderLength  = lcm(layer->size.y, layer->size.x) * 4;
     cubeGliderLength = gliderLength * 6; // Change later for rectangular cuboid
   }
 
@@ -168,7 +168,7 @@ class GameOfLifeEffect: public Node {
   }
 
   void onSizeChanged(Coord3D prevSize) override {
-    dataSize = ((layerV->size.x * layerV->size.y * layerV->size.z + 7) / 8);
+    dataSize = ((layer->size.x * layer->size.y * layer->size.z + 7) / 8);
 
     freeMB(cells);
     freeMB(futureCells);
@@ -176,7 +176,7 @@ class GameOfLifeEffect: public Node {
 
     cells = allocMB<uint8_t>(dataSize);
     futureCells = allocMB<uint8_t>(dataSize);
-    cellColors = allocMB<uint8_t>(layerV->size.x * layerV->size.y * layerV->size.z);
+    cellColors = allocMB<uint8_t>(layer->size.x * layer->size.y * layer->size.z);
 
     if (!cells || !futureCells || !cellColors) {
         MB_LOGE(ML_TAG, "allocation of cells || !futureCells || !cellColors failed");
@@ -196,7 +196,7 @@ class GameOfLifeEffect: public Node {
     }
 
     CRGB bgColor = CRGB(bgC.x, bgC.y, bgC.z);
-    CRGB color   = ColorFromPalette(layerV->layerP->palette, random8()); // Used if all parents died
+    CRGB color   = ColorFromPalette(layer->layerP->palette, random8()); // Used if all parents died
 
     int fadedBackground = 0;
     if (blur > 220 && !colorByAge) { // Keep faded background if blur > 220
@@ -206,24 +206,24 @@ class GameOfLifeEffect: public Node {
     bool blurDead = step > millis() && !fadedBackground;
     // Redraw Loop
     if (generation <= 1 || blurDead) { // Readd overlay support when implemented
-      for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++){
-        uint16_t cIndex = layerV->XYZUnModified(Coord3D(x,y,z)); // Current cell index (bit grid lookup)
+      for (int x = 0; x < layer->size.x; x++) for (int y = 0; y < layer->size.y; y++) for (int z = 0; z < layer->size.z; z++){
+        uint16_t cIndex = layer->XYZUnModified(Coord3D(x,y,z)); // Current cell index (bit grid lookup)
         Coord3D cLocPos = Coord3D(x,y,z);
-        uint16_t cLoc   = layerV->XYZ(cLocPos);            // Current cell location (led index)
-        if (!layerV->isMapped(cIndex)) continue;
+        uint16_t cLoc   = layer->XYZ(cLocPos);            // Current cell location (led index)
+        if (!layer->isMapped(cIndex)) continue;
         bool alive = getBitValue(cells, cIndex);
         bool recolor = (alive && generation == 1 && cellColors[cIndex] == 0 && !random(16)); // Palette change or Initial Color
         // Redraw alive if palette changed, spawn initial colors randomly, age alive cells while paused
         if (alive && recolor) {
           cellColors[cIndex] = random8(1, 255);
-          layerV->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, cellColors[cIndex]));
+          layer->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, cellColors[cIndex]));
         }
-        else if (alive && colorByAge && !generation) layerV->blendColor(cLoc, CRGB::Red, 248); // Age alive cells while paused
-        else if (alive && cellColors[cIndex] != 0) layerV->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, cellColors[cIndex]));
+        else if (alive && colorByAge && !generation) layer->blendColor(cLoc, CRGB::Red, 248); // Age alive cells while paused
+        else if (alive && cellColors[cIndex] != 0) layer->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, cellColors[cIndex]));
         // Redraw dead if palette changed, blur paused game, fade on newgame
-        // if      (!alive && (paletteChanged || disablePause)) layerV->setRGB(cLoc, bgColor);   // Remove blended dead cells
-        else if (!alive && blurDead)         layerV->blendColor(cLoc, bgColor, blur);           // Blend dead cells while paused
-        else if (!alive && generation == 1) layerV->blendColor(cLoc, bgColor, 248);            // Fade dead on new game
+        // if      (!alive && (paletteChanged || disablePause)) layer->setRGB(cLoc, bgColor);   // Remove blended dead cells
+        else if (!alive && blurDead)         layer->blendColor(cLoc, bgColor, blur);           // Blend dead cells while paused
+        else if (!alive && generation == 1) layer->blendColor(cLoc, bgColor, 248);            // Fade dead on new game
       }
     }
 
@@ -232,27 +232,27 @@ class GameOfLifeEffect: public Node {
 
     //Update Game of Life
     int aliveCount = 0, deadCount = 0; // Detect solo gliders and dead grids
-    const int zAxis  = (layerV->layerDimension == _3D) ? 1 : 0; // Avoids looping through z axis neighbors if 2D
+    const int zAxis  = (layer->layerDimension == _3D) ? 1 : 0; // Avoids looping through z axis neighbors if 2D
     bool disableWrap = !wrap || soloGlider || generation % 1500 == 0 || zAxis;
     //Loop through all cells. Count neighbors, apply rules, setPixel
-    for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++){
+    for (int x = 0; x < layer->size.x; x++) for (int y = 0; y < layer->size.y; y++) for (int z = 0; z < layer->size.z; z++){
       Coord3D  cPos      = Coord3D(x, y, z);
-      uint16_t cIndex    = layerV->XYZUnModified(cPos);
+      uint16_t cIndex    = layer->XYZUnModified(cPos);
       bool     cellValue = getBitValue(cells, cIndex);
       if (cellValue) aliveCount++; else deadCount++;
-      if (zAxis && !layerV->isMapped(cIndex)) continue; // Skip if not physical led on 3D fixtures
+      if (zAxis && !layer->isMapped(cIndex)) continue; // Skip if not physical led on 3D fixtures
       uint8_t  neighbors = 0, colorCount = 0;
       uint8_t  nColors[9];
 
       for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -zAxis; k <= zAxis; k++) {
         if (i==0 && j==0 && k==0) continue; // Ignore itself
         Coord3D nPos = Coord3D(x+i, y+j, z+k);
-        if (nPos.isOutofBounds(layerV->size)) {
+        if (nPos.isOutofBounds(layer->size)) {
           // Wrap is disabled when unchecked, for 3D fixtures, every 1500 generations, and solo gliders
           if (disableWrap) continue;
-          nPos = (nPos + layerV->size) % layerV->size; // Wrap around 3D
+          nPos = (nPos + layer->size) % layer->size; // Wrap around 3D
         }
-        uint16_t nIndex = layerV->XYZUnModified(nPos);
+        uint16_t nIndex = layer->XYZUnModified(nPos);
         // Count neighbors and store up to 9 neighbor colors
         if (getBitValue(cells, nIndex)) {
           neighbors++;
@@ -266,7 +266,7 @@ class GameOfLifeEffect: public Node {
       if (cellValue && !surviveNumbers[neighbors]) {
         // Loneliness or Overpopulation
         setBitValue(futureCells, cIndex, false);
-        layerV->blendColor(cPos, bgColor, blur);
+        layer->blendColor(cPos, bgColor, blur);
       }
       else if (!cellValue && birthNumbers[neighbors]){
         // Reproduction
@@ -274,20 +274,20 @@ class GameOfLifeEffect: public Node {
         uint8_t  colorIndex = nColors[random8(colorCount)];
         if (random8(100) < mutation) colorIndex = random8();
         cellColors[cIndex] = colorIndex;
-        layerV->setRGB(cPos, colorByAge ? CRGB::Green : ColorFromPalette(layerV->layerP->palette, colorIndex));
+        layer->setRGB(cPos, colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, colorIndex));
       }
       else {
         // Blending, fade dead cells further causing blurring effect to moving cells
         if (!cellValue) {
           if (fadedBackground) {
-              CRGB val = layerV->getRGB(cPos);
-              if (fadedBackground < val.r + val.g + val.b) layerV->blendColor(cPos, bgColor, blur);
+              CRGB val = layer->getRGB(cPos);
+              if (fadedBackground < val.r + val.g + val.b) layer->blendColor(cPos, bgColor, blur);
           }
-          else layerV->blendColor(cPos, bgColor, blur);
+          else layer->blendColor(cPos, bgColor, blur);
         }
         else { // alive
-          if (colorByAge) layerV->blendColor(cPos, CRGB::Red, 248);
-          else layerV->setRGB(cPos, ColorFromPalette(layerV->layerP->palette, cellColors[cIndex]));
+          if (colorByAge) layer->blendColor(cPos, CRGB::Red, 248);
+          else layer->setRGB(cPos, ColorFromPalette(layer->layerP->palette, cellColors[cIndex]));
         }
       }
     }
@@ -334,11 +334,11 @@ class GEQ3DEffect: public Node {
   bool softHack = true;
 
   void setup() override {
-    layerV->fadeToBlackBy(16);
+    layer->fadeToBlackBy(16);
 
     addControl(speed, "speed", "range", 1, 10);
     addControl(frontFill, "frontFill", "range");
-    addControl(horizon, "horizon", "range", 0, layerV->size.x-1); //layerV->size.x-1 is not always set here
+    addControl(horizon, "horizon", "range", 0, layer->size.x-1); //layer->size.x-1 is not always set here
     addControl(depth, "depth", "range");
     addControl(numBands, "numBands", "range", 2, 16);
     addControl(borders, "borders", "checkbox");
@@ -355,14 +355,14 @@ class GEQ3DEffect: public Node {
 
     if (numBands == 0) return; //init Effect
 
-    const int cols = layerV->size.x;
-    const int rows = layerV->size.y;
+    const int cols = layer->size.x;
+    const int rows = layer->size.y;
 
     if (counter++ % (11-speed) == 0) projector += projector_dir;
     if (projector >= cols) projector_dir = -1;
     if (projector <= 0) projector_dir = 1;
 
-    layerV->fill_solid(CRGB::Black);
+    layer->fill_solid(CRGB::Black);
 
     CRGB ledColorTemp;
     const int NUM_BANDS = numBands;
@@ -379,14 +379,14 @@ class GEQ3DEffect: public Node {
 
     for (int i=0; i<=split; i++) { // paint right vertical faces and top - LEFT to RIGHT
       uint16_t colorIndex = ::map(cols/NUM_BANDS*i, 0, cols, 0, 256);
-      CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
+      CRGB ledColor = ColorFromPalette(layer->layerP->palette, colorIndex);
       int linex = i*(cols/NUM_BANDS);
 
       if (heights[i] > 1) {
         ledColorTemp = blend(ledColor, CRGB::Black, 255-32);
         int pPos = max(0, linex+(cols/NUM_BANDS)-1);
         for (int y = (i<NUM_BANDS-1) ? heights[i+1] : 0; y <= heights[i]; y++) { // don't bother drawing what we'll hide anyway
-          if (rows-y > 0) layerV->drawLine(pPos,rows-y-1,projector,horizon,ledColorTemp,false,depth); // right side perspective
+          if (rows-y > 0) layer->drawLine(pPos,rows-y-1,projector,horizon,ledColorTemp,false,depth); // right side perspective
         } 
 
         ledColorTemp = blend(ledColor, CRGB::Black, 255-128);
@@ -394,7 +394,7 @@ class GEQ3DEffect: public Node {
           if (rows-heights[i] > 1) {  // sanity check - avoid negative Y
             for (uint_fast8_t x=linex; x<=pPos;x++) { 
               bool doSoft = softHack && ((x==linex) || (x==pPos)); // only first and last line need AA
-              layerV->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
+              layer->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
             }
           }
         }
@@ -404,14 +404,14 @@ class GEQ3DEffect: public Node {
 
     for (int i=(NUM_BANDS - 1); i>split; i--) { // paint left vertical faces and top - RIGHT to LEFT
       uint16_t colorIndex = ::map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
-      CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
+      CRGB ledColor = ColorFromPalette(layer->layerP->palette, colorIndex);
       int linex = i*(cols/NUM_BANDS);
       int pPos = max(0, linex+(cols/NUM_BANDS)-1);
 
       if (heights[i] > 1) {
         ledColorTemp = blend(ledColor, CRGB::Black, 255-32);
         for (uint_fast8_t y = (i>0) ? heights[i-1] : 0; y <= heights[i]; y++) { // don't bother drawing what we'll hide anyway
-          if (rows-y > 0) layerV->drawLine(linex,rows-y-1,projector,horizon,ledColorTemp,false,depth); // left side perspective
+          if (rows-y > 0) layer->drawLine(linex,rows-y-1,projector,horizon,ledColorTemp,false,depth); // left side perspective
         }
 
         ledColorTemp = blend(ledColor, CRGB::Black, 255-128);
@@ -419,7 +419,7 @@ class GEQ3DEffect: public Node {
           if (rows-heights[i] > 1) {  // sanity check - avoid negative Y
             for (uint_fast8_t x=linex; x<=pPos;x++) {
               bool doSoft = softHack && ((x==linex) || (x==pPos)); // only first and last line need AA
-              layerV->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
+              layer->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
             }
           }
         }
@@ -429,7 +429,7 @@ class GEQ3DEffect: public Node {
 
     for (int i=0; i<NUM_BANDS; i++) {
       uint16_t colorIndex = ::map(cols/NUM_BANDS*i, 0, cols-1, 0, 255);
-      CRGB ledColor = ColorFromPalette(layerV->layerP->palette, colorIndex);
+      CRGB ledColor = ColorFromPalette(layer->layerP->palette, colorIndex);
       int linex = i*(cols/NUM_BANDS);
       int pPos  = linex+(cols/NUM_BANDS)-1;
       int pPos1 = linex+(cols/NUM_BANDS);
@@ -439,7 +439,7 @@ class GEQ3DEffect: public Node {
           ledColorTemp = blend(ledColor, CRGB::Black, 255-128);
           for (uint_fast8_t x=linex; x<=pPos;x++) {
             bool doSoft = softHack && ((x==linex) || (x==pPos)); // only first and last line need AA
-            layerV->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
+            layer->drawLine(x,rows-heights[i]-2,projector,horizon,ledColorTemp,doSoft,depth); // top perspective
           }
         }
       }
@@ -447,19 +447,19 @@ class GEQ3DEffect: public Node {
       if ((heights[i] > 1) && (rows-heights[i] > 0)) {
         ledColorTemp = blend(ledColor, CRGB::Black, 255-frontFill);
         for (uint_fast8_t x=linex; x<pPos1;x++) { 
-          layerV->drawLine(x,rows-1,x,rows-heights[i]-1,ledColorTemp); // front fill
+          layer->drawLine(x,rows-1,x,rows-heights[i]-1,ledColorTemp); // front fill
         }
 
         if (!borders && heights[i] > rows-horizon) {
           if (frontFill == 0) ledColorTemp = blend(ledColor, CRGB::Black, 255-32); // match side fill if we're in blackout mode
-          layerV->drawLine(linex,rows-heights[i]-1,linex+(cols/NUM_BANDS)-1,rows-heights[i]-1,ledColorTemp); // top line to simulate hidden top fill
+          layer->drawLine(linex,rows-heights[i]-1,linex+(cols/NUM_BANDS)-1,rows-heights[i]-1,ledColorTemp); // top line to simulate hidden top fill
         }
 
         if ((borders) && (rows-heights[i] > 1)) {
-          layerV->drawLine(linex,                   rows-1,linex,rows-heights[i]-1,ledColor); // left side line
-          layerV->drawLine(linex+(cols/NUM_BANDS)-1,rows-1,linex+(cols/NUM_BANDS)-1,rows-heights[i]-1,ledColor); // right side line
-          layerV->drawLine(linex,                   rows-heights[i]-2,linex+(cols/NUM_BANDS)-1,rows-heights[i]-2,ledColor); // top line
-          layerV->drawLine(linex,                   rows-1,linex+(cols/NUM_BANDS)-1,rows-1,ledColor); // bottom line
+          layer->drawLine(linex,                   rows-1,linex,rows-heights[i]-1,ledColor); // left side line
+          layer->drawLine(linex+(cols/NUM_BANDS)-1,rows-1,linex+(cols/NUM_BANDS)-1,rows-heights[i]-1,ledColor); // right side line
+          layer->drawLine(linex,                   rows-heights[i]-2,linex+(cols/NUM_BANDS)-1,rows-heights[i]-2,ledColor); // top line
+          layer->drawLine(linex,                   rows-1,linex+(cols/NUM_BANDS)-1,rows-1,ledColor); // bottom line
         }
       }
     }
@@ -498,14 +498,14 @@ public:
   uint16_t aux1Chaos;
 
   void loop() override {
-    const uint16_t cols = layerV->size.x;
-    const uint16_t rows = layerV->size.y;
-    const uint16_t depth = layerV->size.z;
+    const uint16_t cols = layer->size.x;
+    const uint16_t rows = layer->size.y;
+    const uint16_t depth = layer->size.z;
 
     // uint8_t numLines = map8(nrOfLines,1,64);
     
     (aux0Hue)++;  // hue
-    layerV->fadeToBlackBy(fadeRate);
+    layer->fadeToBlackBy(fadeRate);
 
     aux1Chaos = phase_chaos?random8():0;
 
@@ -532,13 +532,13 @@ public:
       if (length > max(1, (int)minLength)) {
         CRGB color;
         if (color_chaos)
-          color = ColorFromPalette(layerV->layerP->palette, i * 255 / numLines + ((aux0Hue)&0xFF), 255);
+          color = ColorFromPalette(layer->layerP->palette, i * 255 / numLines + ((aux0Hue)&0xFF), 255);
         else
-          color = ColorFromPalette(layerV->layerP->palette, ::map(i, 0, numLines, 0, 255), 255);
+          color = ColorFromPalette(layer->layerP->palette, ::map(i, 0, numLines, 0, 255), 255);
         if (depth > 1)
-          layerV->drawLine3D(x1, y1, z1, x2, y2, z2, color, soft, length); // no soft implemented in 3D yet
+          layer->drawLine3D(x1, y1, z1, x2, y2, z2, color, soft, length); // no soft implemented in 3D yet
         else
-          layerV->drawLine(x1, y1, x2, y2, color, soft, length);
+          layer->drawLine(x1, y1, x2, y2, color, soft, length);
       }
     }
   }

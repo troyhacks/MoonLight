@@ -15,11 +15,11 @@
 #include <ESP32SvelteKit.h> //for safeModeMB
 
 void Node::updateControl(String &oldValue, JsonObject control) {
-    // MB_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
+    MB_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
     if (oldValue == "") return; //newControl, value already set
     if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) { //name and type can be null if control is removed in compareRecursive
         int pointer = control["p"];
-        // MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
+        MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
             if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
@@ -73,18 +73,18 @@ void Node::updateControl(String &oldValue, JsonObject control) {
 Node *gNode = nullptr;
 
 static void _addControl(uint8_t *var, char *name, char* type, uint8_t min = 0, uint8_t max = UINT8_MAX) {MB_LOGV(ML_TAG, "%s %s %d (%d-%d)", name, type, var, min, max);gNode->addControl(*var, name, type, min, max);}
-static void _addPin(uint8_t pinNr) {gNode->layerV->layerP->addPin(pinNr);}
-static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layerV->layerP->addLight({x, y, z});}
+static void _addPin(uint8_t pinNr) {gNode->layer->layerP->addPin(pinNr);}
+static void _addLight(uint8_t x, uint8_t y, uint8_t z) {gNode->layer->layerP->addLight({x, y, z});}
 
 static void _modifySize() {gNode->modifySize();}
 static void _modifyPosition(Coord3D &position) {gNode->modifyPosition(position);} //need &position parameter
 // static void _modifyXYZ() {gNode->modifyXYZ();}//need &position parameter
 
-void _fadeToBlackBy(uint8_t fadeValue) { gNode->layerV->fadeToBlackBy(fadeValue);}
-static void _setRGB(uint16_t indexV, CRGB color) {gNode->layerV->setRGB(indexV, color);}
-static void _setRGBPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layerV->setRGB(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
-static void _setPan(uint16_t indexV, uint8_t value) {gNode->layerV->setPan(indexV, value);}
-static void _setTilt(uint16_t indexV, uint8_t value) {gNode->layerV->setTilt(indexV, value);}
+void _fadeToBlackBy(uint8_t fadeValue) { gNode->layer->fadeToBlackBy(fadeValue);}
+static void _setRGB(uint16_t indexV, CRGB color) {gNode->layer->setRGB(indexV, color);}
+static void _setRGBPal(uint16_t indexV, uint8_t index, uint8_t brightness) { gNode->layer->setRGB(indexV, ColorFromPalette(PartyColors_p, index, brightness));}
+static void _setPan(uint16_t indexV, uint8_t value) {gNode->layer->setPan(indexV, value);}
+static void _setTilt(uint16_t indexV, uint8_t value) {gNode->layer->setTilt(indexV, value);}
 
 volatile xSemaphoreHandle WaitAnimationSync = xSemaphoreCreateBinary();
 
@@ -175,21 +175,21 @@ void LiveScriptNode::setup() {
 
   //MoonLight physical and virtual driver vars
   //  but keep enabled to avoid compile errors when used in non virtual context
-//   addExternal( "uint8_t colorOrder", &layerV->layerP->ledsDriver.colorOrder);
-//   addExternal( "uint8_t clockPin", &layerV->layerP->ledsDriver.clockPin);
-//   addExternal( "uint8_t latchPin", &layerV->layerP->ledsDriver.latchPin);
-//   addExternal( "uint8_t clockFreq", &layerV->layerP->ledsDriver.clockFreq);
-//   addExternal( "uint8_t dmaBuffer", &layerV->layerP->ledsDriver.dmaBuffer);
+//   addExternal( "uint8_t colorOrder", &layer->layerP->ledsDriver.colorOrder);
+//   addExternal( "uint8_t clockPin", &layer->layerP->ledsDriver.clockPin);
+//   addExternal( "uint8_t latchPin", &layer->layerP->ledsDriver.latchPin);
+//   addExternal( "uint8_t clockFreq", &layer->layerP->ledsDriver.clockFreq);
+//   addExternal( "uint8_t dmaBuffer", &layer->layerP->ledsDriver.dmaBuffer);
 
   addExternal(    "void fadeToBlackBy(uint8_t)", (void *)_fadeToBlackBy);
-  addExternal(   "CRGB* leds", (void *)(CRGB *)layerV->layerP->lights.channels);
+  addExternal(   "CRGB* leds", (void *)(CRGB *)layer->layerP->lights.channels);
   addExternal(    "void setRGB(uint16_t,CRGB)", (void *)_setRGB);
   addExternal(    "void setRGBPal(uint16_t,uint8_t,uint8_t)", (void *)_setRGBPal);
   addExternal(    "void setPan(uint16_t,uint8_t)", (void *)_setPan);
   addExternal(    "void setTilt(uint16_t,uint8_t)", (void *)_setTilt);
-  addExternal( "uint8_t width", &layerV->size.x);
-  addExternal( "uint8_t height", &layerV->size.y);
-  addExternal( "uint8_t depth", &layerV->size.z);
+  addExternal( "uint8_t width", &layer->size.x);
+  addExternal( "uint8_t height", &layer->size.y);
+  addExternal( "uint8_t depth", &layer->size.z);
   addExternal(    "bool on", &on);
 
 //   for (asm_external el: external_links) {
@@ -197,7 +197,7 @@ void LiveScriptNode::setup() {
 //   }
 
 
-//   runningPrograms.setPrekill(layerV->layerP->ledsDriver.preKill, layerV->layerP->ledsDriver.postKill); //for clockless driver...
+//   runningPrograms.setPrekill(layer->layerP->ledsDriver.preKill, layer->layerP->ledsDriver.postKill); //for clockless driver...
   runningPrograms.setFunctionToSync(sync);
 
   compileAndRun();
@@ -233,7 +233,7 @@ void LiveScriptNode::compileAndRun() {
       File file = ESPFS.open(animation);
       if (file) {
         Char<32> pre;
-        pre.format("#define NUM_LEDS %d\n", layerV->nrOfLights);
+        pre.format("#define NUM_LEDS %d\n", layer->nrOfLights);
 
           std::string scScript = pre.c_str();
           scScript += file.readString().c_str();
@@ -366,7 +366,7 @@ void DriverNode::setup() {
 
 void DriverNode::loop() {
 
-  LightsHeader *header = &layerV->layerP->lights.header;
+  LightsHeader *header = &layer->layerP->lights.header;
 
   //use ledsDriver LUT for super efficient leds dimming 🔥 (used by reOrderAndDimRGBW)
 
@@ -374,40 +374,40 @@ void DriverNode::loop() {
 
   if (brightness != brightnessSaved) {
     //Use FastLED for setMaxPowerInMilliWatts stuff
-    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layer->layerP->lights.channels, layer->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
     // MB_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
     ledsDriver.setBrightness(correctedBrightness);
     brightnessSaved = brightness;
   }
 
   #if HP_ALL_DRIVERS
-    if (savedColorCorrection.red != layerV->layerP->lights.header.red || savedColorCorrection.green != layerV->layerP->lights.header.green || savedColorCorrection.blue != layerV->layerP->lights.header.blue) {
-      ledsDriver.setGamma(layerV->layerP->lights.header.red/255.0, layerV->layerP->lights.header.blue/255.0, layerV->layerP->lights.header.green/255.0, 1.0);
-      // MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, savedColorCorrection.red, savedColorCorrection.green, savedColorCorrection.blue);
-      savedColorCorrection.red = layerV->layerP->lights.header.red;
-      savedColorCorrection.green = layerV->layerP->lights.header.green;
-      savedColorCorrection.blue = layerV->layerP->lights.header.blue;
+    if (savedColorCorrection.red != layer->layerP->lights.header.red || savedColorCorrection.green != layer->layerP->lights.header.green || savedColorCorrection.blue != layer->layerP->lights.header.blue) {
+      ledsDriver.setGamma(layer->layerP->lights.header.red/255.0, layer->layerP->lights.header.blue/255.0, layer->layerP->lights.header.green/255.0, 1.0);
+      // MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, savedColorCorrection.red, savedColorCorrection.green, savedColorCorrection.blue);
+      savedColorCorrection.red = layer->layerP->lights.header.red;
+      savedColorCorrection.green = layer->layerP->lights.header.green;
+      savedColorCorrection.blue = layer->layerP->lights.header.blue;
     }
   #else //ESP32_LEDSDRIVER
     CRGB correction;
     uint8_t white;
     ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
-    if (correction.red != layerV->layerP->lights.header.red || correction.green != layerV->layerP->lights.header.green || correction.blue != layerV->layerP->lights.header.blue) {
-      MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
-      ledsDriver.setColorCorrection(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
+    if (correction.red != layer->layerP->lights.header.red || correction.green != layer->layerP->lights.header.green || correction.blue != layer->layerP->lights.header.blue) {
+      MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
+      ledsDriver.setColorCorrection(layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue);
     }
   #endif
 }
 
 void DriverNode::onUpdate(String &oldValue, JsonObject control) {
 
-  LightsHeader *header = &layerV->layerP->lights.header;
+  LightsHeader *header = &layer->layerP->lights.header;
 
   MB_LOGD(ML_TAG, "%s: %s ", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
 
   if (control["name"] == "maxPower") {
     uint8_t brightness = (header->offsetBrightness == UINT8_MAX)?header->brightness:255; //set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
-    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layerV->layerP->lights.channels, layerV->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
+    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB *)&layer->layerP->lights.channels, layer->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
     MB_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
     ledsDriver.setBrightness(correctedBrightness);
   }
@@ -428,38 +428,38 @@ void DriverNode::onUpdate(String &oldValue, JsonObject control) {
       case 8: header->channelsPerLight = 6; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2; break; //GRB6
       case 9: header->channelsPerLight = 6; header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2; header->offsetWhite = 3; break; //RGBWYP - 6 channel Par/DMX Lights with UV etc
       case 10: //MHBeTopper19x15W-32
-        layerV->layerP->lights.header.channelsPerLight = 32;
+        layer->layerP->lights.header.channelsPerLight = 32;
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
-        layerV->layerP->lights.header.offsetRGB = 9;
-        layerV->layerP->lights.header.offsetRGB1 = 13;
-        layerV->layerP->lights.header.offsetRGB2 = 17;
-        layerV->layerP->lights.header.offsetRGB3 = 24;
-        layerV->layerP->lights.header.offsetPan = 0;
-        layerV->layerP->lights.header.offsetTilt = 2;
-        layerV->layerP->lights.header.offsetZoom = 5;
-        layerV->layerP->lights.header.offsetBrightness = 6;
+        layer->layerP->lights.header.offsetRGB = 9;
+        layer->layerP->lights.header.offsetRGB1 = 13;
+        layer->layerP->lights.header.offsetRGB2 = 17;
+        layer->layerP->lights.header.offsetRGB3 = 24;
+        layer->layerP->lights.header.offsetPan = 0;
+        layer->layerP->lights.header.offsetTilt = 2;
+        layer->layerP->lights.header.offsetZoom = 5;
+        layer->layerP->lights.header.offsetBrightness = 6;
         break;
       case 11: //MHBeeEyes150W-15
-        layerV->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
+        layer->layerP->lights.header.channelsPerLight = 15; //set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
-        layerV->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
-        layerV->layerP->lights.header.offsetPan = 0;
-        layerV->layerP->lights.header.offsetTilt = 1;
-        layerV->layerP->lights.header.offsetZoom = 7;
-        layerV->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
-        layerV->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
-        layerV->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
+        layer->layerP->lights.header.offsetRGB = 10; //set offset for RGB lights in DMX map
+        layer->layerP->lights.header.offsetPan = 0;
+        layer->layerP->lights.header.offsetTilt = 1;
+        layer->layerP->lights.header.offsetZoom = 7;
+        layer->layerP->lights.header.offsetBrightness = 8; //set offset for brightness
+        layer->layerP->lights.header.offsetGobo = 5; //set offset for color wheel in DMX map
+        layer->layerP->lights.header.offsetBrightness2 = 3; //set offset for color wheel brightness in DMX map    } //BGR
         break;
       case 12: //MH19x15W-24
-        layerV->layerP->lights.header.channelsPerLight = 24;
+        layer->layerP->lights.header.channelsPerLight = 24;
         header->offsetRed = 0; header->offsetGreen = 1; header->offsetBlue = 2;
-        layerV->layerP->lights.header.offsetPan = 0;
-        layerV->layerP->lights.header.offsetTilt = 1;
-        layerV->layerP->lights.header.offsetBrightness = 3;
-        layerV->layerP->lights.header.offsetRGB = 4;
-        layerV->layerP->lights.header.offsetRGB1 = 8;
-        layerV->layerP->lights.header.offsetRGB2 = 12;
-        layerV->layerP->lights.header.offsetZoom = 17;
+        layer->layerP->lights.header.offsetPan = 0;
+        layer->layerP->lights.header.offsetTilt = 1;
+        layer->layerP->lights.header.offsetBrightness = 3;
+        layer->layerP->lights.header.offsetRGB = 4;
+        layer->layerP->lights.header.offsetRGB1 = 8;
+        layer->layerP->lights.header.offsetRGB2 = 12;
+        layer->layerP->lights.header.offsetZoom = 17;
         break;
     }
 
@@ -471,7 +471,7 @@ void DriverNode::onUpdate(String &oldValue, JsonObject control) {
       #ifndef CONFIG_IDF_TARGET_ESP32P4
         if (initDone) {
           
-          // ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+          // ledsDriver.setOffsets(layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue, layer->layerP->lights.header.offsetWhite);
 
           // if (oldChannelsPerLight != header->channelsPerLight)
           //   restartNeeded = true; //in case 
@@ -481,7 +481,7 @@ void DriverNode::onUpdate(String &oldValue, JsonObject control) {
     #else //ESP32_LEDSDRIVER
       if (ledsDriver.initLedsDone) {
         
-        ledsDriver.setOffsets(layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite);
+        ledsDriver.setOffsets(layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue, layer->layerP->lights.header.offsetWhite);
 
         if (oldChannelsPerLight != header->channelsPerLight)
           restartNeeded = true; //in case 
@@ -496,11 +496,11 @@ void DriverNode::reOrderAndDimRGBW(uint8_t *packetRGBChannel, uint8_t *lightsRGB
   //use ledsDriver.__rbg_map[0]; for super fast brightness and gamma correction! see secondPixel in ESP32-LedDriver!
   //apply the LUT to the RGB channels !
   
-  packetRGBChannel[layerV->layerP->lights.header.offsetRed] = ledsDriver.__red_map[lightsRGBChannel[0]];
-  packetRGBChannel[layerV->layerP->lights.header.offsetGreen] = ledsDriver.__green_map[lightsRGBChannel[1]];
-  packetRGBChannel[layerV->layerP->lights.header.offsetBlue] = ledsDriver.__blue_map[lightsRGBChannel[2]];
-  if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX)
-    packetRGBChannel[layerV->layerP->lights.header.offsetWhite] = ledsDriver.__white_map[lightsRGBChannel[3]];
+  packetRGBChannel[layer->layerP->lights.header.offsetRed] = ledsDriver.__red_map[lightsRGBChannel[0]];
+  packetRGBChannel[layer->layerP->lights.header.offsetGreen] = ledsDriver.__green_map[lightsRGBChannel[1]];
+  packetRGBChannel[layer->layerP->lights.header.offsetBlue] = ledsDriver.__blue_map[lightsRGBChannel[2]];
+  if (layer->layerP->lights.header.offsetWhite != UINT8_MAX)
+    packetRGBChannel[layer->layerP->lights.header.offsetWhite] = ledsDriver.__white_map[lightsRGBChannel[3]];
 }
 
 #endif //FT_MOONLIGHT

@@ -36,7 +36,7 @@ class BouncingBallsEffect: public Node {
 
   void onSizeChanged(Coord3D prevSize) override {
     freeMB(balls);
-    balls = allocMB<Ball[maxNumBalls]>(layerV->size.y);
+    balls = allocMB<Ball[maxNumBalls]>(layer->size.y);
 
     if (!balls) {
       MB_LOGE(ML_TAG, "allocate balls failed");
@@ -46,7 +46,7 @@ class BouncingBallsEffect: public Node {
   void loop() override {
     if (!balls) return;
 
-    layerV->fadeToBlackBy(100);
+    layer->fadeToBlackBy(100);
 
     // non-chosen color is a random color
     const float gravity = -9.81f; // standard value of gravity
@@ -58,7 +58,7 @@ class BouncingBallsEffect: public Node {
     //   for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     // }
 
-    for (int y =0; y < layerV->size.y; y++) {
+    for (int y =0; y < layer->size.y; y++) {
       for (size_t i = 0; i < MIN(numBalls, maxNumBalls); i++) {
         float timeSinceLastBounce = (time - balls[y][i].lastBounceTime)/((255-grav)/64 + 1);
         float timeSec = timeSinceLastBounce/1000.0f;
@@ -80,21 +80,21 @@ class BouncingBallsEffect: public Node {
         }
 
         // uint32_t color = SEGCOLOR(0);
-        // if (layerV->layerP->palette) {
-        //   color = layerV->color_wheel(i*(256/MAX(numBalls, 8)));
+        // if (layer->layerP->palette) {
+        //   color = layer->color_wheel(i*(256/MAX(numBalls, 8)));
         // } 
         // else if (hasCol2) {
         //   color = SEGCOLOR(i % NUM_COLORS);
         // }
 
-        uint8_t pos = roundf(balls[y][i].height * (layerV->size.x - 1));
+        uint8_t pos = roundf(balls[y][i].height * (layer->size.x - 1));
 
-        CRGB color = ColorFromPalette(layerV->layerP->palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
+        CRGB color = ColorFromPalette(layer->layerP->palette, i*(256/max(numBalls, (uint8_t)8))); //error: no matching function for call to 'max(uint8_t&, int)'
 
-        layerV->setRGB(Coord3D(pos, y), color);
-        // if (layerV->size.x<32) layerV->setRGB(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
-        // else           layerV->setRGB(balls[i].height + (stripNr+1)*10.0f, color);
-      } //balls      layerV->fill_solid(CRGB::White);
+        layer->setRGB(Coord3D(pos, y), color);
+        // if (layer->size.x<32) layer->setRGB(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
+        // else           layer->setRGB(balls[i].height + (stripNr+1)*10.0f, color);
+      } //balls      layer->fill_solid(CRGB::White);
     }
   }
 };
@@ -128,7 +128,7 @@ class BlurzEffect: public Node {
     addControl(freqMap, "freqMap", "checkbox");
     addControl(geqScanner, "geqScanner", "checkbox");
 
-    layerV->fadeToBlackBy(255);
+    layer->fadeToBlackBy(255);
   }
 
   void loop() override {
@@ -136,42 +136,42 @@ class BlurzEffect: public Node {
 
     int fadeoutDelay = (256 - fadeRate) / 24;
     if ((fadeoutDelay <= 1 ) || ((call % fadeoutDelay) == 0))
-        layerV->fadeToBlackBy(fadeRate);
+        layer->fadeToBlackBy(fadeRate);
     else {
-      layerV->blur2d(8 + blur/8 + fadeoutDelay*4);
+      layer->blur2d(8 + blur/8 + fadeoutDelay*4);
     }
-    if ((aux1 < layerV->size.x * layerV->size.y * layerV->size.z) && (sharedData.volume > 1.0f)) layerV->setRGB(aux1, step); // "repaint" last pixel after blur
+    if ((aux1 < layer->size.x * layer->size.y * layer->size.z) && (sharedData.volume > 1.0f)) layer->setRGB(aux1, step); // "repaint" last pixel after blur
 
     unsigned freqBand = aux0 % 16;
-    uint16_t segLoc = random16(layerV->size.x * layerV->size.y * layerV->size.z);
+    uint16_t segLoc = random16(layer->size.x * layer->size.y * layer->size.z);
 
     if (freqMap) {                                                                                   // FreqMap mode : blob location by major frequency
       int freqLocn;
-      unsigned maxLen = (geqScanner) ? MAX(1, layerV->size.x * layerV->size.y * layerV->size.z-16): layerV->size.x * layerV->size.y * layerV->size.z;                                       // usable segment length - leave 16 pixels when embedding "GEQ scan"
-      freqLocn = roundf((log10f((float)sharedData.majorPeak) - 1.78f) * float(maxLen)/(MAX_FREQ_LOG10 - 1.78f));  // log10 frequency range is from 1.78 to 3.71. Let's scale to layerV->size.x * layerV->size.y * layerV->size.z. // WLEDMM proper rounding
+      unsigned maxLen = (geqScanner) ? MAX(1, layer->size.x * layer->size.y * layer->size.z-16): layer->size.x * layer->size.y * layer->size.z;                                       // usable segment length - leave 16 pixels when embedding "GEQ scan"
+      freqLocn = roundf((log10f((float)sharedData.majorPeak) - 1.78f) * float(maxLen)/(MAX_FREQ_LOG10 - 1.78f));  // log10 frequency range is from 1.78 to 3.71. Let's scale to layer->size.x * layer->size.y * layer->size.z. // WLEDMM proper rounding
       if (freqLocn < 1) freqLocn = 0; // avoid underflow
       segLoc =  (geqScanner) ? freqLocn + freqBand : freqLocn;
     } else if (geqScanner) {                                                                            // GEQ Scanner mode: blob location is defined by frequency band + random offset
-      float bandWidth = float(layerV->size.x * layerV->size.y * layerV->size.z)  / 16.0f;
+      float bandWidth = float(layer->size.x * layer->size.y * layer->size.z)  / 16.0f;
       int bandStart = roundf(bandWidth * freqBand);
       segLoc = bandStart + random16(max(1, int(bandWidth)));
     }
-    segLoc = MAX(uint16_t(0), MIN(uint16_t(layerV->size.x * layerV->size.y * layerV->size.z-1), segLoc));  // fix overflows
+    segLoc = MAX(uint16_t(0), MIN(uint16_t(layer->size.x * layer->size.y * layer->size.z-1), segLoc));  // fix overflows
 
-    if (layerV->size.x * layerV->size.y * layerV->size.z < 2) segLoc = 0; // WLEDMM just to be sure
-    unsigned pixColor = (2*sharedData.bands[freqBand]*240)/max(1, layerV->size.x * layerV->size.y * layerV->size.z-1);                  // WLEDMM avoid uint8 overflow, and preserve pixel parameters for redraw
+    if (layer->size.x * layer->size.y * layer->size.z < 2) segLoc = 0; // WLEDMM just to be sure
+    unsigned pixColor = (2*sharedData.bands[freqBand]*240)/max(1, layer->size.x * layer->size.y * layer->size.z-1);                  // WLEDMM avoid uint8 overflow, and preserve pixel parameters for redraw
     unsigned pixIntensity = min((unsigned)(2.0f*sharedData.bands[freqBand]), 255U);
 
     if (sharedData.volume > 1.0f) {
-      layerV->setRGB(segLoc, ColorFromPalette(layerV->layerP->palette, pixColor));
-      step = layerV->getRGB(segLoc);  // remember last color
+      layer->setRGB(segLoc, ColorFromPalette(layer->layerP->palette, pixColor));
+      step = layer->getRGB(segLoc);  // remember last color
       aux1 = segLoc;                         // remember last position
 
-      layerV->blur2d(blur);
+      layer->blur2d(blur);
       aux0 ++;
       aux0 %= 16; // make sure it doesn't cross 16
-      layerV->addRGB(segLoc,  ColorFromPalette(layerV->layerP->palette, pixColor)); // repaint center pixel after blur
-    } else layerV->blur2d(blur);  // silence - just blur it again
+      layer->addRGB(segLoc,  ColorFromPalette(layer->layerP->palette, pixColor)); // repaint center pixel after blur
+    } else layer->blur2d(blur);  // silence - just blur it again
     call++;
   } //loop
 }; // BlurzEffect
@@ -199,20 +199,20 @@ public:
     uint16_t a2 = a/2;
     uint16_t a3 = a/3;
 
-    uint16_t cx =  beatsin8(10-speed,0,layerV->size.x-1)*scale;
-    uint16_t cy =  beatsin8(12-speed,0,layerV->size.y-1)*scale;
-    uint16_t cx1 = beatsin8(13-speed,0,layerV->size.x-1)*scale;
-    uint16_t cy1 = beatsin8(15-speed,0,layerV->size.y-1)*scale;
-    uint16_t cx2 = beatsin8(17-speed,0,layerV->size.x-1)*scale;
-    uint16_t cy2 = beatsin8(14-speed,0,layerV->size.y-1)*scale;
+    uint16_t cx =  beatsin8(10-speed,0,layer->size.x-1)*scale;
+    uint16_t cy =  beatsin8(12-speed,0,layer->size.y-1)*scale;
+    uint16_t cx1 = beatsin8(13-speed,0,layer->size.x-1)*scale;
+    uint16_t cy1 = beatsin8(15-speed,0,layer->size.y-1)*scale;
+    uint16_t cx2 = beatsin8(17-speed,0,layer->size.x-1)*scale;
+    uint16_t cy2 = beatsin8(14-speed,0,layer->size.y-1)*scale;
     
     uint16_t xoffs = 0;
     Coord3D pos = {0,0,0};
-    for (pos.x = 0; pos.x < layerV->size.x; pos.x++) {
+    for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
       xoffs += scale;
       uint16_t yoffs = 0;
 
-      for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
+      for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
         yoffs += scale;
 
         uint8_t  rdistort = cos8((cos8(((pos.x<<3)+a )&255)+cos8(((pos.y<<3)-a2)&255)+a3   )&255)>>1; 
@@ -223,11 +223,11 @@ public:
         uint8_t  valueG = gdistort+ w*  (a2-( ((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1))>>7 ));
         uint8_t  valueB = bdistort+ w*  (a3-( ((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2))>>7 ));
 
-        valueR = layerV->layerP->gamma8(cos8(valueR));
-        valueG = layerV->layerP->gamma8(cos8(valueG));
-        valueB = layerV->layerP->gamma8(cos8(valueB));
+        valueR = layer->layerP->gamma8(cos8(valueR));
+        valueG = layer->layerP->gamma8(cos8(valueG));
+        valueB = layer->layerP->gamma8(cos8(valueB));
 
-        layerV->setRGB(pos, CRGB(valueR, valueG, valueB));
+        layer->setRGB(pos, CRGB(valueR, valueG, valueB));
       }
     }
   }
@@ -302,12 +302,12 @@ public:
       }
 
       // shift the pixels one pixel up
-      layerV->setRGB(0, color);
-      for (int x = layerV->size.x - 1; x >= 0; x--) { //int as we count down!!!
-        if (x!=0) color = layerV->getRGB(x-1);
-        for (int y = 0; y < layerV->size.y; y++)
-          for (int z = 0; z < layerV->size.z; z++)
-            layerV->setRGB(Coord3D(x,y,z), color);
+      layer->setRGB(0, color);
+      for (int x = layer->size.x - 1; x >= 0; x--) { //int as we count down!!!
+        if (x!=0) color = layer->getRGB(x-1);
+        for (int y = 0; y < layer->size.y; y++)
+          for (int z = 0; z < layer->size.z; z++)
+            layer->setRGB(Coord3D(x,y,z), color);
       }
     }
   }
@@ -348,7 +348,7 @@ public:
 
   void onSizeChanged(Coord3D prevSize) override {
       freeMB(previousBarHeight);
-      previousBarHeight = allocMB<uint16_t>(layerV->size.x);
+      previousBarHeight = allocMB<uint16_t>(layer->size.x);
       if (!previousBarHeight) {
         MB_LOGE(ML_TAG, "allocate previousBarHeight failed");
       }
@@ -356,7 +356,7 @@ public:
 
   void loop() override {
 
-    const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layerV->custom1, 0, 255, 1, 16);
+    const int NUM_BANDS = NUM_GEQ_CHANNELS ; // ::map(layer->custom1, 0, 255, 1, 16);
 
     #ifdef SR_DEBUG
     uint8_t samplePeak = *(uint8_t*)um_data->u_data[3];
@@ -371,16 +371,16 @@ public:
     int fadeoutDelay = (256 - fadeOut) / 64; //256..1 -> 4..0
     size_t beat = ::map(beat16( fadeOut), 0, UINT16_MAX, 0, fadeoutDelay-1 ); // instead of call%fadeOutDelay
 
-    if ((fadeoutDelay <= 1 ) || (beat == 0)) layerV->fadeToBlackBy(fadeOut);
+    if ((fadeoutDelay <= 1 ) || (beat == 0)) layer->fadeToBlackBy(fadeOut);
 
     uint16_t lastBandHeight = 0;  // WLEDMM: for smoothing out bars
 
     //evenly distribute see also Funky Plank/By ewowi/From AXI
-    float bandwidth = (float)layerV->size.x / NUM_BANDS;
+    float bandwidth = (float)layer->size.x / NUM_BANDS;
     float remaining = bandwidth;
     uint8_t band = 0;
     Coord3D pos = {0,0,0};
-    for (pos.x=0; pos.x < layerV->size.x; pos.x++) {
+    for (pos.x=0; pos.x < layer->size.x; pos.x++) {
       //WLEDMM if not enough remaining
       if (remaining < 1) {band++; remaining+= bandwidth;} //increase remaining but keep the current remaining
       remaining--; //consume remaining
@@ -392,7 +392,7 @@ public:
       uint16_t bandHeight = sharedData.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
 
       // WLEDMM begin - smooth out bars
-      if ((pos.x > 0) && (pos.x < (layerV->size.x-1)) && (smoothBars)) {
+      if ((pos.x > 0) && (pos.x < (layer->size.x-1)) && (smoothBars)) {
         // get height of next (right side) bar
         uint8_t nextband = (remaining < 1)? band +1: band;
         nextband = constrain(nextband, 0, NUM_GEQ_CHANNELS-1);  // just to be sure
@@ -401,29 +401,29 @@ public:
         // smooth Band height
         bandHeight = (7*bandHeight + 3*lastBandHeight + 3*nextBandHeight) / 12;   // yeees, its 12 not 13 (10% amplification)
         bandHeight = constrain(bandHeight, 0, 255);   // remove potential over/underflows
-        colorIndex = ::map(pos.x, 0, layerV->size.x, 0, 256); //WLEDMM
+        colorIndex = ::map(pos.x, 0, layer->size.x, 0, 256); //WLEDMM
       }
       lastBandHeight = bandHeight; // remember BandHeight (left side) for next iteration
-      uint16_t barHeight = ::map(bandHeight, 0, 255, 0, layerV->size.y); // Now we map bandHeight to barHeight. do not subtract -1 from layerV->size.y here (should be 256 (ewowiHack) but then the top row is not displayed...)
+      uint16_t barHeight = ::map(bandHeight, 0, 255, 0, layer->size.y); // Now we map bandHeight to barHeight. do not subtract -1 from layer->size.y here (should be 256 (ewowiHack) but then the top row is not displayed...)
       // WLEDMM end
 
-      if (barHeight > layerV->size.y) barHeight = layerV->size.y;                      // WLEDMM ::map() can "overshoot" due to rounding errors
+      if (barHeight > layer->size.y) barHeight = layer->size.y;                      // WLEDMM ::map() can "overshoot" due to rounding errors
 
       CRGB ledColor = CRGB::Black;
 
       for (pos.y=0; pos.y < barHeight; pos.y++) {
         if (colorBars) //color_vertical / color bars toggle
-          colorIndex = ::map(pos.y, 0, layerV->size.y, 0, 256);
+          colorIndex = ::map(pos.y, 0, layer->size.y, 0, 256);
 
-        ledColor = ColorFromPalette(layerV->layerP->palette, (uint8_t)colorIndex);
+        ledColor = ColorFromPalette(layer->layerP->palette, (uint8_t)colorIndex);
 
-        layerV->setRGB(Coord3D(pos.x, layerV->size.y - 1 - pos.y), ledColor);
+        layer->setRGB(Coord3D(pos.x, layer->size.y - 1 - pos.y), ledColor);
       }
 
       if (previousBarHeight) {
         if (barHeight > previousBarHeight[pos.x]) previousBarHeight[pos.x] = barHeight; //drive the peak up
-        if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layerV->size.y))  // WLEDMM avoid "overshooting" into other segments
-          layerV->setRGB(Coord3D(pos.x, layerV->size.y - previousBarHeight[pos.x]), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
+        if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layer->size.y))  // WLEDMM avoid "overshooting" into other segments
+          layer->setRGB(Coord3D(pos.x, layer->size.y - previousBarHeight[pos.x]), (CRGB)CHSV( millis()/50, 255, 255)); // take millis()/50 color for the time being
 
         if (rippleTime && previousBarHeight[pos.x]>0) previousBarHeight[pos.x]--;    //delay/ripple effect
       }
@@ -449,16 +449,16 @@ public:
   }
 
   void loop() override {
-    layerV->fadeToBlackBy(fadeRate);
+    layer->fadeToBlackBy(fadeRate);
     uint_fast16_t phase = millis() * speed / 256;  // allow user to control rotation speed, speed between 0 and 255!
     Coord3D locn = {0,0,0};
     for (int i=0; i < 256; i ++) {
         //WLEDMM: stick to the original calculations of xlocn and ylocn
         locn.x = sin8(phase/2 + (i*xFrequency)/64);
         locn.y = cos8(phase/2 + i*2);
-        locn.x = (layerV->size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(layerV->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
-        locn.y = (layerV->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layerV->size.y-1)) +1) /2;    // "layerV->size.y > 2" is needed to avoid div/0 in ::map()
-        layerV->setRGB(locn, ColorFromPalette(layerV->layerP->palette, millis()/100+i, 255));
+        locn.x = (layer->size.x < 2) ? 1 : (::map(2*locn.x, 0,511, 0,2*(layer->size.x-1)) +1) /2;    // softhack007: "*2 +1" for proper rounding
+        locn.y = (layer->size.y < 2) ? 1 : (::map(2*locn.y, 0,511, 0,2*(layer->size.y-1)) +1) /2;    // "layer->size.y > 2" is needed to avoid div/0 in ::map()
+        layer->setRGB(locn, ColorFromPalette(layer->layerP->palette, millis()/100+i, 255));
     }
   }
 };
@@ -479,10 +479,10 @@ class Noise2DEffect: public Node {
 
   void loop() override {
 
-    for (int y = 0; y < layerV->size.y; y++) {
-      for (int x = 0; x < layerV->size.x; x++) {
+    for (int y = 0; y < layer->size.y; y++) {
+      for (int x = 0; x < layer->size.x; x++) {
         uint8_t pixelHue8 = inoise8(x * scale, y * scale, millis() / (16 - speed));
-        layerV->setRGB(Coord3D(x, y), ColorFromPalette(layerV->layerP->palette, pixelHue8));
+        layer->setRGB(Coord3D(x, y), ColorFromPalette(layer->layerP->palette, pixelHue8));
       }
     }
   }
@@ -506,18 +506,18 @@ class NoiseMeterEffect: public Node {
   uint8_t aux1;
 
   void loop() override {
-    layerV->fadeToBlackBy(fadeRate);
+    layer->fadeToBlackBy(fadeRate);
 
     float tmpSound2 = sharedData.volumeRaw * 2.0 * (float)width / 255.0;
-    int maxLen = ::map(tmpSound2, 0, 255, 0, layerV->size.x); // map to pixels availeable in current segment              // Still a bit too sensitive.
+    int maxLen = ::map(tmpSound2, 0, 255, 0, layer->size.x); // map to pixels availeable in current segment              // Still a bit too sensitive.
     // if (maxLen <0) maxLen = 0;
-    // if (maxLen >layerV->size.x) maxLen = layerV->size.x;
+    // if (maxLen >layer->size.x) maxLen = layer->size.x;
 
     for (int i=0; i<maxLen; i++) {                                    // The louder the sound, the wider the soundbar. By Andrew Tuline.
       uint8_t index = inoise8(i * sharedData.volume + aux0, aux1 + i * sharedData.volume);  // Get a value from the noise function. I'm using both x and y axis.
-      for (int y = 0; y < layerV->size.y; y++) //propagate to other dimensions
-        for (int z = 0; z < layerV->size.z; z++)
-          layerV->setRGB(Coord3D(i, y, z), ColorFromPalette(layerV->layerP->palette, index));//, 255, PALETTE_SOLID_WRAP));
+      for (int y = 0; y < layer->size.y; y++) //propagate to other dimensions
+        for (int z = 0; z < layer->size.z; z++)
+          layer->setRGB(Coord3D(i, y, z), ColorFromPalette(layer->layerP->palette, index));//, 255, PALETTE_SOLID_WRAP));
     }
 
     aux0+=beatsin8(5,0,10);
@@ -559,10 +559,10 @@ class PopCornEffect: public Node {
 
     //binding of loop persistent values (pointers)
 
-    layerV->fill_solid(CRGB::Black);
+    layer->fill_solid(CRGB::Black);
 
     float gravity = -0.0001f - (speed/200000.0f); // m/s/s
-    gravity *= layerV->size.x;
+    gravity *= layer->size.x;
 
     if (numPopcorn == 0) numPopcorn = 1;
 
@@ -586,10 +586,10 @@ class PopCornEffect: public Node {
           popcorn[i].pos = 0.01f;
 
           uint16_t peakHeight = 128 + random8(128); //0-255
-          peakHeight = (peakHeight * (layerV->size.x -1)) >> 8;
+          peakHeight = (peakHeight * (layer->size.x -1)) >> 8;
           popcorn[i].vel = sqrtf(-2.0f * gravity * peakHeight);
 
-          // if (layerV->palette)
+          // if (layer->palette)
           // {
             popcorn[i].colIndex = random8();
           // } else {
@@ -600,15 +600,15 @@ class PopCornEffect: public Node {
         }
       }
       if (popcorn[i].pos >= 0.0f) { // draw now active popcorn (either active before or just popped)
-        // uint32_t col = layerV->color_wheel(popcorn[i].colIndex);
-        // if (!layerV->palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
+        // uint32_t col = layer->color_wheel(popcorn[i].colIndex);
+        // if (!layer->palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
         uint16_t ledIndex = popcorn[i].pos;
-        CRGB col = ColorFromPalette(layerV->layerP->palette, popcorn[i].colIndex*(256/maxNumPopcorn));
-        if (ledIndex < layerV->size.x) {
-          layerV->setRGB(ledIndex, col);
-          for (int y = 0; y < layerV->size.y; y++)
-            for (int z = 0; z < layerV->size.z; z++)
-              layerV->setRGB(Coord3D(ledIndex,y,z), col);
+        CRGB col = ColorFromPalette(layer->layerP->palette, popcorn[i].colIndex*(256/maxNumPopcorn));
+        if (ledIndex < layer->size.x) {
+          layer->setRGB(ledIndex, col);
+          for (int y = 0; y < layer->size.y; y++)
+            for (int z = 0; z < layer->size.z; z++)
+              layer->setRGB(Coord3D(ledIndex,y,z), col);
         }
       }
     }
@@ -630,15 +630,15 @@ class WaverlyEffect: public Node {
     addControl(amplification, "amplification", "range");
     addControl(noClouds, "noClouds", "checkbox");
 
-    // addControl(bool, "soundPressure", layerV->effectData.write<bool>(false));
-    // addControl(bool, "AGCDebug", layerV->effectData.write<bool>(false));
+    // addControl(bool, "soundPressure", layer->effectData.write<bool>(false));
+    // addControl(bool, "AGCDebug", layer->effectData.write<bool>(false));
   }
 
   void loop() override {
-    // bool soundPressure = layerV->effectData.read<bool>();
-    // bool agcDebug = layerV->effectData.read<bool>();
+    // bool soundPressure = layer->effectData.read<bool>();
+    // bool agcDebug = layer->effectData.read<bool>();
 
-    layerV->fadeToBlackBy(fadeRate);
+    layer->fadeToBlackBy(fadeRate);
     //netmindz: cannot find these in audio sync
     // if (agcDebug && soundPressure) soundPressure = false;                 // only one of the two at any time
     // if ((soundPressure) && (audioSync->sync.volumeSmth > 0.5f)) audioSync->sync.volumeSmth = audioSync->sync.soundPressure;    // show sound pressure instead of volume
@@ -646,18 +646,18 @@ class WaverlyEffect: public Node {
 
     long t = millis() / 2; 
     Coord3D pos = {0,0,0}; //initialize z otherwise wrong results
-    for (pos.x = 0; pos.x < layerV->size.x; pos.x++) {
+    for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
       uint16_t thisVal = sharedData.volume * amplification * inoise8(pos.x * 45 , t , t) / 4096;      // WLEDMM back to SR code
-      uint16_t thisMax = min(map(thisVal, 0, 512, 0, layerV->size.y), (long)layerV->size.y);
+      uint16_t thisMax = min(map(thisVal, 0, 512, 0, layer->size.y), (long)layer->size.y);
 
       for (pos.y = 0; pos.y < thisMax; pos.y++) {
-        CRGB color = ColorFromPalette(layerV->layerP->palette, ::map(pos.y, 0, thisMax, 250, 0));
+        CRGB color = ColorFromPalette(layer->layerP->palette, ::map(pos.y, 0, thisMax, 250, 0));
         if (!noClouds)
-          layerV->addRGB(pos, color);
-        layerV->addRGB(Coord3D((layerV->size.x - 1) - pos.x, (layerV->size.y - 1) - pos.y), color);
+          layer->addRGB(pos, color);
+        layer->addRGB(Coord3D((layer->size.x - 1) - pos.x, (layer->size.y - 1) - pos.y), color);
       }
     }
-    layerV->blur2d(16);
+    layer->blur2d(16);
   }
 }; //Waverly
 
@@ -1892,7 +1892,7 @@ class WaverlyEffect: public Node {
 //       spotlights[i].type = random8(SPOT_TYPES_COUNT);
 //     }
 
-//     uint32_t color = SEGMENT. ColorFromPalette(layerV->layerP->palette, spotlights[i].colorIdx);
+//     uint32_t color = SEGMENT. ColorFromPalette(layer->layerP->palette, spotlights[i].colorIdx);
 //     int start = spotlights[i].position;
 
 //     if (spotlights[i].width <= 1) {
@@ -2071,15 +2071,15 @@ class WaverlyEffect: public Node {
 //     if (deltabright >= 32 || (!bg)) {
 //       // If the new pixel is significantly brighter than the background color,
 //       // use the new color.
-//       layerV->setRGB(i, c.red, c.green, c.blue);
+//       layer->setRGB(i, c.red, c.green, c.blue);
 //     } else if (deltabright > 0) {
 //       // If the new pixel is just slightly brighter than the background color,
 //       // mix a blend of the new color and the background color
-//       layerV->setRGB(i, color_blend(RGBW32(bg.r,bg.g,bg.b,0), RGBW32(c.r,c.g,c.b,0), deltabright * 8));
+//       layer->setRGB(i, color_blend(RGBW32(bg.r,bg.g,bg.b,0), RGBW32(c.r,c.g,c.b,0), deltabright * 8));
 //     } else {
 //       // if the new pixel is not at all brighter than the background color,
 //       // just use the background color.
-//       layerV->setRGB(i, bg.r, bg.g, bg.b);
+//       layer->setRGB(i, bg.r, bg.g, bg.b);
 //     }
 //   }
 //   return FRAMETIME;

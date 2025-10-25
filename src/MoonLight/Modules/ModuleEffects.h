@@ -36,10 +36,10 @@ public:
 
     void begin() {
         _state.onUpdateRunInTask = 1;
-        defaultNodeName = RandomEffect::name();
+        defaultNodeName = getNameAndTags<RandomEffect>();
         NodeManager::begin();
 
-        nodes = &(layerP.layerV[0]->nodes);
+        nodes = &(layerP.layers[0]->nodes);
 
         // if (false)
         //create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
@@ -62,7 +62,7 @@ public:
 
                     //     if (updatedItem == name) {
                     //         MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                    //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
+                    //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layers[0]->findLiveScriptNode(nodeState["name"]);
                     //         if (liveScriptNode) {
                     //             liveScriptNode->compileAndRun();
 
@@ -112,7 +112,7 @@ public:
         JsonArray values; // if a property is a select, this is the values of the select
         property = root.add<JsonObject>(); property["name"] = "layer"; property["type"] = "select"; property["default"] = 0; values = property["values"].to<JsonArray>();
         uint8_t i = 0;
-        for (VirtualLayer * layer: layerP.layerV) {
+        for (VirtualLayer * layer: layerP.layers) {
             values.add(i);
             i++;
         }
@@ -256,14 +256,14 @@ public:
         if (node) {
             MB_LOGD(ML_TAG, "%s (p:%p pr:%d)", name, node, isInPSRAM(node));
 
-            node->constructor(layerP.layerV[0], controls); //pass the layer to the node
+            node->constructor(layerP.layers[0], controls); //pass the layer to the node
             node->setup(); //run the setup of the effect
             node->onSizeChanged(Coord3D());
-            // layerV[0]->nodes.reserve(index+1);
-            if (index >= layerP.layerV[0]->nodes.size())
-                layerP.layerV[0]->nodes.push_back(node);
+            // layers[0]->nodes.reserve(index+1);
+            if (index >= layerP.layers[0]->nodes.size())
+                layerP.layers[0]->nodes.push_back(node);
             else
-                layerP.layerV[0]->nodes[index] = node; //add the node to the layer
+                layerP.layers[0]->nodes[index] = node; //add the node to the layer
         }
 
         return node;

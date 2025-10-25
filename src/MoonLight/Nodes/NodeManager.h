@@ -21,7 +21,7 @@
 class NodeManager : public Module {
 public: 
     bool requestUIUpdate = false;
-    const char* defaultNodeName = nullptr;
+    String defaultNodeName = "";
 
 protected:
     PsychicHttpServer *_server;
@@ -53,7 +53,7 @@ protected:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName;
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName.c_str();
 
             addNodes(values);
 

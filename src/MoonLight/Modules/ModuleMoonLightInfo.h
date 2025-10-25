@@ -64,12 +64,12 @@ public:
             data["size"]["z"] = layerP.lights.header.size.z;
             data["nodes#"] = layerP.nodes.size();
             uint8_t index = 0;
-            for (VirtualLayer *layerV : layerP.layerV) {
+            for (VirtualLayer *layer : layerP.layers) {
                 uint16_t nrOfZeroLights = 0;
                 uint16_t nrOfOneLight = 0;
                 uint16_t nrOfMoreLights = 0;
-                for (size_t i = 0; i < layerV->mappingTableSizeUsed; i++) {
-                    PhysMap &map = layerV->mappingTable[i];
+                for (size_t i = 0; i < layer->mappingTableSizeUsed; i++) {
+                    PhysMap &map = layer->mappingTable[i];
                     switch (map.mapType) {
                     case m_zeroLights:
                         nrOfZeroLights++;
@@ -78,23 +78,23 @@ public:
                         nrOfOneLight++;
                         break;
                     case m_moreLights:
-                        for (uint16_t indexP: layerV->mappingTableIndexes[map.indexes]) {
+                        for (uint16_t indexP: layer->mappingTableIndexes[map.indexes]) {
                             nrOfMoreLights++;
                         }
                         break;
                     }
                 }
 
-                data["layers"][index]["nrOfLights"] = layerV->nrOfLights;
-                data["layers"][index]["size"]["x"] = layerV->size.x;
-                data["layers"][index]["size"]["y"] = layerV->size.y;
-                data["layers"][index]["size"]["z"] = layerV->size.z;
-                data["layers"][index]["mappingTable#"] = layerV->mappingTable.size();
+                data["layers"][index]["nrOfLights"] = layer->nrOfLights;
+                data["layers"][index]["size"]["x"] = layer->size.x;
+                data["layers"][index]["size"]["y"] = layer->size.y;
+                data["layers"][index]["size"]["z"] = layer->size.z;
+                data["layers"][index]["mappingTable#"] = layer->mappingTable.size();
                 data["layers"][index]["nrOfZeroLights"] = nrOfZeroLights;
                 data["layers"][index]["nrOfOneLight"] = nrOfOneLight;
-                data["layers"][index]["mappingTableIndexes#"] = layerV->mappingTableIndexesSizeUsed;
+                data["layers"][index]["mappingTableIndexes#"] = layer->mappingTableIndexesSizeUsed;
                 data["layers"][index]["nrOfMoreLights"] = nrOfMoreLights;
-                data["layers"][index]["nodes#"] = layerV->nodes.size();
+                data["layers"][index]["nodes#"] = layer->nodes.size();
                 index++;
             }
         };

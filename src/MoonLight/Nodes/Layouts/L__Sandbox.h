@@ -39,9 +39,9 @@ class ExampleLayout: public Node {
   bool hasOnLayout() const override { return true; } // so the mapping system knows this node has onLayout, eg each time a modifier changes
   void onLayout() override {
     Coord3D pos;
-    for (pos.z = 0; pos.z < layerV->size.z; pos.z++) {
-        for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
-            for (pos.x = 0; pos.x < layerV->size.x; pos.x++) {
+    for (pos.z = 0; pos.z < layer->size.z; pos.z++) {
+        for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
+            for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
                 addLight(pos);
             }
         }

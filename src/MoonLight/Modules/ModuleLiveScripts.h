@@ -57,7 +57,7 @@ public:
 
                                 if (updatedItem == name) {
                                     MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(nodeState["name"]);
+                                    LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layers[0]->findLiveScriptNode(nodeState["name"]);
                                     if (liveScriptNode) {
                                         liveScriptNode->compileAndRun();
 
@@ -111,7 +111,7 @@ public:
             JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
             MB_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue != "null") {//do not run at boot!
-                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layerV[0]->findLiveScriptNode(scriptState["name"]);
+                LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layers[0]->findLiveScriptNode(scriptState["name"]);
                 if (liveScriptNode) {
                     if (updatedItem.name == "stop")
                         liveScriptNode->kill();

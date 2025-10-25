@@ -60,18 +60,18 @@ class FastLEDDriver: public Node {
 
   void loop() override {
     if (FastLED.count()) {
-      if (FastLED.getBrightness() != layerV->layerP->lights.header.brightness) {
-        MB_LOGD(ML_TAG, "setBrightness %d", layerV->layerP->lights.header.brightness);
-        FastLED.setBrightness(layerV->layerP->lights.header.brightness);
+      if (FastLED.getBrightness() != layer->layerP->lights.header.brightness) {
+        MB_LOGD(ML_TAG, "setBrightness %d", layer->layerP->lights.header.brightness);
+        FastLED.setBrightness(layer->layerP->lights.header.brightness);
       }
 
       //FastLED Led Controllers
-      CRGB correction = CRGB(layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue);
+      CRGB correction = CRGB(layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue);
       CLEDController *pCur = CLEDController::head();
       while( pCur) {
           // ++x;
           if (pCur->getCorrection() != correction) {
-            MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (#:%d)", layerV->layerP->lights.header.red, layerV->layerP->lights.header.green, layerV->layerP->lights.header.blue, pCur->size());
+            MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (#:%d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, pCur->size());
             pCur->setCorrection(correction);
           }
           // pCur->size();
@@ -85,18 +85,18 @@ class FastLEDDriver: public Node {
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
 
-    if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
+    if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) { //physical
       // if (safeModeMB) {
       //     MB_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
       //     return;
       // }
 
-      if (layerV->layerP->sortedPins.size() == 0) return;
+      if (layer->layerP->sortedPins.size() == 0) return;
 
-      MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+      MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
 
       uint8_t pinCount = 0;
-      for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
+      for (const SortedPin &sortedPin : layer->layerP->sortedPins) {
         pinCount++;
         if (pinCount > 4) {//FastLED RMT supports max 4 pins!
           MB_LOGW(ML_TAG, "Too many pins!");
@@ -108,7 +108,7 @@ class FastLEDDriver: public Node {
         uint16_t nrOfLights = sortedPin.nrOfLights;
         uint16_t pin = sortedPin.pin;
 
-        CRGB *leds = (CRGB *)layerV->layerP->lights.channels;
+        CRGB *leds = (CRGB *)layer->layerP->lights.channels;
 
         if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
  

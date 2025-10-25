@@ -103,7 +103,7 @@ class PhysicalLayer {
     // std::vector<bool> lightsToBlend; //this is a 1-bit vector !!! overlapping effects will blend
     // uint8_t globalBlend = 128; // to do add as UI control...
 
-    std::vector<VirtualLayer *, VectorRAMAllocator<VirtualLayer *>> layerV; // the virtual layers using this physical layer 
+    std::vector<VirtualLayer *, VectorRAMAllocator<VirtualLayer *>> layers; // the virtual layers using this physical layer 
 
     CRGBPalette16 palette = PartyColors_p;
 

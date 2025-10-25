@@ -45,7 +45,7 @@ public:
   static const char * tags() {return "";}
   static uint8_t dim() {return _NoD;};
 
-  VirtualLayer *layerV = nullptr; //the virtual layer this effect is using
+  VirtualLayer *layer = nullptr; //the virtual layer this effect is using
   JsonArray controls;
 
   virtual bool isLiveScriptNode() const { return false; }
@@ -55,8 +55,8 @@ public:
   bool on = false; //onUpdate will set it on
 
   //C++ constructors are not inherited, so declare it as normal functions
-  virtual void constructor(VirtualLayer *layerV, JsonArray controls) {
-    this->layerV = layerV;
+  virtual void constructor(VirtualLayer *layer, JsonArray controls) {
+    this->layer = layer;
     this->controls = controls;
   }
 
@@ -157,11 +157,11 @@ public:
   void requestMappings() {
     if (hasModifier() || hasOnLayout()) {
         // MB_LOGD(ML_TAG, "hasOnLayout or Modifier -> requestMapVirtual");
-        layerV->layerP->requestMapVirtual = true;
+        layer->layerP->requestMapVirtual = true;
     }
     if (hasOnLayout()) {
         // MB_LOGD(ML_TAG, "hasOnLayout -> requestMapPhysical");
-        layerV->layerP->requestMapPhysical = true;
+        layer->layerP->requestMapPhysical = true;
     }
   }
 
@@ -174,12 +174,12 @@ public:
 
   //convenience functions to add a light
   void addLight(Coord3D position) {
-    layerV->layerP->addLight(position);
+    layer->layerP->addLight(position);
   }
 
   //convenience functions to add a pin
   void addPin(uint8_t pinNr) {
-    layerV->layerP->addPin(pinNr);
+    layer->layerP->addPin(pinNr);
   }
   char * addNextPin(char * &nextPin) { //&: by reference to change the pointer to the next pin
       while (*nextPin && !isdigit((unsigned char)*nextPin)) 

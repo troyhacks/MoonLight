@@ -44,16 +44,16 @@ class ExampleEffect: public Node {
   // each frame of effect
   // use of bpm functions like beatsin8 is recommended so independent from LEDs framerate (33000/nrOfLights)
   void loop() override {
-    layerV->fadeToBlackBy(70);
+    layer->fadeToBlackBy(70);
     sharedData; // read shared data if needed, add sharedData if needed
     Coord3D pos;
-    for (pos.z = 0; pos.z < layerV->size.z; pos.z++) {
-        for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
-            for (pos.x = 0; pos.x < layerV->size.x; pos.x++) {
-                pos.x = beatsin8(bpm, 0, layerV->size.x - 1);
-                pos.y = beatsin8(intensity, 0, layerV->size.y - 1);
-                pos.z = beatsin8(intensity, 0, layerV->size.z - 1);
-                layerV->setRGB(pos, ColorFromPalette(layerV->layerP->palette, beatsin8(12, 0, 255)));
+    for (pos.z = 0; pos.z < layer->size.z; pos.z++) {
+        for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
+            for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
+                pos.x = beatsin8(bpm, 0, layer->size.x - 1);
+                pos.y = beatsin8(intensity, 0, layer->size.y - 1);
+                pos.z = beatsin8(intensity, 0, layer->size.z - 1);
+                layer->setRGB(pos, ColorFromPalette(layer->layerP->palette, beatsin8(12, 0, 255)));
             }
         }
     }
@@ -87,28 +87,28 @@ class BlackholeEffect: public Node {
 
   void loop() override {
 
-    const int cols = layerV->size.x;
-    const int rows = layerV->size.y;
+    const int cols = layer->size.x;
+    const int rows = layer->size.y;
     int x, y;
 
-    layerV->fadeToBlackBy(16 + (fadeRate>>3)); // create fading trails
+    layer->fadeToBlackBy(16 + (fadeRate>>3)); // create fading trails
     unsigned long t = millis()/128;                 // timebase
     // outer stars
     for (size_t i = 0; i < 8; i++) {
       x = beatsin8(outerXfreq>>3,   0, cols - 1, 0, ((i % 2) ? 128 : 0) + t * i);
       y = beatsin8(outerYfreq>>3, 0, rows - 1, 0, ((i % 2) ? 192 : 64) + t * i);
-      layerV->addRGB(Coord3D(x, y), ColorFromPalette(layerV->layerP->palette, i*32));
+      layer->addRGB(Coord3D(x, y), ColorFromPalette(layer->layerP->palette, i*32));
     }
     // inner stars
     for (size_t i = 0; i < 4; i++) {
       x = beatsin8(innerXfreq>>3, cols/4, cols - 1 - cols/4, 0, ((i % 2) ? 128 : 0) + t * i);
       y = beatsin8(innerYfreq>>3   , rows/4, rows - 1 - rows/4, 0, ((i % 2) ? 192 : 64) + t * i);
-      layerV->addRGB(Coord3D(x, y), ColorFromPalette(layerV->layerP->palette, 255-i*64));
+      layer->addRGB(Coord3D(x, y), ColorFromPalette(layer->layerP->palette, 255-i*64));
     }
     // central white dot
-    layerV->setRGB(Coord3D(cols/2, rows/2), CRGB::White);
+    layer->setRGB(Coord3D(cols/2, rows/2), CRGB::White);
     // blur everything a bit
-    if (blur) layerV->blur2d(blur);
+    if (blur) layer->blur2d(blur);
   }
 };
 

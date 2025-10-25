@@ -24,14 +24,14 @@ class CircleModifier: public Node {
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    modifierSize = layerV->size;
+    modifierSize = layer->size;
 
-    modifyPosition(layerV->size); //modify the virtual size as x, 0, 0
+    modifyPosition(layer->size); //modify the virtual size as x, 0, 0
 
     // change the size to be one bigger in each dimension
-    layerV->size.x++;
-    layerV->size.y++;
-    layerV->size.z++;
+    layer->size.x++;
+    layer->size.y++;
+    layer->size.z++;
   }
 
   void modifyPosition(Coord3D &position) override {
@@ -71,11 +71,11 @@ class MirrorModifier: public Node {
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    if (mirrorX) layerV->size.x = (layerV->size.x + 1) / 2;
-    if (mirrorY) layerV->size.y = (layerV->size.y + 1) / 2;
-    if (mirrorZ) layerV->size.z = (layerV->size.z + 1) / 2;
-    modifierSize = layerV->size;
-    MB_LOGV(ML_TAG, "mirror %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    if (mirrorX) layer->size.x = (layer->size.x + 1) / 2;
+    if (mirrorY) layer->size.y = (layer->size.y + 1) / 2;
+    if (mirrorZ) layer->size.z = (layer->size.z + 1) / 2;
+    modifierSize = layer->size;
+    MB_LOGV(ML_TAG, "mirror %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
@@ -103,9 +103,9 @@ class MultiplyModifier: public Node {
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    layerV->size = (layerV->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
-    modifierSize = layerV->size;
-    MB_LOGV(ML_TAG, "multiply %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    layer->size = (layer->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
+    modifierSize = layer->size;
+    MB_LOGV(ML_TAG, "multiply %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
@@ -147,16 +147,16 @@ class PinwheelModifier: public Node {
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    if (layerV->layerDimension > _1D && layerV->effectDimension > _1D) {
-      layerV->size.y = sqrt(sq(max<uint8_t>(layerV->size.x - layerV->middle.x, layerV->middle.x)) + 
-                            sq(max<uint8_t>(layerV->size.y - layerV->middle.y, layerV->middle.y))) + 1; // Adjust y before x
-      layerV->size.x = petals;
-      layerV->size.z = 1;
+    if (layer->layerDimension > _1D && layer->effectDimension > _1D) {
+      layer->size.y = sqrt(sq(max<uint8_t>(layer->size.x - layer->middle.x, layer->middle.x)) + 
+                            sq(max<uint8_t>(layer->size.y - layer->middle.y, layer->middle.y))) + 1; // Adjust y before x
+      layer->size.x = petals;
+      layer->size.z = 1;
     }
     else {
-      layerV->size.x = petals;
-      layerV->size.y = 1;
-      layerV->size.z = 1;
+      layer->size.x = petals;
+      layer->size.y = 1;
+      layer->size.z = 1;
     }
     if (petals < 1) petals = 1; // Ensure at least one petal
     const int FACTORS[23] = {360, 180, 120, 90, 72, 60, 45, 40, 36, 30, 24, 20, 18, 15, 12, 10, 9, 8, 6, 5, 4, 3, 2}; // Factors of 360
@@ -166,15 +166,15 @@ class PinwheelModifier: public Node {
     else factor = 360; // Default to 360 if symmetry is <= 0
     petalWidth = factor / float(petals);
 
-    modifierSize = layerV->size;
-    MB_LOGD(ML_TAG, "Pinwheel %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    modifierSize = layer->size;
+    MB_LOGD(ML_TAG, "Pinwheel %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
     // Coord3D mapped;
 
-    const int dx = position.x - layerV->middle.x;
-    const int dy = position.y - layerV->middle.y;
+    const int dx = position.x - layer->middle.x;
+    const int dy = position.y - layer->middle.y;
     const int swirlFactor = swirlVal == 0 ? 0 : hypot(dy, dx) * abs(swirlVal); // Only calculate if swirlVal != 0
     int angle = degrees(atan2(dy, dx)) + 180;  // 0 - 360
     
@@ -188,12 +188,12 @@ class PinwheelModifier: public Node {
 
     position.x = value;
     position.y = 0;
-    if (layerV->effectDimension > _1D && layerV->layerDimension > _1D) {
+    if (layer->effectDimension > _1D && layer->layerDimension > _1D) {
       position.y = int(sqrt(sq(dx) + sq(dy))); // Round produced blank position
     }
     position.z = 0;
 
-    // if (position.x == 0 && position.y == 0 && position.z == 0) MB_LOGD(ML_TAG, "Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layerV->middle.x, layerV->middle.y, swirlVal, symmetry, petals, zTwist);
+    // if (position.x == 0 && position.y == 0 && position.z == 0) MB_LOGD(ML_TAG, "Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layer->middle.x, layer->middle.y, swirlVal, symmetry, petals, zTwist);
     // MB_LOGD(ML_TAG, "position %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", position.x, position.y, position.z, mapped.x, mapped.y, mapped.z, angle, value);
   }
 };
@@ -219,16 +219,16 @@ class RippleYZModifier: public Node {
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    // modifyPosition(layerV->size);
+    // modifyPosition(layer->size);
     // change the size to be one bigger in each dimension
-    // layerV->size.x++;
-    // layerV->size.y++;
-    // layerV->size.z++;
+    // layer->size.x++;
+    // layer->size.y++;
+    // layer->size.z++;
     if (shrink) {
       if (towardsY)
-        layerV->size.y = 1;
+        layer->size.y = 1;
       if (towardsZ)
-        layerV->size.z = 1;
+        layer->size.z = 1;
     }
   }
 
@@ -245,10 +245,10 @@ class RippleYZModifier: public Node {
 
     //1D->2D: each X is rippled through the y-axis
     if (towardsY) {
-      if (layerV->effectDimension == _1D && layerV->layerDimension > _1D) {
-        for (int y=layerV->size.y-1; y>=1; y--) {
-          for (int x=0; x<layerV->size.x; x++) {
-            layerV->setRGB(Coord3D(x, y, 0), layerV->getRGB(Coord3D(x,y-1,0)));
+      if (layer->effectDimension == _1D && layer->layerDimension > _1D) {
+        for (int y=layer->size.y-1; y>=1; y--) {
+          for (int x=0; x<layer->size.x; x++) {
+            layer->setRGB(Coord3D(x, y, 0), layer->getRGB(Coord3D(x,y-1,0)));
           }
         }
       }
@@ -256,11 +256,11 @@ class RippleYZModifier: public Node {
 
     //2D->3D: each XY plane is rippled through the z-axis
     if (towardsZ) { //not relevant for 2D fixtures
-      if (layerV->effectDimension < _3D && layerV->layerDimension == _3D) {
-        for (int z=layerV->size.z-1; z>=1; z--) {
-          for (int y=0; y<layerV->size.y; y++) {
-            for (int x=0; x<layerV->size.x; x++) {
-              layerV->setRGB(Coord3D(x, y, z), layerV->getRGB(Coord3D(x,y,z-1)));
+      if (layer->effectDimension < _3D && layer->layerDimension == _3D) {
+        for (int z=layer->size.z-1; z>=1; z--) {
+          for (int y=0; y<layer->size.y; y++) {
+            for (int x=0; x<layer->size.x; x++) {
+              layer->setRGB(Coord3D(x, y, z), layer->getRGB(Coord3D(x,y,z-1)));
             }
           }
         }
@@ -307,18 +307,18 @@ class RotateModifier: public Node {
   void modifySize() override {
 
     if (expand) {
-      uint8_t size = MAX(layerV->size.x, MAX(layerV->size.y, layerV->size.z));
+      uint8_t size = MAX(layer->size.x, MAX(layer->size.y, layer->size.z));
       size = sqrt(size * size * 2) + 1;
-      Coord3D offset = Coord3D((size - layerV->size.x) / 2, (size - layerV->size.y) / 2, 0);
+      Coord3D offset = Coord3D((size - layer->size.x) / 2, (size - layer->size.y) / 2, 0);
 
-      layerV->size = Coord3D{size, size, 1};
+      layer->size = Coord3D{size, size, 1};
     }
 
-    modifierSize = layerV->size;
-    midX = layerV->size.x / 2;
-    midY = layerV->size.y / 2;
-    maxX = layerV->size.x;
-    maxY = layerV->size.y;
+    modifierSize = layer->size;
+    midX = layer->size.x / 2;
+    midY = layer->size.y / 2;
+    maxX = layer->size.x;
+    maxY = layer->size.y;
 
   }
 
@@ -419,11 +419,11 @@ class TransposeModifier: public Node {
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    if (transposeXY) { int temp = layerV->size.x; layerV->size.x = layerV->size.y; layerV->size.y = temp; }
-    if (transposeXZ) { int temp = layerV->size.x; layerV->size.x = layerV->size.z; layerV->size.z = temp; }
-    if (transposeYZ) { int temp = layerV->size.y; layerV->size.y = layerV->size.z; layerV->size.z = temp; }
-    modifierSize = layerV->size;
-    MB_LOGV(ML_TAG, "transpose %d %d %d", layerV->size.x, layerV->size.y, layerV->size.z);
+    if (transposeXY) { int temp = layer->size.x; layer->size.x = layer->size.y; layer->size.y = temp; }
+    if (transposeXZ) { int temp = layer->size.x; layer->size.x = layer->size.z; layer->size.z = temp; }
+    if (transposeYZ) { int temp = layer->size.y; layer->size.y = layer->size.z; layer->size.z = temp; }
+    modifierSize = layer->size;
+    MB_LOGV(ML_TAG, "transpose %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D &position) override {
@@ -455,8 +455,8 @@ class CheckerboardModifier: public Node {
 
   void modifySize() override {
 
-    if (group) { layerV->middle /= size; layerV->size = (layerV->size + (size - Coord3D{1,1,1})) / size; }
-    modifierSize = layerV->size;
+    if (group) { layer->middle /= size; layer->size = (layer->size + (size - Coord3D{1,1,1})) / size; }
+    modifierSize = layer->size;
   }
 
   void modifyPosition(Coord3D &position) override {

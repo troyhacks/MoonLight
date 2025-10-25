@@ -53,7 +53,7 @@ class PhysicalDriver: public DriverNode {
     #if HP_ALL_DRIVERS
       if (!initDone) return;
 
-      if (layerV->layerP->lights.header.isPositions == 0) {
+      if (layer->layerP->lights.header.isPositions == 0) {
 
         DriverNode::loop();
 
@@ -61,9 +61,9 @@ class PhysicalDriver: public DriverNode {
           if (ledsDriver.total_leds > 0)
             ledsDriver.showPixels(WAIT);
         #else
-          show_parlio(pins, layerV->layerP->lights.header.nrOfLights, layerV->layerP->lights.channels
-                      , ledsDriver._brightness, layerV->layerP->lights.header.channelsPerLight == 4, nb_pins, lengths[0]
-                      , layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue
+          show_parlio(pins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels
+                      , ledsDriver._brightness, layer->layerP->lights.header.channelsPerLight == 4, nb_pins, lengths[0]
+                      , layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue
                     );
         #endif
 
@@ -71,7 +71,7 @@ class PhysicalDriver: public DriverNode {
     #else //ESP32_LEDSDRIVER
       if (!ledsDriver.initLedsDone) return;
 
-      if (layerV->layerP->lights.header.isPositions == 0) {
+      if (layer->layerP->lights.header.isPositions == 0) {
 
           DriverNode::loop();
 
@@ -83,14 +83,14 @@ class PhysicalDriver: public DriverNode {
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
     #if HP_ALL_DRIVERS
-      if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
+      if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) { //physical
 
-        if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
-          MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layerV->layerP->sortedPins.size());
+        if (!lightPresetSaved || layer->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
+          MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layer->layerP->sortedPins.size());
           return;
         }
 
-        MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+        MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
         if (safeModeMB) {
           MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
           return;
@@ -98,7 +98,7 @@ class PhysicalDriver: public DriverNode {
 
         nb_pins = 0;
 
-        for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
+        for (const SortedPin &sortedPin : layer->layerP->sortedPins) {
           // MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
           if (nb_pins < NUMSTRIPS) {
             if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
@@ -132,7 +132,7 @@ class PhysicalDriver: public DriverNode {
 
               uint8_t savedBrightness = ledsDriver._brightness; //(initLed sets it to 255 and thats not what we want)
 
-              ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
+              ledsDriver.initled(layer->layerP->lights.channels, pins, lengths, nb_pins);
 
               ledsDriver.setBrightness(savedBrightness); //(initLed sets it to 255 and thats not what we want)
 
@@ -149,10 +149,10 @@ class PhysicalDriver: public DriverNode {
 
             //from lightPresetSaved
             //overwrite what initled has done as we don't use colorarrangment but assign offsets directly
-            ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
-            ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
-            ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
-            ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+            ledsDriver.nb_components = layer->layerP->lights.header.channelsPerLight;
+            ledsDriver.p_r = layer->layerP->lights.header.offsetRed;
+            ledsDriver.p_g = layer->layerP->lights.header.offsetGreen;
+            ledsDriver.p_b = layer->layerP->lights.header.offsetBlue;
 
           #else // P4: Parlio Troy Driver
             initDone = true; //so loop is called and initled not called again if channelsPerLight or pins saved
@@ -160,10 +160,10 @@ class PhysicalDriver: public DriverNode {
         }
       }
     #else //ESP32_LEDSDRIVER
-      if (!lightPresetSaved || ledsDriver.initLedsDone || layerV->layerP->sortedPins.size() == 0) return;
+      if (!lightPresetSaved || ledsDriver.initLedsDone || layer->layerP->sortedPins.size() == 0) return;
 
-      if (layerV->layerP->pass == 1) { //physical
-        MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+      if (layer->layerP->pass == 1) { //physical
+        MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
         if (safeModeMB) {
           MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
           return;
@@ -174,7 +174,7 @@ class PhysicalDriver: public DriverNode {
           PinConfig pinConfig[MAX_PINS];
 
 
-          for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
+          for (const SortedPin &sortedPin : layer->layerP->sortedPins) {
             MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
             if (numPins < MAX_PINS) {
               pinConfig[numPins].gpio = sortedPin.pin;
@@ -190,7 +190,7 @@ class PhysicalDriver: public DriverNode {
 
           if (numPins > 0) {
 
-            ledsDriver.initLeds(layerV->layerP->lights.channels, pinConfig, numPins, layerV->layerP->lights.header.channelsPerLight, layerV->layerP->lights.header.offsetRed, layerV->layerP->lights.header.offsetGreen, layerV->layerP->lights.header.offsetBlue, layerV->layerP->lights.header.offsetWhite); //102 is GRB
+            ledsDriver.initLeds(layer->layerP->lights.channels, pinConfig, numPins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue, layer->layerP->lights.header.offsetWhite); //102 is GRB
 
             #if ML_LIVE_MAPPING
               driver.setMapLed(&mapLed);

@@ -29,8 +29,8 @@ PhysicalLayer::PhysicalLayer() {
     // initLightsToBlend();
 
     //create one layer - temporary
-    layerV.push_back(new VirtualLayer());
-    layerV[0]->layerP = this;
+    layers.push_back(new VirtualLayer());
+    layers[0]->layerP = this;
 }
 
 void PhysicalLayer::setup() {
@@ -51,7 +51,7 @@ void PhysicalLayer::setup() {
         lights.maxChannels = 0;
     }
 
-    for (VirtualLayer * layer: layerV) {
+    for (VirtualLayer * layer: layers) {
         layer->setup();
     }
 }
@@ -60,7 +60,7 @@ void PhysicalLayer::loop() {
     if (lights.header.isPositions == 0 || lights.header.isPositions == 3) {//otherwise lights is used for positions etc.
 
         //runs the loop of all effects / nodes in the layer
-        for (VirtualLayer * layer: layerV) {
+        for (VirtualLayer * layer: layers) {
             if (layer) layer->loop(); //if (layer) needed when deleting rows ...
         }
 
@@ -128,7 +128,7 @@ void PhysicalLayer::onLayoutPre() {
         sortedPins.clear(); //clear the added pins for the next pass
     } else if (pass == 2) {
         indexP = 0;
-        for (VirtualLayer * layer: layerV) {
+        for (VirtualLayer * layer: layers) {
             //add the lights in the virtual layer
             layer->onLayoutPre();
         }
@@ -156,7 +156,7 @@ void PhysicalLayer::addLight(Coord3D position) {
         lights.header.size = lights.header.size.maximum(position);
         lights.header.nrOfLights++;
     } else {
-        for (VirtualLayer * layer: layerV) {
+        for (VirtualLayer * layer: layers) {
             //add the position in the virtual layer
             layer->addLight(position);
         }
@@ -215,7 +215,7 @@ void PhysicalLayer::onLayoutPost() {
         } //pins defined
     } else if (pass == 2) {
         MB_LOGD(ML_TAG, "pass %d %d", pass, indexP);
-        for (VirtualLayer * layer: layerV) {
+        for (VirtualLayer * layer: layers) {
             //add the position in the virtual layer
             layer->onLayoutPost();
         }

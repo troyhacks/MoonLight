@@ -82,7 +82,7 @@ class ArtNetDriver: public DriverNode {
 
     DriverNode::loop();
 
-    LightsHeader *header = &layerV->layerP->lights.header;
+    LightsHeader *header = &layer->layerP->lights.header;
 
     //continue with Art-Net code
     controllerIP = WiFi.localIP();
@@ -114,17 +114,17 @@ class ArtNetDriver: public DriverNode {
     //send all the leds to artnet
     for (int indexP = 0; indexP < header->nrOfLights; indexP++) {
       //fill a package
-      memcpy(&packet_buffer[packetSize+18], &layerV->layerP->lights.channels[indexP*header->channelsPerLight], header->channelsPerLight); //set all the channels
+      memcpy(&packet_buffer[packetSize+18], &layer->layerP->lights.channels[indexP*header->channelsPerLight], header->channelsPerLight); //set all the channels
 
       //correct the RGB channels for color order and brightness
-      reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB]);
+      reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB], &layer->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB]);
 
       if (header->offsetRGB1 != UINT8_MAX )
-        reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB1], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB1]);
+        reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB1], &layer->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB1]);
       if (header->offsetRGB2 != UINT8_MAX )
-        reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB2], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB2]);
+        reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB2], &layer->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB2]);
       if (header->offsetRGB3 != UINT8_MAX )
-        reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB3], &layerV->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB3]);
+        reOrderAndDimRGBW(&packet_buffer[packetSize+18+header->offsetRGB3], &layer->layerP->lights.channels[indexP*header->channelsPerLight + header->offsetRGB3]);
 
       if (lightPreset == 9 && indexP < 72) //RGBWYP this config assumes a mix of 4 channels and 6 channels per light !!!!
         packetSize += 4;
