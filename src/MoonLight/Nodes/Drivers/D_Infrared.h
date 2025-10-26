@@ -151,16 +151,16 @@ class IRDriver : public Node {
       switch (symbol_num) {
       case 34: // NEC normal frame
           if (nec_parse_frame(rmt_nec_symbols)) {
-              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X\r\n", s_nec_code_address, s_nec_code_command);
+              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X", s_nec_code_address, s_nec_code_command);
           }
           break;
       case 2: // NEC repeat frame
           if (nec_parse_frame_repeat(rmt_nec_symbols)) {
-              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X, repeat\r\n", s_nec_code_address, s_nec_code_command);
+              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X, repeat", s_nec_code_address, s_nec_code_command);
           }
           break;
       default:
-          MB_LOGI(IR_DRIVER_TAG, "Unknown NEC frame\r\n");
+          MB_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
           break;
       }
   }
@@ -170,6 +170,7 @@ class IRDriver : public Node {
     if (control["name"] == "pin") 
     {
       setup_in_progress = true;
+      rx_channel_cfg.gpio_num = (gpio_num_t)pin;
 
       if (rx_channel) 
       {
