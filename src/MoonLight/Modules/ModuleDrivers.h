@@ -16,7 +16,7 @@
 
 #include "FastLED.h"
 // #include "MoonBase/Module.h"
-#include "MoonLight/Nodes/NodeManager.h"
+#include "MoonBase/NodeManager.h"
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
@@ -66,26 +66,26 @@ public:
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
         Node *node = nullptr;
 
-        if (contains(name, PanelLayout::name())) node = allocMBObject<PanelLayout>();
-        else if (contains(name, PanelsLayout::name())) node = allocMBObject<PanelsLayout>();
-        else if (contains(name, CubeLayout::name())) node = allocMBObject<CubeLayout>();
-        else if (contains(name, RingsLayout::name())) node = allocMBObject<RingsLayout>();
-        else if (contains(name, WheelLayout::name())) node = allocMBObject<WheelLayout>();
-        else if (contains(name, HumanSizedCubeLayout::name())) node = allocMBObject<HumanSizedCubeLayout>();
-        else if (contains(name, SingleLineLayout::name())) node = allocMBObject<SingleLineLayout>();
-        else if (contains(name, SingleRowLayout::name())) node = allocMBObject<SingleRowLayout>();
+        if (equalAZaz09(name, PanelLayout::name())) node = allocMBObject<PanelLayout>();
+        else if (equalAZaz09(name, PanelsLayout::name())) node = allocMBObject<PanelsLayout>();
+        else if (equalAZaz09(name, CubeLayout::name())) node = allocMBObject<CubeLayout>();
+        else if (equalAZaz09(name, RingsLayout::name())) node = allocMBObject<RingsLayout>();
+        else if (equalAZaz09(name, WheelLayout::name())) node = allocMBObject<WheelLayout>();
+        else if (equalAZaz09(name, HumanSizedCubeLayout::name())) node = allocMBObject<HumanSizedCubeLayout>();
+        else if (equalAZaz09(name, SingleLineLayout::name())) node = allocMBObject<SingleLineLayout>();
+        else if (equalAZaz09(name, SingleRowLayout::name())) node = allocMBObject<SingleRowLayout>();
 
         //custom
         #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
-            else if (contains(name, SE16Layout::name())) node = allocMBObject<SE16Layout>();
+            else if (equalAZaz09(name, SE16Layout::name())) node = allocMBObject<SE16Layout>();
         #endif
 
-        else if (contains(name, ArtNetDriver::name())) node = allocMBObject<ArtNetDriver>();
-        else if (contains(name, FastLEDDriver::name())) node = allocMBObject<FastLEDDriver>();
-        else if (contains(name, PhysicalDriver::name())) node = allocMBObject<PhysicalDriver>();
-        else if (contains(name, AudioSyncDriver::name())) node = allocMBObject<AudioSyncDriver>();
-        else if (contains(name, HUB75Driver::name())) node = allocMBObject<HUB75Driver>();
-        else if (contains(name, VirtualDriver::name())) node = allocMBObject<VirtualDriver>();
+        else if (equalAZaz09(name, ArtNetDriver::name())) node = allocMBObject<ArtNetDriver>();
+        else if (equalAZaz09(name, FastLEDDriver::name())) node = allocMBObject<FastLEDDriver>();
+        else if (equalAZaz09(name, PhysicalDriver::name())) node = allocMBObject<PhysicalDriver>();
+        else if (equalAZaz09(name, AudioSyncDriver::name())) node = allocMBObject<AudioSyncDriver>();
+        else if (equalAZaz09(name, HUB75Driver::name())) node = allocMBObject<HUB75Driver>();
+        else if (equalAZaz09(name, VirtualDriver::name())) node = allocMBObject<VirtualDriver>();
         #if FT_LIVESCRIPT
             else {
                 LiveScriptNode *liveScriptNode = allocMBObject<LiveScriptNode>();

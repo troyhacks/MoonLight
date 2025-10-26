@@ -16,7 +16,7 @@
 
 #include "FastLED.h"
 // #include "MoonBase/Module.h"
-#include "MoonLight/Nodes/NodeManager.h"
+#include "MoonBase/NodeManager.h"
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
@@ -196,54 +196,54 @@ public:
 
     Node* addNode(const uint8_t index, const char * name, const JsonArray controls) override {
         Node *node = nullptr;
-        if (contains(name, SolidEffect::name())) node = allocMBObject<SolidEffect>();
-        else if (contains(name, BouncingBallsEffect::name())) node = allocMBObject<BouncingBallsEffect>();
-        else if (contains(name, BlurzEffect::name())) node = allocMBObject<BlurzEffect>();
-        else if (contains(name, DistortionWavesEffect::name())) node = allocMBObject<DistortionWavesEffect>();
-        else if (contains(name, FreqMatrixEffect::name())) node = allocMBObject<FreqMatrixEffect>();
-        else if (contains(name, GameOfLifeEffect::name())) node = allocMBObject<GameOfLifeEffect>();
-        else if (contains(name, GEQEffect::name())) node = allocMBObject<GEQEffect>();
-        else if (contains(name, GEQ3DEffect::name())) node = allocMBObject<GEQ3DEffect>();
-        else if (contains(name, FreqSawsEffect::name())) node = allocMBObject<FreqSawsEffect>();
-        else if (contains(name, LinesEffect::name())) node = allocMBObject<LinesEffect>();
-        else if (contains(name, LissajousEffect::name())) node = allocMBObject<LissajousEffect>();
-        else if (contains(name, BlackholeEffect::name())) node = allocMBObject<BlackholeEffect>();
+        if (equalAZaz09(name, SolidEffect::name())) node = allocMBObject<SolidEffect>();
+        else if (equalAZaz09(name, BouncingBallsEffect::name())) node = allocMBObject<BouncingBallsEffect>();
+        else if (equalAZaz09(name, BlurzEffect::name())) node = allocMBObject<BlurzEffect>();
+        else if (equalAZaz09(name, DistortionWavesEffect::name())) node = allocMBObject<DistortionWavesEffect>();
+        else if (equalAZaz09(name, FreqMatrixEffect::name())) node = allocMBObject<FreqMatrixEffect>();
+        else if (equalAZaz09(name, GameOfLifeEffect::name())) node = allocMBObject<GameOfLifeEffect>();
+        else if (equalAZaz09(name, GEQEffect::name())) node = allocMBObject<GEQEffect>();
+        else if (equalAZaz09(name, GEQ3DEffect::name())) node = allocMBObject<GEQ3DEffect>();
+        else if (equalAZaz09(name, FreqSawsEffect::name())) node = allocMBObject<FreqSawsEffect>();
+        else if (equalAZaz09(name, LinesEffect::name())) node = allocMBObject<LinesEffect>();
+        else if (equalAZaz09(name, LissajousEffect::name())) node = allocMBObject<LissajousEffect>();
+        else if (equalAZaz09(name, BlackholeEffect::name())) node = allocMBObject<BlackholeEffect>();
         #if USE_M5UNIFIED
-            else if (contains(name, MoonManEffect::name())) node = allocMBObject<MoonManEffect>();
+            else if (equalAZaz09(name, MoonManEffect::name())) node = allocMBObject<MoonManEffect>();
         #endif
-        else if (contains(name, Noise2DEffect::name())) node = allocMBObject<Noise2DEffect>();
-        else if (contains(name, NoiseMeterEffect::name())) node = allocMBObject<NoiseMeterEffect>();
-        else if (contains(name, PaintBrushEffect::name())) node = allocMBObject<PaintBrushEffect>();
-        else if (contains(name, ParticlesEffect::name())) node = allocMBObject<ParticlesEffect>();
-        else if (contains(name, PopCornEffect::name())) node = allocMBObject<PopCornEffect>();
-        else if (contains(name, RainbowEffect::name())) node = allocMBObject<RainbowEffect>();
-        else if (contains(name, RandomEffect::name())) node = allocMBObject<RandomEffect>();
-        else if (contains(name, RipplesEffect::name())) node = allocMBObject<RipplesEffect>();
-        else if (contains(name, RubiksCubeEffect::name())) node = allocMBObject<RubiksCubeEffect>();
-        else if (contains(name, ScrollingTextEffect::name())) node = allocMBObject<ScrollingTextEffect>();
-        else if (contains(name, SinusEffect::name())) node = allocMBObject<SinusEffect>();
-        else if (contains(name, SphereMoveEffect::name())) node = allocMBObject<SphereMoveEffect>();
-        else if (contains(name, StarFieldEffect::name())) node = allocMBObject<StarFieldEffect>();
-        else if (contains(name, PraxisEffect::name())) node = allocMBObject<PraxisEffect>();
-        else if (contains(name, WaverlyEffect::name())) node = allocMBObject<WaverlyEffect>();
-        else if (contains(name, FixedRectangleEffect::name())) node = allocMBObject<FixedRectangleEffect>();
-        else if (contains(name, WaveEffect::name())) node = allocMBObject<WaveEffect>();
-        else if (contains(name, Troy1ColorEffect::name())) node = allocMBObject<Troy1ColorEffect>();
-        else if (contains(name, Troy1MoveEffect::name())) node = allocMBObject<Troy1MoveEffect>();
-        else if (contains(name, Troy2ColorEffect::name())) node = allocMBObject<Troy2ColorEffect>();
-        else if (contains(name, Troy2MoveEffect::name())) node = allocMBObject<Troy2MoveEffect>();
-        else if (contains(name, FreqColorsEffect::name())) node = allocMBObject<FreqColorsEffect>();
-        else if (contains(name, WowiMoveEffect::name())) node = allocMBObject<WowiMoveEffect>();
-        else if (contains(name, AmbientMoveEffect::name())) node = allocMBObject<AmbientMoveEffect>();
+        else if (equalAZaz09(name, Noise2DEffect::name())) node = allocMBObject<Noise2DEffect>();
+        else if (equalAZaz09(name, NoiseMeterEffect::name())) node = allocMBObject<NoiseMeterEffect>();
+        else if (equalAZaz09(name, PaintBrushEffect::name())) node = allocMBObject<PaintBrushEffect>();
+        else if (equalAZaz09(name, ParticlesEffect::name())) node = allocMBObject<ParticlesEffect>();
+        else if (equalAZaz09(name, PopCornEffect::name())) node = allocMBObject<PopCornEffect>();
+        else if (equalAZaz09(name, RainbowEffect::name())) node = allocMBObject<RainbowEffect>();
+        else if (equalAZaz09(name, RandomEffect::name())) node = allocMBObject<RandomEffect>();
+        else if (equalAZaz09(name, RipplesEffect::name())) node = allocMBObject<RipplesEffect>();
+        else if (equalAZaz09(name, RubiksCubeEffect::name())) node = allocMBObject<RubiksCubeEffect>();
+        else if (equalAZaz09(name, ScrollingTextEffect::name())) node = allocMBObject<ScrollingTextEffect>();
+        else if (equalAZaz09(name, SinusEffect::name())) node = allocMBObject<SinusEffect>();
+        else if (equalAZaz09(name, SphereMoveEffect::name())) node = allocMBObject<SphereMoveEffect>();
+        else if (equalAZaz09(name, StarFieldEffect::name())) node = allocMBObject<StarFieldEffect>();
+        else if (equalAZaz09(name, PraxisEffect::name())) node = allocMBObject<PraxisEffect>();
+        else if (equalAZaz09(name, WaverlyEffect::name())) node = allocMBObject<WaverlyEffect>();
+        else if (equalAZaz09(name, FixedRectangleEffect::name())) node = allocMBObject<FixedRectangleEffect>();
+        else if (equalAZaz09(name, WaveEffect::name())) node = allocMBObject<WaveEffect>();
+        else if (equalAZaz09(name, Troy1ColorEffect::name())) node = allocMBObject<Troy1ColorEffect>();
+        else if (equalAZaz09(name, Troy1MoveEffect::name())) node = allocMBObject<Troy1MoveEffect>();
+        else if (equalAZaz09(name, Troy2ColorEffect::name())) node = allocMBObject<Troy2ColorEffect>();
+        else if (equalAZaz09(name, Troy2MoveEffect::name())) node = allocMBObject<Troy2MoveEffect>();
+        else if (equalAZaz09(name, FreqColorsEffect::name())) node = allocMBObject<FreqColorsEffect>();
+        else if (equalAZaz09(name, WowiMoveEffect::name())) node = allocMBObject<WowiMoveEffect>();
+        else if (equalAZaz09(name, AmbientMoveEffect::name())) node = allocMBObject<AmbientMoveEffect>();
 
-        else if (contains(name, CheckerboardModifier::name())) node = allocMBObject<CheckerboardModifier>();
-        else if (contains(name, CircleModifier::name())) node = allocMBObject<CircleModifier>();
-        else if (contains(name, MirrorModifier::name())) node = allocMBObject<MirrorModifier>();
-        else if (contains(name, MultiplyModifier::name())) node = allocMBObject<MultiplyModifier>();
-        else if (contains(name, RippleYZModifier::name())) node = allocMBObject<RippleYZModifier>();
-        else if (contains(name, PinwheelModifier::name())) node = allocMBObject<PinwheelModifier>();
-        else if (contains(name, RotateModifier::name())) node = allocMBObject<RotateModifier>();
-        else if (contains(name, TransposeModifier::name())) node = allocMBObject<TransposeModifier>();
+        else if (equalAZaz09(name, CheckerboardModifier::name())) node = allocMBObject<CheckerboardModifier>();
+        else if (equalAZaz09(name, CircleModifier::name())) node = allocMBObject<CircleModifier>();
+        else if (equalAZaz09(name, MirrorModifier::name())) node = allocMBObject<MirrorModifier>();
+        else if (equalAZaz09(name, MultiplyModifier::name())) node = allocMBObject<MultiplyModifier>();
+        else if (equalAZaz09(name, RippleYZModifier::name())) node = allocMBObject<RippleYZModifier>();
+        else if (equalAZaz09(name, PinwheelModifier::name())) node = allocMBObject<PinwheelModifier>();
+        else if (equalAZaz09(name, RotateModifier::name())) node = allocMBObject<RotateModifier>();
+        else if (equalAZaz09(name, TransposeModifier::name())) node = allocMBObject<TransposeModifier>();
         
         #if FT_LIVESCRIPT
             else {

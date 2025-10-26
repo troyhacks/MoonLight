@@ -13,7 +13,7 @@
 
 #include "VirtualLayer.h"
 #include "PhysicalLayer.h"
-#include "MoonLight/Nodes/Nodes.h"
+#include "MoonBase/Nodes.h"
 
 //convenience functions to call fastled functions out of the Leds namespace (there naming conflict)
 void fastled_fadeToBlackBy(CRGB* leds, uint16_t num_leds, uint8_t fadeBy) {

@@ -316,29 +316,29 @@ static struct SharedData {
  */
 
 //Drivers first as used by others
-#include "Drivers/D_PhysicalDriver.h"
-#include "Drivers/D_FastLED.h"
-#include "Drivers/D_Artnet.h"
-#include "Drivers/D_AudioSync.h"
-#include "Drivers/D_VirtualDriver.h"
-#include "Drivers/D_Hub75.h"
-#include "Drivers/D__Sandbox.h"
+#include "MoonLight/Nodes/Drivers/D_PhysicalDriver.h"
+#include "MoonLight/Nodes/Drivers/D_FastLED.h"
+#include "MoonLight/Nodes/Drivers/D_Artnet.h"
+#include "MoonLight/Nodes/Drivers/D_AudioSync.h"
+#include "MoonLight/Nodes/Drivers/D_VirtualDriver.h"
+#include "MoonLight/Nodes/Drivers/D_Hub75.h"
+#include "MoonLight/Nodes/Drivers/D__Sandbox.h"
 
-#include "Layouts/L_MoonLight.h"
+#include "MoonLight/Nodes/Layouts/L_MoonLight.h"
 #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
   #include "Layouts/L_SE16.h"
 #endif
-#include "Layouts/L__Sandbox.h"
+#include "MoonLight/Nodes/Layouts/L__Sandbox.h"
 
-#include "Effects/E_MoonLight.h"
-#include "Effects/E_MoonModules.h"
-#include "Effects/E_WLED.h"
-#include "Effects/E_MovingHeads.h"
-#include "Effects/E_FastLED.h"
-#include "Effects/E_SoulmateLights.h"
-#include "Effects/E__Sandbox.h"
+#include "MoonLight/Nodes/Effects/E_MoonLight.h"
+#include "MoonLight/Nodes/Effects/E_MoonModules.h"
+#include "MoonLight/Nodes/Effects/E_WLED.h"
+#include "MoonLight/Nodes/Effects/E_MovingHeads.h"
+#include "MoonLight/Nodes/Effects/E_FastLED.h"
+#include "MoonLight/Nodes/Effects/E_SoulmateLights.h"
+#include "MoonLight/Nodes/Effects/E__Sandbox.h"
 
-#include "Modifiers/M_MoonLight.h"
-#include "Modifiers/M__Sandbox.h"
+#include "MoonLight/Nodes/Modifiers/M_MoonLight.h"
+#include "MoonLight/Nodes/Modifiers/M__Sandbox.h"
 
 #endif //FT_MOONLIGHT
