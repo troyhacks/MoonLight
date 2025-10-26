@@ -9,18 +9,16 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-
 #if FT_MOONLIGHT
 
 // example template, do not remove!
 // add this class in /src/MoonLight/ModuleDrivers::addNodes()
 // add documentation in /docs/moonlight/drivers.md
-class ExampleDriver: public Node {
-  public:
-
-  static const char * name() {return "Example Driver";}
-  static uint8_t dim() {return _NoD;} // Dimensions not relevant for drivers?
-  static const char * tags() {return "☸️⏳";} // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
+class ExampleDriver : public Node {
+ public:
+  static const char* name() { return "Example Driver"; }
+  static uint8_t dim() { return _NoD; }        // Dimensions not relevant for drivers?
+  static const char* tags() { return "☸️⏳"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
   uint8_t pin = 16;
 
@@ -29,26 +27,25 @@ class ExampleDriver: public Node {
     // for different type of controls see other Nodes
     addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT);
   }
-  
-  void onUpdate(String &oldValue, JsonObject control) {
+
+  void onUpdate(String& oldValue, JsonObject control) {
     // add your custom onUpdate code here
     if (control["name"] == "pin") {
       //...
     }
   }
 
-  bool hasOnLayout() const override { return true; } // so the mapping system knows this node has onLayout, eg each time a modifier changes
+  bool hasOnLayout() const override { return true; }  // so the mapping system knows this node has onLayout, eg each time a modifier changes
   void onLayout() override {};
 
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override {
-    pinMode(pin, INPUT); 
+    pinMode(pin, INPUT);
     int value = digitalRead(pin);
-    sharedData; // write value to shared data if needed, add sharedData if needed, use in other nodes (e.g. effects)
+    sharedData;  // write value to shared data if needed, add sharedData if needed, use in other nodes (e.g. effects)
   };
 
-  ~ExampleDriver() override {}; // e.g. to free allocated memory
+  ~ExampleDriver() override {};  // e.g. to free allocated memory
 };
-
 
 #endif
