@@ -11,13 +11,12 @@
 
 #if FT_MOONLIGHT
 
-//Takes the x dimension from the layout (1D effect) and turn it into a circle in 2D or a sphere in 3D.
-class CircleModifier: public Node {
-  public:
-
-  static const char * name() {return "Circle";}
-  static uint8_t dim() {return _2D;} //1D to 2D ...
-  static const char * tags() {return "💎🐙";}
+// Takes the x dimension from the layout (1D effect) and turn it into a circle in 2D or a sphere in 3D.
+class CircleModifier : public Node {
+ public:
+  static const char* name() { return "Circle"; }
+  static uint8_t dim() { return _2D; }  // 1D to 2D ...
+  static const char* tags() { return "💎🐙"; }
 
   Coord3D modifierSize;
 
@@ -26,7 +25,7 @@ class CircleModifier: public Node {
   void modifySize() override {
     modifierSize = layer->size;
 
-    modifyPosition(layer->size); //modify the virtual size as x, 0, 0
+    modifyPosition(layer->size);  // modify the virtual size as x, 0, 0
 
     // change the size to be one bigger in each dimension
     layer->size.x++;
@@ -34,11 +33,11 @@ class CircleModifier: public Node {
     layer->size.z++;
   }
 
-  void modifyPosition(Coord3D &position) override {
-    //calculate the distance from the center
+  void modifyPosition(Coord3D& position) override {
+    // calculate the distance from the center
     int dx = position.x - modifierSize.x / 2;
     int dy = position.y - modifierSize.y / 2;
-    int dz = position.z - modifierSize.z / 2; 
+    int dz = position.z - modifierSize.z / 2;
 
     // Calculate the distance from the center
     float distance = sqrt(dx * dx + dy * dy + dz * dz);
@@ -49,17 +48,16 @@ class CircleModifier: public Node {
   }
 };
 
-class MirrorModifier: public Node {
-  public:
-
-  static const char * name() {return "Mirror";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "💎🐙";}
+class MirrorModifier : public Node {
+ public:
+  static const char* name() { return "Mirror"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "💎🐙"; }
 
   bool mirrorX = true;
   bool mirrorY = false;
   bool mirrorZ = false;
-  
+
   void setup() override {
     addControl(mirrorX, "mirrorX", "checkbox");
     addControl(mirrorY, "mirrorY", "checkbox");
@@ -67,7 +65,7 @@ class MirrorModifier: public Node {
   }
 
   Coord3D modifierSize;
-  
+
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
@@ -78,58 +76,54 @@ class MirrorModifier: public Node {
     MB_LOGV(ML_TAG, "mirror %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
-  void modifyPosition(Coord3D &position) override {
+  void modifyPosition(Coord3D& position) override {
     if (mirrorX && position.x >= modifierSize.x) position.x = modifierSize.x * 2 - 1 - position.x;
     if (mirrorY && position.y >= modifierSize.y) position.y = modifierSize.y * 2 - 1 - position.y;
     if (mirrorZ && position.z >= modifierSize.z) position.z = modifierSize.z * 2 - 1 - position.z;
   }
 };
 
-class MultiplyModifier: public Node {
-  public:
+class MultiplyModifier : public Node {
+ public:
+  static const char* name() { return "Multiply"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "💎"; }
 
-  static const char * name() {return "Multiply";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "💎";}
-
-  Coord3D proMulti = {2,2,2};
-  bool    mirror = false;
+  Coord3D proMulti = {2, 2, 2};
+  bool mirror = false;
   Coord3D modifierSize;
 
-  void setup() override {
-    addControl(proMulti, "multipliers", "coord3D");
-  }
+  void setup() override { addControl(proMulti, "multipliers", "coord3D"); }
 
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    layer->size = (layer->size + proMulti - Coord3D({1,1,1})) / proMulti; // Round up
+    layer->size = (layer->size + proMulti - Coord3D({1, 1, 1})) / proMulti;  // Round up
     modifierSize = layer->size;
     MB_LOGV(ML_TAG, "multiply %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
-  void modifyPosition(Coord3D &position) override {
+  void modifyPosition(Coord3D& position) override {
     if (mirror) {
-      Coord3D mirrors = position / modifierSize; // Place the light in the right quadrant
+      Coord3D mirrors = position / modifierSize;  // Place the light in the right quadrant
       position = position % modifierSize;
-      if (mirrors.x %2 != 0) position.x = modifierSize.x - 1 - position.x;
-      if (mirrors.y %2 != 0) position.y = modifierSize.y - 1 - position.y;
-      if (mirrors.z %2 != 0) position.z = modifierSize.z - 1 - position.z;
-    }
-    else position = position % modifierSize;
+      if (mirrors.x % 2 != 0) position.x = modifierSize.x - 1 - position.x;
+      if (mirrors.y % 2 != 0) position.y = modifierSize.y - 1 - position.y;
+      if (mirrors.z % 2 != 0) position.z = modifierSize.z - 1 - position.z;
+    } else
+      position = position % modifierSize;
   }
 };
 
-class PinwheelModifier: public Node {
-  public:
-
-  static const char * name() {return "Pinwheel";}
-  static uint8_t dim() {return _3D;} //test zTwist...
-  static const char * tags() {return "💎";}
+class PinwheelModifier : public Node {
+ public:
+  static const char* name() { return "Pinwheel"; }
+  static uint8_t dim() { return _3D; }  // test zTwist...
+  static const char* tags() { return "💎"; }
 
   uint8_t petals = 60;
   uint8_t swirlVal = 30;
-  bool    reverse = false;
+  bool reverse = false;
   uint8_t symmetry = 1;
   uint8_t zTwist = 0;
   float petalWidth = 6.0;
@@ -143,68 +137,69 @@ class PinwheelModifier: public Node {
     addControl(symmetry, "symmetry", "slider");
     addControl(zTwist, "zTwist", "slider");
   }
-  
+
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
     if (layer->layerDimension > _1D && layer->effectDimension > _1D) {
-      layer->size.y = sqrt(sq(max<uint8_t>(layer->size.x - layer->middle.x, layer->middle.x)) + 
-                            sq(max<uint8_t>(layer->size.y - layer->middle.y, layer->middle.y))) + 1; // Adjust y before x
+      layer->size.y = sqrt(sq(max<uint8_t>(layer->size.x - layer->middle.x, layer->middle.x)) + sq(max<uint8_t>(layer->size.y - layer->middle.y, layer->middle.y))) + 1;  // Adjust y before x
       layer->size.x = petals;
       layer->size.z = 1;
-    }
-    else {
+    } else {
       layer->size.x = petals;
       layer->size.y = 1;
       layer->size.z = 1;
     }
-    if (petals < 1) petals = 1; // Ensure at least one petal
-    const int FACTORS[23] = {360, 180, 120, 90, 72, 60, 45, 40, 36, 30, 24, 20, 18, 15, 12, 10, 9, 8, 6, 5, 4, 3, 2}; // Factors of 360
+    if (petals < 1) petals = 1;                                                                                        // Ensure at least one petal
+    const int FACTORS[23] = {360, 180, 120, 90, 72, 60, 45, 40, 36, 30, 24, 20, 18, 15, 12, 10, 9, 8, 6, 5, 4, 3, 2};  // Factors of 360
     int factor;
-    if (symmetry > 23) factor = 2; // Default to 2 if symmetry is greater than 23
-    else if (symmetry > 0) factor = FACTORS[symmetry - 1]; // Convert symmetry to a factor of 360
-    else factor = 360; // Default to 360 if symmetry is <= 0
+    if (symmetry > 23)
+      factor = 2;  // Default to 2 if symmetry is greater than 23
+    else if (symmetry > 0)
+      factor = FACTORS[symmetry - 1];  // Convert symmetry to a factor of 360
+    else
+      factor = 360;  // Default to 360 if symmetry is <= 0
     petalWidth = factor / float(petals);
 
     modifierSize = layer->size;
     MB_LOGD(ML_TAG, "Pinwheel %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
-  void modifyPosition(Coord3D &position) override {
+  void modifyPosition(Coord3D& position) override {
     // Coord3D mapped;
 
     const int dx = position.x - layer->middle.x;
     const int dy = position.y - layer->middle.y;
-    const int swirlFactor = swirlVal == 0 ? 0 : hypot(dy, dx) * abs(swirlVal); // Only calculate if swirlVal != 0
-    int angle = degrees(atan2(dy, dx)) + 180;  // 0 - 360
-    
-    if (swirlVal < 0) angle = 360 - angle; // Reverse Swirl
+    const int swirlFactor = swirlVal == 0 ? 0 : hypot(dy, dx) * abs(swirlVal);  // Only calculate if swirlVal != 0
+    int angle = degrees(atan2(dy, dx)) + 180;                                   // 0 - 360
+
+    if (swirlVal < 0) angle = 360 - angle;  // Reverse Swirl
 
     int value = angle + swirlFactor + (zTwist * position.z);
     value /= petalWidth;
     value %= petals;
 
-    if (reverse) value = petals - value - 1; // Reverse Movement
+    if (reverse) value = petals - value - 1;  // Reverse Movement
 
     position.x = value;
     position.y = 0;
     if (layer->effectDimension > _1D && layer->layerDimension > _1D) {
-      position.y = int(sqrt(sq(dx) + sq(dy))); // Round produced blank position
+      position.y = int(sqrt(sq(dx) + sq(dy)));  // Round produced blank position
     }
     position.z = 0;
 
-    // if (position.x == 0 && position.y == 0 && position.z == 0) MB_LOGD(ML_TAG, "Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layer->middle.x, layer->middle.y, swirlVal, symmetry, petals, zTwist);
-    // MB_LOGD(ML_TAG, "position %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", position.x, position.y, position.z, mapped.x, mapped.y, mapped.z, angle, value);
+    // if (position.x == 0 && position.y == 0 && position.z == 0) MB_LOGD(ML_TAG, "Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layer->middle.x, layer->middle.y,
+    // swirlVal, symmetry, petals, zTwist); MB_LOGD(ML_TAG, "position %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", position.x, position.y, position.z, mapped.x, mapped.y, mapped.z, angle,
+    // value);
   }
 };
 
-//Idea and first implementation (WLEDMM Art-Net) by @Troy
-class RippleYZModifier: public Node {
-  public:
-
-  static const char * name() {return "RippleYZ";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "💎💫";}
+// Idea and first implementation (WLEDMM Art-Net) by @Troy
+class RippleYZModifier : public Node {
+ public:
+  static const char* name() { return "RippleYZ"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "💎💫"; }
 
   bool shrink = true;
   bool towardsY = true;
@@ -225,60 +220,54 @@ class RippleYZModifier: public Node {
     // layer->size.y++;
     // layer->size.z++;
     if (shrink) {
-      if (towardsY)
-        layer->size.y = 1;
-      if (towardsZ)
-        layer->size.z = 1;
+      if (towardsY) layer->size.y = 1;
+      if (towardsZ) layer->size.z = 1;
     }
   }
 
-  void modifyPosition(Coord3D &position) override {
+  void modifyPosition(Coord3D& position) override {
     if (shrink) {
-      if (towardsY)
-        position.y = 0;
-      if (towardsZ)
-        position.z = 0;
+      if (towardsY) position.y = 0;
+      if (towardsZ) position.z = 0;
     }
   }
 
   void loop() override {
-
-    //1D->2D: each X is rippled through the y-axis
+    // 1D->2D: each X is rippled through the y-axis
     if (towardsY) {
       if (layer->effectDimension == _1D && layer->layerDimension > _1D) {
-        for (int y=layer->size.y-1; y>=1; y--) {
-          for (int x=0; x<layer->size.x; x++) {
-            layer->setRGB(Coord3D(x, y, 0), layer->getRGB(Coord3D(x,y-1,0)));
+        for (int y = layer->size.y - 1; y >= 1; y--) {
+          for (int x = 0; x < layer->size.x; x++) {
+            layer->setRGB(Coord3D(x, y, 0), layer->getRGB(Coord3D(x, y - 1, 0)));
           }
         }
       }
     }
 
-    //2D->3D: each XY plane is rippled through the z-axis
-    if (towardsZ) { //not relevant for 2D fixtures
+    // 2D->3D: each XY plane is rippled through the z-axis
+    if (towardsZ) {  // not relevant for 2D fixtures
       if (layer->effectDimension < _3D && layer->layerDimension == _3D) {
-        for (int z=layer->size.z-1; z>=1; z--) {
-          for (int y=0; y<layer->size.y; y++) {
-            for (int x=0; x<layer->size.x; x++) {
-              layer->setRGB(Coord3D(x, y, z), layer->getRGB(Coord3D(x,y,z-1)));
+        for (int z = layer->size.z - 1; z >= 1; z--) {
+          for (int y = 0; y < layer->size.y; y++) {
+            for (int x = 0; x < layer->size.x; x++) {
+              layer->setRGB(Coord3D(x, y, z), layer->getRGB(Coord3D(x, y, z - 1)));
             }
           }
         }
       }
     }
   }
-}; //RippleYZ
+};  // RippleYZ
 
 // RotateModifier rotates the light position around the center of the layout.
 // It can flip the x and y coordinates, reverse the rotation direction, and alternate the rotation
 // direction every full rotation. It also supports shear transformations to create a more dynamic effect.
 // by WildCats08 / @Brandon502
-class RotateModifier: public Node {
-  public:
-
-  static const char * name() {return "Rotate";}
-  static uint8_t dim() {return _2D;}
-  static const char * tags() {return "💎💫";}
+class RotateModifier : public Node {
+ public:
+  static const char* name() { return "Rotate"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "💎💫"; }
 
   bool expand = false;
   bool flip, reverse, alternate;
@@ -305,7 +294,6 @@ class RotateModifier: public Node {
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-
     if (expand) {
       uint8_t size = MAX(layer->size.x, MAX(layer->size.y, layer->size.z));
       size = sqrt(size * size * 2) + 1;
@@ -319,11 +307,9 @@ class RotateModifier: public Node {
     midY = layer->size.y / 2;
     maxX = layer->size.x;
     maxY = layer->size.y;
-
   }
 
-  void modifyPosition(Coord3D &position) override {
-
+  void modifyPosition(Coord3D& position) override {
     if (expand) {
       int size = MAX(modifierSize.x, MAX(modifierSize.y, modifierSize.z));
       size = sqrt(size * size * 2) + 1;
@@ -332,22 +318,28 @@ class RotateModifier: public Node {
     }
   }
 
-  uint16_t angle     = UINT16_MAX;
+  uint16_t angle = UINT16_MAX;
   uint16_t prevAngle = UINT16_MAX;
-  int16_t  shearX;
-  int16_t  shearY;
-  const uint8_t  Scale_Shift = 10;
-  const int      Fixed_Scale = (1 << Scale_Shift);
-  const int      RoundVal    = (1 << (Scale_Shift - 1));
+  int16_t shearX;
+  int16_t shearY;
+  const uint8_t Scale_Shift = 10;
+  const int Fixed_Scale = (1 << Scale_Shift);
+  const int RoundVal = (1 << (Scale_Shift - 1));
 
   void loop() override {
-    //place in loop by by softhack007
-    if (rotateBPM == 0) angle = staticAngle;
-    else angle = ::map(beat16(rotateBPM), 0, UINT16_MAX, 0, 360); //change to time independant
+    // place in loop by by softhack007
+    if (rotateBPM == 0)
+      angle = staticAngle;
+    else
+      angle = ::map(beat16(rotateBPM), 0, UINT16_MAX, 0, 360);  // change to time independant
 
     if (angle != prevAngle) {
-      if (direction == 2) alternate = true; 
-      else              { alternate = false; reverse = (direction == 1); }
+      if (direction == 2)
+        alternate = true;
+      else {
+        alternate = false;
+        reverse = (direction == 1);
+      }
 
       if (alternate && (angle < prevAngle)) reverse = !reverse;
 
@@ -355,23 +347,23 @@ class RotateModifier: public Node {
 
       flip = (shearAngle > 90 && shearAngle < 270);
 
-      shearAngle = flip ? (shearAngle + 180) % 360 : shearAngle; // Flip shearAngle if needed
+      shearAngle = flip ? (shearAngle + 180) % 360 : shearAngle;  // Flip shearAngle if needed
 
       // Calculate shearX and shearY
       float angleRadians = radians(shearAngle);
-      shearX = -tanf(angleRadians / 2) * Fixed_Scale; //f by softhack007
-      shearY =  sinf(angleRadians)     * Fixed_Scale; //f by softhack007
+      shearX = -tanf(angleRadians / 2) * Fixed_Scale;  // f by softhack007
+      shearY = sinf(angleRadians) * Fixed_Scale;       // f by softhack007
 
       prevAngle = angle;
     }
   }
 
-  void modifyXYZ(Coord3D &position) override {
-    if (angle == 0) return; // No rotation needed
+  void modifyXYZ(Coord3D& position) override {
+    if (angle == 0) return;  // No rotation needed
     if (flip) {
       // Reverse x and y values
-      position.x = maxX-1 - position.x;
-      position.y = maxY-1 - position.y;
+      position.x = maxX - 1 - position.x;
+      position.y = maxY - 1 - position.y;
     }
 
     // Translate position to origin
@@ -387,27 +379,28 @@ class RotateModifier: public Node {
     // Delete and swap the commented lines below if drawing out of bounds is no longer possible
     x2 += midX;
     y1 += midY;
-    if (x2 >= maxX || y1 >= maxY || x2 < 0 || y1 < 0) position = {INT16_MAX, INT8_MAX, 0};
-    else position = {static_cast<uint16_t>(x2), static_cast<uint8_t>(y1), 0};
+    if (x2 >= maxX || y1 >= maxY || x2 < 0 || y1 < 0)
+      position = {INT16_MAX, INT8_MAX, 0};
+    else
+      position = {static_cast<uint16_t>(x2), static_cast<uint8_t>(y1), 0};
 
     // Translate position back and assign
     // position.x = x2 + midX;
     // position.y = y1 + midY;
     // position.z = 0;
   }
-}; //RotateModifier
+};  // RotateModifier
 
-class TransposeModifier: public Node {
-  public:
-
-  static const char * name() {return "Transpose";}
-  static uint8_t dim() {return _3D;}
-  static const char * tags() {return "💎🐙";}
+class TransposeModifier : public Node {
+ public:
+  static const char* name() { return "Transpose"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "💎🐙"; }
 
   bool transposeXY = true;
   bool transposeXZ = false;
   bool transposeYZ = false;
-  
+
   void setup() override {
     addControl(transposeXY, "XY", "checkbox");
     addControl(transposeXZ, "XZ", "checkbox");
@@ -415,33 +408,57 @@ class TransposeModifier: public Node {
   }
 
   Coord3D modifierSize;
-  
+
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-    if (transposeXY) { int temp = layer->size.x; layer->size.x = layer->size.y; layer->size.y = temp; }
-    if (transposeXZ) { int temp = layer->size.x; layer->size.x = layer->size.z; layer->size.z = temp; }
-    if (transposeYZ) { int temp = layer->size.y; layer->size.y = layer->size.z; layer->size.z = temp; }
+    if (transposeXY) {
+      int temp = layer->size.x;
+      layer->size.x = layer->size.y;
+      layer->size.y = temp;
+    }
+    if (transposeXZ) {
+      int temp = layer->size.x;
+      layer->size.x = layer->size.z;
+      layer->size.z = temp;
+    }
+    if (transposeYZ) {
+      int temp = layer->size.y;
+      layer->size.y = layer->size.z;
+      layer->size.z = temp;
+    }
     modifierSize = layer->size;
     MB_LOGV(ML_TAG, "transpose %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
-  void modifyPosition(Coord3D &position) override {
-    if (transposeXY) { int temp = position.x; position.x = position.y; position.y = temp; }
-    if (transposeXZ) { int temp = position.x; position.x = position.z; position.z = temp; }
-    if (transposeYZ) { int temp = position.y; position.y = position.z; position.z = temp; }
+  void modifyPosition(Coord3D& position) override {
+    if (transposeXY) {
+      int temp = position.x;
+      position.x = position.y;
+      position.y = temp;
+    }
+    if (transposeXZ) {
+      int temp = position.x;
+      position.x = position.z;
+      position.z = temp;
+    }
+    if (transposeYZ) {
+      int temp = position.y;
+      position.y = position.z;
+      position.z = temp;
+    }
   }
-}; //Transpose
+};  // Transpose
 
-//by WildCats08 / @Brandon502
-class CheckerboardModifier: public Node {
-  public:
-  static const char * name() {return "Checkerboard 💎💫";}
-  static const char * tags() {return "";}
+// by WildCats08 / @Brandon502
+class CheckerboardModifier : public Node {
+ public:
+  static const char* name() { return "Checkerboard 💎💫"; }
+  static const char* tags() { return ""; }
 
-  Coord3D    size   = {3,3,3};
+  Coord3D size = {3, 3, 3};
   bool invert = false;
-  bool group  = false;
+  bool group = false;
 
   void setup() override {
     addControl(size, "squareSize", "coord3D", 1, 100);
@@ -450,28 +467,34 @@ class CheckerboardModifier: public Node {
   }
 
   Coord3D modifierSize;
-  
+
   bool hasModifier() const override { return true; }
 
   void modifySize() override {
-
-    if (group) { layer->middle /= size; layer->size = (layer->size + (size - Coord3D{1,1,1})) / size; }
+    if (group) {
+      layer->middle /= size;
+      layer->size = (layer->size + (size - Coord3D{1, 1, 1})) / size;
+    }
     modifierSize = layer->size;
   }
 
-  void modifyPosition(Coord3D &position) override {
+  void modifyPosition(Coord3D& position) override {
     Coord3D check = position / size;
 
     if (group) position /= size;
 
     if ((check.x + check.y + check.z) % 2 == 0) {
-      if (invert)  { position.x = UINT16_MAX; return; }//do not show this pixel
-    } 
-    else {
-      if (!invert) { position.x = UINT16_MAX; return; } //do not show this pixel
+      if (invert) {
+        position.x = UINT16_MAX;
+        return;
+      }  // do not show this pixel
+    } else {
+      if (!invert) {
+        position.x = UINT16_MAX;
+        return;
+      }  // do not show this pixel
     }
-
   }
-}; //CheckerboardModifier
+};  // CheckerboardModifier
 
 #endif

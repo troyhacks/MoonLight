@@ -9,7 +9,6 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-
 // * filesState: all files on FS
 // * folderList: all files in a folder
 // * editableFile: current file
@@ -22,50 +21,45 @@
 // * socket files / handleFileState (->folderListFromBreadCrumbs)
 // Using component FileEdit, see [Components](https://moonmodules.org/MoonLight/components/#fileedit)
 
-
 #ifndef FileManager_h
 #define FileManager_h
 
 #if FT_MOONBASE == 1
 
-#include <EventSocket.h>
-#include <HttpEndpoint.h>
-#include <EventEndpoint.h>
-#include <WebSocketServer.h>
-#include <PsychicHttp.h>
-#include <ESP32SvelteKit.h>
+  #include <ESP32SvelteKit.h>
+  #include <EventEndpoint.h>
+  #include <EventSocket.h>
+  #include <HttpEndpoint.h>
+  #include <PsychicHttp.h>
+  #include <WebSocketServer.h>
 
-class FilesState
-{
-public:
-    std::vector<String> updatedItems;
-    bool showHidden = false;
+class FilesState {
+ public:
+  std::vector<String> updatedItems;
+  bool showHidden = false;
 
-    static void read(FilesState &settings, JsonObject &root);
+  static void read(FilesState& settings, JsonObject& root);
 
-    static StateUpdateResult update(JsonObject &root, FilesState &filesState);
-
+  static StateUpdateResult update(JsonObject& root, FilesState& filesState);
 };
 
-class FileManager : public StatefulService<FilesState>
-{
-public:
-    FileManager(PsychicHttpServer *server,
-                      ESP32SvelteKit *sveltekit);
+class FileManager : public StatefulService<FilesState> {
+ public:
+  FileManager(PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
 
-    void begin();
+  void begin();
 
-protected:
-    EventSocket *_socket;
+ protected:
+  EventSocket* _socket;
 
-private:
-    HttpEndpoint<FilesState> _httpEndpoint;
-    EventEndpoint<FilesState> _eventEndpoint;
-    WebSocketServer<FilesState> _webSocketServer;
-    PsychicHttpServer *_server;
-    ESP32SvelteKit *_sveltekit;
+ private:
+  HttpEndpoint<FilesState> _httpEndpoint;
+  EventEndpoint<FilesState> _eventEndpoint;
+  WebSocketServer<FilesState> _webSocketServer;
+  PsychicHttpServer* _server;
+  ESP32SvelteKit* _sveltekit;
 
-    void onConfigUpdated();
+  void onConfigUpdated();
 };
 
 #endif

@@ -11,15 +11,14 @@
 
 #if FT_MOONLIGHT
 
-#include <WLED-sync.h> // https://github.com/netmindz/WLED-sync
-#include <WiFi.h>
+  #include <WLED-sync.h>  // https://github.com/netmindz/WLED-sync
+  #include <WiFi.h>
 
-class AudioSyncDriver: public Node {
-  public:
-
-  static const char * name() {return "AudioSync";}
-  static uint8_t dim() {return _NoD;}
-  static const char * tags() {return "☸️♫";}
+class AudioSyncDriver : public Node {
+ public:
+  static const char* name() { return "AudioSync"; }
+  static uint8_t dim() { return _NoD; }
+  static const char* tags() { return "☸️♫"; }
 
   WLEDSync sync;
   bool init = false;
@@ -43,6 +42,6 @@ class AudioSyncDriver: public Node {
   }
 };
 
-static AudioSyncDriver *audioNode;
+static AudioSyncDriver* audioNode;
 
 #endif

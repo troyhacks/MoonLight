@@ -13,12 +13,11 @@
 
 #if FT_MOONLIGHT
 
-class HUB75Driver: public Node {
-  public:
-
-  static const char * name() {return "HUB75 Driver";}
-  static uint8_t dim() {return _NoD;}
-  static const char * tags() {return "☸️🚧";}
+class HUB75Driver : public Node {
+ public:
+  static const char* name() { return "HUB75 Driver"; }
+  static uint8_t dim() { return _NoD; }
+  static const char* tags() { return "☸️🚧"; }
 
   void setup() override {}
   void loop() override {};
