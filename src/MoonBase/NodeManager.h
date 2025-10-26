@@ -14,220 +14,241 @@
 
 #if FT_MOONLIGHT
 
-#include "MoonBase/Module.h"
-
-#include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
+  #include "MoonBase/Module.h"
+  #include "Nodes.h"  //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
 class NodeManager : public Module {
-public: 
-    bool requestUIUpdate = false;
-    String defaultNodeName = "";
+ public:
+  bool requestUIUpdate = false;
+  String defaultNodeName = "";
 
-protected:
-    PsychicHttpServer *_server;
+ protected:
+  PsychicHttpServer* _server;
 
-    std::vector<Node *, VectorRAMAllocator<Node *>> *nodes;
+  std::vector<Node*, VectorRAMAllocator<Node*>>* nodes;
 
-    NodeManager(String moduleName,
-        PsychicHttpServer *server,
-        ESP32SvelteKit *sveltekit
-    ) : Module(moduleName, server, sveltekit) {
-        MB_LOGV(ML_TAG, "constructor");
-        _server = server;
-    }
+  NodeManager(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module(moduleName, server, sveltekit) {
+    MB_LOGV(ML_TAG, "constructor");
+    _server = server;
+  }
 
-    void begin() {
-        Module::begin();
-    }
+  void begin() { Module::begin(); }
 
-    virtual void addNodes(JsonArray values) {}
+  virtual void addNodes(JsonArray values) {}
 
-    virtual Node* addNode(const uint8_t index, const char * name, const JsonArray controls) {return nullptr;}
+  virtual Node* addNode(const uint8_t index, const char* name, const JsonArray controls) { return nullptr; }
 
-    //define the data model
-    void setupDefinition(JsonArray root) override {
-        MB_LOGV(ML_TAG, "");
-        JsonObject property; // state.data has one or more properties
-        JsonArray details = root; // if a property is an array, this is the details of the array
-        JsonArray values; // if a property is a select, this is the values of the select
+  // define the data model
+  void setupDefinition(JsonArray root) override {
+    MB_LOGV(ML_TAG, "");
+    JsonObject property;       // state.data has one or more properties
+    JsonArray details = root;  // if a property is an array, this is the details of the array
+    JsonArray values;          // if a property is a select, this is the values of the select
 
-        property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
-        {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName.c_str();
-
-            addNodes(values);
-
-            property = details.add<JsonObject>(); property["name"] = "on"; property["type"] = "checkbox"; property["default"] = true;
-            property = details.add<JsonObject>(); property["name"] = "controls"; property["type"] = "controls"; details = property["n"].to<JsonArray>();
-            {
-                property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "speed";
-                property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Number"; values = property["values"].to<JsonArray>();
-                values.add("number");
-                values.add("slider");
-                values.add("text");
-                values.add("coordinate");
-                property = details.add<JsonObject>(); property["name"] = "value"; property["type"] = "text"; property["default"] = "128";
-            }
-        }
-    }
-
-    //implement business logic
-    void onUpdate(UpdatedItem &updatedItem) override
+    property = root.add<JsonObject>();
+    property["name"] = "nodes";
+    property["type"] = "array";
+    details = property["n"].to<JsonArray>();
     {
-        // handle nodes
-        if (updatedItem.parent[0] == "nodes") { // onNodes
-            JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
-            // serializeJson(nodeState, Serial); Serial.println();
+      property = details.add<JsonObject>();
+      property["name"] = "name";
+      property["type"] = "selectFile";
+      values = property["values"].to<JsonArray>();
+      property["default"] = defaultNodeName.c_str();
 
-            if (updatedItem.name == "name" && updatedItem.parent[1] == "") { // nodes[i].name
+      addNodes(values);
 
-                Node *oldNode = updatedItem.index[0] < nodes->size() ? (*nodes)[updatedItem.index[0]] : nullptr; //find the node in the nodes list
-                bool newNode = false;
+      property = details.add<JsonObject>();
+      property["name"] = "on";
+      property["type"] = "checkbox";
+      property["default"] = true;
+      property = details.add<JsonObject>();
+      property["name"] = "controls";
+      property["type"] = "controls";
+      details = property["n"].to<JsonArray>();
+      {
+        property = details.add<JsonObject>();
+        property["name"] = "name";
+        property["type"] = "text";
+        property["default"] = "speed";
+        property = details.add<JsonObject>();
+        property["name"] = "type";
+        property["type"] = "select";
+        property["default"] = "Number";
+        values = property["values"].to<JsonArray>();
+        values.add("number");
+        values.add("slider");
+        values.add("text");
+        values.add("coordinate");
+        property = details.add<JsonObject>();
+        property["name"] = "value";
+        property["type"] = "text";
+        property["default"] = "128";
+      }
+    }
+  }
 
-                // remove or add Nodes (incl controls)
-                if (!updatedItem.value.isNull()) { // if name changed // == updatedItem.value
+  // implement business logic
+  void onUpdate(UpdatedItem& updatedItem) override {
+    // handle nodes
+    if (updatedItem.parent[0] == "nodes") {  // onNodes
+      JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
+      // serializeJson(nodeState, Serial); Serial.println();
 
-                    //if old node exists then remove it's controls
-                    if (updatedItem.oldValue != "null") {
-                        // MB_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                        nodeState.remove("controls"); //remove the controls from the nodeState
-                    }
+      if (updatedItem.name == "name" && updatedItem.parent[1] == "") {  // nodes[i].name
 
-                    MB_LOGD(ML_TAG, "add %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    
-                    if (nodeState["controls"].isNull()) { //if controls are not set, create empty array
-                        nodeState["controls"].to<JsonArray>(); //clear the controls
-                    }
+        Node* oldNode = updatedItem.index[0] < nodes->size() ? (*nodes)[updatedItem.index[0]] : nullptr;  // find the node in the nodes list
+        bool newNode = false;
 
-                    Node *nodeClass = addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);
+        // remove or add Nodes (incl controls)
+        if (!updatedItem.value.isNull()) {  // if name changed // == updatedItem.value
 
-                    if (nodeClass != nullptr) {
-                        nodeClass->on = nodeState["on"];
-                        newNode = true;
+          // if old node exists then remove it's controls
+          if (updatedItem.oldValue != "null") {
+            // MB_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
+            // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            nodeState.remove("controls");  // remove the controls from the nodeState
+          }
 
-                        //wait until setup has been executed?
+          MB_LOGD(ML_TAG, "add %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+                  updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
-                        requestUIUpdate = true;
+          if (nodeState["controls"].isNull()) {     // if controls are not set, create empty array
+            nodeState["controls"].to<JsonArray>();  // clear the controls
+          }
 
-                        // MB_LOGD(ML_TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
+          Node* nodeClass = addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);
 
-                        //make sure "p" is also updated
+          if (nodeClass != nullptr) {
+            nodeClass->on = nodeState["on"];
+            newNode = true;
 
-                        nodeClass->requestMappings();
-                    }
-                    else
-                        MB_LOGW(ML_TAG, "Nodeclass %s not found", updatedItem.value.as<String>().c_str());
+            // wait until setup has been executed?
 
-                    // if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
-                    //     MB_LOGW(ML_TAG, "Restart needed");
-                    //     restartNeeded = true;
-                    // }
-                }
+            requestUIUpdate = true;
 
-                //if a node existed and no new node in place, remove 
-                if (updatedItem.oldValue != "null" && oldNode) {
-                    // MB_LOGD(ML_TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                    if (!newNode) {
-                        //remove oldNode from the nodes list 
-                        for (uint8_t i = 0; i < nodes->size(); i++) {
-                            if ((*nodes)[i] == oldNode) {
-                                MB_LOGD(ML_TAG, "remove node %d %s", i, updatedItem.oldValue.c_str());
-                                nodes->erase(nodes->begin() + i);
-                                break;
-                            }
-                        }
-                        MB_LOGD(ML_TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], nodes->size());
-                    }
+            // MB_LOGD(ML_TAG, "update due to new node %s done", updatedItem.value.as<String>().c_str());
 
-                    oldNode->requestMappings();
+            // make sure "p" is also updated
 
-                    MB_LOGD(ML_TAG, "remove oldNode: %d p:%p", nodes->size(), oldNode);
-                    // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
-                    // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
-                    oldNode->~Node();
-                    
-                    freeMBObject(oldNode);
+            nodeClass->requestMappings();
+          } else
+            MB_LOGW(ML_TAG, "Nodeclass %s not found", updatedItem.value.as<String>().c_str());
 
-                }
-                    
-                #if FT_ENABLED(FT_LIVESCRIPT)
-                    // if (updatedItem.oldValue.length()) {
-                    //     MB_LOGV(ML_TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]);
-                    //     if (liveScriptNode) liveScriptNode->kill(); 
-                    //     else MB_LOGW(ML_TAG, "liveScriptNode not found %s", node["name"].as<String>().c_str());
-                    // }
-                    // if (!node["name"].isNull() && !node["type"].isNull()) {
-                    //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]); //todo: can be 2 nodes with the same name ...
-                    //     if (liveScriptNode) liveScriptNode->compileAndRun();
-                    //     // not needed as creating the node is already running it ...
-                    // }
-                #endif
-            } // nodes[i].name
-
-            else if (updatedItem.name == "on" && updatedItem.parent[1] == "") { //nodes[i].on
-                // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                if (updatedItem.index[0] < nodes->size()) {
-                    MB_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
-                    Node *nodeClass = (*nodes)[updatedItem.index[0]];
-                    if (nodeClass != nullptr) {
-                        nodeClass->on = updatedItem.value.as<bool>(); //set nodeclass on/off
-                        MB_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
-
-                        nodeClass->requestMappings();
-                    }
-                    else
-                        MB_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<String>().c_str());
-                }
-            } //nodes[i].on
-
-            else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {  //nodes[i].controls[j].value
-                // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-                if (updatedItem.index[0] < nodes->size()) {
-                    Node *nodeClass = (*nodes)[updatedItem.index[0]];
-                    if (nodeClass != nullptr) {
-
-                        nodeClass->updateControl(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);
-
-                        nodeClass->onUpdate(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]); //custom onUpdate for the node
-
-                        nodeClass->requestMappings();
-                    }
-                    else MB_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
-                }
-            } //nodes[i].controls[j].value
-            // else
-            //     MB_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            // end Nodes
+          // if (updatedItem.oldValue.indexOf("Driver") != -1 && updatedItem.value.as<String>().indexOf("Driver") != -1) {
+          //     MB_LOGW(ML_TAG, "Restart needed");
+          //     restartNeeded = true;
+          // }
         }
-        // else
-        // MB_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    }
 
-    void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) override {
-        MB_LOGD(ML_TAG, "%d %d %d", nodes->size(), stateIndex, newIndex);
-        //swap nodes
-        Node *nodeS = (*nodes)[stateIndex];
-        Node *nodeN = (*nodes)[newIndex];
-        (*nodes)[stateIndex] = nodeN;
-        (*nodes)[newIndex] = nodeS;
+        // if a node existed and no new node in place, remove
+        if (updatedItem.oldValue != "null" && oldNode) {
+          // MB_LOGD(ML_TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+          // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+          if (!newNode) {
+            // remove oldNode from the nodes list
+            for (uint8_t i = 0; i < nodes->size(); i++) {
+              if ((*nodes)[i] == oldNode) {
+                MB_LOGD(ML_TAG, "remove node %d %s", i, updatedItem.oldValue.c_str());
+                nodes->erase(nodes->begin() + i);
+                break;
+              }
+            }
+            MB_LOGD(ML_TAG, "No newnode - remove! %d s:%d", updatedItem.index[0], nodes->size());
+          }
 
-        //modifiers and layouts trigger remaps
-        nodeS->requestMappings();
-        nodeN->requestMappings();
-    }
+          oldNode->requestMappings();
 
-    void loop() {
-        if (requestUIUpdate) {
-            requestUIUpdate = false; //reset the flag
-            // MB_LOGD(ML_TAG, "requestUIUpdate");
+          MB_LOGD(ML_TAG, "remove oldNode: %d p:%p", nodes->size(), oldNode);
+          // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
+          // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
+          oldNode->~Node();
 
-            // update state to UI
-            update([&](ModuleState &state) {
-                return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-            }, "server");
+          freeMBObject(oldNode);
         }
+
+  #if FT_ENABLED(FT_LIVESCRIPT)
+            // if (updatedItem.oldValue.length()) {
+            //     MB_LOGV(ML_TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
+            //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]);
+            //     if (liveScriptNode) liveScriptNode->kill();
+            //     else MB_LOGW(ML_TAG, "liveScriptNode not found %s", node["name"].as<String>().c_str());
+            // }
+            // if (!node["name"].isNull() && !node["type"].isNull()) {
+            //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]); //todo: can be 2 nodes with the same name ...
+            //     if (liveScriptNode) liveScriptNode->compileAndRun();
+            //     // not needed as creating the node is already running it ...
+            // }
+  #endif
+      }  // nodes[i].name
+
+      else if (updatedItem.name == "on" && updatedItem.parent[1] == "") {  // nodes[i].on
+        // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+        // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        if (updatedItem.index[0] < nodes->size()) {
+          MB_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
+          Node* nodeClass = (*nodes)[updatedItem.index[0]];
+          if (nodeClass != nullptr) {
+            nodeClass->on = updatedItem.value.as<bool>();  // set nodeclass on/off
+            MB_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
+
+            nodeClass->requestMappings();
+          } else
+            MB_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<String>().c_str());
+        }
+      }  // nodes[i].on
+
+      else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {  // nodes[i].controls[j].value
+        // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+        // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        if (updatedItem.index[0] < nodes->size()) {
+          Node* nodeClass = (*nodes)[updatedItem.index[0]];
+          if (nodeClass != nullptr) {
+            nodeClass->updateControl(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);
+
+            nodeClass->onUpdate(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);  // custom onUpdate for the node
+
+            nodeClass->requestMappings();
+          } else
+            MB_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
+        }
+      }  // nodes[i].controls[j].value
+      // else
+      //     MB_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
+      //     updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+      // end Nodes
     }
+    // else
+    // MB_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+    // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+  }
+
+  void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) override {
+    MB_LOGD(ML_TAG, "%d %d %d", nodes->size(), stateIndex, newIndex);
+    // swap nodes
+    Node* nodeS = (*nodes)[stateIndex];
+    Node* nodeN = (*nodes)[newIndex];
+    (*nodes)[stateIndex] = nodeN;
+    (*nodes)[newIndex] = nodeS;
+
+    // modifiers and layouts trigger remaps
+    nodeS->requestMappings();
+    nodeN->requestMappings();
+  }
+
+  void loop() {
+    if (requestUIUpdate) {
+      requestUIUpdate = false;  // reset the flag
+      // MB_LOGD(ML_TAG, "requestUIUpdate");
+
+      // update state to UI
+      update(
+          [&](ModuleState& state) {
+            return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
+          },
+          "server");
+    }
+  }
 };
 
 #endif

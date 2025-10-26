@@ -9,9 +9,6 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-
 #if FT_MOONLIGHT
-
-
 
 #endif
