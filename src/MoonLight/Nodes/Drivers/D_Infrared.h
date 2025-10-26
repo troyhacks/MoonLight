@@ -34,7 +34,7 @@ class IRDriver : public Node {
   static uint8_t dim() { return _NoD; }        // Dimensions not relevant for drivers?
   static const char* tags() { return "☸️"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
-  uint8_t pin = 16;
+  uint8_t pin = 5;
   uint16_t s_nec_code_address;
   uint16_t s_nec_code_command;
   bool setup_in_progress = false;
@@ -160,7 +160,7 @@ class IRDriver : public Node {
           }
           break;
       default:
-          MB_LOGI(IR_DRIVER_TAG, "Unknown NEC frame\r\n\r\n");
+          MB_LOGI(IR_DRIVER_TAG, "Unknown NEC frame\r\n");
           break;
       }
   }
