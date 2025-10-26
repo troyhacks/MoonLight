@@ -306,12 +306,7 @@ static struct SharedData {
   #include "MoonLight/Nodes/Drivers/D_Hub75.h"
   #include "MoonLight/Nodes/Drivers/D_PhysicalDriver.h"
   #include "MoonLight/Nodes/Drivers/D_VirtualDriver.h"
-  #include "MoonLight/Nodes/Drivers/D_Infrared.h"
   #include "MoonLight/Nodes/Drivers/D__Sandbox.h"
-  #include "MoonLight/Nodes/Layouts/L_MoonLight.h"
-  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
-    #include "MoonLight/Nodes/Layouts/L_SE16.h"
-  #endif
   #include "MoonLight/Nodes/Effects/E_FastLED.h"
   #include "MoonLight/Nodes/Effects/E_MoonLight.h"
   #include "MoonLight/Nodes/Effects/E_MoonModules.h"
@@ -319,8 +314,13 @@ static struct SharedData {
   #include "MoonLight/Nodes/Effects/E_SoulmateLights.h"
   #include "MoonLight/Nodes/Effects/E_WLED.h"
   #include "MoonLight/Nodes/Effects/E__Sandbox.h"
+  #include "MoonLight/Nodes/Layouts/L_MoonLight.h"
   #include "MoonLight/Nodes/Layouts/L__Sandbox.h"
   #include "MoonLight/Nodes/Modifiers/M_MoonLight.h"
   #include "MoonLight/Nodes/Modifiers/M__Sandbox.h"
+  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+    #include "MoonLight/Nodes/Drivers/D_Infrared.h"
+    #include "MoonLight/Nodes/Layouts/L_SE16.h"
+  #endif
 
 #endif  // FT_MOONLIGHT
