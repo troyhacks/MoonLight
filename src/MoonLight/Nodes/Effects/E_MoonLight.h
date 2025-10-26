@@ -26,11 +26,11 @@ class SolidEffect: public Node {
   uint8_t brightness = 255;
 
   void setup() override {
-    addControl(red, "red", "range");
-    addControl(green, "green", "range");
-    addControl(blue, "blue", "range");
-    addControl(white, "white", "range");
-    addControl(brightness, "brightness", "range");
+    addControl(red, "red", "slider");
+    addControl(green, "green", "slider");
+    addControl(blue, "blue", "slider");
+    addControl(white, "white", "slider");
+    addControl(brightness, "brightness", "slider");
   }
 
   void loop() override {
@@ -61,16 +61,16 @@ class FixedRectangleEffect: public Node {
   bool alternateWhite = false; // to be used for frontlight
 
   void setup() override {
-    addControl(red, "red", "range");
-    addControl(green, "green", "range");
-    addControl(blue, "blue", "range");
-    addControl(white, "white", "range");
-    addControl(x, "X position", "range", 0);
-    addControl(y, "Y position", "range", 0);
-    addControl(z, "Z position", "range", 0);
-    addControl(width, "Rectangle width", "range", 1);
-    addControl(height, "Rectangle height", "range", 1);
-    addControl(depth, "Rectangle depth", "range", 1);
+    addControl(red, "red", "slider");
+    addControl(green, "green", "slider");
+    addControl(blue, "blue", "slider");
+    addControl(white, "white", "slider");
+    addControl(x, "X position", "slider", 0);
+    addControl(y, "Y position", "slider", 0);
+    addControl(z, "Z position", "slider", 0);
+    addControl(width, "Rectangle width", "slider", 1);
+    addControl(height, "Rectangle height", "slider", 1);
+    addControl(depth, "Rectangle depth", "slider", 1);
     addControl(alternateWhite, "alternateWhite", "checkbox");
   }
 
@@ -118,7 +118,7 @@ public:
   uint8_t bpm = 120;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
+    addControl(bpm, "bpm", "slider");
   }
 
   void loop() override {
@@ -155,8 +155,8 @@ public:
   uint8_t speed = 8; //default 8*32 = 256 / 256 = 1 = hue++
 
   void setup() {
-    addControl(speed, "speed", "range", 0, 32);
-    addControl(deltaHue, "deltaHue", "range", 0, 32);
+    addControl(speed, "speed", "slider", 0, 32);
+    addControl(deltaHue, "deltaHue", "slider", 0, 32);
   }
 
   uint16_t hue = 0;
@@ -175,7 +175,7 @@ class RandomEffect: public Node {
 
   uint8_t speed=128;
   void setup() {
-    addControl(speed, "speed", "range");
+    addControl(speed, "speed", "slider");
   }
   void loop() override {
       layer->fadeToBlackBy(70);
@@ -194,8 +194,8 @@ class RipplesEffect: public Node {
   uint8_t interval = 128;
 
   void setup() override {
-    addControl(speed, "speed", "range");
-    addControl(interval, "interval", "range");
+    addControl(speed, "speed", "slider");
+    addControl(interval, "interval", "slider");
   }
 
   void loop() override {
@@ -261,7 +261,7 @@ public:
 
     addControl(textIn, "text", "text", 1, sizeof(textIn)); //size needed to protect char array!
 
-    addControl(speed, "speed", "range");
+    addControl(speed, "speed", "slider");
   }
 
   void loop() override {
@@ -336,7 +336,7 @@ class SinusEffect: public Node {
   uint8_t speed = 5;
 
   void setup() override {
-    addControl(speed, "speed", "range");
+    addControl(speed, "speed", "slider");
   }
 
   void loop() override {
@@ -370,7 +370,7 @@ class SphereMoveEffect: public Node {
   uint8_t speed = 50;
   
   void setup() override {
-    addControl(speed, "speed", "range", 0, 99);
+    addControl(speed, "speed", "slider", 0, 99);
   }
 
   void loop() override {
@@ -423,9 +423,9 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
   bool usePalette = false;
 
   void setup() override {
-    addControl(speed, "speed", "range", 0, 30);
-    addControl(numStars, "numStars", "range", 1, 255);
-    addControl(blur, "blur", "range", 0, 255);
+    addControl(speed, "speed", "slider", 0, 30);
+    addControl(numStars, "numStars", "slider", 1, 255);
+    addControl(blur, "blur", "slider", 0, 255);
     addControl(usePalette, "usePalette", "checkbox");
 
     //set up all stars
@@ -492,12 +492,12 @@ public:
   uint8_t microMutatorMax = 255;
 
   void setup() override {
-    addControl(macroMutatorFreq, "macroMutatorFreq", "range", 0, 15);
-    addControl(macroMutatorMin, "macroMutatorMin", "range", 0, 255);
-    addControl(macroMutatorMax, "macroMutatorMax", "range", 0, 255);
-    addControl(microMutatorFreq, "microMutatorFreq", "range", 0, 15);
-    addControl(microMutatorMin, "microMutatorMin", "range", 0, 255);
-    addControl(microMutatorMax, "microMutatorMax", "range", 0, 255);
+    addControl(macroMutatorFreq, "macroMutatorFreq", "slider", 0, 15);
+    addControl(macroMutatorMin, "macroMutatorMin", "slider", 0, 255);
+    addControl(macroMutatorMax, "macroMutatorMax", "slider", 0, 255);
+    addControl(microMutatorFreq, "microMutatorFreq", "slider", 0, 15);
+    addControl(microMutatorMin, "microMutatorMin", "slider", 0, 255);
+    addControl(microMutatorMax, "microMutatorMax", "slider", 0, 255);
     //ui->initSlider(parentVar, "hueSpeed", layer->effectData.write<uint8_t>(20), 1, 100); // (14), 1, 255)
     //ui->initSlider(parentVar, "saturation", layer->effectData.write<uint8_t>(255), 0, 255);
   }
@@ -539,8 +539,8 @@ public:
   uint8_t type = 0;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
-    addControl(fade, "fade", "range");
+    addControl(bpm, "bpm", "slider");
+    addControl(fade, "fade", "slider");
     JsonObject property = addControl(type, "type", "select"); 
     JsonArray values = property["values"].to<JsonArray>();
     values.add("Saw");
@@ -602,10 +602,10 @@ public:
   uint8_t method = 2;
 
   void setup() override {
-    addControl(fade, "fade", "range");
-    addControl(increaser, "increaser", "range");
-    addControl(decreaser, "decreaser", "range");
-    addControl(bpmMax, "bpmMax", "range");
+    addControl(fade, "fade", "slider");
+    addControl(increaser, "increaser", "slider");
+    addControl(decreaser, "decreaser", "slider");
+    addControl(bpmMax, "bpmMax", "slider");
     addControl(invert, "invert", "checkbox");
     addControl(keepOn, "keepOn", "checkbox");
     JsonObject property = addControl(method, "method", "select");
@@ -910,8 +910,8 @@ class RubiksCubeEffect: public Node {
   bool randomTurning = false;
 
   void setup() override {
-    addControl(turnsPerSecond, "turnsPerSecond", "range", 0, 20);   
-    addControl(cubeSize, "cubeSize", "range", 1, 8);   
+    addControl(turnsPerSecond, "turnsPerSecond", "slider", 0, 20);   
+    addControl(cubeSize, "cubeSize", "slider", 1, 8);   
     addControl(randomTurning, "randomTurning", "checkbox");   
   }
 
@@ -1105,14 +1105,14 @@ class ParticlesEffect: public Node {
   bool debugPrint = false;
 
   void setup() override {
-    addControl(speed, "speed", "range", 0, 30);
-    addControl(numParticles, "number of Particles", "range", 1, 255);
+    addControl(speed, "speed", "slider", 0, 30);
+    addControl(numParticles, "number of Particles", "slider", 1, 255);
     addControl(barriers, "barriers", "checkbox");
     #ifdef STARBASE_USERMOD_MPU6050
       addControl(gyro, "gyro", "checkbox");
     #endif
     addControl(randomGravity, "randomGravity", "checkbox");
-    addControl(gravityChangeInterval, "gravityChangeInterval", "range", 1, 10);
+    addControl(gravityChangeInterval, "gravityChangeInterval", "slider", 1, 10);
     // addControl(bool, "Debug Print",             layer->effectData.write<bool>(0));
   }
 

@@ -23,8 +23,8 @@ class BouncingBallsEffect: public Node {
   uint8_t numBalls = 8;
 
   void setup() override {
-    addControl(grav, "grav", "range");
-    addControl(numBalls, "numBalls", "range", 1, maxNumBalls);
+    addControl(grav, "grav", "slider");
+    addControl(numBalls, "numBalls", "slider", 1, maxNumBalls);
   }
 
   //binding of loop persistent values (pointers)
@@ -123,8 +123,8 @@ class BlurzEffect: public Node {
   bool geqScanner;
 
   void setup() override {
-    addControl(fadeRate, "fadeRate", "range", 1, 255);
-    addControl(blur, "blur", "range", 1, 255);
+    addControl(fadeRate, "fadeRate", "slider", 1, 255);
+    addControl(blur, "blur", "slider", 1, 255);
     addControl(freqMap, "freqMap", "checkbox");
     addControl(geqScanner, "geqScanner", "checkbox");
 
@@ -187,8 +187,8 @@ public:
   uint8_t scale = 4; 
 
   void setup() override {
-    addControl(speed, "speed", "range", 0, 8);
-    addControl(scale, "scale", "range", 0, 8);
+    addControl(speed, "speed", "slider", 0, 8);
+    addControl(scale, "scale", "slider", 0, 8);
   }
 
   void loop() override {
@@ -250,11 +250,11 @@ public:
   bool audioSpeed = false; //💫
 
   void setup() override {
-    addControl(speed, "speed", "range");
-    addControl(fx, "soundFX", "range");
-    addControl(lowBin, "lowBin", "range");
-    addControl(highBin, "highBin", "range");
-    addControl(sensitivity10, "sensitivity", "range", 10, 100);
+    addControl(speed, "speed", "slider");
+    addControl(fx, "soundFX", "slider");
+    addControl(lowBin, "lowBin", "slider");
+    addControl(highBin, "highBin", "slider");
+    addControl(sensitivity10, "sensitivity", "slider", 10, 100);
     addControl(audioSpeed, "audioSpeed", "checkbox");
   }
 
@@ -330,8 +330,8 @@ public:
   void setup() override {
     Node::setup();
 
-    addControl(fadeOut, "fadeOut", "range");
-    addControl(ripple, "ripple", "range");
+    addControl(fadeOut, "fadeOut", "slider");
+    addControl(ripple, "ripple", "slider");
     addControl(colorBars, "colorBars", "checkbox");
     addControl(smoothBars, "smoothBars", "checkbox");
 
@@ -443,9 +443,9 @@ public:
   uint8_t speed = 128;
 
   void setup() override {
-    addControl(xFrequency, "xFrequency", "range");
-    addControl(fadeRate, "fadeRate", "range");
-    addControl(speed, "speed", "range");
+    addControl(xFrequency, "xFrequency", "slider");
+    addControl(fadeRate, "fadeRate", "slider");
+    addControl(speed, "speed", "slider");
   }
 
   void loop() override {
@@ -473,8 +473,8 @@ class Noise2DEffect: public Node {
   uint8_t scale = 64;
 
   void setup() override {
-    addControl(speed, "speed", "range", 0, 15);
-    addControl(scale, "scale", "range", 2, 255);
+    addControl(speed, "speed", "slider", 0, 15);
+    addControl(scale, "scale", "slider", 2, 255);
   }
 
   void loop() override {
@@ -498,8 +498,8 @@ class NoiseMeterEffect: public Node {
   uint8_t width = 128;
 
   void setup() override {
-    addControl(fadeRate, "fadeRate", "range", 200, 254);
-    addControl(width, "width", "range", 0, 255);
+    addControl(fadeRate, "fadeRate", "slider", 200, 254);
+    addControl(width, "width", "slider", 0, 255);
   }
 
   uint8_t aux0;
@@ -548,8 +548,8 @@ class PopCornEffect: public Node {
   bool useaudio = false;
 
   void setup() override {
-    addControl(speed, "speed", "range");
-    addControl(numPopcorn, "corns", "range", 1, maxNumPopcorn);
+    addControl(speed, "speed", "slider");
+    addControl(numPopcorn, "corns", "slider", 1, maxNumPopcorn);
     addControl(useaudio, "useaudio", "checkbox");
   }
 
@@ -626,8 +626,8 @@ class WaverlyEffect: public Node {
   bool noClouds = false;
 
   void setup() override {
-    addControl(fadeRate, "fadeRate", "range");
-    addControl(amplification, "amplification", "range");
+    addControl(fadeRate, "fadeRate", "slider");
+    addControl(amplification, "amplification", "slider");
     addControl(noClouds, "noClouds", "checkbox");
 
     // addControl(bool, "soundPressure", layer->effectData.write<bool>(false));

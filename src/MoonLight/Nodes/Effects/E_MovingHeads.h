@@ -73,14 +73,14 @@ class Troy1MoveEffect: public Node {
   };
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
-    addControl(pan, "pan", "range");
-    addControl(tilt, "tilt", "range");
-    addControl(zoom, "zoom", "range");
-    addControl(colorwheel, "colorwheel", "range", 0, 7); // 0-7 for 8 colors in the colorwheel
-    addControl(colorwheelbrightness, "colorwheelbrightness", "range"); // 0-7 for 8 colors in the colorwheel
+    addControl(bpm, "bpm", "slider");
+    addControl(pan, "pan", "slider");
+    addControl(tilt, "tilt", "slider");
+    addControl(zoom, "zoom", "slider");
+    addControl(colorwheel, "colorwheel", "slider", 0, 7); // 0-7 for 8 colors in the colorwheel
+    addControl(colorwheelbrightness, "colorwheelbrightness", "slider"); // 0-7 for 8 colors in the colorwheel
     addControl(autoMove, "autoMove", "checkbox");
-    addControl(range, "range", "range");
+    addControl(range, "slider", "slider");
     addControl(audioReactive, "audioReactive", "checkbox");
     addControl(invert, "invert", "checkbox");
   }
@@ -148,7 +148,7 @@ class Troy2ColorEffect: public Node {
   bool audioReactive = true;
 
   void setup() override {
-    addControl(cutin, "cutin", "range");
+    addControl(cutin, "cutin", "slider");
     addControl(audioReactive, "audioReactive", "checkbox");
   }
 
@@ -193,13 +193,13 @@ class Troy2MoveEffect: public Node {
   bool invert = true;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
-    addControl(pan, "pan", "range");
-    addControl(tilt, "tilt", "range");
-    addControl(zoom, "zoom", "range");
-    addControl(cutin, "cutin", "range");
+    addControl(bpm, "bpm", "slider");
+    addControl(pan, "pan", "slider");
+    addControl(tilt, "tilt", "slider");
+    addControl(zoom, "zoom", "slider");
+    addControl(cutin, "cutin", "slider");
     addControl(autoMove, "autoMove", "checkbox");
-    addControl(range, "range", "range");
+    addControl(range, "slider", "slider");
     addControl(audioReactive, "audioReactive", "checkbox");
     addControl(invert, "invert", "checkbox");
   }
@@ -267,7 +267,7 @@ class FreqColorsEffect: public Node {
   bool audioReactive = true;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
+    addControl(bpm, "bpm", "slider");
     addControl(audioReactive, "audioReactive", "checkbox");
   }
 
@@ -314,12 +314,12 @@ class WowiMoveEffect: public Node {
   bool invert = true;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
-    addControl(pan, "pan", "range");
-    addControl(tilt, "tilt", "range");
-    addControl(zoom, "zoom", "range");
+    addControl(bpm, "bpm", "slider");
+    addControl(pan, "pan", "slider");
+    addControl(tilt, "tilt", "slider");
+    addControl(zoom, "zoom", "slider");
     addControl(autoMove, "autoMove", "checkbox");
-    addControl(range, "range", "range");
+    addControl(range, "slider", "slider");
     addControl(invert, "invert", "checkbox");
   }
 
@@ -351,13 +351,13 @@ class AmbientMoveEffect: public Node {
   bool invert = true;
 
   void setup() override {
-    addControl(increaser, "increaser", "range");
-    addControl(decreaser, "decreaser", "range");
-    addControl(tiltMin, "tiltMin", "range");
-    addControl(tiltMax, "tiltMax", "range");
-    addControl(panMin, "panMin", "range");
-    addControl(panMax, "panMax", "range");
-    addControl(panBPM, "panBPM", "range");
+    addControl(increaser, "increaser", "slider");
+    addControl(decreaser, "decreaser", "slider");
+    addControl(tiltMin, "tiltMin", "slider");
+    addControl(tiltMax, "tiltMax", "slider");
+    addControl(panMin, "panMin", "slider");
+    addControl(panMax, "panMax", "slider");
+    addControl(panBPM, "panBPM", "slider");
     addControl(invert, "invert", "checkbox");
 
     memset(bandSpeed, 0, NUM_GEQ_CHANNELS);

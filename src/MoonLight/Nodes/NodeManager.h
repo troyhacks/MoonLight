@@ -63,7 +63,7 @@ protected:
                 property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "speed";
                 property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Number"; values = property["values"].to<JsonArray>();
                 values.add("number");
-                values.add("range");
+                values.add("slider");
                 values.add("text");
                 values.add("coordinate");
                 property = details.add<JsonObject>(); property["name"] = "value"; property["type"] = "text"; property["default"] = "128";

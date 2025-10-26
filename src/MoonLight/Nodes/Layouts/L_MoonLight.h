@@ -25,9 +25,9 @@ class HumanSizedCubeLayout: public Node {
   char pins[20] = "12,13,14,15,16"; //minimal 5, 1 for each side.
 
   void setup() override {
-    addControl(width, "width", "range", 1, 20);
-    addControl(height, "height", "range", 1, 20);
-    addControl(depth, "depth", "range", 1, 20);
+    addControl(width, "width", "slider", 1, 20);
+    addControl(height, "height", "slider", 1, 20);
+    addControl(depth, "depth", "slider", 1, 20);
     // addControl(snake, "snake", "checkbox");
     addControl(pins, "pins", "text", 1, sizeof(pins));
   }
@@ -277,8 +277,8 @@ class SingleLineLayout: public Node {
   bool reversed_order = false;
 
   void setup() override {
-    addControl(start_x, "starting X", "range", 0, 255);
-    addControl(width, "width", "range", 1, 255);
+    addControl(start_x, "starting X", "slider", 0, 255);
+    addControl(width, "width", "slider", 1, 255);
     addControl(yposition, "Y position", "number", 0, 255); 
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
@@ -315,8 +315,8 @@ class SingleRowLayout: public Node {
   bool reversed_order = false;
 
   void setup() override {
-    addControl(start_y, "starting Y", "range", 0, 255);
-    addControl(height, "height", "range", 1, 255);
+    addControl(start_y, "starting Y", "slider", 0, 255);
+    addControl(height, "height", "slider", 1, 255);
     addControl(xposition, "X position", "number", 0, 255); 
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
@@ -397,8 +397,8 @@ class WheelLayout: public Node {
   uint8_t ledsPerSpoke = 16;
   
   void setup() override {
-    addControl(nrOfSpokes, "nrOfSpokes", "range", 1, 48);
-    addControl(ledsPerSpoke, "ledsPerSpoke", "range", 1, 255);
+    addControl(nrOfSpokes, "nrOfSpokes", "slider", 1, 48);
+    addControl(ledsPerSpoke, "ledsPerSpoke", "slider", 1, 255);
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 

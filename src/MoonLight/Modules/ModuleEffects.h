@@ -118,7 +118,7 @@ public:
         }
         property = root.add<JsonObject>(); property["name"] = "start"; property["type"] = "coord3D"; property["ro"] = true;
         property = root.add<JsonObject>(); property["name"] = "end"; property["type"] = "coord3D"; property["ro"] = true;
-        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["ro"] = true;
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "slider"; property["ro"] = true;
 
         NodeManager::setupDefinition(root);
     }

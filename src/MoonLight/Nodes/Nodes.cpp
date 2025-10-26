@@ -22,7 +22,7 @@ void Node::updateControl(String &oldValue, JsonObject control) {
         MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
         if (pointer) {
-            if (control["type"] == "range" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
+            if (control["type"] == "slider" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
                 if (control["size"] == 8) {
                     uint8_t *valuePointer = (uint8_t *)pointer;
                     *valuePointer = control["value"];
