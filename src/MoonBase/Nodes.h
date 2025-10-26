@@ -306,6 +306,7 @@ static struct SharedData {
   #include "MoonLight/Nodes/Drivers/D_Hub75.h"
   #include "MoonLight/Nodes/Drivers/D_PhysicalDriver.h"
   #include "MoonLight/Nodes/Drivers/D_VirtualDriver.h"
+  #include "MoonLight/Nodes/Drivers/D_Infrared.h"
   #include "MoonLight/Nodes/Drivers/D__Sandbox.h"
   #include "MoonLight/Nodes/Layouts/L_MoonLight.h"
   #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
