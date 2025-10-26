@@ -37,6 +37,7 @@ class IRDriver : public Node {
   uint8_t pin = 16;
   uint16_t s_nec_code_address;
   uint16_t s_nec_code_command;
+  bool setup_in_progress = false;
   rmt_rx_done_event_data_t rx_data;
   rmt_symbol_word_t raw_symbols[64];      // 64 symbols should be sufficient for a standard NEC frame
   QueueHandle_t receive_queue = NULL;
@@ -150,12 +151,12 @@ class IRDriver : public Node {
       switch (symbol_num) {
       case 34: // NEC normal frame
           if (nec_parse_frame(rmt_nec_symbols)) {
-              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X\r\n\r\n", s_nec_code_address, s_nec_code_command);
+              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X\r\n", s_nec_code_address, s_nec_code_command);
           }
           break;
       case 2: // NEC repeat frame
           if (nec_parse_frame_repeat(rmt_nec_symbols)) {
-              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X, repeat\r\n\r\n", s_nec_code_address, s_nec_code_command);
+              MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X, repeat\r\n", s_nec_code_address, s_nec_code_command);
           }
           break;
       default:
@@ -168,6 +169,8 @@ class IRDriver : public Node {
     // add your custom onUpdate code here
     if (control["name"] == "pin") 
     {
+      setup_in_progress = true;
+
       if (rx_channel) 
       {
           MB_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
@@ -198,13 +201,15 @@ class IRDriver : public Node {
       // ready to receive
       MB_LOGI(IR_DRIVER_TAG, "Arm receive");
       ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+
+      setup_in_progress = false;
     }
   }
 
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override 
   {
-    if (receive_queue && rx_channel)
+    if (!setup_in_progress)
     {
       if (xQueueReceive(receive_queue, &rx_data, pdMS_TO_TICKS(1000)) == pdPASS) 
       {
