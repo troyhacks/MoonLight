@@ -30,30 +30,30 @@ class VirtualDriver: public DriverNode {
 
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
-    if (layerV->layerP->pass == 1 && !layerV->layerP->monitorPass) { //physical
+    if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) { //physical
 
-      if (!lightPresetSaved || layerV->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
-        MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layerV->layerP->sortedPins.size());
+      if (!lightPresetSaved || layer->layerP->sortedPins.size() == 0) { //|| initDone can be done multiple times now...
+        MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved , initDone, layer->layerP->sortedPins.size());
         return;
       }
 
-      MB_LOGD(ML_TAG, "sortedPins #:%d", layerV->layerP->sortedPins.size());
+      MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
       if (safeModeMB) {
         MB_LOGW(ML_TAG, "Safe mode enabled, not adding driver");
         return;
       }
 
-      for (const SortedPin &sortedPin : layerV->layerP->sortedPins) {
+      for (const SortedPin &sortedPin : layer->layerP->sortedPins) {
         // collect the definied pins 
       }
 
-      if (layerV->layerP->sortedPins.size() > 0) {
+      if (layer->layerP->sortedPins.size() > 0) {
 
         //from lightPresetSaved, prepare LUT arrays:
-        ledsDriver.nb_components = layerV->layerP->lights.header.channelsPerLight;
-        ledsDriver.p_r = layerV->layerP->lights.header.offsetRed;
-        ledsDriver.p_g = layerV->layerP->lights.header.offsetGreen;
-        ledsDriver.p_b = layerV->layerP->lights.header.offsetBlue;
+        ledsDriver.nb_components = layer->layerP->lights.header.channelsPerLight;
+        ledsDriver.p_r = layer->layerP->lights.header.offsetRed;
+        ledsDriver.p_g = layer->layerP->lights.header.offsetGreen;
+        ledsDriver.p_b = layer->layerP->lights.header.offsetBlue;
 
         if (initDone) {
 
@@ -66,7 +66,7 @@ class VirtualDriver: public DriverNode {
           
           // set brightness again after initled
 
-          // ledsDriver.initled(layerV->layerP->lights.channels, pins, lengths, nb_pins);
+          // ledsDriver.initled(layer->layerP->lights.channels, pins, lengths, nb_pins);
 
           // ledsDriver.setBrightness(ledsDriver._brightness); //(initLed sets it to 255 and thats not what we want)
 
@@ -86,8 +86,8 @@ class VirtualDriver: public DriverNode {
   void loop() override {
     DriverNode::loop(); //checks for changes in brightness and rgb color corrections and update the lut tables, also using maxPower.
 
-    //driver.show();     // process layerV->layerP->lights.channels (pka leds array) using LUT
-    layerV->layerP->lights.channels;
+    //driver.show();     // process layer->layerP->lights.channels (pka leds array) using LUT
+    layer->layerP->lights.channels;
     ledsDriver.__red_map[0];
     ledsDriver.__green_map[0];
     ledsDriver.__blue_map[0];

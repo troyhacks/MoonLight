@@ -13,7 +13,7 @@
 
 #include "VirtualLayer.h"
 #include "PhysicalLayer.h"
-#include "../Nodes/Nodes.h"
+#include "MoonBase/Nodes.h"
 
 //convenience functions to call fastled functions out of the Leds namespace (there naming conflict)
 void fastled_fadeToBlackBy(CRGB* leds, uint16_t num_leds, uint8_t fadeBy) {
@@ -208,7 +208,7 @@ void VirtualLayer::fadeToBlackMin() {
     //     }
     //   }
     // } else 
-    if (layerP->lights.header.channelsPerLight == 3 && layerP->layerV.size() == 1) { //CRGB lights
+    if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) { //CRGB lights
       fastled_fadeToBlackBy((CRGB *)layerP->lights.channels, layerP->lights.header.nrOfLights, fadeBy);
     } else { //multichannel lights
       for (uint16_t index = 0; index < nrOfLights; index++) {
@@ -250,7 +250,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
   //     }
   //   }
   // } else 
-  if (layerP->lights.header.channelsPerLight == 3 && layerP->layerV.size() == 1) { //faster, else manual 
+  if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) { //faster, else manual 
     fastled_fill_solid((CRGB *)layerP->lights.channels, layerP->lights.header.nrOfLights, color);
   } else {
     for (uint16_t index = 0; index < nrOfLights; index++)
@@ -271,7 +271,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   //     }
   //   }
   // } else 
-  if (layerP->lights.header.channelsPerLight == 3 && layerP->layerV.size() == 1) { //faster, else manual 
+  if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) { //faster, else manual 
     fastled_fill_rainbow((CRGB *)layerP->lights.channels, layerP->lights.header.nrOfLights, initialhue, deltahue);
   } else {
     CHSV hsv;

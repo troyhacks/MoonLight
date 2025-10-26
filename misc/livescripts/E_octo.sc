@@ -12,8 +12,8 @@ uint8_t branches = 4;
 
 void setup()
 {
-  addControl(&speed, "speed", "range", 1, 255);
-  addControl(&branches, "branches", "range", 1, 8);
+  addControl(&speed, "speed", "slider", 1, 255);
+  addControl(&branches, "branches", "slider", 1, 8);
 
   C_X = width / 2;
   C_Y = height / 2;

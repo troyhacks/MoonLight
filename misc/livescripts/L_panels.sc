@@ -6,10 +6,10 @@ bool snake = true;
 uint8_t pin = 16;
 
 void setup() {
-  addControl(&horizontalPanels, "horizontalPanels", "range", 1, 32);
-  addControl(&verticalPanels, "verticalPanels", "range", 1, 32);
-  addControl(&panelWidth, "panelWidth", "range", 1, 64);
-  addControl(&panelHeight, "panelHeight", "range", 1, 64);
+  addControl(&horizontalPanels, "horizontalPanels", "slider", 1, 32);
+  addControl(&verticalPanels, "verticalPanels", "slider", 1, 32);
+  addControl(&panelWidth, "panelWidth", "slider", 1, 64);
+  addControl(&panelHeight, "panelHeight", "slider", 1, 64);
   addControl(&snake, "snake", "checkbox");
   addControl(&pin, "pin", "pin", 1, 48);
 }

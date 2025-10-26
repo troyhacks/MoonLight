@@ -26,17 +26,17 @@ class SolidEffect: public Node {
   uint8_t brightness = 255;
 
   void setup() override {
-    addControl(red, "red", "range");
-    addControl(green, "green", "range");
-    addControl(blue, "blue", "range");
-    addControl(white, "white", "range");
-    addControl(brightness, "brightness", "range");
+    addControl(red, "red", "slider");
+    addControl(green, "green", "slider");
+    addControl(blue, "blue", "slider");
+    addControl(white, "white", "slider");
+    addControl(brightness, "brightness", "slider");
   }
 
   void loop() override {
-      layerV->fill_solid(CRGB(red * brightness/255, green * brightness/255, blue * brightness/255));
-      if (layerV->layerP->lights.header.offsetWhite != UINT8_MAX && white > 0)
-        for (int index; index < layerV->nrOfLights; index++) layerV->setWhite(index, white * brightness/255);
+      layer->fill_solid(CRGB(red * brightness/255, green * brightness/255, blue * brightness/255));
+      if (layer->layerP->lights.header.offsetWhite != UINT8_MAX && white > 0)
+        for (int index; index < layer->nrOfLights; index++) layer->setWhite(index, white * brightness/255);
   }
 };
 
@@ -61,16 +61,16 @@ class FixedRectangleEffect: public Node {
   bool alternateWhite = false; // to be used for frontlight
 
   void setup() override {
-    addControl(red, "red", "range");
-    addControl(green, "green", "range");
-    addControl(blue, "blue", "range");
-    addControl(white, "white", "range");
-    addControl(x, "X position", "range", 0);
-    addControl(y, "Y position", "range", 0);
-    addControl(z, "Z position", "range", 0);
-    addControl(width, "Rectangle width", "range", 1);
-    addControl(height, "Rectangle height", "range", 1);
-    addControl(depth, "Rectangle depth", "range", 1);
+    addControl(red, "red", "slider");
+    addControl(green, "green", "slider");
+    addControl(blue, "blue", "slider");
+    addControl(white, "white", "slider");
+    addControl(x, "X position", "slider", 0);
+    addControl(y, "Y position", "slider", 0);
+    addControl(z, "Z position", "slider", 0);
+    addControl(width, "Rectangle width", "slider", 1);
+    addControl(height, "Rectangle height", "slider", 1);
+    addControl(depth, "Rectangle depth", "slider", 1);
     addControl(alternateWhite, "alternateWhite", "checkbox");
   }
 
@@ -78,17 +78,17 @@ class FixedRectangleEffect: public Node {
 
   void loop() override {
     alternate = false;
-    layerV->fadeToBlackBy(10); //cleanup old leds if changing
+    layer->fadeToBlackBy(10); //cleanup old leds if changing
     Coord3D pos = {0,0,0};
-    for (pos.z = z; pos.z < MIN(z+depth, layerV->size.z); pos.z++) {
-      for (pos.y = y; pos.y < MIN(y+height, layerV->size.y); pos.y++) {
-        for (pos.x = x; pos.x < MIN(x+width, layerV->size.x); pos.x++) {
+    for (pos.z = z; pos.z < MIN(z+depth, layer->size.z); pos.z++) {
+      for (pos.y = y; pos.y < MIN(y+height, layer->size.y); pos.y++) {
+        for (pos.x = x; pos.x < MIN(x+width, layer->size.x); pos.x++) {
           if (alternateWhite && alternate)
-            layerV->setRGB(pos, CRGB::White);
+            layer->setRGB(pos, CRGB::White);
           else
-            layerV->setRGB(pos, CRGB(red, green, blue));
+            layer->setRGB(pos, CRGB(red, green, blue));
           if (white > 0)
-            layerV->setWhite(pos, white);
+            layer->setWhite(pos, white);
           if (height < width)
             alternate = !alternate;
         }
@@ -118,27 +118,27 @@ public:
   uint8_t bpm = 120;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
+    addControl(bpm, "bpm", "slider");
   }
 
   void loop() override {
     int   frameNr;
 
-    layerV->fadeToBlackBy(255);
+    layer->fadeToBlackBy(255);
 
     Coord3D pos = {0,0,0};
-    pos.x = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.x ); //instead of call%width
+    pos.x = ::map(beat16( bpm), 0, UINT16_MAX, 0, layer->size.x ); //instead of call%width
 
-    for (pos.y = 0; pos.y < layerV->size.y; pos.y++) {
-      int colorNr = (frameNr / layerV->size.y) % 3;
-      layerV->setRGB(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
+    for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
+      int colorNr = (frameNr / layer->size.y) % 3;
+      layer->setRGB(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
     }
 
     pos = {0,0,0};
-    pos.y = ::map(beat16( bpm), 0, UINT16_MAX, 0, layerV->size.y ); //instead of call%height
-    for (pos.x = 0; pos.x <  layerV->size.x; pos.x++) {
-      int colorNr = (frameNr / layerV->size.x) % 3;
-      layerV->setRGB(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
+    pos.y = ::map(beat16( bpm), 0, UINT16_MAX, 0, layer->size.y ); //instead of call%height
+    for (pos.x = 0; pos.x <  layer->size.x; pos.x++) {
+      int colorNr = (frameNr / layer->size.x) % 3;
+      layer->setRGB(pos, colorNr == 0?CRGB::Red:colorNr == 1?CRGB::Green:CRGB::Blue);
     }
     (frameNr)++;
   }
@@ -155,14 +155,14 @@ public:
   uint8_t speed = 8; //default 8*32 = 256 / 256 = 1 = hue++
 
   void setup() {
-    addControl(speed, "speed", "range", 0, 32);
-    addControl(deltaHue, "deltaHue", "range", 0, 32);
+    addControl(speed, "speed", "slider", 0, 32);
+    addControl(deltaHue, "deltaHue", "slider", 0, 32);
   }
 
   uint16_t hue = 0;
 
   void loop() override {
-    layerV->fill_rainbow((hue+=speed*32) >> 8, deltaHue); //hue back to uint8_t
+    layer->fill_rainbow((hue+=speed*32) >> 8, deltaHue); //hue back to uint8_t
   }
 };
 
@@ -175,11 +175,11 @@ class RandomEffect: public Node {
 
   uint8_t speed=128;
   void setup() {
-    addControl(speed, "speed", "range");
+    addControl(speed, "speed", "slider");
   }
   void loop() override {
-      layerV->fadeToBlackBy(70);
-      layerV->setRGB(random16(layerV->nrOfLights), CRGB(255, random8(), 0));
+      layer->fadeToBlackBy(70);
+      layer->setRGB(random16(layer->nrOfLights), CRGB(255, random8(), 0));
   }
 };
 
@@ -194,25 +194,25 @@ class RipplesEffect: public Node {
   uint8_t interval = 128;
 
   void setup() override {
-    addControl(speed, "speed", "range");
-    addControl(interval, "interval", "range");
+    addControl(speed, "speed", "slider");
+    addControl(interval, "interval", "slider");
   }
 
   void loop() override {
 
-    float ripple_interval = 1.3f * ((255.0f - interval)/128.0f) * sqrtf(layerV->size.y);
+    float ripple_interval = 1.3f * ((255.0f - interval)/128.0f) * sqrtf(layer->size.y);
     float time_interval = millis()/(100.0 - speed)/((256.0f-128.0f)/20.0f);
 
-    layerV->fadeToBlackBy(255);
+    layer->fadeToBlackBy(255);
 
     Coord3D pos = {0,0,0};
-    for (pos.z=0; pos.z<layerV->size.z; pos.z++) {
-      for (pos.x=0; pos.x<layerV->size.x; pos.x++) {
+    for (pos.z=0; pos.z<layer->size.z; pos.z++) {
+      for (pos.x=0; pos.x<layer->size.x; pos.x++) {
 
-        float d = distance(layerV->size.x/2.0f, layerV->size.z/2.0f, 0.0f, (float)pos.x, (float)pos.z, 0.0f) / 9.899495f * layerV->size.y;
-        pos.y = floor(layerV->size.y/2.0f * (1 + sinf(d/ripple_interval + time_interval))); //between 0 and layerV->size.y
+        float d = distance(layer->size.x/2.0f, layer->size.z/2.0f, 0.0f, (float)pos.x, (float)pos.z, 0.0f) / 9.899495f * layer->size.y;
+        pos.y = floor(layer->size.y/2.0f * (1 + sinf(d/ripple_interval + time_interval))); //between 0 and layer->size.y
 
-        layerV->setRGB(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
+        layer->setRGB(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
       }
     }
   }
@@ -261,12 +261,12 @@ public:
 
     addControl(textIn, "text", "text", 1, sizeof(textIn)); //size needed to protect char array!
 
-    addControl(speed, "speed", "range");
+    addControl(speed, "speed", "slider");
   }
 
   void loop() override {
 
-    layerV->fadeToBlackBy();
+    layer->fadeToBlackBy();
 
     uint8_t choice;
     if (preset > 0) //not auto
@@ -307,13 +307,13 @@ public:
       case 8: text.format("%dCC", sharedData.connectedClients); break;
       case 9: text.format("%dKB", ESP.getFreeHeap()/1024); break;
     }
-    layerV->setRGB(Coord3D(choice-1), CRGB::Blue); 
+    layer->setRGB(Coord3D(choice-1), CRGB::Blue); 
 
     // EVERY_N_SECONDS(1)
     //   Serial.printf(" %d:%s", choice-1, text.c_str());
 
     // if (text && strnlen(text.c_str(), 2) > 0) {
-      layerV->drawText(text.c_str(), 0, 1, font, CRGB::Red, - (millis()/25*speed/256)); //instead of call
+      layer->drawText(text.c_str(), 0, 1, font, CRGB::Red, - (millis()/25*speed/256)); //instead of call
     // }
 
     #if USE_M5UNIFIEDDisplay
@@ -336,23 +336,23 @@ class SinusEffect: public Node {
   uint8_t speed = 5;
 
   void setup() override {
-    addControl(speed, "speed", "range");
+    addControl(speed, "speed", "slider");
   }
 
   void loop() override {
-    layerV->fadeToBlackBy(70);
+    layer->fadeToBlackBy(70);
 
     uint8_t hueOffset =  millis() / 10;
     static uint16_t phase = 0; // Tracks the phase of the sine wave
     uint8_t brightness = 255;
     
-    for (uint16_t i = 0; i < layerV->nrOfLights; i++) {
+    for (uint16_t i = 0; i < layer->nrOfLights; i++) {
         // Calculate the sine wave value for the current LED
-        uint8_t wave = sin8((i * 255 / layerV->nrOfLights) + phase);
+        uint8_t wave = sin8((i * 255 / layer->nrOfLights) + phase);
         // Map the sine wave value to a color hue
         uint8_t hue = wave + hueOffset;
         // Set the LED color using the calculated hue
-        layerV->setRGB(i, (CRGB)CHSV(hue, 255, brightness));
+        layer->setRGB(i, (CRGB)CHSV(hue, 255, brightness));
     }
 
     // Increment the phase to animate the wave
@@ -370,30 +370,30 @@ class SphereMoveEffect: public Node {
   uint8_t speed = 50;
   
   void setup() override {
-    addControl(speed, "speed", "range", 0, 99);
+    addControl(speed, "speed", "slider", 0, 99);
   }
 
   void loop() override {
 
-    layerV->fadeToBlackBy(255);
+    layer->fadeToBlackBy(255);
 
     float time_interval = millis()/(100 - speed)/((256.0f-128.0f)/20.0f);
 
     Coord3D origin;
-    origin.x = layerV->size.x / 2.0 * ( 1.0 + sinf(time_interval));
-    origin.y = layerV->size.y / 2.0 * ( 1.0 + cosf(time_interval));
-    origin.z = layerV->size.z / 2.0 * ( 1.0 + cosf(time_interval));
+    origin.x = layer->size.x / 2.0 * ( 1.0 + sinf(time_interval));
+    origin.y = layer->size.y / 2.0 * ( 1.0 + cosf(time_interval));
+    origin.z = layer->size.z / 2.0 * ( 1.0 + cosf(time_interval));
 
     float diameter = 2.0f+sinf(time_interval/3.0f);
 
     Coord3D pos;
-    for (pos.x=0; pos.x<layerV->size.x; pos.x++) {
-        for (pos.y=0; pos.y<layerV->size.y; pos.y++) {
-            for (pos.z=0; pos.z<layerV->size.z; pos.z++) {
+    for (pos.x=0; pos.x<layer->size.x; pos.x++) {
+        for (pos.y=0; pos.y<layer->size.y; pos.y++) {
+            for (pos.z=0; pos.z<layer->size.z; pos.z++) {
                 float d = distance(pos.x, pos.y, pos.z, origin.x, origin.y, origin.z);
 
                 if (d>diameter && d<diameter + 1.0) {
-                  layerV->setRGB(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
+                  layer->setRGB(pos, (CRGB)CHSV( millis()/50 + random8(64), 200, 255));
                 }
             }
         }
@@ -423,16 +423,16 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
   bool usePalette = false;
 
   void setup() override {
-    addControl(speed, "speed", "range", 0, 30);
-    addControl(numStars, "numStars", "range", 1, 255);
-    addControl(blur, "blur", "range", 0, 255);
+    addControl(speed, "speed", "slider", 0, 30);
+    addControl(numStars, "numStars", "slider", 1, 255);
+    addControl(blur, "blur", "slider", 0, 255);
     addControl(usePalette, "usePalette", "checkbox");
 
     //set up all stars
     for (int i = 0; i < 255; i++) {
-      stars[i].x = random(-layerV->size.x, layerV->size.x);
-      stars[i].y = random(-layerV->size.y, layerV->size.y);
-      stars[i].z = random(layerV->size.x);
+      stars[i].x = random(-layer->size.x, layer->size.x);
+      stars[i].y = random(-layer->size.y, layer->size.y);
+      stars[i].z = random(layer->size.x);
       stars[i].colorIndex = random8();
     }
   }
@@ -444,31 +444,31 @@ class StarFieldEffect: public Node {  // Inspired by Daniel Shiffman's Coding Tr
 
     if (!speed || millis() - step < 1000 / speed) return; // Not enough time passed
 
-    layerV->fadeToBlackBy(blur);
+    layer->fadeToBlackBy(blur);
 
     for (int i = 0; i < numStars; i++) {
       //update star
       // MB_LOGD(ML_TAG, "Star %d Pos: %d, %d, %d -> ", i, stars[i].x, stars[i].y, stars[i].z);
-      float sx = layerV->size.x/2.0 + fmap(float(stars[i].x) / stars[i].z, 0, 1, 0, layerV->size.x/2.0);
-      float sy = layerV->size.y/2.0 + fmap(float(stars[i].y) / stars[i].z, 0, 1, 0, layerV->size.y/2.0);
+      float sx = layer->size.x/2.0 + fmap(float(stars[i].x) / stars[i].z, 0, 1, 0, layer->size.x/2.0);
+      float sy = layer->size.y/2.0 + fmap(float(stars[i].y) / stars[i].z, 0, 1, 0, layer->size.y/2.0);
 
       // MB_LOGD(ML_TAG, " %f, %f\n", sx, sy);
 
       Coord3D pos = Coord3D(sx, sy);
-      if (!pos.isOutofBounds(layerV->size)) {
-        if (usePalette) layerV->setRGB(Coord3D(sx, sy), ColorFromPalette(layerV->layerP->palette, stars[i].colorIndex, ::map(stars[i].z, 0, layerV->size.x, 255, 150)));
+      if (!pos.isOutofBounds(layer->size)) {
+        if (usePalette) layer->setRGB(Coord3D(sx, sy), ColorFromPalette(layer->layerP->palette, stars[i].colorIndex, ::map(stars[i].z, 0, layer->size.x, 255, 150)));
         else {
           uint8_t color = ::map(stars[i].colorIndex, 0, 255, 120, 255);
-          int brightness = ::map(stars[i].z, 0, layerV->size.x, 7, 10);
+          int brightness = ::map(stars[i].z, 0, layer->size.x, 7, 10);
           color *= brightness/10.0;
-          layerV->setRGB(Coord3D(sx, sy), CRGB(color, color, color));
+          layer->setRGB(Coord3D(sx, sy), CRGB(color, color, color));
         }
       }
       stars[i].z -= 1;
-      if (stars[i].z <= 0 || pos.isOutofBounds(layerV->size)) {
-        stars[i].x = random(-layerV->size.x, layerV->size.x);
-        stars[i].y = random(-layerV->size.y, layerV->size.y);
-        stars[i].z = layerV->size.x;
+      if (stars[i].z <= 0 || pos.isOutofBounds(layer->size)) {
+        stars[i].x = random(-layer->size.x, layer->size.x);
+        stars[i].y = random(-layer->size.y, layer->size.y);
+        stars[i].z = layer->size.x;
         stars[i].colorIndex = random8();
       }
     }
@@ -492,19 +492,19 @@ public:
   uint8_t microMutatorMax = 255;
 
   void setup() override {
-    addControl(macroMutatorFreq, "macroMutatorFreq", "range", 0, 15);
-    addControl(macroMutatorMin, "macroMutatorMin", "range", 0, 255);
-    addControl(macroMutatorMax, "macroMutatorMax", "range", 0, 255);
-    addControl(microMutatorFreq, "microMutatorFreq", "range", 0, 15);
-    addControl(microMutatorMin, "microMutatorMin", "range", 0, 255);
-    addControl(microMutatorMax, "microMutatorMax", "range", 0, 255);
-    //ui->initSlider(parentVar, "hueSpeed", layerV->effectData.write<uint8_t>(20), 1, 100); // (14), 1, 255)
-    //ui->initSlider(parentVar, "saturation", layerV->effectData.write<uint8_t>(255), 0, 255);
+    addControl(macroMutatorFreq, "macroMutatorFreq", "slider", 0, 15);
+    addControl(macroMutatorMin, "macroMutatorMin", "slider", 0, 255);
+    addControl(macroMutatorMax, "macroMutatorMax", "slider", 0, 255);
+    addControl(microMutatorFreq, "microMutatorFreq", "slider", 0, 15);
+    addControl(microMutatorMin, "microMutatorMin", "slider", 0, 255);
+    addControl(microMutatorMax, "microMutatorMax", "slider", 0, 255);
+    //ui->initSlider(parentVar, "hueSpeed", layer->effectData.write<uint8_t>(20), 1, 100); // (14), 1, 255)
+    //ui->initSlider(parentVar, "saturation", layer->effectData.write<uint8_t>(255), 0, 255);
   }
 
   void loop() override {
-    //uint8_t huespeed = layerV->effectData.read<uint8_t>();
-    //uint8_t saturation = layerV->effectData.read<uint8_t>(); I will revisit this when I have a display
+    //uint8_t huespeed = layer->effectData.read<uint8_t>();
+    //uint8_t saturation = layer->effectData.read<uint8_t>(); I will revisit this when I have a display
 
     uint16_t macro_mutator = beatsin16(macroMutatorFreq, macroMutatorMin << 8, macroMutatorMax << 8); // beatsin16(14, 65350, 65530);
     uint16_t micro_mutator = beatsin16(microMutatorFreq, microMutatorMin, microMutatorMax); // beatsin16(2, 550, 900);
@@ -514,13 +514,13 @@ public:
     Coord3D pos = {0,0,0};
     uint8_t huebase = millis() / 40; // 1 + ~huespeed
 
-    for (pos.x = 0; pos.x < layerV->size.x; pos.x++){
-      for(pos.y = 0; pos.y < layerV->size.y; pos.y++){
+    for (pos.x = 0; pos.x < layer->size.x; pos.x++){
+      for(pos.y = 0; pos.y < layer->size.y; pos.y++){
         //uint8_t hue = huebase + (-(pos.x+pos.y)*macro_mutator*10) + ((pos.x+pos.x*pos.y*(macro_mutator*256))/(micro_mutator+1));
         uint8_t hue = huebase + ((pos.x+pos.y*macro_mutator*pos.x)/(micro_mutator+1));
         // uint8_t hue = huebase + ((pos.x+pos.y)*(250-macro_mutator)/5) + ((pos.x+pos.y*macro_mutator*pos.x)/(micro_mutator+1)); Original
-        CRGB colour = ColorFromPalette(layerV->layerP->palette, hue, 255);
-        layerV->setRGB(pos, colour);// blend(layerV->getRGB(pos), colour, 155);
+        CRGB colour = ColorFromPalette(layer->layerP->palette, hue, 255);
+        layer->setRGB(pos, colour);// blend(layer->getRGB(pos), colour, 155);
       }
     }
   }
@@ -539,8 +539,8 @@ public:
   uint8_t type = 0;
 
   void setup() override {
-    addControl(bpm, "bpm", "range");
-    addControl(fade, "fade", "range");
+    addControl(bpm, "bpm", "slider");
+    addControl(fade, "fade", "slider");
     JsonObject property = addControl(type, "type", "select"); 
     JsonArray values = property["values"].to<JsonArray>();
     values.add("Saw");
@@ -552,35 +552,35 @@ public:
   }
 
   void loop() override {
-    layerV->fadeToBlackBy(fade); //should only fade rgb ...
+    layer->fadeToBlackBy(fade); //should only fade rgb ...
 
     CRGB color = CHSV( millis()/50, 255, 255);
 
-    int prevPos = layerV->size.x/2; //somewhere in the middle
+    int prevPos = layer->size.x/2; //somewhere in the middle
 
-    for (int y = 0; y<layerV->size.y; y++) {
+    for (int y = 0; y<layer->size.y; y++) {
       int pos = 0;
 
       uint8_t b8 = beat8(bpm, y*100);
       uint8_t bs8 = beatsin8( bpm, 0, 255, y * 100);
       //delay over y-axis..timebase ...
       switch (type) {
-        case 0: pos = b8 * layerV->size.x / 256; break;
-        case 1: pos = triangle8(bpm, y*100) * layerV->size.x / 256; break;
-        case 2: pos = bs8 * layerV->size.x / 256; break;
-        case 3: pos = b8 > 128? 0 : layerV->size.x-1; break;
-        case 4: pos = (bs8 + beatsin8( bpm*0.65, 0, 255, y * 200) + beatsin8( bpm*1.43, 0, 255, y * 300)) * layerV->size.x / 256 / 3; break;
-        case 5: pos = inoise8(millis()*bpm/256 + y*1000) * layerV->size.x / 256; break; //bpm not really bpm, more speed
+        case 0: pos = b8 * layer->size.x / 256; break;
+        case 1: pos = triangle8(bpm, y*100) * layer->size.x / 256; break;
+        case 2: pos = bs8 * layer->size.x / 256; break;
+        case 3: pos = b8 > 128? 0 : layer->size.x-1; break;
+        case 4: pos = (bs8 + beatsin8( bpm*0.65, 0, 255, y * 200) + beatsin8( bpm*1.43, 0, 255, y * 300)) * layer->size.x / 256 / 3; break;
+        case 5: pos = inoise8(millis()*bpm/256 + y*1000) * layer->size.x / 256; break; //bpm not really bpm, more speed
         default: pos = 0;
       }
 
       //connect saw and square
-      if ((type == 0 || type == 3) && abs(prevPos - pos) > layerV->size.x / 2) {
-        for (int x=0; x<layerV->size.x; x++)
-          layerV->setRGB(Coord3D(x, y), color);
+      if ((type == 0 || type == 3) && abs(prevPos - pos) > layer->size.x / 2) {
+        for (int x=0; x<layer->size.x; x++)
+          layer->setRGB(Coord3D(x, y), color);
       }
 
-      layerV->setRGB(Coord3D(pos, y), color); //= CRGB(255, random8(), 0);
+      layer->setRGB(Coord3D(pos, y), color); //= CRGB(255, random8(), 0);
       prevPos = pos;
     }
   }
@@ -602,10 +602,10 @@ public:
   uint8_t method = 2;
 
   void setup() override {
-    addControl(fade, "fade", "range");
-    addControl(increaser, "increaser", "range");
-    addControl(decreaser, "decreaser", "range");
-    addControl(bpmMax, "bpmMax", "range");
+    addControl(fade, "fade", "slider");
+    addControl(increaser, "increaser", "slider");
+    addControl(decreaser, "decreaser", "slider");
+    addControl(bpmMax, "bpmMax", "slider");
     addControl(invert, "invert", "checkbox");
     addControl(keepOn, "keepOn", "checkbox");
     JsonObject property = addControl(method, "method", "select");
@@ -629,14 +629,14 @@ public:
   unsigned long lastTime; // For time-based phase calculation
 
   void loop() override {
-    layerV->fadeToBlackBy(fade);
+    layer->fadeToBlackBy(fade);
     // Update timing for frame-rate independent phase
     unsigned long currentTime = millis();
     uint32_t deltaMs = currentTime - lastTime;
     lastTime = currentTime;
 
-    for (int x = 0; x<layerV->size.x; x++) { //x-axis (column)
-      uint8_t band = ::map(x, 0, layerV->size.x, 0, NUM_GEQ_CHANNELS); //the frequency band applicable for the column, skip the lowest and the highest
+    for (int x = 0; x<layer->size.x; x++) { //x-axis (column)
+      uint8_t band = ::map(x, 0, layer->size.x, 0, NUM_GEQ_CHANNELS); //the frequency band applicable for the column, skip the lowest and the highest
       uint8_t volume = sharedData.bands[band]; // the volume for the frequency band
       // Target speed based on current volume
       uint16_t targetSpeed = (volume * increaser * 257);
@@ -659,7 +659,7 @@ public:
         uint8_t bpm = ::map(bandSpeed[band], 0, UINT16_MAX, 0, bpmMax); //the higher the band speed, the higher the beats per minute.
         uint8_t y;
         if (method == 0) { //chaos
-          y = ::map(beat8(bpm), 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+          y = ::map(beat8(bpm), 0, 255, 0, layer->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
         } else if (method == 1) { //chaos corrected
           // Maintain phase continuity when BPM changes
           if (bpm != lastBpm[band]) {
@@ -668,16 +668,16 @@ public:
             phaseOffset[band] = currentPos - newPos;
             lastBpm[band] = bpm;
           }
-          y = ::map(beat8(bpm) + phaseOffset[band], 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+          y = ::map(beat8(bpm) + phaseOffset[band], 0, 255, 0, layer->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
         } else if (method == 2) { //bandphases
           // Time-based phase increment - 1 complete cycle per second at 60 BPM
           uint32_t phaseIncrement = (bpm * deltaMs * 65536UL) / (60UL * 1000UL);
           phaseIncrement /= 2; // Make it 8x faster - adjust this multiplier as needed
           bandPhase[band] += phaseIncrement;
-          y = ::map(bandPhase[band] >> 8, 0, 255, 0, layerV->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
+          y = ::map(bandPhase[band] >> 8, 0, 255, 0, layer->size.y-1); // saw wave, running over the y-axis, speed is determined by bpm
         }
         //y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
-        layerV->setRGB(Coord3D(x, (invert && x%2==0)?layerV->size.y - 1 - y:y), ColorFromPalette(layerV->layerP->palette, ::map(x, 0, layerV->size.x-1, 0, 255)));
+        layer->setRGB(Coord3D(x, (invert && x%2==0)?layer->size.y - 1 - y:y), ColorFromPalette(layer->layerP->palette, ::map(x, 0, layer->size.x-1, 0, 255)));
       }
     }
   }
@@ -824,16 +824,16 @@ class RubiksCubeEffect: public Node {
         if (width >= SIZE) rotateFace(top, !clockwise);
       }
 
-      void drawCube(VirtualLayer *layerV) {
-        int sizeX = MAX(layerV->size.x-1, 1);
-        int sizeY = MAX(layerV->size.y-1, 1);
-        int sizeZ = MAX(layerV->size.z-1, 1);
+      void drawCube(VirtualLayer *layer) {
+        int sizeX = MAX(layer->size.x-1, 1);
+        int sizeY = MAX(layer->size.y-1, 1);
+        int sizeZ = MAX(layer->size.z-1, 1);
 
         // 3 Sided Cube Cheat add 1 to led size if "panels" missing. May affect different fixture types
-        if (layerV->layerDimension == _3D) {
-          if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(0, layerV->size.y/2, layerV->size.z/2))) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x-1, layerV->size.y/2, layerV->size.z/2)))) sizeX++;
-          if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, 0, layerV->size.z/2))) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y-1, layerV->size.z/2)))) sizeY++;
-          if (!layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, 0))) || !layerV->isMapped(layerV->XYZUnModified(Coord3D(layerV->size.x/2, layerV->size.y/2, layerV->size.z-1)))) sizeZ++;
+        if (layer->layerDimension == _3D) {
+          if (!layer->isMapped(layer->XYZUnModified(Coord3D(0, layer->size.y/2, layer->size.z/2))) || !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x-1, layer->size.y/2, layer->size.z/2)))) sizeX++;
+          if (!layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x/2, 0, layer->size.z/2))) || !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x/2, layer->size.y-1, layer->size.z/2)))) sizeY++;
+          if (!layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x/2, layer->size.y/2, 0))) || !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x/2, layer->size.y/2, layer->size.z-1)))) sizeZ++;
         }
 
         // Previously SIZE - 1. Cube size expanded by 2, makes edges thicker. Constrains are used to prevent out of bounds
@@ -848,9 +848,9 @@ class RubiksCubeEffect: public Node {
 
         const CRGB COLOR_MAP[] = {CRGB::Red, CRGB::DarkOrange, CRGB::Blue, CRGB::Green, CRGB::Yellow, CRGB::White};
         
-        for (int x = 0; x < layerV->size.x; x++) for (int y = 0; y < layerV->size.y; y++) for (int z = 0; z < layerV->size.z; z++) { 
+        for (int x = 0; x < layer->size.x; x++) for (int y = 0; y < layer->size.y; y++) for (int z = 0; z < layer->size.z; z++) { 
           Coord3D led = Coord3D(x, y, z);
-          if (layerV->isMapped(layerV->XYZUnModified(led)) == 0) continue; // skip if not a physical LED
+          if (layer->isMapped(layer->XYZUnModified(led)) == 0) continue; // skip if not a physical LED
 
           // Normalize the coordinates to the Rubik's cube range. Subtract 1 since cube expanded by 2
           int normalizedX = constrain(round(x * scaleX) - 1, 0, SIZE - 1);
@@ -863,12 +863,12 @@ class RubiksCubeEffect: public Node {
           int distZ = min(z, sizeZ - z);
           int dist  = min(distX, min(distY, distZ));
 
-          if      (dist == distZ && z < halfZ)  layerV->setRGB(led, COLOR_MAP[front[normalizedY][normalizedX]]);
-          else if (dist == distX && x < halfX)  layerV->setRGB(led, COLOR_MAP[left[normalizedY][SIZE - 1 - normalizedZ]]);
-          else if (dist == distY && y < halfY)  layerV->setRGB(led, COLOR_MAP[top[SIZE - 1 - normalizedZ][normalizedX]]);
-          else if (dist == distZ && z >= halfZ) layerV->setRGB(led, COLOR_MAP[back[normalizedY][SIZE - 1 - normalizedX]]);
-          else if (dist == distX && x >= halfX) layerV->setRGB(led, COLOR_MAP[right[normalizedY][normalizedZ]]);
-          else if (dist == distY && y >= halfY) layerV->setRGB(led, COLOR_MAP[bottom[normalizedZ][normalizedX]]);
+          if      (dist == distZ && z < halfZ)  layer->setRGB(led, COLOR_MAP[front[normalizedY][normalizedX]]);
+          else if (dist == distX && x < halfX)  layer->setRGB(led, COLOR_MAP[left[normalizedY][SIZE - 1 - normalizedZ]]);
+          else if (dist == distY && y < halfY)  layer->setRGB(led, COLOR_MAP[top[SIZE - 1 - normalizedZ][normalizedX]]);
+          else if (dist == distZ && z >= halfZ) layer->setRGB(led, COLOR_MAP[back[normalizedY][SIZE - 1 - normalizedX]]);
+          else if (dist == distX && x >= halfX) layer->setRGB(led, COLOR_MAP[right[normalizedY][normalizedZ]]);
+          else if (dist == distY && y >= halfY) layer->setRGB(led, COLOR_MAP[bottom[normalizedZ][normalizedX]]);
         }
       }
   };
@@ -910,8 +910,8 @@ class RubiksCubeEffect: public Node {
   bool randomTurning = false;
 
   void setup() override {
-    addControl(turnsPerSecond, "turnsPerSecond", "range", 0, 20);   
-    addControl(cubeSize, "cubeSize", "range", 1, 8);   
+    addControl(turnsPerSecond, "turnsPerSecond", "slider", 0, 20);   
+    addControl(cubeSize, "cubeSize", "slider", 1, 8);   
     addControl(randomTurning, "randomTurning", "checkbox");   
   }
 
@@ -949,7 +949,7 @@ class RubiksCubeEffect: public Node {
 
       moveIndex = moveCount - 1;
 
-      cube.drawCube(layerV);
+      cube.drawCube(layer);
 
   }
 
@@ -970,7 +970,7 @@ class RubiksCubeEffect: public Node {
 
     (cube.*rotateFuncs[move.face])(!move.direction, move.width + 1);
       
-    cube.drawCube(layerV);
+    cube.drawCube(layer);
     
     if (!randomTurning && moveIndex == 0) {
       step = millis() + 3000;
@@ -1009,7 +1009,7 @@ class ParticlesEffect: public Node {
       return Coord3D(round(x), round(y), round(z));
     }
 
-    void updatePositionandDraw(VirtualLayer *layerV, int particleIndex = 0, bool debugPrint = false) {
+    void updatePositionandDraw(VirtualLayer *layer, int particleIndex = 0, bool debugPrint = false) {
       if (debugPrint) MB_LOGD(ML_TAG, "Particle %d: Pos: %f, %f, %f Velocity: %f, %f, %f\n", particleIndex, x, y, z, vx, vy, vz);
 
       Coord3D prevPos = toCoord3DRounded();
@@ -1021,11 +1021,11 @@ class ParticlesEffect: public Node {
 
       if (newPos == prevPos) return; // Skip if no change in position
 
-      layerV->setRGB(prevPos, CRGB::Black); // Clear previous position
+      layer->setRGB(prevPos, CRGB::Black); // Clear previous position
 
-      if (layerV->isMapped(layerV->XYZUnModified(newPos)) && !newPos.isOutofBounds(layerV->size) && layerV->getRGB(newPos) == CRGB::Black) {
+      if (layer->isMapped(layer->XYZUnModified(newPos)) && !newPos.isOutofBounds(layer->size) && layer->getRGB(newPos) == CRGB::Black) {
         if (debugPrint) MB_LOGD(ML_TAG, "     New Pos was mapped and particle placed\n");
-        layerV->setRGB(newPos, color); // Set new position
+        layer->setRGB(newPos, color); // Set new position
         return;
       }
       
@@ -1041,9 +1041,9 @@ class ParticlesEffect: public Node {
       for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++) {
         Coord3D testPos = newPos + Coord3D(i, j, k);
         if (testPos == prevPos)                         continue; // Skip current position
-        if (!layerV->isMapped(layerV->XYZUnModified(testPos)))    continue; // Skip if not mapped
-        if (testPos.isOutofBounds(layerV->size))           continue; // Skip out of bounds
-        if (layerV->getRGB(testPos) != CRGB::Black) continue; // Skip if already colored by another particle
+        if (!layer->isMapped(layer->XYZUnModified(testPos)))    continue; // Skip if not mapped
+        if (testPos.isOutofBounds(layer->size))           continue; // Skip out of bounds
+        if (layer->getRGB(testPos) != CRGB::Black) continue; // Skip if already colored by another particle
         unsigned dist = testPos.distanceSquared(newPos);
         int differences = (prevPos.x != testPos.x) + (prevPos.y != testPos.y) + (prevPos.z != testPos.z);
         if (debugPrint) MB_LOGD(ML_TAG, "     TestPos: %d %d %d Dist: %d Diff: %d", testPos.x, testPos.y, testPos.z, dist, differences);
@@ -1073,21 +1073,21 @@ class ParticlesEffect: public Node {
         revert();
         // change X val
         testing.x = newPos.x;
-        if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vx = 0;
+        if (testing.isOutofBounds(layer->size) || !layer->isMapped(layer->XYZUnModified(testing))) vx = 0;
         // change Y val
         testing = toCoord3DRounded();
         testing.y = newPos.y;
-        if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vy = 0;
+        if (testing.isOutofBounds(layer->size) || !layer->isMapped(layer->XYZUnModified(testing))) vy = 0;
         // change Z val
         testing = toCoord3DRounded();
         testing.z = newPos.z;
-        if (testing.isOutofBounds(layerV->size) || !layerV->isMapped(layerV->XYZUnModified(testing))) vz = 0;
+        if (testing.isOutofBounds(layer->size) || !layer->isMapped(layer->XYZUnModified(testing))) vz = 0;
         
         if (debugPrint) MB_LOGD(ML_TAG, "     No valid position found, reverted. Velocity Updated\n");
         if (debugPrint) MB_LOGD(ML_TAG, "     New Pos: %f, %f, %f Velo: %f, %f, %f\n", x, y, z, vx, vy, vz);
       }
 
-      layerV->setRGB(toCoord3DRounded(), color);
+      layer->setRGB(toCoord3DRounded(), color);
     }
   };
 
@@ -1101,19 +1101,19 @@ class ParticlesEffect: public Node {
   #endif
   bool randomGravity = true;
   uint8_t gravityChangeInterval = 5;
-  // bool debugPrint    = layerV->effectData.read<bool>();
+  // bool debugPrint    = layer->effectData.read<bool>();
   bool debugPrint = false;
 
   void setup() override {
-    addControl(speed, "speed", "range", 0, 30);
-    addControl(numParticles, "number of Particles", "range", 1, 255);
+    addControl(speed, "speed", "slider", 0, 30);
+    addControl(numParticles, "number of Particles", "slider", 1, 255);
     addControl(barriers, "barriers", "checkbox");
     #ifdef STARBASE_USERMOD_MPU6050
       addControl(gyro, "gyro", "checkbox");
     #endif
     addControl(randomGravity, "randomGravity", "checkbox");
-    addControl(gravityChangeInterval, "gravityChangeInterval", "range", 1, 10);
-    // addControl(bool, "Debug Print",             layerV->effectData.write<bool>(0));
+    addControl(gravityChangeInterval, "gravityChangeInterval", "slider", 1, 10);
+    // addControl(bool, "Debug Print",             layer->effectData.write<bool>(0));
   }
 
   void onUpdate(String &oldValue, JsonObject control) override {
@@ -1125,14 +1125,14 @@ class ParticlesEffect: public Node {
 
   void settingUpParticles() {
     MB_LOGD(ML_TAG, "Setting Up Particles\n");
-    layerV->fill_solid(CRGB::Black);
+    layer->fill_solid(CRGB::Black);
 
     if (barriers) {
       // create a 2 pixel thick barrier around middle y value with gaps
-      for (int x = 0; x < layerV->size.x; x++) for (int z = 0; z < layerV->size.z; z++) {
+      for (int x = 0; x < layer->size.x; x++) for (int z = 0; z < layer->size.z; z++) {
         if (!random8(5)) continue;
-        layerV->setRGB(Coord3D(x, layerV->size.y/2, z), CRGB::White);
-        layerV->setRGB(Coord3D(x, layerV->size.y/2 - 1, z), CRGB::White);
+        layer->setRGB(Coord3D(x, layer->size.y/2, z), CRGB::White);
+        layer->setRGB(Coord3D(x, layer->size.y/2 - 1, z), CRGB::White);
       }
     }
 
@@ -1140,9 +1140,9 @@ class ParticlesEffect: public Node {
       Coord3D rPos; 
       int attempts = 0; 
       do { // Get random mapped position that isn't colored (infinite loop if small fixture size and high particle count)
-        rPos = {random8(layerV->size.x), random8(layerV->size.y), random8(layerV->size.z)};
+        rPos = {random8(layer->size.x), random8(layer->size.y), random8(layer->size.z)};
         attempts++;
-      } while ((!layerV->isMapped(layerV->XYZUnModified(rPos)) || layerV->getRGB(rPos) != CRGB::Black) && attempts < 1000);
+      } while ((!layer->isMapped(layer->XYZUnModified(rPos)) || layer->getRGB(rPos) != CRGB::Black) && attempts < 1000);
       // rPos = {1,1,0};
       particles[index].x = rPos.x;
       particles[index].y = rPos.y;
@@ -1150,12 +1150,12 @@ class ParticlesEffect: public Node {
 
       particles[index].vx = (random8() / 256.0f) * 2.0f - 1.0f;
       particles[index].vy = (random8() / 256.0f) * 2.0f - 1.0f;
-      if (layerV->layerDimension == _3D) particles[index].vz = (random8() / 256.0f) * 2.0f - 1.0f;
+      if (layer->layerDimension == _3D) particles[index].vz = (random8() / 256.0f) * 2.0f - 1.0f;
       else particles[index].vz = 0;
 
-      particles[index].color = ColorFromPalette(layerV->layerP->palette, random8());
+      particles[index].color = ColorFromPalette(layer->layerP->palette, random8());
       Coord3D initPos = particles[index].toCoord3DRounded();
-      layerV->setRGB(initPos, particles[index].color);
+      layer->setRGB(initPos, particles[index].color);
     }
     MB_LOGD(ML_TAG, "Particles Set Up\n");
     step = millis();
@@ -1178,7 +1178,7 @@ class ParticlesEffect: public Node {
       gravity[1] =  mpu6050->gravityVector.z; // Swap Y and Z axis
       gravity[2] = -mpu6050->gravityVector.y;
 
-      if (layerV->layerDimension == _2D) { // Swap back Y and Z axis set Z to 0
+      if (layer->layerDimension == _2D) { // Swap back Y and Z axis set Z to 0
         gravity[1] = -gravity[2];
         gravity[2] = 0;
       }
@@ -1198,7 +1198,7 @@ class ParticlesEffect: public Node {
         gravity[1] = constrain(gravity[1], -1.0f, 1.0f);
         gravity[2] = constrain(gravity[2], -1.0f, 1.0f);
 
-        if (layerV->layerDimension == _2D) gravity[2] = 0;
+        if (layer->layerDimension == _2D) gravity[2] = 0;
         // MB_LOGD(ML_TAG, "Random Gravity: %f, %f, %f\n", gravity[0], gravity[1], gravity[2]);
       }
     }
@@ -1210,7 +1210,7 @@ class ParticlesEffect: public Node {
         particles[index].vy += (gravity[1] - particles[index].vy) * lerpFactor; // Swap Y and Z axis
         particles[index].vz += (gravity[2] - particles[index].vz) * lerpFactor;
       }
-      particles[index].updatePositionandDraw(layerV, index, debugPrint);  
+      particles[index].updatePositionandDraw(layer, index, debugPrint);  
     }
 
     step = millis();
@@ -1235,7 +1235,7 @@ class MoonManEffect: public Node {
   void onSizeChanged(Coord3D prevSize) override {
     // Create canvas for processing
     canvas->deleteSprite();
-    canvas->createSprite(layerV->size.x, layerV->size.y);
+    canvas->createSprite(layer->size.x, layer->size.y);
     // Load and display PNG
     displayPNGToPanel();
   }
@@ -1247,7 +1247,7 @@ class MoonManEffect: public Node {
     canvas->fillSprite(TFT_BLACK);
     
     // Draw PNG to canvas - M5GFX handles scaling automatically
-    success = canvas->drawPng(moonmanpng, moonmanpng_len, 0, 0, 0, 0, 0, 0, layerV->size.x/320.0, layerV->size.y/320.0);
+    success = canvas->drawPng(moonmanpng, moonmanpng_len, 0, 0, 0, 0, 0, 0, layer->size.x/320.0, layer->size.y/320.0);
     if (success) {
       Serial.println("PNG decoded successfully!");
       
@@ -1260,8 +1260,8 @@ class MoonManEffect: public Node {
 
   void transferCanvasToPanel() {
     // Read each pixel from canvas and send to LED panel
-    for (int y = 0; y < layerV->size.y; y++) {
-      for (int x = 0; x < layerV->size.x; x++) {
+    for (int y = 0; y < layer->size.y; y++) {
+      for (int x = 0; x < layer->size.x; x++) {
         // Get pixel color from canvas
         uint16_t color = canvas->readPixel(x, y);
         
@@ -1271,7 +1271,7 @@ class MoonManEffect: public Node {
         uint8_t b = (color & 0x1F) << 3;          // 5 bits -> 8 bits
         
         // Set pixel on LED panel
-        layerV->setRGB(Coord3D(x,y), CRGB(r,g,b));
+        layer->setRGB(Coord3D(x,y), CRGB(r,g,b));
       }
     }
   }

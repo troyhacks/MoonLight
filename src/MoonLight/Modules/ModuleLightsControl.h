@@ -15,11 +15,11 @@
 #if FT_MOONLIGHT
 
 #include "FastLED.h"
-#include "../MoonBase/Module.h"
+#include "MoonBase/Module.h"
 
 #include "ModuleEffects.h"
 
-#include "../MoonBase/Utilities.h" //for isInPSRAM
+#include "MoonBase/Utilities.h" //for isInPSRAM
 
 class ModuleLightsControl : public Module
 {
@@ -42,7 +42,7 @@ public:
 
         MB_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer)-sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
-        MB_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layerV[0]->mappingTable), isInPSRAM(&layerP.layerV[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
+        MB_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layers[0]->mappingTable), isInPSRAM(&layerP.layers[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
 
         setPresetsFromFolder(); //set the right values during boot
         
@@ -78,10 +78,10 @@ public:
         JsonArray values; // if a property is a select, this is the values of the select
 
         property = root.add<JsonObject>(); property["name"] = "lightsOn"; property["type"] = "checkbox"; property["default"] = true;
-        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "range"; property["default"] = 10;
-        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "range"; property["default"] = 255; property["color"] = "Red";
-        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "range"; property["default"] = 255; property["color"] = "Green";
-        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "range"; property["default"] = 255; property["color"] = "Blue";
+        property = root.add<JsonObject>(); property["name"] = "brightness"; property["type"] = "slider"; property["default"] = 10;
+        property = root.add<JsonObject>(); property["name"] = "red"; property["type"] = "slider"; property["default"] = 255; property["color"] = "Red";
+        property = root.add<JsonObject>(); property["name"] = "green"; property["type"] = "slider"; property["default"] = 255; property["color"] = "Green";
+        property = root.add<JsonObject>(); property["name"] = "blue"; property["type"] = "slider"; property["default"] = 255; property["color"] = "Blue";
         property = root.add<JsonObject>(); property["name"] = "palette"; property["type"] = "select"; property["default"] = 6; values = property["values"].to<JsonArray>();
         values.add("CloudColors");
         values.add("LavaColors");
@@ -97,9 +97,9 @@ public:
         property["default"]["list"].to<JsonArray>();
         property["default"]["count"] = 64;
 
-        property = root.add<JsonObject>(); property["name"] = "presetLoop"; property["type"] = "range"; property["default"] = 0;
-        property = root.add<JsonObject>(); property["name"] = "firstPreset"; property["type"] = "range"; property["min"] = 0; property["max"] = 63; property["default"] = 0;
-        property = root.add<JsonObject>(); property["name"] = "lastPreset"; property["type"] = "range"; property["min"] = 0; property["max"] = 63; property["default"] = 63;
+        property = root.add<JsonObject>(); property["name"] = "presetLoop"; property["type"] = "slider"; property["default"] = 0;
+        property = root.add<JsonObject>(); property["name"] = "firstPreset"; property["type"] = "slider"; property["min"] = 0; property["max"] = 63; property["default"] = 0;
+        property = root.add<JsonObject>(); property["name"] = "lastPreset"; property["type"] = "slider"; property["min"] = 0; property["max"] = 63; property["default"] = 63;
 
         #if FT_ENABLED(FT_MONITOR)
             property = root.add<JsonObject>(); property["name"] = "monitorOn"; property["type"] = "checkbox"; property["default"] = true;

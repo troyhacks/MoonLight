@@ -1,7 +1,7 @@
 uint8_t height = 16;
 
 void setup() {
-  addControl(&height, "height", "range", 1, 255);
+  addControl(&height, "height", "slider", 1, 255);
 }
 
 void addStrip( uint8_t xposition, uint8_t start_y,  uint8_t stop_y, uint8_t pin) {

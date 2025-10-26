@@ -14,16 +14,14 @@
 
 #if FT_MOONLIGHT
 
-#include "../../MoonBase/Module.h"
+#include "MoonBase/Module.h"
 
 #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
-
-PhysicalLayer layerP; //global declaration of the physical layer
 
 class NodeManager : public Module {
 public: 
     bool requestUIUpdate = false;
-    const char* defaultNodeName = nullptr;
+    String defaultNodeName = "";
 
 protected:
     PsychicHttpServer *_server;
@@ -55,7 +53,7 @@ protected:
 
         property = root.add<JsonObject>(); property["name"] = "nodes"; property["type"] = "array"; details = property["n"].to<JsonArray>();
         {
-            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName;
+            property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "selectFile"; values = property["values"].to<JsonArray>(); property["default"] = defaultNodeName.c_str();
 
             addNodes(values);
 
@@ -65,7 +63,7 @@ protected:
                 property = details.add<JsonObject>(); property["name"] = "name"; property["type"] = "text"; property["default"] = "speed";
                 property = details.add<JsonObject>(); property["name"] = "type"; property["type"] = "select"; property["default"] = "Number"; values = property["values"].to<JsonArray>();
                 values.add("number");
-                values.add("range");
+                values.add("slider");
                 values.add("text");
                 values.add("coordinate");
                 property = details.add<JsonObject>(); property["name"] = "value"; property["type"] = "text"; property["default"] = "128";
@@ -143,7 +141,6 @@ protected:
 
                     oldNode->requestMappings();
 
-                    // layerP.removeNode(oldNode);
                     MB_LOGD(ML_TAG, "remove oldNode: %d p:%p", nodes->size(), oldNode);
                     // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
                     // MB_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));
@@ -208,7 +205,6 @@ protected:
     }
 
     void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) override {
-        //reorder in layerP.nodes.
         MB_LOGD(ML_TAG, "%d %d %d", nodes->size(), stateIndex, newIndex);
         //swap nodes
         Node *nodeS = (*nodes)[stateIndex];
@@ -219,7 +215,6 @@ protected:
         //modifiers and layouts trigger remaps
         nodeS->requestMappings();
         nodeN->requestMappings();
-
     }
 
     void loop() {

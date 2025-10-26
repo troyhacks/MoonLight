@@ -133,7 +133,7 @@
         bind:checked={value}
         on:change={onChange}
     />
-{:else if property.type == "range"}
+{:else if property.type == "slider"}
     <div class="flex-row flex items-center space-x-2">
         <!-- range colors: https://daisyui.com/components/range/ 
          on:input: direct response to server

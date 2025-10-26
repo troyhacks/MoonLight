@@ -14,7 +14,8 @@
 
 #if FT_MOONLIGHT == 1
 
-#include "../MoonBase/Module.h"
+#include "MoonBase/Module.h"
+
 class ModuleChannels : public Module
 {
 public:
@@ -34,7 +35,7 @@ public:
         property = root.add<JsonObject>(); property["name"] = "view"; property["type"] = "select"; property["default"] = 0; values = property["values"].to<JsonArray>();
         values.add("Physical layer");
         uint8_t i = 0;
-        for (VirtualLayer * layer: layerP.layerV) {
+        for (VirtualLayer * layer: layerP.layers) {
             Char<32> layerName;
             layerName.format("Layer %d", i);
             values.add(layerName.c_str());
@@ -57,7 +58,7 @@ public:
         bool group =  _state.data["group"];
 
         if (updatedItem.name == "view" || updatedItem.name == "group") {
-            uint16_t count = view==0?layerP.lights.header.nrOfLights: layerP.layerV[view-1]->nrOfLights;
+            uint16_t count = view==0?layerP.lights.header.nrOfLights: layerP.layers[view-1]->nrOfLights;
             if (!group) count *= layerP.lights.header.channelsPerLight;
             if (count > 512) count = 512;
             _state.data["channel"]["count"] = count;
@@ -83,9 +84,9 @@ public:
                 } else {
                     if (group)
                         for (uint8_t i = 0; i < layerP.lights.header.channelsPerLight; i++)
-                            layerP.layerV[view-1]->setLight(select, &value, i, 1);
+                            layerP.layers[view-1]->setLight(select, &value, i, 1);
                     else
-                        layerP.layerV[view-1]->setLight(select/layerP.lights.header.channelsPerLight , &value, select%layerP.lights.header.channelsPerLight, 1);
+                        layerP.layers[view-1]->setLight(select/layerP.lights.header.channelsPerLight , &value, select%layerP.lights.header.channelsPerLight, 1);
                 }
             }
         } else
