@@ -1,5 +1,7 @@
 # Installation
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/7DQOEWa-Kwg" frameborder="0" allowfullscreen></iframe>
+
 ## MoonLight Web installer
 
 Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installer
