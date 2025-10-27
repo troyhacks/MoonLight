@@ -176,7 +176,6 @@ class IRDriver : public Node {
 
     if (new_pin_in_waiting)
     {
-        rx_channel_cfg.gpio_num = (gpio_num_t)pin;
         MB_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pin);
 
         if (rx_channel) 
@@ -196,7 +195,7 @@ class IRDriver : public Node {
             receive_queue = NULL;
         }
 
-        rx_channel_cfg.gpio_num = GPIO_NUM_5;
+        rx_channel_cfg.gpio_num = (gpio_num_t)pin;
         MB_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
         ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
 
