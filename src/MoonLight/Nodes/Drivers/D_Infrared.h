@@ -38,7 +38,7 @@ class IRDriver : public Node {
   uint8_t pin = 5;
   uint16_t s_nec_code_address;
   uint16_t s_nec_code_command;
-  bool setup_in_progress = false;
+  bool new_pin_in_waiting = false;
   rmt_rx_done_event_data_t rx_data;
   rmt_symbol_word_t raw_symbols[64];  // 64 symbols should be sufficient for a standard NEC frame
   QueueHandle_t receive_queue = NULL;
@@ -46,6 +46,9 @@ class IRDriver : public Node {
 
   rmt_rx_event_callbacks_t cbs = {
       .on_recv_done = IRDriver::ir_rmt_rx_done_callback,
+  };
+  rmt_rx_event_callbacks_t cbs_empty = {
+      .on_recv_done = NULL,
   };
 
   rmt_rx_channel_config_t rx_channel_cfg = {
@@ -153,53 +156,61 @@ class IRDriver : public Node {
   }
 
   void onUpdate(String& oldValue, JsonObject control) {
-    // add your custom onUpdate code here
     if (control["name"] == "pin") {
-      setup_in_progress = true;
-      rx_channel_cfg.gpio_num = (gpio_num_t)pin;
-
-      if (rx_channel) {
-        MB_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
-        ESP_ERROR_CHECK(rmt_disable(rx_channel));
-        MB_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
-        ESP_ERROR_CHECK(rmt_del_channel(rx_channel));
-        rx_channel = NULL;
-      }
-
-      if (receive_queue) {
-        vQueueDelete(receive_queue);
-        receive_queue = NULL;
-      }
-
-      rx_channel_cfg.gpio_num = GPIO_NUM_5;
-      MB_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
-      ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
-
-      MB_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");
-      ESP_ERROR_CHECK(rmt_enable(rx_channel));
-
-      MB_LOGI(IR_DRIVER_TAG, "Register RX done callback");
-      receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
-      assert(receive_queue);
-      ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
-
-      // ready to receive
-      MB_LOGI(IR_DRIVER_TAG, "Arm receive");
-      ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
-
-      setup_in_progress = false;
+      new_pin_in_waiting = true;
     }
   }
 
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override {
-    if (!setup_in_progress) {
-      if (xQueueReceive(receive_queue, &rx_data, pdMS_TO_TICKS(1000)) == pdPASS) {
-        // parse the receive symbols and print the result
-        parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
-        // start receive again
+    if (receive_queue)
+    {
+        if (xQueueReceive(receive_queue, &rx_data, pdMS_TO_TICKS(1000)) == pdPASS) 
+        {
+            // parse the receive symbols and print the result
+            parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
+            // start receive again
+            ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+        }
+    }
+
+    if (new_pin_in_waiting)
+    {
+        MB_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pin);
+
+        if (rx_channel) 
+        {
+            MB_LOGI(IR_DRIVER_TAG, "Removing callback");
+            ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs_empty, receive_queue));
+            MB_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
+            ESP_ERROR_CHECK(rmt_disable(rx_channel));
+            MB_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
+            ESP_ERROR_CHECK(rmt_del_channel(rx_channel));
+            rx_channel = NULL;
+        }
+
+        if (receive_queue) 
+        {
+            vQueueDelete(receive_queue);
+            receive_queue = NULL;
+        }
+
+        rx_channel_cfg.gpio_num = (gpio_num_t)pin;
+        MB_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
+        ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
+
+        MB_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");      
+        ESP_ERROR_CHECK(rmt_enable(rx_channel));
+
+        MB_LOGI(IR_DRIVER_TAG, "Register RX done callback");
+        receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
+        assert(receive_queue);
+        ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
+
+        MB_LOGI(IR_DRIVER_TAG, "Arm receive");
         ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
-      }
+
+        new_pin_in_waiting = false; 
     }
   };
 };
