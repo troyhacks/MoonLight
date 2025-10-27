@@ -23,12 +23,14 @@ class ModuleLiveScripts : public Module {
   PsychicHttpServer* _server;
   FileManager* _fileManager;
   ModuleEffects* _moduleEffects;
+  ModuleDrivers* _moduleDrivers;
 
-  ModuleLiveScripts(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleEffects* moduleEffects) : Module("livescripts", server, sveltekit) {
+  ModuleLiveScripts(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleEffects* moduleEffects, ModuleDrivers* moduleDrivers) : Module("livescripts", server, sveltekit) {
     MB_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
     _moduleEffects = moduleEffects;
+    _moduleDrivers = moduleDrivers;
   }
 
   void begin() {
@@ -49,7 +51,7 @@ class ModuleLiveScripts : public Module {
 
               if (updatedItem == name) {
                 MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-                LiveScriptNode* liveScriptNode = (LiveScriptNode*)layerP.layers[0]->findLiveScriptNode(nodeState["name"]);
+                LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
                   liveScriptNode->compileAndRun();
 
@@ -63,7 +65,26 @@ class ModuleLiveScripts : public Module {
               index++;
             }
           });
-          // todo also for moduleDrivers
+          _moduleDrivers->read([&](ModuleState& effectsState) {
+            for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
+              String name = nodeState["name"];
+
+              if (updatedItem == name) {
+                MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(nodeState["name"]);
+                if (liveScriptNode) {
+                  liveScriptNode->compileAndRun();
+
+                  // wait until setup has been executed?
+
+                  _moduleDrivers->requestUIUpdate = true;  // update the Effects UI
+                }
+
+                MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+              }
+              index++;
+            }
+          });
         }
       });
     });
@@ -138,7 +159,11 @@ class ModuleLiveScripts : public Module {
       MB_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
               updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       if (updatedItem.oldValue != "null") {  // do not run at boot!
-        LiveScriptNode* liveScriptNode = (LiveScriptNode*)layerP.layers[0]->findLiveScriptNode(scriptState["name"]);
+        LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(scriptState["name"]);
+        if (!liveScriptNode) {
+            //try drivers
+            liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(scriptState["name"]);
+        }
         if (liveScriptNode) {
           if (updatedItem.name == "stop") liveScriptNode->kill();
           if (updatedItem.name == "start") liveScriptNode->execute();

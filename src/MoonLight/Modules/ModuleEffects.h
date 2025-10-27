@@ -18,60 +18,18 @@
   // #include "MoonBase/Module.h"
   #include "MoonBase/NodeManager.h"
 
-// #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
+// #include "MoonBase/Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
 class ModuleEffects : public NodeManager {
  public:
-  FileManager* _fileManager;
-
-  ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit) {
-    MB_LOGV(ML_TAG, "constructor");
-    _fileManager = fileManager;
-  }
+  ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit, fileManager) { MB_LOGV(ML_TAG, "constructor"); }
 
   void begin() {
     _state.onUpdateRunInTask = 1;
     defaultNodeName = getNameAndTags<RandomEffect>();
     NodeManager::begin();
 
-    nodes = &(layerP.layers[0]->nodes);
-
-    // if (false)
-    // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
-    _fileManager->addUpdateHandler([&](const String& originId) {
-      MB_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
-      // read the file state (read all files and folders on FS and collect changes)
-      _fileManager->read([&](FilesState& filesState) {
-        // loop over all changed files (normally only one)
-        for (auto updatedItem : filesState.updatedItems) {
-          // if file is the current live script, recompile it (to do: multiple live effects)
-          MB_LOGV(ML_TAG, "updateHandler updatedItem %s", updatedItem.c_str());
-          if (equal(updatedItem.c_str(), "/.config/effects.json")) {
-            MB_LOGV(ML_TAG, " effects.json updated -> call update %s", updatedItem.c_str());
-            readFromFS();  // repopulates the state, processing file changes
-          }
-          // uint8_t index = 0;
-          // for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-          //     String name = nodeState["name"];
-
-          //     if (updatedItem == name) {
-          //         MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
-          //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layers[0]->findLiveScriptNode(nodeState["name"]);
-          //         if (liveScriptNode) {
-          //             liveScriptNode->compileAndRun();
-
-          //             //wait until setup has been executed?
-
-          //             _moduleEffects->requestUIUpdate = true; //update the Effects UI
-          //         }
-
-          //         MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
-          //     }
-          //     index++;
-          // }
-        }
-      });
-    });
+    nodes = &(layerP.layers[0]->nodes);  // to do add nodes from all layers...
 
   #if FT_ENABLED(FT_MONITOR)
     _socket->registerEvent("monitor");

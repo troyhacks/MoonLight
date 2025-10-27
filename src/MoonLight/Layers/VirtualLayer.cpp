@@ -356,21 +356,6 @@ void VirtualLayer::onLayoutPost() {
   MB_LOGD(MB_TAG, "V:%d x %d x %d = v:%d = 1:0:%d + 1:1:%d + mti:%d (1:m:%d)", size.x, size.y, size.z, nrOfLights, nrOfZeroLights, nrOfOneLight, mappingTableIndexesSizeUsed, nrOfMoreLights);
 }
 
-  #if FT_LIVESCRIPT
-Node* VirtualLayer::findLiveScriptNode(const char* animation) {
-  for (Node* node : nodes) {
-    if (node && node->isLiveScriptNode()) {
-      LiveScriptNode* liveScriptNode = (LiveScriptNode*)node;
-      if (equal(liveScriptNode->animation, animation)) {
-        MB_LOGV(ML_TAG, "found %s", animation);
-        return liveScriptNode;
-      }
-    }
-  }
-  return nullptr;
-}
-  #endif
-
 void VirtualLayer::drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft, uint8_t depth) {
   // WLEDMM shorten line according to depth
   if (depth < UINT8_MAX) {

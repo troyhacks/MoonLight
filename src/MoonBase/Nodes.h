@@ -16,7 +16,8 @@
   #include <ESPFS.h>
 
   #include "MoonLight/Layers/VirtualLayer.h"  //VirtualLayer.h will include PhysicalLayer.h
-
+  #include "MoonBase/Module.h"
+  
   #define NODE_METADATA_VIRTUALS()                          \
     const char* getName() const override { return name(); } \
     uint8_t getDim() const override { return dim(); }       \
@@ -50,6 +51,7 @@ class Node {
 
   VirtualLayer* layer = nullptr;  // the virtual layer this effect is using
   JsonArray controls;
+  Module* controlModule = nullptr;  // to access global lights control functions if needed
 
   virtual bool isLiveScriptNode() const { return false; }
   virtual bool hasOnLayout() const { return false; }  // run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2)

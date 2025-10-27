@@ -279,7 +279,6 @@ class VirtualLayer {
 
   void drawText(const char* text, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0);
 
-  Node* findLiveScriptNode(const char* animation);
 };
 
 #endif

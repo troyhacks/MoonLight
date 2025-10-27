@@ -18,6 +18,7 @@
   #include "ModuleEffects.h"
   #include "MoonBase/Module.h"
   #include "MoonBase/Utilities.h"  //for isInPSRAM
+  #include "MoonBase/Modules/FileManager.h"
 
 class ModuleLightsControl : public Module {
  public:

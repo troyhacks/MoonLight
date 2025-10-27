@@ -24,15 +24,57 @@ class NodeManager : public Module {
 
  protected:
   PsychicHttpServer* _server;
+  FileManager* _fileManager;
 
   std::vector<Node*, VectorRAMAllocator<Node*>>* nodes;
 
-  NodeManager(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module(moduleName, server, sveltekit) {
+  NodeManager(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module(moduleName, server, sveltekit) {
     MB_LOGV(ML_TAG, "constructor");
     _server = server;
+    _fileManager = fileManager;
   }
 
-  void begin() { Module::begin(); }
+  void begin() {
+    Module::begin();
+    // if (false)
+    // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
+    _fileManager->addUpdateHandler([&](const String& originId) {
+      MB_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
+      // read the file state (read all files and folders on FS and collect changes)
+      _fileManager->read([&](FilesState& filesState) {
+        // loop over all changed files (normally only one)
+        for (auto updatedItem : filesState.updatedItems) {
+          // if file is the current live script, recompile it (to do: multiple live effects)
+          MB_LOGV(ML_TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+          Char<32> name;
+          name.format("/.config/%s.json", _moduleName);
+          if (equal(updatedItem.c_str(), name.c_str())) {
+            MB_LOGV(ML_TAG, " %s updated -> call update %s", name.c_str(), updatedItem.c_str());
+            readFromFS();  // repopulates the state, processing file changes
+          }
+          // uint8_t index = 0;
+          // for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
+          //     String name = nodeState["name"];
+
+          //     if (updatedItem == name) {
+          //         MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+          //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layers[0]->findLiveScriptNode(nodeState["name"]);
+          //         if (liveScriptNode) {
+          //             liveScriptNode->compileAndRun();
+
+          //             //wait until setup has been executed?
+
+          //             _moduleEffects->requestUIUpdate = true; //update the Effects UI
+          //         }
+
+          //         MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+          //     }
+          //     index++;
+          // }
+        }
+      });
+    });
+  }
 
   virtual void addNodes(JsonArray values) {}
 
@@ -249,6 +291,24 @@ class NodeManager : public Module {
           "server");
     }
   }
+
+ public:
+  #if FT_LIVESCRIPT
+  Node* findLiveScriptNode(const char* animation) {
+    if (!nodes) return nullptr;
+
+    for (Node* node : *nodes) {
+      if (node && node->isLiveScriptNode()) {
+        LiveScriptNode* liveScriptNode = (LiveScriptNode*)node;
+        if (equal(liveScriptNode->animation, animation)) {
+          MB_LOGV(ML_TAG, "found %s", animation);
+          return liveScriptNode;
+        }
+      }
+    }
+    return nullptr;
+  }
+  #endif
 };
 
 #endif

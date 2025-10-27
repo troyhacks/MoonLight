@@ -17,12 +17,17 @@
   #include "FastLED.h"
   // #include "MoonBase/Module.h"
   #include "MoonBase/NodeManager.h"
+  #include "MoonLight/Modules/ModuleLightsControl.h"
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
 class ModuleDrivers : public NodeManager {
  public:
-  ModuleDrivers(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : NodeManager("drivers", server, sveltekit) { MB_LOGV(ML_TAG, "constructor"); }
+  ModuleLightsControl* _moduleLightsControl;
+  ModuleDrivers(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager *fileManager, ModuleLightsControl* moduleLightsControl) : NodeManager("drivers", server, sveltekit, fileManager) {
+    _moduleLightsControl = moduleLightsControl;
+    MB_LOGV(ML_TAG, "constructor");
+  }
 
   void begin() {
     _state.onUpdateRunInTask = 1;  // also in effects class!, the driver only drives !!!
@@ -109,6 +114,7 @@ class ModuleDrivers : public NodeManager {
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node (C++ constructors are not inherited, so declare it as normal functions)
       node->setup();                                  // run the setup of the effect
       node->onSizeChanged(Coord3D());
+      node->controlModule = _moduleLightsControl;                    // to access global lights control functions if needed
       // layers[0]->nodes.reserve(index+1);
       if (index >= layerP.nodes.size())
         layerP.nodes.push_back(node);

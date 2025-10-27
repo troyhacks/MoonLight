@@ -101,11 +101,11 @@ ModuleIO moduleIO = ModuleIO(&server, &esp32sveltekit);
     #include "MoonLight/Modules/ModuleLightsControl.h"
     #include "MoonLight/Modules/ModuleMoonLightInfo.h"
 ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
-ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);
-ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit);
+ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);                        // fileManager for Live Scripts
+ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit, &fileManager, &moduleLightsControl);  // fileManager for Live Scripts, Lights control for drivers
     #if FT_ENABLED(FT_LIVESCRIPT)
       #include "MoonLight/Modules/ModuleLiveScripts.h"
-ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects);
+ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects, &moduleDrivers);
     #endif
 ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
