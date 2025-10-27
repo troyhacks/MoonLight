@@ -143,15 +143,28 @@ class IRDriver : public Node {
       if (nec_parse_frame(rmt_nec_symbols)) {
         MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X", s_nec_code_address, s_nec_code_command);
 
-        bool changed = false;
-        if (changed) {
-          controlModule->update(
-              [&](ModuleState& state) {
-                state.data["brightness"] = s_nec_code_address;
-                return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  // notify StatefulService
-              },
-              "IRDriver");
-        }
+        // Here we should implement code address & command to action mapping
+        controlModule->update(
+            [&](ModuleState& state) {
+              bool changed = false;
+              UpdatedItem updatedItem;
+              updatedItem.name = "brightness";
+              updatedItem.oldValue = state.data["brightness"].as<String>();
+              if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA35C)) {  // Brightness increase
+                state.data["brightness"] = min(state.data["brightness"].as<uint8_t>() + 10, 255);
+                changed = true;
+              } else if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA25D)) {  // Brightness decrease
+                state.data["brightness"] = max(state.data["brightness"].as<uint8_t>() - 10, 0);
+                changed = true;
+              }
+              if (changed) {
+                updatedItem.value = state.data["brightness"];
+                state.onUpdate(updatedItem);
+              }
+
+              return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  // notify StatefulService
+            },
+            "IRDriver");
       }
       break;
     case 2:  // NEC repeat frame
@@ -174,7 +187,7 @@ class IRDriver : public Node {
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override {
     if (receive_queue) {
-      if (xQueueReceive(receive_queue, &rx_data, pdMS_TO_TICKS(1000)) == pdPASS) {
+      if (xQueueReceive(receive_queue, &rx_data, 0) == pdPASS) {
         // parse the receive symbols and print the result
         parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
         // start receive again
