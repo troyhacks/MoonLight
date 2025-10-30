@@ -147,24 +147,50 @@ class IRDriver : public Node {
         controlModule->update(
             [&](ModuleState& state) {
               bool changed = false;
+              // possible actions:
+              //  lightsOn
+              //  brightness
+              //  red
+              //  green
+              //  blue
+              //  palette
+              //  preset
+              //  presetLoop
+              //  firstPreset
+              //  lastPreset
+              //  monitorOn
+
               UpdatedItem updatedItem;
-              updatedItem.name = "brightness";
-              updatedItem.oldValue = state.data["brightness"].as<String>();
               if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA35C)) {  // Brightness increase
-                state.data["brightness"] = min(state.data["brightness"].as<uint8_t>() + 10, 255);
+                updatedItem.name = "brightness";
+                updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+                state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
                 changed = true;
               } else if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA25D)) {  // Brightness decrease
-                state.data["brightness"] = max(state.data["brightness"].as<uint8_t>() - 10, 0);
+                updatedItem.name = "brightness";
+                updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+                state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
+                changed = true;
+              } else if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA25D)) {  // palette increase
+                updatedItem.name = "palette";
+                updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+                state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
+                changed = true;
+              } else if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA25D)) {  // palette decrease
+                updatedItem.name = "palette";
+                updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+                state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 1, 0);
                 changed = true;
               }
+
               if (changed) {
-                updatedItem.value = state.data["brightness"];
+                updatedItem.value = state.data[updatedItem.name];
                 state.onUpdate(updatedItem);
               }
 
               return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  // notify StatefulService
             },
-            "IRDriver");
+            IR_DRIVER_TAG);
       }
       break;
     case 2:  // NEC repeat frame

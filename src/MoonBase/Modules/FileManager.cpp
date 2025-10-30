@@ -145,14 +145,11 @@ FileManager::FileManager(PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
       _socket(sveltekit->getSocket()),
       _server(server),
       _sveltekit(sveltekit) {
-  // configure settings service update handler to update state
-  addUpdateHandler([&](const String& originId) { onConfigUpdated(); }, false);
 }
 
 void FileManager::begin() {
   _httpEndpoint.begin();
   _eventEndpoint.begin();
-  onConfigUpdated();
 
   // setup the file server
   _server->serveStatic("/rest/file", ESPFS, "/");
@@ -183,7 +180,5 @@ void FileManager::begin() {
                   },
                   AuthenticationPredicates::IS_AUTHENTICATED));
 }
-
-void FileManager::onConfigUpdated() { MB_LOGI(MB_TAG, ""); }
 
 #endif

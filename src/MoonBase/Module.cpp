@@ -277,7 +277,7 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
     onReOrderSwap(stateIndex, newIndex);  // Ensure updatedItem is of type UpdatedItem&
   };
 
-  addUpdateHandler([&](const String& originId) { onConfigUpdated(); }, false);
+  addUpdateHandler([&](const String& originId) { updateHandler(); }, false);
 }
 
 void Module::begin() {
@@ -306,11 +306,11 @@ void Module::begin() {
     return response.send();
   });
 
-  onConfigUpdated();  // triggers all onUpdates
+  updateHandler();  // triggers all onUpdates, needed? as setupData already called compareRecursive
 }
 
-void Module::onConfigUpdated() {
-  MB_LOGV(MB_TAG, "onConfigUpdated");
+void Module::updateHandler() {
+  MB_LOGD(MB_TAG, "");
   // if update, for all updated items, run onUpdate
   //  for (UpdatedItem updatedItem : _state.updatedItems) {
   //      onUpdate(updatedItem);
@@ -329,12 +329,8 @@ void Module::setupDefinition(JsonArray root) {  // virtual so it can be override
   property["default"] = "MoonLight";
 }
 
-void Module::onUpdate(UpdatedItem& updatedItem) {
-  // MB_LOGW(MB_TAG, "not implemented %s = %s", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
-}
+void Module::onUpdate(UpdatedItem& updatedItem) { MB_LOGD(MB_TAG, "%s = %s", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str()); }
 
-void Module::onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {
-  // MB_LOGW(MB_TAG, "not implemented %s = %s", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str());
-}
+void Module::onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) { MB_LOGD(MB_TAG, "s:%d n:%d", stateIndex, newIndex); }
 
 #endif
