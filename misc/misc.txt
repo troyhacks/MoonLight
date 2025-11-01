@@ -2,6 +2,14 @@ Youtube download
 ==============
 https://ytdown.io/en2/
 
+Better:
+
+https://github.com/yt-dlp/yt-dlp
+brew install --formula yt-dlp  
+yt-dlp "https://www.youtube.com/watch?v=bKJqJt5RLrs"
+yt-dlp -x --audio-format mp3 "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+help: https://www.reddit.com/r/youtubedl/comments/qzqzaz/comment/hlon6k5/
+
 flash using esptool
 ===================
 [>_] in the statusbar of vscode

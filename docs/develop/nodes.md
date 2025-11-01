@@ -5,7 +5,7 @@
 A node can be an Effect, a Modifier, a Layer or a Driver.
 
 * See the [MoonLight functional video](https://www.youtube.com/watch?v=tdrU9yGkyVo) for an introduction to nodes.
-* See the [Developer quickstart video](https://studio.youtube.com/video/bJIgiBBx3lg/edit) how to add of nodes.
+* See the [Developer quickstart video](https://studio.youtube.com/video/bJIgiBBx3lg) how to add of nodes.
 * MoonLight community approach encourages nodes to be added by 'everybody'.
 * MoonLight only supports one firmware per type of board. This means that all nodes contributed by the community will be available in that firmware and it is expected to be maintained by the author of a node specifically and the community in general.
 
