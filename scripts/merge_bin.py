@@ -53,14 +53,14 @@ def merge_bin(source, target, env):
                 "$OBJCOPY",
                 "--chip",
                 BOARD_CONFIG.get("build.mcu", "esp32"),
-                "merge-bin", # 🌙 _ to -
+                "merge-bin",
                 "-o",
                 MERGED_BIN,
-                "--flash-mode", # 🌙 _ to -
+                "--flash-mode",
                 flash_mode,
-                "--flash-freq", # 🌙 _ to -
+                "--flash-freq",
                 flash_freq,
-                "--flash-size", # 🌙 _ to -
+                "--flash-size",
                 flash_size    
             ]
             + flash_images

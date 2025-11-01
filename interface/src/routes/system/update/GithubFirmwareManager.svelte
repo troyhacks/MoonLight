@@ -34,7 +34,7 @@
 			const results = await githubResponse.json();
 			return results;
 		} catch (error) {
-			console.error('Error:', error);
+			console.warn(error);
 		}
 		return;
 	}

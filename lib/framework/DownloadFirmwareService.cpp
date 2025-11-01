@@ -13,12 +13,12 @@
 
 #include <DownloadFirmwareService.h>
 
-// 🌙 Temporarily skip cert validation !!!!
-// extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
-// extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
+extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
+extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
 
-static EventSocket *_socket2 = nullptr; //🌙 _socket2
+static EventSocket *_socket = nullptr;
 static int previousProgress = 0;
+static String *otaURL = nullptr;
 JsonDocument doc;
 
 void update_started()
@@ -26,7 +26,8 @@ void update_started()
     String output;
     doc["status"] = "preparing";
     JsonObject jsonObject = doc.as<JsonObject>();
-    _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+    _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+    ESP_LOGD(SVK_TAG, "HTTP onUpdate started");
 }
 
 void update_progress(int currentBytes, int totalBytes)
@@ -37,47 +38,43 @@ void update_progress(int currentBytes, int totalBytes)
     {
         doc["progress"] = progress;
         JsonObject jsonObject = doc.as<JsonObject>();
-        _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
-        ESP_LOGD(SVK_TAG, "HTTP update process at %d of %d bytes... (%d %%)", currentBytes, totalBytes, progress);
+        _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+        ESP_LOGV(SVK_TAG, "HTTP update process at %d of %d bytes... (%d %%)", currentBytes, totalBytes, progress);
     }
     previousProgress = progress;
 }
 
-void update_finished()
-{
-    doc["status"] = "finished";
-    JsonObject jsonObject = doc.as<JsonObject>();
-    _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
-
-    // delay to allow the event to be sent out
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-}
-
 void updateTask(void *param)
 {
+    String url = *((String *)param);
+    delete (String *)param; // Clean up the allocated memory
+
     WiFiClientSecure client;
 
-    client.setInsecure();     // 🌙 Temporarily skip cert validation !!!!
-    
-    // #if ESP_ARDUINO_VERSION_MAJOR == 3
-    //     client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
-    // #else
-    //     client.setCACertBundle(rootca_crt_bundle_start);
-    // #endif
+#if ESP_ARDUINO_VERSION_MAJOR == 3
+    client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
+#else
+    client.setCACertBundle(rootca_crt_bundle_start);
+#endif
 
-    client.setTimeout(10);
+    // client.setInsecure(); // For testing purposes only, remove this line for production code
+
+    client.setTimeout(12000);
 
     httpUpdate.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
     httpUpdate.rebootOnUpdate(true);
 
-    String url = *((String *)param);
     String output;
     httpUpdate.onStart(update_started);
     httpUpdate.onProgress(update_progress);
-    httpUpdate.onEnd(update_finished);
 
     t_httpUpdate_return ret = httpUpdate.update(client, url.c_str());
     JsonObject jsonObject;
+
+    // Reduce task priority to allow other tasks to run
+    vTaskPrioritySet(NULL, tskIDLE_PRIORITY + 1);
+
+    bool _emitEvent = false;
 
     switch (ret)
     {
@@ -85,8 +82,7 @@ void updateTask(void *param)
 
         doc["status"] = "error";
         doc["error"] = httpUpdate.getLastErrorString().c_str();
-        jsonObject = doc.as<JsonObject>();
-        _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+        _emitEvent = true;
 
         ESP_LOGE(SVK_TAG, "HTTP Update failed with error (%d): %s", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
 #ifdef SERIAL_INFO
@@ -97,8 +93,7 @@ void updateTask(void *param)
 
         doc["status"] = "error";
         doc["error"] = "Update failed, has same firmware version";
-        jsonObject = doc.as<JsonObject>();
-        _socket2->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+        _emitEvent = true;
 
         ESP_LOGE(SVK_TAG, "HTTP Update failed, has same firmware version");
 #ifdef SERIAL_INFO
@@ -106,12 +101,25 @@ void updateTask(void *param)
 #endif
         break;
     case HTTP_UPDATE_OK:
+
+        doc["status"] = "finished";
+        _emitEvent = true;
+
         ESP_LOGI(SVK_TAG, "HTTP Update successful - Restarting");
 #ifdef SERIAL_INFO
         Serial.println("HTTP Update successful - Restarting");
 #endif
         break;
     }
+
+    if (_emitEvent)
+    {
+        jsonObject = doc.as<JsonObject>();
+        _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+    }
+
+    // delay to allow the event to be sent out
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     vTaskDelete(NULL);
 }
@@ -126,6 +134,8 @@ DownloadFirmwareService::DownloadFirmwareService(PsychicHttpServer *server,
 
 void DownloadFirmwareService::begin()
 {
+    ::_socket = _socket;
+
     _socket->registerEvent(EVENT_DOWNLOAD_OTA);
 
     _server->on(GITHUB_FIRMWARE_PATH,
@@ -134,7 +144,7 @@ void DownloadFirmwareService::begin()
                     std::bind(&DownloadFirmwareService::downloadUpdate, this, std::placeholders::_1, std::placeholders::_2),
                     AuthenticationPredicates::IS_ADMIN));
 
-    ESP_LOGD(SVK_TAG, "Registered POST endpoint: %s", GITHUB_FIRMWARE_PATH);
+    ESP_LOGV(SVK_TAG, "Registered POST endpoint: %s", GITHUB_FIRMWARE_PATH);
 }
 
 esp_err_t DownloadFirmwareService::downloadUpdate(PsychicRequest *request, JsonVariant &json)
@@ -157,18 +167,20 @@ esp_err_t DownloadFirmwareService::downloadUpdate(PsychicRequest *request, JsonV
     JsonObject jsonObject = doc.as<JsonObject>();
     _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
 
-    _socket2 = _socket;
+    // Allocate memory for the URL on the heap
+    String *urlPtr = new String(downloadURL);
 
     if (xTaskCreatePinnedToCore(
             &updateTask,                // Function that should be called
             "Update",                   // Name of the task (for debugging)
             OTA_TASK_STACK_SIZE,        // Stack size (bytes)
-            &downloadURL,               // Pass reference to this class instance
+            urlPtr,                     // Pass reference to this class instance
             (configMAX_PRIORITIES - 1), // Pretty high task priority
             NULL,                       // Task handle
             1                           // Have it on application core
             ) != pdPASS)
     {
+        delete urlPtr; // Clean up if task creation fails
         ESP_LOGE(SVK_TAG, "Couldn't create download OTA task");
         return request->reply(500);
     }
