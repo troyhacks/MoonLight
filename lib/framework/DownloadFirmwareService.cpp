@@ -44,6 +44,16 @@ void update_progress(int currentBytes, int totalBytes)
     previousProgress = progress;
 }
 
+void update_finished()
+{
+    doc["status"] = "finished";
+    JsonObject jsonObject = doc.as<JsonObject>();
+    _socket->emitEvent(EVENT_DOWNLOAD_OTA, jsonObject);
+
+    // delay to allow the event to be sent out
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+}
+
 void updateTask(void *param)
 {
     String url = *((String *)param);
@@ -51,13 +61,14 @@ void updateTask(void *param)
 
     WiFiClientSecure client;
 
-#if ESP_ARDUINO_VERSION_MAJOR == 3
-    client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
-#else
-    client.setCACertBundle(rootca_crt_bundle_start);
-#endif
+    // 🌙 : still not working in MoonLight, setting insecure on again
+// #if ESP_ARDUINO_VERSION_MAJOR == 3
+//     client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
+// #else
+//     client.setCACertBundle(rootca_crt_bundle_start);
+// #endif
 
-    // client.setInsecure(); // For testing purposes only, remove this line for production code
+    client.setInsecure(); // For testing purposes only, remove this line for production code
 
     client.setTimeout(12000);
 
@@ -67,7 +78,8 @@ void updateTask(void *param)
     String output;
     httpUpdate.onStart(update_started);
     httpUpdate.onProgress(update_progress);
-
+    httpUpdate.onEnd(update_finished);
+    
     t_httpUpdate_return ret = httpUpdate.update(client, url.c_str());
     JsonObject jsonObject;
 
