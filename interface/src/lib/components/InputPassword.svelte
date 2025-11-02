@@ -7,20 +7,24 @@
 		id?: string;
 	}
 
-	let { value = $bindable(''), id = '' }: Props = $props();
+	let { value = $bindable('') as string, id = '' as string }: Props = $props();
+
 	function handleInput(e: any) {
 		value = e.target.value;
 	}
 </script>
 
 <div class="relative">
-	<input {type} class="input w-full" {value} oninput={handleInput} {id} />
+	<input {type} class="input input-bordered w-full" {value} oninput={handleInput} {id} />
 	<div class="absolute inset-y-0 right-0 flex items-center pr-1">
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="text-base-content/50 h-6 {show ? 'block' : 'hidden'}"
 			onclick={() => (show = false)}
+			role="button"
+			aria-label="Hide password"
+			tabindex="0"
 			width="40"
 			height="40"
 			viewBox="0 0 24 24"
@@ -29,8 +33,6 @@
 			fill="none"
 			stroke-linecap="round"
 			stroke-linejoin="round"
-			role="button"
-			tabindex="0"
 		>
 			<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 			<path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
@@ -45,6 +47,9 @@
 			xmlns="http://www.w3.org/2000/svg"
 			class="text-base-content/50 h-6 {show ? 'hidden' : 'block'}"
 			onclick={() => (show = true)}
+			role="button"
+			aria-label="Show password"
+			tabindex="0"
 			width="40"
 			height="40"
 			viewBox="0 0 24 24"
@@ -53,8 +58,6 @@
 			fill="none"
 			stroke-linecap="round"
 			stroke-linejoin="round"
-			role="button"
-			tabindex="0"
 		>
 			<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 			<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />

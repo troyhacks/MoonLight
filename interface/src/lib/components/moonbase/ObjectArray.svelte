@@ -13,7 +13,7 @@
 
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import DragDropList, { VerticalDropZone, reorder, type DropEvent } from 'svelte-dnd-list';
+    import DraggableList from '$lib/components/DraggableList.svelte';
 	import Add from '~icons/tabler/circle-plus';
 	import { user } from '$lib/stores/user';
 	import { page } from '$app/state';
@@ -63,15 +63,8 @@
         clearInterval(interval);
     });
 
-	function onDrop(propertyName: string, { detail: { from, to } }: CustomEvent<DropEvent>) {
-		
-		if (!to || from === to) {
-			return;
-		}
-
-		data[propertyName] = reorder(data[propertyName], from.index, to.index);
-		onChange();
-		// console.log(onDrop, data[propertyName]);
+    function handleReorder(propertyName: string, reorderedItems: any[]) {
+		data[propertyName] = reorderedItems;
 	}
 
     function addItem(propertyName: string) {
@@ -149,15 +142,12 @@
         class="overflow-x-auto space-y-1"
         transition:slide|local={{ duration: 300, easing: cubicOut }}
     >
-        <DragDropList
-            id={property.name}
-            type={VerticalDropZone}
-            itemSize={60}
-            itemCount={data[property.name].length}
-            on:drop={(event) => {
-                onDrop(property.name, event);
+        <DraggableList
+            items={data[property.name]}
+            onReorder={() => {
+                handleReorder(property.name, data[property.name]);
             }}
-            
+            class="space-y-2"
         >
             {#snippet children({ index })}
                                         <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -210,7 +200,7 @@
                     {/if}
                 </div>
             {/snippet}
-        </DragDropList>
+        </DraggableList>
     </div>
     {#if showEditor && property.name == propertyEditable && data[property.name] && data[property.name].length}
         <div class="divider my-0"></div>
