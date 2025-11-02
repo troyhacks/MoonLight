@@ -16,6 +16,8 @@
 
 #ifdef BOARD_HAS_PSRAM
 
+  // #include <cstddef> // suggested by copilot to surpress operator warning : first parameter of allocation function must be of type 'size_t' - but made no difference
+
 // Threshold (bytes) above which allocations go into PSRAM
 constexpr size_t PSRAM_THRESHOLD = 0;  // 87K free, works fine until now
 // constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
