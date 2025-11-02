@@ -62,6 +62,8 @@
 	let wifiSettings: WifiSettings = $state({
 		hostname: '',
 		connection_mode: 1,
+		txPower: 0,
+		txPowerMeasured: 0,
 		wifi_networks: [] as KnownNetworkItem[]
 	});
 
