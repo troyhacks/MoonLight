@@ -40,8 +40,9 @@
 
 	const initSocket = () => {
 		const ws_token = page.data.features.security ? '?access_token=' + $user.bearer_token : '';
+		const ws_protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 		socket.init(
-			`ws://${window.location.host}/ws/events${ws_token}`,
+			`${ws_protocol}://${window.location.host}/ws/events${ws_token}`,
 			page.data.features.event_use_json
 		);
 		addEventListeners();
@@ -183,6 +184,7 @@
 			onclick={() => close()}
 			role="button"
 			tabindex="0"
+			aria-label="Close modal"
 		></div>
 	{/snippet}
 </Modals>
