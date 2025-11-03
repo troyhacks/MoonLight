@@ -128,6 +128,11 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
 }
 
 void ModuleState::execOnUpdate(UpdatedItem& updatedItem) {
+  if (updatedItem.oldValue != "null" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
+    EXT_LOGD(MB_TAG, "%s = %s -> %s", updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    saveNeeded = true;
+  }
+
   if (onUpdate) {
     if (onUpdateRunInTask == 1) {  // if set to 0, run in main loopTask
       std::lock_guard<std::mutex> lock(runInTask_mutex);
@@ -229,13 +234,15 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
 }
 
 StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state) {
+  // if (state.data.isNull()) EXT_LOGD(ML_TAG, "state data is null %d %d", root.size(), root != state.data); // state.data never null here
+
   if (root.size() != 0) {  // in case of empty file
 
     // check which propertys have updated
     if (root != state.data) {
       UpdatedItem updatedItem;
 
-      bool isNew = state.data.isNull();  // device is starting
+      // bool isNew = state.data.isNull();  // device is starting , not useful as state.data never null here
 
       bool changed = state.checkReOrderSwap("", state.data, root, updatedItem);
 
@@ -248,13 +255,13 @@ StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state) {
         changed = true;
       }
 
-      if (!isNew && changed) saveNeeded = true;
-
-      return (!isNew && changed) ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;
+      return (changed) ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  //! isNew &&
     } else
       return StateUpdateResult::UNCHANGED;
-  } else
+  } else {
+    EXT_LOGD(MB_TAG, "empty root");
     return StateUpdateResult::UNCHANGED;
+  }
 }
 
 Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
@@ -329,7 +336,7 @@ void Module::setupDefinition(JsonArray root) {  // virtual so it can be override
   property["default"] = "MoonLight";
 }
 
-void Module::onUpdate(UpdatedItem& updatedItem) { EXT_LOGD(MB_TAG, "%s = %s", updatedItem.name.c_str(), updatedItem.value.as<String>().c_str()); }
+void Module::onUpdate(UpdatedItem& updatedItem) { EXT_LOGD(MB_TAG, "%s = %s -> %s", updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str()); }
 
 void Module::onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) { EXT_LOGD(MB_TAG, "s:%d n:%d", stateIndex, newIndex); }
 

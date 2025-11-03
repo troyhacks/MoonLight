@@ -199,7 +199,7 @@ class ModuleLightsControl : public Module {
                   state.updatedItems.push_back("/.config/effects.json");
                   return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
                 },
-                "server");
+                _moduleName);
 
           } else {
             copyFile("/.config/effects.json", presetFile.c_str());
@@ -235,7 +235,7 @@ class ModuleLightsControl : public Module {
           [&](ModuleState& state) {
             return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
           },
-          "server");
+          _moduleName);
     }
   }
 
@@ -280,7 +280,7 @@ class ModuleLightsControl : public Module {
               // EXT_LOGD(ML_TAG, "   preset files %d %s", lastPresetLooped, presetFile.c_str());
               return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
             },
-            "server");
+            _moduleName);
 
         lastPresetLooped++;  // next
       }

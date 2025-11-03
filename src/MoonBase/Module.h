@@ -46,7 +46,7 @@ static JsonDocument* doc = nullptr;  // shared document for all modules, to save
 
 class ModuleState {
  public:
-  JsonObject data;
+  JsonObject data = JsonObject();  // isNull()
 
   ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState constructor");

@@ -288,7 +288,7 @@ class NodeManager : public Module {
           [&](ModuleState& state) {
             return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
           },
-          "server");
+          _moduleName);
     }
   }
 

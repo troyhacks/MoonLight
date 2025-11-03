@@ -97,7 +97,7 @@ void setupDefinition(JsonArray root) override{
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
             update([&](ModuleState &state) {
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-            }, "server");
+            }, _moduleName);
         }
     }
 ```

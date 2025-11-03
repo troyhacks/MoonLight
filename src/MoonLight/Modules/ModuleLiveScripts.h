@@ -156,13 +156,12 @@ class ModuleLiveScripts : public Module {
     // scripts
     if (updatedItem.parent[0] == "scripts") {
       JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
-      EXT_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-              updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+      EXT_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       if (updatedItem.oldValue != "null") {  // do not run at boot!
         LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(scriptState["name"]);
         if (!liveScriptNode) {
-            //try drivers
-            liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(scriptState["name"]);
+          // try drivers
+          liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(scriptState["name"]);
         }
         if (liveScriptNode) {
           if (updatedItem.name == "stop") liveScriptNode->kill();
@@ -201,7 +200,7 @@ class ModuleLiveScripts : public Module {
           [&](ModuleState& state) {
             return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
           },
-          "server");
+          _moduleName);
     }
 
     // if (_state.data["scripts"] != newData["scripts"]) {
@@ -214,7 +213,7 @@ class ModuleLiveScripts : public Module {
     //         state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
     //         // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
     //         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-    //     }, "server");
+    //     }, _moduleName);
     // }
 
     // char buffer[256];

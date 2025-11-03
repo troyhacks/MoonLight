@@ -192,8 +192,7 @@ static int custom_vprintf(const char* fmt, va_list args) {
 #endif
 
 void setup() {
-// 🌙 use ESP_IDF_LOG
-#ifdef USE_ESP_IDF_LOG
+#ifdef USE_ESP_IDF_LOG  // 🌙
   esp_log_set_vprintf(custom_vprintf);
   esp_log_level_set("*", LOG_LOCAL_LEVEL);  // use the platformio setting here
 #endif
@@ -201,7 +200,7 @@ void setup() {
   // start serial and filesystem
   Serial.begin(SERIAL_BAUD_RATE);
 
-  // delay(5000); // 🌙 to capture all the serial output
+  // delay(5000);  // 🌙 to capture all the serial output
 
   // 🌙 safeMode
   if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) {  // see verbosePrintResetReason
