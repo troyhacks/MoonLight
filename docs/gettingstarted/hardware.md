@@ -53,3 +53,8 @@ Work in progress to make this available as pre-assembled board ([Contact](https:
 | Pknight Art-Net DMX 512 | <img width="200" src="https://github.com/user-attachments/assets/e3d605b6-a023-4abb-b604-77b44267b1a3"> | [Shop](https://s.click.aliexpress.com/e/_ExQK8Dc) |
 |18 LED Bars|<img width="300" src="https://github.com/user-attachments/assets/75b18cf6-bc32-4bf0-a03b-7eea8dbfd677" />| [Shop](https://s.click.aliexpress.com/e/_EQMKbmK) |
 |19x15W Zoom Wash Lights RGBW Beam Moving Head|<img width="300" src="https://github.com/user-attachments/assets/6e61c41f-e128-4adc-b9c1-6239fe4736dc" />|[Shop](https://s.click.aliexpress.com/e/_EwBfFYw)|
+
+
+To get an impression of hardware in use see the MoonLight in Concert video:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/NnEV9RplZN8" frameborder="0" allowfullscreen></iframe>

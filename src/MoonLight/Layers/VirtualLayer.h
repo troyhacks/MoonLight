@@ -38,7 +38,7 @@ struct PhysMap {
   };  // 2 bytes
 
   PhysMap() {
-    // MB_LOGV(ML_TAG, "Constructor");
+    // EXT_LOGV(ML_TAG, "Constructor");
     mapType = m_zeroLights;  // the default until indexP is added
     rgb14 = 0;
   }
@@ -72,7 +72,7 @@ class VirtualLayer {
 
   Coord3D prevSize;  // to calculate size change
 
-  VirtualLayer() { MB_LOGV(ML_TAG, "constructor"); }
+  VirtualLayer() { EXT_LOGV(ML_TAG, "constructor"); }
 
   ~VirtualLayer();
 

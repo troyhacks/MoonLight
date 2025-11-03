@@ -4,7 +4,7 @@
 
 A module is a generic building block to create server and UI functionality which can be activated through the menu.
 
-See [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol.md) or [Devices](https://moonmodules.org/MoonLight/moonbase/devices.md) for examples
+See [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol) or [Devices](https://moonmodules.org/MoonLight/moonbase/devices) for examples
 
 Press the ? on any module to go to the documentation.
 
@@ -27,7 +27,7 @@ ModuleDemo(PsychicHttpServer *server
       , ESP32SvelteKit *sveltekit
       , FileManager *fileManager
     ) : Module("demo", server, sveltekit) {
-        MB_LOGD(MB_TAG, "constructor");
+        EXT_LOGD(MB_TAG, "constructor");
     }
 }
 ```
@@ -67,16 +67,16 @@ void setupDefinition(JsonArray root) override{
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            MB_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (updatedItem.parent[0] == "nodes" && updatedItem.name == "name") {    
-            MB_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue.length())
-                MB_LOGD(MB_TAG, "delete %s ...", updatedItem.oldValue.c_str());
+                EXT_LOGD(MB_TAG, "delete %s ...", updatedItem.oldValue.c_str());
             if (updatedItem.value.as<String>().length())
                 compileAndRun(updatedItem.value);
         } else
-            MB_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 ```
 
@@ -97,7 +97,7 @@ void setupDefinition(JsonArray root) override{
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
             update([&](ModuleState &state) {
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-            }, "server");
+            }, _moduleName);
         }
     }
 ```

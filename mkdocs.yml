@@ -24,7 +24,7 @@ nav:
   - "Network":
     - network/sta.md
     - network/ap.md
-    - network/ethernet.md
+    # - network/ethernet.md
     - network/mqtt.md
     - network/ntp.md
   - "System":
@@ -39,7 +39,7 @@ nav:
     - develop/modules.md
     - develop/layers.md
     - develop/sveltekit.md
-    # - develop/documentation.md
+    - develop/documentation.md
   - "ESP32 SvelteKit":
     - esp32sveltekit.md
   - "Build Tools":
@@ -145,6 +145,9 @@ extra:
     - icon: fontawesome/brands/reddit
       link: https://reddit.com/r/moonmodules
       name: Reddit Community
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/@MoonModulesLighting
+      name: YouTube Channel
   consent:
     title: Cookie consent
     description: >-

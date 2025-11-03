@@ -111,7 +111,7 @@ bool isInPSRAM(void* ptr) {
 #elif CONFIG_IDF_TARGET_ESP32C4
   return false;  // ESP32-C4 does not support external PSRAM
 #endif
-  MB_LOGE(MB_TAG, "isInPSRAM not implemented for this target");
+  EXT_LOGE(MB_TAG, "isInPSRAM not implemented for this target");
   return false;
 }
 

@@ -26,7 +26,7 @@ class ModuleLiveScripts : public Module {
   ModuleDrivers* _moduleDrivers;
 
   ModuleLiveScripts(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleEffects* moduleEffects, ModuleDrivers* moduleDrivers) : Module("livescripts", server, sveltekit) {
-    MB_LOGV(ML_TAG, "constructor");
+    EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
     _moduleEffects = moduleEffects;
@@ -38,7 +38,7 @@ class ModuleLiveScripts : public Module {
     #if FT_ENABLED(FT_LIVESCRIPT)
     // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
     _fileManager->addUpdateHandler([&](const String& originId) {
-      MB_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
+      EXT_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
       // read the file state (read all files and folders on FS and collect changes)
       _fileManager->read([&](FilesState& filesState) {
         // loop over all changed files (normally only one)
@@ -50,7 +50,7 @@ class ModuleLiveScripts : public Module {
               String name = nodeState["name"];
 
               if (updatedItem == name) {
-                MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
                   liveScriptNode->compileAndRun();
@@ -60,7 +60,7 @@ class ModuleLiveScripts : public Module {
                   _moduleEffects->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+                EXT_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
               }
               index++;
             }
@@ -70,7 +70,7 @@ class ModuleLiveScripts : public Module {
               String name = nodeState["name"];
 
               if (updatedItem == name) {
-                MB_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
                   liveScriptNode->compileAndRun();
@@ -80,7 +80,7 @@ class ModuleLiveScripts : public Module {
                   _moduleDrivers->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                MB_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+                EXT_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
               }
               index++;
             }
@@ -93,7 +93,7 @@ class ModuleLiveScripts : public Module {
 
   // define the data model
   void setupDefinition(JsonArray root) override {
-    MB_LOGV(ML_TAG, "");
+    EXT_LOGV(ML_TAG, "");
     JsonObject property;       // state.data has one or more properties
     JsonArray details = root;  // if a property is an array, this is the details of the array
     JsonArray values;          // if a property is a select, this is the values of the select
@@ -156,13 +156,12 @@ class ModuleLiveScripts : public Module {
     // scripts
     if (updatedItem.parent[0] == "scripts") {
       JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
-      MB_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-              updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+      EXT_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       if (updatedItem.oldValue != "null") {  // do not run at boot!
         LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(scriptState["name"]);
         if (!liveScriptNode) {
-            //try drivers
-            liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(scriptState["name"]);
+          // try drivers
+          liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(scriptState["name"]);
         }
         if (liveScriptNode) {
           if (updatedItem.name == "stop") liveScriptNode->kill();
@@ -172,11 +171,11 @@ class ModuleLiveScripts : public Module {
           if (updatedItem.name == "delete") liveScriptNode->killAndDelete();
           // updatedItem.value = 0;
         } else
-          MB_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
+          EXT_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
       }
     }
     // else
-    // MB_LOGV(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+    // EXT_LOGV(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
     // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   }
 
@@ -201,25 +200,25 @@ class ModuleLiveScripts : public Module {
           [&](ModuleState& state) {
             return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
           },
-          "server");
+          _moduleName);
     }
 
     // if (_state.data["scripts"] != newData["scripts"]) {
     //     update([&](ModuleState &state) {
 
-    //         MB_LOGV(ML_TAG, "update scripts");
+    //         EXT_LOGV(ML_TAG, "update scripts");
 
     //         UpdatedItem updatedItem;
     //         ; //compare and update
     //         state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
     //         // return state.compareRecursive("scripts", state.data["scripts"], newData["scripts"], updatedItem)?StateUpdateResult::CHANGED:StateUpdateResult::UNCHANGED;
     //         return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-    //     }, "server");
+    //     }, _moduleName);
     // }
 
     // char buffer[256];
     // serializeJson(doc, buffer, sizeof(buffer));
-    // MB_LOGV(ML_TAG, "livescripts %s", buffer);
+    // EXT_LOGV(ML_TAG, "livescripts %s", buffer);
   }
 
 };  // class ModuleLiveScripts

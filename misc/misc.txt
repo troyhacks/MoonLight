@@ -2,9 +2,13 @@ Youtube download
 ==============
 https://ytdown.io/en2/
 
-Image scaling
-=============
-https://www.iloveimg.com/resize-image
+Better:
+
+https://github.com/yt-dlp/yt-dlp
+brew install --formula yt-dlp  
+yt-dlp "https://www.youtube.com/watch?v=bKJqJt5RLrs"
+yt-dlp -x --audio-format mp3 "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+help: https://www.reddit.com/r/youtubedl/comments/qzqzaz/comment/hlon6k5/
 
 flash using esptool
 ===================
@@ -108,14 +112,14 @@ Update devices
 for i in 107 239 143 111 154 177 208 129 157
 do 
     echo upgrade 192.168.168.$i
-    curl -s -F "update=@/Users/ewoudwijma/Downloads/StarLight_24060113_lolin_s2_mini.bin" 192.168.1.$i/update &
+    curl -s -F "update=@/Users/ewowi/Downloads/StarLight_24060113_lolin_s2_mini.bin" 192.168.1.$i/update &
 done
     curl -X POST "http://192.168.1.$i/json" -d '{"reboot":true}' -H "Content-Type: application/json"
 
 for i in 152 132
 do 
     echo upgrade 192.168.168.$i
-    curl -s -F "update=@/Users/ewoudwijma/Downloads/StarLight_24060113_esp32dev.bin" 192.168.1.$i/update &
+    curl -s -F "update=@/Users/ewowi/Downloads/StarLight_24060113_esp32dev.bin" 192.168.1.$i/update &
 done
     curl -X POST "http://192.168.1.$i/json" -d '{"reboot":true}' -H "Content-Type: application/json"
 

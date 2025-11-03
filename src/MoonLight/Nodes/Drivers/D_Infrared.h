@@ -131,11 +131,11 @@ class IRDriver : public Node {
 
   void parse_nec_frame(rmt_symbol_word_t* rmt_nec_symbols, size_t symbol_num) {
     if (false) {
-      MB_LOGD(IR_DRIVER_TAG, "NEC frame start---\r\n");
+      EXT_LOGD(IR_DRIVER_TAG, "NEC frame start---\r\n");
       for (size_t i = 0; i < symbol_num; i++) {
-        MB_LOGI(IR_DRIVER_TAG, "{%d:%d},{%d:%d}\r\n", rmt_nec_symbols[i].level0, rmt_nec_symbols[i].duration0, rmt_nec_symbols[i].level1, rmt_nec_symbols[i].duration1);
+        EXT_LOGI(IR_DRIVER_TAG, "{%d:%d},{%d:%d}\r\n", rmt_nec_symbols[i].level0, rmt_nec_symbols[i].duration0, rmt_nec_symbols[i].level1, rmt_nec_symbols[i].duration1);
       }
-      MB_LOGI(IR_DRIVER_TAG, "---NEC frame end: ");
+      EXT_LOGI(IR_DRIVER_TAG, "---NEC frame end: ");
     }
     // decode RMT symbols
     switch (symbol_num) {
@@ -266,11 +266,11 @@ class IRDriver : public Node {
       break;
     case 2:  // NEC repeat frame
       if (nec_parse_frame_repeat(rmt_nec_symbols)) {
-        MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X, repeat", s_nec_code_address, s_nec_code_command);
+        EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X, repeat", s_nec_code_address, s_nec_code_command);
       }
       break;
     default:
-      MB_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
+      EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
       break;
     }
   }
@@ -293,14 +293,14 @@ class IRDriver : public Node {
     }
 
     if (new_pin_in_waiting) {
-      MB_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pin);
+      EXT_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pin);
 
       if (rx_channel) {
-        MB_LOGI(IR_DRIVER_TAG, "Removing callback");
+        EXT_LOGI(IR_DRIVER_TAG, "Removing callback");
         ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs_empty, receive_queue));
-        MB_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
+        EXT_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
         ESP_ERROR_CHECK(rmt_disable(rx_channel));
-        MB_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
+        EXT_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
         ESP_ERROR_CHECK(rmt_del_channel(rx_channel));
         rx_channel = NULL;
       }
@@ -311,18 +311,18 @@ class IRDriver : public Node {
       }
 
       rx_channel_cfg.gpio_num = (gpio_num_t)pin;
-      MB_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
+      EXT_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
       ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
 
-      MB_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");
+      EXT_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");
       ESP_ERROR_CHECK(rmt_enable(rx_channel));
 
-      MB_LOGI(IR_DRIVER_TAG, "Register RX done callback");
+      EXT_LOGI(IR_DRIVER_TAG, "Register RX done callback");
       receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
       assert(receive_queue);
       ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
 
-      MB_LOGI(IR_DRIVER_TAG, "Arm receive");
+      EXT_LOGI(IR_DRIVER_TAG, "Arm receive");
       ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
 
       new_pin_in_waiting = false;

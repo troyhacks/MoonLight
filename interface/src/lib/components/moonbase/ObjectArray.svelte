@@ -10,10 +10,9 @@
    Not w-full!
 -->
 
-
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import DragDropList, { VerticalDropZone, reorder, type DropEvent } from 'svelte-dnd-list';
+	import DraggableList from '$lib/components/DraggableList.svelte';
 	import Add from '~icons/tabler/circle-plus';
 	import { user } from '$lib/stores/user';
 	import { page } from '$app/state';
@@ -24,57 +23,52 @@
 	import Delete from '~icons/tabler/trash';
 	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
-    import {initCap, getTimeAgo} from '$lib/stores/moonbase_utilities';
+	import { initCap, getTimeAgo } from '$lib/stores/moonbase_utilities';
 
-    let { property, data = $bindable(), definition, onChange, changeOnInput} = $props();
+	let { property, data = $bindable(), definition, onChange, changeOnInput } = $props();
 
-    let dataEditable: any = $state({});
+	let dataEditable: any = $state({});
 
-    let propertyEditable: string = $state("");
+	let propertyEditable: string = $state('');
 
-    let showEditor: boolean = $state(false);
+	let showEditor: boolean = $state(false);
 
-    //if no records added yet, add an empty array
-    if (data[property.name] == undefined) {
-        data[property.name] = [];
-    }
-
-    let lastIndex: number = -1;
-
-    let localDefinition: any = $state([]);
-
-    // console.log("Array property", property, data, definition, changeOnInput, data[property.name], value1, value2);
-    for (let i = 0; i < definition.length; i++) {
-        // console.log("addItem def", propertyName, property)
-        if (property.name == definition[i].name) {
-            localDefinition = definition[i].n;
-            // console.log("localDefinition", property.name, definition[i].n)
-        }
-    }
-
-    //make getTimeAgo reactive
-    let currentTime = $state(Date.now());
-    // Update the dummy variable every second
-    const interval = setInterval(() => {
-        currentTime = Date.now();
-    }, 1000);
-
-    onDestroy(() => {
-        clearInterval(interval);
-    });
-
-	function onDrop(propertyName: string, { detail: { from, to } }: CustomEvent<DropEvent>) {
-		
-		if (!to || from === to) {
-			return;
-		}
-
-		data[propertyName] = reorder(data[propertyName], from.index, to.index);
-		onChange();
-		// console.log(onDrop, data[propertyName]);
+	//if no records added yet, add an empty array
+	if (data[property.name] == undefined) {
+		data[property.name] = [];
 	}
 
-    function addItem(propertyName: string) {
+	let lastIndex: number = -1;
+
+	let localDefinition: any = $state([]);
+
+	// console.log("Array property", property, data, definition, changeOnInput, data[property.name], value1, value2);
+	for (let i = 0; i < definition.length; i++) {
+		// console.log("addItem def", propertyName, property)
+		if (property.name == definition[i].name) {
+			localDefinition = definition[i].n;
+			// console.log("localDefinition", property.name, definition[i].n)
+		}
+	}
+
+	//make getTimeAgo reactive
+	let currentTime = $state(Date.now());
+	// Update the dummy variable every second
+	const interval = setInterval(() => {
+		currentTime = Date.now();
+	}, 1000);
+
+	onDestroy(() => {
+		clearInterval(interval);
+	});
+
+	function handleReorder(reorderedItems: any[]) {
+		console.log('handleReorder', property.name, reorderedItems);
+		data[property.name] = reorderedItems;
+		onChange();
+	}
+
+	function addItem(propertyName: string) {
 		propertyEditable = propertyName;
 		//set the default values from the definition...
 		dataEditable = {};
@@ -83,8 +77,8 @@
 		for (let i = 0; i < definition.length; i++) {
 			let property = definition[i];
 			if (property.name == propertyName) {
-                console.log("addItem def", propertyName, property)
-				for (let i=0; i < property.n.length; i++) {
+				console.log('addItem def', propertyName, property);
+				for (let i = 0; i < property.n.length; i++) {
 					let propertyN = property.n[i];
 					// console.log("propertyN", propertyN)
 					dataEditable[propertyN.name] = propertyN.default;
@@ -95,138 +89,139 @@
 
 	function handleEdit(propertyName: string, index: number) {
 		// console.log("handleEdit", propertyName, index, data[propertyName][index])
-        if (lastIndex != index) {
-            showEditor = true;
-            lastIndex = index;
-        } else
-            showEditor = !showEditor;
-        propertyEditable = propertyName;
+		if (lastIndex != index) {
+			showEditor = true;
+			lastIndex = index;
+		} else showEditor = !showEditor;
+		propertyEditable = propertyName;
 		dataEditable = data[propertyName][index];
 	}
 
 	function deleteItem(propertyName: string, index: number) {
 		// Check if item is currently been edited and delete as well
-		if (data[propertyName][index].name === dataEditable.name) { //todo: remove name here...
+		if (data[propertyName][index].name === dataEditable.name) {
+			//todo: remove name here...
 			addItem(propertyName);
 		}
 		// Remove item from array
+		console.log(propertyName, index, data[propertyName]);
 		data[propertyName].splice(index, 1);
 		data[propertyName] = [...data[propertyName]]; //Trigger reactivity
 		showEditor = false;
 		onChange();
 	}
-
-    function nrofDetails(index: number, propertyN: any) {
-        if (data[property.name][index][propertyN.name])
-            return data[property.name][index][propertyN.name].length
-        else return 0;
-    }
-
 </script>
 
-    <div class="divider mb-2 mt-0"></div>
-    <div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
-        {initCap(property.name)}
-    </div>
-    <div class="relative w-full overflow-visible">
-    <!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->
-        <button
-            class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
-            onclick={() => {
-                addItem(property.name);
-                
-                //add the new item to the data
-                data[property.name].push(dataEditable);
-                onChange();
-                showEditor = true;
-            }}
-        >
-            <Add class="h-6 w-6" /></button
-        >
-    </div>
+<div class="divider mb-2 mt-0"></div>
+<div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
+	{initCap(property.name)}
+</div>
+<div class="relative w-full overflow-visible">
+	<!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->
+	<button
+		class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
+		onclick={() => {
+			addItem(property.name);
 
-    <div
-        class="overflow-x-auto space-y-1"
-        transition:slide|local={{ duration: 300, easing: cubicOut }}
-    >
-        <DragDropList
-            id={property.name}
-            type={VerticalDropZone}
-            itemSize={60}
-            itemCount={data[property.name].length}
-            on:drop={(event) => {
-                onDrop(property.name, event);
-            }}
-            
-        >
-            {#snippet children({ index })}
-                                        <!-- svelte-ignore a11y_click_events_have_key_events -->
-                <div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
-                    <div class="mask mask-hexagon bg-primary h-auto w-10 shrink-0">
-                        <Router class="text-primary-content h-auto w-full scale-75" />
-                    </div>
-                    {#each property.n.slice(0, 3) as propertyN}
-                        {#if propertyN.type == "time"}
-                            <div>
-                                <div class="font-bold">{getTimeAgo(data[property.name][index][propertyN.name], currentTime)}</div>
-                            </div>
-                        {:else if propertyN.type == "coord3D"}
-                            <div>
-                                <div class="font-bold">({data[property.name][index][propertyN.name].x}, {data[property.name][index][propertyN.name].y}, {data[property.name][index][propertyN.name].z})</div>
-                            </div>
-                        {:else if propertyN.type != "array" && propertyN.type != "controls" && propertyN.type != "password"}
-                            <div>
-                                <div class="font-bold">{data[property.name][index][propertyN.name]}</div>
-                            </div>
-                        {/if}
-                    {/each}
-                    {#each property.n as propertyN}
-                        {#if propertyN.type == "array" || propertyN.type == "controls"}
-                            <div>
-                                <div class="font-bold">↓{nrofDetails(index, propertyN)}</div>
-                            </div>
-                        {/if}
-                    {/each}
-                    {#if !page.data.features.security || $user.admin}
-                        <div class="grow"></div>
-                        <div class="space-x-0 px-0 mx-0">
-                            <button
-                                class="btn btn-ghost btn-sm"
-                                onclick={() => {
-                                    handleEdit(property.name, index);
-                                }}
-                            >
-                                <Edit class="h-6 w-6" /></button
-                            >
-                            <button
-                                class="btn btn-ghost btn-sm"
-                                onclick={() => {
-                                    deleteItem(property.name, index);
-                                }}
-                            >
-                                <Delete class="text-error h-6 w-6" />
-                            </button>
-                        </div>
-                    {/if}
-                </div>
-            {/snippet}
-        </DragDropList>
-    </div>
-    {#if showEditor && property.name == propertyEditable && data[property.name] && data[property.name].length}
-        <div class="divider my-0"></div>
-        {#each property.n as propertyN}
-            {#if propertyN.type == "array"}
-                <label for="{propertyN.name}">{propertyN.name}</label>
-                <ObjectArray property={propertyN} bind:data={dataEditable} definition={localDefinition} onChange={onChange} changeOnInput={changeOnInput}></ObjectArray>
-            {:else if propertyN.type == "controls"}
-                {#each dataEditable[propertyN.name] as control}
-                    <!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"slider","default":64,"p":1070417419,"value":64} -->
-                    <MultiInput property={control} bind:value={control.value} onChange={onChange} changeOnInput={changeOnInput}></MultiInput>
-                {/each}
-            {:else}
-                <div>
-                    <MultiInput property={propertyN} bind:value={dataEditable[propertyN.name]} onChange={onChange} changeOnInput={changeOnInput}></MultiInput>
-                </div>
-            {/if}
-        {/each}
-    {/if}
+			//add the new item to the data
+			data[property.name].push(dataEditable);
+			onChange();
+			showEditor = true;
+		}}
+	>
+		<Add class="h-6 w-6" /></button
+	>
+</div>
+
+<div class="overflow-x-auto space-y-1" transition:slide|local={{ duration: 300, easing: cubicOut }}>
+	<DraggableList items={data[property.name]} onReorder={handleReorder} class="space-y-2">
+		{#snippet children({ item: item, index }: { item: any; index: number })}
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+				<div class="mask mask-hexagon bg-primary h-auto w-10 shrink-0">
+					<Router class="text-primary-content h-auto w-full scale-75" />
+				</div>
+				<!-- Show the first 3 fields -->
+				{#each property.n.slice(0, 3) as propertyN}
+					{#if propertyN.type == 'time'}
+						<div>
+							<div class="font-bold">
+								{getTimeAgo(item[propertyN.name], currentTime)}
+							</div>
+						</div>
+					{:else if propertyN.type == 'coord3D'}
+						<div>
+							<div class="font-bold">
+								({item[propertyN.name].x}, {item[propertyN.name].y}, {item[propertyN.name].z})
+							</div>
+						</div>
+					{:else if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
+						<div>
+							<div class="font-bold">{item[propertyN.name]}</div>
+						</div>
+					{/if}
+				{/each}
+				{#each property.n as propertyN}
+					{#if propertyN.type == 'array' || propertyN.type == 'controls'}
+						<div>
+							<div class="font-bold">
+								↓{item[propertyN.name] ? item[propertyN.name].length : ''}
+							</div>
+						</div>
+					{/if}
+				{/each}
+				{#if !page.data.features.security || $user.admin}
+					<div class="grow"></div>
+					<div class="space-x-0 px-0 mx-0">
+						<button
+							class="btn btn-ghost btn-sm"
+							onclick={() => {
+								handleEdit(property.name, index);
+							}}
+						>
+							<Edit class="h-6 w-6" /></button
+						>
+						<button
+							class="btn btn-ghost btn-sm"
+							onclick={() => {
+								deleteItem(property.name, index);
+							}}
+						>
+							<Delete class="text-error h-6 w-6" />
+						</button>
+					</div>
+				{/if}
+			</div>
+		{/snippet}
+	</DraggableList>
+</div>
+{#if showEditor && property.name == propertyEditable && data[property.name] && data[property.name].length}
+	<div class="divider my-0"></div>
+	{#each property.n as propertyN}
+		{#if propertyN.type == 'array'}
+			<label for={propertyN.name}>{propertyN.name}</label>
+			<ObjectArray
+				property={propertyN}
+				bind:data={dataEditable}
+				definition={localDefinition}
+				{onChange}
+				{changeOnInput}
+			></ObjectArray>
+		{:else if propertyN.type == 'controls'}
+			{#each dataEditable[propertyN.name] as control}
+				<!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"slider","default":64,"p":1070417419,"value":64} -->
+				<MultiInput property={control} bind:value={control.value} {onChange} {changeOnInput}
+				></MultiInput>
+			{/each}
+		{:else}
+			<div>
+				<MultiInput
+					property={propertyN}
+					bind:value={dataEditable[propertyN.name]}
+					{onChange}
+					{changeOnInput}
+				></MultiInput>
+			</div>
+		{/if}
+	{/each}
+{/if}

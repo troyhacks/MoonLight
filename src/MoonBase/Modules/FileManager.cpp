@@ -28,7 +28,7 @@ void addFolder(File folder, bool showHidden, JsonArray fileArray) {
         fileObject["name"] = (char*)file.name();  // enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
         fileObject["path"] = (char*)file.path();  // enforces copy, solved in latest arduinojson!, see https://arduinojson.org/news/2024/12/29/arduinojson-7-3/
         fileObject["isFile"] = !file.isDirectory();
-        // MB_LOGI(MB_TAG, "file %s (%d)", file.path(), file.size());
+        // EXT_LOGI(MB_TAG, "file %s (%d)", file.path(), file.size());
         if (file.isDirectory()) {
           addFolder(file, showHidden, fileObject["files"].to<JsonArray>());
         } else {
@@ -52,7 +52,7 @@ void FilesState::read(FilesState& state, JsonObject& root) {
   addFolder(folder, state.showHidden, root["files"].to<JsonArray>());
   folder.close();
   // print->printJson("FilesState::read", root);
-  MB_LOGI(MB_TAG, "");
+  EXT_LOGI(MB_TAG, "");
 }
 
 StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
@@ -60,7 +60,7 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
 
   if (root["showHidden"] != state.showHidden) {
     state.showHidden = root["showHidden"];
-    MB_LOGD(MB_TAG, "showHidden %d", state.showHidden);
+    EXT_LOGD(MB_TAG, "showHidden %d", state.showHidden);
     changed = true;
   }
 
@@ -69,7 +69,7 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
   JsonArray deletes = root["deletes"].as<JsonArray>();
   if (!deletes.isNull()) {
     for (JsonObject var : deletes) {
-      MB_LOGI(MB_TAG, "delete %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
+      EXT_LOGI(MB_TAG, "delete %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
       // print->printJson("new file", var);
       if (var["isFile"])
         ESPFS.remove(var["path"].as<const char*>());
@@ -83,14 +83,14 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
   JsonArray news = root["news"].as<JsonArray>();
   if (!news.isNull()) {
     for (JsonObject var : news) {
-      MB_LOGI(MB_TAG, "new %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
+      EXT_LOGI(MB_TAG, "new %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
       // print->printJson("new file", var);
       if (var["isFile"]) {
         File file = ESPFS.open(var["path"].as<const char*>(), FILE_WRITE);
         const char* contents = var["contents"];
         if (strlen(contents)) {
           if (!file.write((byte*)contents, strlen(contents))) {  // changed not true as contents is not part of the state
-            MB_LOGE(MB_TAG, "Write failed");
+            EXT_LOGE(MB_TAG, "Write failed");
           }
         }
         file.close();
@@ -104,15 +104,15 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
   JsonArray updates = root["updates"].as<JsonArray>();
   if (!updates.isNull()) {
     for (JsonObject var : updates) {
-      MB_LOGI(MB_TAG, "update %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
+      EXT_LOGI(MB_TAG, "update %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
       // print->printJson("update file", var);
       File file = ESPFS.open(var["path"].as<const char*>(), FILE_WRITE);
       if (!file) {
-        MB_LOGE(MB_TAG, "Failed to open file");
+        EXT_LOGE(MB_TAG, "Failed to open file");
       } else {
         const char* contents = var["contents"];
         if (!file.write((byte*)contents, strlen(contents))) {  // changed not true as contents is not part of the state
-          MB_LOGE(MB_TAG, "Write failed");
+          EXT_LOGE(MB_TAG, "Write failed");
         }
         file.close();
 
@@ -121,7 +121,7 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
         strcat(newPath, "/");
         strcat(newPath, var["name"]);
 
-        MB_LOGI(MB_TAG, "rename %s to %s", var["path"].as<const char*>(), newPath);
+        EXT_LOGI(MB_TAG, "rename %s to %s", var["path"].as<const char*>(), newPath);
 
         if (strcmp(var["path"], newPath) != 0) {
           ESPFS.rename(var["path"].as<const char*>(), newPath);
@@ -133,7 +133,7 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
 
   changed |= state.updatedItems.size();
 
-  if (changed && state.updatedItems.size()) MB_LOGV(MB_TAG, "first item %s", state.updatedItems.front().c_str());
+  if (changed && state.updatedItems.size()) EXT_LOGV(MB_TAG, "first item %s", state.updatedItems.front().c_str());
 
   return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;
 }

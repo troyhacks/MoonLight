@@ -46,10 +46,12 @@
 #define WIFI_SETTINGS_FILE "/.config/wifiSettings.json" // 🌙 use /.config (hidden folder)
 #define WIFI_SETTINGS_SERVICE_PATH "/rest/wifiSettings"
 
-#define WIFI_RECONNECTION_DELAY 1000 * 10 // 10 seconds
+#define WIFI_RECONNECTION_DELAY 1000 * 5
 #define RSSI_EVENT_DELAY 500
+#define DELAYED_RECONNECT_MS 1000
 
 #define EVENT_RSSI "rssi"
+#define EVENT_RECONNECT "reconnect"
 
 // Struct defining the wifi settings
 typedef struct
@@ -226,6 +228,7 @@ public:
     void initWiFi();
     void begin();
     void loop();
+    void delayedReconnect();
     String getHostname();
     String getIP();
 
@@ -237,6 +240,8 @@ private:
     EventSocket *_socket;
     unsigned long _lastConnectionAttempt;
     unsigned long _lastRssiUpdate;
+    unsigned long _delayedReconnectTime;
+    bool _delayedReconnectPending;
 
     bool _stopping;
     void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);

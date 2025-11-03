@@ -27,21 +27,21 @@ class ArtNetDriver : public DriverNode {
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️"; }
 
-  uint16_t controllerIP3 = 11;
-  uint16_t port = 6454;
-  uint16_t FPSLimiter = 50;           // default 50ms
-  uint16_t nrOfOutputs = 1;           // max 12 on Art-Net LED Controller
+  uint8_t controllerIP3 = 11;
+  uint16_t port = 6454;               // Art-Net default port
+  uint8_t FPSLimiter = 50;            // default 50 FPS
+  // uint8_t nrOfOutputs = 1;            // max 12 on Art-Net LED Controller
+  uint8_t universesPerOutput = 1;     // 7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
   uint16_t channelsPerOutput = 1024;  // 3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
-  uint16_t universesPerOutput = 2;    // 7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
 
   void setup() override {
     DriverNode::setup();
 
-    addControl(controllerIP3, "controllerIP", "number");
+    addControl(controllerIP3, "controllerIP", "number", 0, 255);
     addControl(port, "port", "number", 0, 65538);
-    addControl(FPSLimiter, "FPSLimiter", "number");
-    addControl(nrOfOutputs, "nrOfOutputs", "number");
-    addControl(universesPerOutput, "universesPerOutput", "number");
+    addControl(FPSLimiter, "Limiter", "number", 0, 255, false, "FPS");
+    // addControl(nrOfOutputs, "#Outputs", "number", 0, 255);
+    addControl(universesPerOutput, "universesPerOutput", "number", 0, 255);
     addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
 
     memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER));  // copy in the Art-Net header.
@@ -95,7 +95,7 @@ class ArtNetDriver : public DriverNode {
     wait = 1000 / FPSLimiter + lastMillis - millis();
     if (wait > 0 && wait < 1000 / FPSLimiter) delay(wait);  // delay in ms
     // else
-    //   MB_LOGW(ML_TAG, "wait %d", wait);
+    //   EXT_LOGW(ML_TAG, "wait %d", wait);
     // if (millis() - lastMillis < 1000 / FPSLimiter)
     //   delay(1000 / FPSLimiter + lastMillis - millis()); // delay in ms
     //   return;
@@ -117,12 +117,9 @@ class ArtNetDriver : public DriverNode {
       // correct the RGB channels for color order and brightness
       reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB]);
 
-      if (header->offsetRGB1 != UINT8_MAX)
-        reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB1], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB1]);
-      if (header->offsetRGB2 != UINT8_MAX)
-        reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB2], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB2]);
-      if (header->offsetRGB3 != UINT8_MAX)
-        reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB3], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB3]);
+      if (header->offsetRGB1 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB1], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB1]);
+      if (header->offsetRGB2 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB2], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB2]);
+      if (header->offsetRGB3 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB3], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB3]);
 
       if (lightPreset == 9 && indexP < 72)  // RGBWYP this config assumes a mix of 4 channels and 6 channels per light !!!!
         packetSize += 4;

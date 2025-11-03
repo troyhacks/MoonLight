@@ -1,21 +1,23 @@
 # Nodes
 
-## Creating new nodes
+## Overview
 
-The nodes system is in principle a general mechanism. Currently it is implemented as a MoonLight feature, might move to a generic MoonBase feature in the future. Currently it is intertwined with MoonLight functionality supporting the Physical and Virtual layer model and supporting the 4 types of nodes: Layout, effect, modifier and supporting node.
+A node can be an Effect, a Modifier, a Layer or a Driver.
 
-The core node functionality supports the following
-
-* setup() and loop()
-* controls: each node has a variable number of flexible variables of different types (sliders/range, checkboxes, numbers etc). They are added with the setControl function in the setup()
-    * Warning: type of controls
-* Firmware or live scripts
+* See the [MoonLight functional video](https://www.youtube.com/watch?v=tdrU9yGkyVo) for an introduction to nodes.
+* See the [Developer quickstart video](https://studio.youtube.com/video/bJIgiBBx3lg) how to add of nodes.
+* MoonLight community approach encourages nodes to be added by 'everybody'.
+* MoonLight only supports one firmware per type of board. This means that all nodes contributed by the community will be available in that firmware and it is expected to be maintained by the author of a node specifically and the community in general.
 
 Nodes are inspired by WLED usermods, further developed in StarBase and now in MoonLight (using the ESP32-Sveltekit infrastructure)
 
-MoonLight specific
+A node implements the following (overloaded) functions:
 
-* Node types: it is recommended that a node is one of the 4 types as described above. However each node could perform functionality of all types. To recognize what a node does the emojis 🚥, 🔥, 💎 and ☸️ are used in the name. The function hasOnLayout() and hasModifier() indicate the specific functionality the node supports. They control when a physical to virtual mapping is recalculated
+* setup() and loop()
+* controls: each node has a variable number of flexible variables of different types (sliders/range, checkboxes, numbers etc). They are added with the setControl function in the setup()
+* ...
+
+* Node types: it is recommended that a node is one of the 4 types (Effect, Modifier, Layer, Driver). However each node could perform functionality of all types. To recognize what a node does the emojis 🚥, 🔥, 💎 and ☸️ are used in the name. The function hasOnLayout() and hasModifier() indicate the specific functionality the node supports. They control when a physical to virtual mapping is recalculated
     * **hasOnLayout()**: a layout node specify the amount of position of lights controlled. E.g. a panel of 16x16 or a cube of 20x20x20. If hasOnLayout() is true you should implement onLayout calling addLight(position) and addPin() for all the lights. 
       * addPin() is needed if a LED driver is used to send the output to LED strips.
     * **hasModifier()**: a modifier node which manipulates virtual size and positions and lights using one or more of the functions modifySize, modifyPosition and modifyXYZ.
