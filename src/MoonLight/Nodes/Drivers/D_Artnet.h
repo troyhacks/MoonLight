@@ -95,7 +95,7 @@ class ArtNetDriver : public DriverNode {
     wait = 1000 / FPSLimiter + lastMillis - millis();
     if (wait > 0 && wait < 1000 / FPSLimiter) delay(wait);  // delay in ms
     // else
-    //   MB_LOGW(ML_TAG, "wait %d", wait);
+    //   EXT_LOGW(ML_TAG, "wait %d", wait);
     // if (millis() - lastMillis < 1000 / FPSLimiter)
     //   delay(1000 / FPSLimiter + lastMillis - millis()); // delay in ms
     //   return;

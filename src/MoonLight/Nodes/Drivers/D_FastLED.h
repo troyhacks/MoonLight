@@ -60,7 +60,7 @@ class FastLEDDriver : public Node {
   void loop() override {
     if (FastLED.count()) {
       if (FastLED.getBrightness() != layer->layerP->lights.header.brightness) {
-        MB_LOGD(ML_TAG, "setBrightness %d", layer->layerP->lights.header.brightness);
+        EXT_LOGD(ML_TAG, "setBrightness %d", layer->layerP->lights.header.brightness);
         FastLED.setBrightness(layer->layerP->lights.header.brightness);
       }
 
@@ -70,7 +70,7 @@ class FastLEDDriver : public Node {
       while (pCur) {
         // ++x;
         if (pCur->getCorrection() != correction) {
-          MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (#:%d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, pCur->size());
+          EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (#:%d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, pCur->size());
           pCur->setCorrection(correction);
         }
         // pCur->size();
@@ -85,22 +85,22 @@ class FastLEDDriver : public Node {
   void onLayout() override {
     if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) {  // physical
       // if (safeModeMB) {
-      //     MB_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
+      //     EXT_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
       //     return;
       // }
 
       if (layer->layerP->sortedPins.size() == 0) return;
 
-      MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
+      EXT_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
 
       uint8_t pinCount = 0;
       for (const SortedPin& sortedPin : layer->layerP->sortedPins) {
         pinCount++;
         if (pinCount > 4) {  // FastLED RMT supports max 4 pins!
-          MB_LOGW(ML_TAG, "Too many pins!");
+          EXT_LOGW(ML_TAG, "Too many pins!");
           break;
         }
-        MB_LOGD(ML_TAG, "sortpins s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+        EXT_LOGD(ML_TAG, "sortpins s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
 
         uint16_t startLed = sortedPin.startLed;
         uint16_t nrOfLights = sortedPin.nrOfLights;
@@ -530,10 +530,10 @@ class FastLEDDriver : public Node {
   #endif  // CONFIG_IDF_TARGET_ESP32S3
 
           default:
-            MB_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", sortedPin.pin);
+            EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", sortedPin.pin);
           }  // switch pinNr
         } else
-          MB_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
+          EXT_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
 
       }  // sortedPins
     }
@@ -543,7 +543,7 @@ class FastLEDDriver : public Node {
 
   void onUpdate(String& oldValue, JsonObject control) override {
     if (control["name"] == "maxPower") {
-      MB_LOGD(ML_TAG, "setMaxPowerInMilliWatts %d", maxPower);
+      EXT_LOGD(ML_TAG, "setMaxPowerInMilliWatts %d", maxPower);
       FastLED.setMaxPowerInMilliWatts(1000 * maxPower);  // 5v, 2000mA, to protect usb while developing
     }
   }

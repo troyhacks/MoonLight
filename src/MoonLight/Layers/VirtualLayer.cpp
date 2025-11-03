@@ -22,7 +22,7 @@ void fastled_fill_solid(struct CRGB* targetArray, int numToFill, const CRGB& col
 void fastled_fill_rainbow(struct CRGB* targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue) { fill_rainbow(targetArray, numToFill, initialhue, deltahue); }
 
 VirtualLayer::~VirtualLayer() {
-  MB_LOGV(ML_TAG, "destructor");
+  EXT_LOGV(ML_TAG, "destructor");
   fadeToBlackBy(255);  // clear the LEDs
 
   for (Node* node : nodes) {
@@ -55,7 +55,7 @@ void VirtualLayer::loop() {
     }
   }
 
-  if (prevSize != size) MB_LOGD(ML_TAG, "onSizeChanged V %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, size.x, size.y, size.z);
+  if (prevSize != size) EXT_LOGD(ML_TAG, "onSizeChanged V %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, size.x, size.y, size.z);
   for (Node* node : nodes) {
     if (prevSize != size) node->onSizeChanged(prevSize);
     if (node->on) node->loop();
@@ -64,7 +64,7 @@ void VirtualLayer::loop() {
 };
 
 void VirtualLayer::addIndexP(PhysMap& physMap, uint16_t indexP) {
-  // MB_LOGV(ML_TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
+  // EXT_LOGV(ML_TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
   switch (physMap.mapType) {
   case m_zeroLights:
     // case m_rgbColor:
@@ -87,10 +87,10 @@ void VirtualLayer::addIndexP(PhysMap& physMap, uint16_t indexP) {
   case m_moreLights:
     // mappingTableIndexes.reserve(physMap.indexes+1);
     mappingTableIndexes[physMap.indexes].push_back(indexP);
-    // MB_LOGV(ML_TAG, " more %d", mappingTableIndexes.size());
+    // EXT_LOGV(ML_TAG, " more %d", mappingTableIndexes.size());
     break;
   }
-  // MB_LOGV(ML_TAG, "\n");
+  // EXT_LOGV(ML_TAG, "\n");
 }
 uint16_t VirtualLayer::XYZ(Coord3D& position) {
   // XYZ modifiers (this is not slowing things down as you might have expected ...)
@@ -115,7 +115,7 @@ uint16_t VirtualLayer::XYZ(Coord3D& position) {
 
 void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint8_t offset, uint8_t length) {
   if (indexV < mappingTableSizeUsed) {
-    // MB_LOGV(ML_TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
+    // EXT_LOGV(ML_TAG, "setLightColor %d %d %d %d", indexV, color.r, color.g, color.b, mappingTableSizeUsed);
     switch (mappingTable[indexV].mapType) {
     case m_zeroLights: {
       // only room for storing colors
@@ -135,7 +135,7 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
           memcpy(&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset], channels, length);
         }
       else
-        MB_LOGW(ML_TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
+        EXT_LOGW(ML_TAG, "dev setLightColor i:%d m:%d s:%d", indexV, mappingTable[indexV].indexes, mappingTableIndexes.size());
       break;
     default:;
     }
@@ -174,7 +174,7 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
     return *result;  // return the color as CRGB
   } else {
     // some operations will go out of bounds e.g. VUMeter, uncomment below lines if you wanna test on a specific effect
-    // MB_LOGV(ML_TAG, " dev gPC %d >= %d", indexV, MAX_CHANNELS);
+    // EXT_LOGV(ML_TAG, " dev gPC %d >= %d", indexV, MAX_CHANNELS);
     return T();
   }
 }
@@ -337,7 +337,7 @@ void VirtualLayer::onLayoutPost() {
       nrOfZeroLights++;
       break;
     case m_oneLight:
-      // MB_LOGV(ML_TAG,"%d mapping =1: #ledsP : %d", i, map.indexP);
+      // EXT_LOGV(ML_TAG,"%d mapping =1: #ledsP : %d", i, map.indexP);
       nrOfOneLight++;
       break;
     case m_moreLights:
@@ -346,14 +346,14 @@ void VirtualLayer::onLayoutPost() {
         // str += indexP;
         nrOfMoreLights++;
       }
-      // MB_LOGV(ML_TAG, "%d mapping >1: #ledsP : %s", i, str.c_str());
+      // EXT_LOGV(ML_TAG, "%d mapping >1: #ledsP : %s", i, str.c_str());
       break;
     }
     // else
-    //   MB_LOGV(ML_TAG, "%d no mapping\n", x);
+    //   EXT_LOGV(ML_TAG, "%d no mapping\n", x);
   }
 
-  MB_LOGD(MB_TAG, "V:%d x %d x %d = v:%d = 1:0:%d + 1:1:%d + mti:%d (1:m:%d)", size.x, size.y, size.z, nrOfLights, nrOfZeroLights, nrOfOneLight, mappingTableIndexesSizeUsed, nrOfMoreLights);
+  EXT_LOGD(MB_TAG, "V:%d x %d x %d = v:%d = 1:0:%d + 1:1:%d + mti:%d (1:m:%d)", size.x, size.y, size.z, nrOfLights, nrOfZeroLights, nrOfOneLight, mappingTableIndexesSizeUsed, nrOfMoreLights);
 }
 
 void VirtualLayer::drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft, uint8_t depth) {

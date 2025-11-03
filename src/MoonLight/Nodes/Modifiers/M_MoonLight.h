@@ -73,7 +73,7 @@ class MirrorModifier : public Node {
     if (mirrorY) layer->size.y = (layer->size.y + 1) / 2;
     if (mirrorZ) layer->size.z = (layer->size.z + 1) / 2;
     modifierSize = layer->size;
-    MB_LOGV(ML_TAG, "mirror %d %d %d", layer->size.x, layer->size.y, layer->size.z);
+    EXT_LOGV(ML_TAG, "mirror %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D& position) override {
@@ -100,7 +100,7 @@ class MultiplyModifier : public Node {
   void modifySize() override {
     layer->size = (layer->size + proMulti - Coord3D({1, 1, 1})) / proMulti;  // Round up
     modifierSize = layer->size;
-    MB_LOGV(ML_TAG, "multiply %d %d %d", layer->size.x, layer->size.y, layer->size.z);
+    EXT_LOGV(ML_TAG, "multiply %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D& position) override {
@@ -162,7 +162,7 @@ class PinwheelModifier : public Node {
     petalWidth = factor / float(petals);
 
     modifierSize = layer->size;
-    MB_LOGD(ML_TAG, "Pinwheel %d %d %d", layer->size.x, layer->size.y, layer->size.z);
+    EXT_LOGD(ML_TAG, "Pinwheel %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D& position) override {
@@ -188,8 +188,8 @@ class PinwheelModifier : public Node {
     }
     position.z = 0;
 
-    // if (position.x == 0 && position.y == 0 && position.z == 0) MB_LOGD(ML_TAG, "Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layer->middle.x, layer->middle.y,
-    // swirlVal, symmetry, petals, zTwist); MB_LOGD(ML_TAG, "position %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", position.x, position.y, position.z, mapped.x, mapped.y, mapped.z, angle,
+    // if (position.x == 0 && position.y == 0 && position.z == 0) EXT_LOGD(ML_TAG, "Pinwheel  Center: (%d, %d) SwirlVal: %d Symmetry: %d Petals: %d zTwist: %d\n", layer->middle.x, layer->middle.y,
+    // swirlVal, symmetry, petals, zTwist); EXT_LOGD(ML_TAG, "position %2d,%2d,%2d -> %2d,%2d,%2d Angle: %3d Petal: %2d\n", position.x, position.y, position.z, mapped.x, mapped.y, mapped.z, angle,
     // value);
   }
 };
@@ -428,7 +428,7 @@ class TransposeModifier : public Node {
       layer->size.z = temp;
     }
     modifierSize = layer->size;
-    MB_LOGV(ML_TAG, "transpose %d %d %d", layer->size.x, layer->size.y, layer->size.z);
+    EXT_LOGV(ML_TAG, "transpose %d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   void modifyPosition(Coord3D& position) override {

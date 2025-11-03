@@ -49,9 +49,9 @@ class ModuleState {
   JsonObject data;
 
   ModuleState() {
-    MB_LOGD(MB_TAG, "ModuleState constructor");
+    EXT_LOGD(MB_TAG, "ModuleState constructor");
     if (!doc) {
-      MB_LOGD(MB_TAG, "Creating doc");
+      EXT_LOGD(MB_TAG, "Creating doc");
       if (psramFound())
         doc = new JsonDocument(JsonRAMAllocator::instance());  // crashed on non psram esp32-d0
       else
@@ -62,17 +62,17 @@ class ModuleState {
       data = doc->add<JsonObject>();
       // data = doc->to<JsonObject>();
     } else {
-      MB_LOGE(MB_TAG, "Failed to create doc");
+      EXT_LOGE(MB_TAG, "Failed to create doc");
     }
   }
   ~ModuleState() {
-    MB_LOGD(MB_TAG, "ModuleState destructor");
+    EXT_LOGD(MB_TAG, "ModuleState destructor");
     // delete data from doc
     JsonArray arr = doc->as<JsonArray>();
     for (size_t i = 0; i < arr.size(); i++) {
       JsonObject obj = arr[i];
       if (obj == data) {  // same object (identity check)
-        MB_LOGD(MB_TAG, "Deleting data from doc");
+        EXT_LOGD(MB_TAG, "Deleting data from doc");
         arr.remove(i);
         break;  // optional, if only one match
       }

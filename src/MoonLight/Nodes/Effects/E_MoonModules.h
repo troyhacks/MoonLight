@@ -140,7 +140,7 @@ class GameOfLifeEffect : public Node {
   uint8_t* cellColors = nullptr;
 
   void startNewGameOfLife() {
-    // MB_LOGD(ML_TAG, "startNewGameOfLife");
+    // EXT_LOGD(ML_TAG, "startNewGameOfLife");
     prevPalette = ColorFromPalette(layer->layerP->palette, 0);
     generation = 1;
     disablePause ? step = millis() : step = millis() + 1500;
@@ -191,7 +191,7 @@ class GameOfLifeEffect : public Node {
     cellColors = allocMB<uint8_t>(layer->size.x * layer->size.y * layer->size.z);
 
     if (!cells || !futureCells || !cellColors) {
-      MB_LOGE(ML_TAG, "allocation of cells || !futureCells || !cellColors failed");
+      EXT_LOGE(ML_TAG, "allocation of cells || !futureCells || !cellColors failed");
     }
 
     startNewGameOfLife();
@@ -201,7 +201,7 @@ class GameOfLifeEffect : public Node {
     if (!cells || !futureCells || !cellColors) return;
 
     if (generation == 0 && step < millis()) {
-      // MB_LOGD(ML_TAG, "gen / step");
+      // EXT_LOGD(ML_TAG, "gen / step");
       startNewGameOfLife();
       return;  // show the start
     }

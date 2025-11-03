@@ -36,7 +36,7 @@ class ExampleModifier : public Node {
   void modifySize() override {
     layer->size /= 2;
     modifierSize = layer->size;
-    MB_LOGV(ML_TAG, "%d %d %d", layer->size.x, layer->size.y, layer->size.z);
+    EXT_LOGV(ML_TAG, "%d %d %d", layer->size.x, layer->size.y, layer->size.z);
   }
 
   // modify the position of each light during mapping

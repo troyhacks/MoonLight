@@ -22,7 +22,7 @@
 
 class ModuleEffects : public NodeManager {
  public:
-  ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit, fileManager) { MB_LOGV(ML_TAG, "constructor"); }
+  ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit, fileManager) { EXT_LOGV(ML_TAG, "constructor"); }
 
   void begin() {
     _state.onUpdateRunInTask = 1;
@@ -34,7 +34,7 @@ class ModuleEffects : public NodeManager {
   #if FT_ENABLED(FT_MONITOR)
     _socket->registerEvent("monitor");
     _server->on("/rest/monitorLayout", HTTP_GET, [&](PsychicRequest* request) {
-      MB_LOGV(ML_TAG, "rest monitor triggered");
+      EXT_LOGV(ML_TAG, "rest monitor triggered");
 
       // trigger pass 1 mapping of layout
       layerP.pass = 1;  //(requestMapPhysical=1 physical rerun)
@@ -59,7 +59,7 @@ class ModuleEffects : public NodeManager {
   }
 
   void setupDefinition(JsonArray root) override {
-    MB_LOGV(ML_TAG, "");
+    EXT_LOGV(ML_TAG, "");
     JsonObject property;  // state.data has one or more properties
     JsonArray values;     // if a property is a select, this is the values of the select
     property = root.add<JsonObject>();
@@ -152,7 +152,7 @@ class ModuleEffects : public NodeManager {
     File rootFolder = ESPFS.open("/");
     walkThroughFiles(rootFolder, [&](File folder, File file) {
       if (strstr(file.name(), ".sc")) {
-        // MB_LOGV(ML_TAG, "found file %s", file.path());
+        // EXT_LOGV(ML_TAG, "found file %s", file.path());
         values.add((char*)file.path());
       }
     });
@@ -264,7 +264,7 @@ class ModuleEffects : public NodeManager {
   #endif
 
     if (node) {
-      MB_LOGD(ML_TAG, "%s (p:%p pr:%d)", name, node, isInPSRAM(node));
+      EXT_LOGD(ML_TAG, "%s (p:%p pr:%d)", name, node, isInPSRAM(node));
 
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node
       node->setup();                                  // run the setup of the effect

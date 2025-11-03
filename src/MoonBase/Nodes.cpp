@@ -15,32 +15,32 @@
   #include <ESP32SvelteKit.h>  //for safeModeMB
 
 void Node::updateControl(String& oldValue, JsonObject control) {
-  MB_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
+  EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
   if (oldValue == "") return;                                                              // newControl, value already set
   if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) {  // name and type can be null if control is removed in compareRecursive
     int pointer = control["p"];
-    MB_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
+    EXT_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
 
     if (pointer) {
       if (control["type"] == "slider" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
         if (control["size"] == 8) {
           uint8_t* valuePointer = (uint8_t*)pointer;
           *valuePointer = control["value"];
-          // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
         } else if (control["size"] == 16) {
           uint16_t* valuePointer = (uint16_t*)pointer;
           *valuePointer = control["value"];
-          // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
         } else if (control["size"] == 32) {
           int* valuePointer = (int*)pointer;
           *valuePointer = control["value"];
-          // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
         } else if (control["size"] == 33) {
           float* valuePointer = (float*)pointer;
           *valuePointer = control["value"];
-          // MB_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
         } else {
-          MB_LOGW(ML_TAG, "size not supported or not set for %s: %d", control["name"].as<String>().c_str(), control["size"].as<int>());
+          EXT_LOGW(ML_TAG, "size not supported or not set for %s: %d", control["name"].as<String>().c_str(), control["size"].as<int>());
         }
       } else if (control["type"] == "selectFile" || control["type"] == "text") {
         char* valuePointer = (char*)pointer;
@@ -52,7 +52,7 @@ void Node::updateControl(String& oldValue, JsonObject control) {
         Coord3D* valuePointer = (Coord3D*)pointer;
         *valuePointer = control["value"].as<Coord3D>();
       } else
-        MB_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
+        EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
     }
   }
 };
@@ -65,7 +65,7 @@ void Node::updateControl(String& oldValue, JsonObject control) {
 Node* gNode = nullptr;
 
 static void _addControl(uint8_t* var, char* name, char* type, uint8_t min = 0, uint8_t max = UINT8_MAX) {
-  MB_LOGV(ML_TAG, "%s %s %d (%d-%d)", name, type, var, min, max);
+  EXT_LOGV(ML_TAG, "%s %s %d (%d-%d)", name, type, var, min, max);
   gNode->addControl(*var, name, type, min, max);
 }
 static void _addPin(uint8_t pinNr) { gNode->layer->layerP->addPin(pinNr); }
@@ -90,7 +90,7 @@ void sync() {
   // Serial.print("s");
   // 🌙 adding semaphore wait too long logging
   if (xSemaphoreTake(WaitAnimationSync, pdMS_TO_TICKS(100)) == pdFALSE) {
-    MB_LOGW(ML_TAG, "WaitAnimationSync wait too long");
+    EXT_LOGW(ML_TAG, "WaitAnimationSync wait too long");
     xSemaphoreTake(WaitAnimationSync, portMAX_DELAY);
   }
 }
@@ -123,14 +123,14 @@ void addExternal(string definition, void* ptr) {
     }
   }
   if (!success) {
-    MB_LOGE(ML_TAG, "Failed to parse function definition: %s", definition.c_str());
+    EXT_LOGE(ML_TAG, "Failed to parse function definition: %s", definition.c_str());
   }
 }
 
 Parser parser = Parser();
 
 void LiveScriptNode::setup() {
-  // MB_LOGV(ML_TAG, "animation %s", animation);
+  // EXT_LOGV(ML_TAG, "animation %s", animation);
 
   if (animation[0] != '/') {  // no sc script
     return;
@@ -186,7 +186,7 @@ void LiveScriptNode::setup() {
   addExternal("bool on", &on);
 
   //   for (asm_external el: external_links) {
-  //       MB_LOGV(ML_TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
+  //       EXT_LOGV(ML_TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
   //   }
 
   //   runningPrograms.setPrekill(layer->layerP->ledsDriver.preKill, layer->layerP->ledsDriver.postKill); //for clockless driver...
@@ -202,13 +202,13 @@ void LiveScriptNode::loop() {
 
 void LiveScriptNode::onLayout() {
   if (hasOnLayout()) {
-    MB_LOGV(ML_TAG, "%s", animation);
+    EXT_LOGV(ML_TAG, "%s", animation);
     scriptRuntime.execute(animation, "onLayout");
   }
 }
 
 LiveScriptNode::~LiveScriptNode() {
-  MB_LOGV(ML_TAG, "%s", animation);
+  EXT_LOGV(ML_TAG, "%s", animation);
   scriptRuntime.kill(animation);
 }
 
@@ -220,7 +220,7 @@ void LiveScriptNode::compileAndRun() {
   // run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
   //  std::lock_guard<std::mutex> lock(runInTask_mutex);
   //  runInTask1.push_back([&, animation, type, error] {
-  MB_LOGV(ML_TAG, "%s", animation);
+  EXT_LOGV(ML_TAG, "%s", animation);
   File file = ESPFS.open(animation);
   if (file) {
     Char<32> pre;
@@ -242,22 +242,22 @@ void LiveScriptNode::compileAndRun() {
     if (hasLoopFunction) scScript += "while(true){if(on){loop();sync();}else delay(1);}";  // loop must pauze when layout changes pass == 1! delay to avoid idle
     scScript += "}";
 
-    MB_LOGV(ML_TAG, "script \n%s", scScript.c_str());
+    EXT_LOGV(ML_TAG, "script \n%s", scScript.c_str());
 
-    // MB_LOGV(ML_TAG, "parsing %s", scScript.c_str());
+    // EXT_LOGV(ML_TAG, "parsing %s", scScript.c_str());
 
     Executable executable = parser.parseScript(&scScript);  // note that this class will be deleted after the function call !!!
     executable.name = animation;
-    MB_LOGV(ML_TAG, "parsing %s done", animation);
+    EXT_LOGV(ML_TAG, "parsing %s done", animation);
     scriptRuntime.addExe(executable);  // if already exists, delete it first
-    MB_LOGV(ML_TAG, "addExe success %s", executable.exeExist ? "true" : "false");
+    EXT_LOGV(ML_TAG, "addExe success %s", executable.exeExist ? "true" : "false");
 
     gNode = this;  // todo: this is not working well with multiple scripts running!!!
 
     if (executable.exeExist) {
       execute();
     } else
-      MB_LOGV(ML_TAG, "error %s", executable.error.error_message.c_str());
+      EXT_LOGV(ML_TAG, "error %s", executable.error.error_message.c_str());
 
     // send error to client ... not working yet
     //  error.set(executable.error.error_message); //String(executable.error.error_message.c_str());
@@ -270,10 +270,10 @@ void LiveScriptNode::compileAndRun() {
 
 void LiveScriptNode::execute() {
   if (safeModeMB) {
-    MB_LOGW(ML_TAG, "Safe mode enabled, not executing script %s", animation);
+    EXT_LOGW(ML_TAG, "Safe mode enabled, not executing script %s", animation);
     return;
   }
-  MB_LOGV(ML_TAG, "%s", animation);
+  EXT_LOGV(ML_TAG, "%s", animation);
 
   requestMappings();  // requestMapPhysical and requestMapVirtual will call the script onLayout function (check if this can be done in case the script also has loop running !!!)
 
@@ -282,28 +282,28 @@ void LiveScriptNode::execute() {
     // executable.execute("setup");
     // send controls to UI
     // executable.executeAsTask("main"); //background task (async - vs sync)
-    MB_LOGV(ML_TAG, "%s executeAsTask main", animation);
+    EXT_LOGV(ML_TAG, "%s executeAsTask main", animation);
     scriptRuntime.executeAsTask(animation, "main");  // background task (async - vs sync)
     // assert failed: xEventGroupSync event_groups.c:228 (uxBitsToWaitFor != 0)
   } else {
-    MB_LOGV(ML_TAG, "%s execute main", animation);
+    EXT_LOGV(ML_TAG, "%s execute main", animation);
     scriptRuntime.execute(animation, "main");
   }
-  MB_LOGV(ML_TAG, "%s execute started", animation);
+  EXT_LOGV(ML_TAG, "%s execute started", animation);
 }
 
 void LiveScriptNode::kill() {
-  MB_LOGV(ML_TAG, "%s", animation);
+  EXT_LOGV(ML_TAG, "%s", animation);
   scriptRuntime.kill(animation);
 }
 
 void LiveScriptNode::free() {
-  MB_LOGV(ML_TAG, "%s", animation);
+  EXT_LOGV(ML_TAG, "%s", animation);
   scriptRuntime.free(animation);
 }
 
 void LiveScriptNode::killAndDelete() {
-  MB_LOGV(ML_TAG, "%s", animation);
+  EXT_LOGV(ML_TAG, "%s", animation);
   scriptRuntime.kill(animation);
   // scriptRuntime.free(animation);
   scriptRuntime.deleteExe(animation);
@@ -325,7 +325,7 @@ void LiveScriptNode::getScriptsJson(JsonArray scripts) {
     object["free"] = 0;
     object["delete"] = 0;
     object["execute"] = 0;
-    // MB_LOGV(ML_TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size,
+    // EXT_LOGV(ML_TAG, "scriptRuntime exec %s r:%d h:%d, e:%d h:%d b:%d + d:%d = %d", exec.name.c_str(), exec.isRunning(), exec.isHalted, exec.exeExist, exec.__run_handle_index, exeInfo.binary_size,
     // exeInfo.data_size, exeInfo.total_size);
   }
 }
@@ -365,7 +365,7 @@ void DriverNode::loop() {
   if (brightness != brightnessSaved) {
     // Use FastLED for setMaxPowerInMilliWatts stuff
     uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB*)&layer->layerP->lights.channels, layer->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
-    // MB_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
+    // EXT_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
     ledsDriver.setBrightness(correctedBrightness);
     brightnessSaved = brightness;
   }
@@ -374,7 +374,7 @@ void DriverNode::loop() {
   if (savedColorCorrection.red != layer->layerP->lights.header.red || savedColorCorrection.green != layer->layerP->lights.header.green ||
       savedColorCorrection.blue != layer->layerP->lights.header.blue) {
     ledsDriver.setGamma(layer->layerP->lights.header.red / 255.0, layer->layerP->lights.header.blue / 255.0, layer->layerP->lights.header.green / 255.0, 1.0);
-    // MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue,
+    // EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue,
     // savedColorCorrection.red, savedColorCorrection.green, savedColorCorrection.blue);
     savedColorCorrection.red = layer->layerP->lights.header.red;
     savedColorCorrection.green = layer->layerP->lights.header.green;
@@ -385,7 +385,7 @@ void DriverNode::loop() {
   uint8_t white;
   ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
   if (correction.red != layer->layerP->lights.header.red || correction.green != layer->layerP->lights.header.green || correction.blue != layer->layerP->lights.header.blue) {
-    MB_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, correction.red,
+    EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, correction.red,
             correction.green, correction.blue);
     ledsDriver.setColorCorrection(layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue);
   }
@@ -395,12 +395,12 @@ void DriverNode::loop() {
 void DriverNode::onUpdate(String& oldValue, JsonObject control) {
   LightsHeader* header = &layer->layerP->lights.header;
 
-  MB_LOGD(ML_TAG, "%s: %s ", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+  EXT_LOGD(ML_TAG, "%s: %s ", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
 
   if (control["name"] == "maxPower") {
     uint8_t brightness = (header->offsetBrightness == UINT8_MAX) ? header->brightness : 255;  // set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
     uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB*)&layer->layerP->lights.channels, layer->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
-    MB_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
+    EXT_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
     ledsDriver.setBrightness(correctedBrightness);
   } else if (control["name"] == "lightPreset") {
     uint8_t oldChannelsPerLight = header->channelsPerLight;
@@ -513,7 +513,7 @@ void DriverNode::onUpdate(String& oldValue, JsonObject control) {
       break;
     }
 
-    MB_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
+    EXT_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
 
     // FASTLED_ASSERT(true, "oki");
 

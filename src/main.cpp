@@ -16,7 +16,7 @@
 
 #ifdef BOARD_HAS_PSRAM
 
-  // #include <cstddef> // suggested by copilot to surpress operator warning : first parameter of allocation function must be of type 'size_t' - but made no difference
+// #include <cstddef> // suggested by copilot to surpress operator warning : first parameter of allocation function must be of type 'size_t' - but made no difference
 
 // Threshold (bytes) above which allocations go into PSRAM
 constexpr size_t PSRAM_THRESHOLD = 0;  // 87K free, works fine until now
@@ -127,7 +127,7 @@ void effectTask(void* pvParameters) {
     esp32sveltekit.lps++;  // 🌙 todo: not moonlight specific?
 
     if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100)) == pdFALSE) {
-      // MB_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
+      // EXT_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
     }
 
     layerP.loop();  // run all the effects of all virtual layers (currently only one layer)
@@ -136,7 +136,7 @@ void effectTask(void* pvParameters) {
 
     std::lock_guard<std::mutex> lock(runInTask_mutex);
     while (!runInTask1.empty()) {
-      // MB_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
+      // EXT_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
       runInTask1.front()();
       runInTask1.erase(runInTask1.begin());
     }
@@ -159,7 +159,7 @@ void driverTask(void* pvParameters) {
 
     std::lock_guard<std::mutex> lock(runInTask_mutex);
     while (!runInTask2.empty()) {
-      MB_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
+      EXT_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
       runInTask2.front()();
       runInTask2.erase(runInTask2.begin());
     }
@@ -171,6 +171,7 @@ void driverTask(void* pvParameters) {
 #endif
 
 // 🌙 Custom log output function - 🚧
+#ifdef USE_ESP_IDF_LOG
 static int custom_vprintf(const char* fmt, va_list args) {
   // Example 1: Write to a custom UART or buffer
   char buffer[256];
@@ -184,15 +185,18 @@ static int custom_vprintf(const char* fmt, va_list args) {
   // For this example, we'll also write to stdout
   return vprintf(fmt, args);
 }
+#endif
 
 #if USE_M5UNIFIED
   #include <M5Unified.h>
 #endif
 
 void setup() {
-  // 🌙 use ESP_IDF_LOG
+// 🌙 use ESP_IDF_LOG
+#ifdef USE_ESP_IDF_LOG
   esp_log_set_vprintf(custom_vprintf);
   esp_log_level_set("*", LOG_LOCAL_LEVEL);  // use the platformio setting here
+#endif
 
   // start serial and filesystem
   Serial.begin(SERIAL_BAUD_RATE);

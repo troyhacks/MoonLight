@@ -28,7 +28,7 @@ class AudioSyncDriver : public Node {
     if (!init) {
       sync.begin();
       init = true;
-      MB_LOGV(ML_TAG, "AudioSync: Initialized");
+      EXT_LOGV(ML_TAG, "AudioSync: Initialized");
     }
     if (sync.read()) {
       memcpy(sharedData.bands, sync.fftResult, NUM_GEQ_CHANNELS);
@@ -36,7 +36,7 @@ class AudioSyncDriver : public Node {
       sharedData.volumeRaw = sync.volumeRaw;
       sharedData.majorPeak = sync.FFT_MajorPeak;
       // if (audio.bands[0] > 0) {
-      //   MB_LOGV(ML_TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);
+      //   EXT_LOGV(ML_TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);
       // }
     }
   }

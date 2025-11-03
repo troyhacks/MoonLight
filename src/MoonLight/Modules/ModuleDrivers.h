@@ -26,7 +26,7 @@ class ModuleDrivers : public NodeManager {
   ModuleLightsControl* _moduleLightsControl;
   ModuleDrivers(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager *fileManager, ModuleLightsControl* moduleLightsControl) : NodeManager("drivers", server, sveltekit, fileManager) {
     _moduleLightsControl = moduleLightsControl;
-    MB_LOGV(ML_TAG, "constructor");
+    EXT_LOGV(ML_TAG, "constructor");
   }
 
   void begin() {
@@ -122,7 +122,7 @@ class ModuleDrivers : public NodeManager {
         layerP.nodes[index] = node;  // add the node to the layer
     }
 
-    MB_LOGV(ML_TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
+    EXT_LOGV(ML_TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
 
     return node;
   }

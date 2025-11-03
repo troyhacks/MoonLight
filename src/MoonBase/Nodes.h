@@ -79,7 +79,7 @@ class Node {
     JsonObject control;
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
-        // MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+        // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
         control1["p"] = pointer;
         control = control1;  // set control to the found one
         break;
@@ -101,7 +101,7 @@ class Node {
       newControl = true;  // set flag to true, as control is new
     }
 
-    // MB_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
+    // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
 
     if (newControl) control["value"] = variable;  // set default
 
@@ -116,25 +116,25 @@ class Node {
       } else if (std::is_same<ControlType, float>::value) {
         control["size"] = 33;  // trick to indicate float (which is 32 bits)
       } else {
-        MB_LOGE(ML_TAG, "size %d mismatch for %s", sizeof(ControlType), name);
+        EXT_LOGE(ML_TAG, "size %d mismatch for %s", sizeof(ControlType), name);
       }
     } else if (control["type"] == "selectFile" || control["type"] == "text") {
       // if (sizeof(ControlType) != 4) {
-      //   MB_LOGE(ML_TAG, "sizeof mismatch for %s", name);
+      //   EXT_LOGE(ML_TAG, "sizeof mismatch for %s", name);
       // } else
       control["size"] = sizeof(variable);
     } else if (control["type"] == "checkbox") {
       if (!std::is_same<ControlType, bool>::value) {
-        MB_LOGE(ML_TAG, "type for %s is not bool", name);
+        EXT_LOGE(ML_TAG, "type for %s is not bool", name);
       } else
         control["size"] = sizeof(bool);
     } else if (control["type"] == "coord3D") {
       if (!sizeof(!std::is_same<ControlType, Coord3D>::value)) {
-        MB_LOGE(ML_TAG, "type for %s is not Coord3D", name);
+        EXT_LOGE(ML_TAG, "type for %s is not Coord3D", name);
       } else
         control["size"] = sizeof(Coord3D);
     } else
-      MB_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
+      EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
 
     if (newControl) {
       String oldValue = "";
@@ -152,11 +152,11 @@ class Node {
 
   void requestMappings() {
     if (hasModifier() || hasOnLayout()) {
-      // MB_LOGD(ML_TAG, "hasOnLayout or Modifier -> requestMapVirtual");
+      // EXT_LOGD(ML_TAG, "hasOnLayout or Modifier -> requestMapVirtual");
       layer->layerP->requestMapVirtual = true;
     }
     if (hasOnLayout()) {
-      // MB_LOGD(ML_TAG, "hasOnLayout -> requestMapPhysical");
+      // EXT_LOGD(ML_TAG, "hasOnLayout -> requestMapPhysical");
       layer->layerP->requestMapPhysical = true;
     }
   }
