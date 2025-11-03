@@ -337,7 +337,7 @@ I2SClocklessLedDriver ledsDriver;
   #endif
 
 void DriverNode::setup() {
-  addControl(maxPower, "maxPower", "number", 0, 100);
+  addControl(maxPower, "maxPower", "number", 0, 500, false, "Watt");
   JsonObject property = addControl(lightPreset, "lightPreset", "select");
   JsonArray values = property["values"].to<JsonArray>();
   values.add("RGB");
@@ -371,8 +371,7 @@ void DriverNode::loop() {
   }
 
   #if HP_ALL_DRIVERS
-  if (savedColorCorrection.red != layer->layerP->lights.header.red || savedColorCorrection.green != layer->layerP->lights.header.green ||
-      savedColorCorrection.blue != layer->layerP->lights.header.blue) {
+  if (savedColorCorrection.red != layer->layerP->lights.header.red || savedColorCorrection.green != layer->layerP->lights.header.green || savedColorCorrection.blue != layer->layerP->lights.header.blue) {
     ledsDriver.setGamma(layer->layerP->lights.header.red / 255.0, layer->layerP->lights.header.blue / 255.0, layer->layerP->lights.header.green / 255.0, 1.0);
     // EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue,
     // savedColorCorrection.red, savedColorCorrection.green, savedColorCorrection.blue);
@@ -385,8 +384,7 @@ void DriverNode::loop() {
   uint8_t white;
   ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
   if (correction.red != layer->layerP->lights.header.red || correction.green != layer->layerP->lights.header.green || correction.blue != layer->layerP->lights.header.blue) {
-    EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, correction.red,
-            correction.green, correction.blue);
+    EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
     ledsDriver.setColorCorrection(layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue);
   }
   #endif

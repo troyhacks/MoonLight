@@ -71,7 +71,7 @@ class Node {
   // effect, layout and modifier
 
   template <class ControlType>
-  JsonObject addControl(ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false) {
+  JsonObject addControl(ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr) {
     uint32_t pointer = (uint32_t)&variable;
 
     bool newControl = false;  // flag to check if control is new or already exists
@@ -97,6 +97,7 @@ class Node {
       if (ro) control["ro"] = true;                // else if (!control["ro"].isNull()) control.remove("ro");
       if (min != 0) control["min"] = min;          // else if (!control["min"].isNull()) control.remove("min");
       if (max != UINT8_MAX) control["max"] = max;  // else if (!control["max"].isNull()) control.remove("max");
+      if (desc) control["desc"] = desc;
 
       newControl = true;  // set flag to true, as control is new
     }

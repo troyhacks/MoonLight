@@ -138,9 +138,8 @@ class PanelsLayout : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🚥"; }
 
-  Wiring panels = {{2, 2, 1}, 1, {true, true, true}, {false, true, false}};  // 2x2 panels, increasing over the axis, snake on the Y-axis
-  Wiring panel = {{16, 16, 1}, 1, {true, true, true}, {false, true, false}};
-  ;  // 16x16 panel, increasing over the axis, snake on the Y-axis
+  Wiring panels = {{2, 2, 1}, 1, {true, true, true}, {false, false, false}};  // 2x2 panels, increasing over the axis,
+  Wiring panel = {{16, 16, 1}, 1, {true, true, true}, {false, true, false}};  // 16x16 panel, increasing over the axis, snake on the Y-axis
 
   #if CONFIG_IDF_TARGET_ESP32
   // char pins[80] = "22,21,14,18,5,4,2,15,13,12"; //Cube202020 (D0)
