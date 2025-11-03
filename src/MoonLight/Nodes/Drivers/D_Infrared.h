@@ -141,7 +141,7 @@ class IRDriver : public Node {
     switch (symbol_num) {
     case 34:  // NEC normal frame
       if (nec_parse_frame(rmt_nec_symbols)) {
-        MB_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X", s_nec_code_address, s_nec_code_command);
+        EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X", s_nec_code_address, s_nec_code_command);
         uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
         // Here we should implement code address & command to action mapping
@@ -185,7 +185,8 @@ class IRDriver : public Node {
               } else if (combined_code == 0xFF00F30C) {  // DIY1 button - enable preset #1
                 updatedItem.name = "preset";
                 updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-                state.data[updatedItem.name] = 1;
+                state.data[updatedItem.name]["action"] = "click";
+                state.data[updatedItem.name]["select"] = 1; 
                 changed = true;
               } else if (combined_code == 0xFF00F20D) {  // DIY2 button - enable preset #2
                 updatedItem.name = "preset";

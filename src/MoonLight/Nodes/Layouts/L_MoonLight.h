@@ -277,14 +277,14 @@ class SingleLineLayout : public Node {
   static const char* tags() { return "🚥"; }
 
   uint8_t start_x = 0;
-  uint8_t width = 30;
+  uint16_t width = 30;
   uint16_t yposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
 
   void setup() override {
     addControl(start_x, "starting X", "slider", 0, 255);
-    addControl(width, "width", "slider", 1, 255);
+    addControl(width, "width", "number", 1, 1000);
     addControl(yposition, "Y position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
@@ -312,14 +312,14 @@ class SingleRowLayout : public Node {
   static const char* tags() { return "🚥"; }
 
   uint8_t start_y = 0;
-  uint8_t height = 30;
+  uint16_t height = 30;
   uint16_t xposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
 
   void setup() override {
     addControl(start_y, "starting Y", "slider", 0, 255);
-    addControl(height, "height", "slider", 1, 255);
+    addControl(height, "height", "number", 1, 1000);
     addControl(xposition, "X position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
