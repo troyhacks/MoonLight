@@ -5,6 +5,7 @@ nav:
     - gettingstarted/overview.md
     - gettingstarted/installation.md
     - gettingstarted/hardware.md
+    - gettingstarted/flashfirmware.md"
   - "MoonLight":
     - moonlight/overview.md
     - moonlight/lightscontrol.md
@@ -110,6 +111,7 @@ theme:
 # Add custom CSS for MoonLight styling
 extra_css:
   - stylesheets/moonlight.css
+  - stylesheets/extra.css
 
 # Add this section to your existing mkdocs.yml
 extra_javascript:
