@@ -2,6 +2,8 @@
   "name": "Noisy Cricket",
   "version": "v0.1.0",
   "funding_url": "",
+  "new_install_prompt_erase": true,
+  "new_install_immediately": false,
   "builds": [
     {
       "chipFamily": "ESP32-S3",

@@ -142,5 +142,14 @@ Otherwise initiate the github CI pipeline by committing and pushing to your repo
 MkDocs comes with a build-in development server which supports hot reload as well. Open a new terminal session in VSCode and type
 
 ```
-mkdocs serve
+mkdocs serve # to create a webserver on your local computer at http://127.0.0.1:8000/
+```
+
+#### 🌙 troubleshooting
+
+```
+brew install mkdocs  # if mkdocs not found
+brew unlink mkdocs   # if material not found
+brew install mkdocs-material # if material not found
+mkdocs build # This will create /site with a local copy of the mkdocs pages
 ```
