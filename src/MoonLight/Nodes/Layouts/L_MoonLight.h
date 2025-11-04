@@ -138,9 +138,8 @@ class PanelsLayout : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🚥"; }
 
-  Wiring panels = {{2, 2, 1}, 1, {true, true, true}, {false, true, false}};  // 2x2 panels, increasing over the axis, snake on the Y-axis
-  Wiring panel = {{16, 16, 1}, 1, {true, true, true}, {false, true, false}};
-  ;  // 16x16 panel, increasing over the axis, snake on the Y-axis
+  Wiring panels = {{2, 2, 1}, 1, {true, true, true}, {false, false, false}};  // 2x2 panels, increasing over the axis,
+  Wiring panel = {{16, 16, 1}, 1, {true, true, true}, {false, true, false}};  // 16x16 panel, increasing over the axis, snake on the Y-axis
 
   #if CONFIG_IDF_TARGET_ESP32
   // char pins[80] = "22,21,14,18,5,4,2,15,13,12"; //Cube202020 (D0)
@@ -278,14 +277,14 @@ class SingleLineLayout : public Node {
   static const char* tags() { return "🚥"; }
 
   uint8_t start_x = 0;
-  uint8_t width = 30;
+  uint16_t width = 30;
   uint16_t yposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
 
   void setup() override {
     addControl(start_x, "starting X", "slider", 0, 255);
-    addControl(width, "width", "slider", 1, 255);
+    addControl(width, "width", "number", 1, 1000);
     addControl(yposition, "Y position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
@@ -313,14 +312,14 @@ class SingleRowLayout : public Node {
   static const char* tags() { return "🚥"; }
 
   uint8_t start_y = 0;
-  uint8_t height = 30;
+  uint16_t height = 30;
   uint16_t xposition = 0;
   uint8_t pin = 16;
   bool reversed_order = false;
 
   void setup() override {
     addControl(start_y, "starting Y", "slider", 0, 255);
-    addControl(height, "height", "slider", 1, 255);
+    addControl(height, "height", "number", 1, 1000);
     addControl(xposition, "X position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);

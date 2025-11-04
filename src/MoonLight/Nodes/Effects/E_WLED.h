@@ -35,7 +35,7 @@ class BouncingBallsEffect : public Node {
     balls = allocMB<Ball[maxNumBalls]>(layer->size.y);
 
     if (!balls) {
-      MB_LOGE(ML_TAG, "allocate balls failed");
+      EXT_LOGE(ML_TAG, "allocate balls failed");
     }
   }
 
@@ -343,7 +343,7 @@ class GEQEffect : public Node {
     freeMB(previousBarHeight);
     previousBarHeight = allocMB<uint16_t>(layer->size.x);
     if (!previousBarHeight) {
-      MB_LOGE(ML_TAG, "allocate previousBarHeight failed");
+      EXT_LOGE(ML_TAG, "allocate previousBarHeight failed");
     }
   }
 
@@ -380,7 +380,7 @@ class GEQEffect : public Node {
       }             // increase remaining but keep the current remaining
       remaining--;  // consume remaining
 
-      // MB_LOGD(ML_TAG, "x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
+      // EXT_LOGD(ML_TAG, "x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
       uint8_t frBand =
           ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS) : band;  // always use full range. comment out this line to get the previous behaviour.
       // frBand = constrain(frBand, 0, NUM_GEQ_CHANNELS-1); //WLEDMM can never be out of bounds (I think...)

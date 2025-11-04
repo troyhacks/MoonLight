@@ -28,10 +28,10 @@ class ModuleDevices : public Module {
   uint16_t deviceUDPPort = 65506;
   bool deviceUDPConnected = false;
 
-  ModuleDevices(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("devices", server, sveltekit) { MB_LOGV(MB_TAG, "constructor"); }
+  ModuleDevices(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("devices", server, sveltekit) { EXT_LOGV(MB_TAG, "constructor"); }
 
   void setupDefinition(JsonArray root) override {
-    MB_LOGV(MB_TAG, "");
+    EXT_LOGV(MB_TAG, "");
     JsonObject property;  // state.data has one or more properties
     JsonArray details;    // if a property is an array, this is the details of the array
     JsonArray values;     // if a property is a select, this is the values of the select
@@ -61,7 +61,7 @@ class ModuleDevices : public Module {
   }
 
   void onUpdate(UpdatedItem& updatedItem) override {
-    MB_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+    EXT_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
             updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   }
 
@@ -78,7 +78,7 @@ class ModuleDevices : public Module {
 
     if (!deviceUDPConnected) {
       deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
-      MB_LOGD(ML_TAG, "deviceUDPConnected %d i:%d p:%d", deviceUDPConnected, deviceUDP.remoteIP()[3], deviceUDPPort);
+      EXT_LOGD(ML_TAG, "deviceUDPConnected %d i:%d p:%d", deviceUDPConnected, deviceUDP.remoteIP()[3], deviceUDPPort);
     }
 
     if (!deviceUDPConnected) return;
@@ -94,12 +94,12 @@ class ModuleDevices : public Module {
     for (JsonObject dev : _state.data["devices"].as<JsonArray>()) {
       if (dev["ip"] == ip.toString()) {
         device = dev;
-        // MB_LOGD(ML_TAG, "updated ...%d %s", ip[3], name);
+        // EXT_LOGD(ML_TAG, "updated ...%d %s", ip[3], name);
       }
     }
     if (device.isNull()) {
       device = _state.data["devices"].as<JsonArray>().add<JsonObject>();
-      MB_LOGD(ML_TAG, "added ...%d %s", ip[3], name);
+      EXT_LOGD(ML_TAG, "added ...%d %s", ip[3], name);
       device["ip"] = ip.toString();
     }
 
@@ -129,7 +129,7 @@ class ModuleDevices : public Module {
     if (packetSize > 0) {
       char buffer[packetSize];
       deviceUDP.read(buffer, packetSize);
-      // MB_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer+6, packetSize);
+      // EXT_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer+6, packetSize);
 
       updateDevices(buffer + 6, deviceUDP.remoteIP());
     }
@@ -141,7 +141,7 @@ class ModuleDevices : public Module {
       message.name = esp32sveltekit.getWiFiSettingsService()->getHostname().c_str();
       deviceUDP.write((uint8_t*)&message, sizeof(message));
       deviceUDP.endPacket();
-      // MB_LOGV(MB_TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
+      // EXT_LOGV(MB_TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
 
       updateDevices(message.name.c_str(), WiFi.localIP());
     }

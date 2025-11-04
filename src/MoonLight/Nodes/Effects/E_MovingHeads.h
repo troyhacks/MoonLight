@@ -248,9 +248,9 @@ class Troy2MoveEffect : public Node {
 
 class FreqColorsEffect : public Node {
  public:
-  static const char* name() { return "Freq Colors 🚨♫"; }
+  static const char* name() { return "Freq Colors"; }
   static uint8_t dim() { return _1D; }
-  static const char* tags() { return "🚨♫🐺"; }
+  static const char* tags() { return "🚨♫"; }
 
   uint8_t bpm = 30;
   bool audioReactive = true;

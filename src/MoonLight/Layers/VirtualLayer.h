@@ -38,7 +38,7 @@ struct PhysMap {
   };  // 2 bytes
 
   PhysMap() {
-    // MB_LOGV(ML_TAG, "Constructor");
+    // EXT_LOGV(ML_TAG, "Constructor");
     mapType = m_zeroLights;  // the default until indexP is added
     rgb14 = 0;
   }
@@ -72,7 +72,7 @@ class VirtualLayer {
 
   Coord3D prevSize;  // to calculate size change
 
-  VirtualLayer() { MB_LOGV(ML_TAG, "constructor"); }
+  VirtualLayer() { EXT_LOGV(ML_TAG, "constructor"); }
 
   ~VirtualLayer();
 
@@ -279,7 +279,6 @@ class VirtualLayer {
 
   void drawText(const char* text, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0);
 
-  Node* findLiveScriptNode(const char* animation);
 };
 
 #endif

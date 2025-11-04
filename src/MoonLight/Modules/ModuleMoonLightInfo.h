@@ -17,10 +17,10 @@
   #include "MoonBase/Module.h"
 class ModuleMoonLightInfo : public Module {
  public:
-  ModuleMoonLightInfo(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("moonlightinfo", server, sveltekit) { MB_LOGV(ML_TAG, "constructor"); }
+  ModuleMoonLightInfo(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("moonlightinfo", server, sveltekit) { EXT_LOGV(ML_TAG, "constructor"); }
 
   void setupDefinition(JsonArray root) override {
-    MB_LOGV(ML_TAG, "");
+    EXT_LOGV(ML_TAG, "");
     JsonObject property;  // state.data has one or more properties
     JsonArray details;    // if a property is an array, this is the details of the array
     // JsonArray values; // if a property is a select, this is the values of the select
@@ -101,7 +101,7 @@ class ModuleMoonLightInfo : public Module {
     Module::begin();
 
     _state.readHook = [&](JsonObject data) {
-      MB_LOGV(ML_TAG, "readHook");
+      EXT_LOGV(ML_TAG, "readHook");
       // this should be updated each time the UI queries for it ... (now only at boot)
       data["nrOfLights"] = layerP.lights.header.nrOfLights;
       data["channelsPerLight"] = layerP.lights.header.channelsPerLight;

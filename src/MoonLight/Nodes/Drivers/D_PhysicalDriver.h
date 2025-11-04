@@ -79,27 +79,27 @@ class PhysicalDriver : public DriverNode {
     if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) {  // physical
 
       if (!lightPresetSaved || layer->layerP->sortedPins.size() == 0) {  //|| initDone can be done multiple times now...
-        MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, layer->layerP->sortedPins.size());
+        EXT_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, layer->layerP->sortedPins.size());
         return;
       }
 
-      MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
+      EXT_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
       if (safeModeMB) {
-        MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
+        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
         return;
       }
 
       nb_pins = 0;
 
       for (const SortedPin& sortedPin : layer->layerP->sortedPins) {
-        // MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+        // EXT_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
         if (nb_pins < NUMSTRIPS) {
           if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
             pins[nb_pins] = sortedPin.pin;
             lengths[nb_pins] = sortedPin.nrOfLights;
             nb_pins++;
           } else
-            MB_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
+            EXT_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
         }
       }
 
@@ -111,11 +111,11 @@ class PhysicalDriver : public DriverNode {
           lengths[i] = 0;
         }
       }
-      MB_LOGD(ML_TAG, "pins[");
+      EXT_LOGD(ML_TAG, "pins[");
       for (int i = 0; i < nb_pins; i++) {
-        MB_LOGD(ML_TAG, ", %d (%d)", pins[i], lengths[i]);
+        EXT_LOGD(ML_TAG, ", %d (%d)", pins[i], lengths[i]);
       }
-      MB_LOGD(ML_TAG, "]");
+      EXT_LOGD(ML_TAG, "]");
 
       if (nb_pins > 0) {
     #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
@@ -124,7 +124,7 @@ class PhysicalDriver : public DriverNode {
 
           uint8_t savedBrightness = ledsDriver._brightness;  //(initLed sets it to 255 and thats not what we want)
 
-          MB_LOGD(ML_TAG, "init Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen,
+          EXT_LOGD(ML_TAG, "init Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen,
                   layer->layerP->lights.header.offsetBlue);
           ledsDriver.initled(layer->layerP->lights.channels, pins, lengths, nb_pins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed,
                              layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
@@ -139,7 +139,7 @@ class PhysicalDriver : public DriverNode {
         } else {
           // don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
-          MB_LOGD(ML_TAG, "update Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen,
+          EXT_LOGD(ML_TAG, "update Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen,
                   layer->layerP->lights.header.offsetBlue);
           ledsDriver.updateDriver(pins, lengths, nb_pins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen,
                                   layer->layerP->lights.header.offsetBlue);
@@ -154,9 +154,9 @@ class PhysicalDriver : public DriverNode {
     if (!lightPresetSaved || ledsDriver.initLedsDone || layer->layerP->sortedPins.size() == 0) return;
 
     if (layer->layerP->pass == 1) {  // physical
-      MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
+      EXT_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
       if (safeModeMB) {
-        MB_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
+        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
         return;
       }
 
@@ -165,7 +165,7 @@ class PhysicalDriver : public DriverNode {
       PinConfig pinConfig[MAX_PINS];
 
       for (const SortedPin& sortedPin : layer->layerP->sortedPins) {
-        MB_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+        EXT_LOGD(ML_TAG, "sortedPin s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
         if (numPins < MAX_PINS) {
           pinConfig[numPins].gpio = sortedPin.pin;
           pinConfig[numPins].nrOfLeds = sortedPin.nrOfLights;
@@ -173,9 +173,9 @@ class PhysicalDriver : public DriverNode {
         }
       }
 
-      MB_LOGD(ML_TAG, "pins[");
+      EXT_LOGD(ML_TAG, "pins[");
       for (int i = 0; i < numPins; i++) {
-        MB_LOGD(ML_TAG, ", %d", pinConfig[i].gpio);
+        EXT_LOGD(ML_TAG, ", %d", pinConfig[i].gpio);
       }
 
       if (numPins > 0) {
@@ -193,7 +193,7 @@ class PhysicalDriver : public DriverNode {
 
   ~PhysicalDriver() override {
   #if HP_ALL_DRIVERS
-    MB_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
+    EXT_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
     ledsDriver.deleteDriver();
 

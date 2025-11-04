@@ -32,13 +32,13 @@ class VirtualDriver : public DriverNode {
     if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) {  // physical
 
       if (!lightPresetSaved || layer->layerP->sortedPins.size() == 0) {  //|| initDone can be done multiple times now...
-        MB_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, layer->layerP->sortedPins.size());
+        EXT_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, layer->layerP->sortedPins.size());
         return;
       }
 
-      MB_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
+      EXT_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
       if (safeModeMB) {
-        MB_LOGW(ML_TAG, "Safe mode enabled, not adding driver");
+        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding driver");
         return;
       }
 

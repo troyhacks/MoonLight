@@ -17,12 +17,17 @@
   #include "FastLED.h"
   // #include "MoonBase/Module.h"
   #include "MoonBase/NodeManager.h"
+  #include "MoonLight/Modules/ModuleLightsControl.h"
 
 // #include "Nodes.h" //Nodes.h will include VirtualLayer.h which will include PhysicalLayer.h
 
 class ModuleDrivers : public NodeManager {
  public:
-  ModuleDrivers(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : NodeManager("drivers", server, sveltekit) { MB_LOGV(ML_TAG, "constructor"); }
+  ModuleLightsControl* _moduleLightsControl;
+  ModuleDrivers(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleLightsControl* moduleLightsControl) : NodeManager("drivers", server, sveltekit, fileManager) {
+    _moduleLightsControl = moduleLightsControl;
+    EXT_LOGV(ML_TAG, "constructor");
+  }
 
   void begin() {
     _state.onUpdateRunInTask = 1;  // also in effects class!, the driver only drives !!!
@@ -34,6 +39,7 @@ class ModuleDrivers : public NodeManager {
   }
 
   void addNodes(JsonArray values) override {
+    // Layouts, Most used first
     values.add(getNameAndTags<PanelLayout>());
     values.add(getNameAndTags<PanelsLayout>());
     values.add(getNameAndTags<CubeLayout>());
@@ -43,23 +49,25 @@ class ModuleDrivers : public NodeManager {
     values.add(getNameAndTags<SingleLineLayout>());
     values.add(getNameAndTags<SingleRowLayout>());
 
-  // custom
-  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
-    values.add(getNameAndTags<SE16Layout>());
-    values.add(getNameAndTags<IRDriver>());
-  #endif
-
+    // Drivers, Most used first
     values.add(getNameAndTags<PhysicalDriver>());
     values.add(getNameAndTags<FastLEDDriver>());
     values.add(getNameAndTags<ArtNetDriver>());
     values.add(getNameAndTags<AudioSyncDriver>());
+    values.add(getNameAndTags<IRDriver>());
     values.add(getNameAndTags<VirtualDriver>());
     values.add(getNameAndTags<HUB75Driver>());
+
+      // custom
+  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+    values.add(getNameAndTags<SE16Layout>());
+  #endif
   }
 
   Node* addNode(const uint8_t index, const char* name, const JsonArray controls) override {
     Node* node = nullptr;
 
+    // Layouts, most used first
     if (equalAZaz09(name, PanelLayout::name()))
       node = allocMBObject<PanelLayout>();
     else if (equalAZaz09(name, PanelsLayout::name()))
@@ -77,26 +85,28 @@ class ModuleDrivers : public NodeManager {
     else if (equalAZaz09(name, SingleRowLayout::name()))
       node = allocMBObject<SingleRowLayout>();
 
+    // Drivers most used first
+    else if (equalAZaz09(name, PhysicalDriver::name()))
+      node = allocMBObject<PhysicalDriver>();
+    else if (equalAZaz09(name, FastLEDDriver::name()))
+      node = allocMBObject<FastLEDDriver>();
+    else if (equalAZaz09(name, ArtNetDriver::name()))
+      node = allocMBObject<ArtNetDriver>();
+    else if (equalAZaz09(name, AudioSyncDriver::name()))
+      node = allocMBObject<AudioSyncDriver>();
+    else if (equalAZaz09(name, IRDriver::name()))
+      node = allocMBObject<IRDriver>();
+    else if (equalAZaz09(name, VirtualDriver::name()))
+      node = allocMBObject<VirtualDriver>();
+    else if (equalAZaz09(name, HUB75Driver::name()))
+      node = allocMBObject<HUB75Driver>();
+
   // custom
   #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
     else if (equalAZaz09(name, SE16Layout::name()))
       node = allocMBObject<SE16Layout>();
-    else if (equalAZaz09(name, IRDriver::name()))
-      node = allocMBObject<IRDriver>();
   #endif
 
-    else if (equalAZaz09(name, ArtNetDriver::name()))
-      node = allocMBObject<ArtNetDriver>();
-    else if (equalAZaz09(name, FastLEDDriver::name()))
-      node = allocMBObject<FastLEDDriver>();
-    else if (equalAZaz09(name, PhysicalDriver::name()))
-      node = allocMBObject<PhysicalDriver>();
-    else if (equalAZaz09(name, AudioSyncDriver::name()))
-      node = allocMBObject<AudioSyncDriver>();
-    else if (equalAZaz09(name, HUB75Driver::name()))
-      node = allocMBObject<HUB75Driver>();
-    else if (equalAZaz09(name, VirtualDriver::name()))
-      node = allocMBObject<VirtualDriver>();
   #if FT_LIVESCRIPT
     else {
       LiveScriptNode* liveScriptNode = allocMBObject<LiveScriptNode>();
@@ -109,6 +119,7 @@ class ModuleDrivers : public NodeManager {
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node (C++ constructors are not inherited, so declare it as normal functions)
       node->setup();                                  // run the setup of the effect
       node->onSizeChanged(Coord3D());
+      node->controlModule = _moduleLightsControl;  // to access global lights control functions if needed
       // layers[0]->nodes.reserve(index+1);
       if (index >= layerP.nodes.size())
         layerP.nodes.push_back(node);
@@ -116,7 +127,7 @@ class ModuleDrivers : public NodeManager {
         layerP.nodes[index] = node;  // add the node to the layer
     }
 
-    MB_LOGV(ML_TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
+    EXT_LOGV(ML_TAG, "%s (s:%d p:%p)", name, layerP.nodes.size(), node);
 
     return node;
   }

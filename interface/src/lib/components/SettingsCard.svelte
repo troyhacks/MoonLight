@@ -29,8 +29,9 @@
 
 {#if collapsible}
 	<div
-		class="bg-base-200 rounded-box shadow-primary/50 relative grid w-full {maxwidth} self-center overflow-hidden shadow-lg m-10"
+		class="bg-base-200 rounded-box shadow-primary/50 relative grid w-full {maxwidth} self-center overflow-hidden shadow-lg m-5"
 	>
+		<!-- 🌙 m-10 -> m-5 for smaller spaces betwoon Cards -->
 		{#if isDirty}
 			<div class="absolute left-0 top-0 w-1.5 h-full bg-red-300"></div>
 		{/if}
@@ -70,8 +71,9 @@
 	</div>
 {:else}
 	<div
-		class="bg-base-200 rounded-box shadow-primary/50 relative grid w-full {maxwidth} self-center overflow-hidden shadow-lg m-10"
+		class="bg-base-200 rounded-box shadow-primary/50 relative grid w-full {maxwidth} self-center overflow-hidden shadow-lg m-5"
 	>
+		<!-- 🌙 m-10 -> m-5 for smaller spaces betwoon Cards -->
 		{#if isDirty}
 			<div class="absolute left-0 top-0 w-1.5 h-full bg-red-300"></div>
 		{/if}

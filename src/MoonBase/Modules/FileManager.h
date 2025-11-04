@@ -58,8 +58,6 @@ class FileManager : public StatefulService<FilesState> {
   WebSocketServer<FilesState> _webSocketServer;
   PsychicHttpServer* _server;
   ESP32SvelteKit* _sveltekit;
-
-  void onConfigUpdated();
 };
 
 #endif

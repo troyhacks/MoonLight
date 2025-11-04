@@ -19,7 +19,7 @@
 class ModuleIO : public Module {
  public:
   ModuleIO(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("inputoutput", server, sveltekit) {
-    MB_LOGV(MB_TAG, "constructor");
+    EXT_LOGV(MB_TAG, "constructor");
 
     // #if CONFIG_IDF_TARGET_ESP32
     //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
@@ -27,7 +27,7 @@ class ModuleIO : public Module {
   }
 
   void setupDefinition(JsonArray root) override {
-    MB_LOGV(MB_TAG, "");
+    EXT_LOGV(MB_TAG, "");
     JsonObject property;  // state.data has one or more properties
     JsonArray details;    // if a property is an array, this is the details of the array
     JsonArray values;     // if a property is a select, this is the values of the select
@@ -64,7 +64,7 @@ class ModuleIO : public Module {
   }
 
   void onUpdate(UpdatedItem& updatedItem) override {
-    MB_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+    EXT_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
             updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   }
 
@@ -150,7 +150,7 @@ class ModuleIO : public Module {
 
       ledPins.split(",", [&](const char* token, uint8_t sequence) {
         if (gpio_num == atoi(token)) {
-          // MB_LOGD(MB_TAG, "token: %s == %s (%d)", task["GPIO"].as<String>().c_str(), token, sequence);
+          // EXT_LOGD(MB_TAG, "token: %s == %s (%d)", task["GPIO"].as<String>().c_str(), token, sequence);
           Char<32> text;
           text.format("LED #%d", sequence + 1);
           task["PinInfo"] = text.c_str();

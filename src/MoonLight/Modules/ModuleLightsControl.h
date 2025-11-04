@@ -18,6 +18,7 @@
   #include "ModuleEffects.h"
   #include "MoonBase/Module.h"
   #include "MoonBase/Utilities.h"  //for isInPSRAM
+  #include "MoonBase/Modules/FileManager.h"
 
 class ModuleLightsControl : public Module {
  public:
@@ -25,7 +26,7 @@ class ModuleLightsControl : public Module {
   FileManager* _fileManager;
 
   ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module("lightscontrol", server, sveltekit) {
-    MB_LOGV(ML_TAG, "constructor");
+    EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
   }
@@ -33,30 +34,30 @@ class ModuleLightsControl : public Module {
   void begin() {
     Module::begin();
 
-    MB_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node),
+    EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node),
             sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
-    MB_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layers[0]->mappingTable), isInPSRAM(&layerP.layers[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
+    EXT_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layers[0]->mappingTable), isInPSRAM(&layerP.layers[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
 
     setPresetsFromFolder();  // set the right values during boot
 
     // update presets if files changed in presets folder
     _fileManager->addUpdateHandler([&](const String& originId) {
-      MB_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
+      EXT_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
       // read the file state (read all files and folders on FS and collect changes)
       _fileManager->read([&](FilesState& filesState) {
         // loop over all changed files (normally only one)
         bool presetChanged = false;
         for (auto updatedItem : filesState.updatedItems) {
           // if file is the current live script, recompile it (to do: multiple live effects)
-          MB_LOGV(ML_TAG, "updateHandler updatedItem %s", updatedItem.c_str());
+          EXT_LOGV(ML_TAG, "updateHandler updatedItem %s", updatedItem.c_str());
           if (strstr(updatedItem.c_str(), "/.config/presets")) {
-            MB_LOGV(ML_TAG, " preset.json updated -> call update %s", updatedItem.c_str());
+            EXT_LOGV(ML_TAG, " preset.json updated -> call update %s", updatedItem.c_str());
             presetChanged = true;
           }
         }
         if (presetChanged) {
-          MB_LOGV(ML_TAG, "setPresetsFromFolder");
+          EXT_LOGV(ML_TAG, "setPresetsFromFolder");
           setPresetsFromFolder();  // update the presets from the folder
         }
       });
@@ -65,7 +66,7 @@ class ModuleLightsControl : public Module {
 
   // define the data model
   void setupDefinition(JsonArray root) override {
-    MB_LOGV(ML_TAG, "");
+    EXT_LOGV(ML_TAG, "");
     JsonObject property;       // state.data has one or more properties
     JsonArray details = root;  // if a property is an array, this is the details of the array
     JsonArray values;          // if a property is a select, this is the values of the select
@@ -143,7 +144,7 @@ class ModuleLightsControl : public Module {
 
   // implement business logic
   void onUpdate(UpdatedItem& updatedItem) override {
-    // MB_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
+    // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
     // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     if (updatedItem.name == "red") {
       layerP.lights.header.red = _state.data["red"];
@@ -198,7 +199,7 @@ class ModuleLightsControl : public Module {
                   state.updatedItems.push_back("/.config/effects.json");
                   return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
                 },
-                "server");
+                _moduleName);
 
           } else {
             copyFile("/.config/effects.json", presetFile.c_str());
@@ -222,7 +223,7 @@ class ModuleLightsControl : public Module {
       int seq = -1;
       if (sscanf(file.name(), "preset%02d.json", &seq) == 1) {
         // seq now contains the 2-digit number, e.g., 34
-        MB_LOGV(ML_TAG, "Preset %d found", seq);
+        EXT_LOGV(ML_TAG, "Preset %d found", seq);
         _state.data["preset"]["list"].add(seq);  // add the preset to the preset array
         changed = true;
       }
@@ -234,7 +235,7 @@ class ModuleLightsControl : public Module {
           [&](ModuleState& state) {
             return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
           },
-          "server");
+          _moduleName);
     }
   }
 
@@ -263,7 +264,7 @@ class ModuleLightsControl : public Module {
         Char<32> presetFile;
         presetFile.format("/.config/presets/preset%02d.json", presets[lastPresetLooped].as<uint8_t>());
 
-        MB_LOGD(ML_TAG, "loading next preset %d %s", lastPresetLooped, presetFile.c_str());
+        EXT_LOGD(ML_TAG, "loading next preset %d %s", lastPresetLooped, presetFile.c_str());
 
         copyFile(presetFile.c_str(), "/.config/effects.json");
 
@@ -276,10 +277,10 @@ class ModuleLightsControl : public Module {
         _fileManager->update(
             [&](FilesState& state) {
               state.updatedItems.push_back("/.config/effects.json");
-              // MB_LOGD(ML_TAG, "   preset files %d %s", lastPresetLooped, presetFile.c_str());
+              // EXT_LOGD(ML_TAG, "   preset files %d %s", lastPresetLooped, presetFile.c_str());
               return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
             },
-            "server");
+            _moduleName);
 
         lastPresetLooped++;  // next
       }
@@ -294,7 +295,7 @@ class ModuleLightsControl : public Module {
           _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.maxChannels));  //*3 is for 3 bytes position
         }
         memset(layerP.lights.channels, 0, layerP.lights.maxChannels);  // set all the channels to 0 //cleaning the positions
-        MB_LOGD(ML_TAG, "positions sent to monitor (2 -> 3, noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.maxChannels);
+        EXT_LOGD(ML_TAG, "positions sent to monitor (2 -> 3, noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.maxChannels);
         layerP.lights.header.isPositions = 3;
       });
     } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI

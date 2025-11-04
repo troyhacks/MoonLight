@@ -22,7 +22,7 @@
 PhysicalLayer layerP;  // global declaration of the physical layer
 
 PhysicalLayer::PhysicalLayer() {
-  MB_LOGD(ML_TAG, "constructor");
+  EXT_LOGD(ML_TAG, "constructor");
 
   // initLightsToBlend();
 
@@ -42,9 +42,9 @@ void PhysicalLayer::setup() {
   lights.channels = allocMB<uint8_t>(lights.maxChannels);
 
   if (lights.channels) {
-    MB_LOGD(ML_TAG, "allocated %d bytes in %s", lights.maxChannels, isInPSRAM(lights.channels) ? "PSRAM" : "RAM");
+    EXT_LOGD(ML_TAG, "allocated %d bytes in %s", lights.maxChannels, isInPSRAM(lights.channels) ? "PSRAM" : "RAM");
   } else {
-    MB_LOGE(ML_TAG, "failed to allocated %d bytes of RAM or PSRAM", lights.maxChannels);
+    EXT_LOGE(ML_TAG, "failed to allocated %d bytes of RAM or PSRAM", lights.maxChannels);
     lights.maxChannels = 0;
   }
 
@@ -62,7 +62,7 @@ void PhysicalLayer::loop() {
     }
 
     if (requestMapPhysical) {
-      MB_LOGD(ML_TAG, "mapLayout physical requested");
+      EXT_LOGD(ML_TAG, "mapLayout physical requested");
 
       pass = 1;
       mapLayout();
@@ -71,7 +71,7 @@ void PhysicalLayer::loop() {
     }
 
     if (requestMapVirtual) {
-      MB_LOGD(ML_TAG, "mapLayout virtual requested");
+      EXT_LOGD(ML_TAG, "mapLayout virtual requested");
 
       pass = 2;
       mapLayout();
@@ -80,7 +80,7 @@ void PhysicalLayer::loop() {
     }
 
     if (lights.header.isPositions == 3) {
-      MB_LOGD(ML_TAG, "positions done (3 -> 0)");
+      EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
       lights.header.isPositions = 0;  // now driver can show again
     }
   }
@@ -88,7 +88,7 @@ void PhysicalLayer::loop() {
 
 void PhysicalLayer::loopDrivers() {
   if (lights.header.isPositions == 0) {  // otherwise lights is used for positions etc.
-    if (prevSize != lights.header.size) MB_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
+    if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     for (Node* node : nodes) {
       if (prevSize != lights.header.size) node->onSizeChanged(prevSize);
       if (node->on) node->loop();
@@ -108,12 +108,12 @@ void PhysicalLayer::mapLayout() {
 }
 
 void PhysicalLayer::onLayoutPre() {
-  MB_LOGD(ML_TAG, "pass %d", pass);
+  EXT_LOGD(ML_TAG, "pass %d", pass);
 
   if (pass == 1) {
     lights.header.nrOfLights = 0;  // for pass1 and pass2 as in pass2 virtual layer needs it
     lights.header.size = {0, 0, 0};
-    MB_LOGD(ML_TAG, "positions in progress (%d -> 1)", lights.header.isPositions);
+    EXT_LOGD(ML_TAG, "positions in progress (%d -> 1)", lights.header.isPositions);
     lights.header.isPositions = 1;  // in progress...
     delay(100);                     // wait to stop effects
     // set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
@@ -136,12 +136,12 @@ void packCoord3DInto3Bytes(uint8_t* buf, Coord3D position) {  // max size suppor
 }
 void PhysicalLayer::addLight(Coord3D position) {
   if (safeModeMB && lights.header.nrOfLights > 1023) {
-    // MB_LOGW(ML_TAG, "Safe mode enabled, not adding lights > 1023");
+    // EXT_LOGW(ML_TAG, "Safe mode enabled, not adding lights > 1023");
     return;
   }
 
   if (pass == 1) {
-    // MB_LOGD(ML_TAG, "%d,%d,%d", position.x, position.y, position.z);
+    // EXT_LOGD(ML_TAG, "%d,%d,%d", position.x, position.y, position.z);
     if (lights.header.nrOfLights < lights.maxChannels / 3) {
       packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights * 3], position);
     }
@@ -159,7 +159,7 @@ void PhysicalLayer::addLight(Coord3D position) {
 
 void PhysicalLayer::addPin(uint8_t pinNr) {
   if (pass == 1 && !monitorPass) {
-    MB_LOGD(ML_TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
+    EXT_LOGD(ML_TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
 
     SortedPin previousPin;
     if (!sortedPins.empty()) {
@@ -190,9 +190,9 @@ void PhysicalLayer::addPin(uint8_t pinNr) {
 void PhysicalLayer::onLayoutPost() {
   if (pass == 1) {
     lights.header.size += Coord3D{1, 1, 1};
-    MB_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
+    EXT_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     // send the positions to the UI _socket_emit
-    MB_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights ? 2 : 3);
+    EXT_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights ? 2 : 3);
     lights.header.isPositions = lights.header.nrOfLights ? 2 : 3;  // filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
 
     // initLightsToBlend();
@@ -206,7 +206,7 @@ void PhysicalLayer::onLayoutPost() {
 
     }  // pins defined
   } else if (pass == 2) {
-    MB_LOGD(ML_TAG, "pass %d %d", pass, indexP);
+    EXT_LOGD(ML_TAG, "pass %d %d", pass, indexP);
     for (VirtualLayer* layer : layers) {
       // add the position in the virtual layer
       layer->onLayoutPost();

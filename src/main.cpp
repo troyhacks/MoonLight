@@ -16,6 +16,8 @@
 
 #ifdef BOARD_HAS_PSRAM
 
+// #include <cstddef> // suggested by copilot to surpress operator warning : first parameter of allocation function must be of type 'size_t' - but made no difference
+
 // Threshold (bytes) above which allocations go into PSRAM
 constexpr size_t PSRAM_THRESHOLD = 0;  // 87K free, works fine until now
 // constexpr size_t PSRAM_THRESHOLD = 512;  //recommended ... ? 32K free, (Small stuff (pointers, FreeRTOS objects, WiFi stack internals) → must stay in internal RAM....)?
@@ -101,11 +103,11 @@ ModuleIO moduleIO = ModuleIO(&server, &esp32sveltekit);
     #include "MoonLight/Modules/ModuleLightsControl.h"
     #include "MoonLight/Modules/ModuleMoonLightInfo.h"
 ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
-ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);
-ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit);
+ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);                        // fileManager for Live Scripts
+ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit, &fileManager, &moduleLightsControl);  // fileManager for Live Scripts, Lights control for drivers
     #if FT_ENABLED(FT_LIVESCRIPT)
       #include "MoonLight/Modules/ModuleLiveScripts.h"
-ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects);
+ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects, &moduleDrivers);
     #endif
 ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
@@ -125,7 +127,7 @@ void effectTask(void* pvParameters) {
     esp32sveltekit.lps++;  // 🌙 todo: not moonlight specific?
 
     if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100)) == pdFALSE) {
-      // MB_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
+      // EXT_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
     }
 
     layerP.loop();  // run all the effects of all virtual layers (currently only one layer)
@@ -134,7 +136,7 @@ void effectTask(void* pvParameters) {
 
     std::lock_guard<std::mutex> lock(runInTask_mutex);
     while (!runInTask1.empty()) {
-      // MB_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
+      // EXT_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
       runInTask1.front()();
       runInTask1.erase(runInTask1.begin());
     }
@@ -157,7 +159,7 @@ void driverTask(void* pvParameters) {
 
     std::lock_guard<std::mutex> lock(runInTask_mutex);
     while (!runInTask2.empty()) {
-      MB_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
+      EXT_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
       runInTask2.front()();
       runInTask2.erase(runInTask2.begin());
     }
@@ -169,6 +171,7 @@ void driverTask(void* pvParameters) {
 #endif
 
 // 🌙 Custom log output function - 🚧
+#ifdef USE_ESP_IDF_LOG
 static int custom_vprintf(const char* fmt, va_list args) {
   // Example 1: Write to a custom UART or buffer
   char buffer[256];
@@ -182,20 +185,22 @@ static int custom_vprintf(const char* fmt, va_list args) {
   // For this example, we'll also write to stdout
   return vprintf(fmt, args);
 }
+#endif
 
 #if USE_M5UNIFIED
   #include <M5Unified.h>
 #endif
 
 void setup() {
-  // 🌙 use ESP_IDF_LOG
+#ifdef USE_ESP_IDF_LOG  // 🌙
   esp_log_set_vprintf(custom_vprintf);
   esp_log_level_set("*", LOG_LOCAL_LEVEL);  // use the platformio setting here
+#endif
 
   // start serial and filesystem
   Serial.begin(SERIAL_BAUD_RATE);
 
-  // delay(5000); // 🌙 to capture all the serial output
+  // delay(5000);  // 🌙 to capture all the serial output
 
   // 🌙 safeMode
   if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) {  // see verbosePrintResetReason
@@ -256,7 +261,7 @@ void setup() {
 
   xTaskCreateUniversal(driverTask,                     // task function
                        "AppDriverTask",                // name
-                       (psramFound() ? 4 : 3) * 1024,  // d0-tuning... stack size
+                       (psramFound() ? 6 : 4) * 1024,  // d0-tuning... stack size
                        NULL,                           // parameter
                        3,                              // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                        &driverTaskHandle,              // task handle
