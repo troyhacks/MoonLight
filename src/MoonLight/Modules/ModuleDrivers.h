@@ -54,13 +54,13 @@ class ModuleDrivers : public NodeManager {
     values.add(getNameAndTags<FastLEDDriver>());
     values.add(getNameAndTags<ArtNetDriver>());
     values.add(getNameAndTags<AudioSyncDriver>());
+    values.add(getNameAndTags<IRDriver>());
     values.add(getNameAndTags<VirtualDriver>());
     values.add(getNameAndTags<HUB75Driver>());
 
       // custom
   #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
     values.add(getNameAndTags<SE16Layout>());
-    values.add(getNameAndTags<IRDriver>());
   #endif
   }
 
@@ -94,6 +94,8 @@ class ModuleDrivers : public NodeManager {
       node = allocMBObject<ArtNetDriver>();
     else if (equalAZaz09(name, AudioSyncDriver::name()))
       node = allocMBObject<AudioSyncDriver>();
+    else if (equalAZaz09(name, IRDriver::name()))
+      node = allocMBObject<IRDriver>();
     else if (equalAZaz09(name, VirtualDriver::name()))
       node = allocMBObject<VirtualDriver>();
     else if (equalAZaz09(name, HUB75Driver::name()))
@@ -103,8 +105,6 @@ class ModuleDrivers : public NodeManager {
   #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
     else if (equalAZaz09(name, SE16Layout::name()))
       node = allocMBObject<SE16Layout>();
-    else if (equalAZaz09(name, IRDriver::name()))
-      node = allocMBObject<IRDriver>();
   #endif
 
   #if FT_LIVESCRIPT

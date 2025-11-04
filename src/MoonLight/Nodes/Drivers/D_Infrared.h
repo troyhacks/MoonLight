@@ -10,32 +10,70 @@
 **/
 
 #if FT_MOONLIGHT
-  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
 
-    #include "driver/rmt_rx.h"
+  #include "driver/rmt_rx.h"
 
-    #define IR_DRIVER_TAG "⛑️"
+  #define IR_DRIVER_TAG "⛑️"
 
-    /**
-     * @brief NEC timing spec
-     */
-    #define NEC_LEADING_CODE_DURATION_0 9000
-    #define NEC_LEADING_CODE_DURATION_1 4500
-    #define NEC_PAYLOAD_ZERO_DURATION_0 560
-    #define NEC_PAYLOAD_ZERO_DURATION_1 560
-    #define NEC_PAYLOAD_ONE_DURATION_0 560
-    #define NEC_PAYLOAD_ONE_DURATION_1 1690
-    #define NEC_REPEAT_CODE_DURATION_0 9000
-    #define NEC_REPEAT_CODE_DURATION_1 2250
-    #define EXAMPLE_IR_NEC_DECODE_MARGIN 200  // Tolerance for parsing RMT symbols into bit stream
+  /**
+   * @brief NEC timing spec
+   */
+  #define NEC_LEADING_CODE_DURATION_0 9000
+  #define NEC_LEADING_CODE_DURATION_1 4500
+  #define NEC_PAYLOAD_ZERO_DURATION_0 560
+  #define NEC_PAYLOAD_ZERO_DURATION_1 560
+  #define NEC_PAYLOAD_ONE_DURATION_0 560
+  #define NEC_PAYLOAD_ONE_DURATION_1 1690
+  #define NEC_REPEAT_CODE_DURATION_0 9000
+  #define NEC_REPEAT_CODE_DURATION_1 2250
+  #define EXAMPLE_IR_NEC_DECODE_MARGIN 200  // Tolerance for parsing RMT symbols into bit stream
 
 class IRDriver : public Node {
  public:
   static const char* name() { return "IR Driver"; }
   static uint8_t dim() { return _NoD; }      // Dimensions not relevant for drivers?
-  static const char* tags() { return "☸️"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
+  static const char* tags() { return "☸️🚧"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
   uint8_t pin = 5;
+  uint8_t irPreset = 1;
+
+  void setup() override {
+    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT);
+    JsonObject property;
+    JsonArray values;
+    property = addControl(irPreset, "irPreset", "select");
+    values = property["values"].to<JsonArray>();
+    values.add("Swiss remote");
+    values.add("Dutch remote");
+  }
+
+  uint32_t codeBrightnessInc = 0xFF00A35C;
+  uint32_t codeBrightnessDec = 0xFF00A25D;
+  uint32_t codePreset1 = 0xFF00F30C;
+  uint32_t codePreset2 = 0x0;
+
+  void onUpdate(String& oldValue, JsonObject control) override {
+    if (control["name"] == "pin") {
+      new_pin_in_waiting = true;
+    } else if (control["name"] == "irPreset") {
+      uint8_t value = control["value"];
+      switch (value) {
+      case 0:  // Swiss remote
+        codeBrightnessInc = 0xFF00A35C;
+        codeBrightnessDec = 0xFF00A25D;
+        codePreset1 = 0xFF00F30C;
+        codePreset2 = 0x0;
+        break;
+      case 1:  // Dutch remote
+        codeBrightnessInc = 0xEF00F20D;
+        codeBrightnessDec = 0xEF00F30C;
+        codePreset1 = 0xEF00EF10;
+        codePreset2 = 0xEF00EE11;
+        break;
+      }
+    }
+  }
+
   uint16_t s_nec_code_address;
   uint16_t s_nec_code_command;
   bool new_pin_in_waiting = false;
@@ -63,12 +101,6 @@ class IRDriver : public Node {
       .signal_range_min_ns = 1250,      // the shortest duration for NEC signal is 560us, 1250ns < 560us, valid signal won't be treated as noise
       .signal_range_max_ns = 12000000,  // the longest duration for NEC signal is 9000us, 12000000ns > 9000us, the receive won't stop early
   };
-
-  void setup() override {
-    // controls will show in the UI
-    // for different type of controls see other Nodes
-    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT);
-  }
 
   static bool ir_rmt_rx_done_callback(rmt_channel_handle_t channel, const rmt_rx_done_event_data_t* edata, void* user_data) {
     BaseType_t high_task_wakeup = pdFALSE;
@@ -120,18 +152,6 @@ class IRDriver : public Node {
   }
 
   static bool nec_parse_frame_repeat(rmt_symbol_word_t* rmt_nec_symbols) { return nec_check_in_range(rmt_nec_symbols->duration0, NEC_REPEAT_CODE_DURATION_0) && nec_check_in_range(rmt_nec_symbols->duration1, NEC_REPEAT_CODE_DURATION_1); }
-
-    #if false  // mathieu remote
-      #define codeBrightnessInc 0xFF00A35C
-      #define codeBrightnessDec 0xFF00A25D
-      #define codePreset1 0xFF00F30C
-      #define codePreset2 0x0
-    #else  // ewowi remote
-      #define codeBrightnessInc 0xEF00F20D
-      #define codeBrightnessDec 0xEF00F30C
-      #define codePreset1 0xEF00EF10
-      #define codePreset2 0xEF00EE11
-    #endif
 
   void parse_nec_frame(rmt_symbol_word_t* rmt_nec_symbols, size_t symbol_num) {
     if (false) {
@@ -276,12 +296,6 @@ class IRDriver : public Node {
     }
   }
 
-  void onUpdate(String& oldValue, JsonObject control) {
-    if (control["name"] == "pin") {
-      new_pin_in_waiting = true;
-    }
-  }
-
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override {
     if (receive_queue) {
@@ -331,5 +345,4 @@ class IRDriver : public Node {
   };
 };
 
-  #endif
 #endif
