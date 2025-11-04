@@ -8,7 +8,7 @@ To get started the minimal you need is an esp32-device connected via USB to your
 
 ## Minimal hardware
 
-* One of the ESP32-devices shown in [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). [ESP32-S3 N16R8](https://s.click.aliexpress.com/e/_DBAtJ2H) recommended. Optional [Expansion board 44pin](https://s.click.aliexpress.com/e/_EJhmlIE)
+* One of the ESP32-devices shown in [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/). [ESP32-S3 N16R8](https://s.click.aliexpress.com/e/_DBAtJ2H) recommended. Optional [Expansion board 44pin](https://s.click.aliexpress.com/e/_EJhmlIE)
 * Any WS2812 LED strip or panel. [256 LED panel](https://s.click.aliexpress.com/e/_EIKoYrg) recommended.
 * Connect the ESP32-device with USB to your computer, connect the LED strip or panel
 
@@ -23,7 +23,7 @@ It is perfactly usable to drive Art-Net. To drive LEDs a few more components are
 
 | Product | Image | Shop |
 | ---- | ----- | ---- |
-| [M5Stack AtomS3R](https://docs.m5stack.com/en/core/AtomS3R) | <img width="200" src="https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/images/esp32-s3-atoms3r.jpg"/>  | <a href="https://shop.m5stack.com/products/atoms3r-dev-kit" target="_blank">Shop</a> |
+| [M5Stack AtomS3R](https://docs.m5stack.com/en/core/AtomS3R) | <img width="200" src="/firmware/installer/images/esp32-s3-atoms3r.jpg"/>  | <a href="https://shop.m5stack.com/products/atoms3r-dev-kit" target="_blank">Shop</a> |
 |Level shifter SN74HCT125(N)|| [Shop](https://s.click.aliexpress.com/e/_EIVbQ2w)|
 | Resistors: 33 or 249 ohm || see [QuinLed - The Myth of the Data Signal Resistor](https://quinled.info/data-signal-cable-conditioning/)|
 | External power supply |||

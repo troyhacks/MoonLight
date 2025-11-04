@@ -38,7 +38,7 @@ Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonL
 
 16 channel LED strip driver by Stephane Electronics
 
-<img width="320" alt="SE16" src="https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/images/esp32-s3-stephanelec-16p.jpg"/>
+<img width="320" alt="SE16" src="/firmware/installer/images/esp32-s3-stephanelec-16p.jpg"/>
 
 * Leds Per Pin: the number of LEDs connected to each pin
 * Pins Are Columns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)
