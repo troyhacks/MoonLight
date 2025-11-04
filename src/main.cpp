@@ -261,7 +261,7 @@ void setup() {
 
   xTaskCreateUniversal(driverTask,                     // task function
                        "AppDriverTask",                // name
-                       (psramFound() ? 4 : 3) * 1024,  // d0-tuning... stack size
+                       (psramFound() ? 6 : 4) * 1024,  // d0-tuning... stack size
                        NULL,                           // parameter
                        3,                              // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                        &driverTaskHandle,              // task handle
