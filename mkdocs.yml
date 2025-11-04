@@ -5,7 +5,7 @@ nav:
     - gettingstarted/overview.md
     - gettingstarted/installation.md
     - gettingstarted/hardware.md
-    - gettingstarted/flashfirmware.md"
+    - gettingstarted/flashfirmware.md
   - "MoonLight":
     - moonlight/overview.md
     - moonlight/lightscontrol.md

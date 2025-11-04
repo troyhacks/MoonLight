@@ -8,7 +8,7 @@ Flashing the firmware is easy and doesn't require you to install any development
 4. After the installation has completed press the `Reset` button once again.
 
 <p class="button-row">
-<esp-web-install-button manifest='../../firmware/installer/manifest_REV03.json'>
+<esp-web-install-button manifest='../firmware/installer/manifest_REV03.json'>
   <button slot="activate" class="md-button md-button--primary">INSTALL</button>
   <span slot="unsupported">Use Chrome Desktop</span>
   <span slot="not-allowed">Not allowed to use this on HTTP!</span>
