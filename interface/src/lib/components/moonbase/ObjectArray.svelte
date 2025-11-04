@@ -8,6 +8,7 @@
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 
    Not w-full!
+   https://tabler.io/icons
 -->
 
 <script lang="ts">
@@ -16,14 +17,15 @@
 	import Add from '~icons/tabler/circle-plus';
 	import { user } from '$lib/stores/user';
 	import { page } from '$app/state';
-	import Router from '~icons/tabler/router';
 	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import Edit from '~icons/tabler/pencil';
+	import SearchIcon from '~icons/tabler/search';
 	import Delete from '~icons/tabler/trash';
-	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
-	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
 	import { initCap, getTimeAgo } from '$lib/stores/moonbase_utilities';
+
+	import EditObject from './EditObject.svelte';
+	import { modals } from 'svelte-modals';
+	import Grip from '~icons/tabler/grip-vertical';
 
 	let { property, data = $bindable(), definition, onChange, changeOnInput } = $props();
 
@@ -31,14 +33,10 @@
 
 	let propertyEditable: string = $state('');
 
-	let showEditor: boolean = $state(false);
-
 	//if no records added yet, add an empty array
 	if (data[property.name] == undefined) {
 		data[property.name] = [];
 	}
-
-	let lastIndex: number = -1;
 
 	let localDefinition: any = $state([]);
 
@@ -85,29 +83,35 @@
 				}
 			}
 		}
+
+		modals.open(EditObject as any, {
+			property: property,
+			localDefinition: localDefinition,
+			title: 'Add ' + initCap(propertyName) + ' #' + (data[propertyName].length + 1),
+			dataEditable: dataEditable, //bindable
+			onChange,
+			changeOnInput
+		});
 	}
 
 	function handleEdit(propertyName: string, index: number) {
-		// console.log("handleEdit", propertyName, index, data[propertyName][index])
-		if (lastIndex != index) {
-			showEditor = true;
-			lastIndex = index;
-		} else showEditor = !showEditor;
-		propertyEditable = propertyName;
-		dataEditable = data[propertyName][index];
+		console.log('handleEdit', propertyName, index, data[propertyName][index]);
+
+		modals.open(EditObject as any, {
+			property: property,
+			localDefinition: localDefinition,
+			title: initCap(propertyName) + ' #' + (index + 1),
+			dataEditable: data[propertyName][index], // By reference (bindable)
+			onChange,
+			changeOnInput
+		});
 	}
 
 	function deleteItem(propertyName: string, index: number) {
-		// Check if item is currently been edited and delete as well
-		if (data[propertyName][index].name === dataEditable.name) {
-			//todo: remove name here...
-			addItem(propertyName);
-		}
 		// Remove item from array
 		console.log(propertyName, index, data[propertyName]);
 		data[propertyName].splice(index, 1);
 		data[propertyName] = [...data[propertyName]]; //Trigger reactivity
-		showEditor = false;
 		onChange();
 	}
 </script>
@@ -126,7 +130,6 @@
 			//add the new item to the data
 			data[property.name].push(dataEditable);
 			onChange();
-			showEditor = true;
 		}}
 	>
 		<Add class="h-6 w-6" /></button
@@ -138,9 +141,7 @@
 		{#snippet children({ item: item, index }: { item: any; index: number })}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
-				<div class="mask mask-hexagon bg-primary h-auto w-10 shrink-0">
-					<Router class="text-primary-content h-auto w-full scale-75" />
-				</div>
+				<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
 				<!-- Show the first 3 fields -->
 				{#each property.n.slice(0, 3) as propertyN}
 					{#if propertyN.type == 'time'}
@@ -179,7 +180,7 @@
 								handleEdit(property.name, index);
 							}}
 						>
-							<Edit class="h-6 w-6" /></button
+							<SearchIcon class="h-6 w-6" /></button
 						>
 						<button
 							class="btn btn-ghost btn-sm"
@@ -195,33 +196,3 @@
 		{/snippet}
 	</DraggableList>
 </div>
-{#if showEditor && property.name == propertyEditable && data[property.name] && data[property.name].length}
-	<div class="divider my-0"></div>
-	{#each property.n as propertyN}
-		{#if propertyN.type == 'array'}
-			<label for={propertyN.name}>{propertyN.name}</label>
-			<ObjectArray
-				property={propertyN}
-				bind:data={dataEditable}
-				definition={localDefinition}
-				{onChange}
-				{changeOnInput}
-			></ObjectArray>
-		{:else if propertyN.type == 'controls'}
-			{#each dataEditable[propertyN.name] as control}
-				<!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"slider","default":64,"p":1070417419,"value":64} -->
-				<MultiInput property={control} bind:value={control.value} {onChange} {changeOnInput}
-				></MultiInput>
-			{/each}
-		{:else}
-			<div>
-				<MultiInput
-					property={propertyN}
-					bind:value={dataEditable[propertyN.name]}
-					{onChange}
-					{changeOnInput}
-				></MultiInput>
-			</div>
-		{/if}
-	{/each}
-{/if}

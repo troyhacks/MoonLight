@@ -15,7 +15,7 @@
   #include <ESP32SvelteKit.h>  //for safeModeMB
 
 void Node::updateControl(String& oldValue, JsonObject control) {
-  EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
+  // EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
   if (oldValue == "") return;                                                              // newControl, value already set
   if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) {  // name and type can be null if control is removed in compareRecursive
     int pointer = control["p"];

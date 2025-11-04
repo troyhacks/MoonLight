@@ -194,9 +194,9 @@ class Node {
   #if FT_LIVESCRIPT
 class LiveScriptNode : public Node {
  public:
-  static const char* name() { return "LiveScriptNode ⚙️"; }
-  static uint8_t dim() { return _2D; }
-  static const char* tags() { return ""; }
+  static const char* name() { return "LiveScriptNode"; }
+  static uint8_t dim() { return _NoD; }
+  static const char* tags() { return "⚙️"; }
 
   bool hasSetupFunction = false;
   bool hasLoopFunction = false;

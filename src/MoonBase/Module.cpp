@@ -129,7 +129,7 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
 
 void ModuleState::execOnUpdate(UpdatedItem& updatedItem) {
   if (updatedItem.oldValue != "null" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
-    EXT_LOGD(MB_TAG, "%s = %s -> %s", updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    // EXT_LOGD(MB_TAG, "%s = %s -> %s", updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     saveNeeded = true;
   }
 
@@ -317,7 +317,7 @@ void Module::begin() {
 }
 
 void Module::updateHandler() {
-  EXT_LOGD(MB_TAG, "");
+  // EXT_LOGD(MB_TAG, "");
   // if update, for all updated items, run onUpdate
   //  for (UpdatedItem updatedItem : _state.updatedItems) {
   //      onUpdate(updatedItem);

@@ -453,8 +453,8 @@ class TransposeModifier : public Node {
 // by WildCats08 / @Brandon502
 class CheckerboardModifier : public Node {
  public:
-  static const char* name() { return "Checkerboard 💎💫"; }
-  static const char* tags() { return ""; }
+  static const char* name() { return "Checkerboard"; }
+  static const char* tags() { return "💎💫"; }
 
   Coord3D size = {3, 3, 3};
   bool invert = false;

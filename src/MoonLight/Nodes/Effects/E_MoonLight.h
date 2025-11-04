@@ -401,7 +401,7 @@ class SphereMoveEffect : public Node {
 // by @Brandon502
 class StarFieldEffect : public Node {  // Inspired by Daniel Shiffman's Coding Train https://www.youtube.com/watch?v=17WoOqgXsRM
  public:
-  static const char* name() { return "StarField 🔥🎨"; }
+  static const char* name() { return "StarField"; }
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🔥🎨"; }
 
