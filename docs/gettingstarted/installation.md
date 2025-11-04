@@ -8,7 +8,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 **Step 1**: Get an **ESP32** and a **WS2812 LED-strip** or **LED-panel**. See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).
 
-**Step 2**: Connect the ESP32 via USB
+**Step 2**: Connect the ESP32 via USB, use an USB cable which supports data transfer
 
 **Step 3**: Go to the [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). Select your ESP32-device, or if not listed, press others.
 
