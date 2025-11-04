@@ -163,7 +163,8 @@ extra:
   analytics:
     provider: google
     property: G-R6QYDG0126
-
+  copy_files:
+      - firmware/
 plugins:
   - search:
       separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
