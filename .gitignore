@@ -22,3 +22,4 @@ ssl_certs/cacert.pem
 .DS_Store
 .aid
 /scripts/__pycache__
+/site

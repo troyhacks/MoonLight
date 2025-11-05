@@ -1,6 +1,11 @@
 # Installation
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/7DQOEWa-Kwg" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=7DQOEWa-Kwg">
+  <img width="380" src="https://img.youtube.com/vi/7DQOEWa-Kwg/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the install tutorial](https://www.youtube.com/watch?v=7DQOEWa-Kwg)**
+
 
 ## MoonLight Web installer
 
@@ -8,9 +13,9 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 **Step 1**: Get an **ESP32** and a **WS2812 LED-strip** or **LED-panel**. See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).
 
-**Step 2**: Connect the ESP32 via USB
+**Step 2**: Connect the ESP32 via USB, use an USB cable which supports data transfer
 
-**Step 3**: Go to the [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html). Select your ESP32-device, or if not listed, press others.
+**Step 3**: Go to the [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/). Select your ESP32-device, or if not listed, press others.
 
 !!! info "Browser support"
 
@@ -136,5 +141,5 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
     * Download from GitHub
     * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
 
-* To install the latest release, you can also use the [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) (no need to erase the device if updating)
+* To install the latest release, you can also use the [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) (no need to erase the device if updating)
 * Upload directly from VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)

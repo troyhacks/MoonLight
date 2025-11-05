@@ -87,7 +87,7 @@ The development environment consists of
 
 !!! info "USB-to-serial chip drivers"
 
-    In some cases, ESP32-devices won't show connected. See USB-to-serial chip drivers at [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) 
+    In some cases, ESP32-devices won't show connected. See USB-to-serial chip drivers at [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
 
 * Erase the device if it is a new device or the device has not been used for MoonModules before: go to 👽 in the left menu and select Erase Flash
 

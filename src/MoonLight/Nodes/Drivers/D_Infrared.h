@@ -31,7 +31,7 @@
 class IRDriver : public Node {
  public:
   static const char* name() { return "IR Driver"; }
-  static uint8_t dim() { return _NoD; }      // Dimensions not relevant for drivers?
+  static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️🚧"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
   uint8_t pin = 5;
@@ -47,10 +47,12 @@ class IRDriver : public Node {
     values.add("Dutch remote");
   }
 
-  uint32_t codeBrightnessInc = 0xFF00A35C;
-  uint32_t codeBrightnessDec = 0xFF00A25D;
-  uint32_t codePreset1 = 0xFF00F30C;
-  uint32_t codePreset2 = 0x0;
+  uint32_t codeBrightnessInc;
+  uint32_t codeBrightnessDec;
+  uint32_t codePaletteInc;
+  uint32_t codePaletteDec;
+  uint32_t codePreset1;
+  uint32_t codePreset2;
 
   void onUpdate(String& oldValue, JsonObject control) override {
     if (control["name"] == "pin") {
@@ -61,12 +63,16 @@ class IRDriver : public Node {
       case 0:  // Swiss remote
         codeBrightnessInc = 0xFF00A35C;
         codeBrightnessDec = 0xFF00A25D;
+        codePaletteInc = 0xFF00A25D;
+        codePaletteDec = 0xFF00A25D;
         codePreset1 = 0xFF00F30C;
         codePreset2 = 0x0;
         break;
       case 1:  // Dutch remote
         codeBrightnessInc = 0xEF00F20D;
         codeBrightnessDec = 0xEF00F30C;
+        codePaletteInc = 0xEF00EA15;
+        codePaletteDec = 0xEF00EB14;
         codePreset1 = 0xEF00EF10;
         codePreset2 = 0xEF00EE11;
         break;
@@ -162,39 +168,85 @@ class IRDriver : public Node {
       EXT_LOGI(IR_DRIVER_TAG, "---NEC frame end: ");
     }
     // decode RMT symbols
-    if ((symbol_num == 34 && nec_parse_frame(rmt_nec_symbols)) || (symbol_num == 2 && nec_parse_frame_repeat(rmt_nec_symbols))) {
-      EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Repeat" : "");
-      uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
-      // Here we should implement code address & command to action mapping
-      controlModule->update(
-          [&](ModuleState& state) {
-            bool changed = false;
-            // possible actions:
-            //  lightsOn
-            //  brightness
-            //  red
-            //  green
-            //  blue
-            //  palette
-            //  preset
-            //  presetLoop
-            //  firstPreset
-            //  lastPreset
-            //  monitorOn
+    if (symbol_num == 34)
+      nec_parse_frame(rmt_nec_symbols);
+    else if (symbol_num == 2) {
+      nec_parse_frame_repeat(rmt_nec_symbols);
+    } else {
+      EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
+      return;
+    }
 
-            UpdatedItem updatedItem;
-            if (combined_code == codeBrightnessInc) {  // Brightness increase
-              updatedItem.name = "brightness";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 5, 255);
-              changed = true;
-            } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
-              updatedItem.name = "brightness";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 5, 0);
-              changed = true;
-            } else if (combined_code == 0xFF00BF40) {  // Lights on/off
+    EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Longpress" : "");
+
+    uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
+
+    // Here we should implement code address & command to action mapping
+    controlModule->update(
+        [&](ModuleState& state) {
+          bool changed = false;
+          // possible actions:
+          //  lightsOn
+          //  brightness
+          //  red
+          //  green
+          //  blue
+          //  palette
+          //  preset
+          //  presetLoop
+          //  firstPreset
+          //  lastPreset
+          //  monitorOn
+
+          UpdatedItem updatedItem;
+
+          // allow longpress (symbol_num == 34 and symbol_num == 2)
+          if (combined_code == codeBrightnessInc) {  // Brightness increase
+            updatedItem.name = "brightness";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 5, 255);
+            changed = true;
+          } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
+            updatedItem.name = "brightness";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 5, 0);
+            changed = true;
+          } else if (combined_code == 0xFF00EB14) {  // increase red
+            updatedItem.name = "red";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
+            changed = true;
+          } else if (combined_code == 0xFF00EF10) {  // decrease red
+            updatedItem.name = "red";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
+            changed = true;
+          } else if (combined_code == 0xFF00EA15) {  // increase green
+            updatedItem.name = "green";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
+            changed = true;
+          } else if (combined_code == 0xFF00EE11) {  // decrease green
+            updatedItem.name = "green";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
+            changed = true;
+          } else if (combined_code == 0xFF00E916) {  // increase blue
+            updatedItem.name = "blue";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
+            changed = true;
+          } else if (combined_code == 0xFF00ED12) {  // decrease blue
+            updatedItem.name = "blue";
+            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
+            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
+            changed = true;
+          }
+
+          // do not process longpress
+          if (symbol_num == 34) {
+            if (combined_code == 0xFF00BF40) {  // Lights on/off
               updatedItem.name = "lightsOn";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
               state.data[updatedItem.name] = state.data[updatedItem.name].as<bool>() ? false : true;
@@ -241,59 +293,27 @@ class IRDriver : public Node {
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
               state.data[updatedItem.name] = 6;
               changed = true;
-            } else if (combined_code == 0xFF00EB14) {  // increase red
-              updatedItem.name = "red";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-              changed = true;
-            } else if (combined_code == 0xFF00EF10) {  // decrease red
-              updatedItem.name = "red";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-              changed = true;
-            } else if (combined_code == 0xFF00EA15) {  // increase green
-              updatedItem.name = "green";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-              changed = true;
-            } else if (combined_code == 0xFF00EE11) {  // decrease green
-              updatedItem.name = "green";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-              changed = true;
-            } else if (combined_code == 0xFF00E916) {  // increase blue
-              updatedItem.name = "blue";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-              changed = true;
-            } else if (combined_code == 0xFF00ED12) {  // decrease blue
-              updatedItem.name = "blue";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-              changed = true;
-            } else if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA25D)) {  // palette increase
+            } else if (combined_code == codePaletteInc) {  // palette increase
               updatedItem.name = "palette";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
+              state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
               changed = true;
-            } else if ((s_nec_code_address == 0xFF00) && (s_nec_code_command == 0xA25D)) {  // palette decrease
+            } else if (combined_code == codePaletteDec) {  // palette decrease
               updatedItem.name = "palette";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
               state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 1, 0);
               changed = true;
             }
+          }
 
-            if (changed) {
-              updatedItem.value = state.data[updatedItem.name];
-              state.onUpdate(updatedItem);
-            }
+          if (changed) {
+            updatedItem.value = state.data[updatedItem.name];
+            state.onUpdate(updatedItem);
+          }
 
-            return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  // notify StatefulService
-          },
-          IR_DRIVER_TAG);
-    } else {
-      EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
-    }
+          return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  // notify StatefulService
+        },
+        IR_DRIVER_TAG);
   }
 
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
