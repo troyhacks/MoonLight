@@ -14,14 +14,14 @@
 
 <p align="center">
   <a href="https://github.com/MoonModules/MoonLight"><img src="https://img.shields.io/github/stars/MoonModules/MoonLight?style=social" alt="GitHub Stars"></a>
-  <a href="https://discord.gg/TC8NSUSCdV"><img src="https://img.shields.io/discord/YOUR_DISCORD_ID?logo=discord&label=Discord" alt="Discord"></a>
+  <a href="https://discord.gg/TC8NSUSCdV"><img src="https://img.shields.io/discord/TC8NSUSCdV?logo=discord&label=Discord" alt="Discord"></a>
   <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
 </p>
 
 <p align="center">
-  <a href="https://moonmodules.org/MoonLight/">📚 Documentation</a> • 
-  <a href="https://discord.gg/TC8NSUSCdV">💬 Discord Community</a> • 
-  <a href="https://reddit.com/r/moonmodules">🗨️ Reddit</a>
+  <a href="https://moonmodules.org/MoonLight/gettingstarted/overview">🚀 Get Started</a> • 
+  <a href="https://moonmodules.org/MoonLight/moonlight/overview">💫 Enjoy</a> • 
+  <a href="https://moonmodules.org/MoonLight/develop/overview">🛠️ Contribute</a>
 </p>
 
 ---
@@ -48,7 +48,7 @@
 ## 🚀 Quick Start
 
 ### 1️⃣ Flash & Go
-Use our [web installer](https://moonmodules.org/MoonLight/gettingstarted/installation/) to flash MoonLight directly to your ESP32. No complex setup needed.
+Use our [web installer](https://moonmodules.org/MoonLight/gettingstarted/installation/) to flash MoonLight directly via a USB cable to your ESP32, connect LEDs to it and you are ready to go.
 
 ### 2️⃣ Connect & Configure
 Built-in access point makes WiFi setup effortless. Configure through the intuitive web interface.
@@ -118,6 +118,7 @@ Start creating stunning effects immediately on both mobile and desktop.
 **The user-friendly baseline release**
 
 ✨ **Coming Features:**
+
 - Plug & Play Experience
 - Preset Controller for quick effect management
 - Enhanced Web Installer with one-click flashing
@@ -139,12 +140,6 @@ MoonLight is built on **MoonBase** and ESP32-Sveltekit, our complete IoT framewo
 - 🔌 **Modular Design** - Add features as needed using the Nodes and Modules system
 - 🔩 **GPIO Access** - Full ESP32 hardware interface
 
-<a href="https://www.youtube.com/watch?v=tdrU9yGkyVo">
-  <img width="380" src="https://img.youtube.com/vi/tdrU9yGkyVo/maxresdefault.jpg" alt="Watch MoonLight Demo">
-</a>
-
-**[▶️ Watch the developer quickstart tutorial](https://www.youtube.com/watch?v=tdrU9yGkyVo)**
-
 ---
 
 ## 🤝 Community & Support
@@ -159,46 +154,40 @@ MoonLight is built on **MoonBase** and ESP32-Sveltekit, our complete IoT framewo
 ### Contributing
 
 We welcome contributions! Whether it's:
+
 - 🐛 Bug fixes and improvements
 - ✨ New effects, modifiers, layouts and drivers
 - 📝 Documentation updates
 - 🎨 UI/UX enhancements
 - 🔧 Hardware support
 
-Check our [contributing guidelines](CONTRIBUTING.md) to get started.
+<a href="https://www.youtube.com/watch?v=tdrU9yGkyVo">
+  <img width="380" src="https://img.youtube.com/vi/tdrU9yGkyVo/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the developer quickstart tutorial](https://www.youtube.com/watch?v=tdrU9yGkyVo)**
 
 ---
 
 ## ❤️ Support the Project
 
-MoonLight is free and open source. Help us continue building amazing tools:
+MoonLight is **free and open source**. Help us continue building amazing tools for the community!
 
-- ⭐ **Star this repo**
-- 💰 **[GitHub Sponsors](https://github.com/sponsors/ewowi)**
-- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)**
+### 🌟 Show Your Support
 
----
+**Star & Follow**
+- ⭐ [Star this repository](https://github.com/moonmodules/moonlight) on GitHub
+- 📺 [Subscribe to our YouTube channel](https://youtube.com/@moonmoduleslighting)
+- 🔼 [Upvote us on Reddit](https://reddit.com/r/moonmodules)
 
-## 📦 Installation
+### 💝 Buy Us a Beer
 
-### Prerequisites
-- ESP32 development board
-- LED strips (WS2812B, SK6812, APA102, etc.)
-- USB cable for flashing
+Help us enjoy a good beer, a tasty meal, or a fine club night while we code:
 
-### Quick Install
+- 💜 **[GitHub Sponsors](https://github.com/sponsors/ewowi)** – Support ongoing development
+- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)** – One-time donation
 
-**Option 1: Web Installer (Recommended)**
-1. Visit our [web installer](https://moonmodules.org/MoonLight/gettingstarted/installation/)
-2. Connect your ESP32 via USB
-3. Click "Install" and follow the prompts
-
-**Option 2: Manual Flashing**
-1. Download the [latest release](https://github.com/MoonModules/MoonLight/releases)
-2. Flash using esptool.py or ESP Flash Tool or using VSCode
-3. Configure via the web interface
-
-**[📖 Detailed Installation Guide](https://moonmodules.org/MoonLight/gettingstarted/overview/)**
+*Every star, subscription, and contribution helps us dedicate more time to making MoonLight better. Thank you for being part of our community!* 🌙✨
 
 ---
 
@@ -222,6 +211,8 @@ MoonLight is free and open source. Help us continue building amazing tools:
 ## 🌙 About MoonModules
 
 MoonLight is a [MoonModules.org](https://moonmodules.org) project - Created by the lighting enthusiasts behind WLED-MM.
+
+<img width="350" src="/media/moonlight-logo.png" />
 
 **Our Mission:** Make professional-grade LED control accessible to everyone, from hobbyists to professionals.
 
