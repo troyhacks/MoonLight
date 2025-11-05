@@ -1,54 +1,241 @@
-# MoonLight
+# 🌙 MoonLight
 
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/2dee317b-70d0-4e25-be6a-779ff5fa94f0" />
+<div align="center">
+  <img width="350" src="https://github.com/user-attachments/assets/278ed02e-7f7a-497c-80ee-089486ddf379" alt="MoonLight Logo" />
+  
+  **The open-source lighting platform that scales from art installations to professional stages**
+  
+  Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs.
 
-[MoonLight](https://github.com/MoonModules/MoonLight) is software which runs on [ESP32 microcontrollers](https://www.espressif.com/en/products/socs/esp32) providing a web-browser interface to control lights in particular and any IOT service in general. ESP32 devices can be connected to your local network via WiFi or Ethernet, Moonlight can be controlled via a web browser selecting the IP-address or network name of the device.
-MoonLight can be installed on ESP32 by means of a web installer or if you are a developer, via Visual Studio Code with the PlatformIO plugin installed.
+  [![GitHub Stars](https://img.shields.io/github/stars/MoonModules/MoonLight?style=social)](https://github.com/MoonModules/MoonLight)
+  [![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?logo=discord&label=Discord)](https://discord.gg/TC8NSUSCdV)
+  [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+  
+  [📚 Documentation](https://moonmodules.org/MoonLight/) • [💬 Discord Community](https://discord.gg/TC8NSUSCdV) • [🗨️ Reddit](https://reddit.com/r/moonmodules)
+</div>
 
-MoonLight's core functionality is called MoonBase, Lighting specific functionality is called MoonLight. MoonLight is a stand alone product for end users controlling lights but Moonlight can also be used to create a custom IOT service by creating a github fork of MoonLight, rename it to the service, switching off the MoonLight feature and build your own functionality. This can be as simple as creating a smart plug or a timer or temperature sensor or as complex as for instance a greenhouse management system, using the ESP32 hardware interfaces (via GPIO ports) or it's network communication protocols.
+---
 
-Examples of Moonbase functionality are monitor and manage a device, manage WiFi, Firmware updates, System Status and Restart. On top of that there is a file manager and an instance manager.
+## ✨ Key Features
 
-MoonLight functionality is aimed at running effects on multiple lights. It's primarely focused on LED strips or LED panels but also DMX lights can be controlled via Art-Net. Depending on the type of ESP32 used and the amount of memory available, the number of LEDs can go up to 12288 at 120 FPS! Even more LEDs are possible, upon 61440 (120x512) at lower framerates. Also a large number of DMX lights can be controlled. MoonLight works with virtual and physical layers of lights and contains a node based model where nodes can be light layouts, effects and modifiers and run effects on a virtual layer and map the effect onto physical lights. 
+| Feature | Capability |
+|---------|-----------|
+| **LED Performance** | 12,288 LEDs @ 120 FPS with 48 parallel outputs |
+| **Max Scale** | Up to 128K LEDs with 120 parallel outputs |
+| **Effects Engine** | Advanced 3D layered effects system |
+| **Protocols** | DMX, Art-Net, WiFi integration |
+| **Platform** | ESP32 + Svelte 5 web interface |
+| **License** | GPL v3 - Free for commercial use |
 
-<img width="400" src="https://github.com/user-attachments/assets/09143feb-1356-463c-bc23-6982ef3eeb42"/>
+### 🎯 Why Choose MoonLight?
 
-MoonLight is a [MoonModules.org](https://moonmodules.org) project. MoonModules is a group of lighting enthusiasts who also made WLED MM and contribute to WLED. Where WLED (MM) is aimed at 1D and 2D effects and LED setups, MoonLight is build to support 2D and 3D effects and multiple light setups. MoonLight has been built from scratch using the experience gained working on WLED (MM).
+**MoonLight bridges the gap between hobbyist lighting projects and professional lighting systems.** Get enterprise-grade performance and flexibility without the enterprise price tag.
 
-* Latest release can be found [here](https://github.com/MoonModules/MoonLight/releases). Release v0.5.9.3 is a developer release and works towards MoonLight 0.6.0 which is aimed at end users and is expected in September 2025. Containing presets controller pad, user friendly installer, physical and virtual driver for large displays, WLED audio sync and more.
-* Progress can be tracked in the [Kanban board](https://github.com/users/MoonModules/projects/2/)
-* Get started [here](https://moonmodules.org/MoonLight/gettingstarted/overview/)
-* Follow us on [Discord/MoonLight](https://discord.gg/TC8NSUSCdV) or [Reddit](https://reddit.com/r/moonmodules).
-* See [Star-Mod-Base-Light-Moon-Svelte-Live](https://moonmodules.org/Star-Mod-Base-Light-Moon-Svelte-Live) how MoonLight evolved from StarMod, StarBase, StarLight, MoonBase. 
-* Documentation see [MoonLightDocs](https://moonmodules.org/MoonLight/).
-* We need developers: to create new layouts, effects and modifiers, to create ci-automations, to connect Midi controllers, to make web installers, to improve the UI or whatever good idea you have. Contact us on [Discord](https://discord.com/channels/700041398778331156/1203994211301728296) or [Reddit](https://reddit.com/r/moonmodules) if you want to help!
-* If you appreciate this project, a star on the repo would be awesome: [![GitHub stars](https://img.shields.io/github/stars/MoonModules/MoonLight?style=social)](https://github.com/MoonModules/MoonLight/stargazers)
+- ⚡ **High Performance** - 12K+ LEDs at 120 FPS with FastLED + I2S drivers
+- 🎨 **3D Effects Engine** - Stunning visuals for 1D strips, 2D panels, 3D cubes, and custom layouts
+- 🏗️ **Flexible Setups** - From simple strips to complex installations and DMX fixtures
+- 🌐 **Modern IoT** - ESP32-powered with responsive Svelte 5 interface
+- 🎭 **Professional Integration** - DMX/Art-Net support for stage lighting
+- 💝 **Open Source** - GPL v3 licensed, budget-friendly, community-driven
 
-## Acknowledgements
+---
 
-MoonLight uses the following repositories:
+## 🚀 Quick Start
 
-* [theelims/ESP32-sveltekit](https://github.com/theelims/ESP32-sveltekit): MoonLight is a fork of ESP32-sveltekit. A simple and extensible framework for ESP32 based IoT projects with a feature-rich, beautiful, and responsive front-end build with Sveltekit, TailwindCSS and DaisyUI. It provides a powerful back end service, an amazing front end served from the ESP32 and an easy to use build chain to get everything going. See also [ESP32-sveltekit POC](https://github.com/theelims/ESP32-sveltekit/issues/68) where the idea of MoonLight on ESP32SvelteKit started
-* [hoeken/PsychicHttp](https://github.com/hoeken/PsychicHttp): PsychicHttp is a webserver library for ESP32 + Arduino framework which uses the ESP-IDF HTTP Server library under the hood.
-* [theelims/PsychicMqttClient](https://github.com/theelims/PsychicMqttClient): Fully featured async MQTT 3.1.1 client for ESP32 with support for SSL/TLS and MQTT over WS. Uses the ESP-IDF MQTT client library under the hood and adds a powerful but easy to use API on top of it. Supports MQTT over TCP, SSL with mbedtls, MQTT over Websocket and MQTT over Websocket Secure.
-* [bblanchon/ArduinoJson](https://github.com/bblanchon/ArduinoJson): ArduinoJson is a C++ JSON library for Arduino and IoT (Internet Of Things).
-* [FastLED/FastLED](https://github.com/FastLED/FastLED): FastLED is a robust and massively parallel-led driver. Due to it's incredibly small compile size, high end devices can drive upto ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering means you can respond to user input while the LEDs render.
-* [hpwit/ESPLiveScript](https://github.com/hpwit/ESPLiveScript): execute programs on the esp32 without having to load the code via any IDE (Arduino, VSCode)
-* [hpwit/I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver): This library is a new take on driving ws2812 LEDs with I2S on an esp32. It allows to drive up to 16 LED strips in parallel
-* [/hpwit/I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver): This library is a new take on driving ws2812 LEDs with I2S on an esp32. It allows to drive up to 120 LED strips !!! in parallel
-* [netmindz/WLED-sync](https://github.com/netmindz/WLED-sync): Library to create WLED compatible projects that sync their audio
+### 1️⃣ Flash & Go
+Use our [web installer](https://moonmodules.org/MoonLight/gettingstarted/installation/) to flash MoonLight directly to your ESP32. No complex setup needed.
 
-<img src="https://github.com/user-attachments/assets/c655d610-53eb-4dd3-8e9e-0cfa23b97bb4"/>
+### 2️⃣ Connect & Configure
+Built-in access point makes WiFi setup effortless. Configure through the intuitive web interface.
 
-## License
+### 3️⃣ Create & Enjoy
+Start creating stunning effects immediately on both mobile and desktop.
 
-MoonBase, MoonLight ⚖️ GPL-v3
+**[📖 Full Installation Guide](https://moonmodules.org/MoonLight/gettingstarted/overview/)**
 
-If you are an individual user and want to support the development or if you run a commercial project using MoonLight, think about sponsoring MoonLight development: it ensures the code your products rely on stays actively maintained. We can also give your project exposure to the MoonLight community by listing it on this page.
+---
 
-https://github.com/sponsors/ewowi
-[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)
+## 🛠️ Built With Modern Technologies
 
-## Disclaimer
+<table>
+<tr>
+<td width="50%">
 
-Using this software is the sole user's responsibility as it is not bug free. Therefore, contributors of this repo are not liable for anything, including but not limited to spontaneous combustion of the entire LED strip, the house and the inevitable heat death of the universe
+**Firmware**
+- 🔧 ESP-IDF 5 - Modern ESP32 framework
+- 💡 FastLED 3.10 - Industry-standard LED library
+- 📡 PsychicHTTP 1.21 - High-performance web server
+- 📊 ArduinoJson 7 - Advanced JSON processing
+
+</td>
+<td width="50%">
+
+**Interface**
+- ⚡ Svelte 5 - Lightning-fast reactive UI
+- 🎨 DaisyUI 5 - Modern component library
+- 🎯 Tailwind 4 - Utility-first CSS
+- 📱 Mobile & Desktop responsive
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🎯 Perfect For
+
+- 🎨 **Artists & Creators** - Bring your vision to life without breaking the bank
+- 🏛️ **Small Venues** - Professional lighting for theaters, events, and installations
+- 🔧 **Makers & Hobbyists** - Advanced features with user-friendly interfaces
+- 💼 **Professionals** - Integrate into existing lighting systems with standard protocols
+- 🏫 **Educational** - Open source platform perfect for learning and teaching
+
+---
+
+## 📊 Technical Specifications
+
+### LED Control
+- **Performance**: 12,288 LEDs @ 120 FPS (recommended max)
+- **Maximum**: 128K LEDs with 120 parallel outputs
+- **Outputs**: 16-48 parallel LED strips (recommended)
+- **Drivers**: FastLED + I2S for high-speed parallel processing
+
+### Effects & Layouts
+- **Dimensions**: 1D strips, 2D panels, 3D cubes and custom layouts
+- **Effects**: Layered effects system with modifiers
+- **Fixtures**: DMX lights (PAR lights, Light Bars, Moving Heads)
+
+### Connectivity
+- **Protocols**: DMX, Art-Net, WiFi, Ethernet
+- **Platform**: ESP32 with modern web interface
+- **Integration**: Professional lighting system compatible
+
+---
+
+## 📈 Release Roadmap
+
+### Current Status
+**Version 0.5.9.3** - Developer preview available now
+
+### Version 0.6.0 - October 2025
+**The user-friendly baseline release**
+
+✨ **Coming Features:**
+- Plug & Play Experience
+- Preset Controller for quick effect management
+- Enhanced Web Installer with one-click flashing
+- Large Display Drivers for massive installations
+- WLED Audio Sync for music synchronization
+- Refined Interface with polished UX
+
+**From 0.6.0 Forward:** Community-driven development focused on ease of use, more effects, and expanded hardware support.
+
+---
+
+## 🏗️ Architecture & Flexibility
+
+MoonLight is built on **MoonBase**, our complete IoT framework:
+
+- 🎮 **For LED Enthusiasts** - Complete lighting solution out of the box
+- 🔧 **For Developers** - Fork MoonBase to create custom IoT applications
+- 🏭 **For Integrators** - Embed into larger systems using standard protocols
+- 🔌 **Modular Design** - Add or remove features as needed
+- 🔩 **GPIO Access** - Full ESP32 hardware interface
+
+---
+
+## 🤝 Community & Support
+
+### Get Help & Share Your Creations
+
+- 💬 **[Discord Community](https://discord.gg/TC8NSUSCdV)** - Real-time support & project sharing
+- 🗨️ **[Reddit](https://reddit.com/r/moonmodules)** - Discussion and showcase
+- 📋 **[GitHub Issues](https://github.com/MoonModules/MoonLight/issues)** - Bug reports and feature requests
+- 📚 **[Documentation](https://moonmodules.org/MoonLight/)** - Complete technical guides
+
+### Contributing
+
+We welcome contributions! Whether it's:
+- 🐛 Bug fixes and improvements
+- ✨ New effects and features
+- 📝 Documentation updates
+- 🎨 UI/UX enhancements
+- 🔧 Hardware support
+
+Check our [contributing guidelines](CONTRIBUTING.md) to get started.
+
+---
+
+## ❤️ Support the Project
+
+MoonLight is free and open source. Help us continue building amazing tools:
+
+- ⭐ **Star this repo** - Show your support
+- 💰 **[GitHub Sponsors](https://github.com/sponsors/ewowi)** - Recurring support
+- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)** - One-time donation
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+- ESP32 development board
+- LED strips (WS2812B, SK6812, APA102, etc.)
+- USB cable for flashing
+
+### Quick Install
+
+**Option 1: Web Installer (Recommended)**
+1. Visit our [web installer](https://moonmodules.org/MoonLight/gettingstarted/installation/)
+2. Connect your ESP32 via USB
+3. Click "Install" and follow the prompts
+
+**Option 2: Manual Flashing**
+1. Download the [latest release](https://github.com/MoonModules/MoonLight/releases)
+2. Flash using esptool.py or ESP Flash Tool
+3. Configure via the web interface
+
+**[📖 Detailed Installation Guide](https://moonmodules.org/MoonLight/gettingstarted/overview/)**
+
+---
+
+## 📄 License & Credits
+
+**License:** GPL-v3 - Free for personal and commercial use
+
+### Built on Amazing Open Source Projects
+
+- [ESP32-sveltekit](https://github.com/theelims/ESP32-sveltekit) - Foundation framework
+- [PsychicHttp](https://github.com/hoeken/PsychicHttp) - High-performance web server
+- [FastLED](https://github.com/FastLED/FastLED) - Industry-standard LED library
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Advanced JSON processing
+- [I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver) - Parallel LED control
+- [I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver) - Virtual driver
+- [ESPLiveScript](https://github.com/hpwit/ESPLiveScript) - Scripts
+- [WLED-sync](https://github.com/netmindz/WLED-sync) - Audio synchronization
+
+---
+
+## 🌙 About MoonModules
+
+MoonLight is a [MoonModules.org](https://moonmodules.org) project - Created by the lighting enthusiasts behind WLED-MM.
+
+**Our Mission:** Make professional-grade LED control accessible to everyone, from hobbyists to professionals.
+
+---
+
+## ⚠️ Disclaimer
+
+Using this software is at your own risk. While we strive for quality, this software is not bug-free. Contributors to this repository are not liable for any issues, including but not limited to spontaneous combustion of LED strips, hardware damage, or the inevitable heat death of the universe. 🔥🕺🌌
+
+---
+
+<div align="center">
+
+**Ready to light up your world?** 🌙✨
+
+[Get Started](https://moonmodules.org/MoonLight/gettingstarted/overview/) • [Download Latest](https://github.com/MoonModules/MoonLight/releases) • [Join Discord](https://discord.gg/TC8NSUSCdV)
+
+Made with ❤️ by the MoonModules community
+
+</div>
