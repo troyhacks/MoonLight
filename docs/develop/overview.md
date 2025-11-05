@@ -9,5 +9,8 @@
 * [Sveltekit](https://moonmodules.org/MoonLight/develop/sveltekit/): Explaining the repository MoonLight is forked from
 * [Documentation](https://moonmodules.org/MoonLight/develop/documentation/): One repo for code AND documentation
 
-Watch the developer quick start tutorial:
-<iframe width="280" height="160" src="https://www.youtube.com/embed/tdrU9yGkyVo" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=tdrU9yGkyVo">
+  <img width="380" src="https://img.youtube.com/vi/tdrU9yGkyVo/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the developer quickstart tutorial](https://www.youtube.com/watch?v=tdrU9yGkyVo)**

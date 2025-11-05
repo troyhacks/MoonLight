@@ -1,18 +1,28 @@
 # 🌙 MoonLight
 
-<div align="center">
+<p align="center">
   <img width="350" src="https://github.com/user-attachments/assets/278ed02e-7f7a-497c-80ee-089486ddf379" alt="MoonLight Logo" />
-  
-  **The open-source lighting platform that scales from art installations to professional stages**
-  
-  Drive lots of DMX or LED lights with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs.
+</p>
 
-  [![GitHub Stars](https://img.shields.io/github/stars/MoonModules/MoonLight?style=social)](https://github.com/MoonModules/MoonLight)
-  [![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?logo=discord&label=Discord)](https://discord.gg/TC8NSUSCdV)
-  [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-  
-  [📚 Documentation](https://moonmodules.org/MoonLight/) • [💬 Discord Community](https://discord.gg/TC8NSUSCdV) • [🗨️ Reddit](https://reddit.com/r/moonmodules)
-</div>
+<p align="center">
+  <strong>The open-source lighting platform that scales from art installations to professional stages</strong>
+</p>
+
+<p align="center">
+  Drive lots of DMX or LED lights with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs.
+</p>
+
+<p align="center">
+  <a href="https://github.com/MoonModules/MoonLight"><img src="https://img.shields.io/github/stars/MoonModules/MoonLight?style=social" alt="GitHub Stars"></a>
+  <a href="https://discord.gg/TC8NSUSCdV"><img src="https://img.shields.io/discord/YOUR_DISCORD_ID?logo=discord&label=Discord" alt="Discord"></a>
+  <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
+</p>
+
+<p align="center">
+  <a href="https://moonmodules.org/MoonLight/">📚 Documentation</a> • 
+  <a href="https://discord.gg/TC8NSUSCdV">💬 Discord Community</a> • 
+  <a href="https://reddit.com/r/moonmodules">🗨️ Reddit</a>
+</p>
 
 ---
 
@@ -27,8 +37,11 @@
 - 🎭 **Professional Integration** - DMX/Art-Net support for stage lighting
 - 💝 **Open Source** - GPL v3 licensed, budget-friendly, community-driven
 
-Watch the introduction video:
-<iframe width="280" height="160" src="https://www.youtube.com/embed/Z70zDhpqY8o" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
+  <img width="380" src="https://img.youtube.com/vi/Z70zDhpqY8o/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the introduction](https://www.youtube.com/watch?v=Z70zDhpqY8o)**
 
 ---
 
@@ -45,35 +58,22 @@ Start creating stunning effects immediately on both mobile and desktop.
 
 **[📖 Full Installation Guide](https://moonmodules.org/MoonLight/gettingstarted/overview/)**
 
-Watch the install video:
-<iframe width="280" height="160" src="https://www.youtube.com/embed/7DQOEWa-Kwg" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=7DQOEWa-Kwg">
+  <img width="380" src="https://img.youtube.com/vi/7DQOEWa-Kwg/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the install tutorial](https://www.youtube.com/watch?v=7DQOEWa-Kwg)**
 
 ---
 
 ## 🛠️ Built With Modern Technologies
 
-<table>
-<tr>
-<td width="50%">
-
-**Firmware**
-- 🔧 ESP-IDF 5 - Modern ESP32 framework
-- 💡 FastLED 3.10 - Industry-standard LED library
-- 📡 PsychicHTTP 1.21 - High-performance web server
-- 📊 ArduinoJson 7 - Advanced JSON processing
-
-</td>
-<td width="50%">
-
-**Interface**
-- ⚡ Svelte 5 - Lightning-fast reactive UI
-- 🎨 DaisyUI 5 - Modern component library
-- 🎯 Tailwind 4 - Utility-first CSS
-- 📱 Mobile & Desktop responsive
-
-</td>
-</tr>
-</table>
+| Firmware | Interface |
+|----------|-----------|
+| 🔧 **ESP-IDF 5** - Modern ESP32 framework | ⚡ **Svelte 5** - Lightning-fast reactive UI |
+| 💡 **FastLED 3.10** - Industry-standard LED library | 🎨 **DaisyUI 5** - Modern component library |
+| 📡 **PsychicHTTP 1.21** - High-performance web server | 🎯 **Tailwind 4** - Utility-first CSS |
+| 📊 **ArduinoJson 7** - Advanced JSON processing | 📱 **Mobile & Desktop** responsive |
 
 ---
 
@@ -85,8 +85,11 @@ Watch the install video:
 - 💼 **Professionals** - Integrate into existing lighting systems with standard protocols
 - 🏫 **Educational** - Open source platform perfect for learning and teaching
 
-Watch the functional overview:
-<iframe width="280" height="160" src="https://www.youtube.com/embed/bJIgiBBx3lg" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=bJIgiBBx3lg">
+  <img width="380" src="https://img.youtube.com/vi/bJIgiBBx3lg/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the functional overview](https://www.youtube.com/watch?v=bJIgiBBx3lg)**
 
 ---
 
@@ -136,8 +139,11 @@ MoonLight is built on **MoonBase** and ESP32-Sveltekit, our complete IoT framewo
 - 🔌 **Modular Design** - Add features as needed using the Nodes and Modules system
 - 🔩 **GPIO Access** - Full ESP32 hardware interface
 
-Watch the developer quick start tutorial:
-<iframe width="280" height="160" src="https://www.youtube.com/embed/tdrU9yGkyVo" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=tdrU9yGkyVo">
+  <img width="380" src="https://img.youtube.com/vi/tdrU9yGkyVo/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the developer quickstart tutorial](https://www.youtube.com/watch?v=tdrU9yGkyVo)**
 
 ---
 
@@ -227,12 +233,8 @@ Using this software is at your own risk. While we strive for quality, this softw
 
 ---
 
-<div align="center">
-
 **Ready to light up your world?** 🌙✨
 
 [Get Started](https://moonmodules.org/MoonLight/gettingstarted/overview/) • [Download Latest](https://github.com/MoonModules/MoonLight/releases) • [Join Discord](https://discord.gg/TC8NSUSCdV)
 
 Made with ❤️ by the MoonModules community
-
-</div>

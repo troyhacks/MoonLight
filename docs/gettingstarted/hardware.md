@@ -54,7 +54,10 @@ Work in progress to make this available as pre-assembled board ([Contact](https:
 |18 LED Bars|<img width="300" src="https://github.com/user-attachments/assets/75b18cf6-bc32-4bf0-a03b-7eea8dbfd677" />| [Shop](https://s.click.aliexpress.com/e/_EQMKbmK) |
 |19x15W Zoom Wash Lights RGBW Beam Moving Head|<img width="300" src="https://github.com/user-attachments/assets/6e61c41f-e128-4adc-b9c1-6239fe4736dc" />|[Shop](https://s.click.aliexpress.com/e/_EwBfFYw)|
 
+For an impression of hardware in use:
 
-To get an impression of hardware in use see the MoonLight in Concert video:
+<a href="https://www.youtube.com/watch?v=NnEV9RplZN8">
+  <img width="380" src="https://img.youtube.com/vi/NnEV9RplZN8/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
 
-<iframe width="280" height="160" src="https://www.youtube.com/embed/NnEV9RplZN8" frameborder="0" allowfullscreen></iframe>
+**[▶️ Watch MoonLight in Concert ](https://www.youtube.com/watch?v=NnEV9RplZN8)**

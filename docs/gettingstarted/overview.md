@@ -7,8 +7,12 @@
     * [Effects](https://moonmodules.org/MoonLight/moonlight/effects/)
     * [Drivers](https://moonmodules.org/MoonLight/moonlight/drivers/)
 
-Watch the introduction video:
-<iframe width="280" height="160" src="https://www.youtube.com/embed/Z70zDhpqY8o" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
+  <img width="380" src="https://img.youtube.com/vi/Z70zDhpqY8o/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the introduction](https://www.youtube.com/watch?v=Z70zDhpqY8o)**
+
 
 ## Sitemap
 

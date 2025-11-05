@@ -1,7 +1,11 @@
 # Installation
 
-Watch the install video:
-<iframe width="280" height="160" src="https://www.youtube.com/embed/7DQOEWa-Kwg" frameborder="0" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=7DQOEWa-Kwg">
+  <img width="380" src="https://img.youtube.com/vi/7DQOEWa-Kwg/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the install tutorial](https://www.youtube.com/watch?v=7DQOEWa-Kwg)**
+
 
 ## MoonLight Web installer
 
