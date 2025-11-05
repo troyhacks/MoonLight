@@ -1,6 +1,7 @@
 # Installation
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/7DQOEWa-Kwg" frameborder="0" allowfullscreen></iframe>
+Watch the install video:
+<iframe width="280" height="160" src="https://www.youtube.com/embed/7DQOEWa-Kwg" frameborder="0" allowfullscreen></iframe>
 
 ## MoonLight Web installer
 

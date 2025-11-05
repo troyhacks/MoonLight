@@ -1,6 +1,7 @@
 # MoonLight Overview
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/bJIgiBBx3lg" frameborder="0" allowfullscreen></iframe>
+Watch the functional overview:
+<iframe width="280" height="160" src="https://www.youtube.com/embed/bJIgiBBx3lg" frameborder="0" allowfullscreen></iframe>
 
 MoonLight is an open-source lighting platform that scales from art installations to professional stages.
 

@@ -57,4 +57,4 @@ Work in progress to make this available as pre-assembled board ([Contact](https:
 
 To get an impression of hardware in use see the MoonLight in Concert video:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/NnEV9RplZN8" frameborder="0" allowfullscreen></iframe>
+<iframe width="280" height="160" src="https://www.youtube.com/embed/NnEV9RplZN8" frameborder="0" allowfullscreen></iframe>

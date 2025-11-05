@@ -5,7 +5,7 @@
   
   **The open-source lighting platform that scales from art installations to professional stages**
   
-  Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs.
+  Drive lots of DMX or LED lights with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs.
 
   [![GitHub Stars](https://img.shields.io/github/stars/MoonModules/MoonLight?style=social)](https://github.com/MoonModules/MoonLight)
   [![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?logo=discord&label=Discord)](https://discord.gg/TC8NSUSCdV)
@@ -16,27 +16,19 @@
 
 ---
 
-## ✨ Key Features
-
-| Feature | Capability |
-|---------|-----------|
-| **LED Performance** | 12,288 LEDs @ 120 FPS with 48 parallel outputs |
-| **Max Scale** | Up to 128K LEDs with 120 parallel outputs |
-| **Effects Engine** | Advanced 3D layered effects system |
-| **Protocols** | DMX, Art-Net, WiFi integration |
-| **Platform** | ESP32 + Svelte 5 web interface |
-| **License** | GPL v3 - Free for commercial use |
-
-### 🎯 Why Choose MoonLight?
+## 🎯 Why Choose MoonLight?
 
 **MoonLight bridges the gap between hobbyist lighting projects and professional lighting systems.** Get enterprise-grade performance and flexibility without the enterprise price tag.
 
-- ⚡ **High Performance** - 12K+ LEDs at 120 FPS with FastLED + I2S drivers
+- ⚡ **High Performance** - 12K LEDs at 100 FPS with FastLED + parallel drivers
 - 🎨 **3D Effects Engine** - Stunning visuals for 1D strips, 2D panels, 3D cubes, and custom layouts
 - 🏗️ **Flexible Setups** - From simple strips to complex installations and DMX fixtures
 - 🌐 **Modern IoT** - ESP32-powered with responsive Svelte 5 interface
 - 🎭 **Professional Integration** - DMX/Art-Net support for stage lighting
 - 💝 **Open Source** - GPL v3 licensed, budget-friendly, community-driven
+
+Watch the introduction video:
+<iframe width="280" height="160" src="https://www.youtube.com/embed/Z70zDhpqY8o" frameborder="0" allowfullscreen></iframe>
 
 ---
 
@@ -52,6 +44,9 @@ Built-in access point makes WiFi setup effortless. Configure through the intuiti
 Start creating stunning effects immediately on both mobile and desktop.
 
 **[📖 Full Installation Guide](https://moonmodules.org/MoonLight/gettingstarted/overview/)**
+
+Watch the install video:
+<iframe width="280" height="160" src="https://www.youtube.com/embed/7DQOEWa-Kwg" frameborder="0" allowfullscreen></iframe>
 
 ---
 
@@ -90,15 +85,17 @@ Start creating stunning effects immediately on both mobile and desktop.
 - 💼 **Professionals** - Integrate into existing lighting systems with standard protocols
 - 🏫 **Educational** - Open source platform perfect for learning and teaching
 
+Watch the functional overview:
+<iframe width="280" height="160" src="https://www.youtube.com/embed/bJIgiBBx3lg" frameborder="0" allowfullscreen></iframe>
+
 ---
 
 ## 📊 Technical Specifications
 
 ### LED Control
-- **Performance**: 12,288 LEDs @ 120 FPS (recommended max)
-- **Maximum**: 128K LEDs with 120 parallel outputs
-- **Outputs**: 16-48 parallel LED strips (recommended)
-- **Drivers**: FastLED + I2S for high-speed parallel processing
+- **Performance**: up to 12,288 LEDs @ 100 FPS
+- **Outputs**: Typical 1, 4, 16 or 48 parallel LED strips
+- **Drivers**: FastLED + Parallel drivers for high-speed parallel processing
 
 ### Effects & Layouts
 - **Dimensions**: 1D strips, 2D panels, 3D cubes and custom layouts
@@ -114,10 +111,7 @@ Start creating stunning effects immediately on both mobile and desktop.
 
 ## 📈 Release Roadmap
 
-### Current Status
-**Version 0.5.9.3** - Developer preview available now
-
-### Version 0.6.0 - October 2025
+### Version 0.6.0 - November 2025
 **The user-friendly baseline release**
 
 ✨ **Coming Features:**
@@ -134,13 +128,16 @@ Start creating stunning effects immediately on both mobile and desktop.
 
 ## 🏗️ Architecture & Flexibility
 
-MoonLight is built on **MoonBase**, our complete IoT framework:
+MoonLight is built on **MoonBase** and ESP32-Sveltekit, our complete IoT framework:
 
 - 🎮 **For LED Enthusiasts** - Complete lighting solution out of the box
-- 🔧 **For Developers** - Fork MoonBase to create custom IoT applications
+- 🔧 **For Developers** - Fork MoonLight and add Effects, Modifiers, Layouts or Drivers or use MoonBase to create custom IoT applications
 - 🏭 **For Integrators** - Embed into larger systems using standard protocols
-- 🔌 **Modular Design** - Add or remove features as needed
+- 🔌 **Modular Design** - Add features as needed using the Nodes and Modules system
 - 🔩 **GPIO Access** - Full ESP32 hardware interface
+
+Watch the developer quick start tutorial:
+<iframe width="280" height="160" src="https://www.youtube.com/embed/tdrU9yGkyVo" frameborder="0" allowfullscreen></iframe>
 
 ---
 
@@ -157,7 +154,7 @@ MoonLight is built on **MoonBase**, our complete IoT framework:
 
 We welcome contributions! Whether it's:
 - 🐛 Bug fixes and improvements
-- ✨ New effects and features
+- ✨ New effects, modifiers, layouts and drivers
 - 📝 Documentation updates
 - 🎨 UI/UX enhancements
 - 🔧 Hardware support
@@ -170,9 +167,9 @@ Check our [contributing guidelines](CONTRIBUTING.md) to get started.
 
 MoonLight is free and open source. Help us continue building amazing tools:
 
-- ⭐ **Star this repo** - Show your support
-- 💰 **[GitHub Sponsors](https://github.com/sponsors/ewowi)** - Recurring support
-- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)** - One-time donation
+- ⭐ **Star this repo**
+- 💰 **[GitHub Sponsors](https://github.com/sponsors/ewowi)**
+- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)**
 
 ---
 
@@ -192,7 +189,7 @@ MoonLight is free and open source. Help us continue building amazing tools:
 
 **Option 2: Manual Flashing**
 1. Download the [latest release](https://github.com/MoonModules/MoonLight/releases)
-2. Flash using esptool.py or ESP Flash Tool
+2. Flash using esptool.py or ESP Flash Tool or using VSCode
 3. Configure via the web interface
 
 **[📖 Detailed Installation Guide](https://moonmodules.org/MoonLight/gettingstarted/overview/)**
