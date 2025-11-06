@@ -26,6 +26,7 @@ WiFiSettingsService::WiFiSettingsService(PsychicHttpServer *server,
                                                                 _fsPersistence(WiFiSettings::read, WiFiSettings::update, this, fs, WIFI_SETTINGS_FILE), _lastConnectionAttempt(0),
                                                                 _delayedReconnectTime(0),
                                                                 _delayedReconnectPending(false),
+                                                                _analyticsSent(false),
                                                                 _socket(socket)
 {
     addUpdateHandler([&](const String &originId)
@@ -101,7 +102,7 @@ void WiFiSettingsService::reconfigureWiFiConnection()
 
     ESP_LOGI(SVK_TAG, "Reconfiguring WiFi connection to: %s", connectionMode.c_str());
 
-    ESP_LOGI(SVK_TAG, "Reconfiguring WiFi TxPower to: %d", _state.txPower); // 🌙
+    ESP_LOGI(SVK_TAG, "Reconfiguring WiFi TxPower to: %d", _state.txPower?_state.txPower:-1); // 🌙
 
     ESP_LOGI(SVK_TAG, "Hostname: %s", _state.hostname.c_str()); // 🌙
 
@@ -187,6 +188,66 @@ void WiFiSettingsService::reconfigureWiFiConnection()
     #endif
 }
 
+// 🌙 only send analytics once
+bool sendAnalytics(const String& eventName) {
+  if (WiFi.status() != WL_CONNECTED) return false;
+
+//   ESP_LOGI(SVK_TAG, "send Event %s to Google Analytics", eventName.c_str());
+
+  // full 48-bit MAC for client_id
+  uint64_t mac = ESP.getEfuseMac();
+  String client_id = String((uint32_t)(mac >> 32), HEX) + String((uint32_t)mac, HEX);
+  client_id.toLowerCase();
+
+  String evtName = eventName;
+  evtName.toLowerCase(); // GA4 requires lowercase
+
+  WiFiClientSecure client;
+  client.setInsecure();  // skip certificate verification for GA4
+
+  HTTPClient http;  // only one HTTPClient instance
+
+  // --- Step 1: get country via ip-api.com ---
+  String country = "unknown";
+  http.begin("http://ip-api.com/json");  // plain HTTP
+  int code = http.GET();
+  if (code == 200) {
+    String payloadStr = http.getString();
+    // ESP_LOGI(SVK_TAG, "ip-api payload: %s", payloadStr.c_str());
+    int idx = payloadStr.indexOf("\"country\":\"");
+    if (idx != -1) {
+      idx += 11;
+      int endIdx = payloadStr.indexOf("\"", idx);
+      country = payloadStr.substring(idx, endIdx);
+    }
+  }
+  http.end();  // finish ip-api request
+
+  // --- Step 2: send event to GA4 ---
+  String url = "https://www.google-analytics.com/mp/collect?measurement_id=" 
+                + String("G-0PXJER2TPD") + "&api_secret=" + String("5XSeAS") + String("6gSEibdr") + String("LiKRx1UQ");
+
+  // Build valid JSON payload
+  String payload = "{"
+                   "\"client_id\":\"" + client_id + "\","
+                   "\"events\":[{"
+                     "\"name\":\"" + evtName + "\","
+                     "\"params\":{"
+                       "\"type\":\"" + BUILD_TARGET + "\","
+                       "\"version\":\"" + APP_VERSION + "\","
+                       "\"country\":\"" + country + "\""
+                     "}"
+                   "}]"
+                 "}";
+
+  http.begin(client, url);           // HTTPS GA4
+  http.addHeader("Content-Type", "application/json");
+  code = http.POST(payload);
+//   ESP_LOGI(SVK_TAG, "Event '%s' sent, HTTP %d payload: %s", evtName.c_str(), code, payload.c_str());
+  http.end();
+  return code == 204; // successfull
+}
+
 void WiFiSettingsService::loop()
 {
     unsigned long currentMillis = millis();
@@ -203,6 +264,11 @@ void WiFiSettingsService::loop()
     {
         _lastConnectionAttempt = currentMillis;
         manageSTA();
+
+        // 🌙 only send analytics once (if enabled)
+        if (_state.trackAnalytics && !_analyticsSent) {
+            _analyticsSent = sendAnalytics("esp32");
+        }
     }
 
     if (!_lastRssiUpdate || (unsigned long)(currentMillis - _lastRssiUpdate) >= RSSI_EVENT_DELAY)
@@ -391,7 +457,7 @@ void WiFiSettingsService::configureNetwork(wifi_settings_t &network)
                 ESP_LOGE(SVK_TAG, "Invalid txPower value: %d", _state.txPower);
                 return;
         }
-        ESP_LOGI(SVK_TAG, "WiFi setTxPower to: %d", _state.txPower);
+        ESP_LOGI(SVK_TAG, "WiFi setTxPower to: %d", _state.txPower?_state.txPower:-1);
     }
 }
 

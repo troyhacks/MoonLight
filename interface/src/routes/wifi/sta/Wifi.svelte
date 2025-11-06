@@ -64,6 +64,7 @@
 		connection_mode: 1,
 		txPower: 0,
 		txPowerMeasured: 0,
+		trackAnalytics: false,
 		wifi_networks: [] as KnownNetworkItem[]
 	});
 
@@ -491,7 +492,7 @@
 							</select>
 						</div>
 						
-						<!-- 🌙 -->
+						<!-- 🌙 add txPower -->
 						<div>
 							<label class="label" for="apmode">WiFi TX Power </label>
 							<select class="select w-full" id="apmode" bind:value={wifiSettings.txPower}>
@@ -502,6 +503,22 @@
 								{/each}
 							</select>
 							<span>(🔍{getTxPowerText(wifiSettings.txPowerMeasured)})</span>
+						</div>
+					</div>
+					<!-- 🌙 add trackAnalytics -->
+					<br>
+					<div>
+						<label class="label text-base inline-flex cursor-pointer content-end justify-start gap-4">
+							<input
+								type="checkbox"
+								bind:checked={wifiSettings.trackAnalytics}
+								class="checkbox checkbox-primary"
+							/>Track analytics
+						</label>
+						<div class="alert alert-info my-2 shadow-lg">
+							<Info class="h-6 w-6 shrink-0 stroke-current" />
+							<span>Track analytics will send one ping to Google Analytics each time MoonLight is restarted so we can track usage of MoonLight. Country, Board and version will be tracked. Uncheck to opt-out</span
+							>
 						</div>
 					</div>
 				</div>
