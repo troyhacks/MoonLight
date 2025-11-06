@@ -53,6 +53,10 @@ class IRDriver : public Node {
   uint32_t codePaletteDec;
   uint32_t codePreset1;
   uint32_t codePreset2;
+  uint32_t codePreset3;
+  uint32_t codePreset4;
+  uint32_t codePreset5;
+  uint32_t codePreset6;
 
   void onUpdate(String& oldValue, JsonObject control) override {
     if (control["name"] == "pin") {
@@ -66,7 +70,11 @@ class IRDriver : public Node {
         codePaletteInc = 0xFF00A25D;
         codePaletteDec = 0xFF00A25D;
         codePreset1 = 0xFF00F30C;
-        codePreset2 = 0x0;
+        codePreset2 = 0xFF00F20D;
+        codePreset3 = 0xFF00F10E;
+        codePreset4 = 0xFF00F708;
+        codePreset5 = 0xFF00F609;
+        codePreset6 = 0xFF00F50A;
         break;
       case 1:  // Dutch remote
         codeBrightnessInc = 0xEF00F20D;
@@ -169,10 +177,12 @@ class IRDriver : public Node {
     }
     // decode RMT symbols
 
+    bool nec_repeat = false;
     if (symbol_num == 34)
       nec_parse_frame(rmt_nec_symbols);
     else if (symbol_num == 2) {
       nec_parse_frame_repeat(rmt_nec_symbols);
+      nec_repeat = true;
     } else {
       EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
       return;
@@ -245,7 +255,7 @@ class IRDriver : public Node {
           }
 
           // do not process longpress
-          if (symbol_num == 34) {
+          if (nec_repeat == false) {
             if (combined_code == 0xFF00BF40) {  // Lights on/off
               updatedItem.name = "lightsOn";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
@@ -268,30 +278,29 @@ class IRDriver : public Node {
               state.data[updatedItem.name]["action"] = "click";
               state.data[updatedItem.name]["select"] = 2;
               changed = true;
-            } else if (combined_code == 0xFF00F20D) {  // DIY2 button - enable preset #2
+            } else if (combined_code == codePreset3) {  // DIY3 button - enable preset #3
               updatedItem.name = "preset";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = 2;
+              state.data[updatedItem.name]["action"] = "click";
+              state.data[updatedItem.name]["select"] = 3;
               changed = true;
-            } else if (combined_code == 0xFF00F10E) {  // DIY3 button - enable preset #3
+            } else if (combined_code == codePreset4) {  // DIY4 button - enable preset #4
               updatedItem.name = "preset";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = 3;
+              state.data[updatedItem.name]["action"] = "click";
+              state.data[updatedItem.name]["select"] = 4;
               changed = true;
-            } else if (combined_code == 0xFF00F708) {  // DIY4 button - enable preset #4
+            } else if (combined_code == codePreset5) {  // DIY5 button - enable preset #5
               updatedItem.name = "preset";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = 4;
+              state.data[updatedItem.name]["action"] = "click";
+              state.data[updatedItem.name]["select"] = 5;
               changed = true;
-            } else if (combined_code == 0xFF00F609) {  // DIY5 button - enable preset #5
+            } else if (combined_code == codePreset6) {  // DIY6 button - enable preset #6
               updatedItem.name = "preset";
               updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = 5;
-              changed = true;
-            } else if (combined_code == 0xFF00F50A) {  // DIY6 button - enable preset #6
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = 6;
+              state.data[updatedItem.name]["action"] = "click";
+              state.data[updatedItem.name]["select"] = 6;
               changed = true;
             } else if (combined_code == codePaletteInc) {  // palette increase
               updatedItem.name = "palette";
