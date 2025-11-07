@@ -188,8 +188,11 @@ void WiFiSettingsService::reconfigureWiFiConnection()
     #endif
 }
 
+extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
+extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
+
 // 🌙 only send analytics once
-bool sendAnalytics(const String& eventName) {
+bool sendAnalytics() {
   if (WiFi.status() != WL_CONNECTED) return false;
 
 //   ESP_LOGI(SVK_TAG, "send Event %s to Google Analytics", eventName.c_str());
@@ -199,11 +202,14 @@ bool sendAnalytics(const String& eventName) {
   String client_id = String((uint32_t)(mac >> 32), HEX) + String((uint32_t)mac, HEX);
   client_id.toLowerCase();
 
-  String evtName = eventName;
-  evtName.toLowerCase(); // GA4 requires lowercase
+  String eventName = BUILD_TARGET;
+  eventName.toLowerCase(); // GA4 requires lowercase
+  eventName.replace("-", "_");
+  eventName = eventName.substring(0, 40);
 
   WiFiClientSecure client;
-  client.setInsecure();  // skip certificate verification for GA4
+//   client.setInsecure();  // skip certificate verification for GA4
+  client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
 
   HTTPClient http;  // only one HTTPClient instance
 
@@ -231,10 +237,11 @@ bool sendAnalytics(const String& eventName) {
   String payload = "{"
                    "\"client_id\":\"" + client_id + "\","
                    "\"events\":[{"
-                     "\"name\":\"" + evtName + "\","
+                     "\"name\":\"" + eventName + "\","
                      "\"params\":{"
-                       "\"type\":\"" + BUILD_TARGET + "\","
+                    //    "\"type\":\"" + BUILD_TARGET + "\","
                        "\"version\":\"" + APP_VERSION + "\","
+                       "\"board\":\"" + "Default" + "\","
                        "\"country\":\"" + country + "\""
                      "}"
                    "}]"
@@ -243,7 +250,7 @@ bool sendAnalytics(const String& eventName) {
   http.begin(client, url);           // HTTPS GA4
   http.addHeader("Content-Type", "application/json");
   code = http.POST(payload);
-//   ESP_LOGI(SVK_TAG, "Event '%s' sent, HTTP %d payload: %s", evtName.c_str(), code, payload.c_str());
+//   ESP_LOGI(SVK_TAG, "Event '%s' sent, HTTP %d payload: %s", eventName.c_str(), code, payload.c_str());
   http.end();
   return code == 204; // successfull
 }
@@ -267,7 +274,7 @@ void WiFiSettingsService::loop()
 
         // 🌙 only send analytics once (if enabled)
         if (_state.trackAnalytics && !_analyticsSent) {
-            _analyticsSent = sendAnalytics("esp32");
+            _analyticsSent = sendAnalytics();
         }
     }
 

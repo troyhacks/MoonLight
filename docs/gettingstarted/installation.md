@@ -84,6 +84,10 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
     The hostname will be used to access your device. E.g. if the hostname is ML-home you can access it using [http://ml-home.local](http://ml-home.local)
 
+!!! tip "Track analytics"
+
+    MoonLight sends anonymous usage data to Google Analytics when it is restarted. This data consists of country, firmware, board, and version. You can opt-out at any time by unchecking this option. See also [WiFi Station](https://moonmodules.org/MoonLight/network/sta/)
+
 **Step 4**: Press **Add Network** and apply settings. After connecting to your normal WiFi network you will see this screen showing the new IP address of your MoonLight ESP32-device. 
 
    <img width="400" src="https://github.com/user-attachments/assets/e924ebe0-49a1-47f6-84f7-786cdadc4d19" />

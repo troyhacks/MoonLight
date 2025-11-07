@@ -517,7 +517,7 @@
 						</label>
 						<div class="alert alert-info my-2 shadow-lg">
 							<Info class="h-6 w-6 shrink-0 stroke-current" />
-							<span>Track analytics will send one ping to Google Analytics each time MoonLight is restarted so we can track usage of MoonLight. Country, Board and version will be tracked. Uncheck to opt-out</span
+							<span>MoonLight sends anonymous usage data to Google Analytics when it is restarted. This data consists of country, firmware, board, and version. You can opt-out at any time by unchecking this option.</span
 							>
 						</div>
 					</div>

@@ -182,6 +182,7 @@ MoonLight is **free and open source**. Help us continue building amazing tools f
 ### 🌟 Show Your Support
 
 **Star & Follow**
+
 - ⭐ [Star this repository](https://github.com/moonmodules/moonlight) on GitHub
 - 📺 [Subscribe to our YouTube channel](https://youtube.com/@moonmoduleslighting)
 - 🔼 [Upvote us on Reddit](https://reddit.com/r/moonmodules)
@@ -190,10 +191,10 @@ MoonLight is **free and open source**. Help us continue building amazing tools f
 
 Help us enjoy a good beer, a tasty meal, or a fine club night while we code:
 
-- 💜 **[GitHub Sponsors](https://github.com/sponsors/ewowi)** – Support ongoing development
-- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)** – One-time donation
+- 💜 **[GitHub Sponsors](https://github.com/sponsors/ewowi)**
+- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)**
 
-*Every star, subscription, and contribution helps us dedicate more time to making MoonLight better. Thank you for being part of our community!* 🌙✨
+*Every star, subscription, and contribution helps us dedicate more time to making MoonLight better. Thank you for being part of our community!* 🌙✨💫
 
 ---
 
@@ -218,7 +219,7 @@ Help us enjoy a good beer, a tasty meal, or a fine club night while we code:
 
 MoonLight is a [MoonModules.org](https://moonmodules.org) project - Created by the lighting enthusiasts behind WLED-MM.
 
-<img width="350" src="/media/moonlight-logo.png" />
+<img width="350" src="https://moonmodules.org/MoonLight/media/moonlight-logo.png" />
 
 **Our Mission:** Make professional-grade LED control accessible to everyone, from hobbyists to professionals.
 
@@ -229,9 +230,5 @@ MoonLight is a [MoonModules.org](https://moonmodules.org) project - Created by t
 Using this software is at your own risk. While we strive for quality, this software is not bug-free. Contributors to this repository are not liable for any issues, including but not limited to spontaneous combustion of LED strips, hardware damage, or the inevitable heat death of the universe. 🔥🕺🌌
 
 ---
-
-**Ready to light up your world?** 🌙✨
-
-[Get Started](https://moonmodules.org/MoonLight/gettingstarted/overview/) • [Download Latest](https://github.com/MoonModules/MoonLight/releases) • [Join Discord](https://discord.gg/TC8NSUSCdV)
 
 Made with ❤️ by the MoonModules community
