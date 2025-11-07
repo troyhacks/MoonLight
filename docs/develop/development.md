@@ -109,10 +109,10 @@ Firmware binaries come in 2 flavours: including boot and partition (merged) and 
 !!! tip "flash firmware using esptool"
      * [>_] in the statusbar of vscode
      ```
-     esptool --port /dev/cu.usbmodem11201 write-flash 0x0 ./build/merged/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9-3_webflash.bin
+     esptool --port /dev/cu.usbmodem11201 write-flash 0x0 ./build/merged/MoonLight_esp32-s3-devkitc-1-n16r8v_0-6-0_webflash.bin
      ```
      * optionally add erase-flash before write-flash
-     * use ./build/release/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9-3.bin and address 0x10000 to flash only the MoonLight partition
+     * use ./build/release/MoonLight_esp32-s3-devkitc-1-n16r8v_0-6-0.bin and address 0x10000 to flash only the MoonLight partition
 
 ### Adding an ESP32 device Definition
 

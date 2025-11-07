@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/MoonModules/MoonLight"><img src="https://img.shields.io/github/stars/MoonModules/MoonLight?style=social" alt="GitHub Stars"></a>
-  <a href="https://discord.gg/TC8NSUSCdV"><img src="https://img.shields.io/discord/TC8NSUSCdV?logo=discord&label=Discord" alt="Discord"></a>
+  <a href="https://discord.gg/TC8NSUSCdV"><img src="https://img.shields.io/discord/700041398778331156?logo=discord&label=Discord" alt="Discord"></a>
   <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
 </p>
 
@@ -22,6 +22,15 @@
   <a href="https://moonmodules.org/MoonLight/gettingstarted/overview">🚀 Get Started</a> • 
   <a href="https://moonmodules.org/MoonLight/moonlight/overview">💫 Enjoy</a> • 
   <a href="https://moonmodules.org/MoonLight/develop/overview">🛠️ Contribute</a>
+</p>
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
+    <img width="600" src="https://img.youtube.com/vi/l6lTDG6EdEA/maxresdefault.jpg" alt="Watch MoonLight Demo">
+  </a>
+</p>
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">▶️ Watch the release 0.6.0 video</a>
 </p>
 
 ---

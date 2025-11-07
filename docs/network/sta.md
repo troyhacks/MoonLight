@@ -12,13 +12,22 @@
 
 ## MoonLight Analytics
 
-MoonLight sends **anonymous** usage data to Google Analytics when it is restarted. This data consists of:
+MoonLight sends **anonymous** usage data to Google Analytics when it restarts.
 
-* Country e.g. France. determined via [ip-api](http://ip-api.com/json), only the country field is extracted.
-* Firmware e.g. esp32-s3-devkitc-1-n16r8v
-* Board model e.g. QuinLEDDigQuad, based on board presets, not implemented yet
-* MoonLight version e.g. 0.6.0
+You can **opt out** at any time by disabling Track analytics in the settings.
 
-No other information is collected or stored.
+The data collected consists of:
 
-The data is sent only to Google Analytics, which processes it to help us understand general usage patterns and improve MoonLight. You can **opt-out** at any time by unchecking track analytics in the settings.
+* Country – e.g. France, determined via ip-api.com; only the country field is extracted.
+* Firmware – e.g. esp32-s3-devkitc-1-n16r8v
+* Board model – e.g. QuinLED DigQuad, based on board presets (not yet implemented)
+* MoonLight version – e.g. 0.6.0
+
+No personal data, IP addresses, or identifiers that can trace back to an individual are collected, stored, or shared.
+Each event is sent with a random, anonymous client ID, so usage cannot be linked to a specific device or person.
+
+We use this anonymous data to understand how MoonLight is being used, identify which hardware and versions are most common, and prioritize future development and improvements accordingly.
+
+The data is sent only to Google Analytics, which processes it to provide aggregated usage insights.
+
+This data is fully anonymous and handled in a way that meets the principles of the GDPR and other global privacy standards.

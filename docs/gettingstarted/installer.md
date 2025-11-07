@@ -4,7 +4,7 @@ Flashing the firmware is easy and doesn't require you to install any development
 
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 
-Release 0.5.9.3, Oktober 2025
+Release 0.6.0, 7 November 2025
 
 This installer installs <a href="https://github.com/MoonModules/MoonLight" target="_blank">MoonModules/MoonLight</a> on an ESP32 microcontroller.
 
@@ -30,7 +30,7 @@ For a step-by-step instruction, go to <a href="https://moonmodules.org/MoonLight
 | esp32-s3-zero-n4r2 | ![esp32-s3-zero-n4r2](../firmware/installer/images/esp32-s3-zero-n4r2.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-zero-n4r2.json"></esp-web-install-button> | [Ali*](https://s.click.aliexpress.com/e/_EukjHX8){:target="_blank"} | |
 | esp32-d0-wrover | ![esp32-d0-wrover](../firmware/installer/images/esp32-d0-wrover.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-wrover.json"></esp-web-install-button> | [Ali*](https://a.aliexpress.com/_EzhPi6g){:target="_blank"} | |
 | esp32-d0-wrover-moonbase | ![esp32-d0-wrover](../firmware/installer/images/esp32-d0-wrover.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-wrover-moonbase.json"></esp-web-install-button> | [Ali*](https://a.aliexpress.com/_EzhPi6g){:target="_blank"} | |
-| esp32-d0-16MB | ![esp32-d0-16MB](../firmware/installer/images/esp32-d0-16MB.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-16MB.json"></esp-web-install-button> | [Serg74](https://www.tindie.com/products/serg74/esp32-wroom-usb-c-d1-mini32-form-factor-board/){:target="_blank"} | |
+| esp32-d0-16mb | ![esp32-d0-16mb](../firmware/installer/images/esp32-d0-16mb.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-16mb.json"></esp-web-install-button> | [Serg74](https://www.tindie.com/products/serg74/esp32-wroom-usb-c-d1-mini32-form-factor-board/){:target="_blank"} | |
 | esp32-d0 | ![esp32-d0](../firmware/installer/images/esp32-d0.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0.json"></esp-web-install-button> | | |
 | esp32-d0-moonbase | ![esp32-d0](../firmware/installer/images/esp32-d0.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-moonbase.json"></esp-web-install-button> | | |
 | esp32-p4-nano | ![esp32-p4-nano](../firmware/installer/images/esp32-p4-nano.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-p4-nano.json"></esp-web-install-button> | [Waveshare](https://www.waveshare.com/esp32-p4-nano.htm){:target="_blank"} | |

@@ -197,10 +197,11 @@ bool sendAnalytics() {
 
 //   ESP_LOGI(SVK_TAG, "send Event %s to Google Analytics", eventName.c_str());
 
-  // full 48-bit MAC for client_id
-  uint64_t mac = ESP.getEfuseMac();
-  String client_id = String((uint32_t)(mac >> 32), HEX) + String((uint32_t)mac, HEX);
-  client_id.toLowerCase();
+  String client_id = "";
+  for (int i = 0; i < 16; i++) {
+    uint8_t n = random(0, 16);
+    client_id += String(n, HEX);
+  }
 
   String eventName = BUILD_TARGET;
   eventName.toLowerCase(); // GA4 requires lowercase

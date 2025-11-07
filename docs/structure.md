@@ -98,7 +98,7 @@ Also you must make use of couple build flags in [platformio.ini](https://github.
 ```ini
     -D BUILD_TARGET=\"$PIOENV\"
     -D APP_NAME=\"ESP32-Sveltekit\" ; Must only contain characters from [a-zA-Z0-9-_] as this is converted into a filename
-    -D APP_VERSION=\"0.5.9.3\" ; semver compatible version string
+    -D APP_VERSION=\"0.6.0\" ; semver compatible version string
 ```
 
 Out of these flags the [rename_fw.py](https://github.com/theelims/ESP32-sveltekit/blob/main/scripts/rename_fw.py) script will copy and rename the firmware binary to `/build/firmware/{APP_NAME}_{$PIOENV}_{APP_VERSION}.bin`. In addition it will also create a corresponding MD5 checksum file. These files are ready to be uploaded to the Github release page without any further changes. The frontend searches for the firmware binary which matches the build environment and uses this as the update link. This allows you to serve different build targets (e.g. different boards) from the same release page.
