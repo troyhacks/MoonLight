@@ -24,6 +24,12 @@
   <a href="https://moonmodules.org/MoonLight/develop/overview">🛠️ Contribute</a>
 </p>
 
+<a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
+  <img width="600" src="https://img.youtube.com/vi/l6lTDG6EdEA/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the release 0.6.0 video](https://www.youtube.com/watch?v=l6lTDG6EdEA)**
+
 ---
 
 ## 🎯 Why Choose MoonLight?
