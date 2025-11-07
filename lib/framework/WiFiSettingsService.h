@@ -82,8 +82,9 @@ public:
     // core wifi configuration
     String hostname;
     u_int8_t staConnectionMode;
-    u_int8_t txPower;
-    u_int8_t txPowerMeasured;
+    u_int8_t txPower; // 🌙 
+    u_int8_t txPowerMeasured; // 🌙 
+    bool trackAnalytics; // 🌙 
     std::vector<wifi_settings_t> wifiSettings;
 
     static void read(WiFiSettings &settings, JsonObject &root)
@@ -92,6 +93,7 @@ public:
         root["connection_mode"] = settings.staConnectionMode;
         root["txPower"] = settings.txPower;//(uint8_t )WiFi.getTxPower();
         root["txPowerMeasured"] = abs(WiFi.getTxPower());
+        root["trackAnalytics"] = settings.trackAnalytics;
 
         // create JSON array from root
         JsonArray wifiNetworks = root["wifi_networks"].to<JsonArray>();
@@ -129,6 +131,8 @@ public:
         #else 
             settings.txPower = root["txPower"] | 0; // default (do not set the power)
         #endif
+
+        settings.trackAnalytics = root["trackAnalytics"].isNull()?true:root["trackAnalytics"]; // 🌙 
 
         settings.wifiSettings.clear();
 
@@ -242,6 +246,7 @@ private:
     unsigned long _lastRssiUpdate;
     unsigned long _delayedReconnectTime;
     bool _delayedReconnectPending;
+    bool _analyticsSent; // 🌙 
 
     bool _stopping;
     void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);

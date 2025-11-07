@@ -9,3 +9,16 @@
 	    * For battery-powered devices: 10-15 dBm
 	    * For close-range applications: 8-12 dBm
     * 🚨: When the board is in AP mode, it is set to 8.5dBM as most boards work okay with this. WiFi is also initially set to 8.5dBM
+
+## MoonLight Analytics
+
+MoonLight sends **anonymous** usage data to Google Analytics when it is restarted. This data consists of:
+
+* Country e.g. France. determined via [ip-api](http://ip-api.com/json), only the country field is extracted.
+* Firmware e.g. esp32-s3-devkitc-1-n16r8v
+* Board model e.g. QuinLEDDigQuad, based on board presets, not implemented yet
+* MoonLight version e.g. 0.6.0
+
+No other information is collected or stored.
+
+The data is sent only to Google Analytics, which processes it to help us understand general usage patterns and improve MoonLight. You can **opt-out** at any time by unchecking track analytics in the settings.
