@@ -47,6 +47,8 @@ class IRDriver : public Node {
     values.add("Dutch remote");
   }
 
+  uint32_t codeOn;
+  uint32_t codeOff;
   uint32_t codeBrightnessInc;
   uint32_t codeBrightnessDec;
   uint32_t codeRedInc;
@@ -57,12 +59,21 @@ class IRDriver : public Node {
   uint32_t codeBlueDec;
   uint32_t codePaletteInc;
   uint32_t codePaletteDec;
+  uint32_t codePresetInc;
+  uint32_t codePresetDec;
+  uint32_t codePreset0;
   uint32_t codePreset1;
   uint32_t codePreset2;
   uint32_t codePreset3;
   uint32_t codePreset4;
   uint32_t codePreset5;
   uint32_t codePreset6;
+  uint32_t codePresetLoopInc;
+  uint32_t codePresetLoopDec;
+  uint32_t codeFirstPresetInc;
+  uint32_t codeFirstPresetDec;
+  uint32_t codeLastPresetInc;
+  uint32_t codeLastPresetDec;
 
   void onUpdate(String& oldValue, JsonObject control) override {
     if (control["name"] == "pin") {
@@ -71,6 +82,8 @@ class IRDriver : public Node {
       uint8_t value = control["value"];
       switch (value) {
       case 0:  // Swiss remote
+        codeOn = 0xFF00BF40;
+        codeOff = 0xFF00BF40;
         codeBrightnessInc = 0xFF00A35C;
         codeBrightnessDec = 0xFF00A25D;
         codeRedInc = 0xFF00EB14;
@@ -89,12 +102,26 @@ class IRDriver : public Node {
         codePreset6 = 0xFF00F50A;
         break;
       case 1:  // Dutch remote
-        codeBrightnessInc = 0xEF00F20D;
-        codeBrightnessDec = 0xEF00F30C;
-        codePaletteInc = 0xEF00EA15;
-        codePaletteDec = 0xEF00EB14;
-        codePreset1 = 0xEF00EF10;
-        codePreset2 = 0xEF00EE11;
+        codeOn = 0xEF00FC03;
+        codeOff = 0xEF00FD02;
+        codeBrightnessInc = 0xEF00F40B;
+        codeBrightnessDec = 0xEF00F906;
+        codeRedInc = 0xEF00F708;
+        codeRedDec = 0xEF00F30C;
+        codeGreenInc = 0xEF00F609;
+        codeGreenDec = 0xEF00F20D;
+        codeBlueInc = 0xEF00F50A;
+        codeBlueDec = 0xEF00F10E;
+        codePaletteInc = 0xEF00E916;
+        codePaletteDec = 0xEF00EA15;
+        codePresetInc = 0xEF00FF00;
+        codePresetDec = 0xEF00FE01;
+        codePresetLoopInc = 0xEF00FB04;
+        codePresetLoopDec = 0xEF00FA05;
+        codeFirstPresetInc = 0;
+        codeFirstPresetDec = 0;
+        codeLastPresetInc = 0;
+        codeLastPresetDec = 0;
         break;
       }
     }
@@ -204,8 +231,10 @@ class IRDriver : public Node {
 
     uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
+    // EXT_LOGI(IR_DRIVER_TAG, "%08X %08X %d", combined_code, codeBlueDec, combined_code == codeBlueDec);
+
     JsonDocument doc;
-    JsonObject newState = doc.as<JsonObject>();
+    JsonObject newState = doc.to<JsonObject>();
 
     // remaining actions:
     //  presetLoop
@@ -219,53 +248,86 @@ class IRDriver : public Node {
       } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
         newState["brightness"] = max(state.data["brightness"].as<uint8_t>() - 5, 0);
       } else if (combined_code == codeRedInc) {  // increase red
-        newState["red"] = min(state.data["red"].as<uint8_t>() + 10, 255);
+        newState["red"] = min(state.data["red"].as<uint8_t>() + 5, 255);
       } else if (combined_code == codeRedDec) {  // decrease red
-        newState["red"] = max(state.data["red"].as<uint8_t>() - 10, 0);
+        newState["red"] = max(state.data["red"].as<uint8_t>() - 5, 0);
       } else if (combined_code == codeGreenInc) {  // increase green
-        newState["green"] = min(state.data["green"].as<uint8_t>() + 10, 255);
+        newState["green"] = min(state.data["green"].as<uint8_t>() + 5, 255);
       } else if (combined_code == codeGreenDec) {  // decrease green
-        newState["green"] = max(state.data["green"].as<uint8_t>() - 10, 0);
+        newState["green"] = max(state.data["green"].as<uint8_t>() - 5, 0);
       } else if (combined_code == codeBlueInc) {  // increase blue
-        newState["blue"] = min(state.data["blue"].as<uint8_t>() + 10, 255);
+        newState["blue"] = min(state.data["blue"].as<uint8_t>() + 5, 255);
       } else if (combined_code == codeBlueDec) {  // decrease blue
-        newState["blue"] = max(state.data["blue"].as<uint8_t>() - 10, 0);
+        newState["blue"] = max(state.data["blue"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codePresetLoopInc) {
+        newState["presetLoop"] = min(state.data["presetLoop"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codePresetLoopDec) {
+        newState["presetLoop"] = max(state.data["presetLoop"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeFirstPresetInc) {
+        newState["firstPreset"] = min(state.data["firstPreset"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeFirstPresetDec) {
+        newState["firstPreset"] = max(state.data["firstPreset"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeLastPresetInc) {
+        newState["lastPreset"] = min(state.data["lastPreset"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeLastPresetDec) {
+        newState["lastPreset"] = max(state.data["lastPreset"].as<uint8_t>() - 5, 0);
       }
+
+      // find the current preset in the list, select the next
 
       // do not process longpress
       if (nec_repeat == false) {
-        if (combined_code == 0xFF00BF40) {  // Lights on/off
+        if (combined_code == codeOff || combined_code == codeOn) {  // Lights on/off
           newState["lightsOn"] = state.data["lightsOn"].as<bool>() ? false : true;
-        } else if (combined_code == 0xFF00BE41) {  // next button - go to next preset
-          newState["preset"] = state.data["preset"].as<uint8_t>() == 63 ? 0 : state.data["preset"].as<uint8_t>() + 1;
+        } else if (combined_code == codePaletteInc) {                             // palette increase
+          newState["palette"] = min(state.data["palette"].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
+        } else if (combined_code == codePaletteDec) {                             // palette decrease
+          newState["palette"] = max(state.data["palette"].as<uint8_t>() - 1, 0);
+        } else if (combined_code == codePresetDec) {  // next button - go to previous preset
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = getNextItemInArray(state.data["preset"]["list"], state.data["preset"]["selected"], true);  // backwards
+        } else if (combined_code == codePresetInc) {                                                                                // next button - go to next preset
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = getNextItemInArray(state.data["preset"]["list"], state.data["preset"]["selected"]);
+        } else if (combined_code == codePreset0) {  // DIY1 button - enable preset #0
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 0;
         } else if (combined_code == codePreset1) {  // DIY1 button - enable preset #1
+          newState["preset"] = state.data["preset"];
           newState["preset"]["action"] = "click";
           newState["preset"]["select"] = 1;
         } else if (combined_code == codePreset2) {  // DIY1 button - enable preset #2
+          newState["preset"] = state.data["preset"];
           newState["preset"]["action"] = "click";
           newState["preset"]["select"] = 2;
         } else if (combined_code == codePreset3) {  // DIY3 button - enable preset #3
+          newState["preset"] = state.data["preset"];
           newState["preset"]["action"] = "click";
           newState["preset"]["select"] = 3;
         } else if (combined_code == codePreset4) {  // DIY4 button - enable preset #4
+          newState["preset"] = state.data["preset"];
           newState["preset"]["action"] = "click";
           newState["preset"]["select"] = 4;
         } else if (combined_code == codePreset5) {  // DIY5 button - enable preset #5
+          newState["preset"] = state.data["preset"];
           newState["preset"]["action"] = "click";
           newState["preset"]["select"] = 5;
         } else if (combined_code == codePreset6) {  // DIY6 button - enable preset #6
+          newState["preset"] = state.data["preset"];
           newState["preset"]["action"] = "click";
           newState["preset"]["select"] = 6;
-        } else if (combined_code == codePaletteInc) {  // palette increase
-          newState["palette"] = min(state.data["palette"].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
-        } else if (combined_code == codePaletteDec) {  // palette decrease
-          newState["palette"] = max(state.data["palette"].as<uint8_t>() - 1, 0);
         }
       }
-    });
 
-    //update the state and ModuleState::update processes the changes behind the scenes
-    controlModule->update(newState, ModuleState::update, IR_DRIVER_TAG);
+      // update the state and ModuleState::update processes the changes behind the scenes
+      if (newState.size()) {
+        serializeJson(doc, Serial); Serial.println();
+        controlModule->update(newState, ModuleState::update, IR_DRIVER_TAG);
+      }
+    });
   }
 
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)

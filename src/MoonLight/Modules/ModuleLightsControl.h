@@ -71,32 +71,20 @@ class ModuleLightsControl : public Module {
     JsonArray details = root;  // if a property is an array, this is the details of the array
     JsonArray values;          // if a property is a select, this is the values of the select
 
-    property = root.add<JsonObject>();
-    property["name"] = "lightsOn";
-    property["type"] = "checkbox";
+    property = addControl(root, "lightsOn", "checkbox");
     property["default"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "brightness";
-    property["type"] = "slider";
+    property = addControl(root, "brightness", "slider");
     property["default"] = 10;
-    property = root.add<JsonObject>();
-    property["name"] = "red";
-    property["type"] = "slider";
+    property = addControl(root, "red", "slider");
     property["default"] = 255;
     property["color"] = "Red";
-    property = root.add<JsonObject>();
-    property["name"] = "green";
-    property["type"] = "slider";
+    property = addControl(root, "green", "slider");
     property["default"] = 255;
     property["color"] = "Green";
-    property = root.add<JsonObject>();
-    property["name"] = "blue";
-    property["type"] = "slider";
+    property = addControl(root, "blue", "slider");
     property["default"] = 255;
     property["color"] = "Blue";
-    property = root.add<JsonObject>();
-    property["name"] = "palette";
-    property["type"] = "select";
+    property = addControl(root, "palette", "select");
     property["default"] = 6;
     values = property["values"].to<JsonArray>();
     values.add("CloudColors");
@@ -108,36 +96,22 @@ class ModuleLightsControl : public Module {
     values.add("PartyColors");
     values.add("HeatColors");
     values.add("RandomColors");
-    property = root.add<JsonObject>();
-    property["name"] = "preset";
-    property["type"] = "pad";
+    property = addControl(root, "preset", "pad");
     property["width"] = 8;
     property["size"] = 18;
     property["default"].to<JsonObject>();  // clear the preset array before adding new presets
     property["default"]["list"].to<JsonArray>();
     property["default"]["count"] = 64;
 
-    property = root.add<JsonObject>();
-    property["name"] = "presetLoop";
-    property["type"] = "slider";
+    property = addControl(root, "presetLoop", "slider");
     property["default"] = 0;
-    property = root.add<JsonObject>();
-    property["name"] = "firstPreset";
-    property["type"] = "slider";
-    property["min"] = 0;
-    property["max"] = 63;
+    property = addControl(root, "firstPreset", "slider", 0, 63);
     property["default"] = 0;
-    property = root.add<JsonObject>();
-    property["name"] = "lastPreset";
-    property["type"] = "slider";
-    property["min"] = 0;
-    property["max"] = 63;
+    property = addControl(root, "lastPreset", "slider", 0, 63);
     property["default"] = 63;
 
   #if FT_ENABLED(FT_MONITOR)
-    property = root.add<JsonObject>();
-    property["name"] = "monitorOn";
-    property["type"] = "checkbox";
+    property = addControl(root, "monitorOn", "checkbox");
     property["default"] = true;
   #endif
   }
@@ -252,23 +226,23 @@ class ModuleLightsControl : public Module {
       //  std::lock_guard<std::mutex> lock(runInTask_mutex);
       //  runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
       //  load the xth preset from FS
-      JsonArray presets = _state.data["preset"]["list"];
+      JsonArray presetList = _state.data["preset"]["list"];
 
       if (_state.data["firstPreset"] <= _state.data["lastPreset"]) {
         // find the next preset within the range
-        while (presets[lastPresetLooped % presets.size()] < _state.data["firstPreset"] || presets[lastPresetLooped % presets.size()] > _state.data["lastPreset"]) lastPresetLooped++;
+        while (presetList[lastPresetLooped % presetList.size()] < _state.data["firstPreset"] || presetList[lastPresetLooped % presetList.size()] > _state.data["lastPreset"]) lastPresetLooped++;
 
         // correct overflow
-        lastPresetLooped = lastPresetLooped % presets.size();
+        lastPresetLooped = lastPresetLooped % presetList.size();
 
         Char<32> presetFile;
-        presetFile.format("/.config/presets/preset%02d.json", presets[lastPresetLooped].as<uint8_t>());
+        presetFile.format("/.config/presets/preset%02d.json", presetList[lastPresetLooped].as<uint8_t>());
 
         EXT_LOGD(ML_TAG, "loading next preset %d %s", lastPresetLooped, presetFile.c_str());
 
         copyFile(presetFile.c_str(), "/.config/effects.json");
 
-        _state.data["preset"]["selected"] = presets[lastPresetLooped];
+        _state.data["preset"]["selected"] = presetList[lastPresetLooped];
 
         // update UI
         _socket->emitEvent(_moduleName, _state.data);

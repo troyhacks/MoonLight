@@ -127,7 +127,9 @@ struct Converter<Coord3D> {
 };
 }  // namespace ArduinoJson
 
+// ArduinoJson functions
 bool arrayContainsValue(JsonArray array, int value);
+int getNextItemInArray(JsonArray array, size_t currentValue, bool backwards = false);
 
 // convenience function to compare two char strings
 static bool equal(const char* a, const char* b) {

@@ -21,6 +21,16 @@ bool arrayContainsValue(JsonArray array, int value) {
   }
   return false;
 }
+int getNextItemInArray(JsonArray array, size_t currentValue, bool backwards) {
+  size_t n = array.size();
+  if (!n) return -1;
+
+  size_t i = 0;
+  while (i < n && array[i] != currentValue) i++;
+
+  size_t next = (i + (backwards ? -1 : 1) + n) % n;
+  return array[next];
+}
 
 float distance(float x1, float y1, float z1, float x2, float y2, float z2) { return sqrtf((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2)); }
 
