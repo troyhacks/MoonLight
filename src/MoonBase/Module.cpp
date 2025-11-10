@@ -341,4 +341,11 @@ void Module::onUpdate(UpdatedItem& updatedItem) { EXT_LOGD(MB_TAG, "%s = %s -> %
 
 void Module::onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) { EXT_LOGD(MB_TAG, "s:%d n:%d", stateIndex, newIndex); }
 
+JsonObject Module::addControl(JsonArray root, const char* name, const char* type, int min, int max, bool ro, const char* desc) {
+  JsonObject property = root.add<JsonObject>();
+  property["name"] = name;
+  property["type"] = type;
+  return property;
+}
+
 #endif
