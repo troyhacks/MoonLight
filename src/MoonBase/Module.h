@@ -116,6 +116,8 @@ class Module : public StatefulService<ModuleState> {
 
   virtual void setupDefinition(JsonArray root);
 
+  JsonObject addControl(JsonArray root, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
+
   // called in compareRecursive->execOnUpdate
   virtual void onUpdate(UpdatedItem& updatedItem);
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex);

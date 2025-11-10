@@ -31,7 +31,8 @@ class ExampleDriver : public Node {
   void onUpdate(String& oldValue, JsonObject control) {
     // add your custom onUpdate code here
     if (control["name"] == "pin") {
-      //...
+      if (control["value"] = 0) {
+      }
     }
   }
 
