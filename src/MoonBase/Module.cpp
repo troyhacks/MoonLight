@@ -316,8 +316,8 @@ void Module::begin() {
   updateHandler(_moduleName);  // triggers all onUpdates, needed? as setupData already called compareRecursive
 }
 
-//called when ModuleState::update returns changed. if something has changed, process these changes: compare, onUpdate...
-void Module::updateHandler(const String &originId) {
+// called when ModuleState::update returns changed. if something has changed, process these changes: compare, onUpdate...
+void Module::updateHandler(const String& originId) {
   // EXT_LOGD(MB_TAG, "");
   // if update, for all updated items, run onUpdate
   //  for (UpdatedItem updatedItem : _state.updatedItems) {
@@ -342,10 +342,14 @@ void Module::onUpdate(UpdatedItem& updatedItem) { EXT_LOGD(MB_TAG, "%s = %s -> %
 void Module::onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) { EXT_LOGD(MB_TAG, "s:%d n:%d", stateIndex, newIndex); }
 
 JsonObject Module::addControl(JsonArray root, const char* name, const char* type, int min, int max, bool ro, const char* desc) {
-  JsonObject property = root.add<JsonObject>();
-  property["name"] = name;
-  property["type"] = type;
-  return property;
+  JsonObject control = root.add<JsonObject>();
+  control["name"] = name;
+  control["type"] = type;
+  if (min != 0) control["min"] = min;
+  if (max != UINT8_MAX) control["max"] = max;
+  if (ro) control["ro"] = true;  // else if (!control["ro"].isNull()) control.remove("ro");
+  if (desc) control["desc"] = desc;
+  return control;
 }
 
 #endif
