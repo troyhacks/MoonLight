@@ -139,7 +139,7 @@ class Module : public StatefulService<ModuleState> {
   FSPersistence<ModuleState> _fsPersistence;
   PsychicHttpServer* _server;
 
-  void updateHandler();
+  void updateHandler(const String &originId);
 };
 
 #endif

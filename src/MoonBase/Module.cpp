@@ -284,7 +284,7 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
     onReOrderSwap(stateIndex, newIndex);  // Ensure updatedItem is of type UpdatedItem&
   };
 
-  addUpdateHandler([&](const String& originId) { updateHandler(); }, false);
+  addUpdateHandler([&](const String& originId) { updateHandler(originId); }, false);
 }
 
 void Module::begin() {
@@ -313,10 +313,11 @@ void Module::begin() {
     return response.send();
   });
 
-  updateHandler();  // triggers all onUpdates, needed? as setupData already called compareRecursive
+  updateHandler(_moduleName);  // triggers all onUpdates, needed? as setupData already called compareRecursive
 }
 
-void Module::updateHandler() {
+//called when ModuleState::update returns changed. if something has changed, process these changes: compare, onUpdate...
+void Module::updateHandler(const String &originId) {
   // EXT_LOGD(MB_TAG, "");
   // if update, for all updated items, run onUpdate
   //  for (UpdatedItem updatedItem : _state.updatedItems) {

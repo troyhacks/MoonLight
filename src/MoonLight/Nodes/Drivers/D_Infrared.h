@@ -49,6 +49,12 @@ class IRDriver : public Node {
 
   uint32_t codeBrightnessInc;
   uint32_t codeBrightnessDec;
+  uint32_t codeRedInc;
+  uint32_t codeRedDec;
+  uint32_t codeGreenInc;
+  uint32_t codeGreenDec;
+  uint32_t codeBlueInc;
+  uint32_t codeBlueDec;
   uint32_t codePaletteInc;
   uint32_t codePaletteDec;
   uint32_t codePreset1;
@@ -67,6 +73,12 @@ class IRDriver : public Node {
       case 0:  // Swiss remote
         codeBrightnessInc = 0xFF00A35C;
         codeBrightnessDec = 0xFF00A25D;
+        codeRedInc = 0xFF00EB14;
+        codeRedDec = 0xFF00EF10;
+        codeGreenInc = 0xFF00EA15;
+        codeGreenDec = 0xFF00EE11;
+        codeBlueInc = 0xFF00E916;
+        codeBlueDec = 0xFF00ED12;
         codePaletteInc = 0xFF00A25D;
         codePaletteDec = 0xFF00A25D;
         codePreset1 = 0xFF00F30C;
@@ -192,137 +204,68 @@ class IRDriver : public Node {
 
     uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
-    // Here we should implement code address & command to action mapping
-    controlModule->update(
-        [&](ModuleState& state) {
-          bool changed = false;
-          // possible actions:
-          //  lightsOn
-          //  brightness
-          //  red
-          //  green
-          //  blue
-          //  palette
-          //  preset
-          //  presetLoop
-          //  firstPreset
-          //  lastPreset
-          //  monitorOn
+    JsonDocument doc;
+    JsonObject newState = doc.as<JsonObject>();
 
-          UpdatedItem updatedItem;
+    // remaining actions:
+    //  presetLoop
+    //  firstPreset
+    //  lastPreset
+    //  monitorOn
 
-          // allow longpress (symbol_num == 34 and symbol_num == 2)
-          if (combined_code == codeBrightnessInc) {  // Brightness increase
-            updatedItem.name = "brightness";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 5, 255);
-            changed = true;
-          } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
-            updatedItem.name = "brightness";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 5, 0);
-            changed = true;
-          } else if (combined_code == 0xFF00EB14) {  // increase red
-            updatedItem.name = "red";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-            changed = true;
-          } else if (combined_code == 0xFF00EF10) {  // decrease red
-            updatedItem.name = "red";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-            changed = true;
-          } else if (combined_code == 0xFF00EA15) {  // increase green
-            updatedItem.name = "green";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-            changed = true;
-          } else if (combined_code == 0xFF00EE11) {  // decrease green
-            updatedItem.name = "green";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-            changed = true;
-          } else if (combined_code == 0xFF00E916) {  // increase blue
-            updatedItem.name = "blue";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-            changed = true;
-          } else if (combined_code == 0xFF00ED12) {  // decrease blue
-            updatedItem.name = "blue";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-            changed = true;
-          }
+    controlModule->read([&](ModuleState& state) {
+      if (combined_code == codeBrightnessInc) {  // Brightness increase
+        newState["brightness"] = min(state.data["brightness"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
+        newState["brightness"] = max(state.data["brightness"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeRedInc) {  // increase red
+        newState["red"] = min(state.data["red"].as<uint8_t>() + 10, 255);
+      } else if (combined_code == codeRedDec) {  // decrease red
+        newState["red"] = max(state.data["red"].as<uint8_t>() - 10, 0);
+      } else if (combined_code == codeGreenInc) {  // increase green
+        newState["green"] = min(state.data["green"].as<uint8_t>() + 10, 255);
+      } else if (combined_code == codeGreenDec) {  // decrease green
+        newState["green"] = max(state.data["green"].as<uint8_t>() - 10, 0);
+      } else if (combined_code == codeBlueInc) {  // increase blue
+        newState["blue"] = min(state.data["blue"].as<uint8_t>() + 10, 255);
+      } else if (combined_code == codeBlueDec) {  // decrease blue
+        newState["blue"] = max(state.data["blue"].as<uint8_t>() - 10, 0);
+      }
 
-          // do not process longpress
-          if (nec_repeat == false) {
-            if (combined_code == 0xFF00BF40) {  // Lights on/off
-              updatedItem.name = "lightsOn";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = state.data[updatedItem.name].as<bool>() ? false : true;
-              changed = true;
-            } else if (combined_code == 0xFF00BE41) {  // next button - go to next preset
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = state.data[updatedItem.name].as<uint8_t>() == 63 ? 0 : state.data[updatedItem.name].as<uint8_t>() + 1;
-              changed = true;
-            } else if (combined_code == codePreset1) {  // DIY1 button - enable preset #1
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 1;
-              changed = true;
-            } else if (combined_code == codePreset2) {  // DIY1 button - enable preset #2
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 2;
-              changed = true;
-            } else if (combined_code == codePreset3) {  // DIY3 button - enable preset #3
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 3;
-              changed = true;
-            } else if (combined_code == codePreset4) {  // DIY4 button - enable preset #4
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 4;
-              changed = true;
-            } else if (combined_code == codePreset5) {  // DIY5 button - enable preset #5
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 5;
-              changed = true;
-            } else if (combined_code == codePreset6) {  // DIY6 button - enable preset #6
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 6;
-              changed = true;
-            } else if (combined_code == codePaletteInc) {  // palette increase
-              updatedItem.name = "palette";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
-              changed = true;
-            } else if (combined_code == codePaletteDec) {  // palette decrease
-              updatedItem.name = "palette";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 1, 0);
-              changed = true;
-            }
-          }
+      // do not process longpress
+      if (nec_repeat == false) {
+        if (combined_code == 0xFF00BF40) {  // Lights on/off
+          newState["lightsOn"] = state.data["lightsOn"].as<bool>() ? false : true;
+        } else if (combined_code == 0xFF00BE41) {  // next button - go to next preset
+          newState["preset"] = state.data["preset"].as<uint8_t>() == 63 ? 0 : state.data["preset"].as<uint8_t>() + 1;
+        } else if (combined_code == codePreset1) {  // DIY1 button - enable preset #1
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 1;
+        } else if (combined_code == codePreset2) {  // DIY1 button - enable preset #2
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 2;
+        } else if (combined_code == codePreset3) {  // DIY3 button - enable preset #3
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 3;
+        } else if (combined_code == codePreset4) {  // DIY4 button - enable preset #4
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 4;
+        } else if (combined_code == codePreset5) {  // DIY5 button - enable preset #5
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 5;
+        } else if (combined_code == codePreset6) {  // DIY6 button - enable preset #6
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 6;
+        } else if (combined_code == codePaletteInc) {  // palette increase
+          newState["palette"] = min(state.data["palette"].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
+        } else if (combined_code == codePaletteDec) {  // palette decrease
+          newState["palette"] = max(state.data["palette"].as<uint8_t>() - 1, 0);
+        }
+      }
+    });
 
-          if (changed) {
-            updatedItem.value = state.data[updatedItem.name];
-            state.onUpdate(updatedItem);
-          }
-
-          return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  // notify StatefulService
-        },
-        IR_DRIVER_TAG);
+    //update the state and ModuleState::update processes the changes behind the scenes
+    controlModule->update(newState, ModuleState::update, IR_DRIVER_TAG);
   }
 
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
