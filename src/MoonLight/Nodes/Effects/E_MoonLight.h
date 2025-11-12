@@ -49,12 +49,12 @@ class FixedRectangleEffect : public Node {
   uint8_t green = 15;
   uint8_t blue = 98;
   uint8_t white = 0;
-  uint8_t width = 1;
-  uint8_t x = 0;
-  uint8_t height = 1;
-  uint8_t y = 0;
-  uint8_t depth = 1;
-  uint8_t z = 0;
+  uint16_t width = 1;
+  uint16_t x = 0;
+  uint16_t height = 1;
+  uint16_t y = 0;
+  uint16_t depth = 1;
+  uint16_t z = 0;
   bool alternateWhite = false;  // to be used for frontlight
 
   void setup() override {
