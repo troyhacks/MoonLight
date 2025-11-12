@@ -102,6 +102,8 @@ class Node {
       newControl = true;  // set flag to true, as control is new
     }
 
+    control["valid"] = true; //invalid controls will be deleted
+
     // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
 
     if (newControl) control["value"] = variable;  // set default

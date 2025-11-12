@@ -133,6 +133,7 @@ void ModuleState::execOnUpdate(UpdatedItem& updatedItem) {
     saveNeeded = true;
   }
 
+  // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   if (onUpdate) {
     if (onUpdateRunInTask == 1) {  // if set to 0, run in main loopTask
       std::lock_guard<std::mutex> lock(runInTask_mutex);
@@ -186,11 +187,10 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
         for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) {  // compare each item in the array
           // EXT_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateArray[i].as<String>().c_str(), newArray[i].as<String>().c_str());
           if (i >= stateArray.size()) {  // newArray has added a row
-            // EXT_LOGD(MB_TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+            EXT_LOGD(MB_TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
             stateArray.add<JsonObject>();  // add new row
             changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth + 1, i) || changed;
           } else if (i >= newArray.size()) {  // newArray has deleted a row
-            // EXT_LOGD(MB_TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
             // newArray.add<JsonObject>(); //add dummy row
             changed = true;  // compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
 
@@ -207,12 +207,34 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
               updatedItem.oldValue = property.value().as<String>();
               updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
               stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
-              execOnUpdate(updatedItem);
+              execOnUpdate(updatedItem);             // async in other task
             }
 
+            // String tt;
+            // serializeJson(stateArray, tt);
+            // EXT_LOGD(MB_TAG, "remove %s.%s[%d] d: %d (%s)", parent.c_str(), key.c_str(), i, depth, tt.c_str());
+
             stateArray.remove(i);  // remove the state row entirely
-          } else                   // row already exists
+            // ([{"name":"xFrequency","type":"slider","default":64,"p":1009144377,"value":173,"size":8},{"name":"fadeRate","type":"slider","default":128,"p":1009144378,"value":128,"size":8},{"name":"speed","type":"slider","default":128,"p":1009144379,"value":128,"size":8},{"name":"brightness","type":"slider","default":255,"p":1009144380,"value":255,"size":8}])
+          } else {  // row already exists
+
+            // if node has changed, remove the controls
+            // "nodes":[{"name":"Lissajous ⏹️ 🔥🎨🐙","on":true,"controls":[{"name":"xFrequency","type":"slider","default":64,"p":1009123281,"value":64,"size":8},{"name":"fadeRate","type":"slider","default":128,"p":1009123282,"value":128,"size":8},{"name":"speed","type":"slider","default":128,"p":1009123283,"value":128,"size":8}]}]}
+            // if (key == "nodes") {
+            //   // the array is a list of nodes, for each node, remove the controls
+            //   // remove the old controls from state, so new controls will be added
+            //   String sr;
+            //   serializeJson(stateArray[i], sr);
+            //   EXT_LOGD(MB_TAG, "remove %s node controls old %s (%s)", parent.c_str(), key.c_str(), sr.c_str());
+            //   stateArray[i].remove("controls");
+            //   stateArray[i]["controls"].to<JsonArray>();
+            //   serializeJson(newArray[i], sr);
+            //   EXT_LOGD(MB_TAG, "remove %s node controls new %s (%s)", parent.c_str(), key.c_str(), sr.c_str());
+            // }
+            // else  // compare the details (not for node controls)
+            // old node with empty controls, new node with new controls
             changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth + 1, i) || changed;
+          }
         }
       } else {  // if property is key/value
         if (key != "p") {

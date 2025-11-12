@@ -170,6 +170,7 @@ class ModuleLightsControl : public Module {
             // trigger notification of update of effects.json
             _fileManager->update(
                 [&](FilesState& state) {
+                  state.updatedItems.clear();
                   state.updatedItems.push_back("/.config/effects.json");
                   return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
                 },
