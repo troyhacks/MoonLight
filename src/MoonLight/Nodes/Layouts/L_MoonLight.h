@@ -418,4 +418,75 @@ class WheelLayout : public Node {
   }
 };
 
+class SpiralLayout : public Node {
+ public:
+  static const char* name() { return "Spiral"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "🚥"; }
+
+  uint8_t pin = 16;
+  uint16_t ledCount = 640;
+  uint16_t bottomRadius = 10;
+  uint16_t height = 25;
+
+  void setup() override {
+    addControl(ledCount, "ledCount", "number", 1, 2048);
+    addControl(bottomRadius, "bottomRadius", "number", 1, 100);
+    addControl(height, "height", "number", 1, 200);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
+  }
+
+  Coord3D middle;
+
+  bool hasOnLayout() const override { return true; }
+
+  void onLayout() override {
+    // Calculate middle point (bottom center of spiral)
+    middle.x = bottomRadius;
+    middle.y = 0;
+    middle.z = bottomRadius;
+
+    // Calculate strip length: 1cm between LEDs
+    float stripLength = (ledCount - 1) * 1.0f;  // in cm
+
+    // Calculate circumference at bottom
+    float bottomCircumference = 2.0f * PI * bottomRadius;
+
+    // Estimate LEDs per round at bottom (adjusts as radius changes)
+    float ledsPerRound = bottomCircumference / 1.0f;  // 1cm spacing
+
+    float currentLength = 0;
+
+    for (int i = 0; i < ledCount; i++) {
+      // Calculate progress through the spiral (0 to 1)
+      float progress = (float)i / (ledCount - 1);
+
+      // Calculate current radius (linear taper from bottom to 0)
+      float currentRadius = bottomRadius * (1.0f - progress);
+
+      // Calculate current height
+      float currentHeight = height * progress;
+
+      // Calculate angle - accumulate based on arc length
+      // For each LED, advance by 1cm along the current circumference
+      float currentCircumference = 2.0f * PI * currentRadius;
+      float angleIncrement = (currentCircumference > 0) ? (1.0f / currentRadius) : 0;
+      currentLength += (i > 0) ? angleIncrement : 0;
+
+      // Alternative: use estimated leds per round
+      float radians = i * 2.0f * PI / ledsPerRound;
+
+      // Calculate position
+      float x = currentRadius * sinf(radians);
+      float y = currentHeight;
+      float z = currentRadius * cosf(radians);
+
+      // Add light at calculated position
+      addLight(Coord3D(x + middle.x, y + middle.y, z + middle.z));
+    }
+
+    addPin(pin);
+  }
+};
+
 #endif  // FT_MOONLIGHT

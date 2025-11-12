@@ -86,9 +86,8 @@
 </script>
 
 <div>
-	<div class="flex-row flex items-center space-x-2">
-		<label class="label cursor-pointer" for={property.name}>
-			<!-- <span class="text-md">{initCap(property.name)}</span> -->
+	<div class="flex-row flex items-center space-x-2  mb-2">
+		<label class="label cursor-pointer min-w-24" for={property.name}>
 			<span class="mr-4">{initCap(property.name)}</span>
 		</label>
 
@@ -131,7 +130,7 @@
 				min={property.min ? property.min : 0}
 				max={property.max ? property.max : 255}
 				{step}
-				class={'w-full range ' +
+				class={'flex-1 range ' +
 					(disabled == false
 						? property.color == 'Red'
 							? 'range-error'
@@ -140,7 +139,6 @@
 								: 'range-primary'
 						: 'range-secondary')}
 				{disabled}
-				title={property.default}
 				bind:value
 				on:input={onChange}
 			/>

@@ -46,6 +46,7 @@ class ModuleDrivers : public NodeManager {
     values.add(getNameAndTags<HumanSizedCubeLayout>());
     values.add(getNameAndTags<RingsLayout>());
     values.add(getNameAndTags<WheelLayout>());
+    values.add(getNameAndTags<SpiralLayout>());
     values.add(getNameAndTags<SingleLineLayout>());
     values.add(getNameAndTags<SingleRowLayout>());
 
@@ -79,6 +80,8 @@ class ModuleDrivers : public NodeManager {
       node = allocMBObject<RingsLayout>();
     else if (equalAZaz09(name, WheelLayout::name()))
       node = allocMBObject<WheelLayout>();
+    else if (equalAZaz09(name, SpiralLayout::name()))
+      node = allocMBObject<SpiralLayout>();
     else if (equalAZaz09(name, HumanSizedCubeLayout::name()))
       node = allocMBObject<HumanSizedCubeLayout>();
     else if (equalAZaz09(name, SingleLineLayout::name()))
