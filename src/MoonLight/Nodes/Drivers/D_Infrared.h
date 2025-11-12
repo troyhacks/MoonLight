@@ -231,7 +231,10 @@ class IRDriver : public Node {
 
     uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
-    // EXT_LOGI(IR_DRIVER_TAG, "%08X %08X %d", combined_code, codeBlueDec, combined_code == codeBlueDec);
+    // do not allow 0s, which also match non initialize IR codes
+    if (combined_code == 0){
+      return;
+    }
 
     JsonDocument doc;
     JsonObject newState = doc.to<JsonObject>();
