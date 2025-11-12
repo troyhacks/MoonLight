@@ -223,7 +223,7 @@ class IRDriver : public Node {
       nec_parse_frame_repeat(rmt_nec_symbols);
       nec_repeat = true;
     } else {
-      EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
+      //EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
       return;
     }
 
