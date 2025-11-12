@@ -210,6 +210,7 @@ void LiveScriptNode::onLayout() {
 LiveScriptNode::~LiveScriptNode() {
   EXT_LOGV(ML_TAG, "%s", animation);
   scriptRuntime.kill(animation);
+  Node::~Node();
 }
 
 // LiveScriptNode functions

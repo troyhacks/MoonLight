@@ -199,7 +199,7 @@ bool sendAnalytics() {
 
   String client_id = "";
   for (int i = 0; i < 16; i++) {
-    uint8_t n = random(0, 16);
+    uint8_t n = esp_random()%16; //true random © softhack007
     client_id += String(n, HEX);
   }
 
