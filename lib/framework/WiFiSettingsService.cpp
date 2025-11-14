@@ -275,7 +275,10 @@ void WiFiSettingsService::loop()
 
         // 🌙 only send analytics once (if enabled)
         if (_state.trackAnalytics && !_analyticsSent) {
-            _analyticsSent = sendAnalytics();
+            #if FT_ENABLED(FT_MOONLIGHT)
+                if (psramFound())
+            #endif
+                    _analyticsSent = sendAnalytics(); // 🌙 disabled for MoonLight without PSRAM atm
         }
     }
 
