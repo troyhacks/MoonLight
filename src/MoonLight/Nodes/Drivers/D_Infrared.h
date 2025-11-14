@@ -20,13 +20,13 @@
    */
   #define NEC_LEADING_CODE_DURATION_0 9000
   #define NEC_LEADING_CODE_DURATION_1 4500
-  #define NEC_PAYLOAD_ZERO_DURATION_0 560
-  #define NEC_PAYLOAD_ZERO_DURATION_1 560
-  #define NEC_PAYLOAD_ONE_DURATION_0 560
-  #define NEC_PAYLOAD_ONE_DURATION_1 1690
+  #define NEC_PAYLOAD_ZERO_DURATION_0 562
+  #define NEC_PAYLOAD_ZERO_DURATION_1 562
+  #define NEC_PAYLOAD_ONE_DURATION_0 562
+  #define NEC_PAYLOAD_ONE_DURATION_1 1687
   #define NEC_REPEAT_CODE_DURATION_0 9000
   #define NEC_REPEAT_CODE_DURATION_1 2250
-  #define EXAMPLE_IR_NEC_DECODE_MARGIN 200  // Tolerance for parsing RMT symbols into bit stream
+  #define EXAMPLE_IR_NEC_DECODE_MARGIN 300  // Tolerance for parsing RMT symbols into bit stream
 
 class IRDriver : public Node {
  public:
@@ -151,7 +151,7 @@ class IRDriver : public Node {
 
   // the following timing requirement is based on NEC protocol
   rmt_receive_config_t receive_config = {
-      .signal_range_min_ns = 1250,      // the shortest duration for NEC signal is 560us, 1250ns < 560us, valid signal won't be treated as noise
+      .signal_range_min_ns = 3186,      // the shortest duration for NEC signal is 560us, (set to max value)
       .signal_range_max_ns = 12000000,  // the longest duration for NEC signal is 9000us, 12000000ns > 9000us, the receive won't stop early
   };
 
@@ -184,6 +184,7 @@ class IRDriver : public Node {
       } else if (nec_parse_logic0(cur)) {
         address &= ~(1 << i);
       } else {
+        EXT_LOGI(IR_DRIVER_TAG, "addr bit decode error");
         return false;
       }
       cur++;
@@ -194,6 +195,7 @@ class IRDriver : public Node {
       } else if (nec_parse_logic0(cur)) {
         command &= ~(1 << i);
       } else {
+        EXT_LOGI(IR_DRIVER_TAG, "command bit decode error");
         return false;
       }
       cur++;
@@ -216,22 +218,27 @@ class IRDriver : public Node {
     }
     // decode RMT symbols
 
+    bool valid_parsing = false;
     bool nec_repeat = false;
     if (symbol_num == 34)
-      nec_parse_frame(rmt_nec_symbols);
+      valid_parsing = nec_parse_frame(rmt_nec_symbols);
     else if (symbol_num == 2) {
-      nec_parse_frame_repeat(rmt_nec_symbols);
+      valid_parsing = nec_parse_frame_repeat(rmt_nec_symbols);
       nec_repeat = true;
     } else {
       //EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
       return;
     }
 
-    EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Longpress" : "");
-
+    // create combined code
     uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
-    // EXT_LOGI(IR_DRIVER_TAG, "%08X %08X %d", combined_code, codeBlueDec, combined_code == codeBlueDec);
+    // do not allow 0s, which also match non initialize IR codes
+    if ((combined_code == 0) || (valid_parsing == false)){
+      return;
+    }
+
+    EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Longpress" : "");
 
     JsonDocument doc;
     JsonObject newState = doc.to<JsonObject>();
@@ -334,6 +341,7 @@ class IRDriver : public Node {
   void loop() override {
     if (receive_queue) {
       if (xQueueReceive(receive_queue, &rx_data, 0) == pdPASS) {
+        EXT_LOGD(IR_DRIVER_TAG, "Received symbols: #%d", rx_data.num_symbols);
         // parse the receive symbols and print the result
         parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
         // start receive again
