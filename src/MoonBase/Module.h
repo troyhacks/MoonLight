@@ -79,14 +79,9 @@ class ModuleState {
     }
   }
 
-  uint8_t onUpdateRunInTask = UINT8_MAX;  // if set to UINT8_MAX, runInTask1 is not called, otherwise it is called with this value as index
-
   std::function<void(JsonArray root)> setupDefinition = nullptr;
 
   void setupData();
-
-  // called from ModuleState::update.checkReOrderSwap
-  void execOnReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
 
   // called from compareRecursive
   void execOnUpdate(UpdatedItem& updatedItem);
@@ -121,6 +116,8 @@ class Module : public StatefulService<ModuleState> {
   // called in compareRecursive->execOnUpdate
   virtual void onUpdate(UpdatedItem& updatedItem);
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
+
+  String updateOriginId;
 
  protected:
   EventSocket* _socket;

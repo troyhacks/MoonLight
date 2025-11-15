@@ -38,7 +38,7 @@ class IRDriver : public Node {
   uint8_t irPreset = 1;
 
   void setup() override {
-    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT);
+    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT-1);
     JsonObject property;
     JsonArray values;
     property = addControl(irPreset, "irPreset", "select");

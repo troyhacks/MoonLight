@@ -108,7 +108,7 @@ class PanelLayout : public Node {
     addControl(panel.inc[1], "Y++", "checkbox");
     addControl(panel.snake[1], "snake", "checkbox");
 
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -287,7 +287,7 @@ class SingleLineLayout : public Node {
     addControl(width, "width", "number", 1, 1000);
     addControl(yposition, "Y position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -322,7 +322,7 @@ class SingleRowLayout : public Node {
     addControl(height, "height", "number", 1, 1000);
     addControl(xposition, "X position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -351,7 +351,7 @@ class RingsLayout : public Node {
   uint8_t width = 16;
   uint8_t height = 16;
 
-  void setup() override { addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT); }
+  void setup() override { addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1); }
 
   void add(int leds, int radius) {
     for (int i = 0; i < leds; i++) {
@@ -395,7 +395,7 @@ class WheelLayout : public Node {
   void setup() override {
     addControl(nrOfSpokes, "nrOfSpokes", "slider", 1, 48);
     addControl(ledsPerSpoke, "ledsPerSpoke", "slider", 1, 255);
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -433,7 +433,7 @@ class SpiralLayout : public Node {
     addControl(ledCount, "ledCount", "number", 1, 2048);
     addControl(bottomRadius, "bottomRadius", "number", 1, 100);
     addControl(height, "height", "number", 1, 200);
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   Coord3D middle;

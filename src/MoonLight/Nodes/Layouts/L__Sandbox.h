@@ -31,7 +31,7 @@ class ExampleLayout : public Node {
     addControl(width, "width", "slider");
     addControl(height, "height", "slider");
     addControl(depth, "depth", "slider");
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
+    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }  // so the mapping system knows this node has onLayout, eg each time a modifier changes

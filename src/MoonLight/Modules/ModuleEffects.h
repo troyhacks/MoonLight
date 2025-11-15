@@ -25,7 +25,6 @@ class ModuleEffects : public NodeManager {
   ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit, fileManager) { EXT_LOGV(ML_TAG, "constructor"); }
 
   void begin() {
-    _state.onUpdateRunInTask = 1;
     defaultNodeName = getNameAndTags<RandomEffect>();
     NodeManager::begin();
 

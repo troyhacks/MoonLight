@@ -75,7 +75,7 @@ void operator delete[](void* ptr, size_t size) noexcept {
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
 
-#include "MoonBase/Utilities.h"  // for runInTask1/2
+#include "MoonBase/Utilities.h"  // for runInAppTask
 
 #define SERIAL_BAUD_RATE 115200
 
@@ -134,12 +134,12 @@ void effectTask(void* pvParameters) {
 
     xSemaphoreGive(driverSemaphore);
 
-    std::lock_guard<std::mutex> lock(runInTask_mutex);
-    while (!runInTask1.empty()) {
-      // EXT_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
-      runInTask1.front()();
-      runInTask1.erase(runInTask1.begin());
+    std::vector<std::function<void()>> tasks;
+    {
+      std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+      tasks.swap(runInAppTask);  // move all into local vector
     }
+    for (auto& task : tasks) task(); //run the tasks
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
@@ -156,13 +156,6 @@ void driverTask(void* pvParameters) {
     layerP.loopDrivers();
 
     xSemaphoreGive(effectSemaphore);
-
-    std::lock_guard<std::mutex> lock(runInTask_mutex);
-    while (!runInTask2.empty()) {
-      EXT_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
-      runInTask2.front()();
-      runInTask2.erase(runInTask2.begin());
-    }
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
@@ -209,22 +202,35 @@ void setup() {
   }
 
   // check sizes ...
-  //  sizeof(esp32sveltekit);
-  //  sizeof(WiFiSettingsService);
-  //  sizeof(fileManager);
-  //  sizeof(Module);
-  //  sizeof(moduleDevices);
-  //  sizeof(moduleIO);
-  //  #if FT_ENABLED(FT_MOONLIGHT)
-  //      sizeof(moduleEffects);
-  //      sizeof(moduleDrivers);
-  //      sizeof(moduleLightsControl);
-  //      sizeof(moduleLightsControl);
-  //      sizeof(moduleChannels);
-  //      sizeof(moduleMoonLightInfo);
-  //      sizeof(layerP.lights);
-  //      sizeof(layerP.lights.header);
-  //  #endif
+  //   sizeof(esp32sveltekit);                // 4152
+  //   sizeof(WiFiSettingsService);           // 456
+  //   sizeof(SystemStatus);                  // 16
+  //   sizeof(UploadFirmwareService);         // 32
+  //   sizeof(HttpEndpoint<ModuleState>);     // 152
+  //   sizeof(EventEndpoint<ModuleState>);    // 112
+  //   sizeof(WebSocketServer<ModuleState>);  // 488
+  //   sizeof(FSPersistence<ModuleState>);    // 128
+  //   sizeof(PsychicHttpServer*);            // 8
+  //   sizeof(HttpEndpoint<APSettings>);      // 152
+  //   sizeof(FSPersistence<APSettings>);     // 128
+  //   sizeof(APSettingsService);             // 600;
+  //   sizeof(PsychicWebSocketHandler);       // 336
+  //   sizeof(fileManager);                   // 864
+  //   sizeof(Module);                        // 1144
+  //   sizeof(moduleDevices);                 // 1320
+  //   sizeof(moduleIO);                      // 1144
+  // #if FT_ENABLED(FT_MOONLIGHT)
+  //   sizeof(moduleEffects);        // 1208
+  //   sizeof(moduleDrivers);        // 1216
+  //   sizeof(moduleLightsControl);  // 1176
+  //   #if FT_ENABLED(FT_LIVESCRIPT)
+  //   sizeof(moduleLiveScripts);  // 1176
+  //   #endif
+  //   sizeof(moduleChannels);        // 1144
+  //   sizeof(moduleMoonLightInfo);   // 1144
+  //   sizeof(layerP.lights);         // 56
+  //   sizeof(layerP.lights.header);  // 40
+  // #endif
 
   // start ESP32-SvelteKit
   esp32sveltekit.begin();
@@ -285,7 +291,6 @@ void setup() {
 
       moduleDevices.loop1s();
       moduleTasks.loop1s();
-      moduleIO.loop1s();
 
   #if FT_ENABLED(FT_MOONLIGHT)
       // set shared data (eg used in scrolling text effect)

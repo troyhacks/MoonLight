@@ -24,6 +24,7 @@
 	export let disabled = false;
 	export let step = 1;
 	export let changeOnInput: boolean = true;
+	export let noPrompts: boolean = false;
 
 	//make getTimeAgo reactive
 	export let currentTime = Date.now();
@@ -86,16 +87,20 @@
 </script>
 
 <div>
-	<div class="flex-row flex items-center space-x-2  mb-2">
-		<label class="label cursor-pointer min-w-24" for={property.name}>
-			<span class="mr-4">{initCap(property.name)}</span>
-		</label>
+	<div class="flex-row flex items-center space-x-2 mb-2">
+		{#if !noPrompts}
+			<label class="label cursor-pointer min-w-24" for={property.name}>
+				<span class="mr-4">{initCap(property.name)}</span>
+			</label>
+		{/if}
 
 		{#if property.ro}
 			{#if property.type == 'ip'}
 				<a href="http://{value}" target="_blank">{value}</a>
 			{:else if property.type == 'mdnsName'}
 				<a href="http://{value}.local" target="_blank">{value}</a>
+			{:else if property.type == 'time'}
+				<span>{getTimeAgo(value, currentTime)}</span>
 			{:else if property.type == 'coord3D' && value != null}
 				<!-- value not null otherwise value.x etc can cause errors-->
 				<span>{value.x}, {value.y}, {value.z}</span>
@@ -193,7 +198,7 @@
 				}}
 			/>
 		{:else if property.type == 'time'}
-			<span>{value} {getTimeAgo(value, currentTime)}</span>
+			<span>{getTimeAgo(value, currentTime)}</span>
 		{:else if property.type == 'ip'}
 			<input
 				type={property.type}
@@ -338,38 +343,40 @@ Adjust space-x-2 and space-y-2 for spacing. -->
 				on:change={onChange}
 			/>
 		{/if}
-		{#if !property.ro && property.default != null && property.type != 'pad'}
-			<button
-				type="button"
-				class="btn btn-ghost btn-sm"
-				disabled={disabled ||
-					(property.type == 'coord3D'
-						? property.default.x == value.x &&
-							property.default.y == value.y &&
-							property.default.z == value.z
-						: property.default == value)}
-				on:click={(event: any) => {
-					if (property.type == 'coord3D') {
-						value.x = property.default.x;
-						value.y = property.default.y;
-						value.z = property.default.z;
-					} else {
-						value = property.default;
-					}
-					onChange(event);
-				}}
-				title={'Reset to default (' +
-					(property.type == 'coord3D'
-						? property.default.x + ',' + property.default.y + ',' + property.default.z
-						: property.default) +
-					')'}>↻</button
-			>
-		{/if}
-		{#if property.desc}
-			<label class="label cursor-pointer" for={property.desc}>
-				<!-- <span class="text-md">{initCap(property.name)}</span> -->
-				<span class="mr-4">{initCap(property.desc)}</span>
-			</label>
+		{#if !noPrompts}
+			{#if !property.ro && property.default != null && property.type != 'pad'}
+				<button
+					type="button"
+					class="btn btn-ghost btn-sm"
+					disabled={disabled ||
+						(property.type == 'coord3D'
+							? property.default.x == value.x &&
+								property.default.y == value.y &&
+								property.default.z == value.z
+							: property.default == value)}
+					on:click={(event: any) => {
+						if (property.type == 'coord3D') {
+							value.x = property.default.x;
+							value.y = property.default.y;
+							value.z = property.default.z;
+						} else {
+							value = property.default;
+						}
+						onChange(event);
+					}}
+					title={'Reset to default (' +
+						(property.type == 'coord3D'
+							? property.default.x + ',' + property.default.y + ',' + property.default.z
+							: property.default) +
+						')'}>↻</button
+				>
+			{/if}
+			{#if property.desc}
+				<label class="label cursor-pointer" for={property.desc}>
+					<!-- <span class="text-md">{initCap(property.name)}</span> -->
+					<span class="mr-4">{initCap(property.desc)}</span>
+				</label>
+			{/if}
 		{/if}
 	</div>
 </div>

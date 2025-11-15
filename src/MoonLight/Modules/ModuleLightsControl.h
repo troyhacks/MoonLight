@@ -224,8 +224,8 @@ class ModuleLightsControl : public Module {
       lastPresetTime = millis();
 
       // bugfix;
-      //  std::lock_guard<std::mutex> lock(runInTask_mutex);
-      //  runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
+      //  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+      //  runInAppTask.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
       //  load the xth preset from FS
       JsonArray presetList = _state.data["preset"]["list"];
 

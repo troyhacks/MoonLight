@@ -219,8 +219,8 @@ void LiveScriptNode::compileAndRun() {
   // send UI spinner
 
   // run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-  //  std::lock_guard<std::mutex> lock(runInTask_mutex);
-  //  runInTask1.push_back([&, animation, type, error] {
+  //  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+  //  runInAppTask.push_back([&, animation, type, error] {
   EXT_LOGV(ML_TAG, "%s", animation);
   File file = ESPFS.open(animation);
   if (file) {

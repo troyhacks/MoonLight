@@ -21,17 +21,22 @@
 	import { cubicOut } from 'svelte/easing';
 	import SearchIcon from '~icons/tabler/search';
 	import Delete from '~icons/tabler/trash';
-	import { initCap, getTimeAgo } from '$lib/stores/moonbase_utilities';
+	import { initCap } from '$lib/stores/moonbase_utilities';
 
 	import EditObject from './EditObject.svelte';
 	import { modals } from 'svelte-modals';
 	import Grip from '~icons/tabler/grip-vertical';
+	import MultiInput from './MultiInput.svelte';
+	import { isNumber } from 'chart.js/helpers';
 
 	let { property, data = $bindable(), definition, onChange, changeOnInput } = $props();
 
 	let dataEditable: any = $state({});
 
-	let propertyEditable: string = $state('');
+	// let propertyEditable: string = $state('');
+
+	let searchQuery: string = $state('');
+	searchQuery = "!none";
 
 	//if no records added yet, add an empty array
 	if (data[property.name] == undefined) {
@@ -67,7 +72,7 @@
 	}
 
 	function addItem(propertyName: string) {
-		propertyEditable = propertyName;
+		// propertyEditable = propertyName;
 		//set the default values from the definition...
 		dataEditable = {};
 
@@ -114,6 +119,53 @@
 		data[propertyName] = [...data[propertyName]]; //Trigger reactivity
 		onChange();
 	}
+
+	// Filter items based on search query - returns array of {item, originalIndex}
+	let filteredItems = $derived.by(() => {
+		if (!searchQuery.trim()) {
+			return data[property.name].map((item: any, index: number) => ({
+				item,
+				originalIndex: index
+			}));
+		}
+
+		const isNegated = searchQuery.startsWith('!');
+		const query = (isNegated ? searchQuery.slice(1) : searchQuery).toLowerCase().trim();
+
+		if (!query) {
+			return data[property.name].map((item: any, index: number) => ({
+				item,
+				originalIndex: index
+			}));
+		}
+
+		const filtered = data[property.name]
+			.map((item: any, index: number) => ({ item, originalIndex: index }))
+			.filter(({ item }: { item: any }) => {
+				// Search through the first 3 visible fields
+				const matchFound = property.n.slice(0, 3).some((propertyN: any) => {
+					let valueStr;
+
+					// Check dropdown - only check the SELECTED option's label, not all options
+					if (
+						propertyN.values &&
+						Array.isArray(propertyN.values) &&
+						isNumber(item[propertyN.name])
+					) {
+						valueStr = propertyN.values[item[propertyN.name]];
+					} else {
+						valueStr = item[propertyN.name];
+					}
+
+					return String(valueStr).toLowerCase().includes(query);
+				});
+
+				// If negated (!), return items that DON'T match
+				return isNegated ? !matchFound : matchFound;
+			});
+
+		return filtered;
+	});
 </script>
 
 <div class="divider mb-2 mt-0"></div>
@@ -136,37 +188,60 @@
 	>
 </div>
 
+<!-- Search Filter -->
+{#if data[property.name].length > 0}
+	<div class="mb-3">
+		<div class="relative">
+			<SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/50" />
+			<input
+				type="text"
+				bind:value={searchQuery}
+				placeholder="Search... (prefix with ! to exclude)"
+				class="input input-bordered w-full input-sm"
+			/>
+			{#if searchQuery}
+				<button
+					class="btn btn-ghost btn-sm absolute right-1 top-1/2 -translate-y-1/2"
+					onclick={() => (searchQuery = '')}
+				>
+					✕
+				</button>
+			{/if}
+		</div>
+		{#if searchQuery.trim()}
+			<div class="text-sm text-base-content/60 mt-1 ml-1">
+				{filteredItems.length} of {data[property.name].length} items
+				{searchQuery.startsWith('!') ? '(excluding matches)' : ''}
+			</div>
+		{/if}
+	</div>
+{/if}
+
 <div class="overflow-x-auto space-y-1" transition:slide|local={{ duration: 300, easing: cubicOut }}>
-	<DraggableList items={data[property.name]} onReorder={handleReorder} class="space-y-2">
-		{#snippet children({ item: item, index }: { item: any; index: number })}
+	<DraggableList items={filteredItems} onReorder={handleReorder} class="space-y-2">
+		{#snippet children({ item: itemWrapper, index }: { item: any; index: number })}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 				<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
 				<!-- Show the first 3 fields -->
 				{#each property.n.slice(0, 3) as propertyN}
-					{#if propertyN.type == 'time'}
-						<div>
-							<div class="font-bold">
-								{getTimeAgo(item[propertyN.name], currentTime)}
-							</div>
-						</div>
-					{:else if propertyN.type == 'coord3D'}
-						<div>
-							<div class="font-bold">
-								({item[propertyN.name].x}, {item[propertyN.name].y}, {item[propertyN.name].z})
-							</div>
-						</div>
-					{:else if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
-						<div>
-							<div class="font-bold">{item[propertyN.name]}</div>
-						</div>
+					{#if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
+						<MultiInput
+							property={propertyN}
+							bind:value={itemWrapper.item[propertyN.name]}
+							noPrompts={true}
+							onChange={(event) => {
+								onChange(event);
+							}}
+						></MultiInput>
 					{/if}
 				{/each}
+				<!-- Show nr of controls -->
 				{#each property.n as propertyN}
 					{#if propertyN.type == 'array' || propertyN.type == 'controls'}
 						<div>
 							<div class="font-bold">
-								↓{item[propertyN.name] ? item[propertyN.name].length : ''}
+								↓{itemWrapper.item[propertyN.name] ? itemWrapper.item[propertyN.name].length : ''}
 							</div>
 						</div>
 					{/if}
@@ -177,7 +252,7 @@
 						<button
 							class="btn btn-ghost btn-sm"
 							onclick={() => {
-								handleEdit(property.name, index);
+								handleEdit(property.name, itemWrapper.originalIndex);
 							}}
 						>
 							<SearchIcon class="h-6 w-6" /></button
@@ -185,7 +260,7 @@
 						<button
 							class="btn btn-ghost btn-sm"
 							onclick={() => {
-								deleteItem(property.name, index);
+								deleteItem(property.name, itemWrapper.originalIndex);
 							}}
 						>
 							<Delete class="text-error h-6 w-6" />

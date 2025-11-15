@@ -172,7 +172,7 @@
 </script>
 
 {#if path[0] === '/'}
-	<Collapsible open={showEditor} class="shadow-lg" icon={null} opened={() => {}} closed={() => {}}>
+	<Collapsible open={showEditor} class="shadow-lg" opened={() => {}} closed={() => {}}>
 		{#snippet title()}
 			<span>{newItem ? 'Add ' + (isFile?"file":"folder") : 'Edit ' + editableFile.name}</span>
 		{/snippet}

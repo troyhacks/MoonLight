@@ -380,8 +380,8 @@ void freeMBObject(T* obj) {
   freeMB(obj, "object");
 }
 
-extern std::vector<std::function<void()>, VectorRAMAllocator<std::function<void()>>> runInTask1, runInTask2;  // functions to be called in main loopTask (to avoid https to run out of stack space)
-extern std::mutex runInTask_mutex;                                                                            // protect the runInTask vectors
+extern std::vector<std::function<void()>> runInAppTask;  // functions to be called in main loopTask (to avoid https to run out of stack space). No , VectorRAMAllocator<std::function<void()> see main.cpp
+extern std::mutex runInAppTask_mutex;                                             // protect the runInAppTask vectors
 
 // to use in effect and on display
 #if USE_M5UNIFIED

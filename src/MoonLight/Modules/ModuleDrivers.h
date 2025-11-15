@@ -30,7 +30,6 @@ class ModuleDrivers : public NodeManager {
   }
 
   void begin() {
-    _state.onUpdateRunInTask = 1;  // also in effects class!, the driver only drives !!!
     defaultNodeName = getNameAndTags<PanelLayout>();
 
     NodeManager::begin();

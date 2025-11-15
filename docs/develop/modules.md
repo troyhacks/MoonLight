@@ -61,7 +61,7 @@ void setupDefinition(JsonArray root) override{
 
 * Implement function **onUpdate** to define what happens if data changes
     * struct UpdatedItem defines the update (parent property (including index in case of multiple records), name of property and value)
-    * This runs in the httpd / webserver task. To run it in another task (application task) use runInTask1 and 2 - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
+    * This runs in the httpd / webserver task. To run it in another task (application task) use runInAppTask - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
 
 ```cpp
     void onUpdate(UpdatedItem &updatedItem) override
