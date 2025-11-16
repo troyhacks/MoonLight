@@ -23,7 +23,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
 !!! tip "ESP32-P4-Nano"
 
-    On each esp32-p4-nano board, install [C6 firmware]([esp32-c6-firmware-update](https://esp32-c6-firmware-update.github.io/)) first, choose Via ESP32-P4 USB/UART port ("OTA update"), then press connect for MoonLight install. 
+    On each esp32-p4-nano board, install [C6 firmware update](https://esp32-c6-firmware-update.github.io/) first, choose Via ESP32-P4 USB/UART port ("OTA update"), then press connect for MoonLight install.
 
 **Step 4**: Connect to the ESP32-device
 
@@ -134,8 +134,11 @@ Keep this page visible until installation complete.
 
 !!! tip "Choose driver"
     FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. 
+
     Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...). Other drivers (Virtual, Hub,) not supported yet.
+
     In some cases restart the device to make layout changes effective is needed.
+    
     For ESP32-P4-Nano, choose Physical driver, using the Parallel IO driver by @Troyhacks. Easy quick start: choose Pin 37 and connect a LED strip or panel as follows:
   
     <img width="200" src="../../media/moonlight/esp32-p4-nano-quickstart.jpeg"/>
