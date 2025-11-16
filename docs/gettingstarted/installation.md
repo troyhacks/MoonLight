@@ -139,7 +139,7 @@ Keep this page visible until installation complete.
 
     In some cases restart the device to make layout changes effective is needed.
     
-    For ESP32-P4-Nano, choose Physical driver, using the Parallel IO driver by @Troyhacks. Easy quick start: choose Pin 37 and connect a LED strip or panel as follows:
+    For ESP32-P4-Nano, choose Physical driver, using the Parallel IO driver by @Troyhacks. Easy quick start: choose Pin 37 and connect a LED strip or panel as follows (Note: the pins on the board the jst connector is plugged in are in order +, Ground, Data !!! - Ignore the wire colors!):
   
     <img width="200" src="../../media/moonlight/esp32-p4-nano-quickstart.jpeg"/>
 
