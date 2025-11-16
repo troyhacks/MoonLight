@@ -21,6 +21,10 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
     The Web Installer works on Google Chrome or Microsoft Edge or similar browsers, not on Safari.
 
+!!! tip "ESP32-P4-Nano"
+
+    On each esp32-p4-nano board, install [C6 firmware]([esp32-c6-firmware-update](https://esp32-c6-firmware-update.github.io/)) first, choose Via ESP32-P4 USB/UART port ("OTA update"), then press connect for MoonLight install. 
+
 **Step 4**: Connect to the ESP32-device
 
    <img width="350" src="https://github.com/user-attachments/assets/f092743f-a362-40da-b932-d31b203d966d" />
@@ -42,6 +46,8 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
    <img width="200" src="https://github.com/user-attachments/assets/25c05a6c-d2ef-41cb-b83c-fc40a60c6ccc" />
    <img width="200" src="https://github.com/user-attachments/assets/b2391752-51c4-400e-b95c-4fa865e93595" />
    <img width="200" src="https://github.com/user-attachments/assets/5e2ceefd-4c31-4b72-a228-f29373b677ac" />
+
+Keep this page visible until installation complete.
 
 **Step 8**: Optionally Press **Logs and Console**
 
@@ -97,6 +103,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 !!! info "Using hostname"
     * Restart the device to make the hostname known to your network (go to system status, scroll down and press restart)
     * Enter the hostname in your browser e.g. [http://ml-home.local](http://ml-home.local)
+    * ESP32-P4-Nano: November 16, 2025: hostname is not working correctly, use IP address instead
 
 !!! warning "reload UI"
     See step 2 ⚠️ if UI is not showing up, use [http://ml-home.local](http://ml-home.local) (replace ml-home with the hostname) or the IP address.
@@ -111,7 +118,7 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
 
    <img width="350" src="https://github.com/user-attachments/assets/8d8b9c2d-bed3-439e-a145-2bb204639c6c" />
 
-* Add a layout Node by pressing the blue + button and select on off the 🚥 options (Panel 🚥 is a safe bet to start with). Scroll down to the Pin Control field and enter the pin number(s) you connected the strip or panel to. 
+* Add a layout Node by pressing the blue + button and select on off the 🚥 options (Panel 🚥 is a safe bet to start with). Scroll down to the Pin Control field and enter the pin number(s) you connected the strip or panel to, make sure the pin exists, otherwise the device can crash and will restart in save mode. Correct the pin(s) in the Layout node and restart. 
 
 !!! info "Monitor"
     The Monitor should now show the effect
@@ -126,9 +133,13 @@ Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installe
     The LEDs on your strip or panel should now show the effect
 
 !!! tip "Choose driver"
-    FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...). Other drivers (Virtual, Hub,) not supported yet.
+    FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. 
+    Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...). Other drivers (Virtual, Hub,) not supported yet.
     In some cases restart the device to make layout changes effective is needed.
+    For ESP32-P4-Nano, choose Physical driver, using the Parallel IO driver by @Troyhacks. Easy quick start: choose Pin 37 and connect a LED strip or panel as follows:
   
+    <img width="200" src="../../media/moonlight/esp32-p4-nano-quickstart.jpeg"/>
+
 **Step 4**: Press save (💾). Saves your setup to the file system, so if a device is restarted, your settings are still there.
 
 !!! info "Next steps"
