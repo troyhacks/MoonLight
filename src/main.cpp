@@ -134,13 +134,6 @@ void effectTask(void* pvParameters) {
 
     xSemaphoreGive(driverSemaphore);
 
-    std::vector<std::function<void()>> tasks;
-    {
-      std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-      tasks.swap(runInAppTask);  // move all into local vector
-    }
-    for (auto& task : tasks) task(); //run the tasks
-
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
 }
@@ -156,6 +149,16 @@ void driverTask(void* pvParameters) {
     layerP.loopDrivers();
 
     xSemaphoreGive(effectSemaphore);
+
+    std::vector<std::function<void()>> tasks;
+    {
+      runInAppTask_mutexChecker++;
+      if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
+      std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+      tasks.swap(runInAppTask);  // move all into local vector
+      runInAppTask_mutexChecker--;
+    }
+    for (auto& task : tasks) task();  // run the tasks
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }

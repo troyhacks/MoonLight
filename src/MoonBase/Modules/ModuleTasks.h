@@ -70,12 +70,12 @@ class ModuleTasks : public Module {
   }
 
   void onUpdate(UpdatedItem& updatedItem) override {
-    EXT_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-            updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    // EXT_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   }
 
   void loop1s() {
     if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
+    if (!WiFi.localIP()) return;
 
   #define MAX_TASKS 30
 

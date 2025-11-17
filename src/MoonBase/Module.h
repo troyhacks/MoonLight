@@ -65,6 +65,7 @@ class ModuleState {
       EXT_LOGE(MB_TAG, "Failed to create doc");
     }
   }
+
   ~ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState destructor");
     // delete data from doc
@@ -138,7 +139,7 @@ class Module : public StatefulService<ModuleState> {
   FSPersistence<ModuleState> _fsPersistence;
   PsychicHttpServer* _server;
 
-  void updateHandler(const String &originId);
+  void updateHandler(const String& originId);
 };
 
 #endif

@@ -104,8 +104,11 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
                 newStateIndex = parkedAtIndex;    // e.g. 1 is stored in 0
 
               if (newStateIndex != newIndex && onReOrderSwap) {
+                runInAppTask_mutexChecker++;
+                if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
                 std::lock_guard<std::mutex> lock(runInAppTask_mutex);
                 runInAppTask.push_back([&, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
+                runInAppTask_mutexChecker--;
               }
 
               if (parkedFromIndex == UINT8_MAX) parkedFromIndex = newIndex;  // the index of value in the array stored in the parking spot
@@ -127,10 +130,13 @@ void ModuleState::execOnUpdate(UpdatedItem& updatedItem) {
 
   // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   if (onUpdate) {
+    runInAppTask_mutexChecker++;
+    if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
     std::lock_guard<std::mutex> lock(runInAppTask_mutex);
     runInAppTask.push_back([&, updatedItem]() mutable {  // mutable as updatedItem is called by reference (&)
       onUpdate(updatedItem);
     });
+    runInAppTask_mutexChecker--;
   }
 }
 
@@ -174,8 +180,8 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
             EXT_LOGD(MB_TAG, "add %s.%s[%d] (%d/%d) d: %d", parent.c_str(), key.c_str(), i, stateArray.size(), newArray.size(), depth);
             stateArray.add<JsonObject>();  // add new row
             // setupdatedItem index right...
-            updatedItem.parent[0] = parent.c_str();
-            updatedItem.index[0] = i;
+            // updatedItem.parent[0] = parent.c_str();
+            // updatedItem.index[0] = i;
             // EXT_LOGD(ML_TAG, "before cr %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             // String xxx;
             // serializeJson(newArray[i], xxx);

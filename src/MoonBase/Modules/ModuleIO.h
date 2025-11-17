@@ -28,14 +28,14 @@ class ModuleIO : public Module {
 
   enum IO_Boards {
     board_none,  //
-    board_SE16,
-    board_QuinLEDDigUno,
-    board_QuinLEDDigQuad,
-    board_QuinLEDDigOcto,
+    board_QuinLEDDigUnoV3,
+    board_QuinLEDDigQuadV3,
+    board_QuinLEDDigOctoV2,
     board_QuinLEDPenta,
     board_QuinLEDPentaPlus,
-    board_SergUniShield,
+    board_SergUniShieldV5,
     board_SergMiniShield,
+    board_SE16V1,
     board_WladiD0,
     board_WladiP4Nano,
     board_YvesV48,
@@ -104,15 +104,15 @@ class ModuleIO : public Module {
     control = addControl(root, "boardPreset", "select");
     control["default"] = 0;
     values = control["values"].to<JsonArray>();
-    values.add(BUILD_TARGET);          // 0
-    values.add("Mathieu SE16");        // 1
-    values.add("QuinLED Dig Uno");     // 2
-    values.add("QuinLED Dig Quad");    // 3
-    values.add("QuinLED Dig Octa");    // 4
-    values.add("QuinLED Penta");       // 5
-    values.add("QuinLED Penta Plus");  // 6
-    values.add("Serg Universal Shield");
+    values.add(BUILD_TARGET);
+    values.add("QuinLED Dig Uno V3");
+    values.add("QuinLED Dig Quad V3");
+    values.add("QuinLED Dig Octa V2");
+    values.add("QuinLED Penta");
+    values.add("QuinLED Penta Plus");
+    values.add("Serg Universal Shield V5");
     values.add("Serg Mini Shield");
+    values.add("Mathieu SE16 V1");
     values.add("Wladi D0");
     values.add("Wladi P4 Nano");
     values.add("Yves V48");
@@ -167,8 +167,8 @@ class ModuleIO : public Module {
       values.add("Button 02");
       values.add("Button 03");
       values.add("Voltage");  // 29
-      values.add("Current");//30
-      values.add("IR");//31
+      values.add("Current");  // 30
+      values.add("IR");       // 31
       values.add("Relais");
       values.add("Relais Brightness");
       values.add("DMX");
@@ -245,7 +245,7 @@ class ModuleIO : public Module {
       pin["DriveCap"] = (drive_result == ESP_OK) ? drive_cap_to_string(drive_cap) : "N/A";
     }
 
-    if (boardID == board_SE16) {
+    if (boardID == board_SE16V1) {
       object["maxPower"] = 500;
       uint8_t ledPins[16] = {47, 48, 21, 38, 14, 39, 13, 40, 12, 41, 11, 42, 10, 2, 3, 1};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["pinFunction"] = pin_LED01 + i;
@@ -255,7 +255,8 @@ class ModuleIO : public Module {
       pins[8]["pinFunction"] = pin_Voltage;
       pins[9]["pinFunction"] = pin_Current;
       pins[5]["pinFunction"] = pin_IR;
-    } else if (boardID == board_QuinLEDDigUno) {
+    } else if (boardID == board_QuinLEDDigUnoV3) {
+      object["maxPower"] = 75;
       pins[0]["pinFunction"] = pin_Button01;
       pins[1]["pinFunction"] = pin_LED02;
       pins[3]["pinFunction"] = pin_LED02;
@@ -265,7 +266,8 @@ class ModuleIO : public Module {
       pins[15]["pinFunction"] = pin_MicSCK;
       pins[16]["pinFunction"] = pin_LED01;
       pins[32]["pinFunction"] = pin_Exposed;
-    } else if (boardID == board_QuinLEDDigQuad) {
+    } else if (boardID == board_QuinLEDDigQuadV3) {
+      object["maxPower"] = 150;
       uint8_t ledPins[4] = {16, 3, 1, 4};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["pinFunction"] = pin_LED01 + i;
       pins[0]["pinFunction"] = pin_Button01;
@@ -274,7 +276,7 @@ class ModuleIO : public Module {
       pins[13]["pinFunction"] = pin_Temperature;
       pins[15]["pinFunction"] = pin_MicSCK;
       pins[32]["pinFunction"] = pin_Exposed;
-    } else if (boardID == board_QuinLEDDigOcto) {
+    } else if (boardID == board_QuinLEDDigOctoV2) {
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["pinFunction"] = pin_LED01 + i;
     } else if (boardID == board_QuinLEDPenta) {
@@ -302,7 +304,7 @@ class ModuleIO : public Module {
       object["maxPower"] = 50;  // 10A Fuse ...
       pins[1]["pinFunction"] = pin_LED01;
       pins[3]["pinFunction"] = pin_LED02;
-    } else if (boardID == board_SergUniShield) {
+    } else if (boardID == board_SergUniShieldV5) {
       object["maxPower"] = 50;  // 10A Fuse ...
       pins[1]["pinFunction"] = pin_LED01;
       pins[3]["pinFunction"] = pin_LED02;

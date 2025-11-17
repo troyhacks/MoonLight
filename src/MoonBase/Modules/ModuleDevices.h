@@ -67,6 +67,7 @@ class ModuleDevices : public Module {
 
   void loop1s() {
     if (!_socket->getConnectedClients()) return;
+    if (!WiFi.localIP()) return;
 
     if (!deviceUDPConnected) return;
 
@@ -75,6 +76,7 @@ class ModuleDevices : public Module {
 
   void loop10s() {
     if (!_socket->getConnectedClients()) return;
+    if (!WiFi.localIP()) return;
 
     if (!deviceUDPConnected) {
       deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
@@ -107,6 +109,7 @@ class ModuleDevices : public Module {
     device["time"] = time(nullptr);  // time will change
 
     if (!_socket->getConnectedClients()) return;
+    if (!WiFi.localIP()) return;
 
     // sort in vector
     std::vector<JsonObject> v;

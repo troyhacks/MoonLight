@@ -38,7 +38,7 @@ class IRDriver : public Node {
   uint8_t irPreset = 1;
 
   void setup() override {
-    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT-1);
+    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT);
     JsonObject property;
     JsonArray values;
     property = addControl(irPreset, "irPreset", "select");
@@ -226,7 +226,7 @@ class IRDriver : public Node {
       valid_parsing = nec_parse_frame_repeat(rmt_nec_symbols);
       nec_repeat = true;
     } else {
-      //EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
+      // EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
       return;
     }
 
@@ -234,7 +234,7 @@ class IRDriver : public Node {
     uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
     // do not allow 0s, which also match non initialize IR codes
-    if ((combined_code == 0) || (valid_parsing == false)){
+    if ((combined_code == 0) || (valid_parsing == false)) {
       return;
     }
 
@@ -331,7 +331,8 @@ class IRDriver : public Node {
 
       // update the state and ModuleState::update processes the changes behind the scenes
       if (newState.size()) {
-        serializeJson(doc, Serial); Serial.println();
+        serializeJson(doc, Serial);
+        Serial.println();
         controlModule->update(newState, ModuleState::update, IR_DRIVER_TAG);
       }
     });

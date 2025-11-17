@@ -17,8 +17,8 @@
   #include "FastLED.h"
   #include "ModuleEffects.h"
   #include "MoonBase/Module.h"
-  #include "MoonBase/Utilities.h"  //for isInPSRAM
   #include "MoonBase/Modules/FileManager.h"
+  #include "MoonBase/Utilities.h"  //for isInPSRAM
 
 class ModuleLightsControl : public Module {
  public:
@@ -34,8 +34,7 @@ class ModuleLightsControl : public Module {
   void begin() {
     Module::begin();
 
-    EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node),
-            sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
+    EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
     EXT_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layers[0]->mappingTable), isInPSRAM(&layerP.layers[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
 
@@ -118,8 +117,7 @@ class ModuleLightsControl : public Module {
 
   // implement business logic
   void onUpdate(UpdatedItem& updatedItem) override {
-    // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-    // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     if (updatedItem.name == "red") {
       layerP.lights.header.red = _state.data["red"];
     } else if (updatedItem.name == "green") {
@@ -214,7 +212,6 @@ class ModuleLightsControl : public Module {
     }
   }
 
-  uint8_t lastPresetLooped = 0;
   unsigned long lastPresetTime = 0;
 
   void loop() {
@@ -230,23 +227,15 @@ class ModuleLightsControl : public Module {
       JsonArray presetList = _state.data["preset"]["list"];
 
       if (_state.data["firstPreset"] <= _state.data["lastPreset"]) {
-        // find the next preset within the range
-        while (presetList[lastPresetLooped % presetList.size()] < _state.data["firstPreset"] || presetList[lastPresetLooped % presetList.size()] > _state.data["lastPreset"]) lastPresetLooped++;
+        uint8_t nextPreset = 0;
 
-        // correct overflow
-        lastPresetLooped = lastPresetLooped % presetList.size();
+        nextPreset = getNextItemInArray(presetList, _state.data["preset"]["selected"]);
+        // EXT_LOGD(ML_TAG, "loading next preset %d ", nextPreset);
+        while (nextPreset < _state.data["firstPreset"] || nextPreset > _state.data["lastPreset"]) {
+          nextPreset = getNextItemInArray(presetList, nextPreset);
+        }
 
-        Char<32> presetFile;
-        presetFile.format("/.config/presets/preset%02d.json", presetList[lastPresetLooped].as<uint8_t>());
-
-        EXT_LOGD(ML_TAG, "loading next preset %d %s", lastPresetLooped, presetFile.c_str());
-
-        copyFile(presetFile.c_str(), "/.config/effects.json");
-
-        _state.data["preset"]["selected"] = presetList[lastPresetLooped];
-
-        // update UI
-        _socket->emitEvent(_moduleName, _state.data);
+        // EXT_LOGD(ML_TAG, "loading next preset %d ", nextPreset);
 
         // trigger file manager notification of update of effects.json
         _fileManager->update(
@@ -257,16 +246,26 @@ class ModuleLightsControl : public Module {
             },
             _moduleName);
 
-        lastPresetLooped++;  // next
+        JsonDocument doc;
+        JsonObject newState = doc.to<JsonObject>();
+        newState["preset"] = _state.data["preset"];
+        newState["preset"]["action"] = "click";
+        newState["preset"]["select"] = nextPreset;
+
+        // update the state and ModuleState::update processes the changes behind the scenes
+        if (newState.size()) {
+          // serializeJson(doc, Serial);
+          // Serial.println();
+          update(newState, ModuleState::update, _moduleName);
+        }
       }
-      // });
     }
 
   #if FT_ENABLED(FT_MONITOR)
     if (layerP.lights.header.isPositions == 2) {  // send to UI
       read([&](ModuleState& _state) {
         if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
-          _socket->emitEvent("monitor", (char*)&layerP.lights.header, 37);  // sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above 32 to avoid monitor data to be seen as header
+          _socket->emitEvent("monitor", (char*)&layerP.lights.header, 37);                                                                    // sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above 32 to avoid monitor data to be seen as header
           _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.maxChannels));  //*3 is for 3 bytes position
         }
         memset(layerP.lights.channels, 0, layerP.lights.maxChannels);  // set all the channels to 0 //cleaning the positions
@@ -276,8 +275,7 @@ class ModuleLightsControl : public Module {
     } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
       EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
         read([&](ModuleState& _state) {
-          if (_socket->getConnectedClients() && _state.data["monitorOn"])
-            _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.maxChannels));
+          if (_socket->getConnectedClients() && _state.data["monitorOn"]) _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.maxChannels));
         });
       }
     }

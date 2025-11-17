@@ -321,7 +321,7 @@ T* allocMB(size_t n, const char* name = nullptr) {
 
 template <typename T>
 T* reallocMB(T* p, size_t n, const char* name = nullptr) {
-  T* res = (T*)heap_caps_realloc_prefer(p, n, sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);  // calloc is malloc + memset(0);
+  T* res = (T*)heap_caps_realloc_prefer(p, n * sizeof(T), 2, MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT);  // calloc is malloc + memset(0);
   if (res) {
     // EXT_LOGD(MB_TAG, "Re-Allocated %s: %d x %d bytes in %s s:%d", name?name:"", n, sizeof(T), isInPSRAM(res)?"PSRAM":"RAM", heap_caps_get_allocated_size(res));
   } else
@@ -381,7 +381,8 @@ void freeMBObject(T* obj) {
 }
 
 extern std::vector<std::function<void()>> runInAppTask;  // functions to be called in main loopTask (to avoid https to run out of stack space). No , VectorRAMAllocator<std::function<void()> see main.cpp
-extern std::mutex runInAppTask_mutex;                                             // protect the runInAppTask vectors
+extern std::mutex runInAppTask_mutex;                    // protect the runInAppTask vectors
+extern int runInAppTask_mutexChecker;
 
 // to use in effect and on display
 #if USE_M5UNIFIED

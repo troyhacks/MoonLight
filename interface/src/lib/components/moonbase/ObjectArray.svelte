@@ -67,7 +67,7 @@
 
 	function handleReorder(reorderedItems: any[]) {
 		console.log('handleReorder', property.name, reorderedItems);
-		data[property.name] = reorderedItems;
+		data[property.name] = reorderedItems.map((wrapper: any) => wrapper.item);
 		onChange();
 	}
 
