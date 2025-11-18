@@ -125,7 +125,7 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
 void Module::execOnUpdate(UpdatedItem& updatedItem) {
   if (updatedItem.oldValue != "null" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
     if (!contains(updateOriginId.c_str(), "server")) {                    // only triggered by updates from front end
-      EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s (oID:%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updateOriginId.c_str());
+      // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s (oID:%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updateOriginId.c_str());
       saveNeeded = true;
     }
   }
