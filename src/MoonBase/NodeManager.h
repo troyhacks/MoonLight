@@ -89,7 +89,7 @@ class NodeManager : public Module {
 
     property = root.add<JsonObject>();
     property["name"] = "nodes";
-    property["type"] = "array";
+    property["type"] = "rows";
     details = property["n"].to<JsonArray>();
     {
       property = details.add<JsonObject>();
@@ -250,7 +250,7 @@ class NodeManager : public Module {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
             nodeClass->on = updatedItem.value.as<bool>();  // set nodeclass on/off
-            EXT_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
+            // EXT_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
 
             nodeClass->requestMappings();
           } else

@@ -9,7 +9,7 @@
 	// import Cancel from '~icons/tabler/x';
 	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
 	import { socket } from '$lib/stores/socket';
-	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
+	import MultiRow from '$src/lib/components/moonbase/MultiRow.svelte';
     import {initCap} from '$lib/stores/moonbase_utilities';
 
 	let definition: any = $state([]);
@@ -198,13 +198,13 @@
 				<!-- <div class="grid w-full grid-cols-1 content-center gap-x-4 px-4 sm:grid-cols-2"> -->
 				<div class="relative w-full overflow-visible">
 					{#each definition as property}
-						{#if property.type != "array"}
+						{#if property.type != "rows"}
 							<div>
 								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
 							</div>
-						{:else if property.type == "array"}
+						{:else if property.type == "rows"}
 						    <!-- e.g. definition: [name:"nodes", n: [name: ,,, name:"on", name:"controls", n:[]]]] -->
-							<ObjectArray property={property} bind:data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></ObjectArray>
+							<MultiRow property={property} bind:data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></MultiRow>
 						{/if}
 					{/each}
 				</div>

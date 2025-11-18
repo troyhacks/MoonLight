@@ -100,7 +100,7 @@ class ModuleLiveScripts : public Module {
 
     property = root.add<JsonObject>();
     property["name"] = "scripts";
-    property["type"] = "array";
+    property["type"] = "rows";
     details = property["n"].to<JsonArray>();
     {
       property = details.add<JsonObject>();

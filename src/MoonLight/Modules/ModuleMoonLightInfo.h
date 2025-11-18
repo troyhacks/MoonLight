@@ -52,7 +52,7 @@ class ModuleMoonLightInfo : public Module {
 
     property = root.add<JsonObject>();
     property["name"] = "layers";
-    property["type"] = "array";
+    property["type"] = "rows";
     details = property["n"].to<JsonArray>();
     {
       property = details.add<JsonObject>();

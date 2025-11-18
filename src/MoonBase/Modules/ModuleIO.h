@@ -26,25 +26,6 @@ class ModuleIO : public Module {
     // #endif
   }
 
-  enum IO_Boards {
-    board_none,  //
-    board_QuinLEDDigUnoV3,
-    board_QuinLEDDigQuadV3,
-    board_QuinLEDDigOctoV2,
-    board_QuinLEDPenta,
-    board_QuinLEDPentaPlus,
-    board_SergUniShieldV5,
-    board_SergMiniShield,
-    board_SE16V1,
-    board_WladiD0,
-    board_WladiP4Nano,
-    board_YvesV48,
-    board_TroyP4Nano,
-    board_AtomS3,
-    board_LuxceoMood1XiaoMod,
-    board_count
-  };
-
   enum IO_Pins {
     pin_none,
     pin_LED01,
@@ -95,6 +76,26 @@ class ModuleIO : public Module {
     pin_count
   };
 
+  enum IO_Boards {
+    board_none,  //
+    board_QuinLEDDigUnoV3,
+    board_QuinLEDDigQuadV3,
+    board_QuinLEDDigOctoV2,
+    board_QuinLEDPenta,
+    board_QuinLEDPentaPlus,
+    board_SergUniShieldV5,
+    board_SergMiniShield,
+    board_SE16V1,
+    board_WladiD0,
+    board_WladiP4Nano,
+    board_YvesV48,
+    board_TroyP4Nano,
+    board_AtomS3,
+    board_LuxceoMood1XiaoMod,
+    board_Cube202010,
+    board_count
+  };
+
   void setupDefinition(JsonArray root) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more controls
@@ -104,32 +105,33 @@ class ModuleIO : public Module {
     control = addControl(root, "boardPreset", "select");
     control["default"] = 0;
     values = control["values"].to<JsonArray>();
-    values.add(BUILD_TARGET);
-    values.add("QuinLED Dig Uno V3");
-    values.add("QuinLED Dig Quad V3");
-    values.add("QuinLED Dig Octa V2");
+    values.add(BUILD_TARGET); // 0 none
+    values.add("QuinLED Dig Uno v3");
+    values.add("QuinLED Dig Quad v3");
+    values.add("QuinLED Dig Octa v2");
     values.add("QuinLED Penta");
     values.add("QuinLED Penta Plus");
-    values.add("Serg Universal Shield V5");
+    values.add("Serg Universal Shield v5");
     values.add("Serg Mini Shield");
-    values.add("Mathieu SE16 V1");
+    values.add("Mathieu SE16 v1");
     values.add("Wladi D0");
     values.add("Wladi P4 Nano");
     values.add("Yves V48");
     values.add("Troy P4 Nano");
     values.add("Atom S3R");
     values.add("Luxceo Mood1 Xiao Mod");
+    values.add("Cube202010");
 
     control = addControl(root, "modded", "checkbox");
     control["default"] = false;
 
     control = addControl(root, "maxPower", "number", 0, 500, false, "Watt");
     control["default"] = 10;
-    // control = addControl(root, "search", "text", 0, 64);
+    // control = addControl(root, "filter", "text", 0, 64);
     // control["default"] = "!none";
 
-    control = addControl(root, "pins", "array");
-    control["search"] = "!none";
+    control = addControl(root, "pins", "rows");
+    control["filter"] = "!none";
     details = control["n"].to<JsonArray>();
     {
       control = addControl(details, "GPIO", "number", 0, SOC_GPIO_PIN_COUNT - 1, true);  // ro
@@ -324,6 +326,10 @@ class ModuleIO : public Module {
     } else if (boardID == board_AtomS3) {
       uint8_t ledPins[4] = {5, 6, 7, 8};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["pinFunction"] = pin_LED01 + i;
+    } else if (boardID == board_Cube202010) {
+      object["maxPower"] = 50;
+      uint8_t ledPins[10] = {22,21,14,18,5,4,2,15,13,12};  // LED_PINS
+      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["pinFunction"] = pin_LED01 + i;
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
       // pins[2]["pinFunction"] = pin_LED00;
@@ -335,7 +341,7 @@ class ModuleIO : public Module {
     // serializeJson(object, xxx);
     // EXT_LOGD(MB_TAG, "%s", xxx.c_str());
 
-    update(object, ModuleState::update, _moduleName);
+    update(object, ModuleState::update, _moduleName + "server");
   }
 
   void onUpdate(UpdatedItem& updatedItem) override {

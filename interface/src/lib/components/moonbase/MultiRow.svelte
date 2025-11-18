@@ -12,7 +12,6 @@
 -->
 
 <script lang="ts">
-	import { onDestroy } from 'svelte';
 	import DraggableList from '$lib/components/DraggableList.svelte';
 	import Add from '~icons/tabler/circle-plus';
 	import { user } from '$lib/stores/user';
@@ -33,11 +32,6 @@
 
 	let dataEditable: any = $state({});
 
-	// let propertyEditable: string = $state('');
-
-	let searchQuery: string = $state('');
-	searchQuery = "!none";
-
 	//if no records added yet, add an empty array
 	if (data[property.name] == undefined) {
 		data[property.name] = [];
@@ -53,17 +47,6 @@
 			// console.log("localDefinition", property.name, definition[i].n)
 		}
 	}
-
-	//make getTimeAgo reactive
-	let currentTime = $state(Date.now());
-	// Update the dummy variable every second
-	const interval = setInterval(() => {
-		currentTime = Date.now();
-	}, 1000);
-
-	onDestroy(() => {
-		clearInterval(interval);
-	});
 
 	function handleReorder(reorderedItems: any[]) {
 		console.log('handleReorder', property.name, reorderedItems);
@@ -88,15 +71,6 @@
 				}
 			}
 		}
-
-		modals.open(EditObject as any, {
-			property: property,
-			localDefinition: localDefinition,
-			title: 'Add ' + initCap(propertyName) + ' #' + (data[propertyName].length + 1),
-			dataEditable: dataEditable, //bindable
-			onChange,
-			changeOnInput
-		});
 	}
 
 	function handleEdit(propertyName: string, index: number) {
@@ -120,17 +94,21 @@
 		onChange();
 	}
 
-	// Filter items based on search query - returns array of {item, originalIndex}
+	// Filter items based on filter query - returns array of {item, originalIndex}
 	let filteredItems = $derived.by(() => {
-		if (!searchQuery.trim()) {
+		if (!data[property.name + '_filter']) {
 			return data[property.name].map((item: any, index: number) => ({
 				item,
 				originalIndex: index
 			}));
 		}
 
-		const isNegated = searchQuery.startsWith('!');
-		const query = (isNegated ? searchQuery.slice(1) : searchQuery).toLowerCase().trim();
+		const isNegated = data[property.name + '_filter'].startsWith('!');
+		const query = (
+			isNegated ? data[property.name + '_filter'].slice(1) : data[property.name + '_filter']
+		)
+			.toLowerCase()
+			.trim();
 
 		if (!query) {
 			return data[property.name].map((item: any, index: number) => ({
@@ -142,7 +120,6 @@
 		const filtered = data[property.name]
 			.map((item: any, index: number) => ({ item, originalIndex: index }))
 			.filter(({ item }: { item: any }) => {
-				// Search through the first 3 visible fields
 				const matchFound = property.n.slice(0, 3).some((propertyN: any) => {
 					let valueStr;
 
@@ -165,6 +142,20 @@
 			});
 
 		return filtered;
+	});
+
+	const findItemInDefinition = $derived(definition.find((obj: any) => obj.name === property.name));
+
+	let propertyFilter = $state({
+		name: property.name + '_filter',
+		type: 'text',
+		label: 'Filter ' + initCap(property.name),
+		default: ''
+	});
+
+	// Update the default value reactively so we don't capture the initial derived value only once
+	$effect(() => {
+		propertyFilter.default = findItemInDefinition?.filter ?? '!none';
 	});
 </script>
 
@@ -189,32 +180,21 @@
 </div>
 
 <!-- Search Filter -->
-{#if data[property.name].length > 0}
-	<div class="mb-3">
-		<div class="relative">
-			<SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/50" />
-			<input
-				type="text"
-				bind:value={searchQuery}
-				placeholder="Search... (prefix with ! to exclude)"
-				class="input input-bordered w-full input-sm"
-			/>
-			{#if searchQuery}
-				<button
-					class="btn btn-ghost btn-sm absolute right-1 top-1/2 -translate-y-1/2"
-					onclick={() => (searchQuery = '')}
-				>
-					✕
-				</button>
-			{/if}
+{#if findItemInDefinition.filter != null}
+	<MultiInput
+		property={propertyFilter}
+		bind:value={data[property.name + '_filter']}
+		noPrompts={false}
+		onChange={(event) => {
+			onChange(event);
+		}}
+	></MultiInput>
+	{#if data[property.name + '_filter']}
+		<div class="text-sm text-base-content/60 mt-1 ml-1">
+			{filteredItems.length} of {data[property.name].length} items
+			{data[property.name + '_filter'].startsWith('!') ? '(excluding matches)' : ''}
 		</div>
-		{#if searchQuery.trim()}
-			<div class="text-sm text-base-content/60 mt-1 ml-1">
-				{filteredItems.length} of {data[property.name].length} items
-				{searchQuery.startsWith('!') ? '(excluding matches)' : ''}
-			</div>
-		{/if}
-	</div>
+	{/if}
 {/if}
 
 <div class="overflow-x-auto space-y-1" transition:slide|local={{ duration: 300, easing: cubicOut }}>
@@ -228,7 +208,7 @@
 					{#if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
 						<MultiInput
 							property={propertyN}
-							bind:value={itemWrapper.item[propertyN.name]}
+							bind:value={data[property.name][itemWrapper.originalIndex][propertyN.name]}
 							noPrompts={true}
 							onChange={(event) => {
 								onChange(event);

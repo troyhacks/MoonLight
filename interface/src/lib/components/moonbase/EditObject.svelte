@@ -6,7 +6,7 @@
 	import Cancel from '~icons/tabler/x';
 
 	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
-	import ObjectArray from '$lib/components/moonbase/ObjectArray.svelte';
+	import MultiRow from '$src/lib/components/moonbase/MultiRow.svelte';
 
 	interface Props {
 		property: any;
@@ -51,13 +51,13 @@
 			{#each property.n as propertyN}
 				{#if propertyN.type == 'array'}
 					<label for={propertyN.name}>{propertyN.name}</label>
-					<ObjectArray
+					<MultiRow
 						property={propertyN}
 						bind:data={dataEditable}
 						definition={localDefinition}
 						{onChange}
 						{changeOnInput}
-					></ObjectArray>
+					></MultiRow>
 				{:else if propertyN.type == 'controls'}
 					{#each dataEditable[propertyN.name] as control}
 						<!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"slider","default":64,"p":1070417419,"value":64} -->

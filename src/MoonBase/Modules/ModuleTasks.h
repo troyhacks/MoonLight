@@ -22,55 +22,28 @@ class ModuleTasks : public Module {
 
   void setupDefinition(JsonArray root) override {
     EXT_LOGV(MB_TAG, "");
-    JsonObject property;  // state.data has one or more properties
-    JsonArray details;    // if a property is an array, this is the details of the array
-    JsonArray values;     // if a property is a select, this is the values of the select
+    JsonObject control;  // state.data has one or more properties
+    JsonArray details;    // if a control is an array, this is the details of the array
+    JsonArray values;     // if a control is a select, this is the values of the select
 
   #ifndef CONFIG_IDF_TARGET_ESP32C3
-    property = root.add<JsonObject>();
-    property["name"] = "core0";
-    property["type"] = "text";
-    property["ro"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "core1";
-    property["type"] = "text";
-    property["ro"] = true;
+    control = addControl(root, "core0", "text", 0, 32, true);
+    control = addControl(root, "core1", "text", 0, 32, true);
   #endif
 
-    property = root.add<JsonObject>();
-    property["name"] = "tasks";
-    property["type"] = "array";
-    details = property["n"].to<JsonArray>();
+    control = addControl(root, "tasks", "rows");
+    control["filter"] = "";
+    details = control["n"].to<JsonArray>();
     {
-      property = details.add<JsonObject>();
-      property["name"] = "name";
-      property["type"] = "text";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "summary";
-      property["type"] = "text";
-      property["ro"] = true;
-      // property = details.add<JsonObject>(); property["name"] = "state"; property["type"] = "text"; property["ro"] = true;
-      // property = details.add<JsonObject>(); property["name"] = "cpu"; property["type"] = "text"; property["ro"] = true;
-      // property = details.add<JsonObject>(); property["name"] = "prio"; property["type"] = "number"; property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "stack";
-      property["type"] = "number";
-      property["ro"] = true;
-      property["max"] = 65538;
-      property = details.add<JsonObject>();
-      property["name"] = "runtime";
-      property["type"] = "text";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "core";
-      property["type"] = "number";
-      property["ro"] = true;
+      control = addControl(details, "name", "text", 0, 32, true);
+      control = addControl(details, "summary", "text", 0, 32, true);
+      // control = details.add<JsonObject>(); control["name"] = "state"; control["type"] = "text"; control["ro"] = true;
+      // control = details.add<JsonObject>(); control["name"] = "cpu"; control["type"] = "text"; control["ro"] = true;
+      // control = details.add<JsonObject>(); control["name"] = "prio"; control["type"] = "number"; control["ro"] = true;
+      control = addControl(details, "stack", "number", 0, 65538, true);
+      control = addControl(details, "runtime", "text", 0, 32, true);
+      control = addControl(details, "core", "number", 0, 65538, true);
     }
-  }
-
-  void onUpdate(UpdatedItem& updatedItem) override {
-    // EXT_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   }
 
   void loop1s() {
@@ -155,7 +128,8 @@ class ModuleTasks : public Module {
     // _state.compareRecursive("", _state.data, root, updatedItem); //fill data with doc
 
     JsonObject object = root.as<JsonObject>();
-    _socket->emitEvent(_moduleName, object);
+    // _socket->emitEvent(_moduleName, object);
+    update(object, ModuleState::update, _moduleName + "server");
   }
 };
 

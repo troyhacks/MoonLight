@@ -162,10 +162,10 @@ class RandomEffect : public Node {
   static uint8_t dim() { return _3D; }
   static const char* tags() { return "🔥"; }
 
-  uint8_t speed = 128;
-  void setup() { addControl(speed, "speed", "slider"); }
+  uint8_t fade = 70;
+  void setup() { addControl(fade, "fade", "slider"); }
   void loop() override {
-    layer->fadeToBlackBy(70);
+    layer->fadeToBlackBy(fade);
     layer->setRGB(random16(layer->nrOfLights), CRGB(255, random8(), 0));
   }
 };
