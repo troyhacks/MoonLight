@@ -21,3 +21,4 @@ ssl_certs/cacert.pem
 /logs
 .DS_Store
 .aid
+platformio_override.ini
