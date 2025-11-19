@@ -24,10 +24,13 @@ WiFiSettingsService::WiFiSettingsService(PsychicHttpServer *server,
                                                                 _httpEndpoint(WiFiSettings::read, WiFiSettings::update, this, server, WIFI_SETTINGS_SERVICE_PATH, securityManager,
                                                                               AuthenticationPredicates::IS_ADMIN),
                                                                 _fsPersistence(WiFiSettings::read, WiFiSettings::update, this, fs, WIFI_SETTINGS_FILE), _lastConnectionAttempt(0),
+                                                                _delayedReconnectTime(0),
+                                                                _delayedReconnectPending(false),
+                                                                _analyticsSent(false),
                                                                 _socket(socket)
 {
     addUpdateHandler([&](const String &originId)
-                     { reconfigureWiFiConnection(); },
+                     { delayedReconnect(); },
                      false);
 }
 
@@ -56,8 +59,22 @@ void WiFiSettingsService::initWiFi()
 void WiFiSettingsService::begin()
 {
     _socket->registerEvent(EVENT_RSSI);
+    _socket->registerEvent(EVENT_RECONNECT);
 
     _httpEndpoint.begin();
+}
+
+void WiFiSettingsService::delayedReconnect()
+{
+    _delayedReconnectTime = millis() + DELAYED_RECONNECT_MS;
+    _delayedReconnectPending = true;
+    ESP_LOGI(SVK_TAG, "Delayed WiFi reconnection scheduled in %d ms", DELAYED_RECONNECT_MS);
+
+    // Emit event to notify clients of impending reconnection
+    JsonDocument doc;
+    doc["delay_ms"] = DELAYED_RECONNECT_MS;
+    JsonObject jsonObject = doc.as<JsonObject>();
+    _socket->emitEvent(EVENT_RECONNECT, jsonObject);
 }
 
 void WiFiSettingsService::reconfigureWiFiConnection()
@@ -85,7 +102,7 @@ void WiFiSettingsService::reconfigureWiFiConnection()
 
     ESP_LOGI(SVK_TAG, "Reconfiguring WiFi connection to: %s", connectionMode.c_str());
 
-    ESP_LOGI(SVK_TAG, "Reconfiguring WiFi TxPower to: %d", _state.txPower); // 🌙
+    ESP_LOGI(SVK_TAG, "Reconfiguring WiFi TxPower to: %d", _state.txPower?_state.txPower:-1); // 🌙
 
     ESP_LOGI(SVK_TAG, "Hostname: %s", _state.hostname.c_str()); // 🌙
 
@@ -171,13 +188,95 @@ void WiFiSettingsService::reconfigureWiFiConnection()
     #endif
 }
 
+extern const uint8_t rootca_crt_bundle_start[] asm("_binary_src_certs_x509_crt_bundle_bin_start");
+extern const uint8_t rootca_crt_bundle_end[] asm("_binary_src_certs_x509_crt_bundle_bin_end");
+
+// 🌙 only send analytics once
+bool sendAnalytics() {
+  if (WiFi.status() != WL_CONNECTED) return false;
+
+//   ESP_LOGI(SVK_TAG, "send Event %s to Google Analytics", eventName.c_str());
+
+  String client_id = "";
+  for (int i = 0; i < 16; i++) {
+    uint8_t n = esp_random()%16; //true random © softhack007
+    client_id += String(n, HEX);
+  }
+
+  String eventName = BUILD_TARGET;
+  eventName.toLowerCase(); // GA4 requires lowercase
+  eventName.replace("-", "_");
+  eventName = eventName.substring(0, 40);
+
+  WiFiClientSecure client;
+//   client.setInsecure();  // skip certificate verification for GA4
+  client.setCACertBundle(rootca_crt_bundle_start, rootca_crt_bundle_end - rootca_crt_bundle_start);
+
+  HTTPClient http;  // only one HTTPClient instance
+
+  // --- Step 1: get country via ip-api.com ---
+  String country = "unknown";
+  http.begin("http://ip-api.com/json");  // plain HTTP
+  int code = http.GET();
+  if (code == 200) {
+    String payloadStr = http.getString();
+    // ESP_LOGI(SVK_TAG, "ip-api payload: %s", payloadStr.c_str());
+    int idx = payloadStr.indexOf("\"country\":\"");
+    if (idx != -1) {
+      idx += 11;
+      int endIdx = payloadStr.indexOf("\"", idx);
+      country = payloadStr.substring(idx, endIdx);
+    }
+  }
+  http.end();  // finish ip-api request
+
+  // --- Step 2: send event to GA4 ---
+  String url = "https://www.google-analytics.com/mp/collect?measurement_id=" 
+                + String("G-0PXJER2TPD") + "&api_secret=" + String("5XSeAS") + String("6gSEibdr") + String("LiKRx1UQ");
+
+  // Build valid JSON payload
+  String payload = "{"
+                   "\"client_id\":\"" + client_id + "\","
+                   "\"events\":[{"
+                     "\"name\":\"" + eventName + "\","
+                     "\"params\":{"
+                    //    "\"type\":\"" + BUILD_TARGET + "\","
+                       "\"version\":\"" + APP_VERSION + "\","
+                       "\"board\":\"" + "Default" + "\","
+                       "\"country\":\"" + country + "\""
+                     "}"
+                   "}]"
+                 "}";
+
+  http.begin(client, url);           // HTTPS GA4
+  http.addHeader("Content-Type", "application/json");
+  code = http.POST(payload);
+//   ESP_LOGI(SVK_TAG, "Event '%s' sent, HTTP %d payload: %s", eventName.c_str(), code, payload.c_str());
+  http.end();
+  return code == 204; // successfull
+}
+
 void WiFiSettingsService::loop()
 {
     unsigned long currentMillis = millis();
+
+    // Handle delayed reconnection
+    if (_delayedReconnectPending && currentMillis >= _delayedReconnectTime)
+    {
+        _delayedReconnectPending = false;
+        ESP_LOGI(SVK_TAG, "Executing delayed WiFi reconnection");
+        reconfigureWiFiConnection();
+    }
+
     if (!_lastConnectionAttempt || (unsigned long)(currentMillis - _lastConnectionAttempt) >= WIFI_RECONNECTION_DELAY)
     {
         _lastConnectionAttempt = currentMillis;
         manageSTA();
+
+        // 🌙 only send analytics once (if enabled)
+        if (_state.trackAnalytics && !_analyticsSent) {
+            _analyticsSent = sendAnalytics();
+        }
     }
 
     if (!_lastRssiUpdate || (unsigned long)(currentMillis - _lastRssiUpdate) >= RSSI_EVENT_DELAY)
@@ -210,7 +309,7 @@ void WiFiSettingsService::manageSTA()
     }
 
     // Connect or reconnect as required
-    if ((WiFi.getMode() & WIFI_STA) == 0)
+    // if ((WiFi.getMode() & WIFI_STA) == 0) //🌙 commented, see https://github.com/theelims/ESP32-sveltekit/issues/109
     {
 #ifdef SERIAL_INFO
         Serial.println("Connecting to WiFi...");
@@ -280,8 +379,7 @@ void WiFiSettingsService::connectToWiFi()
             }
         }
 
-        // if configured to prioritize signal strength, use the best network else use the first available network
-        // if (_state.priorityBySignalStrength == false)
+        // Connection mode PRIORITY: connect to the first available network
         if (_state.staConnectionMode == (u_int8_t)STAConnectionMode::PRIORITY)
         {
             for (auto &network : _state.wifiSettings)
@@ -294,14 +392,28 @@ void WiFiSettingsService::connectToWiFi()
                 }
             }
         }
-        else if (_state.staConnectionMode == (u_int8_t)STAConnectionMode::STRENGTH && bestNetwork)
+        // Connection mode STRENGTH: connect to the strongest network
+        else if (_state.staConnectionMode == (u_int8_t)STAConnectionMode::STRENGTH)
         {
-            ESP_LOGI(SVK_TAG, "Connecting to strongest network: %s, BSSID: " MACSTR " ", bestNetwork->ssid.c_str(), MAC2STR(bestNetwork->bssid));
-            configureNetwork(*bestNetwork);
+            if (bestNetwork)
+            {
+                ESP_LOGI(SVK_TAG, "Connecting to strongest network: %s, BSSID: " MACSTR " ", bestNetwork->ssid.c_str(), MAC2STR(bestNetwork->bssid));
+                configureNetwork(*bestNetwork);
+            }
+            else
+            {
+                ESP_LOGI(SVK_TAG, "No suitable network found.");
+            }
         }
-        else // no suitable network to connect
+        // Connection mode OFFLINE: do not connect to any network
+        else if (_state.staConnectionMode == (u_int8_t)STAConnectionMode::OFFLINE)
         {
-            ESP_LOGI(SVK_TAG, "No known networks found.");
+            ESP_LOGI(SVK_TAG, "WiFi connection mode is OFFLINE, not connecting to any network.");
+        }
+        // Connection mode is unknown: do not connect to any network
+        else
+        {
+            ESP_LOGE(SVK_TAG, "Unknown connection mode, not connecting to any network.");
         }
 
         // delete scan results
@@ -353,7 +465,7 @@ void WiFiSettingsService::configureNetwork(wifi_settings_t &network)
                 ESP_LOGE(SVK_TAG, "Invalid txPower value: %d", _state.txPower);
                 return;
         }
-        ESP_LOGI(SVK_TAG, "WiFi setTxPower to: %d", _state.txPower);
+        ESP_LOGI(SVK_TAG, "WiFi setTxPower to: %d", _state.txPower?_state.txPower:-1);
     }
 }
 

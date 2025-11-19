@@ -4,337 +4,240 @@ hide:
   - toc
 ---
 
-# MoonLight
+# 🌙 MoonLight
 
-<div style="text-align: center;">
-  <img width="350" src="https://github.com/user-attachments/assets/278ed02e-7f7a-497c-80ee-089486ddf379" />
-</div>
+<p align="center">
+  <img width="350" src="https://github.com/user-attachments/assets/278ed02e-7f7a-497c-80ee-089486ddf379" alt="MoonLight Logo" />
+</p>
 
-<div class="moonlight-hero">
-  <!-- <div class="hero-title">🌙 MoonLight</div> -->
-  <div class="hero-subtitle">
-    The open-source lighting platform that scales from art installations to professional stages
-  </div>
-  <div class="hero-description">
-    Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs. Scales from small installations to large displays.
-  </div>
+<p align="center">
+  <strong>The open-source lighting platform that scales from art installations to professional stages</strong>
+</p>
 
-  <div class="moonlight-buttons">
-    <a href="gettingstarted/overview/" class="moonlight-btn">🚀 Get Started</a>
-    <a href="https://github.com/MoonModules/MoonLight" class="moonlight-btn moonlight-btn-secondary">⭐ GitHub</a>
-    <a href="https://discord.gg/TC8NSUSCdV" class="moonlight-btn moonlight-btn-secondary">💬 Discord</a>
-  </div>
-</div>
+<p align="center">
+  Drive lots of DMX or LED lights with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs.
+</p>
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<p align="center">
+  <a href="https://github.com/MoonModules/MoonLight"><img src="https://img.shields.io/github/stars/MoonModules/MoonLight?style=social" alt="GitHub Stars"></a>
+  <a href="https://discord.gg/TC8NSUSCdV"><img src="https://img.shields.io/discord/700041398778331156?logo=discord&label=Discord" alt="Discord"></a>
+  <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
+</p>
 
-<div class="moonlight-stats">
-  <div class="moonlight-stat">
-    <span class="moonlight-stat-number">12K</span>
-    <div class="moonlight-stat-label">LEDs</div>
-  </div>
-  <div class="moonlight-stat">
-    <span class="moonlight-stat-number">120</span>
-    <div class="moonlight-stat-label">FPS</div>
-  </div>
-  <div class="moonlight-stat">
-    <span class="moonlight-stat-number">48</span>
-    <div class="moonlight-stat-label">Parallel Outputs</div>
-  </div>
-  <div class="moonlight-stat">
-    <span class="moonlight-stat-number">3D</span>
-    <div class="moonlight-stat-label">Effects Engine</div>
-  </div>
-</div>
-(Recommended maximum setup. Max is 128K Leds and 120 parallel outputs)
+<p align="center">
+  <a href="https://moonmodules.org/MoonLight/gettingstarted/overview">🚀 Get Started</a> • 
+  <a href="https://moonmodules.org/MoonLight/moonlight/overview">💫 Enjoy</a> • 
+  <a href="https://moonmodules.org/MoonLight/develop/overview">🛠️ Contribute</a>
+</p>
 
-## 🌟 Why Choose MoonLight?
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
+    <img width="600" src="https://img.youtube.com/vi/l6lTDG6EdEA/maxresdefault.jpg" alt="Watch MoonLight Demo">
+  </a>
+</p>
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">▶️ Watch the release 0.6.0 video</a>
+</p>
 
-**MoonLight bridges the gap between hobbyist lighting projects and professional lighting systems.** Get enterprise-grade performance and flexibility without the enterprise price tag - perfect for art installations, small venues, maker projects, and professional integrations.
+---
 
-<div class="features-section">
-  <div class="section-header">
-    <div class="section-title">Professional Performance, Maker-Friendly</div>
-    <div class="section-subtitle">Everything you need to create stunning lighting experiences</div>
-  </div>
+## 🎯 Why Choose MoonLight?
 
-  <div class="features-grid">
-    <div class="feature-card fade-in">
-      <div class="feature-icon">⚡</div>
-      <h3 class="feature-title">High-Performance LED Control</h3>
-      <p class="feature-description">Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs. Scales from small installations to large displays.</p>
-      <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
-        • 12,288 LEDs @ 120 FPS<br>
-        • 16-48 parallel LED outputs<br>
-        • FastLED + I2S drivers
-      </div>
-    </div>
-    
-    <div class="feature-card fade-in">
-      <div class="feature-icon">🎨</div>
-      <h3 class="feature-title">Advanced 3D Effects Engine</h3>
-      <p class="feature-description">Create stunning visuals with our layered effects system. Support for 1D strips, 2D panels, 3D cubes, and complex custom layouts with professional effects and modifiers.</p>
-      <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
-        • 1D/2D/3D effect support<br>
-        • Layered effects system<br>
-        • Custom layout mapping
-      </div>
-    </div>
-    
-    <div class="feature-card fade-in">
-      <div class="feature-icon">🏗️</div>
-      <h3 class="feature-title">Flexible Light Setups</h3>
-      <p class="feature-description">From simple LED strips to complex 3D installations. Build anything from accent lighting to interactive sculptures with support for multiple geometric configurations.</p>
-      <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
-        • LED strips (1D)<br>
-        • Panels & matrices (2D)<br>
-        • Cubes & sculptures (3D)
-        • DMX lights like PAR lights, Light Bars and Moving Heads
-      </div>
-    </div>
-    
-    <div class="feature-card fade-in">
-      <div class="feature-icon">🌐</div>
-      <h3 class="feature-title">Modern IoT Platform</h3>
-      <p class="feature-description">Built on ESP32 with cutting-edge web technologies. Responsive mobile & desktop interface powered by Svelte 5, with MoonBase as a standalone IoT solution.</p>
-      <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
-        • ESP32-powered<br>
-        • Svelte5 + DaisyUI5 + Tailwind4<br>
-        • Desktop + Mobile-responsive UI
-      </div>
-    </div>
-    
-    <div class="feature-card fade-in">
-      <div class="feature-icon">🎭</div>
-      <h3 class="feature-title">Professional Integration</h3>
-      <p class="feature-description">Seamlessly integrate with professional lighting systems via DMX and Art-Net protocols. Mix light installations with traditional stage lighting equipment.</p>
-      <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
-        • DMX/Art-Net support<br>
-        • Professional protocols<br>
-        • Stage lighting integration
-      </div>
-    </div>
-    
-    <div class="feature-card fade-in">
-      <div class="feature-icon">💝</div>
-      <h3 class="feature-title">Open Source & Affordable</h3>
-      <p class="feature-description">GPL v3 licensed for maximum freedom and affordability. Perfect for artists, makers, and small venues who need professional results on a budget.</p>
-      <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
-        • GPL v3 license<br>
-        • Budget-friendly hardware<br>
-        • Community-driven
-      </div>
-    </div>
-  </div>
-</div>
+**MoonLight bridges the gap between hobbyist lighting projects and professional lighting systems.** Get enterprise-grade performance and flexibility without the enterprise price tag.
 
-## 🚀 Built with Modern Technologies
+- ⚡ **High Performance** - 12K LEDs at 100 FPS with FastLED + parallel drivers
+- 🎨 **3D Effects Engine** - Stunning visuals for 1D strips, 2D panels, 3D cubes, and custom layouts
+- 🏗️ **Flexible Setups** - From simple strips to complex installations and DMX fixtures
+- 🌐 **Modern IoT** - ESP32-powered with responsive Svelte 5 interface
+- 🎭 **Professional Integration** - DMX/Art-Net support for stage lighting
+- 💝 **Open Source** - GPL v3 licensed, budget-friendly, community-driven
 
-**Latest versions of industry-leading frameworks and libraries**
+<a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
+  <img width="380" src="https://img.youtube.com/vi/Z70zDhpqY8o/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
 
-<div class="features-grid" style="margin-top: 2rem; margin-bottom: 3rem;">
-  <div class="feature-card fade-in">
-    <div class="feature-icon">🔧</div>
-    <h3 class="feature-title">ESP-IDF 5</h3>
-    <p class="feature-description">Modern ESP32 development framework with latest features</p>
-  </div>
-  
-  <div class="feature-card fade-in">
-    <div class="feature-icon">💡</div>
-    <h3 class="feature-title">FastLED 3.10</h3>
-    <p class="feature-description">Industry-standard LED library with latest optimizations</p>
-  </div>
-  
-  <div class="feature-card fade-in">
-    <div class="feature-icon">⚡</div>
-    <h3 class="feature-title">Svelte 5</h3>
-    <p class="feature-description">Latest web framework for lightning-fast, reactive user interfaces</p>
-  </div>
-  
-  <div class="feature-card fade-in">
-    <div class="feature-icon">🎨</div>
-    <h3 class="feature-title">PhysicHTTP 1.21</h3>
-    <p class="feature-description">High Performance Web Server</p>
-  </div>
+**[▶️ Watch the introduction](https://www.youtube.com/watch?v=Z70zDhpqY8o)**
 
-  <div class="feature-card fade-in">
-    <div class="feature-icon">🎨</div>
-    <h3 class="feature-title">ArduinoJson 7</h3>
-    <p class="feature-description">Advanced JSON processing</p>
-  </div>
+---
 
-  <div class="feature-card fade-in">
-    <div class="feature-icon">🎨</div>
-    <h3 class="feature-title">DaisyUI 5 + Tailwind 4</h3>
-    <p class="feature-description">Modern CSS framework for beautiful, responsive design</p>
-  </div>
+## 🚀 Quick Start
 
-</div>
+### 1️⃣ Flash & Go
+Use our [web installer](https://moonmodules.org/MoonLight/gettingstarted/installation/) to flash MoonLight directly via a USB cable to your ESP32, connect LEDs to it and you are ready to go.
+
+### 2️⃣ Connect & Configure
+Built-in access point makes WiFi setup effortless. Configure through the intuitive web interface.
+
+### 3️⃣ Create & Enjoy
+Start creating stunning effects immediately on both mobile and desktop.
+
+**[📖 Full Installation Guide](https://moonmodules.org/MoonLight/gettingstarted/overview/)**
+
+<a href="https://www.youtube.com/watch?v=7DQOEWa-Kwg">
+  <img width="380" src="https://img.youtube.com/vi/7DQOEWa-Kwg/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the install tutorial](https://www.youtube.com/watch?v=7DQOEWa-Kwg)**
+
+---
+
+## 🛠️ Built With Modern Technologies
+
+| Firmware | Interface |
+|----------|-----------|
+| 🔧 **ESP-IDF 5** - Modern ESP32 framework | ⚡ **Svelte 5** - Lightning-fast reactive UI |
+| 💡 **FastLED 3.10** - Industry-standard LED library | 🎨 **DaisyUI 5** - Modern component library |
+| 📡 **PsychicHTTP 1.21** - High-performance web server | 🎯 **Tailwind 4** - Utility-first CSS |
+| 📊 **ArduinoJson 7** - Advanced JSON processing | 📱 **Mobile & Desktop** responsive |
+
+---
 
 ## 🎯 Perfect For
 
-**🎨 Artists & Creators** - Bring your vision to life without breaking the bank  
-**🏛️ Small Venues** - Professional lighting effects for theaters, events, and installations  
-**🔧 Makers & Hobbyists** - Advanced features with user-friendly interfaces  
-**💼 Professionals** - Integrate into existing lighting systems with standard protocols  
-**🏫 Educational** - Open source platform perfect for learning and teaching  
+- 🎨 **Artists & Creators** - Bring your vision to life without breaking the bank
+- 🏛️ **Small Venues** - Professional lighting for theaters, events, and installations
+- 🔧 **Makers & Hobbyists** - Advanced features with user-friendly interfaces
+- 💼 **Professionals** - Integrate into existing lighting systems with standard protocols
+- 🏫 **Educational** - Open source platform perfect for learning and teaching
+
+<a href="https://www.youtube.com/watch?v=bJIgiBBx3lg">
+  <img width="380" src="https://img.youtube.com/vi/bJIgiBBx3lg/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the functional overview](https://www.youtube.com/watch?v=bJIgiBBx3lg)**
 
 ---
 
 ## 📊 Technical Specifications
 
-| Category | Specification | Details |
-|----------|---------------|---------|
-| **LED Performance** | 12,288 @ 120 FPS - 48 outputs | High-performance parallel processing |
-| **Outputs** | 1-128 parallel strips | Simultaneous multi-strip control |
-| **Effects** | 1D/2D/3D engine | Layered effects with modifiers |
-| **Protocols** | DMX, Art-Net, WiFi | Professional lighting integration |
-| **Platform** | ESP32 + SvelteKit | Modern IoT architecture |
-| **License** | GPL v3 | Free for commercial use |
+### LED Control
+- **Performance**: up to 12,288 LEDs @ 100 FPS
+- **Outputs**: Typical 1, 4, 16 or 48 parallel LED strips
+- **Drivers**: FastLED + Parallel drivers for high-speed parallel processing
+
+### Effects & Layouts
+- **Dimensions**: 1D strips, 2D panels, 3D cubes and custom layouts
+- **Effects**: Layered effects system with modifiers
+- **Fixtures**: DMX lights (PAR lights, Light Bars, Moving Heads)
+
+### Connectivity
+- **Protocols**: DMX, Art-Net, WiFi, Ethernet
+- **Platform**: ESP32 with modern web interface
+- **Integration**: Professional lighting system compatible
 
 ---
 
-## 🚀 Quick Start - Ready in Minutes
+## 📈 Release Roadmap
 
-<div class="features-grid" style="margin-top: 2rem;">
-  <div class="feature-card scale-in">
-    <div class="feature-icon">1️⃣</div>
-    <h3 class="feature-title">Flash & Go</h3>
-    <p class="feature-description">Use our web installer to flash MoonLight directly to your ESP32. No complex setup or development environment needed.</p>
-    <div style="margin-top: 1rem;">
-      <a href="gettingstarted/installation/" class="moonlight-btn" style="font-size: 0.9rem; padding: 0.8rem 1.5rem;">Start Installation</a>
-    </div>
-  </div>
-  
-  <div class="feature-card scale-in">
-    <div class="feature-icon">2️⃣</div>
-    <h3 class="feature-title">Connect & Configure</h3>
-    <p class="feature-description">Built-in access point makes initial WiFi setup effortless. Configure your network and LED setup through the intuitive web interface.</p>
-    <div style="margin-top: 1rem;">
-      <a href="wifi/sta/" class="moonlight-btn" style="font-size: 0.9rem; padding: 0.8rem 1.5rem;">WiFi Setup</a>
-    </div>
-  </div>
-  
-  <div class="feature-card scale-in">
-    <div class="feature-icon">3️⃣</div>
-    <h3 class="feature-title">Create & Enjoy</h3>
-    <p class="feature-description">Start creating stunning effects immediately. Responsive interface works perfectly on both mobile and desktop devices.</p>
-    <div style="margin-top: 1rem;">
-      <a href="moonlight/overview/" class="moonlight-btn" style="font-size: 0.9rem; padding: 0.8rem 1.5rem;">Learn Effects</a>
-    </div>
-  </div>
-</div>
+### Version 0.6.0 - November 2025
+**The user-friendly baseline release**
 
----
+✨ **Coming Features:**
 
-## 📈 Release Roadmap - User-Focused Development
+- Plug & Play Experience
+- Preset Controller for quick effect management
+- Enhanced Web Installer with one-click flashing
+- Large Display Drivers for massive installations
+- WLED Audio Sync for music synchronization
+- Refined Interface with polished UX
 
-!!! info "Current Status"
-    **Version 0.5.9.2** - Developer preview available now
-    
-    **Version 0.6.0** - **October 2025** - The user-friendly baseline release
-    
-    ✨ **Coming in 0.6.0
-    - **Plug & Play Experience** - True user-friendly installation
-    - **Preset Controller** - Quick effect selection and management
-    - **Enhanced Web Installer** - One-click device flashing
-    - **Large Display Drivers** - Physical and virtual drivers for massive installations
-    - **WLED Audio Sync** - Seamless music synchronization
-    - **Refined Interface** - Polished user experience
-
-**From 0.6.0 Forward:** Community-driven development with focus on ease of use, more effects, and expanded hardware support.
+**From 0.6.0 Forward:** Community-driven development focused on ease of use, more effects, and expanded hardware support.
 
 ---
 
 ## 🏗️ Architecture & Flexibility
 
-MoonLight is built on **MoonBase**, our complete IoT framework, making it incredibly flexible:
+MoonLight is built on **MoonBase** and ESP32-Sveltekit, our complete IoT framework:
 
-**🎮 For LED Enthusiasts:** Use MoonLight as a complete lighting solution  
-**🔧 For Developers:** Fork MoonBase to create custom IoT applications  
-**🏭 For Integrators:** Embed into larger systems using standard protocols  
-
-- **Modular Design** - Add or remove features as needed
-- **GPIO Access** - Full ESP32 hardware interface
-- **Custom Applications** - Build anything from smart plugs to greenhouse control
-- **Standard Protocols** - WiFi, Ethernet, Art-Net, DMX integration
+- 🎮 **For LED Enthusiasts** - Complete lighting solution out of the box
+- 🔧 **For Developers** - Fork MoonLight and add Effects, Modifiers, Layouts or Drivers or use MoonBase to create custom IoT applications
+- 🏭 **For Integrators** - Embed into larger systems using standard protocols
+- 🔌 **Modular Design** - Add features as needed using the Nodes and Modules system
+- 🔩 **GPIO Access** - Full ESP32 hardware interface
 
 ---
 
-## 🤝 Join the Community
+## 🤝 Community & Support
 
-<div class="features-grid" style="margin-top: 2rem;">
-  <div class="feature-card slide-in-left">
-    <div class="feature-icon">💬</div>
-    <h3 class="feature-title">Active Discord Community</h3>
-    <p class="feature-description">Get real-time help, share your creations, and collaborate with fellow creators. From beginners to professionals, everyone's welcome.</p>
-    <div style="margin-top: 1rem;">
-      <a href="https://discord.gg/TC8NSUSCdV" class="moonlight-btn" style="font-size: 0.9rem; padding: 0.8rem 1.5rem;">Join Discord</a>
-    </div>
-  </div>
-  
-  <div class="feature-card slide-in-right">
-    <div class="feature-icon">👨‍💻</div>
-    <h3 class="feature-title">Developer Community</h3>
-    <p class="feature-description">Contribute to the future of LED control. Help with effects, UI improvements, hardware support, and documentation.</p>
-    <div style="margin-top: 1rem;">
-      <a href="https://github.com/MoonModules/MoonLight" class="moonlight-btn" style="font-size: 0.9rem; padding: 0.8rem 1.5rem;">Contribute on GitHub</a>
-    </div>
-  </div>
-</div>
+### Get Help & Share Your Creations
 
-**MoonLight is a [MoonModules.org](https://moonmodules.org) project** - Created by the lighting enthusiasts behind WLED-MM.
+- 💬 **[Discord Community](https://discord.gg/TC8NSUSCdV)** - Real-time support & project sharing
+- 🗨️ **[Reddit](https://reddit.com/r/moonmodules)** - Discussion and showcase
+- 📋 **[GitHub Issues](https://github.com/MoonModules/MoonLight/issues)** - Bug reports and feature requests
+- 📚 **[Documentation](https://moonmodules.org/MoonLight/)** - Complete technical guides
 
-**Connect With Us:**
-- 💬 [Discord Community](https://discord.gg/TC8NSUSCdV) - Real-time support & project sharing
-- 🗨️ [Reddit](https://reddit.com/r/moonmodules) - Discussion and showcase
-- 📋 [GitHub](https://github.com/MoonModules/MoonLight) - Source code and issues
-- 📚 [Documentation](https://moonmodules.org/MoonLight/) - Complete technical docs
+### Contributing
+
+We welcome contributions! Whether it's:
+
+- 🐛 Bug fixes and improvements
+- ✨ New effects, modifiers, layouts and drivers
+- 📝 Documentation updates
+- 🎨 UI/UX enhancements
+- 🔧 Hardware support
+
+<a href="https://www.youtube.com/watch?v=tdrU9yGkyVo">
+  <img width="380" src="https://img.youtube.com/vi/tdrU9yGkyVo/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the developer quickstart tutorial](https://www.youtube.com/watch?v=tdrU9yGkyVo)**
 
 ---
 
-<div class="cta-section">
-  <div class="cta-title">Ready to Light Up Your World?</div>
-  <div class="cta-subtitle">
-    Join the creators using MoonLight for professional LED installations
-  </div>
-  
-  <div class="moonlight-buttons">
-    <a href="gettingstarted/overview/" class="moonlight-btn">🚀 Get Started Now</a>
-    <a href="https://github.com/MoonModules/MoonLight/releases" class="moonlight-btn moonlight-btn-secondary">📦 Download Latest</a>
-  </div>
-</div>
+## ❤️ Support the Project
+
+MoonLight is **free and open source**. Help us continue building amazing tools for the community!
+
+### 🌟 Show Your Support
+
+**Star & Follow**
+
+- ⭐ [Star this repository](https://github.com/moonmodules/moonlight) on GitHub
+- 📺 [Subscribe to our YouTube channel](https://youtube.com/@moonmoduleslighting)
+- 🔼 [Upvote us on Reddit](https://reddit.com/r/moonmodules)
+
+### 💝 Buy Us a Beer
+
+Help us enjoy a good beer, a tasty meal, or a fine club night while we code:
+
+- 💜 **[GitHub Sponsors](https://github.com/sponsors/ewowi)**
+- 💵 **[PayPal](https://www.paypal.com/donate?business=moonmodules@icloud.com)**
+
+*Every star, subscription, and contribution helps us dedicate more time to making MoonLight better. Thank you for being part of our community!* 🌙✨💫
 
 ---
 
-## ❤️ Support Open Source Development
-
-MoonLight is free. Help us continue building amazing tools for the creative community:
-
-<div class="moonlight-buttons">
-  <a href="https://github.com/MoonModules/MoonLight" class="moonlight-btn">⭐ Star on GitHub</a>
-  <a href="https://github.com/sponsors/ewowi" class="moonlight-btn moonlight-btn-secondary">💰 GitHub Sponsors</a>
-  <a href="https://www.paypal.com/donate?business=moonmodules@icloud.com" class="moonlight-btn moonlight-btn-secondary">💵 PayPal</a>
-</div>
-
----
-
-## 📄 Built on Amazing Open Source
+## 📄 License & Credits
 
 **License:** GPL-v3 - Free for personal and commercial use
 
-**Powered by these incredible projects:**
+### Built on Amazing Open Source Projects
+
 - [ESP32-sveltekit](https://github.com/theelims/ESP32-sveltekit) - Foundation framework
 - [PsychicHttp](https://github.com/hoeken/PsychicHttp) - High-performance web server
 - [FastLED](https://github.com/FastLED/FastLED) - Industry-standard LED library
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) - Advanced JSON processing
 - [I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver) - Parallel LED control
-- [I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver) - Virtual Driver
+- [I2SClocklessVirtualLedDriver](https://github.com/hpwit/I2SClocklessVirtualLedDriver) - Virtual driver
 - [ESPLiveScript](https://github.com/hpwit/ESPLiveScript) - Scripts
-- [WLED-sync](https://github.com/netmindz/WLED-sync) - Audio
+- [WLED-sync](https://github.com/netmindz/WLED-sync) - Audio synchronization
 
 ---
 
-**⚠️ Disclaimer:** Using this software is the sole user's responsibility as it is not bug free. Therefore, contributors of this repo are not liable for anything, including but not limited to spontaneous combustion of the entire LED strip, the house and the inevitable heat death of the universe 🔥🕺🌌
+## 🌙 About MoonModules
 
-*Ready to create something amazing?* **[Get started now!](gettingstarted/overview/)** 🌙✨
+MoonLight is a [MoonModules.org](https://moonmodules.org) project - Created by the lighting enthusiasts behind WLED-MM.
+
+<img width="350" src="https://moonmodules.org/MoonLight/media/moonlight-logo.png" />
+
+**Our Mission:** Make professional-grade LED control accessible to everyone, from hobbyists to professionals.
+
+---
+
+## ⚠️ Disclaimer
+
+Using this software is at your own risk. While we strive for quality, this software is not bug-free. Contributors to this repository are not liable for any issues, including but not limited to spontaneous combustion of LED strips, hardware damage, or the inevitable heat death of the universe. 🔥🕺🌌
+
+---
+
+Made with ❤️ by the MoonModules community

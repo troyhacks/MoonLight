@@ -40,8 +40,9 @@
 
 	const initSocket = () => {
 		const ws_token = page.data.features.security ? '?access_token=' + $user.bearer_token : '';
+		const ws_protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 		socket.init(
-			`ws://${window.location.host}/ws/events${ws_token}`,
+			`${ws_protocol}://${window.location.host}/ws/events${ws_token}`,
 			page.data.features.event_use_json
 		);
 		addEventListeners();
@@ -90,15 +91,22 @@
 	}
 
 	const handleOpen = () => {
-		// $telemetry.rssi.disconnected = false; // 🌙 
+		// $telemetry.rssi.disconnected = false; // 🌙
 		// notifications.success('Connection to device established', 5000);
 	};
 
 	const handleClose = () => {
 		// if (!location.host.includes("captive.apple.com")) // 🌙 dirty workaround to not show this on macOS captive portal...
 		// 	notifications.error('Connection to device lost', 5000);
-		// $telemetry.rssi.disconnected = true; // 🌙 
-		telemetry.setRSSI({ rssi: 0, ssid: '', safeMode: false, restartNeeded: false, saveNeeded: false , hostName: 'MoonLight' }); // 🌙 add safeMode etc
+		// $telemetry.rssi.disconnected = true; // 🌙
+		telemetry.setRSSI({
+			rssi: 0,
+			ssid: '',
+			safeMode: false,
+			restartNeeded: false,
+			saveNeeded: false,
+			hostName: 'MoonLight'
+		}); // 🌙 add safeMode etc
 	};
 
 	const handleError = (data: any) => console.error(data);
@@ -136,7 +144,7 @@
 	let menuOpen = $state(false);
 
 	// 🌙
-	let loadMsg = document.getElementById("loadMsg");
+	let loadMsg = document.getElementById('loadMsg');
 	if (loadMsg) loadMsg.hidden = true;
 </script>
 
@@ -154,11 +162,11 @@
 			<Statusbar />
 
 			<!-- 🌙 Show Monitor (only if moon screen) -->
-			{#if (page.data.features.monitor && page.url.pathname.includes("moon"))}
-				<br>
+			{#if page.data.features.monitor && page.url.pathname.includes('moon')}
+				<!-- <br /> -->
 				<Monitor />
 			{/if}
-		
+
 			<!-- Main page content here -->
 			{@render children?.()}
 		</div>
@@ -183,6 +191,7 @@
 			onclick={() => close()}
 			role="button"
 			tabindex="0"
+			aria-label="Close modal"
 		></div>
 	{/snippet}
 </Modals>

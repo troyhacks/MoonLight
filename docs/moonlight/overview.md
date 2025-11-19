@@ -1,5 +1,11 @@
 # MoonLight Overview
 
+<a href="https://www.youtube.com/watch?v=bJIgiBBx3lg">
+  <img width="380" src="https://img.youtube.com/vi/bJIgiBBx3lg/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the functional overview](https://www.youtube.com/watch?v=bJIgiBBx3lg)**
+
 MoonLight is an open-source lighting platform that scales from art installations to professional stages.
 
 Drive lots of lights or thousands of LEDs with stunning effects running on ESP32 microcontrollers. For creators who demand professional results without enterprise costs. Scales from small installations to large displays.
@@ -8,12 +14,12 @@ Drive lots of lights or thousands of LEDs with stunning effects running on ESP32
 
 MoonLight consist of the following modules:
 
-* [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
-* [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/)
-* [Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/)
-* [Channels](https://moonmodules.org/MoonLight/moonbase/module/channels/)
-* [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/)
-* [MoonLight info](https://moonmodules.org/MoonLight/moonbase/module/moonLightInfo/)
+* [Lights control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
+* [Effects](https://moonmodules.org/MoonLight/moonlight/effects/)
+* [Drivers](https://moonmodules.org/MoonLight/moonlight/drivers/)
+* [Channels](https://moonmodules.org/MoonLight/moonlight/channels/)
+* [Live Scripts](https://moonmodules.org/MoonLight/moonlight/livescripts/)
+* [MoonLight info](https://moonmodules.org/MoonLight/moonlight/moonlightinfo/)
 
 ## MoonLight by MoonModules
 
@@ -82,10 +88,12 @@ MoonBase
 
 * ESP32-P4 support
 * MIDI support (light control desks) 
-* Live Scripts, see [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/), included in MoonLight but needs refactoring 🥜
-* SuperSync 🥜: See above: development basically stopped in 2023 but the ideas are still there.
+* Ethernet
+* Live Scripts, see [Live Scripts](https://moonmodules.org/MoonLight/moonbase/module/liveScripts/), included in MoonLight
+* SuperSync 🥜: See above: development basically stopped in 2023 but the ideas are still there: device groups, sync effects, distributed effects.
 * HA / MQTT
-* UI enrichments: help needed
+* UI enrichments
+* Specific board profiles, E.g. see [Premade boards](https://moonmodules.org/MoonLight/gettingstarted/hardware/#premade-boards)
 
 MoonLight 
 
@@ -99,4 +107,36 @@ MoonLight
     * Physics
     * Live Scripts
 
-🥜: MoonBase functionality which is specific for MoonLight but will be refactored to generic MoonLight functionality
+### Where you can help
+
+* Add more effects (FastLED, WLED, Particle system, Animartrix, Soulmate lights, ...), modifiers, layouts and drivers
+* Improve the web installer
+* Improve the UI (Svelte 5, DaisyUI 5, TailWind 4)
+  * e.g. File Manager, Multi row layout, Monitor (WebGL)
+* Tune FastLED, add FastLED 2D effects
+* CI automation (Generate daily builds in Github and use by installer)
+* Palettes: more, custom, audio reactive
+* ...
+
+Contact us in the MoonLight channels on [Discord MoonModules](https://discord.gg/TC8NSUSCdV)
+
+## Emoji coding
+
+Effects, Modifiers, Layouts and drivers use emoji's to visualize their usage. See below for an overview:
+
+* 🔥 Effect
+    * 🎨 Using palette
+    * 🐙 WLED origin
+    * 💫 MoonLight origin
+    * 🚨 Moving head color effect
+    * 🗼 Moving head move effect
+* 💎 Modifier
+* 🚥 Layout
+* ☸️ Driver
+
+* ♫ Audio reactive FFT based
+* ♪ Audio reactive volume based
+* 💡 supports up to 0D
+* 📏 supports up to 1D
+* 🟦 supports up to 2D
+* 🧊 supports up to 3D

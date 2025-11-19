@@ -35,7 +35,7 @@
 
 	type menuItem = {
 		title: string;
-		icon: ConstructorOfATypedSvelteComponent;
+		icon: any; // 🌙 instead of ConstructorOfATypedSvelteComponent to surpress warning in menuItems
 		href?: string;
 		feature: boolean;
 		active?: boolean;
@@ -44,7 +44,7 @@
 
 	type subMenuItem = {
 		title: string;
-		icon: ConstructorOfATypedSvelteComponent;
+		icon: any; // 🌙 instead of ConstructorOfATypedSvelteComponent to surpress warning in menuItems
 		href: string;
 		feature: boolean;
 		active: boolean;
@@ -59,39 +59,39 @@
 				{
 					title: 'Control',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=lightsControl',
-					feature: page.data.features.moonlight,
+					href: '/moonbase/module?group=moonlight&module=lightscontrol',
+					feature: page.data.features.moonlight
 				},
 				{
 					title: 'Effects',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=effects',
-					feature: page.data.features.moonlight,
+					href: '/moonbase/module?group=moonlight&module=effects',
+					feature: page.data.features.moonlight
 				},
 				{
 					title: 'Drivers',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=drivers',
-					feature: page.data.features.moonlight,
+					href: '/moonbase/module?group=moonlight&module=drivers',
+					feature: page.data.features.moonlight
 				},
 				{
 					title: 'Channels',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=channels',
-					feature: page.data.features.moonlight,
+					href: '/moonbase/module?group=moonlight&module=channels',
+					feature: page.data.features.moonlight
 				},
 				{
 					title: 'Live Scripts',
 					icon: BulbIcon,
-					href: '/moonbase/module?module=liveScripts',
-					feature: page.data.features.livescript,
+					href: '/moonbase/module?group=moonlight&module=livescripts',
+					feature: page.data.features.livescript
 				},
 				{
 					title: 'Info',
 					icon: CPU,
-					href: '/moonbase/module?module=moonLightInfo',
-					feature: page.data.features.moonlight,
-				},
+					href: '/moonbase/module?group=moonlight&module=moonlightinfo',
+					feature: page.data.features.moonlight
+				}
 			]
 		},
 		{
@@ -103,26 +103,26 @@
 					title: 'Files',
 					icon: FilesIcon,
 					href: '/moonbase/filemanager',
-					feature: page.data.features.moonbase,
+					feature: page.data.features.moonbase
 				},
 				{
 					title: 'Devices',
 					icon: CPU,
-					href: '/moonbase/module?module=devices',
-					feature: page.data.features.moonbase,
+					href: '/moonbase/module?group=moonbase&module=devices',
+					feature: page.data.features.moonbase
 				},
 				{
 					title: 'Tasks',
 					icon: CPU,
-					href: '/moonbase/module?module=tasks',
-					feature: page.data.features.moonbase,
+					href: '/moonbase/module?group=moonbase&module=tasks',
+					feature: page.data.features.moonbase
 				},
 				{
 					title: 'IO',
 					icon: CPU,
-					href: '/moonbase/module?module=inputoutput',
-					feature: page.data.features.moonbase,
-				},
+					href: '/moonbase/module?group=moonbase&module=inputoutput',
+					feature: page.data.features.moonbase
+				}
 			]
 		},
 		{
@@ -133,13 +133,13 @@
 				{
 					title: 'WiFi Station',
 					icon: Router,
-					href: '/network/sta',
+					href: '/wifi/sta',
 					feature: true
 				},
 				{
 					title: 'Access Point',
 					icon: AP,
-					href: '/network/ap', 
+					href: '/wifi/ap',
 					feature: true
 				},
 				{
@@ -151,13 +151,13 @@
 				{
 					title: 'MQTT',
 					icon: MQTT,
-					href: '/network/mqtt',
+					href: '/connections/mqtt',
 					feature: page.data.features.mqtt
 				},
 				{
 					title: 'NTP',
 					icon: NTP,
-					href: '/network/ntp',
+					href: '/connections/ntp',
 					feature: page.data.features.ntp
 				}
 			]
@@ -200,7 +200,7 @@
 							page.data.features.upload_firmware ||
 							page.data.features.download_firmware) &&
 						(!page.data.features.security || $user.admin)
-				},
+				}
 			]
 		}
 	] as menuItem[]);
@@ -227,7 +227,7 @@
 		class="rounded-box mb-4 flex items-center hover:scale-[1.02] active:scale-[0.98]"
 		onclick={() => setActiveMenuItem('')}
 	>
-		<img src={logo} alt="Logo" class="h-12 w-12" />
+		<img src={logo} alt="Logo" class="max-h-12 max-w-12 h-auto w-auto object-contain" />
 		<h1 class="px-4 text-2xl font-bold">{page.data.appName}</h1>
 	</a>
 	<ul class="menu w-full rounded-box menu-vertical flex-nowrap overflow-y-auto">
@@ -263,7 +263,7 @@
 							class:bg-base-100={menuItem.active}
 							class="text-lg font-bold"
 							onclick={() => {
-								setActiveMenuItem(menuItem.href||'');
+								setActiveMenuItem(menuItem.href || '');
 							}}><menuItem.icon class="h-6 w-6" />{menuItem.title}</a
 						>
 					{/if}

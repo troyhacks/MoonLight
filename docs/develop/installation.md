@@ -16,28 +16,33 @@ The development environment consists of
 
 ## Summary
 
-Install VSCode with the platformIO IDE extension. Download the MoonLight repo. Open it in VSCode and build or upload to an ESP32 device.
+* Fork the MoonLight repo and download
+* Install VSCode with the platformIO IDE extension
+* Open MoonLight in VSCode. 
+* Build or upload to an ESP32 device. 
 
-!!! info "supporting tools"
+## Fork and Download
 
-     * Optionally you need to install git and nodejs, run npm install and make sure python > v3.10 in VSCode.
-     * Instead of Platformio IDE, the pioarduino IDE extension might be needed in VSCode
+**Step 1**: Create a fork
 
-## Install Visual Studio Code
+    * Login to your own github account
+    * Fork: go to [MoonModules/MoonLight](https://github.com/MoonModules/MoonLight/) and press Fork, uncheck 'Copy the main branch only' and press Create Fork. You will be moved to your fork of MoonLight
 
-**Step 1**: Download the MoonLight repository
+**Step 2**: Download the MoonLight repository
 
 * Use [GitKraken](https://www.gitkraken.com/download) or GitHub Desktop (or manually)
     * Create a folder to download to: e.g. Developer/GitGub/MoonModules/MoonLight
     * Press + / New tab and select Clone a Repo 
-    * Copy [MoonLight.git](https://github.com/MoonModules/MoonLight.git) and paste in the URL field of GitKraken
+    * Copy https://github.com/<your forked repo>/MoonLight.git and paste in the URL field of GitKraken
     * Press clone the repo
 
     <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
     * The main branch will be checked out per default. To run / test latest developments, switch to the dev branch
 
-**Step 2**: Download Visual Studio Code
+## Install and setup VSCode
+
+**Step 1**: Download Visual Studio Code
 
 * Windows: download from the Microsoft Store
 
@@ -45,9 +50,8 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 
 * MacOS: [Visual Studio download](https://code.visualstudio.com/download)
 
-**Step 3**: Install PlatformIO IDE
+**Step 2**: Install PlatformIO IDE
 
-* Open the MoonLight repository folder created in step 1
 * In VSCode, search for the extension
 
     <img width="320" src="https://github.com/user-attachments/assets/d91ab6b0-aeeb-42ed-8a85-d608b88c6103" />
@@ -60,11 +64,74 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 
      PlatformIO IDE is default but as we are using latest esp-idf, pioarduino IDE is needed when PlatformIO IDE fails.
 
-**Step 4**: Build MoonLight
+**Step 3**: * Open the downloaded MoonLight repository 
+
+
+## Build and upload
+
+**Step 1**: Build
 
 * Press ☑️ in the bottom statusbar
 
     <img width="320" src="https://github.com/user-attachments/assets/4e6faf4a-f169-46e4-a2f8-5d4021516a04" />
+
+
+* If you compile for the first time it take some time to finish (☕️)
+
+    <img width="320" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
+    <img width="320" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
+
+**Step 2**: Upload MoonLight to an ESP32-device
+
+* Connect an ESP32-device via USB and select the device using the (second) 🔌 icon in the staturbar. See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).   
+
+!!! info "USB-to-serial chip drivers"
+
+    In some cases, ESP32-devices won't show connected. See USB-to-serial chip drivers at [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
+
+* Erase the device if it is a new device or the device has not been used for MoonModules before: go to 👽 in the left menu and select Erase Flash
+
+    <img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
+
+* Press upload (➡️) in the status bar
+
+    <img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
+
+* The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
+
+!!! tip "Serial Monitor"
+    Recommended: Press PlatformIO:Serial Monitor to see the debug information produced (the first 🔌 on the VSCode statusbar)
+
+    <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
+
+**Step 3**: Connect to MoonLight
+
+Before changing code, test if the current download of MoonLight is running fine. Follow the instructions in [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight) and [Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#setup-moonlight).
+
+* If you are developing or updating existing MoonLight installations MoonLight might be outdated or not show up correctly in the browser or not even appear. Two reasons
+
+    * Sometimes the latest front end code is not generated yet (WWWData.h). This is how to set it right: 
+        * Open platformIO new terminal (>_)
+        * touch ./interface/src/app.html so the build process will be triggered to create a new WWWData.h
+        * build the project (✔) - if nodejs is not installed (yet) you will get errors. See troubleshooting
+        * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
+
+    * An old version is cached in the browser. See [UI not showing when installing new version of MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight) how to solve that.
+
+* A MoonLight device can be accessed via it's IP address or via [http://ml-home.local](http://ml-home.local). The latter uses MDNS.
+
+!!! tip "ESP32Devices"
+    IF you want to know which MoonLight (or WLED) devices run on your network, use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network
+
+## Troubleshooting
+
+!!! info "supporting tools"
+
+     * Optionally you need to install git and nodejs, run npm install and make sure python > v3.10 in VSCode.
+     * Instead of Platformio IDE, the pioarduino IDE extension might be needed in VSCode
+
+
+### Git install
 
 * When git is not installed on your system, [download git](https://git-scm.com/downloads) and install, restart VSCode and press ☑️ again
 
@@ -91,10 +158,7 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
     brew install git
     ```
 
-* If you compile for the first time it take some time to finish (☕️)
-
-    <img width="320" src="https://github.com/user-attachments/assets/c5655c00-6b91-4745-ae22-39f8573ae05a" />
-    <img width="320" src="https://github.com/user-attachments/assets/2d21319d-2e86-473e-9e5a-d500ecb462c8" />
+### Python and LZMA
 
 !!! warning "MacOS: Python and LZMA"
 
@@ -112,46 +176,9 @@ Install VSCode with the platformIO IDE extension. Download the MoonLight repo. O
 
     * python -V should show a version > 3.10 (e.g. 3.11.7)
 
-**Step 5**: Upload MoonLight to an esp32-device
 
-* Connect an ESP32-device via USB and select the device using the (second) 🔌 icon in the staturbar. See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).   
 
-!!! info "USB-to-serial chip drivers"
-
-    In some cases, ESP32-devices won't show connected. See USB-to-serial chip drivers at [MoonLight Web Installer](https://raw.githack.com/MoonModules/MoonLight/refs/heads/main/firmware/installer/index.html) 
-
-* Erase the device if it is a new device or the device has not been used for MoonModules before: go to 👽 in the left menu and select Erase Flash
-
-    <img width="350" src="https://github.com/user-attachments/assets/322bb30e-2709-43de-bd68-80044c9a0673" />
-
-* Press upload (➡️) in the status bar
-
-    <img width="350" src="https://github.com/user-attachments/assets/e4cbda64-739c-410d-9cdc-d2645e24c7ba" />
-
-* The firmware is now flashed to your ESP32 device, after flashing the ESP32 device will reboot
-
-!!! tip "Serial Monitor"
-    Recommended: Press PlatformIO:Serial Monitor to see the debug information produced (the first 🔌 on the VSCode statusbar)
-
-    <img width="350" src="https://github.com/user-attachments/assets/c925d883-173b-4288-89d4-4770c2d86a02" />
-
-## Connect and setup MoonLight
-
-Before changing code, test if the current download of MoonLight is running fine. Follow the instructions in [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight) and [Setup MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#setup-moonlight)
-
-Technical info:
-
-* MoonLight has a cache expiration of one year. However if you are developing or updating nightly builds cached UI code might be outdated.
-
-    * First time connect to an ESP32-device is generally smoothly
-    * If the UI has changed, reconnect to the same device might result in the UI not showing up. See the instructions 'UI not showing when installing new version of MoonLight' in [Connect MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/#connect-moonlight)
-
-* A MoonLight device can be accessed via it's IP address or via [http://ml-home.local](http://ml-home.local). The latter uses MDNS.
-
-!!! tip "ESP32Devices"
-    IF you want to know which MoonLight (or WLED) devices run on your network, use [ESP32Devices](https://github.com/ewowi/ESP32Devices) to discover the ESP32 nodes on your network
-
-## Prepare for development
+### Install nodejs
 
 nodejs is needed if changes on the frontend (UI) are made (interface folder). On each file change, ☑️ or ➡️ will rebuild the UI using nodejs.
 
@@ -208,44 +235,10 @@ npm install
 
 * Go to [development](https://moonmodules.org/MoonLight/develop/development/) for further info on developing MoonBase / MoonLight functionality.
 
-## UI development server
-
-To ease the frontend development you can deploy the back end code on an ESP32 board and pass the websocket and REST API calls through the development server's proxy running on your computer.
-
-This very much speeds up UI development as no flashing to ESP32 is required to test updated UI. Svaing an UI file is enough to see the results!!!
-
-See [Setup Proxy for Development](https://moonmodules.org/MoonLight/gettingstarted/#setup-proxy-for-development) and [development-server](https://moonmodules.org/MoonLight/gettingstarted/#development-server) how to setup.
-
-!!! tip "nodejs" 
-     if nodejs is not installed yet: see [Prepare for development](https://moonmodules.org/MoonLight/develop/installation/#prepare-for-development) to install nodejs
-
-After configuring the development server, a local webserver starts on [localhost:5173](http://localhost:5173/). 
-
-## Release and merged firmware binaries
-
-Firmware binaries come in 2 flavours: including boot and partition (merged) and MoonLight code only (release). They are stored in the build folder of the MoonLight repo and updated each time a build or upload (☑️ or ➡️) is done. Subfolder merged contains the first type, release the second type.
-
-* Merged bins are used by the web installer, release bins by the [System update](https://moonmodules.org/MoonLight/system/update/) module (OTA). System update uses the bins stored in [GitHub releases](https://github.com/MoonModules/MoonLight/releases).
-* Merged bins starts flashing on address 0x0, release bins on address 0x10000.
-* All MoonLight partition schemes have a firmware size of 3MB. Smaller devices (e.g. ESP32-D0) have no OTA partition. System update is possible in this situation, but there is no fallback if update fails (need to flash using USB in that case) 🚧
-
-!!! tip "flash firmware using esptool"
-     * [>_] in the statusbar of vscode
-     ```
-     esptool --port /dev/cu.usbmodem11201 write-flash 0x0 ./build/merged/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9-2_webflash.bin
-     ```
-     * optionally add erase-flash before write-flash
-     * use ./build/release/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9-2.bin and address 0x10000 to flash only the MoonLight partition
-
-## Troubleshooting
+### Other troubles
 * In general: first close and restart VSCode and run ☑️ or ➡️ again.
 * python > 3.10: install python (3.11.13) in the VSCode shell (not in a normal os terminal)
 * esptool.py not downloaded: deinstall platformIO IDE and install pioarduino IDE extensions (required for support of latest esp-idf 5.5)
 * Run everything from within VSCode, close any alternative / external tools which (potentially) access esp32 devices. They can claim resources or send commands to the device which interfere with what we trying to accomplish here.
-* Set WWWData.h right
-    * Open platformIO new terminal (>_)
-    * touch ./interface/src/app.html (or windows variant?) so the build process will be triggered to create a new WWWData.h
-    * build the project (✔)
-    * check in your github manager (gitkraken of github desktop) that a new WWWData.h is created
 * If the ESP32 device AP is not showing up in your WiFi list it might be helpful to fully erase the ESP32 device before flashing (VSCode 👽, Erase flash)
 * Sometimes the Serial log may show: [5817][W][WiFiGeneric.cpp:1408] setTxPower(): Neither AP or STA has been started. This is from setTxPower in APSettingsService. Delay has been added to prevent this.

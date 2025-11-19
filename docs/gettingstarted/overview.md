@@ -3,9 +3,16 @@
 * [Install MoonLight](https://moonmodules.org/MoonLight/gettingstarted/installation/)
 * [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/)
 * [Run MoonLight](https://moonmodules.org/MoonLight/moonlight/overview/)
-    * [Lights control](https://moonmodules.org/MoonLight/moonbase/module/lightsControl/)
-    * [Effects](https://moonmodules.org/MoonLight/moonbase/module/effects/)
-    * [Drivers](https://moonmodules.org/MoonLight/moonbase/module/drivers/)
+    * [Lights control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
+    * [Effects](https://moonmodules.org/MoonLight/moonlight/effects/)
+    * [Drivers](https://moonmodules.org/MoonLight/moonlight/drivers/)
+
+<a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
+  <img width="380" src="https://img.youtube.com/vi/Z70zDhpqY8o/maxresdefault.jpg" alt="Watch MoonLight Demo">
+</a>
+
+**[▶️ Watch the introduction](https://www.youtube.com/watch?v=Z70zDhpqY8o)**
+
 
 ## Sitemap
 

@@ -17,6 +17,7 @@ export type WifiSettings = {
 	connection_mode: number;
 	txPower: number; // 🌙
 	txPowerMeasured: number; // 🌙
+	trackAnalytics: boolean; // 🌙
 	wifi_networks: KnownNetworkItem[];
 };
 

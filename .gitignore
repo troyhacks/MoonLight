@@ -22,3 +22,5 @@ ssl_certs/cacert.pem
 .DS_Store
 .aid
 platformio_override.ini
+/scripts/__pycache__
+/site

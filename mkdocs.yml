@@ -5,26 +5,27 @@ nav:
     - gettingstarted/overview.md
     - gettingstarted/installation.md
     - gettingstarted/hardware.md
+    - gettingstarted/installer.md
   - "MoonLight":
     - moonlight/overview.md
-    - moonbase/module/lightsControl.md
-    - moonbase/module/effects.md
+    - moonlight/lightscontrol.md
+    - moonlight/effects.md
     - moonlight/modifiers.md
-    - moonbase/module/drivers.md
+    - moonlight/drivers.md
     - moonlight/layouts.md
-    - moonbase/module/channels.md
-    - moonbase/module/liveScripts.md
-    - moonbase/module/moonLightInfo.md
+    - moonlight/channels.md
+    - moonlight/livescripts.md
+    - moonlight/moonlightinfo.md
   - "MoonBase":
     - moonbase/overview.md
     - moonbase/filemanager.md
-    - moonbase/module/devices.md
-    - moonbase/module/tasks.md
-    - moonbase/module/inputoutput.md
+    - moonbase/devices.md
+    - moonbase/tasks.md
+    - moonbase/inputoutput.md
   - "Network":
     - network/sta.md
     - network/ap.md
-    - network/ethernet.md
+    # - network/ethernet.md
     - network/mqtt.md
     - network/ntp.md
   - "System":
@@ -35,13 +36,11 @@ nav:
     - develop/overview.md
     - develop/installation.md
     - develop/development.md
-    - develop/customizingsveltekit.md
-    - develop/pull-requests.md
-    - develop/documentation.md
-    - develop/modules.md
     - develop/nodes.md
+    - develop/modules.md
     - develop/layers.md
-    - develop/drivers.md
+    - develop/sveltekit.md
+    - develop/documentation.md
   - "ESP32 SvelteKit":
     - esp32sveltekit.md
   - "Build Tools":
@@ -112,6 +111,7 @@ theme:
 # Add custom CSS for MoonLight styling
 extra_css:
   - stylesheets/moonlight.css
+  - stylesheets/extra.css
 
 # Add this section to your existing mkdocs.yml
 extra_javascript:
@@ -147,6 +147,9 @@ extra:
     - icon: fontawesome/brands/reddit
       link: https://reddit.com/r/moonmodules
       name: Reddit Community
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/@MoonModulesLighting
+      name: YouTube Channel
   consent:
     title: Cookie consent
     description: >-
@@ -160,13 +163,12 @@ extra:
   analytics:
     provider: google
     property: G-R6QYDG0126
-
+  copy_files:
+      - firmware/
 plugins:
   - search:
       separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
 
 copyright: |
   Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/MoonModules" target="_blank" rel="noopener">MoonModules</a> -
-  Copyright &copy; 2025 GPL-3.0 by <a href="https://github.com/ewowi" target="_blank" rel="noopener">ewowi</a> -
-  Copyright &copy; 2025 by <a href="https://github.com/theelims" target="_blank" rel="noopener">elims</a> -
   <a href="#__consent">Change cookie settings</a>

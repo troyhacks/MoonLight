@@ -1,4 +1,3 @@
-# Drivers
 
 ## Overview
 
@@ -41,7 +40,7 @@ This is the current list of supported lights ranging from 3 channels per light (
 * GRBW: rgbw LED eg. SK6812
 * GRB6: some LED curtains
 * RGBWYP: 6 channel par/dmx light with UV etc
-* MHBeeEyes150W-15 🐺: 15 channels moving head, see https://moonmodules.org/MoonLight/moonbase/module/drivers/#art-net
+* MHBeeEyes150W-15 🐺: 15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
 * MHBeTopper19x15W-32 🐺: 32 channels moving head
 * MH19x15W-24: 24 channels moving heads
 

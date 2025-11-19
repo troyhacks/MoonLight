@@ -1,15 +1,19 @@
-Youtube export
+Youtube download
 ==============
 https://ytdown.io/en2/
 
-Image scaling
-=============
-https://www.iloveimg.com/resize-image
+Better:
+
+https://github.com/yt-dlp/yt-dlp
+brew install --formula yt-dlp  
+yt-dlp "https://www.youtube.com/watch?v=bKJqJt5RLrs"
+yt-dlp -x --audio-format mp3 "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+help: https://www.reddit.com/r/youtubedl/comments/qzqzaz/comment/hlon6k5/
 
 flash using esptool
 ===================
 [>_] in the statusbar of vscode
-esptool --port /dev/cu.usbmodem11201 write-flash 0x0 ./build/merged/MoonLight_esp32-s3-devkitc-1-n16r8v_0-5-9-2_webflash.bin
+esptool --port /dev/cu.usbmodem11201 write-flash 0x0 ./build/merged/MoonLight_esp32-s3-devkitc-1-n16r8v_0-6-0_webflash.bin
 optionally add erase-flash before write-flash
 
 Copy changes to ESP32-LedDrivers
@@ -108,14 +112,14 @@ Update devices
 for i in 107 239 143 111 154 177 208 129 157
 do 
     echo upgrade 192.168.168.$i
-    curl -s -F "update=@/Users/ewoudwijma/Downloads/StarLight_24060113_lolin_s2_mini.bin" 192.168.1.$i/update &
+    curl -s -F "update=@/Users/ewowi/Downloads/StarLight_24060113_lolin_s2_mini.bin" 192.168.1.$i/update &
 done
     curl -X POST "http://192.168.1.$i/json" -d '{"reboot":true}' -H "Content-Type: application/json"
 
 for i in 152 132
 do 
     echo upgrade 192.168.168.$i
-    curl -s -F "update=@/Users/ewoudwijma/Downloads/StarLight_24060113_esp32dev.bin" 192.168.1.$i/update &
+    curl -s -F "update=@/Users/ewowi/Downloads/StarLight_24060113_esp32dev.bin" 192.168.1.$i/update &
 done
     curl -X POST "http://192.168.1.$i/json" -d '{"reboot":true}' -H "Content-Type: application/json"
 

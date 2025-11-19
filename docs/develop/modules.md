@@ -4,7 +4,7 @@
 
 A module is a generic building block to create server and UI functionality which can be activated through the menu.
 
-See [Lights Control](module/lightsControl.md) or [Devices](module/devices.md) for examples
+See [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol) or [Devices](https://moonmodules.org/MoonLight/moonbase/devices) for examples
 
 Press the ? on any module to go to the documentation.
 
@@ -27,7 +27,7 @@ ModuleDemo(PsychicHttpServer *server
       , ESP32SvelteKit *sveltekit
       , FileManager *fileManager
     ) : Module("demo", server, sveltekit) {
-        MB_LOGD(MB_TAG, "constructor");
+        EXT_LOGD(MB_TAG, "constructor");
     }
 }
 ```
@@ -39,20 +39,20 @@ ModuleDemo(PsychicHttpServer *server
 
 ```cpp
 void setupDefinition(JsonArray root) override{
-    JsonObject property; // state.data has one or more properties
-    JsonArray details; // if a property is an array, this is the details of the array
-    JsonArray values; // if a property is a select, this is the values of the select
+    JsonObject control; // state.data has one or more properties
+    JsonArray details; // if a control is an array, this is the details of the array
+    JsonArray values; // if a control is a select, this is the values of the select
 
-    property = root.add<JsonObject>(); property["name"] = "hostName"; property["type"] = "text"; property["default"] = "MoonLight";
-    property = root.add<JsonObject>(); property["name"] = "connectionMode"; property["type"] = "select"; property["default"] = "Signal Strength"; values = property["values"].to<JsonArray>();
+    control = root.add<JsonObject>(); control["name"] = "hostName"; control["type"] = "text"; control["default"] = "MoonLight";
+    control = root.add<JsonObject>(); control["name"] = "connectionMode"; control["type"] = "select"; control["default"] = "Signal Strength"; values = control["values"].to<JsonArray>();
     values.add("Offline");
     values.add("Signal Strength");
     values.add("Priority");
 
-    property = root.add<JsonObject>(); property["name"] = "savedNetworks"; property["type"] = "array"; details = property["n"].to<JsonArray>();
+    control = root.add<JsonObject>(); control["name"] = "savedNetworks"; control["type"] = "rows"; details = control["n"].to<JsonArray>();
     {
-        property = details.add<JsonObject>(); property["name"] = "SSID"; property["type"] = "text"; property["default"] = "ewtr"; property["min"] = 3; property["max"] = 32; 
-        property = details.add<JsonObject>(); property["name"] = "Password"; property["type"] = "password"; property["default"] = "";
+        control = details.add<JsonObject>(); control["name"] = "SSID"; control["type"] = "text"; control["default"] = "ewtr"; control["min"] = 3; control["max"] = 32; 
+        control = details.add<JsonObject>(); control["name"] = "Password"; control["type"] = "password"; control["default"] = "";
     }
 
 }
@@ -60,23 +60,23 @@ void setupDefinition(JsonArray root) override{
 ```
 
 * Implement function **onUpdate** to define what happens if data changes
-    * struct UpdatedItem defines the update (parent property (including index in case of multiple records), name of property and value)
-    * This runs in the httpd / webserver task. To run it in another task (application task) use runInTask1 and 2 - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
+    * struct UpdatedItem defines the update (parent control (including index in case of multiple records), name of control and value)
+    * This runs in the httpd / webserver task. To run it in another task (application task) use runInAppTask - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
 
 ```cpp
     void onUpdate(UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-            MB_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             FastLED.setBrightness(_state.data["lightsOn"]?_state.data["brightness"]:0);
         } else if (updatedItem.parent[0] == "nodes" && updatedItem.name == "name") {    
-            MB_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             if (updatedItem.oldValue.length())
-                MB_LOGD(MB_TAG, "delete %s ...", updatedItem.oldValue.c_str());
+                EXT_LOGD(MB_TAG, "delete %s ...", updatedItem.oldValue.c_str());
             if (updatedItem.value.as<String>().length())
                 compileAndRun(updatedItem.value);
         } else
-            MB_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 ```
 
@@ -97,7 +97,7 @@ void setupDefinition(JsonArray root) override{
             _state.data["scripts"] = newData["scripts"]; //update without compareRecursive -> without handles
             update([&](ModuleState &state) {
                 return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-            }, "server");
+            }, _moduleName);
         }
     }
 ```
@@ -121,7 +121,7 @@ submenu: [
    {
       title: 'Module Demo',
       icon: BulbIcon,
-      href: '/moonbase/module?module=demo',
+      href: '/moonbase/module?group=moon&module=demo',
       feature: page.data.features.moonlight,
    },
 ]
@@ -131,7 +131,7 @@ submenu: [
 
 ### Readonly data
 
-A module can consist of data which is edited by the user (e.g. selecting a live script to run) and data which is send from the server to the UI (e.g. a list of running processes). Currently both type of valuas are stored in state data and definition. Distinguished by property["ro"] = true in setupDefinition. So the client uses state data and definition to build a screen with both types visually mixed together (what is desirable). Currently there are 2 websocket events: one for the entire state (including readonly) and one only for readonly which only contains the changed values. Module.svelte handles readonly differently by the function handleRO which calls updateRecursive which only update the parts of the data which has changed.
+A module can consist of data which is edited by the user (e.g. selecting a live script to run) and data which is send from the server to the UI (e.g. a list of running processes). Currently both type of values are stored in state data and definition. Distinguished by control["ro"] = true in setupDefinition. So the client uses state data and definition to build a screen with both types visually mixed together (what is desirable). Currently there are 2 websocket events: one for the entire state (including readonly) and one only for readonly which only contains the changed values. Module.svelte handles readonly differently by the function handleRO which calls updateRecursive which only update the parts of the data which has changed.
 
 It might be arguable that readonly variables are not stored in state data.
 

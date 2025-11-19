@@ -105,7 +105,7 @@ public:
                         // update state to UI
                         _statefulService->update([&](T &state) {
                             return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
-                        }, "server");
+                        }, SVK_TAG);
                     }
                     this->_hasDelayedWrite = false;
                 });
