@@ -25,7 +25,7 @@ nav:
   - "Network":
     - network/sta.md
     - network/ap.md
-    # - network/ethernet.md
+    - network/ethernet.md
     - network/mqtt.md
     - network/ntp.md
   - "System":

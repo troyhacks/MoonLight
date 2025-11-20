@@ -20,6 +20,7 @@
 	import type { RSSI } from '$lib/types/models';
 	import type { Battery } from '$lib/types/models';
 	import type { DownloadOTA } from '$lib/types/models';
+  import type { Ethernet } from '$lib/types/models';
 	import Monitor from './moonbase/monitor/Monitor.svelte'; // 🌙
 
 	interface Props {

@@ -42,7 +42,7 @@
 #define FACTORY_NTP_SERVER "time.google.com"
 #endif
 
-#define NTP_SETTINGS_FILE "/.config/ntpSettings.json" // 🌙 use /.config (hidden folder)
+#define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define NTP_SETTINGS_SERVICE_PATH "/rest/ntpSettings"
 
 #define TIME_PATH "/rest/time"
@@ -86,8 +86,8 @@ private:
     HttpEndpoint<NTPSettings> _httpEndpoint;
     FSPersistence<NTPSettings> _fsPersistence;
 
-    void onStationModeGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
-    void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    void onNetworkGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
+    void onNetworkDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
     void configureNTP();
     esp_err_t configureTime(PsychicRequest *request, JsonVariant &json);
 };

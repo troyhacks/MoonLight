@@ -20,6 +20,7 @@
 	import NTP from '~icons/tabler/clock-check';
 	import Metrics from '~icons/tabler/report-analytics';
 	import Bug from '~icons/tabler/bug';
+  import PlugConnected from '~icons/tabler/plug-connected';
 	import { page } from '$app/state';
 	import { user } from '$lib/stores/user';
 	import StarIcon from '~icons/tabler/star';
@@ -145,7 +146,7 @@
 				{
 					title: 'Ethernet',
 					icon: Router,
-					href: '/network/ethernet',
+					href: '/ethernet',
 					feature: page.data.features.ethernet
 				},
 				{
@@ -161,6 +162,12 @@
 					feature: page.data.features.ntp
 				}
 			]
+		},
+		{
+			title: 'Ethernet',
+			icon: PlugConnected,
+			href: '/ethernet',
+			feature: page.data.features.ethernet
 		},
 		{
 			title: 'Users',

@@ -40,16 +40,29 @@ export type NetworkItem = {
 	encryption_type: number;
 };
 
+export type Ethernet = {
+  connected: boolean;
+};
+
 export type EthernetStatus = {
-	status: number;
-	ip_address: string;
-	mac_address: string;
+  connected: boolean;
+  local_ip: string;
+  mac_address: string;
+  subnet_mask: string;
+  gateway_ip?: string;
+  dns_ip_1?: string;
+  dns_ip_2?: string;
+  link_speed?: number;
 };
 
 export type EthernetSettings = {
-	local_ip: string;
-	gateway_ip: string;
-	subnet_mask: string;
+  hostname: string;
+  static_ip_config: boolean;
+  local_ip?: string;
+  subnet_mask?: string;
+  gateway_ip?: string;
+  dns_ip_1?: string;
+  dns_ip_2?: string;
 };
 
 export type ApStatus = {
