@@ -68,7 +68,7 @@ static void _addControl(uint8_t* var, char* name, char* type, uint8_t min = 0, u
   EXT_LOGV(ML_TAG, "%s %s %d (%d-%d)", name, type, var, min, max);
   gNode->addControl(*var, name, type, min, max);
 }
-static void _addPin(uint8_t pinNr) { gNode->layer->layerP->addPin(pinNr); }
+static void _nextPin() { gNode->layer->layerP->nextPin(); }
 static void _addLight(uint8_t x, uint8_t y, uint8_t z) { gNode->layer->layerP->addLight({x, y, z}); }
 
 static void _modifySize() { gNode->modifySize(); }
@@ -160,7 +160,7 @@ void LiveScriptNode::setup() {
 
   // MoonLight functions
   addExternal("void addControl(void*,char*,char*,uint8_t,uint8_t)", (void*)_addControl);
-  addExternal("void addPin(uint8_t)", (void*)_addPin);
+  addExternal("void nextPin()", (void*)_nextPin);
   addExternal("void addLight(uint8_t,uint8_t,uint8_t)", (void*)_addLight);
   addExternal("void modifySize()", (void*)_modifySize);
   //   addExternal(    "void modifyPosition(Coord3D &position)", (void *)_modifyPosition);

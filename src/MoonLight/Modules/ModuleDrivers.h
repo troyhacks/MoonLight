@@ -24,17 +24,46 @@
 class ModuleDrivers : public NodeManager {
  public:
   ModuleLightsControl* _moduleLightsControl;
-  ModuleDrivers(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleLightsControl* moduleLightsControl) : NodeManager("drivers", server, sveltekit, fileManager) {
+  ModuleIO* _moduleIO;
+  ModuleDrivers(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleLightsControl* moduleLightsControl, ModuleIO* moduleIO) : NodeManager("drivers", server, sveltekit, fileManager) {
     _moduleLightsControl = moduleLightsControl;
+    _moduleIO = moduleIO;
     EXT_LOGV(ML_TAG, "constructor");
+  }
+
+  void readPins() {
+    _moduleIO->read([&](ModuleState& state) {
+      // find the pins in board definitions
+
+      memset(layerP.ledPins, UINT8_MAX, sizeof(layerP.ledPins));
+      layerP.nrOfLedPins = 0;
+
+      EXT_LOGD(ML_TAG, "maxPower %d", state.data["maxPower"].as<uint16_t>());
+      // serializeJson(state.data["pins"], Serial);Serial.println();
+      for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
+        uint8_t pinFunction = pinObject["pinFunction"];
+        if (pinFunction >= pin_LED01 && pinFunction <= pin_LED20) {
+          layerP.ledPins[pinFunction - 1] = pinObject["GPIO"];
+          layerP.nrOfLedPins = MAX(layerP.nrOfLedPins, pinFunction - 1 + 1);
+        }
+      }
+
+      for (int i = 0; i < layerP.nrOfLedPins; i++) {
+        if (layerP.ledPins[i] != UINT16_MAX) EXT_LOGD(ML_TAG, "pin %d = %d", i, layerP.ledPins[i]);
+      }
+      layerP.requestMapPhysical = true;
+      layerP.requestMapVirtual = true;
+    });
   }
 
   void begin() {
     defaultNodeName = getNameAndTags<PanelLayout>();
 
     NodeManager::begin();
-
     nodes = &layerP.nodes;
+
+    _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    readPins();  // initially
   }
 
   void addNodes(JsonArray values) override {
@@ -59,10 +88,8 @@ class ModuleDrivers : public NodeManager {
     values.add(getNameAndTags<VirtualDriver>());
     values.add(getNameAndTags<HUB75Driver>());
 
-      // custom
-  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+    // custom
     values.add(getNameAndTags<SE16Layout>());
-  #endif
   }
 
   Node* addNode(const uint8_t index, const char* name, const JsonArray controls) override {
@@ -106,11 +133,9 @@ class ModuleDrivers : public NodeManager {
     else if (equalAZaz09(name, HUB75Driver::name()))
       node = allocMBObject<HUB75Driver>();
 
-  // custom
-  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
+    // custom
     else if (equalAZaz09(name, SE16Layout::name()))
       node = allocMBObject<SE16Layout>();
-  #endif
 
   #if FT_LIVESCRIPT
     else {
@@ -122,9 +147,10 @@ class ModuleDrivers : public NodeManager {
 
     if (node) {
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node (C++ constructors are not inherited, so declare it as normal functions)
+      node->moduleControl = _moduleLightsControl;     // to access global lights control functions if needed
+      node->moduleIO = _moduleIO;                     // to access global lights control functions if needed
       node->setup();                                  // run the setup of the effect
       node->onSizeChanged(Coord3D());
-      node->controlModule = _moduleLightsControl;  // to access global lights control functions if needed
       // layers[0]->nodes.reserve(index+1);
       if (index >= layerP.nodes.size())
         layerP.nodes.push_back(node);

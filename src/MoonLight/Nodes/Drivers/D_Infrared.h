@@ -34,17 +34,65 @@ class IRDriver : public Node {
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️🚧"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
-  uint8_t pin = 5;
+  uint8_t pinInfrared = UINT8_MAX;
   uint8_t irPreset = 1;
 
+  void readPins() {
+    moduleIO->read([&](ModuleState& state) {
+      for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
+        uint8_t pinFunction = pinObject["pinFunction"];
+        if (pinFunction == pin_Infrared) {
+          pinInfrared = pinObject["GPIO"].as<uint8_t>();
+          EXT_LOGD(ML_TAG, "pin_Infrared found %d", pinInfrared);
+
+          EXT_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pinInfrared);
+
+          if (rx_channel) {
+            EXT_LOGI(IR_DRIVER_TAG, "Removing callback");
+            ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs_empty, receive_queue));
+            EXT_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
+            ESP_ERROR_CHECK(rmt_disable(rx_channel));
+            EXT_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
+            ESP_ERROR_CHECK(rmt_del_channel(rx_channel));
+            rx_channel = NULL;
+          }
+
+          if (receive_queue) {
+            vQueueDelete(receive_queue);
+            receive_queue = NULL;
+          }
+
+          rx_channel_cfg.gpio_num = (gpio_num_t)pinInfrared;
+          EXT_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
+          ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
+
+          EXT_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");
+          ESP_ERROR_CHECK(rmt_enable(rx_channel));
+
+          EXT_LOGI(IR_DRIVER_TAG, "Register RX done callback");
+          receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
+          assert(receive_queue);
+          ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
+
+          EXT_LOGI(IR_DRIVER_TAG, "Arm receive");
+          ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+        }
+      }
+      // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
+    });
+  }
+
   void setup() override {
-    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT);
     JsonObject property;
     JsonArray values;
     property = addControl(irPreset, "irPreset", "select");
     values = property["values"].to<JsonArray>();
     values.add("Swiss remote");
-    values.add("Dutch remote");
+    values.add("Athom"); //see https://www.athom.tech/blank-1/wled-esp32-music-addressable-led-strip-controller
+    values.add("Luxceo");
+
+    moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    readPins();  // initially
   }
 
   uint32_t codeOn;
@@ -76,9 +124,7 @@ class IRDriver : public Node {
   uint32_t codeLastPresetDec;
 
   void onUpdate(String& oldValue, JsonObject control) override {
-    if (control["name"] == "pin") {
-      new_pin_in_waiting = true;
-    } else if (control["name"] == "irPreset") {
+    if (control["name"] == "irPreset") {
       uint8_t value = control["value"];
       switch (value) {
       case 0:  // Swiss remote
@@ -123,13 +169,34 @@ class IRDriver : public Node {
         codeLastPresetInc = 0;
         codeLastPresetDec = 0;
         break;
+      case 2:  // Luxceo Mood1
+        codeOn = 0x7F80ED12;
+        codeOff = 0x7F80E51A;
+        codeBrightnessInc = 0x7F80FD02;
+        codeBrightnessDec = 0x7F80FA05;
+        // codeRedInc = 0xEF00F708;
+        // codeRedDec = 0xEF00F30C;
+        // codeGreenInc = 0xEF00F609;
+        // codeGreenDec = 0xEF00F20D;
+        // codeBlueInc = 0xEF00F50A;
+        // codeBlueDec = 0xEF00F10E;
+        codePaletteInc = 0x7F80F10E;
+        codePaletteDec = 0x7F80F20D;
+        codePresetInc = 0x7F80FE01;
+        codePresetDec = 0x7F80FB04;
+        codePresetLoopInc = 0xEF00FB04;
+        codePresetLoopDec = 0xEF00FA05;
+        // codeFirstPresetInc = 0;
+        // codeFirstPresetDec = 0;
+        // codeLastPresetInc = 0;
+        // codeLastPresetDec = 0;
+        break;
       }
     }
   }
 
   uint16_t s_nec_code_address;
   uint16_t s_nec_code_command;
-  bool new_pin_in_waiting = false;
   rmt_rx_done_event_data_t rx_data;
   rmt_symbol_word_t raw_symbols[64];  // 64 symbols should be sufficient for a standard NEC frame
   QueueHandle_t receive_queue = NULL;
@@ -238,7 +305,7 @@ class IRDriver : public Node {
       return;
     }
 
-    EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Longpress" : "");
+    EXT_LOGI(IR_DRIVER_TAG, "AddressCommand=%04X%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Longpress" : "");
 
     JsonDocument doc;
     JsonObject newState = doc.to<JsonObject>();
@@ -249,7 +316,7 @@ class IRDriver : public Node {
     //  lastPreset
     //  monitorOn
 
-    controlModule->read([&](ModuleState& state) {
+    moduleControl->read([&](ModuleState& state) {
       if (combined_code == codeBrightnessInc) {  // Brightness increase
         newState["brightness"] = min(state.data["brightness"].as<uint8_t>() + 5, 255);
       } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
@@ -331,14 +398,13 @@ class IRDriver : public Node {
 
       // update the state and ModuleState::update processes the changes behind the scenes
       if (newState.size()) {
-        serializeJson(doc, Serial);
-        Serial.println();
-        controlModule->update(newState, ModuleState::update, IR_DRIVER_TAG);
+        // serializeJson(doc, Serial);
+        // Serial.println();
+        moduleControl->update(newState, ModuleState::update, IR_DRIVER_TAG);  // Do not add server in the originID as that blocks updates, see execOnUpdate
       }
     });
   }
 
-  // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override {
     if (receive_queue) {
       if (xQueueReceive(receive_queue, &rx_data, 0) == pdPASS) {
@@ -348,42 +414,6 @@ class IRDriver : public Node {
         // start receive again
         ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
       }
-    }
-
-    if (new_pin_in_waiting) {
-      EXT_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pin);
-
-      if (rx_channel) {
-        EXT_LOGI(IR_DRIVER_TAG, "Removing callback");
-        ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs_empty, receive_queue));
-        EXT_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
-        ESP_ERROR_CHECK(rmt_disable(rx_channel));
-        EXT_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
-        ESP_ERROR_CHECK(rmt_del_channel(rx_channel));
-        rx_channel = NULL;
-      }
-
-      if (receive_queue) {
-        vQueueDelete(receive_queue);
-        receive_queue = NULL;
-      }
-
-      rx_channel_cfg.gpio_num = (gpio_num_t)pin;
-      EXT_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
-      ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
-
-      EXT_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");
-      ESP_ERROR_CHECK(rmt_enable(rx_channel));
-
-      EXT_LOGI(IR_DRIVER_TAG, "Register RX done callback");
-      receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
-      assert(receive_queue);
-      ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
-
-      EXT_LOGI(IR_DRIVER_TAG, "Arm receive");
-      ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
-
-      new_pin_in_waiting = false;
     }
   };
 };

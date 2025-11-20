@@ -22,6 +22,8 @@
 
 // #include "VirtualLayer.h"
 
+  #define MAXLEDPINS 20  // max strips for physical driver
+
 class VirtualLayer;  // Forward as PhysicalLayer refers back to VirtualLayer
 class Node;          // Forward as PhysicalLayer refers back to Node
 class Modifier;      // Forward as PhysicalLayer refers back to Modifier
@@ -89,12 +91,6 @@ struct Lights {
   // std::vector<size_t> universes; //tells at which byte the universe starts
 };
 
-struct SortedPin {
-  uint16_t startLed;
-  uint16_t nrOfLights;
-  uint8_t pin;
-};
-
 // contains the Lights structure/definition and implements layout functions (add*, modify*)
 class PhysicalLayer {
  public:
@@ -120,6 +116,7 @@ class PhysicalLayer {
 
   void setup();
   void loop();
+  void loop20ms();
   void loopDrivers();
 
   // mapLayout calls onLayoutPre, onLayout for each node and onLayoutPost and expects pass to be set (1 or 2)
@@ -129,10 +126,12 @@ class PhysicalLayer {
   bool monitorPass = false;
   void onLayoutPre();
   void addLight(Coord3D position);
-  void addPin(uint8_t pinNr);
+  void nextPin();  // if more pins are defined, the next lights will be assigned to the next pin
   void onLayoutPost();
 
-  std::vector<SortedPin> sortedPins;
+  uint8_t ledPins[MAXLEDPINS];
+  uint16_t ledsPerPin[MAXLEDPINS];
+  uint8_t nrOfLedPins = 0;
 
   // an effect is using a virtual layer: tell the effect in which layer to run...
 

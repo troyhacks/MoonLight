@@ -28,5 +28,5 @@ void onLayout() {
   add(48, 73);
   add(60, 83);
 
-  addPin(pin);
+  nextPin(); // all lights to one pin
 }

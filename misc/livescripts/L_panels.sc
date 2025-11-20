@@ -3,7 +3,6 @@ uint8_t  verticalPanels = 4;
 uint8_t  panelWidth = 32;
 uint8_t  panelHeight = 8;
 bool snake = true;
-uint8_t pin = 16;
 
 void setup() {
   addControl(&horizontalPanels, "horizontalPanels", "slider", 1, 32);
@@ -11,7 +10,6 @@ void setup() {
   addControl(&panelWidth, "panelWidth", "slider", 1, 64);
   addControl(&panelHeight, "panelHeight", "slider", 1, 64);
   addControl(&snake, "snake", "checkbox");
-  addControl(&pin, "pin", "pin", 1, 48);
 }
 
 void onLayout() {
@@ -29,7 +27,7 @@ void onLayout() {
 
     }
 
-    addPin(pin);
+    nextPin(); // each row of panel it's own pin
 
   }
 }

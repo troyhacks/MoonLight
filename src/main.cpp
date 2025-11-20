@@ -102,9 +102,9 @@ ModuleIO moduleIO = ModuleIO(&server, &esp32sveltekit);
     #include "MoonLight/Modules/ModuleEffects.h"
     #include "MoonLight/Modules/ModuleLightsControl.h"
     #include "MoonLight/Modules/ModuleMoonLightInfo.h"
-ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
-ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);                        // fileManager for Live Scripts
-ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit, &fileManager, &moduleLightsControl);  // fileManager for Live Scripts, Lights control for drivers
+ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager, &moduleIO);
+ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);                                   // fileManager for Live Scripts
+ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit, &fileManager, &moduleLightsControl, &moduleIO);  // fileManager for Live Scripts, Lights control for drivers
     #if FT_ENABLED(FT_LIVESCRIPT)
       #include "MoonLight/Modules/ModuleLiveScripts.h"
 ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects, &moduleDrivers);
@@ -131,6 +131,12 @@ void effectTask(void* pvParameters) {
     }
 
     layerP.loop();  // run all the effects of all virtual layers (currently only one layer)
+
+    static unsigned long last20ms = 0;
+    if (millis() - last20ms >= 20) {
+      last20ms = millis();
+      layerP.loop20ms();
+    }
 
     xSemaphoreGive(driverSemaphore);
 
@@ -186,6 +192,10 @@ static int custom_vprintf(const char* fmt, va_list args) {
 #if USE_M5UNIFIED
   #include <M5Unified.h>
 #endif
+
+uint8_t pinVoltage = -1;
+uint8_t pinCurrent = -1;
+uint8_t pinBattery = -1;
 
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
@@ -244,7 +254,28 @@ void setup() {
   moduleDevices.begin();
   moduleTasks.begin();
   moduleIO.begin();
-
+  #if FT_BATTERY
+  moduleIO.addUpdateHandler(
+      [&](const String& originId) {
+        moduleIO.read([&](ModuleState& state) {
+          for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
+            uint8_t pinFunction = pinObject["pinFunction"];
+            if (pinFunction == pin_Voltage) {
+              pinVoltage = pinObject["GPIO"];
+              EXT_LOGD(ML_TAG, "pinVoltage found %d", pinVoltage);
+            } else if (pinFunction == pin_Current) {
+              pinCurrent = pinObject["GPIO"];
+              EXT_LOGD(ML_TAG, "pinCurrent found %d", pinCurrent);
+            } else if (pinFunction == pin_Battery) {
+              pinBattery = pinObject["GPIO"];
+              EXT_LOGD(ML_TAG, "pinBattery found %d", pinBattery);
+            }
+          }
+          // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
+        });
+      },
+      false);
+  #endif
   // MoonLight
   #if FT_ENABLED(FT_MOONLIGHT)
   moduleEffects.begin();
@@ -291,6 +322,30 @@ void setup() {
     static unsigned long lastSecond = 0;
     if (millis() - lastSecond >= 1000) {
       lastSecond = millis();
+
+      // 🌙
+  #if FT_BATTERY
+      BatteryService* batteryService = esp32sveltekit.getBatteryService();
+      if (pinBattery != UINT8_MAX) {
+        float mVB = analogReadMilliVolts(pinBattery) * 2.0;
+        float perc = (mVB - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35);  // 65% of full battery is 0%, showing 0-100%
+        // ESP_LOGD("", "bat mVB %f p:%f", mVB, perc);
+        batteryService->updateSOC(perc * 100);
+      }
+      if (pinVoltage != UINT8_MAX) {
+        float mV = analogReadMilliVolts(pinVoltage) * 2.0 / 1000;  // /2 resistor divider
+        batteryService->updateVoltage(mV);
+      }
+      if (pinCurrent != UINT8_MAX) {
+        float mA = analogReadMilliVolts(pinCurrent);
+        if (mA > 250)  // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
+        {
+          batteryService->updateCurrent(((mA - 250) * 50.0) / 1000);  // 40mV / A with a /2 resistor divider, so a 50mA/mV
+        } else {
+          batteryService->updateCurrent(0);
+        }
+      }
+  #endif
 
       moduleDevices.loop1s();
       moduleTasks.loop1s();

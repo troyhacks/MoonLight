@@ -16,6 +16,76 @@
 
     #include "MoonBase/Module.h"
 
+enum IO_Pins {
+  pin_none,
+  pin_LED01,
+  pin_LED02,
+  pin_LED03,
+  pin_LED04,
+  pin_LED05,
+  pin_LED06,
+  pin_LED07,
+  pin_LED08,
+  pin_LED09,
+  pin_LED10,
+  pin_LED11,
+  pin_LED12,
+  pin_LED13,
+  pin_LED14,
+  pin_LED15,
+  pin_LED16,
+  pin_LED17,
+  pin_LED18,
+  pin_LED19,  // LED pins
+  pin_LED20,  // LED pins
+  pin_LEDCW,
+  pin_LEDWW,
+  pin_LEDB,
+  pin_LEDG,
+  pin_LEDR,
+  pin_Button01,
+  pin_Button02,
+  pin_Button03,
+  pin_Voltage,
+  pin_Current,
+  pin_Infrared,
+  pin_Relais,
+  pin_RelaisBrightness,
+  pin_DMX,
+  pin_MicSD,
+  pin_MicWS,
+  pin_MicSCK,
+  pin_MicMCLK,
+  pin_OnBoardLed,
+  pin_OnBoardKey,
+  pin_Battery,
+  pin_Temperature,
+  pin_Exposed,
+  pin_I2CSDA,
+  pin_I2CSCL,
+  pin_count
+};
+
+enum IO_Boards {
+  board_none,  //
+  board_QuinLEDDigUnoV3,
+  board_QuinLEDDigQuadV3,
+  board_QuinLEDDigOctoV2,
+  board_QuinLEDPenta,
+  board_QuinLEDPentaPlus,
+  board_SergUniShieldV5,
+  board_SergMiniShield,
+  board_SE16V1,
+  board_WladiD0,
+  board_WladiP4Nano,
+  board_YvesV48,
+  board_TroyP4Nano,
+  board_AtomS3,
+  board_LuxceoMood1XiaoMod,
+  board_Cube202010,
+  board_count
+};
+
 class ModuleIO : public Module {
  public:
   ModuleIO(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("inputoutput", server, sveltekit) {
@@ -26,76 +96,6 @@ class ModuleIO : public Module {
     // #endif
   }
 
-  enum IO_Pins {
-    pin_none,
-    pin_LED01,
-    pin_LED02,
-    pin_LED03,
-    pin_LED04,
-    pin_LED05,
-    pin_LED06,
-    pin_LED07,
-    pin_LED08,
-    pin_LED09,
-    pin_LED10,
-    pin_LED11,
-    pin_LED12,
-    pin_LED13,
-    pin_LED14,
-    pin_LED15,
-    pin_LED16,
-    pin_LED17,
-    pin_LED18,
-    pin_LED19,  // LED pins
-    pin_LED20,  // LED pins
-    pin_LEDCW,
-    pin_LEDWW,
-    pin_LEDB,
-    pin_LEDG,
-    pin_LEDR,
-    pin_Button01,
-    pin_Button02,
-    pin_Button03,
-    pin_Voltage,
-    pin_Current,
-    pin_IR,
-    pin_Relais,
-    pin_RelaisBrightness,
-    pin_DMX,
-    pin_MicSD,
-    pin_MicWS,
-    pin_MicSCK,
-    pin_MicMCLK,
-    pin_OnBoardLed,
-    pin_OnBoardKey,
-    pin_Battery,
-    pin_Temperature,
-    pin_Exposed,
-    pin_I2CSDA,
-    pin_I2CSCL,
-    pin_count
-  };
-
-  enum IO_Boards {
-    board_none,  //
-    board_QuinLEDDigUnoV3,
-    board_QuinLEDDigQuadV3,
-    board_QuinLEDDigOctoV2,
-    board_QuinLEDPenta,
-    board_QuinLEDPentaPlus,
-    board_SergUniShieldV5,
-    board_SergMiniShield,
-    board_SE16V1,
-    board_WladiD0,
-    board_WladiP4Nano,
-    board_YvesV48,
-    board_TroyP4Nano,
-    board_AtomS3,
-    board_LuxceoMood1XiaoMod,
-    board_Cube202010,
-    board_count
-  };
-
   void setupDefinition(JsonArray root) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more controls
@@ -105,7 +105,7 @@ class ModuleIO : public Module {
     control = addControl(root, "boardPreset", "select");
     control["default"] = 0;
     values = control["values"].to<JsonArray>();
-    values.add(BUILD_TARGET); // 0 none
+    values.add(BUILD_TARGET);  // 0 none
     values.add("QuinLED Dig Uno v3");
     values.add("QuinLED Dig Quad v3");
     values.add("QuinLED Dig Octa v2");
@@ -256,7 +256,7 @@ class ModuleIO : public Module {
       pins[46]["pinFunction"] = pin_Button03;
       pins[8]["pinFunction"] = pin_Voltage;
       pins[9]["pinFunction"] = pin_Current;
-      pins[5]["pinFunction"] = pin_IR;
+      pins[5]["pinFunction"] = pin_Infrared;
     } else if (boardID == board_QuinLEDDigUnoV3) {
       object["maxPower"] = 75;
       pins[0]["pinFunction"] = pin_Button01;
@@ -328,7 +328,8 @@ class ModuleIO : public Module {
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["pinFunction"] = pin_LED01 + i;
     } else if (boardID == board_Cube202010) {
       object["maxPower"] = 50;
-      uint8_t ledPins[10] = {22,21,14,18,5,4,2,15,13,12};  // LED_PINS
+      uint8_t ledPins[10] = {22, 21, 14, 18, 5, 4, 2, 15, 13, 12};  // LED_PINS
+                                                                    // char pins[80] = "2,3,4,16,17,18,19,21,22,23,25,26,27,32,33";  //(D0), more pins possible. to do: complete list.
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["pinFunction"] = pin_LED01 + i;
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
@@ -338,8 +339,10 @@ class ModuleIO : public Module {
     // String xxx;
     // serializeJson(_state.data, xxx);
     // EXT_LOGD(MB_TAG, "%s", xxx.c_str());
-    // serializeJson(object, xxx);
     // EXT_LOGD(MB_TAG, "%s", xxx.c_str());
+
+    EXT_LOGD(ML_TAG, "boardID %d", boardID);
+    // serializeJson(object, Serial);Serial.println();
 
     update(object, ModuleState::update, _moduleName + "server");
   }
@@ -348,10 +351,10 @@ class ModuleIO : public Module {
     // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     if (updatedItem.name == "boardPreset") {
       setBoardPresetDefaults(updatedItem.value);
-    } else if (updatedItem.name == "modded" && updateOriginId != _moduleName) {  // not done by this module: done by UI
+    } else if (updatedItem.name == "modded" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
       if (updatedItem.value == false) setBoardPresetDefaults(_state.data["boardPreset"]);
-      // set pins to default
-    } else if (updatedItem.name == "pinFunction" && updateOriginId != _moduleName) {  // not done by this module: done by UI
+      // set pins to default if modded is turned off
+    } else if (updatedItem.name == "pinFunction" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
       JsonDocument doc;
       JsonObject object = doc.to<JsonObject>();
       object["modded"] = true;
