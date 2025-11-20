@@ -129,9 +129,11 @@ class PhysicalLayer {
   void nextPin();  // if more pins are defined, the next lights will be assigned to the next pin
   void onLayoutPost();
 
+  //from board presets
   uint8_t ledPins[MAXLEDPINS];
   uint16_t ledsPerPin[MAXLEDPINS];
   uint8_t nrOfLedPins = 0;
+  uint16_t maxPower = 0;
 
   // an effect is using a virtual layer: tell the effect in which layer to run...
 

@@ -122,10 +122,10 @@ class ModuleLightsControl : public Module {
 
     property = addControl(root, "presetLoop", "slider");
     property["default"] = 0;
-    property = addControl(root, "firstPreset", "slider", 0, 63);
-    property["default"] = 0;
-    property = addControl(root, "lastPreset", "slider", 0, 63);
-    property["default"] = 63;
+    property = addControl(root, "firstPreset", "slider", 1, 64);
+    property["default"] = 1;
+    property = addControl(root, "lastPreset", "slider", 1, 64);
+    property["default"] = 64;
 
   #if FT_ENABLED(FT_MONITOR)
     property = addControl(root, "monitorOn", "checkbox");

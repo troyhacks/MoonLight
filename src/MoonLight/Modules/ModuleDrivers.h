@@ -38,7 +38,9 @@ class ModuleDrivers : public NodeManager {
       memset(layerP.ledPins, UINT8_MAX, sizeof(layerP.ledPins));
       layerP.nrOfLedPins = 0;
 
-      EXT_LOGD(ML_TAG, "maxPower %d", state.data["maxPower"].as<uint16_t>());
+      layerP.maxPower = state.data["maxPower"];
+      EXT_LOGD(ML_TAG, "maxPower %d", layerP.maxPower);
+
       // serializeJson(state.data["pins"], Serial);Serial.println();
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t pinFunction = pinObject["pinFunction"];
