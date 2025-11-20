@@ -65,7 +65,7 @@ export type EthernetSettings = {
   dns_ip_2?: string;
 };
 
-export type ApStatus = {
+export type ApStatus = { 
 	status: number;
 	ip_address: string;
 	mac_address: string;
