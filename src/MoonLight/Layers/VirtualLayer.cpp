@@ -63,6 +63,12 @@ void VirtualLayer::loop() {
   prevSize = size;
 };
 
+void VirtualLayer::loop20ms() {
+  for (Node* node : nodes) {
+    if (node->on) node->loop20ms();
+  }
+}
+
 void VirtualLayer::addIndexP(PhysMap& physMap, uint16_t indexP) {
   // EXT_LOGV(ML_TAG, "i:%d t:%d s:%d i:%d", indexP, physMap.mapType, mappingTableIndexes.size(), physMap.indexes);
   switch (physMap.mapType) {

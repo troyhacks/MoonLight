@@ -15,7 +15,7 @@
 
   #include <ESPFS.h>
 
-  #include "MoonBase/Module.h"
+  #include "MoonBase/Modules/ModuleIO.h"      // Includes also Module.h but also enum IO_Pins
   #include "MoonLight/Layers/VirtualLayer.h"  //VirtualLayer.h will include PhysicalLayer.h
 
   #define NODE_METADATA_VIRTUALS()                          \
@@ -51,7 +51,8 @@ class Node {
 
   VirtualLayer* layer = nullptr;  // the virtual layer this effect is using
   JsonArray controls;
-  Module* controlModule = nullptr;  // to access global lights control functions if needed
+  Module* moduleControl = nullptr;  // to access global lights control functions if needed
+  Module* moduleIO = nullptr;       // to access io pins if needed
 
   virtual bool isLiveScriptNode() const { return false; }
   virtual bool hasOnLayout() const { return false; }  // run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2)
@@ -102,7 +103,7 @@ class Node {
       newControl = true;  // set flag to true, as control is new
     }
 
-    control["valid"] = true; //invalid controls will be deleted
+    control["valid"] = true;  // invalid controls will be deleted
 
     // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
 
@@ -166,6 +167,7 @@ class Node {
 
   // effect, layout and modifier (?)
   virtual void loop() {}
+  virtual void loop20ms() {}
   virtual void onSizeChanged(Coord3D oldSize) {}  // virtual/effect nodes: virtual size, physical/driver nodes: physical size
 
   // layout
@@ -174,16 +176,8 @@ class Node {
   // convenience functions to add a light
   void addLight(Coord3D position) { layer->layerP->addLight(position); }
 
-  // convenience functions to add a pin
-  void addPin(uint8_t pinNr) { layer->layerP->addPin(pinNr); }
-  char* addNextPin(char*& nextPin) {  //&: by reference to change the pointer to the next pin
-    while (*nextPin && !isdigit((unsigned char)*nextPin)) nextPin++;
-    if (*nextPin) {
-      int pin = strtol(nextPin, (char**)&nextPin, 10);
-      addPin(pin);
-    }  // add next pin
-    return nextPin;
-  }
+  // convenience function for next pin
+  void nextPin() { layer->layerP->nextPin(); }
 
   // modifier
   virtual void modifySize() {}
@@ -305,8 +299,8 @@ static struct SharedData {
    */
 
   // Drivers first as used by others
-  #include "MoonLight/Nodes/Drivers/D_ArtnetOut.h"
   #include "MoonLight/Nodes/Drivers/D_ArtnetIn.h"
+  #include "MoonLight/Nodes/Drivers/D_ArtnetOut.h"
   #include "MoonLight/Nodes/Drivers/D_AudioSync.h"
   #include "MoonLight/Nodes/Drivers/D_FastLED.h"
   #include "MoonLight/Nodes/Drivers/D_Hub75.h"
@@ -322,11 +316,9 @@ static struct SharedData {
   #include "MoonLight/Nodes/Effects/E_WLED.h"
   #include "MoonLight/Nodes/Effects/E__Sandbox.h"
   #include "MoonLight/Nodes/Layouts/L_MoonLight.h"
+  #include "MoonLight/Nodes/Layouts/L_SE16.h"
   #include "MoonLight/Nodes/Layouts/L__Sandbox.h"
   #include "MoonLight/Nodes/Modifiers/M_MoonLight.h"
   #include "MoonLight/Nodes/Modifiers/M__Sandbox.h"
-  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
-    #include "MoonLight/Nodes/Layouts/L_SE16.h"
-  #endif
 
 #endif  // FT_MOONLIGHT

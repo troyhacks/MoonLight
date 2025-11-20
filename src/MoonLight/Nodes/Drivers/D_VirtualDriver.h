@@ -31,43 +31,37 @@ class VirtualDriver : public DriverNode {
   void onLayout() override {
     if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) {  // physical
 
-      if (!lightPresetSaved || layer->layerP->sortedPins.size() == 0) {  //|| initDone can be done multiple times now...
-        EXT_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, layer->layerP->sortedPins.size());
+      if (!lightPresetSaved || layer->layerP->nrOfLedPins == 0) {  //|| initDone can be done multiple times now...
+        EXT_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, layer->layerP->nrOfLedPins);
         return;
       }
 
-      EXT_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
+      EXT_LOGD(ML_TAG, "nrOfLedPins #:%d", layer->layerP->nrOfLedPins);
       if (safeModeMB) {
-        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding driver");
+        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
         return;
       }
 
-      for (const SortedPin& sortedPin : layer->layerP->sortedPins) {
-        // collect the definied pins
-      }
+      // from lightPresetSaved, prepare LUT arrays:
+      ledsDriver.nb_components = layer->layerP->lights.header.channelsPerLight;
+      ledsDriver.p_r = layer->layerP->lights.header.offsetRed;
+      ledsDriver.p_g = layer->layerP->lights.header.offsetGreen;
+      ledsDriver.p_b = layer->layerP->lights.header.offsetBlue;
 
-      if (layer->layerP->sortedPins.size() > 0) {
-        // from lightPresetSaved, prepare LUT arrays:
-        ledsDriver.nb_components = layer->layerP->lights.header.channelsPerLight;
-        ledsDriver.p_r = layer->layerP->lights.header.offsetRed;
-        ledsDriver.p_g = layer->layerP->lights.header.offsetGreen;
-        ledsDriver.p_b = layer->layerP->lights.header.offsetBlue;
+      if (initDone) {
+        // do things after the driver has been initialized
+        // eg change the pin assignment if needed
 
-        if (initDone) {
-          // do things after the driver has been initialized
-          // eg change the pin assignment if needed
+      } else {
+        // init the driver for the first time, using pins, leds per pin etc.
 
-        } else {
-          // init the driver for the first time, using pins, leds per pin etc.
+        // set brightness again after initled
 
-          // set brightness again after initled
+        // ledsDriver.initled(layer->layerP->lights.channels, pins, lengths, nb_pins);
 
-          // ledsDriver.initled(layer->layerP->lights.channels, pins, lengths, nb_pins);
+        // ledsDriver.setBrightness(ledsDriver._brightness); //(initLed sets it to 255 and thats not what we want)
 
-          // ledsDriver.setBrightness(ledsDriver._brightness); //(initLed sets it to 255 and thats not what we want)
-
-          initDone = true;  // so loop is called and initled not called again if channelsPerLight or pins saved
-        }
+        initDone = true;  // so loop is called and initled not called again if channelsPerLight or pins saved
       }
     }
   }
