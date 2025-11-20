@@ -338,7 +338,6 @@ I2SClocklessLedDriver ledsDriver;
   #endif
 
 void DriverNode::setup() {
-  addControl(maxPower, "maxPower", "number", 0, 500, false, "Watt");
   JsonObject property = addControl(lightPreset, "lightPreset", "select");
   JsonArray values = property["values"].to<JsonArray>();
   values.add("RGB");
@@ -357,28 +356,29 @@ void DriverNode::setup() {
 }
 
 void DriverNode::loop() {
-  LightsHeader* header = &layer->layerP->lights.header;
+  LightsHeader* header = &layerP.lights.header;
 
   // use ledsDriver LUT for super efficient leds dimming 🔥 (used by reOrderAndDimRGBW)
 
   uint8_t brightness = (header->offsetBrightness == UINT8_MAX) ? header->brightness : 255;  // set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
 
-  if (brightness != brightnessSaved) {
+  if (brightness != brightnessSaved || layerP.maxPower != maxPowerSaved) {
     // Use FastLED for setMaxPowerInMilliWatts stuff
-    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB*)&layer->layerP->lights.channels, layer->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
-    // EXT_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
+    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB*)&layerP.lights.channels, layerP.lights.header.nrOfLights, brightness, layerP.maxPower * 1000);
+    // EXT_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, layerP.maxPower, correctedBrightness);
     ledsDriver.setBrightness(correctedBrightness);
     brightnessSaved = brightness;
+    maxPowerSaved = layerP.maxPower;
   }
 
   #if HP_ALL_DRIVERS
-  if (savedColorCorrection.red != layer->layerP->lights.header.red || savedColorCorrection.green != layer->layerP->lights.header.green || savedColorCorrection.blue != layer->layerP->lights.header.blue) {
-    ledsDriver.setGamma(layer->layerP->lights.header.red / 255.0, layer->layerP->lights.header.blue / 255.0, layer->layerP->lights.header.green / 255.0, 1.0);
-    // EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue,
+  if (savedColorCorrection.red != layerP.lights.header.red || savedColorCorrection.green != layerP.lights.header.green || savedColorCorrection.blue != layerP.lights.header.blue) {
+    ledsDriver.setGamma(layerP.lights.header.red / 255.0, layerP.lights.header.blue / 255.0, layerP.lights.header.green / 255.0, 1.0);
+    // EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layerP.lights.header.red, layerP.lights.header.green, layerP.lights.header.blue,
     // savedColorCorrection.red, savedColorCorrection.green, savedColorCorrection.blue);
-    savedColorCorrection.red = layer->layerP->lights.header.red;
-    savedColorCorrection.green = layer->layerP->lights.header.green;
-    savedColorCorrection.blue = layer->layerP->lights.header.blue;
+    savedColorCorrection.red = layerP.lights.header.red;
+    savedColorCorrection.green = layerP.lights.header.green;
+    savedColorCorrection.blue = layerP.lights.header.blue;
   }
   #else  // ESP32_LEDSDRIVER
   CRGB correction;
@@ -396,12 +396,7 @@ void DriverNode::onUpdate(String& oldValue, JsonObject control) {
 
   EXT_LOGD(ML_TAG, "%s: %s ", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
 
-  if (control["name"] == "maxPower") {
-    uint8_t brightness = (header->offsetBrightness == UINT8_MAX) ? header->brightness : 255;  // set brightness to 255 if offsetBrightness is set (fixture will do its own brightness)
-    uint8_t correctedBrightness = calculate_max_brightness_for_power_mW((CRGB*)&layer->layerP->lights.channels, layer->layerP->lights.header.nrOfLights, brightness, maxPower * 1000);
-    EXT_LOGD(ML_TAG, "setBrightness b:%d + p:%d -> cb:%d", brightness, maxPower, correctedBrightness);
-    ledsDriver.setBrightness(correctedBrightness);
-  } else if (control["name"] == "lightPreset") {
+  if (control["name"] == "lightPreset") {
     uint8_t oldChannelsPerLight = header->channelsPerLight;
 
     header->resetOffsets();

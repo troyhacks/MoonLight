@@ -39,7 +39,6 @@
 		clearInterval(interval);
 	});
 
-
 	let dragSource: { row: number; col: number } | null = null;
 
 	function handleDragStart(event: DragEvent, row: number, col: number) {
@@ -268,9 +267,9 @@
 						{#if x + y * property.width < value.count}
 							<button
 								class="btn btn-square w-{property.size} h-{property.size} text-xl rounded-lg {value.selected ==
-								x + y * property.width
+								x + y * property.width + 1
 									? `btn-error`
-									: Array.isArray(value.list) && value.list.includes(x + y * property.width)
+									: Array.isArray(value.list) && value.list.includes(x + y * property.width + 1)
 										? `btn-success`
 										: 'btn-primary'}"
 								type="button"
@@ -282,7 +281,7 @@
 									preventClick = false;
 									clickTimeout = setTimeout(() => {
 										if (!preventClick) {
-											value.select = x + y * property.width;
+											value.select = x + y * property.width + 1;
 											console.log('click', y, x, value.select);
 											value.selected = value.select;
 											value.action = 'click';
@@ -294,7 +293,7 @@
 								on:dblclick={(event: any) => {
 									preventClick = true;
 									clearTimeout(clickTimeout);
-									value.select = x + y * property.width;
+									value.select = x + y * property.width + 1;
 									console.log('dblclick', y, x, value.select);
 									value.action = 'dblclick';
 									onChange(event);
@@ -302,27 +301,27 @@
 								on:mouseenter={(event: any) => {
 									// console.log("mousenter", rowIndex, colIndex, cell, value);
 									if (property.hoverToServer) {
-										value.select = x + y * property.width;
+										value.select = x + y * property.width + 1;
 										value.action = 'mouseenter';
 										onChange(event);
 									} else
 										handleMouseEnter(
-											x + y * property.width,
+											x + y * property.width + 1,
 											event,
-											value.list.includes(x + y * property.width)
+											value.list.includes(x + y * property.width + 1)
 										);
 								}}
 								on:mouseleave={(event: any) => {
 									// console.log("mouseleave", rowIndex, colIndex, cell, value);
 									if (property.hoverToServer) {
-										value.select = x + y * property.width;
+										value.select = x + y * property.width + 1;
 										value.action = 'mouseleave';
 										onChange(event);
 									} else handleMouseLeave();
 								}}
 							>
-								{x + y * property.width}
-								{#if popupCell === x + y * property.width}
+								{x + y * property.width + 1}
+								{#if popupCell === x + y * property.width + 1}
 									<div
 										class="fixed z-50 bg-neutral-100 p-6 rounded shadow-lg mt-2 min-h-0 text-left inline-block min-w-0"
 										style="left: {popupX}px; top: {popupY}px;"

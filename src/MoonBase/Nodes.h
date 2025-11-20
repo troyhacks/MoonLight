@@ -242,8 +242,8 @@ static LedsDriver ledsDriver;  //   only the core driver, for setBrightness and 
   #endif
 
 class DriverNode : public Node {
-  uint16_t maxPower = 10;
   uint8_t brightnessSaved = UINT8_MAX;
+  uint16_t maxPowerSaved = UINT16_MAX;
 
  protected:
   bool lightPresetSaved = false;  // initLeds can only start if this has been saved
