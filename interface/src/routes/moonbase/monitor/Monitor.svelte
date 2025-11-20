@@ -52,6 +52,7 @@
 	let nrOfLights: number;
 	let channelsPerLight: number;
 	let offsetRGB: number;
+	let offsetWhite: number;
 	let isPositions: boolean = false;
 	// let offsetRed:number;
 	// let offsetGreen:number;
@@ -73,6 +74,7 @@
 		nrOfLights = view.getUint16(12, true); //  header[12] + 256 * header[13];
 		channelsPerLight = view.getUint8(19); //header[19];
 		offsetRGB = view.getUint8(20); //header[20];
+		offsetWhite = view.getUint8(21); //header[21];
 
 		//rebuild scene
 		createScene(el);
@@ -130,8 +132,10 @@
 			const r = channels[index + offsetRGB + 0] / 255;
 			const g = channels[index + offsetRGB + 1] / 255;
 			const b = channels[index + offsetRGB + 2] / 255;
+			let w = 0;
+			if (offsetWhite != 255) w = channels[index + offsetRGB + 3] / 255; //add white channel if present
 			const a = 1.0; // Full opacity
-			colors.push(r, g, b, a);
+			colors.push(r + w, g + w, b + w, a);
 		}
 
 		updateScene(vertices, colors);

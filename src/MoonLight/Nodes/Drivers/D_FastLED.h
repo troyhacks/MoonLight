@@ -89,27 +89,20 @@ class FastLEDDriver : public Node {
       //     return;
       // }
 
-      if (layer->layerP->sortedPins.size() == 0) return;
+      if (layer->layerP->nrOfLedPins == 0) return;
 
-      EXT_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
+      EXT_LOGD(ML_TAG, "nrOfLedPins #:%d", layer->layerP->nrOfLedPins);
 
-      uint8_t pinCount = 0;
-      for (const SortedPin& sortedPin : layer->layerP->sortedPins) {
-        pinCount++;
-        if (pinCount > 4) {  // FastLED RMT supports max 4 pins!
-          EXT_LOGW(ML_TAG, "Too many pins!");
-          break;
-        }
-        EXT_LOGD(ML_TAG, "sortpins s:%d #:%d p:%d", sortedPin.startLed, sortedPin.nrOfLights, sortedPin.pin);
+      uint16_t startLed = 0;
+      for (uint8_t pinIndex = 0; pinIndex < layer->layerP->nrOfLedPins && pinIndex < 4; pinIndex++) {  // FastLED RMT supports max 4 pins!
+        EXT_LOGD(ML_TAG, "ledPin s:%d #:%d p:%d", pinIndex, layer->layerP->ledsPerPin[pinIndex]);
 
-        uint16_t startLed = sortedPin.startLed;
-        uint16_t nrOfLights = sortedPin.nrOfLights;
-        uint16_t pin = sortedPin.pin;
+        uint16_t nrOfLights = layer->layerP->ledsPerPin[pinIndex];
 
         CRGB* leds = (CRGB*)layer->layerP->lights.channels;
 
-        if (GPIO_IS_VALID_OUTPUT_GPIO(sortedPin.pin)) {
-          switch (sortedPin.pin) {
+        if (GPIO_IS_VALID_OUTPUT_GPIO(layer->layerP->ledPins[pinIndex])) {
+          switch (layer->layerP->ledPins[pinIndex]) {
   #if CONFIG_IDF_TARGET_ESP32
           case 0:
             FastLED.addLeds<ML_CHIPSET, 0 COLOR_ORDER_ARG>(leds, startLed, nrOfLights).setCorrection(TypicalLEDStrip) RGBW_CALL;
@@ -530,10 +523,12 @@ class FastLEDDriver : public Node {
   #endif  // CONFIG_IDF_TARGET_ESP32S3
 
           default:
-            EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", sortedPin.pin);
+            EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", layer->layerP->ledPins[pinIndex]);
           }  // switch pinNr
         } else
-          EXT_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", sortedPin.pin, sortedPin.nrOfLights);
+          EXT_LOGW(ML_TAG, "Pin %d (%d lights) not added as not valid for output", layer->layerP->ledPins[pinIndex], layer->layerP->ledsPerPin[pinIndex]);
+
+        startLed += layer->layerP->ledsPerPin[pinIndex];
 
       }  // sortedPins
     }

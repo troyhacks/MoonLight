@@ -21,48 +21,44 @@ class HumanSizedCubeLayout : public Node {
   uint8_t height = 10;
   uint8_t depth = 10;
   // bool snake;
-  char pins[20] = "12,13,14,15,16";  // minimal 5, 1 for each side.
 
   void setup() override {
     addControl(width, "width", "slider", 1, 20);
     addControl(height, "height", "slider", 1, 20);
     addControl(depth, "depth", "slider", 1, 20);
     // addControl(snake, "snake", "checkbox");
-    addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
-    char* nextPin = pins;
-
     // front: z = 0
     for (int x = 0; x < width; x++)
       for (int y = 0; y < height; y++) addLight(Coord3D(x + 1, y + 1, 0));
-    addNextPin(nextPin);
+    nextPin();  // each curtain it's own pin
 
     // back: z = depth+1
     for (int x = 0; x < width; x++)
       for (int y = 0; y < height; y++) addLight(Coord3D(x + 1, y + 1, depth + 1));
-    addNextPin(nextPin);
+    nextPin();  // each curtain it's own pin
 
     // above: y = 0
     for (int x = 0; x < width; x++)
       for (int z = 0; z < depth; z++) addLight(Coord3D(x + 1, 0, z + 1));
-    addNextPin(nextPin);
+    nextPin();  // each curtain it's own pin
 
     // //below: y = height+1
     // for (int x = 0; x<width; x++) for (int z = 0; z<depth; z++) addLight(Coord3D(x+1, height+1, z+1));
-    // addNextPin(nextPin);
+    // nextPin();  // each curtain it's own pin
 
     // left: x = 0
     for (int z = 0; z < depth; z++)
       for (int y = 0; y < height; y++) addLight(Coord3D(0, y + 1, z + 1));
-    addNextPin(nextPin);
+    nextPin();  // each curtain it's own pin
 
     // right: x = width+1
     for (int z = 0; z < depth; z++)
       for (int y = 0; y < height; y++) addLight(Coord3D(width + 1, y + 1, z + 1));
-    addNextPin(nextPin);
+    nextPin();  // each curtain it's own pin
   }
 };
 
@@ -92,8 +88,6 @@ class PanelLayout : public Node {
   Wiring panel = {{16, 16, 1}, 1, {true, true, true}, {false, true, false}};
   ;  // 16x16 panel, increasing over the axis, snake on the Y-axis
 
-  uint8_t pin = 16;
-
   void setup() override {
     JsonObject property;
     JsonArray values;
@@ -107,8 +101,6 @@ class PanelLayout : public Node {
     addControl(panel.inc[0], "X++", "checkbox");
     addControl(panel.inc[1], "Y++", "checkbox");
     addControl(panel.snake[1], "snake", "checkbox");
-
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -127,8 +119,7 @@ class PanelLayout : public Node {
         addLight(Coord3D(coords[0], coords[1]));
       });
     });
-
-    addPin(pin);
+    nextPin();  // all lights to one pin
   }
 };
 
@@ -140,13 +131,6 @@ class PanelsLayout : public Node {
 
   Wiring panels = {{2, 2, 1}, 1, {true, true, true}, {false, false, false}};  // 2x2 panels, increasing over the axis,
   Wiring panel = {{16, 16, 1}, 1, {true, true, true}, {false, true, false}};  // 16x16 panel, increasing over the axis, snake on the Y-axis
-
-  #if CONFIG_IDF_TARGET_ESP32
-  // char pins[80] = "22,21,14,18,5,4,2,15,13,12"; //Cube202020 (D0)
-  char pins[80] = "2,3,4,16,17,18,19,21,22,23,25,26,27,32,33";  //(D0), more pins possible. to do: complete list.
-  #else
-  char pins[80] = "47,48,21,38,14,39,1,13,40,12,41,11,42,10,2,3";  // SE16 pins (S3)
-  #endif
 
   void setup() override {
     JsonObject property;
@@ -171,14 +155,10 @@ class PanelsLayout : public Node {
     addControl(panel.inc[0], "X++", "checkbox");
     addControl(panel.inc[1], "Y++", "checkbox");
     addControl(panel.snake[1], "snake", "checkbox");
-
-    addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
-    char* nextPin = pins;
-
     uint8_t axisOrders[2][2] = {
         {1, 0},  // Y(1) outer loop, X(0) inner loop
         {0, 1},  // X(0) outer loop, Y(1) inner loop
@@ -201,7 +181,7 @@ class PanelsLayout : public Node {
           });
         });
 
-        addNextPin(nextPin);
+        nextPin();  // each panel it's own pin
       });
     });
   }
@@ -215,8 +195,6 @@ class CubeLayout : public Node {
 
   Wiring panels = {{10, 10, 10}, 3, {true, true, true}, {false, true, false}};
   ;  // 16x16 panel, increasing over the axis, snake on the Y-axis
-
-  char pins[20] = "12,13,14,15,16,17";
 
   void setup() override {
     addControl(panels.size[0], "width", "number", 1, 128);
@@ -238,7 +216,6 @@ class CubeLayout : public Node {
     addControl(panels.snake[0], "snakeX", "checkbox");
     addControl(panels.snake[1], "snakeY", "checkbox");
     addControl(panels.snake[2], "snakeZ", "checkbox");
-    addControl(pins, "pins", "text", 1, sizeof(pins));
   }
 
   bool hasOnLayout() const override { return true; }
@@ -251,7 +228,6 @@ class CubeLayout : public Node {
         {0, 2, 1},  // X, Z, Y
         {0, 1, 2}   // X, Y, Z
     };
-    char* nextPin = pins;
 
     panels.axes = axisOrders[panels.wiringOrder];  // choose one of the orders
     panels.iterate(0, 0, [&](uint16_t i) {
@@ -265,7 +241,7 @@ class CubeLayout : public Node {
         });
       });
 
-      addNextPin(nextPin);
+      nextPin();  // each plane it's own pin
     });
   }
 };
@@ -279,7 +255,6 @@ class SingleLineLayout : public Node {
   uint8_t start_x = 0;
   uint16_t width = 30;
   uint16_t yposition = 0;
-  uint8_t pin = 16;
   bool reversed_order = false;
 
   void setup() override {
@@ -287,7 +262,6 @@ class SingleLineLayout : public Node {
     addControl(width, "width", "number", 1, 1000);
     addControl(yposition, "Y position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -301,7 +275,7 @@ class SingleLineLayout : public Node {
         addLight(Coord3D(x, yposition, 0));
       }
     }
-    addPin(pin);
+    nextPin();  // all lights to one pin
   }
 };
 
@@ -314,7 +288,6 @@ class SingleRowLayout : public Node {
   uint8_t start_y = 0;
   uint16_t height = 30;
   uint16_t xposition = 0;
-  uint8_t pin = 16;
   bool reversed_order = false;
 
   void setup() override {
@@ -322,7 +295,6 @@ class SingleRowLayout : public Node {
     addControl(height, "height", "number", 1, 1000);
     addControl(xposition, "X position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -336,7 +308,7 @@ class SingleRowLayout : public Node {
         addLight(Coord3D(xposition, y, 0));
       }
     }
-    addPin(pin);
+    nextPin();  // all lights to one pin
   }
 };
 
@@ -346,12 +318,10 @@ class RingsLayout : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🚥"; }
 
-  uint8_t pin = 16;
-
   uint8_t width = 16;
   uint8_t height = 16;
 
-  void setup() override { addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1); }
+  void setup() override {}
 
   void add(int leds, int radius) {
     for (int i = 0; i < leds; i++) {
@@ -376,8 +346,7 @@ class RingsLayout : public Node {
     add(40, 63);
     add(48, 73);
     add(60, 83);
-
-    addPin(pin);
+    nextPin();  // all lights to one pin
   }
 };
 
@@ -387,15 +356,12 @@ class WheelLayout : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🚥"; }
 
-  uint8_t pin = 16;
-
   uint8_t nrOfSpokes = 12;
   uint8_t ledsPerSpoke = 16;
 
   void setup() override {
     addControl(nrOfSpokes, "nrOfSpokes", "slider", 1, 48);
     addControl(ledsPerSpoke, "ledsPerSpoke", "slider", 1, 255);
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   bool hasOnLayout() const override { return true; }
@@ -414,7 +380,7 @@ class WheelLayout : public Node {
         addLight(Coord3D(x + middle.x, y + middle.y, middle.z));
       }
     }
-    addPin(pin);
+    nextPin();  // all lights to one pin
   }
 };
 
@@ -424,7 +390,6 @@ class SpiralLayout : public Node {
   static uint8_t dim() { return _3D; }
   static const char* tags() { return "🚥"; }
 
-  uint8_t pin = 16;
   uint16_t ledCount = 640;
   uint16_t bottomRadius = 10;
   uint16_t height = 25;
@@ -433,7 +398,6 @@ class SpiralLayout : public Node {
     addControl(ledCount, "ledCount", "number", 1, 2048);
     addControl(bottomRadius, "bottomRadius", "number", 1, 100);
     addControl(height, "height", "number", 1, 200);
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
   Coord3D middle;
@@ -484,8 +448,7 @@ class SpiralLayout : public Node {
       // Add light at calculated position
       addLight(Coord3D(x + middle.x, y + middle.y, z + middle.z));
     }
-
-    addPin(pin);
+    nextPin();  // all lights to one pin
   }
 };
 

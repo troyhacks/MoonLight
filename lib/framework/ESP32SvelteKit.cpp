@@ -283,30 +283,6 @@ void ESP32SvelteKit::_loop()
             lastTime = millis();
             _analyticsService.lps = lps; // 🌙
             lps = 0; // 🌙
-            // 🌙 
-            #if FT_BATTERY
-                #if BATTERY_PIN && BATTERY_MV
-                    float mVB = analogReadMilliVolts(BATTERY_PIN) * 2.0;
-                    float perc = (mVB - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35); //65% of full battery is 0%, showing 0-100%
-                    // ESP_LOGD("", "bat mVB %f p:%f", mVB, perc);
-                    _batteryService.updateSOC(perc * 100);
-                #endif
-                #ifdef VOLTAGE_PIN //see esp32-s3-stephanelec-16p
-                    float mV = analogReadMilliVolts(VOLTAGE_PIN) * 2.0 / 1000; // /2 resistor divider
-                    _batteryService.updateVoltage(mV);
-                #endif
-                #ifdef CURRENT_PIN //see esp32-s3-stephanelec-16p
-                    float mA = analogReadMilliVolts(CURRENT_PIN);
-                    if (mA > 250) // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
-                    {
-                        _batteryService.updateCurrent(((mA - 250) * 50.0) / 1000); // 40mV / A with a /2 resistor divider, so a 50mA/mV
-                    }
-                    else
-                    {
-                        _batteryService.updateCurrent(0);
-                    }
-                #endif
-            #endif
 #ifdef TELEPLOT_TASKS
             Serial.printf(">ESP32SveltekitTask:%i:%i\n", millis(), uxTaskGetStackHighWaterMark(NULL));
 #endif

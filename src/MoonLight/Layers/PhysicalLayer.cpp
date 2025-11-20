@@ -86,6 +86,13 @@ void PhysicalLayer::loop() {
   }
 }
 
+void PhysicalLayer::loop20ms() {
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop20ms();  // if (layer) needed when deleting rows ...
+  }
+}
+
 void PhysicalLayer::loopDrivers() {
   if (lights.header.isPositions == 0) {  // otherwise lights is used for positions etc.
     if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
@@ -108,7 +115,7 @@ void PhysicalLayer::mapLayout() {
 }
 
 void PhysicalLayer::onLayoutPre() {
-  EXT_LOGD(ML_TAG, "pass %d", pass);
+  EXT_LOGD(ML_TAG, "pass %d mp:%d", pass, monitorPass);
 
   if (pass == 1) {
     lights.header.nrOfLights = 0;  // for pass1 and pass2 as in pass2 virtual layer needs it
@@ -119,7 +126,9 @@ void PhysicalLayer::onLayoutPre() {
     // set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
     memset(lights.channels, 0, lights.maxChannels);  // set all the channels to 0
     // dealloc pins
-    sortedPins.clear();  // clear the added pins for the next pass
+    if (!monitorPass) {
+      memset(ledsPerPin, UINT16_MAX, sizeof(ledsPerPin));
+    }
   } else if (pass == 2) {
     indexP = 0;
     for (VirtualLayer* layer : layers) {
@@ -148,7 +157,7 @@ void PhysicalLayer::addLight(Coord3D position) {
 
     lights.header.size = lights.header.size.maximum(position);
     lights.header.nrOfLights++;
-  } else {
+  } else {  // pass == 2
     for (VirtualLayer* layer : layers) {
       // add the position in the virtual layer
       layer->addLight(position);
@@ -157,54 +166,33 @@ void PhysicalLayer::addLight(Coord3D position) {
   }
 }
 
-void PhysicalLayer::addPin(uint8_t pinNr) {
+void PhysicalLayer::nextPin() {
   if (pass == 1 && !monitorPass) {
-    EXT_LOGD(ML_TAG, "addPin %d %d", pinNr, lights.header.nrOfLights);
-
-    SortedPin previousPin;
-    if (!sortedPins.empty()) {
-      previousPin = sortedPins.back();  // get the last added pin
-      if (previousPin.pin == pinNr) {   // if the same pin, just increase the number of LEDs
-        previousPin.nrOfLights = lights.header.nrOfLights - previousPin.startLed;
-        sortedPins.back() = previousPin;  // update the last added pin
-        return;                           // no need to add a new pin
-      }
-    } else {
-      previousPin.startLed = 0;  // first pin, start at 0
-      previousPin.nrOfLights = 0;
+    uint16_t prevNrOfLights = 0;
+    uint8_t i = 0;
+    while (ledsPerPin[i] != UINT16_MAX && i < sizeof(ledsPerPin)) {
+      prevNrOfLights += ledsPerPin[i];
+      i++;
     }
-
-    // 0 400
-    // 400 400
-    // 800 400
-
-    SortedPin sortedPin;
-    sortedPin.startLed = previousPin.startLed + previousPin.nrOfLights;  // start at the end of the previous pin
-    sortedPin.nrOfLights = lights.header.nrOfLights - sortedPin.startLed;
-    sortedPin.pin = pinNr;  // the pin number
-
-    sortedPins.push_back(sortedPin);
+    // ledsPerPin[i] is the first empty slot
+    if (i < sizeof(ledsPerPin)) {
+      ledsPerPin[i] = lights.header.nrOfLights - prevNrOfLights;
+      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d", i, ledsPerPin[i]);
+    }
   }
 }
 
 void PhysicalLayer::onLayoutPost() {
   if (pass == 1) {
     lights.header.size += Coord3D{1, 1, 1};
-    EXT_LOGD(ML_TAG, "pass %d #:%d s:%d,%d,%d", pass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
+    EXT_LOGD(ML_TAG, "pass %d mp:%d #:%d s:%d,%d,%d", pass, monitorPass, lights.header.nrOfLights, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     // send the positions to the UI _socket_emit
     EXT_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights ? 2 : 3);
     lights.header.isPositions = lights.header.nrOfLights ? 2 : 3;  // filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
 
     // initLightsToBlend();
 
-    // if pins defined
-    if (!sortedPins.empty()) {
-      // sort the vector by the starLed
-      std::sort(sortedPins.begin(), sortedPins.end(), [](const SortedPin& a, const SortedPin& b) { return a.startLed < b.startLed; });
-
-      // ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
-
-    }  // pins defined
+    // ledsDriver.init(lights, sortedPins); //init the driver with the sorted pins and lights
   } else if (pass == 2) {
     EXT_LOGD(ML_TAG, "pass %d %d", pass, indexP);
     for (VirtualLayer* layer : layers) {

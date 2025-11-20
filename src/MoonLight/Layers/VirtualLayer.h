@@ -78,6 +78,7 @@ class VirtualLayer {
 
   void setup();
   void loop();
+  void loop20ms();
 
   void addIndexP(PhysMap& physMap, uint16_t indexP);
 

@@ -24,11 +24,14 @@ class ModuleLightsControl : public Module {
  public:
   PsychicHttpServer* _server;
   FileManager* _fileManager;
+  ModuleIO* _moduleIO;
+  uint8_t pinRelaisBrightness = -1;
 
-  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module("lightscontrol", server, sveltekit) {
+  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
+    _moduleIO = moduleIO;
   }
 
   void begin() {
@@ -60,6 +63,21 @@ class ModuleLightsControl : public Module {
           setPresetsFromFolder();  // update the presets from the folder
         }
       });
+    });
+    moduleIO.addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    readPins(); //initially
+  }
+
+  void readPins() {
+    moduleIO.read([&](ModuleState& state) {
+      for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
+        uint8_t pinFunction = pinObject["pinFunction"];
+        if (pinFunction == pin_RelaisBrightness) {
+          pinRelaisBrightness = pinObject["GPIO"];
+          EXT_LOGD(ML_TAG, "pinRelaisBrightness found %d", pinRelaisBrightness);
+        }
+      }
+      // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
     });
   }
 
@@ -125,7 +143,11 @@ class ModuleLightsControl : public Module {
     } else if (updatedItem.name == "blue") {
       layerP.lights.header.blue = _state.data["blue"];
     } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-      layerP.lights.header.brightness = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
+      uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
+      if (!!layerP.lights.header.brightness != !!newBri && pinRelaisBrightness != UINT8_MAX) {
+        EXT_LOGD(ML_TAG, "pinRelaisBrightness %s", !!newBri ? "On" : "Off");
+      };
+      layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
       // String value = _state.data["palette"];//updatedItem.oldValue;
       if (updatedItem.value == 0)

@@ -18,8 +18,8 @@ A node implements the following (overloaded) functions:
 * ...
 
 * Node types: it is recommended that a node is one of the 4 types (Effect, Modifier, Layer, Driver). However each node could perform functionality of all types. To recognize what a node does the emojis 🚥, 🔥, 💎 and ☸️ are used in the name. The function hasOnLayout() and hasModifier() indicate the specific functionality the node supports. They control when a physical to virtual mapping is recalculated
-    * **hasOnLayout()**: a layout node specify the amount of position of lights controlled. E.g. a panel of 16x16 or a cube of 20x20x20. If hasOnLayout() is true you should implement onLayout calling addLight(position) and addPin() for all the lights. 
-      * addPin() is needed if a LED driver is used to send the output to LED strips.
+    * **hasOnLayout()**: a layout node specify the amount of position of lights controlled. E.g. a panel of 16x16 or a cube of 20x20x20. If hasOnLayout() is true you should implement onLayout calling addLight(position) for all the lights and nextPin()
+      * nextPin() is needed to define how many ledsPerPin are used for each pin
     * **hasModifier()**: a modifier node which manipulates virtual size and positions and lights using one or more of the functions modifySize, modifyPosition and modifyXYZ.
     * if the loop() function contains setXXX functions is used it is an **effect** node. It will contain for-loops iterating over each virtual ! light defined by layout and modifier nodes. The iteration will be on the x-axis for 1D effects, but also on the y- and z-axis for 2D and 3D effects. setRGB is the default function setting the RGB values of the light. If a light has more 'channels' (e.g. Moving heads) they also can be set. 
 * Moving heads
