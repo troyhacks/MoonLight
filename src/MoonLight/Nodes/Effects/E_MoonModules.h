@@ -564,4 +564,243 @@ class PaintBrushEffect : public Node {
   }
 };
 
+// Author: @TroyHacks, for MoonModules
+// @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+class BouncingCubeEffect : public Node {
+public:
+  static const char* name() { return "BouncingCube"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "🎶⬛🐺"; }
+
+  uint8_t fadeRate = 40;
+  uint8_t minBass = 0;
+  uint8_t maxBass = 255;
+  bool soft = false;       // default off
+  bool wireframe = false;  // default off
+
+  void setup() override {
+    addControl(fadeRate, "fadeRate", "slider", 0, 128);
+    addControl(minBass, "minBass", "slider", 0, 255);
+    addControl(maxBass, "maxBass", "slider", 0, 255);
+    addControl(soft, "soft", "checkbox");
+    addControl(wireframe, "wireframe", "checkbox");
+  }
+
+  void loop() override {
+    const uint16_t cols = layer->size.x;
+    const uint16_t rows = layer->size.y;
+    const uint16_t depth = layer->size.z;
+
+    // Decide minimum size based on parity
+    uint8_t minSize;
+    if ((cols % 2 == 0) || (rows % 2 == 0) || (depth > 1 && depth % 2 == 0)) {
+      minSize = 2;   // even dimension → use 2×2 (or 2×2×2)
+    } else {
+      minSize = 1;   // odd dimension → allow 1×1
+    }
+
+    layer->fadeToBlackBy(fadeRate);
+
+    uint8_t bass = sharedData.bands[0];
+
+    // Only draw if within thresholds
+    if (bass < minBass || bass > maxBass) return;
+
+    // Map bass to cube size with dynamic minimum
+    uint8_t cubeSize = map(bass, minBass, maxBass, minSize, min(cols, min(rows, depth)));
+
+    // Compute half-size with rounding up
+    int half = (cubeSize + 1) / 2;
+
+    // Center coordinates
+    int cx = cols / 2;
+    int cy = rows / 2;
+    int cz = depth / 2;
+
+    CRGB color = ColorFromPalette(layer->layerP->palette, bass, 255);
+
+    if (depth > 1) {
+      // Draw cube in 3D
+      layer->drawCube(cx - half, cy - half, cz - half, cx + half - 1, cy + half - 1, cz + half - 1, color, soft, wireframe);
+    } else {
+      // Draw square in 2D
+      layer->drawRect(cx - half, cy - half, cx + half - 1, cy + half - 1, color, soft, wireframe);
+    }
+  }
+};
+
+// Author: @TroyHacks, for MoonModules
+// @license GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+class BandShapesEffect : public Node {
+public:
+  static const char* name() { return "BandShapes"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "🎶⭕⬛🐺"; }
+
+  uint8_t fadeRate = 40;     // 0 = no fade, >0 = fade strength
+  uint8_t minScale = 2;      // minimum shape size
+  uint8_t minBand = 10;      // minimum band amplitude to show
+  uint8_t maxBand = 255;     // maximum band amplitude for scaling
+  bool useCircles = true;    // toggle circles vs rectangles
+  bool soft = false;         // anti-aliased edges
+  bool wireframe = false;    // outline vs filled
+  bool smoothBands = true;   // toggle interpolation
+
+  void setup() override {
+    addControl(fadeRate, "fadeRate", "slider", 0, 255); // allow 0 for no fade
+    addControl(minScale, "minScale", "slider", 1, 32);
+    addControl(minBand, "minBand", "slider", 0, 255);
+    addControl(maxBand, "maxBand", "slider", 0, 255);
+    addControl(useCircles, "useCircles", "checkbox");
+    addControl(soft, "soft", "checkbox");
+    addControl(wireframe, "wireframe", "checkbox");
+    addControl(smoothBands, "smoothBands", "checkbox");
+  }
+
+  void loop() override {
+    const uint16_t cols = layer->size.x;
+    const uint16_t rows = layer->size.y;
+    const uint16_t depth = layer->size.z;
+
+    // Fade only if fadeRate > 0
+    if (fadeRate > 0) {
+      layer->fadeToBlackBy(fadeRate);
+    }
+
+    // Parity-aware centers
+    int cx = (cols % 2 == 0) ? (cols / 2) : (cols / 2);
+    int cy = (rows % 2 == 0) ? (rows / 2) : (rows / 2);
+
+    const int NUM_BANDS = NUM_GEQ_CHANNELS;
+    float bandwidth = (float)depth / NUM_BANDS;
+    float remaining = bandwidth;
+    uint8_t band = 0;
+
+    uint16_t lastBandValue = 0;
+
+    for (int z = 0; z < depth; z++) {
+      if (remaining < 1) {
+        band++;
+        remaining += bandwidth;
+      }
+      remaining--;
+
+      // Map band index into full range
+      uint8_t frBand = (NUM_BANDS < NUM_GEQ_CHANNELS && NUM_BANDS > 1)
+        ? ::map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS)
+        : band;
+      frBand = constrain(frBand, 0, NUM_GEQ_CHANNELS - 1);
+
+      uint16_t bandValue = sharedData.bands[frBand];
+
+      // Interpolation with neighbors if enabled
+      if (smoothBands && z > 0 && z < depth - 1) {
+        uint8_t nextBand = (remaining < 1) ? band + 1 : band;
+        nextBand = constrain(nextBand, 0, NUM_GEQ_CHANNELS - 1);
+        uint8_t frNext = (NUM_BANDS < NUM_GEQ_CHANNELS && NUM_BANDS > 1)
+          ? ::map(nextBand, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS)
+          : nextBand;
+        frNext = constrain(frNext, 0, NUM_GEQ_CHANNELS - 1);
+        uint16_t nextValue = sharedData.bands[frNext];
+
+        bandValue = (7 * bandValue + 3 * lastBandValue + 3 * nextValue) / 13;
+        bandValue = constrain(bandValue, 0, 255);
+      }
+      lastBandValue = bandValue;
+
+      // Thresholds
+      if (bandValue < minBand) continue;
+      bandValue = constrain(bandValue, minBand, maxBand);
+
+      // Scale to shape size
+      uint8_t size = map(bandValue, minBand, maxBand, minScale, min(cols, rows));
+
+      // Enforce parity-aware diameters
+      if (cols % 2 == 0 && size % 2 != 0) size++;
+      if (rows % 2 == 0 && size % 2 != 0) size++;
+
+      // Consistent, non-wrapping color mapping
+      uint8_t step = 255 / depth;
+      uint16_t colorIndex = z * step;
+      CRGB color = ColorFromPalette(layer->layerP->palette, colorIndex, 255, LINEARBLEND);
+
+      if (useCircles) {
+        layer->drawCircle3D(cx, cy, z, size / 2, color, soft);
+      } else {
+        int half = (size + 1) / 2;
+        layer->drawRect3D(cx - half, cy - half,
+          cx + half - 1, cy + half - 1,
+          z,
+          color, soft, wireframe);
+      }
+    }
+  }
+};
+
+class PlaneDemoEffect : public Node {
+public:
+  static const char* name() { return "ArbitraryPlane"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "✂️📐🟦"; }
+
+  bool wireframe = false;
+  bool filled = true;
+  uint8_t fadeRate = 40;
+
+  void setup() override {
+    addControl(wireframe, "wireframe", "checkbox");
+    addControl(filled, "filled", "checkbox");
+    addControl(fadeRate, "fadeRate", "slider", 0, 128);
+  }
+
+  void loop() override {
+    if (fadeRate > 0) layer->fadeToBlackBy(fadeRate);
+
+    int maxX = layer->size.x - 1;
+    int maxY = layer->size.y - 1;
+    int maxZ = layer->size.z - 1;
+
+    // Animate plane normal vector (rotating orientation)
+    float t = millis() / 1000.0f;
+    float a = sinf(t * 0.7f);
+    float b = cosf(t * 0.5f);
+    float c = sinf(t * 0.3f);
+    float d = (maxX / 2) * a + (maxY / 2) * b + (maxZ / 2) * c;
+
+    // Collect intersections with cube edges
+    std::vector<Coord3D> pts;
+    auto checkEdge = [&](Coord3D p1, Coord3D p2) {
+      float denom = (a * (p2.x - p1.x) + b * (p2.y - p1.y) + c * (p2.z - p1.z));
+      if (fabs(denom) < 1e-6) return;
+      float tEdge = (d - (a * p1.x + b * p1.y + c * p1.z)) / denom;
+      if (tEdge >= 0 && tEdge <= 1) {
+        pts.push_back({
+          int(p1.x + tEdge * (p2.x - p1.x)),
+          int(p1.y + tEdge * (p2.y - p1.y)),
+          int(p1.z + tEdge * (p2.z - p1.z))
+          });
+      }
+      };
+
+    // Define cube edges
+    Coord3D corners[8] = {
+      {0,0,0}, {maxX,0,0}, {0,maxY,0}, {maxX,maxY,0},
+      {0,0,maxZ}, {maxX,0,maxZ}, {0,maxY,maxZ}, {maxX,maxY,maxZ}
+    };
+    int edges[12][2] = {
+      {0,1},{1,3},{3,2},{2,0}, // bottom
+      {4,5},{5,7},{7,6},{6,4}, // top
+      {0,4},{1,5},{2,6},{3,7}  // verticals
+    };
+    for (int i = 0;i < 12;i++) checkEdge(corners[edges[i][0]], corners[edges[i][1]]);
+
+    if (pts.size() >= 3) {
+      // Pick first 4 intersection points (convex polygon)
+      CRGB color = ColorFromPalette(layer->layerP->palette, millis() / 10 % 255);
+      layer->drawPlane3D(pts[0], pts[1], pts[2], pts[3], color, filled, false, wireframe);
+    }
+  }
+};
+
+
 #endif

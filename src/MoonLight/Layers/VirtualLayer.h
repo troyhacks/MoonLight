@@ -280,6 +280,47 @@ class VirtualLayer {
 
   void drawText(const char* text, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0);
 
+  void drawRect(int x1, int y1, int x2, int y2, CRGB col, bool soft = false, bool wireframe = false);
+
+  void drawCube(int x1, int y1, int z1, int x2, int y2, int z2, CRGB col, bool soft = false, bool wireframe = false);
+
+  // Draw a circle in XY plane at depth z
+  void drawCircle3D(int cx, int cy, int cz,
+    uint8_t radius, CRGB col,
+    bool soft = false);
+
+  // Draw a rectangle in XY plane at depth z
+  void drawRect3D(int x1, int y1, int x2, int y2, int z,
+    CRGB col,
+    bool soft = false, bool wireframe = false);
+
+  // Draw a filled or wireframe rectangular volume (box)
+  void drawRectVolume(int x1, int y1, int x2, int y2,
+    int z1, int z2,
+    CRGB col,
+    bool soft = false, bool wireframe = false);
+
+  // Draw a cylindrical volume (stacked circles)
+  void drawCircleVolume(int cx, int cy,
+    int z1, int z2,
+    uint8_t radius, CRGB col,
+    bool soft = false);
+
+  // Draw a triangle in 3D space
+  // p1, p2, p3: 3D coordinates of the triangle vertices
+  // col: color
+  // soft: anti-aliased edges
+  // wireframe: if true, draw only the edges
+  void drawTriangle3D(Coord3D p1, Coord3D p2, Coord3D p3, CRGB col, bool soft = false, bool wireframe = false);
+
+  // Draw a quadrilateral plane in 3D space
+  // p1..p4: 3D coordinates of the four corners
+  // col: color
+  // filled: if true, fill the plane (split into two triangles)
+  // soft: anti-aliased edges
+  // wireframe: if true, draw only the outline
+  void drawPlane3D(Coord3D p1, Coord3D p2, Coord3D p3, Coord3D p4, CRGB col, bool filled = false, bool soft = false, bool wireframe = false);
+
 };
 
 #endif

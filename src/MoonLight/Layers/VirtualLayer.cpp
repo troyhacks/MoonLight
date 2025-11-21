@@ -604,6 +604,249 @@ void VirtualLayer::drawCircle(int cx, int cy, uint8_t radius, CRGB col, bool sof
   }
 }
 
+void VirtualLayer::drawRect(int x1, int y1, int x2, int y2, CRGB col, bool soft, bool wireframe) {
+  if (x1 > x2) std::swap(x1, x2);
+  if (y1 > y2) std::swap(y1, y2);
+
+  if (wireframe) {
+    // outline: four edges
+    drawLine(x1, y1, x2, y1, col, soft);
+    drawLine(x2, y1, x2, y2, col, soft);
+    drawLine(x2, y2, x1, y2, col, soft);
+    drawLine(x1, y2, x1, y1, col, soft);
+  } else {
+    // filled
+    for (int y = y1; y <= y2; y++) {
+      for (int x = x1; x <= x2; x++) {
+        if (soft)
+          setRGB(Coord3D(x, y, 0), blend(col, getRGB(Coord3D(x, y, 0)), 128));
+        else
+          setRGB(Coord3D(x, y, 0), col);
+      }
+    }
+  }
+}
+
+void VirtualLayer::drawCube(int x1, int y1, int z1, int x2, int y2, int z2, CRGB col, bool soft, bool wireframe) {
+
+  if (x1 > x2) std::swap(x1, x2);
+  if (y1 > y2) std::swap(y1, y2);
+  if (z1 > z2) std::swap(z1, z2);
+
+  if (wireframe) {
+    // 12 edges of the cube
+    drawLine3D(x1, y1, z1, x2, y1, z1, col, soft);
+    drawLine3D(x2, y1, z1, x2, y2, z1, col, soft);
+    drawLine3D(x2, y2, z1, x1, y2, z1, col, soft);
+    drawLine3D(x1, y2, z1, x1, y1, z1, col, soft);
+
+    drawLine3D(x1, y1, z2, x2, y1, z2, col, soft);
+    drawLine3D(x2, y1, z2, x2, y2, z2, col, soft);
+    drawLine3D(x2, y2, z2, x1, y2, z2, col, soft);
+    drawLine3D(x1, y2, z2, x1, y1, z2, col, soft);
+
+    drawLine3D(x1, y1, z1, x1, y1, z2, col, soft);
+    drawLine3D(x2, y1, z1, x2, y1, z2, col, soft);
+    drawLine3D(x2, y2, z1, x2, y2, z2, col, soft);
+    drawLine3D(x1, y2, z1, x1, y2, z2, col, soft);
+  } else {
+    // filled cube
+    for (int z = z1; z <= z2; z++) {
+      for (int y = y1; y <= y2; y++) {
+        for (int x = x1; x <= x2; x++) {
+          if (soft)
+            setRGB(Coord3D(x, y, z), blend(col, getRGB(Coord3D(x, y, z)), 128));
+          else
+            setRGB(Coord3D(x, y, z), col);
+        }
+      }
+    }
+  }
+}
+
+void VirtualLayer::drawRect3D(int x1, int y1, int x2, int y2, int z, CRGB col, bool soft, bool wireframe) {
+
+  if (x1 > x2) std::swap(x1, x2);
+  if (y1 > y2) std::swap(y1, y2);
+
+  if (wireframe) {
+    drawLine3D(x1, y1, z, x2, y1, z, col, soft);
+    drawLine3D(x2, y1, z, x2, y2, z, col, soft);
+    drawLine3D(x2, y2, z, x1, y2, z, col, soft);
+    drawLine3D(x1, y2, z, x1, y1, z, col, soft);
+  } else {
+    for (int y = y1; y <= y2; y++) {
+      for (int x = x1; x <= x2; x++) {
+        if (soft)
+          setRGB(Coord3D(x, y, z), blend(col, getRGB(Coord3D(x, y, z)), 128));
+        else
+          setRGB(Coord3D(x, y, z), col);
+      }
+    }
+  }
+}
+
+void VirtualLayer::drawCircle3D(int cx, int cy, int cz,
+  uint8_t radius, CRGB col,
+  bool soft) {
+  if (radius == 0) return;
+
+  // --- Parity-aware centering ---
+  float fx = (size.x % 2 == 0) ? (size.x / 2.0f - 0.5f) : float(cx);
+  float fy = (size.y % 2 == 0) ? (size.y / 2.0f - 0.5f) : float(cy);
+
+  // --- Special case: radius == 1 → draw as 2×2 block ---
+  if (radius == 1) {
+    setRGB(Coord3D(int(fx), int(fy), cz), col);
+    setRGB(Coord3D(int(fx) + 1, int(fy), cz), col);
+    setRGB(Coord3D(int(fx), int(fy) + 1, cz), col);
+    setRGB(Coord3D(int(fx) + 1, int(fy) + 1, cz), col);
+    return;
+  }
+
+  if (soft) {
+    // Xiaolin Wu’s algorithm
+    int rsq = radius * radius;
+    int x = 0;
+    int y = radius;
+    unsigned oldFade = 0;
+    while (x < y) {
+      float yf = sqrtf(float(rsq - x * x));
+      unsigned fade = float(0xFF) * (ceilf(yf) - yf);
+      if (oldFade > fade) y--;
+      oldFade = fade;
+
+      setRGB(Coord3D(int(fx + x), int(fy + y), cz),
+        blend(col, getRGB(Coord3D(int(fx + x), int(fy + y), cz)), fade));
+      setRGB(Coord3D(int(fx - x), int(fy + y), cz),
+        blend(col, getRGB(Coord3D(int(fx - x), int(fy + y), cz)), fade));
+      setRGB(Coord3D(int(fx + x), int(fy - y), cz),
+        blend(col, getRGB(Coord3D(int(fx + x), int(fy - y), cz)), fade));
+      setRGB(Coord3D(int(fx - x), int(fy - y), cz),
+        blend(col, getRGB(Coord3D(int(fx - x), int(fy - y), cz)), fade));
+      setRGB(Coord3D(int(fx + y), int(fy + x), cz),
+        blend(col, getRGB(Coord3D(int(fx + y), int(fy + x), cz)), fade));
+      setRGB(Coord3D(int(fx - y), int(fy + x), cz),
+        blend(col, getRGB(Coord3D(int(fx - y), int(fy + x), cz)), fade));
+      setRGB(Coord3D(int(fx + y), int(fy - x), cz),
+        blend(col, getRGB(Coord3D(int(fx + y), int(fy - x), cz)), fade));
+      setRGB(Coord3D(int(fx - y), int(fy - x), cz),
+        blend(col, getRGB(Coord3D(int(fx - y), int(fy - x), cz)), fade));
+      x++;
+    }
+  } else {
+    // Bresenham’s Algorithm
+    int d = 3 - (2 * radius);
+    int y = radius, x = 0;
+    while (y >= x) {
+      setRGB(Coord3D(int(fx + x), int(fy + y), cz), col);
+      setRGB(Coord3D(int(fx - x), int(fy + y), cz), col);
+      setRGB(Coord3D(int(fx + x), int(fy - y), cz), col);
+      setRGB(Coord3D(int(fx - x), int(fy - y), cz), col);
+      setRGB(Coord3D(int(fx + y), int(fy + x), cz), col);
+      setRGB(Coord3D(int(fx - y), int(fy + x), cz), col);
+      setRGB(Coord3D(int(fx + y), int(fy - x), cz), col);
+      setRGB(Coord3D(int(fx - y), int(fy - x), cz), col);
+      x++;
+      if (d > 0) {
+        y--;
+        d += 4 * (x - y) + 10;
+      } else {
+        d += 4 * x + 6;
+      }
+    }
+  }
+}
+
+void VirtualLayer::drawRectVolume(int x1, int y1, int x2, int y2,
+  int z1, int z2,
+  CRGB col, bool soft, bool wireframe) {
+  for (int z = z1; z <= z2; z++) {
+    drawRect3D(x1, y1, x2, y2, z, col, soft, wireframe);
+  }
+}
+
+void VirtualLayer::drawCircleVolume(int cx, int cy, int z1, int z2,
+  uint8_t radius, CRGB col, bool soft) {
+  for (int z = z1; z <= z2; z++) {
+    drawCircle3D(cx, cy, z, radius, col, soft);
+  }
+}
+
+// General 3D triangle rasterizer
+void VirtualLayer::drawTriangle3D(Coord3D p1, Coord3D p2, Coord3D p3,
+  CRGB col, bool soft, bool wireframe) {
+  if (wireframe) {
+    drawLine3D(p1, p2, col, soft);
+    drawLine3D(p2, p3, col, soft);
+    drawLine3D(p3, p1, col, soft);
+    return;
+  }
+
+  // --- Project into XY plane ---
+  // (You can switch to XZ or YZ if you want different slicing views)
+  struct V2 { int x, y; float z; };
+  V2 v1 = { p1.x, p1.y, float(p1.z) };
+  V2 v2 = { p2.x, p2.y, float(p2.z) };
+  V2 v3 = { p3.x, p3.y, float(p3.z) };
+
+  // Sort by y
+  if (v2.y < v1.y) std::swap(v1, v2);
+  if (v3.y < v1.y) std::swap(v1, v3);
+  if (v3.y < v2.y) std::swap(v2, v3);
+
+  int totalHeight = v3.y - v1.y;
+  if (totalHeight == 0) return;
+
+  for (int y = v1.y; y <= v3.y; y++) {
+    bool secondHalf = y > v2.y || v2.y == v1.y;
+    int segmentHeight = secondHalf ? v3.y - v2.y : v2.y - v1.y;
+    if (segmentHeight == 0) continue;
+
+    float alpha = float(y - v1.y) / totalHeight;
+    float beta = float(y - (secondHalf ? v2.y : v1.y)) / segmentHeight;
+
+    V2 A = { int(v1.x + (v3.x - v1.x) * alpha),
+             y,
+             v1.z + (v3.z - v1.z) * alpha };
+    V2 B = secondHalf
+      ? V2 { int(v2.x + (v3.x - v2.x) * beta), y, v2.z + (v3.z - v2.z) * beta }
+    : V2 { int(v1.x + (v2.x - v1.x) * beta), y, v1.z + (v2.z - v1.z) * beta };
+
+    if (A.x > B.x) std::swap(A, B);
+
+    // Fill scanline
+    for (int x = A.x; x <= B.x; x++) {
+      float phi = (B.x == A.x) ? 1.0f : float(x - A.x) / (B.x - A.x);
+      float zInterp = A.z + (B.z - A.z) * phi;
+      setRGB(Coord3D(x, y, int(zInterp)), col);
+    }
+  }
+}
+
+
+void VirtualLayer::drawPlane3D(Coord3D p1, Coord3D p2,
+  Coord3D p3, Coord3D p4,
+  CRGB col,
+  bool filled,
+  bool soft,
+  bool wireframe) {
+  if (wireframe) {
+    // Only perimeter edges
+    drawLine3D(p1, p2, col, soft);
+    drawLine3D(p2, p3, col, soft);
+    drawLine3D(p3, p4, col, soft);
+    drawLine3D(p4, p1, col, soft);
+    return;
+  }
+
+  if (filled) {
+    // Split quad into two triangles
+    drawTriangle3D(p1, p2, p3, col, soft, false);
+    drawTriangle3D(p1, p3, p4, col, soft, false);
+  }
+}
+
   #include "../misc/font/console_font_4x6.h"
   #include "../misc/font/console_font_5x12.h"
   #include "../misc/font/console_font_5x8.h"

@@ -115,7 +115,10 @@ class ModuleEffects : public NodeManager {
     values.add(getNameAndTags<GameOfLifeEffect>());
     values.add(getNameAndTags<GEQ3DEffect>());
     values.add(getNameAndTags<PaintBrushEffect>());
-
+    values.add(getNameAndTags<BouncingCubeEffect>());
+    values.add(getNameAndTags<BandShapesEffect>());
+    values.add(getNameAndTags<PlaneDemoEffect>());
+    
     // WLED effects, alphabetically
     values.add(getNameAndTags<BlackholeEffect>());
     values.add(getNameAndTags<BouncingBallsEffect>());
@@ -203,6 +206,12 @@ class ModuleEffects : public NodeManager {
       node = allocMBObject<GEQ3DEffect>();
     else if (equalAZaz09(name, PaintBrushEffect::name()))
       node = allocMBObject<PaintBrushEffect>();
+    else if (equalAZaz09(name, BouncingCubeEffect::name()))
+      node = allocMBObject<BouncingCubeEffect>();
+    else if (equalAZaz09(name, BandShapesEffect::name()))
+      node = allocMBObject<BandShapesEffect>();
+    else if (equalAZaz09(name, PlaneDemoEffect::name()))
+      node = allocMBObject<PlaneDemoEffect>();
 
     // WLED effects, alphabetically
     else if (equalAZaz09(name, BlackholeEffect::name()))
