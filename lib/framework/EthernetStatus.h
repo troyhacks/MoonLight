@@ -16,28 +16,33 @@
  **/
 
 #include <WiFi.h>
+#include <ETH.h>
 
 #include <ArduinoJson.h>
 #include <PsychicHttp.h>
-#include <IPAddress.h>
+#include <IPUtils.h>
 #include <SecurityManager.h>
-#include <EthernetSettingsService.h>
 
 #define ETHERNET_STATUS_SERVICE_PATH "/rest/ethernetStatus"
 
 class EthernetStatus
 {
 public:
-    EthernetStatus(PsychicHttpServer *server, SecurityManager *securityManager, EthernetSettingsService *ethernetSettingsService);
+    EthernetStatus(PsychicHttpServer *server, SecurityManager *securityManager);
 
     void begin();
 
-    bool isActive();
+    bool isConnected();
 
 private:
     PsychicHttpServer *_server;
     SecurityManager *_securityManager;
-    EthernetSettingsService *_ethernetSettingsService;
+
+    // static functions for logging Ethernet events to the UART
+    // they are using the same signature as WiFi events
+    static void onConnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    static void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+    static void onGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
     esp_err_t ethernetStatus(PsychicRequest *request);
 };
 

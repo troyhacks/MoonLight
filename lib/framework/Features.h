@@ -67,6 +67,11 @@
 #define FT_COREDUMP 0
 #endif
 
+// Ethernet feature off by default
+#ifndef FT_ETHERNET
+#define FT_ETHERNET 0
+#endif
+
 // 🌙
 #ifndef FT_MOONBASE
 #define FT_MOONBASE 1
