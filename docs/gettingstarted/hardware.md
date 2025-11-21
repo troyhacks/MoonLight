@@ -8,7 +8,7 @@ To get started the minimal you need is an esp32-device connected via USB to your
 
 ## Minimal hardware
 
-* One of the ESP32-devices shown in [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/). [ESP32-S3 N16R8](https://s.click.aliexpress.com/e/_DBAtJ2H) recommended. Optional [Expansion board 44pin](https://s.click.aliexpress.com/e/_EJhmlIE)
+* One of the ESP32-devices shown in [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/). [ESP32-S3 N16R8](https://s.click.aliexpress.com/e/_DBAtJ2H) recommended. Optional [Expansion board 44pin](https://s.click.aliexpress.com/e/_EJhmlIE)
 * Any WS2812 LED strip or panel. [256 LED panel](https://s.click.aliexpress.com/e/_EIKoYrg) recommended.
 * Connect the ESP32-device with USB to your computer, connect the LED strip or panel
 

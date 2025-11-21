@@ -6,20 +6,21 @@
 
 **[▶️ Watch the install tutorial](https://www.youtube.com/watch?v=7DQOEWa-Kwg)**
 
+## MoonLight Installer
 
-## MoonLight Web installer
-
-Install Moonlight onto an ESP32 microcontroller using the MoonLight Web installer
+Install Moonlight onto an ESP32 microcontroller using the MoonLight Installer
 
 **Step 1**: Get an **ESP32** and a **WS2812 LED-strip** or **LED-panel**. See [Hardware](https://moonmodules.org/MoonLight/gettingstarted/hardware/).
 
 **Step 2**: Connect the ESP32 via USB, use an USB cable which supports data transfer
 
-**Step 3**: Go to the [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/). Select your ESP32-device, or if not listed, press others.
+!!! info "Bootloader mode"
+    Some boards: Place the board in bootloader mode by press and holding the `Boot` button on the ESP32, press the `Reset` button on the ESP32 and then release the `Boot` button.
+
+**Step 3**: Go to the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/). Select your ESP32-device, or if not listed, press others.
 
 !!! info "Browser support"
-
-    The Web Installer works on Google Chrome or Microsoft Edge or similar browsers, not on Safari.
+    The installer works on Google Chrome or Microsoft Edge or similar browsers, not on Safari.
 
 !!! tip "ESP32-P4-Nano"
 
@@ -61,6 +62,9 @@ Keep this page visible until installation complete.
 **Step 1**: Make a **WiFi connection** to the ESP32-device, it should present itself in the list of WiFi access points of your computer, phone or tablet.
 
    <img width="200" src="https://github.com/user-attachments/assets/9a146e3c-1a53-4906-ad2a-d70215efcf4b" />
+
+!!! tip "Reset"
+    Some boards need a reset to show up. Press the reset button on the ESP32 or press Reset in Step 8 above
 
 **Step 2**: After connecting, MoonLight will show up in a **web browser** (all browsers supported). You will see this screen, select WiFi Station.
 
@@ -159,5 +163,5 @@ Keep this page visible until installation complete.
     * Download from GitHub
     * Upload from file. From a [GitHub release](https://github.com/MoonModules/MoonLight/releases), or created by VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
 
-* To install the latest release, you can also use the [MoonLight Web Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) (no need to erase the device if updating)
+* To install the latest release, you can also use the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) (no need to erase the device if updating)
 * Upload directly from VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)

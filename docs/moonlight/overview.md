@@ -110,7 +110,7 @@ MoonLight
 ### Where you can help
 
 * Add more effects (FastLED, WLED, Particle system, Animartrix, Soulmate lights, ...), modifiers, layouts and drivers
-* Improve the web installer
+* Improve the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/)
 * Improve the UI (Svelte 5, DaisyUI 5, TailWind 4)
   * e.g. File Manager, Multi row layout, Monitor (WebGL)
 * Tune FastLED, add FastLED 2D effects

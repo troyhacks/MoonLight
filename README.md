@@ -57,7 +57,7 @@
 ## 🚀 Quick Start
 
 ### 1️⃣ Flash & Go
-Use our [web installer](https://moonmodules.org/MoonLight/gettingstarted/installation/) to flash MoonLight directly via a USB cable to your ESP32, connect LEDs to it and you are ready to go.
+Use our [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installation/) to flash MoonLight directly via a USB cable to your ESP32, connect LEDs to it and you are ready to go.
 
 ### 2️⃣ Connect & Configure
 Built-in access point makes WiFi setup effortless. Configure through the intuitive web interface.
@@ -126,16 +126,9 @@ Start creating stunning effects immediately on both mobile and desktop.
 ### Version 0.6.0 - November 2025
 **The user-friendly baseline release**
 
-✨ **Coming Features:**
-
-- Plug & Play Experience
-- Preset Controller for quick effect management
-- Enhanced Web Installer with one-click flashing
-- Large Display Drivers for massive installations
-- WLED Audio Sync for music synchronization
-- Refined Interface with polished UX
-
 **From 0.6.0 Forward:** Community-driven development focused on ease of use, more effects, and expanded hardware support.
+
+See [v0.7.0 Kanban board](https://github.com/users/MoonModules/projects/4) or log an [Issue](https://github.com/MoonModules/MoonLight/issues/new/choose) to report issues or request enhancements.
 
 ---
 
