@@ -80,11 +80,6 @@ void FeaturesService::createJSON(JsonObject &root)
 #else
     root["security"] = false;
 #endif
-#if FT_ENABLED(FT_ETHERNET)
-    root["ethernet"] = true;
-#else
-    root["ethernet"] = false;
-#endif
 #if FT_ENABLED(FT_MQTT)
     root["mqtt"] = true;
 #else
@@ -130,6 +125,12 @@ void FeaturesService::createJSON(JsonObject &root)
     root["event_use_json"] = true;
 #else
     root["event_use_json"] = false;
+#endif
+
+#if FT_ENABLED(FT_ETHERNET)
+    root["ethernet"] = true;
+#else
+    root["ethernet"] = false;
 #endif
 
     root["firmware_version"] = APP_VERSION;

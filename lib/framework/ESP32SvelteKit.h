@@ -44,6 +44,8 @@
 #include <WiFiScanner.h>
 #include <WiFiSettingsService.h>
 #include <WiFiStatus.h>
+#include <EthernetSettingsService.h>
+#include <EthernetStatus.h>
 #include <ESPFS.h>
 #include <PsychicHttp.h>
 #include <vector>
@@ -142,10 +144,13 @@ public:
         return &_apSettingsService;
     }
 
+    // 🌙 added getEthernetSettingsService
+#if FT_ENABLED(FT_ETHERNET)
     EthernetSettingsService *getEthernetSettingsService()
     {
         return &_ethernetSettingsService;
     }
+#endif
 
     NotificationService *getNotificationService()
     {
@@ -232,8 +237,10 @@ private:
     WiFiStatus _wifiStatus;
     APSettingsService _apSettingsService;
     APStatus _apStatus;
+#if FT_ENABLED(FT_ETHERNET)
     EthernetSettingsService _ethernetSettingsService;
     EthernetStatus _ethernetStatus;
+#endif
     EventSocket _socket;
     NotificationService _notificationService;
 #if FT_ENABLED(FT_NTP)

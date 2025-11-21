@@ -1,45 +1,37 @@
 # MoonLight Installer
 
-Flashing the firmware is easy and doesn't require you to install any development tools. You can do this through a compatible browser which supports webserial like Chrome. 
-
-<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
-
-Release 0.6.0, 7 November 2025
-
-This installer installs <a href="https://github.com/MoonModules/MoonLight" target="_blank">MoonModules/MoonLight</a> on an ESP32 microcontroller.
-
-See <a href="https://moonmodules.org/MoonLight/gettingstarted/hardware" target="_blank">MoonLight Hardware</a> for more info
+This installer installs <a href="https://github.com/MoonModules/MoonLight" target="_blank">MoonModules/MoonLight</a> on an ESP32 microcontroller. You need a compatible browser like Chrome, or Edge, not supported on Safari.
 
 For a step-by-step instruction, go to <a href="https://moonmodules.org/MoonLight/gettingstarted/installation" target="_blank">MoonLight installation</a>
 
 ## Installer
 
-* Plug in your ESP32 Microcontroller to an USB port and wait for the USB port to enumerate, use an USB cable which supports data transfer
-* Choose your board and press Connect and follow the steps, select the correct COM port (USB JTAG/serial debug unit).
-* Most recommended boards are listed first. If your board isn't listed here, try 'others'
-* Some boards: Place the board in bootloader mode by press and holding the `Boot` button on the ESP32, press the `Reset` button on the ESP32 and then release the `Boot` button.
-* After the installation has completed press the `Reset` button on the ESP32 once again.
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 
+MoonLight v0.6.0, 7 November 2025
 
-| Name | Image | Flash | Shop | USB Driver |
-|------|-------|-------|------|------------|
-| esp32-s3-atoms3r - 🆕 ! | ![esp32-s3-atoms3r](../firmware/installer/images/esp32-s3-atoms3r.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-atoms3r.json"></esp-web-install-button> | [M5Stack store](https://shop.m5stack.com/products/atoms3r-dev-kit){:target="_blank"} | |
-| esp32-s3-devkitc-1-n8r8v | ![esp32-s3-devkitc-1-n8r8v](../firmware/installer/images/esp32-s3-devkitc-1-n8r8v.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-devkitc-1-n8r8v.json"></esp-web-install-button> | | |
+| Name | Image* | Flash | Shop | Board presets |
+|------|--------|-------|------|---------------|
+| esp32-s3-devkitc-1-n8r8v | ![esp32-s3-devkitc-1-n8r8v](../firmware/installer/images/esp32-s3-devkitc-1-n8r8v.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-devkitc-1-n8r8v.json"></esp-web-install-button> | | esp32-s3-stephanelec-16p ![esp32-s3-stephanelec-16p](../firmware/installer/images/esp32-s3-stephanelec-16p.jpg){: style="width:100px"} |
 | esp32-s3-devkitc-1-n16r8v | ![esp32-s3-devkitc-1-n16r8v](../firmware/installer/images/esp32-s3-devkitc-1-n8r8v.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-devkitc-1-n16r8v.json"></esp-web-install-button> | [Ali*](https://s.click.aliexpress.com/e/_DBAtJ2H){:target="_blank"} | |
-| esp32-s3-stephanelec-16p | ![esp32-s3-stephanelec-16p](../firmware/installer/images/esp32-s3-stephanelec-16p.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-stephanelec-16p.json"></esp-web-install-button> | | |
+| esp32-s3-atoms3r | ![esp32-s3-atoms3r](../firmware/installer/images/esp32-s3-atoms3r.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-atoms3r.json"></esp-web-install-button> | [M5Stack store](https://shop.m5stack.com/products/atoms3r-dev-kit){:target="_blank"} | |
 | esp32-s3-zero-n4r2 | ![esp32-s3-zero-n4r2](../firmware/installer/images/esp32-s3-zero-n4r2.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-s3-zero-n4r2.json"></esp-web-install-button> | [Ali*](https://s.click.aliexpress.com/e/_EukjHX8){:target="_blank"} | |
+| esp32-p4-nano | ![esp32-p4-nano](../firmware/installer/images/esp32-p4-nano.jpg){: style="width:100px"} | [esp32-c6-firmware-update](https://esp32-c6-firmware-update.github.io/) * <br><esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-p4-nano.json"></esp-web-install-button> | [Waveshare](https://www.waveshare.com/esp32-p4-nano.htm){:target="_blank"} | |
 | esp32-d0-wrover | ![esp32-d0-wrover](../firmware/installer/images/esp32-d0-wrover.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-wrover.json"></esp-web-install-button> | [Ali*](https://a.aliexpress.com/_EzhPi6g){:target="_blank"} | |
 | esp32-d0-wrover-moonbase | ![esp32-d0-wrover](../firmware/installer/images/esp32-d0-wrover.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-wrover-moonbase.json"></esp-web-install-button> | [Ali*](https://a.aliexpress.com/_EzhPi6g){:target="_blank"} | |
 | esp32-d0-16mb | ![esp32-d0-16mb](../firmware/installer/images/esp32-d0-16mb.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-16mb.json"></esp-web-install-button> | [Serg74](https://www.tindie.com/products/serg74/esp32-wroom-usb-c-d1-mini32-form-factor-board/){:target="_blank"} | |
 | esp32-d0 | ![esp32-d0](../firmware/installer/images/esp32-d0.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0.json"></esp-web-install-button> | | |
 | esp32-d0-moonbase | ![esp32-d0](../firmware/installer/images/esp32-d0.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-d0-moonbase.json"></esp-web-install-button> | | |
-| esp32-p4-nano | ![esp32-p4-nano](../firmware/installer/images/esp32-p4-nano.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-p4-nano.json"></esp-web-install-button> | [Waveshare](https://www.waveshare.com/esp32-p4-nano.htm){:target="_blank"} | |
 | esp32-p4-olimex 🚧 | ![esp32-p4-olimex](../firmware/installer/images/esp32-p4-olimex.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-p4-olimex.json"></esp-web-install-button> | [Olimex](https://www.olimex.com/Products/IoT/ESP32-P4/ESP32-P4-DevKit/open-source-hardware){:target="_blank"} | |
 | esp32-c3-devkitm-1 | ![esp32-c3-devkitm-1](../firmware/installer/images/esp32-c3-devkitm-1.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-c3-devkitm-1.json"></esp-web-install-button> | [Ali*](https://s.click.aliexpress.com/e/_EIl7NKw){:target="_blank"} | |
 | esp32-c3-supermini | ![esp32-c3-supermini](../firmware/installer/images/esp32-c3-supermini.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest_esp32-c3-supermini.json"></esp-web-install-button> | [Ali*](https://s.click.aliexpress.com/e/_EIl7NKw){:target="_blank"} | |
 | others | ![others](../firmware/installer/images/others.jpg){: style="width:100px"} | <esp-web-install-button manifest="https://moonmodules.org/MoonLight/firmware/installer/manifest.json"></esp-web-install-button> | | |
 
+* Most recommended boards are listed first. If your board isn't listed here, try 'others'
+* Images are examples, especially the esp32-d0 has many variants. Look at the esp32 chip on the board to find out what type it is.
+* 🆕 Board presets shows boards which can be selected as board preset in MoonLight. Will be added in the [IO Module](https://moonmodules.org/MoonLight/moonbase/inputoutput/)
 * MoonBase firmware is MoonBase only, no MoonLight included (basis for other IOT projects)
+* On each esp32-p4-nano board, install [C6 firmware update](https://esp32-c6-firmware-update.github.io/) first, choose Via ESP32-P4 USB/UART port ("OTA update"), then press connect for MoonLight install.
 
 ## USB-to-serial chip drivers
 

@@ -1,5 +1,5 @@
-#ifndef EthernetSettingsConfig_h
-#define EthernetSettingsConfig_h
+#ifndef EthernetSettingsService_h
+#define EthernetSettingsService_h
 
 /**
  *   ESP32 SvelteKit
@@ -15,135 +15,113 @@
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
  **/
 
+#include <WiFi.h>
+#include <ETH.h>
 #include <SettingValue.h>
-#include <HttpEndpoint.h>
+#include <StatefulService.h>
+#include <EventSocket.h>
 #include <FSPersistence.h>
+#include <HttpEndpoint.h>
 #include <JsonUtils.h>
-// #include <WiFi.h>
+#include <SecurityManager.h>
+#include <PsychicHttp.h>
+#include <vector>
 
-// #include <DNSServer.h>
-// #include <IPAddress.h>
+#ifndef FACTORY_ETHERNET_HOSTNAME
+#define FACTORY_ETHERNET_HOSTNAME "#{platform}-#{unique_id}"
+#endif
 
-//🌙 redundant as all set in factory_settings.ini
-// #ifndef FACTORY_AP_PROVISION_MODE
-// #define FACTORY_AP_PROVISION_MODE AP_MODE_DISCONNECTED
-// #endif
+#define ETHERNET_EVENT_DELAY 500
 
-// #ifndef FACTORY_AP_SSID
-// #define FACTORY_AP_SSID "ESP32-SvelteKit-#{unique_id}"
-// #endif
-
-// #ifndef FACTORY_AP_PASSWORD
-// #define FACTORY_AP_PASSWORD "esp-sveltekit"
-// #endif
-
-// #ifndef FACTORY_AP_LOCAL_IP
-// #define FACTORY_AP_LOCAL_IP "192.168.4.1"
-// #endif
-
-// #ifndef FACTORY_AP_GATEWAY_IP
-// #define FACTORY_AP_GATEWAY_IP "192.168.4.1"
-// #endif
-
-// #ifndef FACTORY_AP_SUBNET_MASK
-// #define FACTORY_AP_SUBNET_MASK "255.255.255.0"
-// #endif
-
-// #ifndef FACTORY_AP_CHANNEL
-// #define FACTORY_AP_CHANNEL 1
-// #endif
-
-// #ifndef FACTORY_AP_SSID_HIDDEN
-// #define FACTORY_AP_SSID_HIDDEN false
-// #endif
-
-// #ifndef FACTORY_AP_MAX_CLIENTS
-// #define FACTORY_AP_MAX_CLIENTS 4
-// #endif
-
-#define ETHERNET_SETTINGS_FILE "/.config/ethernetSettings.json" // 🌙 use /.config (hidden folder)
+#define ETHERNET_SETTINGS_FILE "/config/ethernetSettings.json"
 #define ETHERNET_SETTINGS_SERVICE_PATH "/rest/ethernetSettings"
 
-// #define AP_MODE_ALWAYS 0
-// #define AP_MODE_DISCONNECTED 1
-// #define AP_MODE_NEVER 2
+#define EVENT_ETHERNET "ethernet"
 
-// #define MANAGE_NETWORK_DELAY 10000
-// #define DNS_PORT 53
-
-enum EthernetNetworkStatus
+// Struct defining the ethernet settings
+typedef struct
 {
-    E_ACTIVE = 0,
-    E_INACTIVE,
-    E_LINGERING
-};
+    bool staticIPConfig;
+    IPAddress localIP;
+    IPAddress gatewayIP;
+    IPAddress subnetMask;
+    IPAddress dnsIP1;
+    IPAddress dnsIP2;
+    bool available;
+} ethernet_settings_t;
 
 class EthernetSettings
 {
 public:
-
-    IPAddress localIP;
-    IPAddress gatewayIP;
-    IPAddress subnetMask;
-
-    bool operator==(const EthernetSettings &settings) const
-    {
-        return localIP == settings.localIP && gatewayIP == settings.gatewayIP && subnetMask == settings.subnetMask;
-    }
+    // core ethernet configuration
+    String hostname;
+    ethernet_settings_t ethernetSettings;
 
     static void read(EthernetSettings &settings, JsonObject &root)
     {
-        root["local_ip"] = settings.localIP.toString();
-        root["gateway_ip"] = settings.gatewayIP.toString();
-        root["subnet_mask"] = settings.subnetMask.toString();
+        root["hostname"] = settings.hostname;
+        root["static_ip_config"] = settings.ethernetSettings.staticIPConfig;
+        JsonUtils::writeIP(root, "local_ip", settings.ethernetSettings.localIP);
+        JsonUtils::writeIP(root, "gateway_ip", settings.ethernetSettings.gatewayIP);
+        JsonUtils::writeIP(root, "subnet_mask", settings.ethernetSettings.subnetMask);
+        JsonUtils::writeIP(root, "dns_ip_1", settings.ethernetSettings.dnsIP1);
+        JsonUtils::writeIP(root, "dns_ip_2", settings.ethernetSettings.dnsIP2);
+        ESP_LOGV(SVK_TAG, "Ethernet Settings read");
     }
 
     static StateUpdateResult update(JsonObject &root, EthernetSettings &settings)
     {
-        EthernetSettings newSettings = {};
+        settings.hostname = root["hostname"] | SettingValue::format(FACTORY_ETHERNET_HOSTNAME);
+        settings.ethernetSettings.staticIPConfig = root["static_ip_config"] | false;
+        JsonUtils::readIP(root, "local_ip", settings.ethernetSettings.localIP);
+        JsonUtils::readIP(root, "gateway_ip", settings.ethernetSettings.gatewayIP);
+        JsonUtils::readIP(root, "subnet_mask", settings.ethernetSettings.subnetMask);
+        JsonUtils::readIP(root, "dns_ip_1", settings.ethernetSettings.dnsIP1);
+        JsonUtils::readIP(root, "dns_ip_2", settings.ethernetSettings.dnsIP2);
 
-        JsonUtils::readIPStr(root, "local_ip", newSettings.localIP, FACTORY_AP_LOCAL_IP);
-        JsonUtils::readIPStr(root, "gateway_ip", newSettings.gatewayIP, FACTORY_AP_GATEWAY_IP);
-        JsonUtils::readIPStr(root, "subnet_mask", newSettings.subnetMask, FACTORY_AP_SUBNET_MASK);
-
-        if (newSettings == settings)
+        // Swap around the dns servers if 2 is populated but 1 is not
+        if (IPUtils::isNotSet(settings.ethernetSettings.dnsIP1) && IPUtils::isSet(settings.ethernetSettings.dnsIP2))
         {
-            return StateUpdateResult::UNCHANGED;
+            settings.ethernetSettings.dnsIP1 = settings.ethernetSettings.dnsIP2;
+            settings.ethernetSettings.dnsIP2 = INADDR_NONE;
         }
-        settings = newSettings;
+
+        // Turning off static ip config if we don't meet the minimum requirements
+        // of ipAddress and subnet. This may change to static ip only
+        // as sensible defaults can be assumed for gateway and subnet
+        if (settings.ethernetSettings.staticIPConfig && (IPUtils::isNotSet(settings.ethernetSettings.localIP) || IPUtils::isNotSet(settings.ethernetSettings.subnetMask)))
+        {
+            settings.ethernetSettings.staticIPConfig = false;
+        }
+        ESP_LOGV(SVK_TAG, "Ethernet Settings updated");
+
         return StateUpdateResult::CHANGED;
-    }
+    };
 };
 
 class EthernetSettingsService : public StatefulService<EthernetSettings>
 {
 public:
-    EthernetSettingsService(PsychicHttpServer *server, FS *fs, SecurityManager *securityManager);
+    EthernetSettingsService(PsychicHttpServer *server, FS *fs, SecurityManager *securityManager, EventSocket *socket);
 
+    void initEthernet();
     void begin();
     void loop();
-    EthernetNetworkStatus getEthernetNetworkStatus();
-    void recoveryMode();
+    String getHostname();
+    String getIP();
 
 private:
     PsychicHttpServer *_server;
     SecurityManager *_securityManager;
     HttpEndpoint<EthernetSettings> _httpEndpoint;
     FSPersistence<EthernetSettings> _fsPersistence;
+    EventSocket *_socket;
+    unsigned long _lastEthernetUpdate;
 
-    // // for the captive portal
-    // DNSServer *_dnsServer;
+    void configureNetwork(ethernet_settings_t &network);
+    void reconfigureEthernet();
+    void updateEthernet();
 
-    // for the mangement delay loop
-    // volatile unsigned long _lastManaged;
-    // volatile boolean _reconfigureAp;
-    // volatile boolean _recoveryMode = false;
-
-    void reconfigureAP();
-    void manageAP();
-    void startAP();
-    void stopAP();
-    // void handleDNS();
 };
 
-#endif // end EthernetSettingsConfig_h
+#endif // end EthernetSettingsService_h

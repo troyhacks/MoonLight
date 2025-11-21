@@ -102,7 +102,7 @@ After configuring the development server, a local webserver starts on [localhost
 
 Firmware binaries come in 2 flavours: including boot and partition (merged) and MoonLight code only (release). They are stored in the build folder of the MoonLight repo and updated each time a build or upload (☑️ or ➡️) is done. Subfolder merged contains the first type, release the second type.
 
-* Merged bins are used by the web installer, release bins by the [System update](https://moonmodules.org/MoonLight/system/update/) module (OTA). System update uses the bins stored in [GitHub releases](https://github.com/MoonModules/MoonLight/releases).
+* Merged bins are used by the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/), release bins by the [System update](https://moonmodules.org/MoonLight/system/update/) module (OTA). System update uses the bins stored in [GitHub releases](https://github.com/MoonModules/MoonLight/releases).
 * Merged bins starts flashing on address 0x0, release bins on address 0x10000.
 * All MoonLight partition schemes have a firmware size of 3MB. Smaller devices (e.g. ESP32-D0) have no OTA partition. System update is possible in this situation, but there is no fallback if update fails (need to flash using USB in that case) 🚧
 
