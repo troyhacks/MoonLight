@@ -51,7 +51,7 @@ class ModuleDrivers : public NodeManager {
       // Remove all UINT8_MAX values by compacting the array
       layerP.nrOfLedPins = 0;
       for (int readPos = 0; readPos < sizeof(layerP.ledPins); readPos++) {
-        if (layerP.ledPins[readPos] != UINT8_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != UINT16_MAX) { //only pins which have a nrOfLedPins
+        if (layerP.ledPins[readPos] != UINT8_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != UINT16_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != 0) {  // only pins which have a nrOfLedPins
           layerP.ledPins[layerP.nrOfLedPins++] = layerP.ledPins[readPos];
         }
       }
@@ -73,7 +73,6 @@ class ModuleDrivers : public NodeManager {
     nodes = &layerP.nodes;
 
     _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
-    readPins();  // initially
   }
 
   void addNodes(JsonArray values) override {
@@ -173,12 +172,18 @@ class ModuleDrivers : public NodeManager {
     return node;
   }
 
-  // run effects
+  bool initPins = false;
+
   void loop() {
     // if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
     //     layerP.loop(); //run all the effects of all virtual layers (currently only one)
 
     NodeManager::loop();
+
+    if (!initPins) {
+      readPins();  // initially
+      initPins = true;
+    }
   }
 
 };  // class ModuleDrivers
