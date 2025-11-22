@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts"> 
 	import Battery0 from '~icons/tabler/battery';
 	import Battery25 from '~icons/tabler/battery-1';
 	import Battery50 from '~icons/tabler/battery-2';

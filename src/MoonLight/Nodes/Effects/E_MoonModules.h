@@ -802,5 +802,101 @@ public:
   }
 };
 
+class RotatingCubeEffect : public Node {
+public:
+  static const char* name() { return "RotatingCube"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "🟦🔄"; }
+
+  bool wireframe = false;
+  bool filled = true;
+  uint8_t fadeRate = 40;
+
+  float angleX = 0.0f;
+  float angleY = 0.0f;
+  float angleZ = 0.0f;
+
+  void setup() override {
+    addControl(wireframe, "wireframe", "checkbox");
+    addControl(filled, "filled", "checkbox");
+    addControl(fadeRate, "fadeRate", "slider", 0, 128);
+  }
+
+  void loop() override {
+    if (fadeRate > 0) layer->fadeToBlackBy(fadeRate);
+
+    angleX += 0.02f; // smooth rotation speeds
+    angleY += 0.03f;
+    angleZ += 0.015f;
+
+    int maxX = layer->size.x;
+    int maxY = layer->size.y;
+    int maxZ = layer->size.z;
+
+    float cx = maxX / 2.0f;
+    float cy = maxY / 2.0f;
+    float cz = maxZ / 2.0f;
+
+    float half = min({ maxX, maxY, maxZ }) / 4.0f;
+
+    // Define cube corners in local space
+    std::vector<Coord3D> verts;
+    for (int dx : {-1, 1}) {
+      for (int dy : {-1, 1}) {
+        for (int dz : {-1, 1}) {
+          // local point
+          float lx = dx * half;
+          float ly = dy * half;
+          float lz = dz * half;
+
+          // rotate
+          Coord3D r = rotateXYZ(lx, ly, lz, angleX, angleY, angleZ);
+
+          // translate to center
+          int nx = int(cx + r.x);
+          int ny = int(cy + r.y);
+          int nz = int(cz + r.z);
+
+          verts.push_back({ nx, ny, nz });
+        }
+      }
+    }
+
+    // Faces
+    int faces[6][4] = {
+      {0,1,3,2}, {4,5,7,6}, // bottom, top
+      {0,1,5,4}, {2,3,7,6}, // front, back
+      {0,2,6,4}, {1,3,7,5}  // left, right
+    };
+
+    CRGB color = ColorFromPalette(layer->layerP->palette, millis() / 10 % 255);
+
+    for (auto& f : faces) {
+      layer->drawPlane3D(verts[f[0]], verts[f[1]], verts[f[2]], verts[f[3]],
+        color, filled, false, wireframe);
+    }
+  }
+
+  // Proper rotation using matrices
+  Coord3D rotateXYZ(float x, float y, float z,
+    float ax, float ay, float az) {
+    // Rotate around X
+    float cosX = cos(ax), sinX = sin(ax);
+    float y1 = y * cosX - z * sinX;
+    float z1 = y * sinX + z * cosX;
+
+    // Rotate around Y
+    float cosY = cos(ay), sinY = sin(ay);
+    float x2 = x * cosY + z1 * sinY;
+    float z2 = -x * sinY + z1 * cosY;
+
+    // Rotate around Z
+    float cosZ = cos(az), sinZ = sin(az);
+    float x3 = x2 * cosZ - y1 * sinZ;
+    float y3 = x2 * sinZ + y1 * cosZ;
+
+    return { int(x3), int(y3), int(z2) };
+  }
+};
 
 #endif

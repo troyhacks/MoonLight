@@ -118,6 +118,7 @@ class ModuleEffects : public NodeManager {
     values.add(getNameAndTags<BouncingCubeEffect>());
     values.add(getNameAndTags<BandShapesEffect>());
     values.add(getNameAndTags<PlaneDemoEffect>());
+    values.add(getNameAndTags<RotatingCubeEffect>());
     
     // WLED effects, alphabetically
     values.add(getNameAndTags<BlackholeEffect>());
@@ -212,6 +213,8 @@ class ModuleEffects : public NodeManager {
       node = allocMBObject<BandShapesEffect>();
     else if (equalAZaz09(name, PlaneDemoEffect::name()))
       node = allocMBObject<PlaneDemoEffect>();
+    else if (equalAZaz09(name, RotatingCubeEffect::name()))
+      node = allocMBObject<RotatingCubeEffect>();
 
     // WLED effects, alphabetically
     else if (equalAZaz09(name, BlackholeEffect::name()))

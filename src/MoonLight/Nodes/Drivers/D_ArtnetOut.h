@@ -67,7 +67,7 @@ class ArtNetOutDriver : public DriverNode {
     packet_buffer[16] = packetSize >> 8;  // The length of the DMX512 data array. High Byte
     packet_buffer[17] = packetSize;       // Low Byte of above
 
-    if (!artnetudp.writeTo(packet_buffer, MIN(packetSize, 512) + 18, controllerIP, port)) {
+    if (!artnetudp.writeTo(packet_buffer, MIN(packetSize, 512) + 18, controllerIP, port, TCPIP_ADAPTER_IF_ETH)) {
       // Serial.print("🐛");
       return false;  // borked //no connection...
     }
