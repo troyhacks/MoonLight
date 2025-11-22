@@ -75,7 +75,7 @@ void operator delete[](void* ptr, size_t size) noexcept {
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
 
-#include "MoonBase/Utilities.h"  // for runInTask1/2
+#include "MoonBase/Utilities.h"  // for runInAppTask
 
 #define SERIAL_BAUD_RATE 115200
 
@@ -102,9 +102,9 @@ ModuleIO moduleIO = ModuleIO(&server, &esp32sveltekit);
     #include "MoonLight/Modules/ModuleEffects.h"
     #include "MoonLight/Modules/ModuleLightsControl.h"
     #include "MoonLight/Modules/ModuleMoonLightInfo.h"
-ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager);
-ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);                        // fileManager for Live Scripts
-ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit, &fileManager, &moduleLightsControl);  // fileManager for Live Scripts, Lights control for drivers
+ModuleLightsControl moduleLightsControl = ModuleLightsControl(&server, &esp32sveltekit, &fileManager, &moduleIO);
+ModuleEffects moduleEffects = ModuleEffects(&server, &esp32sveltekit, &fileManager);                                   // fileManager for Live Scripts
+ModuleDrivers moduleDrivers = ModuleDrivers(&server, &esp32sveltekit, &fileManager, &moduleLightsControl, &moduleIO);  // fileManager for Live Scripts, Lights control for drivers
     #if FT_ENABLED(FT_LIVESCRIPT)
       #include "MoonLight/Modules/ModuleLiveScripts.h"
 ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit, &fileManager, &moduleEffects, &moduleDrivers);
@@ -132,14 +132,13 @@ void effectTask(void* pvParameters) {
 
     layerP.loop();  // run all the effects of all virtual layers (currently only one layer)
 
-    xSemaphoreGive(driverSemaphore);
-
-    std::lock_guard<std::mutex> lock(runInTask_mutex);
-    while (!runInTask1.empty()) {
-      // EXT_LOGD(ML_TAG, "runInTask1 %d", runInTask1.size());
-      runInTask1.front()();
-      runInTask1.erase(runInTask1.begin());
+    static unsigned long last20ms = 0;
+    if (millis() - last20ms >= 20) {
+      last20ms = millis();
+      layerP.loop20ms();
     }
+
+    xSemaphoreGive(driverSemaphore);
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
@@ -157,12 +156,15 @@ void driverTask(void* pvParameters) {
 
     xSemaphoreGive(effectSemaphore);
 
-    std::lock_guard<std::mutex> lock(runInTask_mutex);
-    while (!runInTask2.empty()) {
-      EXT_LOGV(MB_TAG, "runInTask2 %d", runInTask2.size());
-      runInTask2.front()();
-      runInTask2.erase(runInTask2.begin());
+    std::vector<std::function<void()>> tasks;
+    {
+      // runInAppTask_mutexChecker++;
+      // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
+      std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+      tasks.swap(runInAppTask);  // move all into local vector
+      // runInAppTask_mutexChecker--;
     }
+    for (auto& task : tasks) task();  // run the tasks
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
@@ -191,6 +193,10 @@ static int custom_vprintf(const char* fmt, va_list args) {
   #include <M5Unified.h>
 #endif
 
+uint8_t pinVoltage = -1;
+uint8_t pinCurrent = -1;
+uint8_t pinBattery = -1;
+
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
   esp_log_set_vprintf(custom_vprintf);
@@ -209,22 +215,35 @@ void setup() {
   }
 
   // check sizes ...
-  //  sizeof(esp32sveltekit);
-  //  sizeof(WiFiSettingsService);
-  //  sizeof(fileManager);
-  //  sizeof(Module);
-  //  sizeof(moduleDevices);
-  //  sizeof(moduleIO);
-  //  #if FT_ENABLED(FT_MOONLIGHT)
-  //      sizeof(moduleEffects);
-  //      sizeof(moduleDrivers);
-  //      sizeof(moduleLightsControl);
-  //      sizeof(moduleLightsControl);
-  //      sizeof(moduleChannels);
-  //      sizeof(moduleMoonLightInfo);
-  //      sizeof(layerP.lights);
-  //      sizeof(layerP.lights.header);
-  //  #endif
+  //   sizeof(esp32sveltekit);                // 4152
+  //   sizeof(WiFiSettingsService);           // 456
+  //   sizeof(SystemStatus);                  // 16
+  //   sizeof(UploadFirmwareService);         // 32
+  //   sizeof(HttpEndpoint<ModuleState>);     // 152
+  //   sizeof(EventEndpoint<ModuleState>);    // 112
+  //   sizeof(WebSocketServer<ModuleState>);  // 488
+  //   sizeof(FSPersistence<ModuleState>);    // 128
+  //   sizeof(PsychicHttpServer*);            // 8
+  //   sizeof(HttpEndpoint<APSettings>);      // 152
+  //   sizeof(FSPersistence<APSettings>);     // 128
+  //   sizeof(APSettingsService);             // 600;
+  //   sizeof(PsychicWebSocketHandler);       // 336
+  //   sizeof(fileManager);                   // 864
+  //   sizeof(Module);                        // 1144
+  //   sizeof(moduleDevices);                 // 1320
+  //   sizeof(moduleIO);                      // 1144
+  // #if FT_ENABLED(FT_MOONLIGHT)
+  //   sizeof(moduleEffects);        // 1208
+  //   sizeof(moduleDrivers);        // 1216
+  //   sizeof(moduleLightsControl);  // 1176
+  //   #if FT_ENABLED(FT_LIVESCRIPT)
+  //   sizeof(moduleLiveScripts);  // 1176
+  //   #endif
+  //   sizeof(moduleChannels);        // 1144
+  //   sizeof(moduleMoonLightInfo);   // 1144
+  //   sizeof(layerP.lights);         // 56
+  //   sizeof(layerP.lights.header);  // 40
+  // #endif
 
   // start ESP32-SvelteKit
   esp32sveltekit.begin();
@@ -235,7 +254,28 @@ void setup() {
   moduleDevices.begin();
   moduleTasks.begin();
   moduleIO.begin();
-
+  #if FT_BATTERY
+  moduleIO.addUpdateHandler(
+      [&](const String& originId) {
+        moduleIO.read([&](ModuleState& state) {
+          for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
+            uint8_t usage = pinObject["usage"];
+            if (usage == pin_Voltage) {
+              pinVoltage = pinObject["GPIO"];
+              EXT_LOGD(ML_TAG, "pinVoltage found %d", pinVoltage);
+            } else if (usage == pin_Current) {
+              pinCurrent = pinObject["GPIO"];
+              EXT_LOGD(ML_TAG, "pinCurrent found %d", pinCurrent);
+            } else if (usage == pin_Battery) {
+              pinBattery = pinObject["GPIO"];
+              EXT_LOGD(ML_TAG, "pinBattery found %d", pinBattery);
+            }
+          }
+          // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
+        });
+      },
+      false);
+  #endif
   // MoonLight
   #if FT_ENABLED(FT_MOONLIGHT)
   moduleEffects.begin();
@@ -283,9 +323,32 @@ void setup() {
     if (millis() - lastSecond >= 1000) {
       lastSecond = millis();
 
+      // 🌙
+  #if FT_BATTERY
+      BatteryService* batteryService = esp32sveltekit.getBatteryService();
+      if (pinBattery != UINT8_MAX) {
+        float mVB = analogReadMilliVolts(pinBattery) * 2.0;
+        float perc = (mVB - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35);  // 65% of full battery is 0%, showing 0-100%
+        // ESP_LOGD("", "bat mVB %f p:%f", mVB, perc);
+        batteryService->updateSOC(perc * 100);
+      }
+      if (pinVoltage != UINT8_MAX) {
+        float mV = analogReadMilliVolts(pinVoltage) * 2.0 / 1000;  // /2 resistor divider
+        batteryService->updateVoltage(mV);
+      }
+      if (pinCurrent != UINT8_MAX) {
+        float mA = analogReadMilliVolts(pinCurrent);
+        if (mA > 250)  // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
+        {
+          batteryService->updateCurrent(((mA - 250) * 50.0) / 1000);  // 40mV / A with a /2 resistor divider, so a 50mA/mV
+        } else {
+          batteryService->updateCurrent(0);
+        }
+      }
+  #endif
+
       moduleDevices.loop1s();
       moduleTasks.loop1s();
-      moduleIO.loop1s();
 
   #if FT_ENABLED(FT_MOONLIGHT)
       // set shared data (eg used in scrolling text effect)

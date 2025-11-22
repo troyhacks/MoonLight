@@ -22,7 +22,7 @@ void setDefaults(JsonObject root, JsonArray definition) {
     //     root[property["name"]]["y"] = property["default"]["y"];
     //     root[property["name"]]["z"] = property["default"]["z"];
     // } else
-    if (property["type"] != "array") {
+    if (property["type"] != "rows") {
       root[property["name"]] = property["default"];
     } else {
       // JsonArray array = root[property["name"]].to<JsonArray>();
@@ -50,7 +50,7 @@ void ModuleState::setupData() {
     // assign the new defaults to state and run onUpdate
     data.clear();  //->to<JsonObject>(); //clear data
     UpdatedItem updatedItem;
-    compareRecursive("", data, doc.as<JsonObject>(), updatedItem);  // fill data with doc
+    compareRecursive("", data, doc.as<JsonObject>(), updatedItem);  // fill data with doc and calls onUpdates
   }
 
   // to do: check if the file matches the definition
@@ -60,17 +60,6 @@ void ModuleState::read(ModuleState& state, JsonObject& root) {
   if (state.readHook) state.readHook(state.data);
 
   root.set(state.data);  // copy
-}
-
-void ModuleState::execOnReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {
-  if (onUpdateRunInTask == 1) {  // if set to 0, run in main loopTask
-    std::lock_guard<std::mutex> lock(runInTask_mutex);
-    runInTask1.push_back([&, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
-  } else if (onUpdateRunInTask == 2) {  // if set to 0, run in main loopTask
-    std::lock_guard<std::mutex> lock(runInTask_mutex);
-    runInTask2.push_back([&, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
-  } else
-    onReOrderSwap(stateIndex, newIndex);  // this code will swap the values in its array from stateIndex to newIndex, so the value at stateIndex is storage for the value which was on newIndex
 }
 
 bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
@@ -114,7 +103,13 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
               if (stateIndex == parkedFromIndex)  // e.g. parkedFromIndex ==1
                 newStateIndex = parkedAtIndex;    // e.g. 1 is stored in 0
 
-              if (newStateIndex != newIndex) execOnReOrderSwap(newStateIndex, newIndex);
+              if (newStateIndex != newIndex && onReOrderSwap) {
+                // runInAppTask_mutexChecker++;
+                // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
+                std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+                runInAppTask.push_back([&, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
+                // runInAppTask_mutexChecker--;
+              }
 
               if (parkedFromIndex == UINT8_MAX) parkedFromIndex = newIndex;  // the index of value in the array stored in the parking spot
               parkedAtIndex = newStateIndex;                                 // the parking spot created
@@ -127,26 +122,22 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
   return changed;
 }
 
-void ModuleState::execOnUpdate(UpdatedItem& updatedItem) {
+void Module::execOnUpdate(UpdatedItem& updatedItem) {
   if (updatedItem.oldValue != "null" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
-    // EXT_LOGD(MB_TAG, "%s = %s -> %s", updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    saveNeeded = true;
+    if (!contains(updateOriginId.c_str(), "server")) {                    // only triggered by updates from front end
+      // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s (oID:%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updateOriginId.c_str());
+      saveNeeded = true;
+    }
   }
 
-  if (onUpdate) {
-    if (onUpdateRunInTask == 1) {  // if set to 0, run in main loopTask
-      std::lock_guard<std::mutex> lock(runInTask_mutex);
-      runInTask1.push_back([&, updatedItem]() mutable {  // mutable as updatedItem is called by reference (&)
-        onUpdate(updatedItem);
-      });
-    } else if (onUpdateRunInTask == 2) {  // if set to 0, run in main loopTask
-      std::lock_guard<std::mutex> lock(runInTask_mutex);
-      runInTask2.push_back([&, updatedItem]() mutable {  // mutable as updatedItem is called by reference (&)
-        onUpdate(updatedItem);
-      });
-    } else
-      onUpdate(updatedItem);
-  }
+  // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+  // runInAppTask_mutexChecker++;
+  // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
+  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+  runInAppTask.push_back([&, updatedItem]() mutable {  // mutable as updatedItem is called by reference (&)
+    onUpdate(updatedItem);
+  });
+  // runInAppTask_mutexChecker--;
 }
 
 bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
@@ -164,7 +155,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
     JsonVariant newValue = newData[key.c_str()];
     if (!newValue.isNull() && stateValue != newValue) {  // if value changed, don't update if not defined in newValue
 
-      if (depth != UINT8_MAX) {  // depth starts with '-1' (no depth)
+      if (depth != UINT8_MAX && depth < 2) {  // depth starts with '-1' (no depth)
         updatedItem.parent[depth] = parent.c_str();
         updatedItem.index[depth] = index;
       }
@@ -186,13 +177,21 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
         for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) {  // compare each item in the array
           // EXT_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateArray[i].as<String>().c_str(), newArray[i].as<String>().c_str());
           if (i >= stateArray.size()) {  // newArray has added a row
-            // EXT_LOGD(MB_TAG, "add %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
+            // EXT_LOGD(MB_TAG, "add %s.%s[%d] (%d/%d) d: %d", parent.c_str(), key.c_str(), i, stateArray.size(), newArray.size(), depth);
             stateArray.add<JsonObject>();  // add new row
+            // setupdatedItem index right...
+            // updatedItem.parent[0] = parent.c_str();
+            // updatedItem.index[0] = i;
+            // EXT_LOGD(ML_TAG, "before cr %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            // String xxx;
+            // serializeJson(newArray[i], xxx);
+            // EXT_LOGD(ML_TAG, "before cr %s", xxx.c_str());
             changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth + 1, i) || changed;
           } else if (i >= newArray.size()) {  // newArray has deleted a row
-            // EXT_LOGD(MB_TAG, "remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
             // newArray.add<JsonObject>(); //add dummy row
             changed = true;  // compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth+1, i) || changed;
+
+            // EXT_LOGD(MB_TAG, "remove %s.%s[%d] (%d/%d) d: %d", parent.c_str(), key.c_str(), i, stateArray.size(), newArray.size(), depth);
 
             // set all the values to null
             //  UpdatedItem updatedItem; //create local updatedItem
@@ -205,14 +204,43 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
               // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
               updatedItem.name = property.key().c_str();
               updatedItem.oldValue = property.value().as<String>();
-              updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
-              stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
-              execOnUpdate(updatedItem);
+              updatedItem.value = JsonVariant();            // Assign an empty JsonVariant
+              stateArray[i].remove(property.key());         // remove the property from the state row so onUpdate see it as empty
+              if (execOnUpdate) execOnUpdate(updatedItem);  // async in other task
             }
 
+            // String tt;
+            // serializeJson(stateArray, tt);
+            // EXT_LOGD(MB_TAG, "remove %s.%s[%d] d: %d (%s)", parent.c_str(), key.c_str(), i, depth, tt.c_str());
+
             stateArray.remove(i);  // remove the state row entirely
-          } else                   // row already exists
+            // ([{"name":"xFrequency","type":"slider","default":64,"p":1009144377,"value":173,"size":8},{"name":"fadeRate","type":"slider","default":128,"p":1009144378,"value":128,"size":8},{"name":"speed","type":"slider","default":128,"p":1009144379,"value":128,"size":8},{"name":"brightness","type":"slider","default":255,"p":1009144380,"value":255,"size":8}])
+          } else {  // row already exists
+
+            // if node has changed, remove the controls
+            // "nodes":[{"name":"Lissajous ⏹️ 🔥🎨🐙","on":true,"controls":[{"name":"xFrequency","type":"slider","default":64,"p":1009123281,"value":64,"size":8},{"name":"fadeRate","type":"slider","default":128,"p":1009123282,"value":128,"size":8},{"name":"speed","type":"slider","default":128,"p":1009123283,"value":128,"size":8}]}]}
+            // if (key == "nodes") {
+            //   // the array is a list of nodes, for each node, remove the controls
+            //   // remove the old controls from state, so new controls will be added
+            //   String sr;
+            //   serializeJson(stateArray[i], sr);
+            //   EXT_LOGD(MB_TAG, "remove %s node controls old %s (%s)", parent.c_str(), key.c_str(), sr.c_str());
+            //   stateArray[i].remove("controls");
+            //   stateArray[i]["controls"].to<JsonArray>();
+            //   serializeJson(newArray[i], sr);
+            //   EXT_LOGD(MB_TAG, "remove %s node controls new %s (%s)", parent.c_str(), key.c_str(), sr.c_str());
+            // }
+            // else  // compare the details (not for node controls)
+            // old node with empty controls, new node with new controls
+            // updatedItem.parent[0] = parent.c_str();
+            // updatedItem.index[0] = i;
+
+            // EXT_LOGD(ML_TAG, "before cr %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            // String xxx;
+            // serializeJson(newArray[i], xxx);
+            // EXT_LOGD(ML_TAG, "before cr %s", xxx.c_str());
             changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth + 1, i) || changed;
+          }
         }
       } else {  // if property is key/value
         if (key != "p") {
@@ -222,7 +250,10 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
           stateData[updatedItem.name] = newValue;           // update the value in stateData, should not be done in runLoopTask as FS update then misses the change!!
           updatedItem.value = stateData[updatedItem.name];  // store the stateData item (convenience)
 
-          execOnUpdate(updatedItem);
+          // EXT_LOGD(MB_TAG, "kv %s.%s v: %s d: %d", parent.c_str(), key.c_str(), newValue.as<String>().c_str(), depth);
+          // EXT_LOGD(MB_TAG, "kv %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+
+          if (execOnUpdate) execOnUpdate(updatedItem);
         }
         // else {
         //     EXT_LOGD(MB_TAG, "do not update %s", key.c_str());
@@ -276,22 +307,23 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
   EXT_LOGV(MB_TAG, "constructor %s", moduleName.c_str());
   _server = server;
 
-  _state.onUpdate = [&](UpdatedItem& updatedItem) {
-    onUpdate(updatedItem);  // Ensure updatedItem is of type UpdatedItem&
+  _state.execOnUpdate = [&](UpdatedItem& updatedItem) {
+    execOnUpdate(updatedItem);  // Ensure updatedItem is of type UpdatedItem&
   };
 
   _state.onReOrderSwap = [&](uint8_t stateIndex, uint8_t newIndex) {
     onReOrderSwap(stateIndex, newIndex);  // Ensure updatedItem is of type UpdatedItem&
   };
 
-  addUpdateHandler([&](const String& originId) { updateHandler(); }, false);
+  addUpdateHandler([&](const String& originId) { updateHandler(originId); }, false);
 }
 
 void Module::begin() {
   EXT_LOGV(MB_TAG, "");
   _httpEndpoint.begin();
   _eventEndpoint.begin();
-  _fsPersistence.readFromFS();  // overwrites the default settings in state
+  _fsPersistence.readFromFS();              // overwrites the default settings in state
+  updateOriginId = _moduleName + "server";  // checked by setupDefinition -> compareRecursive -> execOnUpdate -> onUpdate
 
   // no virtual functions in constructor so this is in begin()
   _state.setupDefinition = [&](JsonArray root) {
@@ -312,16 +344,12 @@ void Module::begin() {
 
     return response.send();
   });
-
-  updateHandler();  // triggers all onUpdates, needed? as setupData already called compareRecursive
 }
 
-void Module::updateHandler() {
-  // EXT_LOGD(MB_TAG, "");
-  // if update, for all updated items, run onUpdate
-  //  for (UpdatedItem updatedItem : _state.updatedItems) {
-  //      onUpdate(updatedItem);
-  //  }
+// called when ModuleState::update returns changed. if something has changed, process these changes: compare, onUpdate...
+void Module::updateHandler(const String& originId) {
+  // EXT_LOGD(MB_TAG, "originId: %s", originId.c_str());
+  updateOriginId = originId;
 }
 
 void Module::setupDefinition(JsonArray root) {  // virtual so it can be overriden in derived classes
@@ -336,8 +364,15 @@ void Module::setupDefinition(JsonArray root) {  // virtual so it can be override
   property["default"] = "MoonLight";
 }
 
-void Module::onUpdate(UpdatedItem& updatedItem) { EXT_LOGD(MB_TAG, "%s = %s -> %s", updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str()); }
-
-void Module::onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) { EXT_LOGD(MB_TAG, "s:%d n:%d", stateIndex, newIndex); }
+JsonObject Module::addControl(JsonArray root, const char* name, const char* type, int min, int max, bool ro, const char* desc) {
+  JsonObject control = root.add<JsonObject>();
+  control["name"] = name;
+  control["type"] = type;
+  if (min != 0) control["min"] = min;
+  if (max != UINT8_MAX) control["max"] = max;
+  if (ro) control["ro"] = true;  // else if (!control["ro"].isNull()) control.remove("ro");
+  if (desc) control["desc"] = desc;
+  return control;
+}
 
 #endif

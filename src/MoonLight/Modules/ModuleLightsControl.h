@@ -17,25 +17,27 @@
   #include "FastLED.h"
   #include "ModuleEffects.h"
   #include "MoonBase/Module.h"
-  #include "MoonBase/Utilities.h"  //for isInPSRAM
   #include "MoonBase/Modules/FileManager.h"
+  #include "MoonBase/Utilities.h"  //for isInPSRAM
 
 class ModuleLightsControl : public Module {
  public:
   PsychicHttpServer* _server;
   FileManager* _fileManager;
+  ModuleIO* _moduleIO;
+  uint8_t pinRelaisBrightness = -1;
 
-  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module("lightscontrol", server, sveltekit) {
+  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
+    _moduleIO = moduleIO;
   }
 
   void begin() {
     Module::begin();
 
-    EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node),
-            sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
+    EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
     EXT_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layers[0]->mappingTable), isInPSRAM(&layerP.layers[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
 
@@ -62,6 +64,21 @@ class ModuleLightsControl : public Module {
         }
       });
     });
+    moduleIO.addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    readPins(); //initially
+  }
+
+  void readPins() {
+    moduleIO.read([&](ModuleState& state) {
+      for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
+        uint8_t usage = pinObject["usage"];
+        if (usage == pin_Relais_Brightness) {
+          pinRelaisBrightness = pinObject["GPIO"];
+          EXT_LOGD(ML_TAG, "pinRelaisBrightness found %d", pinRelaisBrightness);
+        }
+      }
+      // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
+    });
   }
 
   // define the data model
@@ -71,32 +88,20 @@ class ModuleLightsControl : public Module {
     JsonArray details = root;  // if a property is an array, this is the details of the array
     JsonArray values;          // if a property is a select, this is the values of the select
 
-    property = root.add<JsonObject>();
-    property["name"] = "lightsOn";
-    property["type"] = "checkbox";
+    property = addControl(root, "lightsOn", "checkbox");
     property["default"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "brightness";
-    property["type"] = "slider";
+    property = addControl(root, "brightness", "slider");
     property["default"] = 10;
-    property = root.add<JsonObject>();
-    property["name"] = "red";
-    property["type"] = "slider";
+    property = addControl(root, "red", "slider");
     property["default"] = 255;
     property["color"] = "Red";
-    property = root.add<JsonObject>();
-    property["name"] = "green";
-    property["type"] = "slider";
+    property = addControl(root, "green", "slider");
     property["default"] = 255;
     property["color"] = "Green";
-    property = root.add<JsonObject>();
-    property["name"] = "blue";
-    property["type"] = "slider";
+    property = addControl(root, "blue", "slider");
     property["default"] = 255;
     property["color"] = "Blue";
-    property = root.add<JsonObject>();
-    property["name"] = "palette";
-    property["type"] = "select";
+    property = addControl(root, "palette", "select");
     property["default"] = 6;
     values = property["values"].to<JsonArray>();
     values.add("CloudColors");
@@ -108,44 +113,29 @@ class ModuleLightsControl : public Module {
     values.add("PartyColors");
     values.add("HeatColors");
     values.add("RandomColors");
-    property = root.add<JsonObject>();
-    property["name"] = "preset";
-    property["type"] = "pad";
+    property = addControl(root, "preset", "pad");
     property["width"] = 8;
     property["size"] = 18;
     property["default"].to<JsonObject>();  // clear the preset array before adding new presets
     property["default"]["list"].to<JsonArray>();
     property["default"]["count"] = 64;
 
-    property = root.add<JsonObject>();
-    property["name"] = "presetLoop";
-    property["type"] = "slider";
+    property = addControl(root, "presetLoop", "slider");
     property["default"] = 0;
-    property = root.add<JsonObject>();
-    property["name"] = "firstPreset";
-    property["type"] = "slider";
-    property["min"] = 0;
-    property["max"] = 63;
-    property["default"] = 0;
-    property = root.add<JsonObject>();
-    property["name"] = "lastPreset";
-    property["type"] = "slider";
-    property["min"] = 0;
-    property["max"] = 63;
-    property["default"] = 63;
+    property = addControl(root, "firstPreset", "slider", 1, 64);
+    property["default"] = 1;
+    property = addControl(root, "lastPreset", "slider", 1, 64);
+    property["default"] = 64;
 
   #if FT_ENABLED(FT_MONITOR)
-    property = root.add<JsonObject>();
-    property["name"] = "monitorOn";
-    property["type"] = "checkbox";
+    property = addControl(root, "monitorOn", "checkbox");
     property["default"] = true;
   #endif
   }
 
   // implement business logic
   void onUpdate(UpdatedItem& updatedItem) override {
-    // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-    // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     if (updatedItem.name == "red") {
       layerP.lights.header.red = _state.data["red"];
     } else if (updatedItem.name == "green") {
@@ -153,7 +143,11 @@ class ModuleLightsControl : public Module {
     } else if (updatedItem.name == "blue") {
       layerP.lights.header.blue = _state.data["blue"];
     } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
-      layerP.lights.header.brightness = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
+      uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
+      if (!!layerP.lights.header.brightness != !!newBri && pinRelaisBrightness != UINT8_MAX) {
+        EXT_LOGD(ML_TAG, "pinRelaisBrightness %s", !!newBri ? "On" : "Off");
+      };
+      layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
       // String value = _state.data["palette"];//updatedItem.oldValue;
       if (updatedItem.value == 0)
@@ -196,6 +190,7 @@ class ModuleLightsControl : public Module {
             // trigger notification of update of effects.json
             _fileManager->update(
                 [&](FilesState& state) {
+                  state.updatedItems.clear();
                   state.updatedItems.push_back("/.config/effects.json");
                   return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
                 },
@@ -239,7 +234,6 @@ class ModuleLightsControl : public Module {
     }
   }
 
-  uint8_t lastPresetLooped = 0;
   unsigned long lastPresetTime = 0;
 
   void loop() {
@@ -249,29 +243,21 @@ class ModuleLightsControl : public Module {
       lastPresetTime = millis();
 
       // bugfix;
-      //  std::lock_guard<std::mutex> lock(runInTask_mutex);
-      //  runInTask1.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
+      //  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+      //  runInAppTask.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
       //  load the xth preset from FS
-      JsonArray presets = _state.data["preset"]["list"];
+      JsonArray presetList = _state.data["preset"]["list"];
 
       if (_state.data["firstPreset"] <= _state.data["lastPreset"]) {
-        // find the next preset within the range
-        while (presets[lastPresetLooped % presets.size()] < _state.data["firstPreset"] || presets[lastPresetLooped % presets.size()] > _state.data["lastPreset"]) lastPresetLooped++;
+        uint8_t nextPreset = 0;
 
-        // correct overflow
-        lastPresetLooped = lastPresetLooped % presets.size();
+        nextPreset = getNextItemInArray(presetList, _state.data["preset"]["selected"]);
+        // EXT_LOGD(ML_TAG, "loading next preset %d ", nextPreset);
+        while (nextPreset < _state.data["firstPreset"] || nextPreset > _state.data["lastPreset"]) {
+          nextPreset = getNextItemInArray(presetList, nextPreset);
+        }
 
-        Char<32> presetFile;
-        presetFile.format("/.config/presets/preset%02d.json", presets[lastPresetLooped].as<uint8_t>());
-
-        EXT_LOGD(ML_TAG, "loading next preset %d %s", lastPresetLooped, presetFile.c_str());
-
-        copyFile(presetFile.c_str(), "/.config/effects.json");
-
-        _state.data["preset"]["selected"] = presets[lastPresetLooped];
-
-        // update UI
-        _socket->emitEvent(_moduleName, _state.data);
+        // EXT_LOGD(ML_TAG, "loading next preset %d ", nextPreset);
 
         // trigger file manager notification of update of effects.json
         _fileManager->update(
@@ -282,16 +268,26 @@ class ModuleLightsControl : public Module {
             },
             _moduleName);
 
-        lastPresetLooped++;  // next
+        JsonDocument doc;
+        JsonObject newState = doc.to<JsonObject>();
+        newState["preset"] = _state.data["preset"];
+        newState["preset"]["action"] = "click";
+        newState["preset"]["select"] = nextPreset;
+
+        // update the state and ModuleState::update processes the changes behind the scenes
+        if (newState.size()) {
+          // serializeJson(doc, Serial);
+          // Serial.println();
+          update(newState, ModuleState::update, _moduleName);
+        }
       }
-      // });
     }
 
   #if FT_ENABLED(FT_MONITOR)
     if (layerP.lights.header.isPositions == 2) {  // send to UI
       read([&](ModuleState& _state) {
         if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
-          _socket->emitEvent("monitor", (char*)&layerP.lights.header, 37);  // sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above 32 to avoid monitor data to be seen as header
+          _socket->emitEvent("monitor", (char*)&layerP.lights.header, 37);                                                                    // sizeof(LightsHeader)); //sizeof(LightsHeader), nearest prime nr above 32 to avoid monitor data to be seen as header
           _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.maxChannels));  //*3 is for 3 bytes position
         }
         memset(layerP.lights.channels, 0, layerP.lights.maxChannels);  // set all the channels to 0 //cleaning the positions
@@ -301,8 +297,7 @@ class ModuleLightsControl : public Module {
     } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
       EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
         read([&](ModuleState& _state) {
-          if (_socket->getConnectedClients() && _state.data["monitorOn"])
-            _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.maxChannels));
+          if (_socket->getConnectedClients() && _state.data["monitorOn"]) _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.maxChannels));
         });
       }
     }

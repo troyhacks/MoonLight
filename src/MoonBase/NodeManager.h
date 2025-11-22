@@ -89,7 +89,7 @@ class NodeManager : public Module {
 
     property = root.add<JsonObject>();
     property["name"] = "nodes";
-    property["type"] = "array";
+    property["type"] = "rows";
     details = property["n"].to<JsonArray>();
     {
       property = details.add<JsonObject>();
@@ -132,6 +132,8 @@ class NodeManager : public Module {
 
   // implement business logic
   void onUpdate(UpdatedItem& updatedItem) override {
+    // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+
     // handle nodes
     if (updatedItem.parent[0] == "nodes") {  // onNodes
       JsonVariant nodeState = _state.data["nodes"][updatedItem.index[0]];
@@ -145,21 +147,37 @@ class NodeManager : public Module {
         // remove or add Nodes (incl controls)
         if (!updatedItem.value.isNull()) {  // if name changed // == updatedItem.value
 
-          // if old node exists then remove it's controls
-          if (updatedItem.oldValue != "null") {
-            // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
-            // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-            nodeState.remove("controls");  // remove the controls from the nodeState
-          }
+          // // if old node exists then remove it's controls
+          // if (updatedItem.oldValue != "null") {
+          //   // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
+          //   // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+          //   nodeState.remove("controls");  // remove the controls from the nodeState
+          // }
 
-          EXT_LOGD(ML_TAG, "add %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-                  updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+          // String xx;
+          // serializeJson(nodeState["controls"], xx);
+          // EXT_LOGD(ML_TAG, "add %s[%d]%s[%d].%s = %s -> %s (%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), xx.c_str());
 
+          //invalidate controls
           if (nodeState["controls"].isNull()) {     // if controls are not set, create empty array
             nodeState["controls"].to<JsonArray>();  // clear the controls
+          } else {
+            for (JsonObject control : nodeState["controls"].as<JsonArray>()) {
+              control["valid"] = false;
+            }
           }
 
-          Node* nodeClass = addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);
+          Node* nodeClass = addNode(updatedItem.index[0], updatedItem.value, nodeState["controls"]);  // set controls to valid
+
+          // remove invalid controls
+          // Iterate backwards to avoid index shifting issues
+          for (int i = nodeState["controls"].as<JsonArray>().size() - 1; i >= 0; i--) {
+            JsonObject control = nodeState["controls"][i];
+            if (!control["valid"].as<bool>()) {
+              EXT_LOGD(ML_TAG, "remove control %d", i);
+              nodeState["controls"].remove(i);
+            }
+          }
 
           if (nodeClass != nullptr) {
             nodeClass->on = nodeState["on"];
@@ -232,7 +250,7 @@ class NodeManager : public Module {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
             nodeClass->on = updatedItem.value.as<bool>();  // set nodeclass on/off
-            EXT_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
+            // EXT_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
 
             nodeClass->requestMappings();
           } else
@@ -240,14 +258,15 @@ class NodeManager : public Module {
         }
       }  // nodes[i].on
 
-      else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value") {  // nodes[i].controls[j].value
-        // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-        // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+      else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value" && updatedItem.index[1] < nodeState["controls"].size()) {  // nodes[i].controls[j].value
+        // String xx;
+        // serializeJson(nodeState["controls"][updatedItem.index[1]], xx);
+        // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s (%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), xx.c_str());
+
         if (updatedItem.index[0] < nodes->size()) {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
             nodeClass->updateControl(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);
-
             nodeClass->onUpdate(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);  // custom onUpdate for the node
 
             nodeClass->requestMappings();

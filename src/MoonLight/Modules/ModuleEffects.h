@@ -25,7 +25,6 @@ class ModuleEffects : public NodeManager {
   ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit, fileManager) { EXT_LOGV(ML_TAG, "constructor"); }
 
   void begin() {
-    _state.onUpdateRunInTask = 1;
     defaultNodeName = getNameAndTags<RandomEffect>();
     NodeManager::begin();
 
@@ -110,6 +109,7 @@ class ModuleEffects : public NodeManager {
     values.add(getNameAndTags<SphereMoveEffect>());
     values.add(getNameAndTags<StarFieldEffect>());
     values.add(getNameAndTags<WaveEffect>());
+    values.add(getNameAndTags<SpiralFireEffect>());
 
     // MoonModules effects, alphabetically
     values.add(getNameAndTags<GameOfLifeEffect>());
@@ -193,6 +193,8 @@ class ModuleEffects : public NodeManager {
       node = allocMBObject<StarFieldEffect>();
     else if (equalAZaz09(name, WaveEffect::name()))
       node = allocMBObject<WaveEffect>();
+    else if (equalAZaz09(name, SpiralFireEffect::name()))
+      node = allocMBObject<SpiralFireEffect>();
 
     // MoonModules effects, alphabetically
     else if (equalAZaz09(name, GameOfLifeEffect::name()))

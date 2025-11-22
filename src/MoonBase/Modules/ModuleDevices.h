@@ -32,41 +32,24 @@ class ModuleDevices : public Module {
 
   void setupDefinition(JsonArray root) override {
     EXT_LOGV(MB_TAG, "");
-    JsonObject property;  // state.data has one or more properties
-    JsonArray details;    // if a property is an array, this is the details of the array
-    JsonArray values;     // if a property is a select, this is the values of the select
+    JsonObject control;  // state.data has one or more properties
+    JsonArray details;   // if a control is an array, this is the details of the array
+    JsonArray values;    // if a control is a select, this is the values of the select
 
-    property = root.add<JsonObject>();
-    property["name"] = "devices";
-    property["type"] = "array";
-    details = property["n"].to<JsonArray>();
+    control = addControl(root, "devices", "rows");
+    control["filter"] = "";
+    details = control["n"].to<JsonArray>();
     {
-      property = details.add<JsonObject>();
-      property["name"] = "name";
-      property["type"] = "mdnsName";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "ip";
-      property["type"] = "ip";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "time";
-      property["type"] = "time";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "mac";
-      property["type"] = "text";
-      property["ro"] = true;
+      control = addControl(details, "name", "mdnsName", 0, 32, true);
+      control = addControl(details, "ip", "ip", 0, 32, true);
+      control = addControl(details, "time", "time", 0, 32, true);
+      control = addControl(details, "mac", "text", 0, 32, true);
     }
-  }
-
-  void onUpdate(UpdatedItem& updatedItem) override {
-    EXT_LOGV(MB_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
-            updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
   }
 
   void loop1s() {
     if (!_socket->getConnectedClients()) return;
+    if (!WiFi.localIP()) return;
 
     if (!deviceUDPConnected) return;
 
@@ -75,6 +58,7 @@ class ModuleDevices : public Module {
 
   void loop10s() {
     if (!_socket->getConnectedClients()) return;
+    if (!WiFi.localIP()) return;
 
     if (!deviceUDPConnected) {
       deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
@@ -87,6 +71,7 @@ class ModuleDevices : public Module {
   }
 
   void updateDevices(const char* name, IPAddress ip) {
+    // EXT_LOGD(ML_TAG, "updateDevices ...%d %s", ip[3], name);
     if (_state.data["devices"].isNull()) _state.data["devices"].to<JsonArray>();
 
     JsonObject device = JsonObject();
@@ -107,6 +92,7 @@ class ModuleDevices : public Module {
     device["time"] = time(nullptr);  // time will change
 
     if (!_socket->getConnectedClients()) return;
+    if (!WiFi.localIP()) return;
 
     // sort in vector
     std::vector<JsonObject> v;
@@ -120,8 +106,8 @@ class ModuleDevices : public Module {
     devices["devices"].to<JsonArray>();
     for (auto& obj : v) devices["devices"].add(obj);
 
-    JsonObject data = devices.as<JsonObject>();
-    _socket->emitEvent(_moduleName, data);
+    JsonObject object = devices.as<JsonObject>();
+    update(object, ModuleState::update, _moduleName + "server");
   }
 
   void readUDP() {
@@ -141,7 +127,7 @@ class ModuleDevices : public Module {
       message.name = esp32sveltekit.getWiFiSettingsService()->getHostname().c_str();
       deviceUDP.write((uint8_t*)&message, sizeof(message));
       deviceUDP.endPacket();
-      // EXT_LOGV(MB_TAG, "UDP packet written (%d)", WiFi.localIP()[3]);
+      // EXT_LOGD(MB_TAG, "UDP packet written (%s -> %d)", message.name.c_str(), WiFi.localIP()[3]);
 
       updateDevices(message.name.c_str(), WiFi.localIP());
     }

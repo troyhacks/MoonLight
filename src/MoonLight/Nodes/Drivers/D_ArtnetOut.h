@@ -21,9 +21,9 @@ static const uint8_t ART_NET_HEADER[] = {0x41, 0x72, 0x74, 0x2d, 0x4e, 0x65, 0x7
   // 11: Low byte of the Art-Net protocol revision number. Current value 14
   #include <AsyncUDP.h>
 
-class ArtNetDriver : public DriverNode {
+class ArtNetOutDriver : public DriverNode {
  public:
-  static const char* name() { return "Art-Net Driver"; }
+  static const char* name() { return "Art-Net Out"; }
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️"; }
 

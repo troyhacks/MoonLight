@@ -49,12 +49,12 @@ class FixedRectangleEffect : public Node {
   uint8_t green = 15;
   uint8_t blue = 98;
   uint8_t white = 0;
-  uint8_t width = 1;
-  uint8_t x = 0;
-  uint8_t height = 1;
-  uint8_t y = 0;
-  uint8_t depth = 1;
-  uint8_t z = 0;
+  uint16_t width = 1;
+  uint16_t x = 0;
+  uint16_t height = 1;
+  uint16_t y = 0;
+  uint16_t depth = 1;
+  uint16_t z = 0;
   bool alternateWhite = false;  // to be used for frontlight
 
   void setup() override {
@@ -162,10 +162,10 @@ class RandomEffect : public Node {
   static uint8_t dim() { return _3D; }
   static const char* tags() { return "🔥"; }
 
-  uint8_t speed = 128;
-  void setup() { addControl(speed, "speed", "slider"); }
+  uint8_t fade = 70;
+  void setup() { addControl(fade, "fade", "slider"); }
   void loop() override {
-    layer->fadeToBlackBy(70);
+    layer->fadeToBlackBy(fade);
     layer->setRGB(random16(layer->nrOfLights), CRGB(255, random8(), 0));
   }
 };
@@ -294,12 +294,7 @@ class ScrollingTextEffect : public Node {
         text.format("%dh", millis() / (MILLIS_PER_DAY));                                        // days
       break;
     case 6:
-      text.format("%s", sharedData.connectionStatus == 0   ? "Off"
-                        : sharedData.connectionStatus == 1 ? "AP-"
-                        : sharedData.connectionStatus == 2 ? "AP+"
-                        : sharedData.connectionStatus == 3 ? "Sta-"
-                        : sharedData.connectionStatus == 4 ? "Sta+"
-                                                           : "mqqt");
+      text.format("%s", sharedData.connectionStatus == 0 ? "Off" : sharedData.connectionStatus == 1 ? "AP-" : sharedData.connectionStatus == 2 ? "AP+" : sharedData.connectionStatus == 3 ? "Sta-" : sharedData.connectionStatus == 4 ? "Sta+" : "mqqt");
       break;
     case 7:
       text.format("%dC", sharedData.clientListSize);
@@ -836,15 +831,9 @@ class RubiksCubeEffect : public Node {
 
       // 3 Sided Cube Cheat add 1 to led size if "panels" missing. May affect different fixture types
       if (layer->layerDimension == _3D) {
-        if (!layer->isMapped(layer->XYZUnModified(Coord3D(0, layer->size.y / 2, layer->size.z / 2))) ||
-            !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x - 1, layer->size.y / 2, layer->size.z / 2))))
-          sizeX++;
-        if (!layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, 0, layer->size.z / 2))) ||
-            !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, layer->size.y - 1, layer->size.z / 2))))
-          sizeY++;
-        if (!layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, layer->size.y / 2, 0))) ||
-            !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, layer->size.y / 2, layer->size.z - 1))))
-          sizeZ++;
+        if (!layer->isMapped(layer->XYZUnModified(Coord3D(0, layer->size.y / 2, layer->size.z / 2))) || !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x - 1, layer->size.y / 2, layer->size.z / 2)))) sizeX++;
+        if (!layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, 0, layer->size.z / 2))) || !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, layer->size.y - 1, layer->size.z / 2)))) sizeY++;
+        if (!layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, layer->size.y / 2, 0))) || !layer->isMapped(layer->XYZUnModified(Coord3D(layer->size.x / 2, layer->size.y / 2, layer->size.z - 1)))) sizeZ++;
       }
 
       // Previously SIZE - 1. Cube size expanded by 2, makes edges thicker. Constrains are used to prevent out of bounds
@@ -1047,8 +1036,7 @@ class ParticlesEffect : public Node {
       int diff = 0;                                            // If distance the same check how many coordinates are different (larger is better)
       bool changed = false;
 
-      if (debugPrint)
-        EXT_LOGD(ML_TAG, "     %d, %d, %d, Not Mapped! Nearest: %d, %d, %d dist: %d diff: %d\n", newPos.x, newPos.y, newPos.z, nearestMapped.x, nearestMapped.y, nearestMapped.z, nearestDist, diff);
+      if (debugPrint) EXT_LOGD(ML_TAG, "     %d, %d, %d, Not Mapped! Nearest: %d, %d, %d dist: %d diff: %d\n", newPos.x, newPos.y, newPos.z, nearestMapped.x, nearestMapped.y, nearestMapped.z, nearestDist, diff);
 
       // Check neighbors for nearest mapped pixel. This should be changed to check neighbors with similar velocity
       for (int i = -1; i <= 1; i++)
@@ -1299,4 +1287,72 @@ class MoonManEffect : public Node {
 
   #endif
 
+class SpiralFireEffect : public Node {
+ public:
+  static const char* name() { return "Spiral Fire"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "🔥🎨⏳"; }
+
+  uint8_t speed = 60;
+  uint8_t intensity = 180;
+  uint8_t rotationSpeed = 30;
+
+  void setup() override {
+    addControl(speed, "speed", "slider");
+    addControl(intensity, "intensity", "slider");
+    addControl(rotationSpeed, "rotation", "slider");
+  }
+
+  void loop() override {
+    layer->fadeToBlackBy(40);
+
+    Coord3D pos;
+    uint16_t time = millis() >> 4;
+
+    // Calculate center of the cone
+    float centerX = layer->size.x / 2.0f;
+    float centerZ = layer->size.z / 2.0f;
+
+    for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
+      for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
+        for (pos.z = 0; pos.z < layer->size.z; pos.z++) {
+          // Calculate distance from center (radius)
+          float dx = pos.x - centerX;
+          float dz = pos.z - centerZ;
+          float radius = sqrtf(dx * dx + dz * dz);
+
+          // Calculate angle around the cone
+          float angle = atan2f(dz, dx);
+
+          // Expected radius at this height (cone tapers to point at top)
+          float expectedRadius = (layer->size.x / 2.0f) * (1.0f - (float)pos.y / layer->size.y);
+
+          // Only light LEDs that are close to the cone surface
+          if (fabsf(radius - expectedRadius) < 1.5f) {
+            // Create rising flame effect with spiral
+            uint8_t spiralPhase = (uint8_t)(angle * 40.0f + pos.y * 20 - time * rotationSpeed / 10);
+            uint8_t flameHeight = beatsin8(speed, 0, layer->size.y);
+
+            // Brightness based on height and spiral pattern
+            if (pos.y <= flameHeight) {
+              uint8_t brightness = 255 - (pos.y * 255 / layer->size.y);
+              brightness = qadd8(brightness, sin8(spiralPhase) / 2);
+
+              // Color: bottom hot (yellow/white), top cooler (red/orange)
+              uint8_t colorIndex = 255 - (pos.y * 180 / layer->size.y) + sin8(spiralPhase) / 3;
+
+              CRGB color = ColorFromPalette(layer->layerP->palette, colorIndex, brightness);
+
+              // Add some intensity variation
+              color.nscale8(intensity);
+
+              layer->setRGB(pos, color);
+            }
+          }
+        }
+      }
+    }
+  }
+
+};
 #endif

@@ -21,6 +21,16 @@ bool arrayContainsValue(JsonArray array, int value) {
   }
   return false;
 }
+int getNextItemInArray(JsonArray array, size_t currentValue, bool backwards) {
+  size_t n = array.size();
+  if (!n) return -1;
+
+  size_t i = 0;
+  while (i < n && array[i] != currentValue) i++;
+
+  size_t next = (i + (backwards ? -1 : 1) + n) % n;
+  return array[next];
+}
 
 float distance(float x1, float y1, float z1, float x2, float y2, float z2) { return sqrtf((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2)); }
 
@@ -153,8 +163,9 @@ void setBitValue(uint8_t* byteArray, size_t n, bool value) {
     byteArray[byteIndex] &= ~(1 << bitIndex);
 }
 
-std::vector<std::function<void()>, VectorRAMAllocator<std::function<void()>>> runInTask1, runInTask2;  // see .h
-std::mutex runInTask_mutex;                                                                            // see .h
+std::vector<std::function<void()>> runInAppTask;  // see .h
+std::mutex runInAppTask_mutex;                    // see .h
+// int runInAppTask_mutexChecker = 0;
 
 #if USE_M5UNIFIED
   #include "moonmanpng.h"

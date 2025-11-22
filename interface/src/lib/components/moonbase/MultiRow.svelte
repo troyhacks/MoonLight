@@ -12,7 +12,6 @@
 -->
 
 <script lang="ts">
-	import { onDestroy } from 'svelte';
 	import DraggableList from '$lib/components/DraggableList.svelte';
 	import Add from '~icons/tabler/circle-plus';
 	import { user } from '$lib/stores/user';
@@ -21,17 +20,17 @@
 	import { cubicOut } from 'svelte/easing';
 	import SearchIcon from '~icons/tabler/search';
 	import Delete from '~icons/tabler/trash';
-	import { initCap, getTimeAgo } from '$lib/stores/moonbase_utilities';
+	import { initCap } from '$lib/stores/moonbase_utilities';
 
 	import EditObject from './EditObject.svelte';
 	import { modals } from 'svelte-modals';
 	import Grip from '~icons/tabler/grip-vertical';
+	import MultiInput from './MultiInput.svelte';
+	import { isNumber } from 'chart.js/helpers';
 
 	let { property, data = $bindable(), definition, onChange, changeOnInput } = $props();
 
 	let dataEditable: any = $state({});
-
-	let propertyEditable: string = $state('');
 
 	//if no records added yet, add an empty array
 	if (data[property.name] == undefined) {
@@ -49,25 +48,14 @@
 		}
 	}
 
-	//make getTimeAgo reactive
-	let currentTime = $state(Date.now());
-	// Update the dummy variable every second
-	const interval = setInterval(() => {
-		currentTime = Date.now();
-	}, 1000);
-
-	onDestroy(() => {
-		clearInterval(interval);
-	});
-
 	function handleReorder(reorderedItems: any[]) {
 		console.log('handleReorder', property.name, reorderedItems);
-		data[property.name] = reorderedItems;
+		data[property.name] = reorderedItems.map((wrapper: any) => wrapper.item);
 		onChange();
 	}
 
 	function addItem(propertyName: string) {
-		propertyEditable = propertyName;
+		// propertyEditable = propertyName;
 		//set the default values from the definition...
 		dataEditable = {};
 
@@ -75,7 +63,7 @@
 		for (let i = 0; i < definition.length; i++) {
 			let property = definition[i];
 			if (property.name == propertyName) {
-				console.log('addItem def', propertyName, property);
+				console.log('addItem def', propertyName);
 				for (let i = 0; i < property.n.length; i++) {
 					let propertyN = property.n[i];
 					// console.log("propertyN", propertyN)
@@ -83,37 +71,72 @@
 				}
 			}
 		}
+	}
 
+	function handleEdit(propertyName: string, itemToEdit: any) {
+		console.log('handleEdit', propertyName);
 		modals.open(EditObject as any, {
-			property: property,
-			localDefinition: localDefinition,
-			title: 'Add ' + initCap(propertyName) + ' #' + (data[propertyName].length + 1),
-			dataEditable: dataEditable, //bindable
+			property,
+			localDefinition,
+			title: initCap(propertyName),
+			dataEditable: itemToEdit, // direct reference
 			onChange,
 			changeOnInput
 		});
 	}
 
-	function handleEdit(propertyName: string, index: number) {
-		console.log('handleEdit', propertyName, index, data[propertyName][index]);
-
-		modals.open(EditObject as any, {
-			property: property,
-			localDefinition: localDefinition,
-			title: initCap(propertyName) + ' #' + (index + 1),
-			dataEditable: data[propertyName][index], // By reference (bindable)
-			onChange,
-			changeOnInput
-		});
-	}
-
-	function deleteItem(propertyName: string, index: number) {
-		// Remove item from array
-		console.log(propertyName, index, data[propertyName]);
-		data[propertyName].splice(index, 1);
-		data[propertyName] = [...data[propertyName]]; //Trigger reactivity
+	function deleteItem(propertyName: string, itemToDelete: any) {
+		console.log('deleteItem', propertyName);
+		data[propertyName] = data[propertyName].filter((item: any) => item !== itemToDelete);
 		onChange();
 	}
+
+	// Filter items based on filter query - returns array of {item, originalIndex}
+	let filteredItems = $derived.by(() => {
+		const filterValue = data[property.name + '_filter']?.trim() || '';
+		const isNegated = filterValue.startsWith('!');
+		const query = (isNegated ? filterValue.slice(1) : filterValue).toLowerCase();
+
+		// No filter or empty query → return items directly
+		if (!query) return data[property.name].map((item:any) => ({ item }));
+
+		// Filtered items
+		return data[property.name]
+			.map((item:any) => ({ item }))
+			.filter(({ item }: { item: any }) => {
+				const matchFound = property.n.slice(0, 3).some((propertyN:any) => {
+					let valueStr;
+
+					if (
+						propertyN.values &&
+						Array.isArray(propertyN.values) &&
+						isNumber(item[propertyN.name])
+					) {
+						valueStr = propertyN.values[item[propertyN.name]];
+					} else {
+						valueStr = item[propertyN.name];
+					}
+
+					return String(valueStr).toLowerCase().includes(query);
+				});
+
+				return isNegated ? !matchFound : matchFound;
+			});
+	});
+
+	const findItemInDefinition = $derived(definition.find((obj: any) => obj.name === property.name));
+
+	let propertyFilter = $state({
+		name: property.name + '_filter',
+		type: 'text',
+		label: 'Filter ' + initCap(property.name),
+		default: ''
+	});
+
+	// Update the default value reactively so we don't capture the initial derived value only once
+	$effect(() => {
+		propertyFilter.default = findItemInDefinition?.filter ?? '!Unused';
+	});
 </script>
 
 <div class="divider mb-2 mt-0"></div>
@@ -136,37 +159,49 @@
 	>
 </div>
 
+<!-- Search Filter -->
+{#if findItemInDefinition.filter != null}
+	<MultiInput
+		property={propertyFilter}
+		bind:value={data[property.name + '_filter']}
+		noPrompts={false}
+		onChange={(event) => {
+			onChange(event);
+		}}
+	></MultiInput>
+	{#if data[property.name + '_filter']}
+		<div class="text-sm text-base-content/60 mt-1 ml-1">
+			{filteredItems.length} of {data[property.name].length} items
+			{data[property.name + '_filter'].startsWith('!') ? '(excluding matches)' : ''}
+		</div>
+	{/if}
+{/if}
+
 <div class="overflow-x-auto space-y-1" transition:slide|local={{ duration: 300, easing: cubicOut }}>
-	<DraggableList items={data[property.name]} onReorder={handleReorder} class="space-y-2">
-		{#snippet children({ item: item, index }: { item: any; index: number })}
+	<DraggableList items={filteredItems} onReorder={handleReorder} class="space-y-2">
+		{#snippet children({ item: itemWrapper }: { item: any })}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 				<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
 				<!-- Show the first 3 fields -->
 				{#each property.n.slice(0, 3) as propertyN}
-					{#if propertyN.type == 'time'}
-						<div>
-							<div class="font-bold">
-								{getTimeAgo(item[propertyN.name], currentTime)}
-							</div>
-						</div>
-					{:else if propertyN.type == 'coord3D'}
-						<div>
-							<div class="font-bold">
-								({item[propertyN.name].x}, {item[propertyN.name].y}, {item[propertyN.name].z})
-							</div>
-						</div>
-					{:else if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
-						<div>
-							<div class="font-bold">{item[propertyN.name]}</div>
-						</div>
+					{#if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
+						<MultiInput
+							property={propertyN}
+							bind:value={itemWrapper.item[propertyN.name]}
+							noPrompts={true}
+							onChange={(event) => {
+								onChange(event);
+							}}
+						></MultiInput>
 					{/if}
 				{/each}
+				<!-- Show nr of controls -->
 				{#each property.n as propertyN}
 					{#if propertyN.type == 'array' || propertyN.type == 'controls'}
 						<div>
 							<div class="font-bold">
-								↓{item[propertyN.name] ? item[propertyN.name].length : ''}
+								↓{itemWrapper.item[propertyN.name] ? itemWrapper.item[propertyN.name].length : ''}
 							</div>
 						</div>
 					{/if}
@@ -177,7 +212,7 @@
 						<button
 							class="btn btn-ghost btn-sm"
 							onclick={() => {
-								handleEdit(property.name, index);
+								handleEdit(property.name, itemWrapper.item);
 							}}
 						>
 							<SearchIcon class="h-6 w-6" /></button
@@ -185,7 +220,7 @@
 						<button
 							class="btn btn-ghost btn-sm"
 							onclick={() => {
-								deleteItem(property.name, index);
+								deleteItem(property.name, itemWrapper.item);
 							}}
 						>
 							<Delete class="text-error h-6 w-6" />

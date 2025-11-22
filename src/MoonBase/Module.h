@@ -65,6 +65,7 @@ class ModuleState {
       EXT_LOGE(MB_TAG, "Failed to create doc");
     }
   }
+
   ~ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState destructor");
     // delete data from doc
@@ -79,17 +80,9 @@ class ModuleState {
     }
   }
 
-  uint8_t onUpdateRunInTask = UINT8_MAX;  // if set to UINT8_MAX, runInTask1 is not called, otherwise it is called with this value as index
-
   std::function<void(JsonArray root)> setupDefinition = nullptr;
 
   void setupData();
-
-  // called from ModuleState::update.checkReOrderSwap
-  void execOnReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
-
-  // called from compareRecursive
-  void execOnUpdate(UpdatedItem& updatedItem);
 
   // called from ModuleState::update and ModuleState::setupData()
   bool compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
@@ -97,7 +90,7 @@ class ModuleState {
   // called from ModuleState::update
   bool checkReOrderSwap(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
 
-  std::function<void(UpdatedItem&)> onUpdate = nullptr;
+  std::function<void(UpdatedItem&)> execOnUpdate = nullptr;
   std::function<void(uint8_t, uint8_t)> onReOrderSwap = nullptr;
 
   static void read(ModuleState& state, JsonObject& root);
@@ -116,9 +109,15 @@ class Module : public StatefulService<ModuleState> {
 
   virtual void setupDefinition(JsonArray root);
 
+  JsonObject addControl(JsonArray root, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
+
   // called in compareRecursive->execOnUpdate
-  virtual void onUpdate(UpdatedItem& updatedItem);
-  virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex);
+  // called from compareRecursive
+  void execOnUpdate(UpdatedItem& updatedItem);
+  virtual void onUpdate(UpdatedItem& updatedItem) {};
+  virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {};
+
+  String updateOriginId;
 
  protected:
   EventSocket* _socket;
@@ -139,7 +138,7 @@ class Module : public StatefulService<ModuleState> {
   FSPersistence<ModuleState> _fsPersistence;
   PsychicHttpServer* _server;
 
-  void updateHandler();
+  void updateHandler(const String& originId);
 };
 
 #endif

@@ -100,7 +100,7 @@ class ModuleLiveScripts : public Module {
 
     property = root.add<JsonObject>();
     property["name"] = "scripts";
-    property["type"] = "array";
+    property["type"] = "rows";
     details = property["n"].to<JsonArray>();
     {
       property = details.add<JsonObject>();
@@ -182,6 +182,7 @@ class ModuleLiveScripts : public Module {
   // update scripts / read only values in the UI
   void loop1s() {
     if (!_socket->getConnectedClients()) return;
+    if (!WiFi.localIP()) return;
 
     JsonDocument newData;                                    // to only send updatedData
     JsonArray scripts = newData["scripts"].to<JsonArray>();  // to: remove old array

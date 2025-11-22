@@ -14,7 +14,7 @@ Controls:
         * Hover with the mouse to see effects and modifiers in the preset
         * Double click on a saved preset to delete the preset.
     * Red: Selected preset
-    * 🚨: Save (💾) or cancel (🚫 effects first, before storing them as a preset!
+    * 🚨: Save (💾) or cancel (↻) Save effects first, before storing them as a preset!
     * Note: Presets only stores Effects and Modifiers, not Layers and Drivers.
 * Preset loop: loop over presets (seconds per presets)
 * Monitor On: sends LED output to the monitor.

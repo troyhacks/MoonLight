@@ -23,7 +23,6 @@ class ExampleLayout : public Node {
   uint8_t width = 12;
   uint8_t height = 12;
   uint8_t depth = 12;
-  uint8_t pin = 16;
 
   void setup() override {
     // controls will show in the UI
@@ -31,7 +30,6 @@ class ExampleLayout : public Node {
     addControl(width, "width", "slider");
     addControl(height, "height", "slider");
     addControl(depth, "depth", "slider");
-    addControl(pin, "pin", "pin", 1, SOC_GPIO_PIN_COUNT);
   }
 
   bool hasOnLayout() const override { return true; }  // so the mapping system knows this node has onLayout, eg each time a modifier changes
@@ -43,8 +41,8 @@ class ExampleLayout : public Node {
           addLight(pos);
         }
       }
+      nextPin(); // if more pins are defined, the next lights will be assigned to the next pin
     }
-    addPin(pin);
   }
 };
 

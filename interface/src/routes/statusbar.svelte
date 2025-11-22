@@ -123,7 +123,7 @@
 				💾
 			</button>
 			<button class="btn btn-square btn-ghost h-9 w-10" onclick={postCancelConfig}>
-				🚫
+				↻
 			</button>
 		</div>
 	{/if}

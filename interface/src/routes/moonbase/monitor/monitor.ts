@@ -3,16 +3,20 @@
 
 import { mat4 } from 'gl-matrix';
 
-let uMVPLocation: WebGLUniformLocation;
+let uMVPLocation: WebGLUniformLocation | null = null;
 
-let gl: WebGLRenderingContext;
-let program: WebGLProgram;
-let positionBuffer: WebGLBuffer;
+let gl: WebGLRenderingContext | null = null;
+let program: WebGLProgram | null = null;
+let positionBuffer: WebGLBuffer | null = null;
 
 export let vertices: number[] = [];
 export let colors: number[] = [];
 
-let colorBuffer: WebGLBuffer; // Buffer for color data
+// Store LED matrix dimensions
+let matrixWidth: number = 1;
+let matrixHeight: number = 1;
+
+let colorBuffer: WebGLBuffer | null = null; // Buffer for color data
 
 export function createScene(el: HTMLCanvasElement) {
       // Initialize WebGL
@@ -77,14 +81,15 @@ export function createScene(el: HTMLCanvasElement) {
 
 const createShader = (gl: WebGLRenderingContext, type: number, source: string): WebGLShader => {
   const shader = gl.createShader(type);
-  if (shader) {
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        throw new Error("Shader compilation failed");
-    }
+  if (!shader) {
+    throw new Error("Unable to create shader");
+  }
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      throw new Error("Shader compilation failed");
   }
   return shader;
 };
@@ -110,12 +115,20 @@ export function clearVertices() {
   vertices = [];
 }
 
+// New function to set the LED matrix dimensions
+export function setMatrixDimensions(width: number, height: number) {
+  matrixWidth = width;
+  matrixHeight = height;
+}
+
 export const updateScene = (vertices: number[], colors: number[]) => {
-  if (!gl) return; 
+  if (!gl || !positionBuffer || !colorBuffer) return; 
 
     // Set the MVP matrix
   const mvp = getMVPMatrix();
-  gl.uniformMatrix4fv(uMVPLocation, false, mvp);
+  if (uMVPLocation) {
+    gl.uniformMatrix4fv(uMVPLocation, false, mvp);
+  }
 
   // Bind the position buffer and upload the vertex data
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -132,19 +145,48 @@ export const updateScene = (vertices: number[], colors: number[]) => {
   gl.drawArrays(gl.POINTS, 0, vertices.length / 3);
 };
 
-function getMVPMatrix(): Float32Array {
-  const aspect = gl.canvas.width / gl.canvas.height;
-  const fov = Math.PI / 6; // from 4 (45 degrees) to 6
+function getMVPMatrix(): mat4 {
+  const canvas = gl!.canvas as HTMLCanvasElement;
+  const canvasAspect = canvas.width / canvas.height;
+  const fov = Math.PI / 6; // 30 degrees
   const near = 0.1;
   const far = 100.0;
 
   const projection = mat4.create();
-  mat4.perspective(projection, fov, aspect, near, far);
+  mat4.perspective(projection, fov, canvasAspect, near, far);
+
+  // Calculate the required camera distance to fit the matrix in view
+  const matrixAspect = matrixWidth / matrixHeight;
+  
+  // The object will be scaled by matrixAspect in X direction and 1 in Y direction
+  // We need to fit the larger dimension in the view
+  // Calculate the size of the object after scaling
+  const objectWidth = matrixAspect;
+  const objectHeight = 1;
+  
+  // Determine which dimension is limiting based on canvas aspect
+  // The vertical FOV determines how much we see vertically
+  // The horizontal FOV is: horizontal = 2 * atan(tan(vertical/2) * aspect)
+  const verticalSize = objectHeight;
+  const horizontalSize = objectWidth;
+  
+  // Calculate required distance for vertical fit
+  const distanceForHeight = verticalSize / (2 * Math.tan(fov / 2));
+  
+  // Calculate required distance for horizontal fit
+  const horizontalFov = 2 * Math.atan(Math.tan(fov / 2) * canvasAspect);
+  const distanceForWidth = horizontalSize / (2 * Math.tan(horizontalFov / 2));
+  
+  // Use the larger distance to ensure both dimensions fit
+  const cameraDistance = Math.max(distanceForHeight, distanceForWidth) * 2.5; // 1.2 adds some padding
 
   const view = mat4.create();
-  mat4.lookAt(view, [0, 0, 5], [0, 0, 0], [0, 1, 0]); // Camera at (0,0,5) looking at origin
+  mat4.lookAt(view, [0, 0, cameraDistance], [0, 0, 0], [0, 1, 0]);
 
-  const model = mat4.create(); // Identity
+  const model = mat4.create();
+  
+  // Scale by the matrix aspect ratio to get correct proportions
+  mat4.scale(model, model, [matrixAspect, 1, 1]);
 
   const mvp = mat4.create();
   mat4.multiply(mvp, projection, view);

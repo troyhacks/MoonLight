@@ -11,8 +11,6 @@
 
 #if FT_MOONLIGHT
 
-  #ifdef BUILD_TARGET_ESP32_S3_STEPHANELEC_16P
-
 // SE16 board
 class SE16Layout : public Node {
  public:
@@ -23,16 +21,12 @@ class SE16Layout : public Node {
   bool mirroredPins = false;
   bool pinsAreColumns = false;
   uint16_t ledsPerPin = 10;
-  char pins[80] = "47,48,21,38,14,39,13,40,12,41,11,42,10,2,3,1";  // SE16 pin layout
 
   void setup() override {
     addControl(mirroredPins, "mirroredPins", "checkbox");
     addControl(pinsAreColumns, "pinsAreColumns", "checkbox");
     addControl(ledsPerPin, "ledsPerPin", "number", 1, 2047);
-    addControl(pins, "pins", "text", 1, sizeof(pins));
   }
-
-  char* nextPin = pins;
 
   void addStrip(uint16_t xposition, uint16_t start_y, uint16_t stop_y) {
     bool increasing = start_y < stop_y;
@@ -43,23 +37,11 @@ class SE16Layout : public Node {
         addLight(Coord3D(y, xposition, 0));  // ewowi
     }
 
-    addNextPin(nextPin);
+    nextPin();  // each strip it's own pin
   }
 
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
-    // pin layout of the board
-    //  47-48
-    //  21-38
-    //  14-39
-    //  13-40
-    //  12-41
-    //  11-42
-    //  10-02
-    //  03-01
-
-    nextPin = pins;
-
     if (mirroredPins) {  // limpkin
       addStrip(7, ledsPerPin, 2 * ledsPerPin - 1);
       addStrip(7, ledsPerPin - 1, 0);
@@ -97,6 +79,5 @@ class SE16Layout : public Node {
     }
   }
 };
-  #endif
 
 #endif  // FT_MOONLIGHT

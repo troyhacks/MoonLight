@@ -20,13 +20,13 @@
    */
   #define NEC_LEADING_CODE_DURATION_0 9000
   #define NEC_LEADING_CODE_DURATION_1 4500
-  #define NEC_PAYLOAD_ZERO_DURATION_0 560
-  #define NEC_PAYLOAD_ZERO_DURATION_1 560
-  #define NEC_PAYLOAD_ONE_DURATION_0 560
-  #define NEC_PAYLOAD_ONE_DURATION_1 1690
+  #define NEC_PAYLOAD_ZERO_DURATION_0 562
+  #define NEC_PAYLOAD_ZERO_DURATION_1 562
+  #define NEC_PAYLOAD_ONE_DURATION_0 562
+  #define NEC_PAYLOAD_ONE_DURATION_1 1687
   #define NEC_REPEAT_CODE_DURATION_0 9000
   #define NEC_REPEAT_CODE_DURATION_1 2250
-  #define EXAMPLE_IR_NEC_DECODE_MARGIN 200  // Tolerance for parsing RMT symbols into bit stream
+  #define EXAMPLE_IR_NEC_DECODE_MARGIN 300  // Tolerance for parsing RMT symbols into bit stream
 
 class IRDriver : public Node {
  public:
@@ -34,39 +34,110 @@ class IRDriver : public Node {
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️🚧"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
-  uint8_t pin = 5;
+  uint8_t pinInfrared = UINT8_MAX;
   uint8_t irPreset = 1;
 
+  void readPins() {
+    moduleIO->read([&](ModuleState& state) {
+      for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
+        uint8_t usage = pinObject["usage"];
+        if (usage == pin_Infrared) {
+          pinInfrared = pinObject["GPIO"].as<uint8_t>();
+          EXT_LOGD(ML_TAG, "pin_Infrared found %d", pinInfrared);
+
+          EXT_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pinInfrared);
+
+          if (rx_channel) {
+            EXT_LOGI(IR_DRIVER_TAG, "Removing callback");
+            ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs_empty, receive_queue));
+            EXT_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
+            ESP_ERROR_CHECK(rmt_disable(rx_channel));
+            EXT_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
+            ESP_ERROR_CHECK(rmt_del_channel(rx_channel));
+            rx_channel = NULL;
+          }
+
+          if (receive_queue) {
+            vQueueDelete(receive_queue);
+            receive_queue = NULL;
+          }
+
+          rx_channel_cfg.gpio_num = (gpio_num_t)pinInfrared;
+          EXT_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
+          ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
+
+          EXT_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");
+          ESP_ERROR_CHECK(rmt_enable(rx_channel));
+
+          EXT_LOGI(IR_DRIVER_TAG, "Register RX done callback");
+          receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
+          assert(receive_queue);
+          ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
+
+          EXT_LOGI(IR_DRIVER_TAG, "Arm receive");
+          ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+        }
+      }
+      // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
+    });
+  }
+
   void setup() override {
-    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT);
     JsonObject property;
     JsonArray values;
     property = addControl(irPreset, "irPreset", "select");
     values = property["values"].to<JsonArray>();
     values.add("Swiss remote");
-    values.add("Dutch remote");
+    values.add("Athom"); //see https://www.athom.tech/blank-1/wled-esp32-music-addressable-led-strip-controller
+    values.add("Luxceo");
+
+    moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    readPins();  // initially
   }
 
+  uint32_t codeOn;
+  uint32_t codeOff;
   uint32_t codeBrightnessInc;
   uint32_t codeBrightnessDec;
+  uint32_t codeRedInc;
+  uint32_t codeRedDec;
+  uint32_t codeGreenInc;
+  uint32_t codeGreenDec;
+  uint32_t codeBlueInc;
+  uint32_t codeBlueDec;
   uint32_t codePaletteInc;
   uint32_t codePaletteDec;
+  uint32_t codePresetInc;
+  uint32_t codePresetDec;
+  uint32_t codePreset0;
   uint32_t codePreset1;
   uint32_t codePreset2;
   uint32_t codePreset3;
   uint32_t codePreset4;
   uint32_t codePreset5;
   uint32_t codePreset6;
+  uint32_t codePresetLoopInc;
+  uint32_t codePresetLoopDec;
+  uint32_t codeFirstPresetInc;
+  uint32_t codeFirstPresetDec;
+  uint32_t codeLastPresetInc;
+  uint32_t codeLastPresetDec;
 
   void onUpdate(String& oldValue, JsonObject control) override {
-    if (control["name"] == "pin") {
-      new_pin_in_waiting = true;
-    } else if (control["name"] == "irPreset") {
+    if (control["name"] == "irPreset") {
       uint8_t value = control["value"];
       switch (value) {
       case 0:  // Swiss remote
+        codeOn = 0xFF00BF40;
+        codeOff = 0xFF00BF40;
         codeBrightnessInc = 0xFF00A35C;
         codeBrightnessDec = 0xFF00A25D;
+        codeRedInc = 0xFF00EB14;
+        codeRedDec = 0xFF00EF10;
+        codeGreenInc = 0xFF00EA15;
+        codeGreenDec = 0xFF00EE11;
+        codeBlueInc = 0xFF00E916;
+        codeBlueDec = 0xFF00ED12;
         codePaletteInc = 0xFF00A25D;
         codePaletteDec = 0xFF00A25D;
         codePreset1 = 0xFF00F30C;
@@ -77,12 +148,48 @@ class IRDriver : public Node {
         codePreset6 = 0xFF00F50A;
         break;
       case 1:  // Dutch remote
-        codeBrightnessInc = 0xEF00F20D;
-        codeBrightnessDec = 0xEF00F30C;
-        codePaletteInc = 0xEF00EA15;
-        codePaletteDec = 0xEF00EB14;
-        codePreset1 = 0xEF00EF10;
-        codePreset2 = 0xEF00EE11;
+        codeOn = 0xEF00FC03;
+        codeOff = 0xEF00FD02;
+        codeBrightnessInc = 0xEF00F40B;
+        codeBrightnessDec = 0xEF00F906;
+        codeRedInc = 0xEF00F708;
+        codeRedDec = 0xEF00F30C;
+        codeGreenInc = 0xEF00F609;
+        codeGreenDec = 0xEF00F20D;
+        codeBlueInc = 0xEF00F50A;
+        codeBlueDec = 0xEF00F10E;
+        codePaletteInc = 0xEF00E916;
+        codePaletteDec = 0xEF00EA15;
+        codePresetInc = 0xEF00FF00;
+        codePresetDec = 0xEF00FE01;
+        codePresetLoopInc = 0xEF00FB04;
+        codePresetLoopDec = 0xEF00FA05;
+        codeFirstPresetInc = 0;
+        codeFirstPresetDec = 0;
+        codeLastPresetInc = 0;
+        codeLastPresetDec = 0;
+        break;
+      case 2:  // Luxceo Mood1
+        codeOn = 0x7F80ED12;
+        codeOff = 0x7F80E51A;
+        codeBrightnessInc = 0x7F80FD02;
+        codeBrightnessDec = 0x7F80FA05;
+        // codeRedInc = 0xEF00F708;
+        // codeRedDec = 0xEF00F30C;
+        // codeGreenInc = 0xEF00F609;
+        // codeGreenDec = 0xEF00F20D;
+        // codeBlueInc = 0xEF00F50A;
+        // codeBlueDec = 0xEF00F10E;
+        codePaletteInc = 0x7F80F10E;
+        codePaletteDec = 0x7F80F20D;
+        codePresetInc = 0x7F80FE01;
+        codePresetDec = 0x7F80FB04;
+        codePresetLoopInc = 0xEF00FB04;
+        codePresetLoopDec = 0xEF00FA05;
+        // codeFirstPresetInc = 0;
+        // codeFirstPresetDec = 0;
+        // codeLastPresetInc = 0;
+        // codeLastPresetDec = 0;
         break;
       }
     }
@@ -90,7 +197,6 @@ class IRDriver : public Node {
 
   uint16_t s_nec_code_address;
   uint16_t s_nec_code_command;
-  bool new_pin_in_waiting = false;
   rmt_rx_done_event_data_t rx_data;
   rmt_symbol_word_t raw_symbols[64];  // 64 symbols should be sufficient for a standard NEC frame
   QueueHandle_t receive_queue = NULL;
@@ -112,7 +218,7 @@ class IRDriver : public Node {
 
   // the following timing requirement is based on NEC protocol
   rmt_receive_config_t receive_config = {
-      .signal_range_min_ns = 1250,      // the shortest duration for NEC signal is 560us, 1250ns < 560us, valid signal won't be treated as noise
+      .signal_range_min_ns = 3186,      // the shortest duration for NEC signal is 560us, (set to max value)
       .signal_range_max_ns = 12000000,  // the longest duration for NEC signal is 9000us, 12000000ns > 9000us, the receive won't stop early
   };
 
@@ -145,6 +251,7 @@ class IRDriver : public Node {
       } else if (nec_parse_logic0(cur)) {
         address &= ~(1 << i);
       } else {
+        EXT_LOGI(IR_DRIVER_TAG, "addr bit decode error");
         return false;
       }
       cur++;
@@ -155,6 +262,7 @@ class IRDriver : public Node {
       } else if (nec_parse_logic0(cur)) {
         command &= ~(1 << i);
       } else {
+        EXT_LOGI(IR_DRIVER_TAG, "command bit decode error");
         return false;
       }
       cur++;
@@ -177,199 +285,135 @@ class IRDriver : public Node {
     }
     // decode RMT symbols
 
+    bool valid_parsing = false;
     bool nec_repeat = false;
     if (symbol_num == 34)
-      nec_parse_frame(rmt_nec_symbols);
+      valid_parsing = nec_parse_frame(rmt_nec_symbols);
     else if (symbol_num == 2) {
-      nec_parse_frame_repeat(rmt_nec_symbols);
+      valid_parsing = nec_parse_frame_repeat(rmt_nec_symbols);
       nec_repeat = true;
     } else {
-      EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
+      // EXT_LOGI(IR_DRIVER_TAG, "Unknown NEC frame");
       return;
     }
 
-    EXT_LOGI(IR_DRIVER_TAG, "Address=%04X, Command=%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Longpress" : "");
-
+    // create combined code
     uint32_t combined_code = (((uint32_t)s_nec_code_address) << 16) | s_nec_code_command;
 
-    // Here we should implement code address & command to action mapping
-    controlModule->update(
-        [&](ModuleState& state) {
-          bool changed = false;
-          // possible actions:
-          //  lightsOn
-          //  brightness
-          //  red
-          //  green
-          //  blue
-          //  palette
-          //  preset
-          //  presetLoop
-          //  firstPreset
-          //  lastPreset
-          //  monitorOn
+    // do not allow 0s, which also match non initialize IR codes
+    if ((combined_code == 0) || (valid_parsing == false)) {
+      return;
+    }
 
-          UpdatedItem updatedItem;
+    EXT_LOGI(IR_DRIVER_TAG, "AddressCommand=%04X%04X %s", s_nec_code_address, s_nec_code_command, symbol_num == 2 ? "Longpress" : "");
 
-          // allow longpress (symbol_num == 34 and symbol_num == 2)
-          if (combined_code == codeBrightnessInc) {  // Brightness increase
-            updatedItem.name = "brightness";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 5, 255);
-            changed = true;
-          } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
-            updatedItem.name = "brightness";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 5, 0);
-            changed = true;
-          } else if (combined_code == 0xFF00EB14) {  // increase red
-            updatedItem.name = "red";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-            changed = true;
-          } else if (combined_code == 0xFF00EF10) {  // decrease red
-            updatedItem.name = "red";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-            changed = true;
-          } else if (combined_code == 0xFF00EA15) {  // increase green
-            updatedItem.name = "green";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-            changed = true;
-          } else if (combined_code == 0xFF00EE11) {  // decrease green
-            updatedItem.name = "green";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-            changed = true;
-          } else if (combined_code == 0xFF00E916) {  // increase blue
-            updatedItem.name = "blue";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 10, 255);
-            changed = true;
-          } else if (combined_code == 0xFF00ED12) {  // decrease blue
-            updatedItem.name = "blue";
-            updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-            state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 10, 0);
-            changed = true;
-          }
+    JsonDocument doc;
+    JsonObject newState = doc.to<JsonObject>();
 
-          // do not process longpress
-          if (nec_repeat == false) {
-            if (combined_code == 0xFF00BF40) {  // Lights on/off
-              updatedItem.name = "lightsOn";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = state.data[updatedItem.name].as<bool>() ? false : true;
-              changed = true;
-            } else if (combined_code == 0xFF00BE41) {  // next button - go to next preset
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = state.data[updatedItem.name].as<uint8_t>() == 63 ? 0 : state.data[updatedItem.name].as<uint8_t>() + 1;
-              changed = true;
-            } else if (combined_code == codePreset1) {  // DIY1 button - enable preset #1
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 1;
-              changed = true;
-            } else if (combined_code == codePreset2) {  // DIY1 button - enable preset #2
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 2;
-              changed = true;
-            } else if (combined_code == codePreset3) {  // DIY3 button - enable preset #3
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 3;
-              changed = true;
-            } else if (combined_code == codePreset4) {  // DIY4 button - enable preset #4
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 4;
-              changed = true;
-            } else if (combined_code == codePreset5) {  // DIY5 button - enable preset #5
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 5;
-              changed = true;
-            } else if (combined_code == codePreset6) {  // DIY6 button - enable preset #6
-              updatedItem.name = "preset";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name]["action"] = "click";
-              state.data[updatedItem.name]["select"] = 6;
-              changed = true;
-            } else if (combined_code == codePaletteInc) {  // palette increase
-              updatedItem.name = "palette";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = min(state.data[updatedItem.name].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
-              changed = true;
-            } else if (combined_code == codePaletteDec) {  // palette decrease
-              updatedItem.name = "palette";
-              updatedItem.oldValue = state.data[updatedItem.name].as<String>();
-              state.data[updatedItem.name] = max(state.data[updatedItem.name].as<uint8_t>() - 1, 0);
-              changed = true;
-            }
-          }
+    // remaining actions:
+    //  presetLoop
+    //  firstPreset
+    //  lastPreset
+    //  monitorOn
 
-          if (changed) {
-            updatedItem.value = state.data[updatedItem.name];
-            state.onUpdate(updatedItem);
-          }
+    moduleControl->read([&](ModuleState& state) {
+      if (combined_code == codeBrightnessInc) {  // Brightness increase
+        newState["brightness"] = min(state.data["brightness"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeBrightnessDec) {  // Brightness decrease
+        newState["brightness"] = max(state.data["brightness"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeRedInc) {  // increase red
+        newState["red"] = min(state.data["red"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeRedDec) {  // decrease red
+        newState["red"] = max(state.data["red"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeGreenInc) {  // increase green
+        newState["green"] = min(state.data["green"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeGreenDec) {  // decrease green
+        newState["green"] = max(state.data["green"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeBlueInc) {  // increase blue
+        newState["blue"] = min(state.data["blue"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeBlueDec) {  // decrease blue
+        newState["blue"] = max(state.data["blue"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codePresetLoopInc) {
+        newState["presetLoop"] = min(state.data["presetLoop"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codePresetLoopDec) {
+        newState["presetLoop"] = max(state.data["presetLoop"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeFirstPresetInc) {
+        newState["firstPreset"] = min(state.data["firstPreset"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeFirstPresetDec) {
+        newState["firstPreset"] = max(state.data["firstPreset"].as<uint8_t>() - 5, 0);
+      } else if (combined_code == codeLastPresetInc) {
+        newState["lastPreset"] = min(state.data["lastPreset"].as<uint8_t>() + 5, 255);
+      } else if (combined_code == codeLastPresetDec) {
+        newState["lastPreset"] = max(state.data["lastPreset"].as<uint8_t>() - 5, 0);
+      }
 
-          return changed ? StateUpdateResult::CHANGED : StateUpdateResult::UNCHANGED;  // notify StatefulService
-        },
-        IR_DRIVER_TAG);
+      // find the current preset in the list, select the next
+
+      // do not process longpress
+      if (nec_repeat == false) {
+        if (combined_code == codeOff || combined_code == codeOn) {  // Lights on/off
+          newState["lightsOn"] = state.data["lightsOn"].as<bool>() ? false : true;
+        } else if (combined_code == codePaletteInc) {                             // palette increase
+          newState["palette"] = min(state.data["palette"].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
+        } else if (combined_code == codePaletteDec) {                             // palette decrease
+          newState["palette"] = max(state.data["palette"].as<uint8_t>() - 1, 0);
+        } else if (combined_code == codePresetDec) {  // next button - go to previous preset
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = getNextItemInArray(state.data["preset"]["list"], state.data["preset"]["selected"], true);  // backwards
+        } else if (combined_code == codePresetInc) {                                                                                // next button - go to next preset
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = getNextItemInArray(state.data["preset"]["list"], state.data["preset"]["selected"]);
+        } else if (combined_code == codePreset0) {  // DIY1 button - enable preset #0
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 0;
+        } else if (combined_code == codePreset1) {  // DIY1 button - enable preset #1
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 1;
+        } else if (combined_code == codePreset2) {  // DIY1 button - enable preset #2
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 2;
+        } else if (combined_code == codePreset3) {  // DIY3 button - enable preset #3
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 3;
+        } else if (combined_code == codePreset4) {  // DIY4 button - enable preset #4
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 4;
+        } else if (combined_code == codePreset5) {  // DIY5 button - enable preset #5
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 5;
+        } else if (combined_code == codePreset6) {  // DIY6 button - enable preset #6
+          newState["preset"] = state.data["preset"];
+          newState["preset"]["action"] = "click";
+          newState["preset"]["select"] = 6;
+        }
+      }
+
+      // update the state and ModuleState::update processes the changes behind the scenes
+      if (newState.size()) {
+        // serializeJson(doc, Serial);
+        // Serial.println();
+        moduleControl->update(newState, ModuleState::update, IR_DRIVER_TAG);  // Do not add server in the originID as that blocks updates, see execOnUpdate
+      }
+    });
   }
 
-  // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override {
     if (receive_queue) {
       if (xQueueReceive(receive_queue, &rx_data, 0) == pdPASS) {
+        EXT_LOGD(IR_DRIVER_TAG, "Received symbols: #%d", rx_data.num_symbols);
         // parse the receive symbols and print the result
         parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
         // start receive again
         ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
       }
-    }
-
-    if (new_pin_in_waiting) {
-      EXT_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pin);
-
-      if (rx_channel) {
-        EXT_LOGI(IR_DRIVER_TAG, "Removing callback");
-        ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs_empty, receive_queue));
-        EXT_LOGI(IR_DRIVER_TAG, "Stopping RMT reception");
-        ESP_ERROR_CHECK(rmt_disable(rx_channel));
-        EXT_LOGI(IR_DRIVER_TAG, "Deleting old RX channel");
-        ESP_ERROR_CHECK(rmt_del_channel(rx_channel));
-        rx_channel = NULL;
-      }
-
-      if (receive_queue) {
-        vQueueDelete(receive_queue);
-        receive_queue = NULL;
-      }
-
-      rx_channel_cfg.gpio_num = (gpio_num_t)pin;
-      EXT_LOGI(IR_DRIVER_TAG, "create RMT RX channel");
-      ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
-
-      EXT_LOGI(IR_DRIVER_TAG, "Enable RMT RX channel");
-      ESP_ERROR_CHECK(rmt_enable(rx_channel));
-
-      EXT_LOGI(IR_DRIVER_TAG, "Register RX done callback");
-      receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
-      assert(receive_queue);
-      ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
-
-      EXT_LOGI(IR_DRIVER_TAG, "Arm receive");
-      ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
-
-      new_pin_in_waiting = false;
     }
   };
 };

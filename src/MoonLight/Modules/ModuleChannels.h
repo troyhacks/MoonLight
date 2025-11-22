@@ -23,13 +23,11 @@ class ModuleChannels : public Module {
 
   void setupDefinition(JsonArray root) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;  // state.data has one or more properties
-    // JsonArray details; // if a property is an array, this is the details of the array
-    JsonArray values;  // if a property is a select, this is the values of the select
 
-    property = root.add<JsonObject>();
-    property["name"] = "view";
-    property["type"] = "select";
+    JsonObject property;  // state.data has one or more properties
+    JsonArray values;     // if a property is a select, this is the values of the select
+
+    property = addControl(root, "view", "select");
     property["default"] = 0;
     values = property["values"].to<JsonArray>();
     values.add("Physical layer");
@@ -40,19 +38,14 @@ class ModuleChannels : public Module {
       values.add(layerName.c_str());
       i++;
     }
-    property = root.add<JsonObject>();
-    property["name"] = "group";
-    property["type"] = "checkbox";
+
+    property = addControl(root, "group", "checkbox");
     property["default"] = true;
 
-    // property = root.add<JsonObject>();
-    // property["name"] = "universe";
-    // property["type"] = "number";
+    // property = addControl(root, "universe", "number");
     // property["default"] = 0;
 
-    property = root.add<JsonObject>();
-    property["name"] = "channel";
-    property["type"] = "pad";
+    property = addControl(root, "channel", "pad");
     property["width"] = 12;
     property["hoverToServer"] = true;
     property["size"] = 10;

@@ -24,9 +24,20 @@
 	export let disabled = false;
 	export let step = 1;
 	export let changeOnInput: boolean = true;
+	export let noPrompts: boolean = false;
 
 	//make getTimeAgo reactive
 	export let currentTime = Date.now();
+	// let currentTime = $state(Date.now());
+	// Update the dummy variable every second
+	const interval = setInterval(() => {
+		currentTime = Date.now();
+	}, 1000);
+
+	onDestroy(() => {
+		console.log('MultiInput clearing interval');
+		clearInterval(interval);
+	});
 
 	let dragSource: { row: number; col: number } | null = null;
 
@@ -85,17 +96,20 @@
 	let preventClick = false;
 </script>
 
-<div>
-	<label class="label cursor-pointer" for={property.name}>
-		<!-- <span class="text-md">{initCap(property.name)}</span> -->
-		<span class="mr-4">{initCap(property.name)}</span>
-	</label>
+<div class="flex-row flex items-center space-x-2 {!noPrompts ? 'mb-1' : ''}">
+	{#if !noPrompts}
+		<label class="label cursor-pointer min-w-24" for={property.name}>
+			<span class="mr-4">{initCap(property.name)}</span>
+		</label>
+	{/if}
 
 	{#if property.ro}
 		{#if property.type == 'ip'}
 			<a href="http://{value}" target="_blank">{value}</a>
 		{:else if property.type == 'mdnsName'}
 			<a href="http://{value}.local" target="_blank">{value}</a>
+		{:else if property.type == 'time'}
+			<span>{getTimeAgo(value, currentTime)}</span>
 		{:else if property.type == 'coord3D' && value != null}
 			<!-- value not null otherwise value.x etc can cause errors-->
 			<span>{value.x}, {value.y}, {value.z}</span>
@@ -122,42 +136,39 @@
 			on:change={onChange}
 		/>
 	{:else if property.type == 'slider'}
-		<div class="flex-row flex items-center space-x-2">
-			<!-- range colors: https://daisyui.com/components/range/ 
+		<!-- range colors: https://daisyui.com/components/range/ 
          on:input: direct response to server
          -->
+		<input
+			type="range"
+			min={property.min ? property.min : 0}
+			max={property.max ? property.max : 255}
+			{step}
+			class={'flex-1 range ' +
+				(disabled == false
+					? property.color == 'Red'
+						? 'range-error'
+						: property.color == 'Green'
+							? 'range-success'
+							: 'range-primary'
+					: 'range-secondary')}
+			{disabled}
+			bind:value
+			on:input={onChange}
+		/>
+		{#if hasNumber}
 			<input
-				type="range"
+				type="number"
 				min={property.min ? property.min : 0}
 				max={property.max ? property.max : 255}
 				{step}
-				class={'w-full range ' +
-					(disabled == false
-						? property.color == 'Red'
-							? 'range-error'
-							: property.color == 'Green'
-								? 'range-success'
-								: 'range-primary'
-						: 'range-secondary')}
+				class="input"
+				style="height: 2rem; width: 5rem"
 				{disabled}
-				title={property.default}
 				bind:value
-				on:input={onChange}
+				on:change={onChange}
 			/>
-			{#if hasNumber}
-				<input
-					type="number"
-					min={property.min ? property.min : 0}
-					max={property.max ? property.max : 255}
-					{step}
-					class="input"
-					style="height: 2rem; width: 5rem"
-					{disabled}
-					bind:value
-					on:change={onChange}
-				/>
-			{/if}
-		</div>
+		{/if}
 	{:else if property.type == 'textarea'}
 		<textarea
 			rows="10"
@@ -196,7 +207,7 @@
 			}}
 		/>
 	{:else if property.type == 'time'}
-		<span>{value} {getTimeAgo(value, currentTime)}</span>
+		<span>{getTimeAgo(value, currentTime)}</span>
 	{:else if property.type == 'ip'}
 		<input
 			type={property.type}
@@ -256,9 +267,9 @@
 						{#if x + y * property.width < value.count}
 							<button
 								class="btn btn-square w-{property.size} h-{property.size} text-xl rounded-lg {value.selected ==
-								x + y * property.width
+								x + y * property.width + 1
 									? `btn-error`
-									: Array.isArray(value.list) && value.list.includes(x + y * property.width)
+									: Array.isArray(value.list) && value.list.includes(x + y * property.width + 1)
 										? `btn-success`
 										: 'btn-primary'}"
 								type="button"
@@ -270,7 +281,7 @@
 									preventClick = false;
 									clickTimeout = setTimeout(() => {
 										if (!preventClick) {
-											value.select = x + y * property.width;
+											value.select = x + y * property.width + 1;
 											console.log('click', y, x, value.select);
 											value.selected = value.select;
 											value.action = 'click';
@@ -282,7 +293,7 @@
 								on:dblclick={(event: any) => {
 									preventClick = true;
 									clearTimeout(clickTimeout);
-									value.select = x + y * property.width;
+									value.select = x + y * property.width + 1;
 									console.log('dblclick', y, x, value.select);
 									value.action = 'dblclick';
 									onChange(event);
@@ -290,27 +301,27 @@
 								on:mouseenter={(event: any) => {
 									// console.log("mousenter", rowIndex, colIndex, cell, value);
 									if (property.hoverToServer) {
-										value.select = x + y * property.width;
+										value.select = x + y * property.width + 1;
 										value.action = 'mouseenter';
 										onChange(event);
 									} else
 										handleMouseEnter(
-											x + y * property.width,
+											x + y * property.width + 1,
 											event,
-											value.list.includes(x + y * property.width)
+											value.list.includes(x + y * property.width + 1)
 										);
 								}}
 								on:mouseleave={(event: any) => {
 									// console.log("mouseleave", rowIndex, colIndex, cell, value);
 									if (property.hoverToServer) {
-										value.select = x + y * property.width;
+										value.select = x + y * property.width + 1;
 										value.action = 'mouseleave';
 										onChange(event);
 									} else handleMouseLeave();
 								}}
 							>
-								{x + y * property.width}
-								{#if popupCell === x + y * property.width}
+								{x + y * property.width + 1}
+								{#if popupCell === x + y * property.width + 1}
 									<div
 										class="fixed z-50 bg-neutral-100 p-6 rounded shadow-lg mt-2 min-h-0 text-left inline-block min-w-0"
 										style="left: {popupX}px; top: {popupY}px;"
@@ -341,10 +352,39 @@ Adjust space-x-2 and space-y-2 for spacing. -->
 			on:change={onChange}
 		/>
 	{/if}
-	{#if property.desc}
-		<label class="label cursor-pointer" for={property.desc}>
-			<!-- <span class="text-md">{initCap(property.name)}</span> -->
-			<span class="mr-4">{initCap(property.desc)}</span>
-		</label>
+	{#if !noPrompts}
+		{#if !property.ro && property.default != null && property.type != 'pad'}
+			<button
+				type="button"
+				class="btn btn-ghost btn-sm"
+				disabled={disabled ||
+					(property.type == 'coord3D'
+						? property.default.x == value.x &&
+							property.default.y == value.y &&
+							property.default.z == value.z
+						: property.default == value)}
+				on:click={(event: any) => {
+					if (property.type == 'coord3D') {
+						value.x = property.default.x;
+						value.y = property.default.y;
+						value.z = property.default.z;
+					} else {
+						value = property.default;
+					}
+					onChange(event);
+				}}
+				title={'Reset to default (' +
+					(property.type == 'coord3D'
+						? property.default.x + ',' + property.default.y + ',' + property.default.z
+						: property.default) +
+					')'}>↻</button
+			>
+		{/if}
+		{#if property.desc}
+			<label class="label cursor-pointer" for={property.desc}>
+				<!-- <span class="text-md">{initCap(property.name)}</span> -->
+				<span class="mr-4">{initCap(property.desc)}</span>
+			</label>
+		{/if}
 	{/if}
 </div>

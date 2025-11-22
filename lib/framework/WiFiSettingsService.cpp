@@ -199,7 +199,7 @@ bool sendAnalytics() {
 
   String client_id = "";
   for (int i = 0; i < 16; i++) {
-    uint8_t n = random(0, 16);
+    uint8_t n = esp_random()%16; //true random © softhack007
     client_id += String(n, HEX);
   }
 
@@ -312,7 +312,7 @@ void WiFiSettingsService::manageSTA()
     }
 
     // Connect or reconnect as required
-    if ((WiFi.getMode() & WIFI_STA) == 0)
+    // if ((WiFi.getMode() & WIFI_STA) == 0) //🌙 commented, see https://github.com/theelims/ESP32-sveltekit/issues/109
     {
 #ifdef SERIAL_INFO
         Serial.println("Connecting to WiFi...");
