@@ -83,6 +83,10 @@ PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS);  // 🌙 pio variable
 
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// The module class is used for each module, about 15 times, 1144 bytes each (allocated in main.cpp, in global memory area) + each class allocates it's own heap
+
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
   #include "MoonBase/Modules/FileManager.h"

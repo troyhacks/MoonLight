@@ -295,6 +295,10 @@ StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state) {
   }
 }
 
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// For each Module (about 15 in total, a number of endpoints and websocketserver is created)
+
 Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
     : _httpEndpoint(ModuleState::read, ModuleState::update, this, server, String("/rest/" + moduleName).c_str(), sveltekit->getSecurityManager(), AuthenticationPredicates::IS_AUTHENTICATED),
       _eventEndpoint(ModuleState::read, ModuleState::update, this, sveltekit->getSocket(), moduleName.c_str()),
@@ -319,6 +323,25 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
 }
 
 void Module::begin() {
+    size_t heapBefore = ESP.getFreeHeap();
+  
+  _httpEndpoint.begin();
+  Serial.printf("%s HttpEndpoint used: %d bytes\n", 
+                _moduleName.c_str(), 
+                heapBefore - ESP.getFreeHeap());
+  heapBefore = ESP.getFreeHeap();
+  
+  _eventEndpoint.begin();
+  Serial.printf("%s EventEndpoint used: %d bytes\n", 
+                _moduleName.c_str(), 
+                heapBefore - ESP.getFreeHeap());
+  heapBefore = ESP.getFreeHeap();
+  
+  _webSocketServer.begin();  // ← This probably uses the most
+  Serial.printf("%s WebSocketServer used: %d bytes\n", 
+                _moduleName.c_str(), 
+                heapBefore - ESP.getFreeHeap());
+
   EXT_LOGV(MB_TAG, "");
   _httpEndpoint.begin();
   _eventEndpoint.begin();
@@ -351,6 +374,10 @@ void Module::updateHandler(const String& originId) {
   // EXT_LOGD(MB_TAG, "originId: %s", originId.c_str());
   updateOriginId = originId;
 }
+
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// setupDefinition defines for each module, the json info of all fields
 
 void Module::setupDefinition(JsonArray root) {  // virtual so it can be overriden in derived classes
   EXT_LOGW(MB_TAG, "not implemented");

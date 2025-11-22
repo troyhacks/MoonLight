@@ -42,6 +42,10 @@ struct UpdatedItem {
 
 typedef std::function<void(JsonObject data)> ReadHook;
 
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// JsonDocument* doc is used to store all definitions of fields in the modules used (about 15 modules in total). doc is a JsonArray with JsonObjects, one for each module
+
 static JsonDocument* doc = nullptr;  // shared document for all modules, to save RAM
 
 class ModuleState {
@@ -123,15 +127,23 @@ class Module : public StatefulService<ModuleState> {
   EventSocket* _socket;
   void readFromFS() {             // used in ModuleEffects, for live scripts...
     _fsPersistence.readFromFS();  // overwrites the default settings in state
-    //  sizeof(StatefulService<ModuleState>);
-    //  sizeof(_httpEndpoint);
-    //  sizeof(_eventEndpoint);
-    //  sizeof(_webSocketServer);
-    //  sizeof(_fsPersistence);
-    //  sizeof(_server);
+    // sizeof(StatefulService<ModuleState>);  // 200
+    // sizeof(_server);                       // 8
+    // sizeof(HttpEndpoint<ModuleState>);     // 152
+    //   sizeof(EventEndpoint<ModuleState>);    // 112
+    //   sizeof(WebSocketServer<ModuleState>);  // 488
+    //   sizeof(FSPersistence<ModuleState>);    // 128
+    //   sizeof(PsychicHttpServer*);            // 8
+    //   sizeof(HttpEndpoint<APSettings>);      // 152
+    //   sizeof(FSPersistence<APSettings>);     // 128
+    //   sizeof(Module);                        // 1144
   }
 
  private:
+  // heap-optimization: request heap optimization review
+  // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+  // This module class is used for each module, about 15 times, 1144 bytes each (allocated in main.cpp, in global memory area) + each class allocates it's own heap
+
   HttpEndpoint<ModuleState> _httpEndpoint;
   EventEndpoint<ModuleState> _eventEndpoint;
   WebSocketServer<ModuleState> _webSocketServer;
