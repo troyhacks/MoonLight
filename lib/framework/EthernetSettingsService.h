@@ -33,7 +33,7 @@
 
 #define ETHERNET_EVENT_DELAY 500
 
-#define ETHERNET_SETTINGS_FILE "/config/ethernetSettings.json"
+#define ETHERNET_SETTINGS_FILE "/.config/ethernetSettings.json"
 #define ETHERNET_SETTINGS_SERVICE_PATH "/rest/ethernetSettings"
 
 #define EVENT_ETHERNET "ethernet"
