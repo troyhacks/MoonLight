@@ -135,7 +135,7 @@
 
 	// Update the default value reactively so we don't capture the initial derived value only once
 	$effect(() => {
-		propertyFilter.default = findItemInDefinition?.filter ?? '!none';
+		propertyFilter.default = findItemInDefinition?.filter ?? '!Unused';
 	});
 </script>
 

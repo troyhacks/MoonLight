@@ -158,11 +158,11 @@ void driverTask(void* pvParameters) {
 
     std::vector<std::function<void()>> tasks;
     {
-      runInAppTask_mutexChecker++;
-      if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
+      // runInAppTask_mutexChecker++;
+      // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
       std::lock_guard<std::mutex> lock(runInAppTask_mutex);
       tasks.swap(runInAppTask);  // move all into local vector
-      runInAppTask_mutexChecker--;
+      // runInAppTask_mutexChecker--;
     }
     for (auto& task : tasks) task();  // run the tasks
 
@@ -259,14 +259,14 @@ void setup() {
       [&](const String& originId) {
         moduleIO.read([&](ModuleState& state) {
           for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
-            uint8_t pinFunction = pinObject["pinFunction"];
-            if (pinFunction == pin_Voltage) {
+            uint8_t usage = pinObject["usage"];
+            if (usage == pin_Voltage) {
               pinVoltage = pinObject["GPIO"];
               EXT_LOGD(ML_TAG, "pinVoltage found %d", pinVoltage);
-            } else if (pinFunction == pin_Current) {
+            } else if (usage == pin_Current) {
               pinCurrent = pinObject["GPIO"];
               EXT_LOGD(ML_TAG, "pinCurrent found %d", pinCurrent);
-            } else if (pinFunction == pin_Battery) {
+            } else if (usage == pin_Battery) {
               pinBattery = pinObject["GPIO"];
               EXT_LOGD(ML_TAG, "pinBattery found %d", pinBattery);
             }

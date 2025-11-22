@@ -71,8 +71,8 @@ class ModuleLightsControl : public Module {
   void readPins() {
     moduleIO.read([&](ModuleState& state) {
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
-        uint8_t pinFunction = pinObject["pinFunction"];
-        if (pinFunction == pin_RelaisBrightness) {
+        uint8_t usage = pinObject["usage"];
+        if (usage == pin_Relais_Brightness) {
           pinRelaisBrightness = pinObject["GPIO"];
           EXT_LOGD(ML_TAG, "pinRelaisBrightness found %d", pinRelaisBrightness);
         }

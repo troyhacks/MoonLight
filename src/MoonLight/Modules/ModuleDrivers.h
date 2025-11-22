@@ -36,23 +36,31 @@ class ModuleDrivers : public NodeManager {
       // find the pins in board definitions
 
       memset(layerP.ledPins, UINT8_MAX, sizeof(layerP.ledPins));
-      layerP.nrOfLedPins = 0;
 
       layerP.maxPower = state.data["maxPower"];
       EXT_LOGD(ML_TAG, "maxPower %d", layerP.maxPower);
 
-      // serializeJson(state.data["pins"], Serial);Serial.println();
+      // assign pins (valid only)
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
-        uint8_t pinFunction = pinObject["pinFunction"];
-        if (pinFunction >= pin_LED01 && pinFunction <= pin_LED20) {
-          layerP.ledPins[pinFunction - 1] = pinObject["GPIO"];
-          layerP.nrOfLedPins = MAX(layerP.nrOfLedPins, pinFunction - 1 + 1);
+        uint8_t usage = pinObject["usage"];
+        if (usage >= pin_LED_01 && usage <= pin_LED_20 && GPIO_IS_VALID_OUTPUT_GPIO(pinObject["GPIO"].as<uint8_t>())) {
+          layerP.ledPins[usage - 1] = pinObject["GPIO"];
         }
       }
 
-      for (int i = 0; i < layerP.nrOfLedPins; i++) {
-        if (layerP.ledPins[i] != UINT16_MAX) EXT_LOGD(ML_TAG, "pin %d = %d", i, layerP.ledPins[i]);
+      // Remove all UINT8_MAX values by compacting the array
+      layerP.nrOfLedPins = 0;
+      for (int readPos = 0; readPos < sizeof(layerP.ledPins); readPos++) {
+        if (layerP.ledPins[readPos] != UINT8_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != UINT16_MAX) { //only pins which have a nrOfLedPins
+          layerP.ledPins[layerP.nrOfLedPins++] = layerP.ledPins[readPos];
+        }
       }
+
+      // log pins
+      for (int i = 0; i < layerP.nrOfLedPins; i++) {
+        EXT_LOGD(ML_TAG, "ledPins[%d-%d] = %d (#%d)", i, layerP.nrOfLedPins, layerP.ledPins[i], layerP.ledsPerPin[i]);
+      }
+
       layerP.requestMapPhysical = true;
       layerP.requestMapVirtual = true;
     });

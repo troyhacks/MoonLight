@@ -104,11 +104,11 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
                 newStateIndex = parkedAtIndex;    // e.g. 1 is stored in 0
 
               if (newStateIndex != newIndex && onReOrderSwap) {
-                runInAppTask_mutexChecker++;
-                if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
+                // runInAppTask_mutexChecker++;
+                // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
                 std::lock_guard<std::mutex> lock(runInAppTask_mutex);
                 runInAppTask.push_back([&, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
-                runInAppTask_mutexChecker--;
+                // runInAppTask_mutexChecker--;
               }
 
               if (parkedFromIndex == UINT8_MAX) parkedFromIndex = newIndex;  // the index of value in the array stored in the parking spot
@@ -131,13 +131,13 @@ void Module::execOnUpdate(UpdatedItem& updatedItem) {
   }
 
   // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-  runInAppTask_mutexChecker++;
-  if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
+  // runInAppTask_mutexChecker++;
+  // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
   std::lock_guard<std::mutex> lock(runInAppTask_mutex);
   runInAppTask.push_back([&, updatedItem]() mutable {  // mutable as updatedItem is called by reference (&)
     onUpdate(updatedItem);
   });
-  runInAppTask_mutexChecker--;
+  // runInAppTask_mutexChecker--;
 }
 
 bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {

@@ -60,29 +60,6 @@ void PhysicalLayer::loop() {
     for (VirtualLayer* layer : layers) {
       if (layer) layer->loop();  // if (layer) needed when deleting rows ...
     }
-
-    if (requestMapPhysical) {
-      EXT_LOGD(ML_TAG, "mapLayout physical requested");
-
-      pass = 1;
-      mapLayout();
-
-      requestMapPhysical = false;
-    }
-
-    if (requestMapVirtual) {
-      EXT_LOGD(ML_TAG, "mapLayout virtual requested");
-
-      pass = 2;
-      mapLayout();
-
-      requestMapVirtual = false;
-    }
-
-    if (lights.header.isPositions == 3) {
-      EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
-      lights.header.isPositions = 0;  // now driver can show again
-    }
   }
 }
 
@@ -94,6 +71,31 @@ void PhysicalLayer::loop20ms() {
 }
 
 void PhysicalLayer::loopDrivers() {
+  //run mapping in the driver task
+  
+  if (requestMapPhysical) {
+    EXT_LOGD(ML_TAG, "mapLayout physical requested");
+
+    pass = 1;
+    mapLayout();
+
+    requestMapPhysical = false;
+  }
+
+  if (requestMapVirtual) {
+    EXT_LOGD(ML_TAG, "mapLayout virtual requested");
+
+    pass = 2;
+    mapLayout();
+
+    requestMapVirtual = false;
+  }
+
+  if (lights.header.isPositions == 3) {
+    EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
+    lights.header.isPositions = 0;  // now driver can show again
+  }
+
   if (lights.header.isPositions == 0) {  // otherwise lights is used for positions etc.
     if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     for (Node* node : nodes) {

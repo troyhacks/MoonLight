@@ -40,8 +40,8 @@ class IRDriver : public Node {
   void readPins() {
     moduleIO->read([&](ModuleState& state) {
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
-        uint8_t pinFunction = pinObject["pinFunction"];
-        if (pinFunction == pin_Infrared) {
+        uint8_t usage = pinObject["usage"];
+        if (usage == pin_Infrared) {
           pinInfrared = pinObject["GPIO"].as<uint8_t>();
           EXT_LOGD(ML_TAG, "pin_Infrared found %d", pinInfrared);
 

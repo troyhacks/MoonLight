@@ -77,7 +77,7 @@ class PhysicalDriver : public DriverNode {
         return;
       }
 
-      EXT_LOGD(ML_TAG, "nrOfLedPins #:%d", layer->layerP->nrOfLedPins);
+      EXT_LOGD(ML_TAG, "nrOfLedPins %d", layer->layerP->nrOfLedPins);
       if (safeModeMB) {
         EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
         return;
