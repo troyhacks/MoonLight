@@ -16,7 +16,7 @@
 
 void Node::updateControl(const Char<20>& oldValue, const JsonObject control) {
   // EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<const char*>());
-  if (oldValue == "") return;                                                              // newControl, value already set
+  // if (oldValue == "") return;                                                              // newControl, value already set
   if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) {  // name and type can be null if control is removed in compareRecursive
     int pointer = control["p"];
     EXT_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<const char*>(), control["value"].as<String>().c_str(), control["type"].as<const char*>(), (void*)pointer);
