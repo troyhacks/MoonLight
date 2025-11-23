@@ -46,7 +46,7 @@ typedef std::function<void(JsonObject data)> ReadHook;
 // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
 // JsonDocument* doc is used to store all definitions of fields in the modules used (about 15 modules in total). doc is a JsonArray with JsonObjects, one for each module
 
-static JsonDocument* doc = nullptr;  // shared document for all modules, to save RAM
+extern JsonDocument* gModulesDoc;  // shared document for all modules, to save RAM
 
 class ModuleState {
  public:
@@ -54,16 +54,16 @@ class ModuleState {
 
   ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState constructor");
-    if (!doc) {
+    if (!gModulesDoc) {
       EXT_LOGD(MB_TAG, "Creating doc");
       if (psramFound())
-        doc = new JsonDocument(JsonRAMAllocator::instance());  // crashed on non psram esp32-d0
+        gModulesDoc = new JsonDocument(JsonRAMAllocator::instance());  // crashed on non psram esp32-d0
       else
-        doc = new JsonDocument();
+        gModulesDoc = new JsonDocument();
     }
-    if (doc) {
+    if (gModulesDoc) {
       // doc = new JsonDocument();
-      data = doc->add<JsonObject>();
+      data = gModulesDoc->add<JsonObject>();
       // data = doc->to<JsonObject>();
     } else {
       EXT_LOGE(MB_TAG, "Failed to create doc");
@@ -73,7 +73,8 @@ class ModuleState {
   ~ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState destructor");
     // delete data from doc
-    JsonArray arr = doc->as<JsonArray>();
+    if (!gModulesDoc) return;
+    JsonArray arr = gModulesDoc->as<JsonArray>();
     for (size_t i = 0; i < arr.size(); i++) {
       JsonObject obj = arr[i];
       if (obj == data) {  // same object (identity check)
@@ -94,7 +95,7 @@ class ModuleState {
   // called from ModuleState::update
   bool checkReOrderSwap(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
 
-  std::function<void(UpdatedItem&)> execOnUpdate = nullptr;
+  std::function<void(const UpdatedItem&)> execOnUpdate = nullptr;
   std::function<void(uint8_t, uint8_t)> onReOrderSwap = nullptr;
 
   static void read(ModuleState& state, JsonObject& root);
@@ -117,8 +118,8 @@ class Module : public StatefulService<ModuleState> {
 
   // called in compareRecursive->execOnUpdate
   // called from compareRecursive
-  void execOnUpdate(UpdatedItem& updatedItem);
-  virtual void onUpdate(UpdatedItem& updatedItem) {};
+  void execOnUpdate(const UpdatedItem& updatedItem);
+  virtual void onUpdate(const UpdatedItem& updatedItem) {};
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {};
 
   Char<16> updateOriginId;

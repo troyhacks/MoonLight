@@ -206,9 +206,9 @@ struct Char {
   }
 
   // compare
-  bool operator==(const char* rhs) { return strcmp(s, rhs) == 0; }
-  bool operator==(const Char& rhs) { return strcmp(s, rhs.s) == 0; }
-  bool operator!=(const char* rhs) { return strcmp(s, rhs) != 0; }
+  bool operator==(const char* rhs) const { return strcmp(s, rhs) == 0; }
+  bool operator==(const Char& rhs) const { return strcmp(s, rhs.s) == 0; }
+  bool operator!=(const char* rhs) const { return strcmp(s, rhs) != 0; }
 
   bool contains(const char* rhs) { return strnstr(s, rhs, sizeof(s)) != nullptr; }
 
@@ -239,7 +239,7 @@ struct Char {
     return *this;
   }
 
-  const char* c_str() { return s; }
+  const char* c_str() const { return s; }
 
   void split(const char* splitter, std::function<void(const char*, uint8_t)> callback) {
     char savedS[N];

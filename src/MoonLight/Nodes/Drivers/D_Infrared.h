@@ -123,7 +123,7 @@ class IRDriver : public Node {
   uint32_t codeLastPresetInc;
   uint32_t codeLastPresetDec;
 
-  void onUpdate(Char<16>& oldValue, JsonObject control) override {
+  void onUpdate(const Char<16>& oldValue, const JsonObject control) override {
     if (control["name"] == "irPreset") {
       uint8_t value = control["value"];
       switch (value) {

@@ -14,12 +14,12 @@
 
   #include <ESP32SvelteKit.h>  //for safeModeMB
 
-void Node::updateControl(Char<16>& oldValue, JsonObject control) {
+void Node::updateControl(const Char<16>& oldValue, const JsonObject control) {
   // EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<const char*>());
   if (oldValue == "") return;                                                              // newControl, value already set
   if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) {  // name and type can be null if control is removed in compareRecursive
     int pointer = control["p"];
-    EXT_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<const char*>(), control["value"].as<String>().c_str(), control["type"].as<const char*>(), pointer);
+    EXT_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<const char*>(), control["value"].as<String>().c_str(), control["type"].as<const char*>(), (void*)pointer);
 
     if (pointer) {
       if (control["type"] == "slider" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
@@ -44,7 +44,15 @@ void Node::updateControl(Char<16>& oldValue, JsonObject control) {
         }
       } else if (control["type"] == "selectFile" || control["type"] == "text") {
         char* valuePointer = (char*)pointer;
-        strncpy(valuePointer, control["value"].as<const char*>(), control["max"].isNull() ? 32 : control["max"]);
+        size_t maxLen = control["max"].isNull() ? 32 : control["max"].as<size_t>();
+        const char* src = control["value"].as<const char*>();
+        size_t copyLen = maxLen > 0 ? maxLen - 1 : 0;
+        if (copyLen > 0 && src) {
+          strncpy(valuePointer, src, copyLen);
+          valuePointer[copyLen] = '\0';
+        } else {
+          valuePointer[0] = '\0';
+        }
       } else if (control["type"] == "checkbox" && control["size"] == sizeof(bool)) {
         bool* valuePointer = (bool*)pointer;
         *valuePointer = control["value"].as<bool>();
@@ -391,7 +399,7 @@ void DriverNode::loop() {
   #endif
 }
 
-void DriverNode::onUpdate(Char<16>& oldValue, JsonObject control) {
+void DriverNode::onUpdate(const Char<16>& oldValue, const JsonObject control) {
   LightsHeader* header = &layer->layerP->lights.header;
 
   EXT_LOGD(ML_TAG, "%s: %s ", control["name"].as<const char*>(), control["value"].as<String>().c_str());

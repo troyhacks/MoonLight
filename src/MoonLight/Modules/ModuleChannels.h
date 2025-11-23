@@ -55,7 +55,7 @@ class ModuleChannels : public Module {
     property["default"]["count"] = 512;
   }
 
-  void onUpdate(UpdatedItem& updatedItem) override {
+  void onUpdate(const UpdatedItem& updatedItem) override {
     uint8_t view = _state.data["view"];
     bool group = _state.data["group"];
 

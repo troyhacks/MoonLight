@@ -142,7 +142,6 @@ class Node {
 
     if (newControl) {
       Char<16> oldValue;
-      oldValue = "";
       updateControl(oldValue, control);
       onUpdate(oldValue, control);  // custom onUpdate for the node
     }
@@ -151,9 +150,9 @@ class Node {
   }
 
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  virtual void updateControl(Char<16>& oldValue, JsonObject control);  // see Nodes.cpp for implementation
+  virtual void updateControl(const Char<16>& oldValue, const JsonObject control);  // see Nodes.cpp for implementation
 
-  virtual void onUpdate(Char<16>& oldValue, JsonObject control) {}
+  virtual void onUpdate(const Char<16>& oldValue, const JsonObject control) {}
 
   void requestMappings() {
     if (hasModifier() || hasOnLayout()) {
@@ -265,7 +264,7 @@ class DriverNode : public Node {
   void reOrderAndDimRGBW(uint8_t* packetRGBChannel, uint8_t* lightsRGBChannel);
 
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  void onUpdate(Char<16>& oldValue, JsonObject control) override;
+  void onUpdate(const Char<16>& oldValue, const JsonObject control) override;
 };
 
 // Helper function to generate a triangle wave similar to beat16

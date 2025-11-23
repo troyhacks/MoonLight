@@ -13,6 +13,8 @@
 
   #include "Module.h"
 
+JsonDocument* gModulesDoc = nullptr;
+
 void setDefaults(JsonObject root, JsonArray definition) {
   for (JsonObject property : definition) {
     // if (property["type"] == "coord3Dxx") {
@@ -108,7 +110,7 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
                 // runInAppTask_mutexChecker++;
                 // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
                 std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-                runInAppTask.push_back([&, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
+                runInAppTask.push_back([this, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
                   // runInAppTask_mutexChecker--;
   #else
                 onReOrderSwap(stateIndex, newIndex);
@@ -126,9 +128,9 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
   return changed;
 }
 
-void Module::execOnUpdate(UpdatedItem& updatedItem) {
+void Module::execOnUpdate(const UpdatedItem& updatedItem) {
   if (updatedItem.oldValue != "null" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
-    if (!updateOriginId.contains("server")) {                    // only triggered by updates from front end
+    if (!updateOriginId.contains("server")) {                             // only triggered by updates from front end
       // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s (oID:%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updateOriginId.c_str());
       saveNeeded = true;
     }
@@ -139,9 +141,7 @@ void Module::execOnUpdate(UpdatedItem& updatedItem) {
   // runInAppTask_mutexChecker++;
   // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
   std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-  runInAppTask.push_back([&, updatedItem]() mutable {  // mutable as updatedItem is called by reference (&)
-    onUpdate(updatedItem);
-  });
+  runInAppTask.push_back([this, updatedItem]() { onUpdate(updatedItem); });
   // runInAppTask_mutexChecker--;
   #else
   onUpdate(updatedItem);
@@ -319,7 +319,7 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
   EXT_LOGV(MB_TAG, "constructor %s", moduleName.c_str());
   _server = server;
 
-  _state.execOnUpdate = [&](UpdatedItem& updatedItem) {
+  _state.execOnUpdate = [&](const UpdatedItem& updatedItem) {
     execOnUpdate(updatedItem);  // Ensure updatedItem is of type UpdatedItem&
   };
 

@@ -388,7 +388,7 @@ class ModuleIO : public Module {
     update(object, ModuleState::update, _moduleName + "server");
   }
 
-  void onUpdate(UpdatedItem& updatedItem) override {
+  void onUpdate(const UpdatedItem& updatedItem) override {
     // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     if (updatedItem.name == "boardPreset" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
       setBoardPresetDefaults(updatedItem.value);

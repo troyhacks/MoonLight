@@ -66,7 +66,7 @@ class VirtualDriver : public DriverNode {
     }
   }
 
-  void onUpdate(Char<16>& oldValue, JsonObject control) override {
+  void onUpdate(const Char<16>& oldValue, const JsonObject control) override {
     if (control["name"] == "whatever") {
       // something changed
     }

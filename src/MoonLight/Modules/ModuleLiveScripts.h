@@ -49,7 +49,7 @@ class ModuleLiveScripts : public Module {
             for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
 
               if (updatedItem == nodeState["name"]) {
-                EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
                   liveScriptNode->compileAndRun();
@@ -59,16 +59,16 @@ class ModuleLiveScripts : public Module {
                   _moduleEffects->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
               }
               index++;
             }
           });
-          _moduleDrivers->read([&](ModuleState& effectsState) {
-            for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
+          _moduleDrivers->read([&](ModuleState& driversState) {
+            for (JsonObject nodeState : driversState.data["nodes"].as<JsonArray>()) {
 
               if (updatedItem == nodeState["name"]) {
-                EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+                EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
                   liveScriptNode->compileAndRun();
@@ -78,7 +78,7 @@ class ModuleLiveScripts : public Module {
                   _moduleDrivers->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
               }
               index++;
             }
@@ -150,7 +150,7 @@ class ModuleLiveScripts : public Module {
   }
 
   // implement business logic
-  void onUpdate(UpdatedItem& updatedItem) override {
+  void onUpdate(const UpdatedItem& updatedItem) override {
     // scripts
     if (updatedItem.parent[0] == "scripts") {
       JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];

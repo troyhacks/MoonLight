@@ -34,7 +34,7 @@ class SolidEffect : public Node {
   void loop() override {
     layer->fill_solid(CRGB(red * brightness / 255, green * brightness / 255, blue * brightness / 255));
     if (layer->layerP->lights.header.offsetWhite != UINT8_MAX && white > 0)
-      for (int index; index < layer->nrOfLights; index++) layer->setWhite(index, white * brightness / 255);
+      for (int index = 0; index < layer->nrOfLights; index++) layer->setWhite(index, white * brightness / 255);
   }
 };
 
@@ -922,7 +922,7 @@ class RubiksCubeEffect : public Node {
   }
 
   bool doInit = false;
-  void onUpdate(Char<16>& oldValue, JsonObject control) override {
+  void onUpdate(const Char<16>& oldValue, const JsonObject control) override {
     if (control["name"] == "cubeSize" || control["name"] == "randomTurning") {
       doInit = true;
     }
@@ -1118,7 +1118,7 @@ class ParticlesEffect : public Node {
     // addControl(bool, "Debug Print",             layer->effectData.write<bool>(0));
   }
 
-  void onUpdate(Char<16>& oldValue, JsonObject control) override {
+  void onUpdate(const Char<16>& oldValue, const JsonObject control) override {
     if (control["name"] == "number of Particles" || control["name"] == "barriers") {
       settingUpParticles();
     }
@@ -1353,6 +1353,5 @@ class SpiralFireEffect : public Node {
       }
     }
   }
-
 };
 #endif

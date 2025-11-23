@@ -64,7 +64,7 @@ void setupDefinition(JsonArray root) override{
     * This runs in the httpd / webserver task. To run it in another task (application task) use runInAppTask - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
 
 ```cpp
-    void onUpdate(UpdatedItem &updatedItem) override
+    void onUpdate(const UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
             EXT_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
