@@ -390,12 +390,12 @@ class ModuleIO : public Module {
 
   void onUpdate(UpdatedItem& updatedItem) override {
     // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    if (updatedItem.name == "boardPreset" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
+    if (updatedItem.name == "boardPreset" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
       setBoardPresetDefaults(updatedItem.value);
-    } else if (updatedItem.name == "modded" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
+    } else if (updatedItem.name == "modded" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
       if (updatedItem.value == false) setBoardPresetDefaults(_state.data["boardPreset"]);
       // set pins to default if modded is turned off
-    } else if (updatedItem.name == "usage" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
+    } else if (updatedItem.name == "usage" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
       JsonDocument doc;
       JsonObject object = doc.to<JsonObject>();
       object["modded"] = true;

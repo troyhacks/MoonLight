@@ -128,7 +128,7 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
 
 void Module::execOnUpdate(UpdatedItem& updatedItem) {
   if (updatedItem.oldValue != "null" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
-    if (!contains(updateOriginId.c_str(), "server")) {                    // only triggered by updates from front end
+    if (!updateOriginId.contains("server")) {                    // only triggered by updates from front end
       // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s (oID:%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updateOriginId.c_str());
       saveNeeded = true;
     }
@@ -144,7 +144,7 @@ void Module::execOnUpdate(UpdatedItem& updatedItem) {
   });
   // runInAppTask_mutexChecker--;
   #else
-    onUpdate(updatedItem);
+  onUpdate(updatedItem);
   #endif
 }
 
@@ -164,7 +164,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
     if (!newValue.isNull() && stateValue != newValue) {  // if value changed, don't update if not defined in newValue
 
       if (depth != UINT8_MAX && depth < 2) {  // depth starts with '-1' (no depth)
-        updatedItem.parent[depth] = parent.c_str();
+        updatedItem.parent[depth] = parent;
         updatedItem.index[depth] = index;
       }
       for (uint8_t i = depth + 1; i < 2; i++) {  // reset deeper levels when coming back from recursion
@@ -180,10 +180,10 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
         JsonArray stateArray = stateValue.as<JsonArray>();
         JsonArray newArray = newValue.as<JsonArray>();
 
-        // EXT_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<String>().c_str(), newValue.as<String>().c_str());
+        // EXT_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateValue.as<const char*>(), newValue.as<const char*>());
 
         for (int i = 0; i < max(stateArray.size(), newArray.size()); i++) {  // compare each item in the array
-          // EXT_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateArray[i].as<String>().c_str(), newArray[i].as<String>().c_str());
+          // EXT_LOGD(MB_TAG, "compare %s[%d] %s = %s -> %s", parent.c_str(), index, key.c_str(), stateArray[i].as<const char*>(), newArray[i].as<const char*>());
           if (i >= stateArray.size()) {  // newArray has added a row
             // EXT_LOGD(MB_TAG, "add %s.%s[%d] (%d/%d) d: %d", parent.c_str(), key.c_str(), i, stateArray.size(), newArray.size(), depth);
             stateArray.add<JsonObject>();  // add new row
@@ -205,13 +205,13 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
             //  UpdatedItem updatedItem; //create local updatedItem
             updatedItem.parent[1] = "";  // reset deeper levels when coming back from recursion (repeat in loop)
             updatedItem.index[1] = UINT8_MAX;
-            updatedItem.parent[(uint8_t)(depth + 1)] = key.c_str();
+            updatedItem.parent[(uint8_t)(depth + 1)] = key;
             updatedItem.index[(uint8_t)(depth + 1)] = i;
             for (JsonPair property : stateArray[i].as<JsonObject>()) {
-              // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<String>().c_str());
+              // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<const char*>());
               // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
-              updatedItem.name = property.key().c_str();
-              updatedItem.oldValue = property.value().as<String>();
+              updatedItem.name = property.key();
+              updatedItem.oldValue = property.value();
               updatedItem.value = JsonVariant();            // Assign an empty JsonVariant
               stateArray[i].remove(property.key());         // remove the property from the state row so onUpdate see it as empty
               if (execOnUpdate) execOnUpdate(updatedItem);  // async in other task
@@ -253,10 +253,10 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
       } else {  // if property is key/value
         if (key != "p") {
           changed = true;
-          updatedItem.name = key.c_str();
-          updatedItem.oldValue = stateValue.as<String>();
-          stateData[updatedItem.name] = newValue;           // update the value in stateData, should not be done in runLoopTask as FS update then misses the change!!
-          updatedItem.value = stateData[updatedItem.name];  // store the stateData item (convenience)
+          updatedItem.name = key;
+          updatedItem.oldValue = stateValue;
+          stateData[updatedItem.name.c_str()] = newValue;           // update the value in stateData, should not be done in runLoopTask as FS update then misses the change!!
+          updatedItem.value = stateData[updatedItem.name.c_str()];  // store the stateData item (convenience)
 
           // EXT_LOGD(MB_TAG, "kv %s.%s v: %s d: %d", parent.c_str(), key.c_str(), newValue.as<String>().c_str(), depth);
           // EXT_LOGD(MB_TAG, "kv %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
@@ -331,29 +331,13 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
 }
 
 void Module::begin() {
-    size_t heapBefore = ESP.getFreeHeap();
-  
-  _httpEndpoint.begin();
-  Serial.printf("%s HttpEndpoint used: %d bytes\n", 
-                _moduleName.c_str(), 
-                heapBefore - ESP.getFreeHeap());
-  heapBefore = ESP.getFreeHeap();
-  
-  _eventEndpoint.begin();
-  Serial.printf("%s EventEndpoint used: %d bytes\n", 
-                _moduleName.c_str(), 
-                heapBefore - ESP.getFreeHeap());
-  heapBefore = ESP.getFreeHeap();
-  
-  _webSocketServer.begin();  // ← This probably uses the most
-  Serial.printf("%s WebSocketServer used: %d bytes\n", 
-                _moduleName.c_str(), 
-                heapBefore - ESP.getFreeHeap());
-
   EXT_LOGV(MB_TAG, "");
+
   _httpEndpoint.begin();
   _eventEndpoint.begin();
-  _fsPersistence.readFromFS();              // overwrites the default settings in state
+  _webSocketServer.begin();
+  _fsPersistence.readFromFS();  // overwrites the default settings in state
+
   updateOriginId = _moduleName + "server";  // checked by setupDefinition -> compareRecursive -> execOnUpdate -> onUpdate
 
   // no virtual functions in constructor so this is in begin()

@@ -47,10 +47,10 @@ class ArtNetInDriver : public Node {
     }
   }
 
-  void onUpdate(String& oldValue, JsonObject control) {
+  void onUpdate(Char<16>& oldValue, JsonObject control) {
     // add your custom onUpdate code here
     if (control["name"] == "ddp") {
-      if (control["value"] = 0) {
+      if (control["value"] == 0) {
       }
     }
   }

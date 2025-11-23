@@ -150,6 +150,7 @@ FileManager::FileManager(PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
 void FileManager::begin() {
   _httpEndpoint.begin();
   _eventEndpoint.begin();
+  _webSocketServer.begin();
 
   // setup the file server
   _server->serveStatic("/rest/file", ESPFS, "/");

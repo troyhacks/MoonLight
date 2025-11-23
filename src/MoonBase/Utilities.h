@@ -59,7 +59,6 @@ struct Coord3D {
 
   // comparisons
   bool operator!=(Coord3D rhs) {
-    // ppf("Coord3D compare%d %d %d %d %d %d\n", x, y, z, rhs.x, rhs.y, rhs.z);
     return x != rhs.x || y != rhs.y || z != rhs.z;
     // return !(*this==rhs);
   }
@@ -110,16 +109,13 @@ namespace ArduinoJson {
 template <>
 struct Converter<Coord3D> {
   static bool toJson(const Coord3D& src, JsonVariant dst) {
-    // JsonObject obj = dst.to<JsonObject>();
     dst["x"] = src.x;
     dst["y"] = src.y;
     dst["z"] = src.z;
-    // ppf("Coord3D toJson %d,%d,%d -> %s\n", src.x, src.y, src.z, dst.as<String>().c_str());
     return true;
   }
 
   static Coord3D fromJson(JsonVariantConst src) {
-    // ppf("Coord3D fromJson %s\n", src.as<String>().c_str());
     return Coord3D{src["x"], src["y"], src["z"]};
   }
 
@@ -173,11 +169,15 @@ struct Char {
     return *this;
   }
   Char& operator=(const JsonVariant rhs) {
-    if (!rhs.isNull()) strlcpy(s, rhs.as<String>().c_str(), sizeof(s));
+    if (!rhs.isNull()) strlcpy(s, rhs.as<String>().c_str(), sizeof(s)); //.as<String>().c_str() as rhs can also contain non strings 
     return *this;
   }
   Char& operator=(const JsonString rhs) {
     if (!rhs.isNull()) strlcpy(s, rhs.c_str(), sizeof(s));
+    return *this;
+  }
+  Char& operator=(const String& rhs) {
+    strlcpy(s, rhs.c_str(), sizeof(s));
     return *this;
   }
 
@@ -186,7 +186,7 @@ struct Char {
     strlcat(s, rhs, sizeof(s));
     return *this;
   }
-  Char& operator+(String rhs) {
+  Char& operator+(const String& rhs) {
     strlcat(s, rhs.c_str(), sizeof(s));
     return *this;
   }
@@ -194,20 +194,20 @@ struct Char {
     strlcat(s, rhs, sizeof(s));
     return *this;
   }
-  Char& operator+=(int rhs) {  // add integer to string
+  Char& operator+=(const int rhs) {  // add integer to string
     char buffer[12];           // enough for 32-bit int
     snprintf(buffer, sizeof(buffer), " %d", rhs);
     strlcat(s, buffer, sizeof(s));
     return *this;
   }
-  Char& operator+=(String rhs) {
+  Char& operator+=(const String& rhs) {
     strlcat(s, rhs.c_str(), sizeof(s));
     return *this;
   }
 
   // compare
   bool operator==(const char* rhs) { return strcmp(s, rhs) == 0; }
-  bool operator==(Char& rhs) { return strcmp(s, rhs.s) == 0; }
+  bool operator==(const Char& rhs) { return strcmp(s, rhs.s) == 0; }
   bool operator!=(const char* rhs) { return strcmp(s, rhs) != 0; }
 
   bool contains(const char* rhs) { return strnstr(s, rhs, sizeof(s)) != nullptr; }

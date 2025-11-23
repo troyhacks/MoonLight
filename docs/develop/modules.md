@@ -76,7 +76,7 @@ void setupDefinition(JsonArray root) override{
             if (updatedItem.value.as<String>().length())
                 compileAndRun(updatedItem.value);
         } else
-            EXT_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.name.c_str(), updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 ```
 

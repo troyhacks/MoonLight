@@ -24,12 +24,12 @@
 
   #include "Utilities.h"
 
-// sizeof was 160 chars -> 80 -> 68
+// sizeof was 160 chars -> 80 -> 68 -> 88
 struct UpdatedItem {
-  String parent[2];   // 24 -> 32
-  uint8_t index[2];   // 2x1 = 2
-  String name;        // 16 -> 16
-  String oldValue;    // 32 -> 16, smaller then 11 bytes mostly
+  Char<16> parent[2];   // 24 -> 2*16
+  uint8_t index[2];   // 2*1
+  Char<16> name;        // 16 -> 16
+  Char<16> oldValue;    // 32 -> 16, smaller then 11 bytes mostly
   JsonVariant value;  // 8->16->4
 
   UpdatedItem() {
@@ -121,7 +121,7 @@ class Module : public StatefulService<ModuleState> {
   virtual void onUpdate(UpdatedItem& updatedItem) {};
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {};
 
-  String updateOriginId;
+  Char<16> updateOriginId;
 
  protected:
   EventSocket* _socket;

@@ -47,9 +47,8 @@ class ModuleLiveScripts : public Module {
           uint8_t index = 0;
           _moduleEffects->read([&](ModuleState& effectsState) {
             for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
-              String name = nodeState["name"];
 
-              if (updatedItem == name) {
+              if (updatedItem == nodeState["name"]) {
                 EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
@@ -67,9 +66,8 @@ class ModuleLiveScripts : public Module {
           });
           _moduleDrivers->read([&](ModuleState& effectsState) {
             for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
-              String name = nodeState["name"];
 
-              if (updatedItem == name) {
+              if (updatedItem == nodeState["name"]) {
                 EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
@@ -171,7 +169,7 @@ class ModuleLiveScripts : public Module {
           if (updatedItem.name == "delete") liveScriptNode->killAndDelete();
           // updatedItem.value = 0;
         } else
-          EXT_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
+          EXT_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<const char*>());
       }
     }
     // else

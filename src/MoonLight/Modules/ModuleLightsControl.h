@@ -149,7 +149,6 @@ class ModuleLightsControl : public Module {
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
-      // String value = _state.data["palette"];//updatedItem.oldValue;
       if (updatedItem.value == 0)
         layerP.palette = CloudColors_p;
       else if (updatedItem.value == 1)

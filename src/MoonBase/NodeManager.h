@@ -20,7 +20,7 @@
 class NodeManager : public Module {
  public:
   bool requestUIUpdate = false;
-  String defaultNodeName = "";
+  Char<16> defaultNodeName;
 
  protected:
   PsychicHttpServer* _server;
@@ -54,9 +54,8 @@ class NodeManager : public Module {
           }
           // uint8_t index = 0;
           // for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-          //     String name = nodeState["name"];
 
-          //     if (updatedItem == name) {
+          //     if (updatedItem == nodeState["name"]) {
           //         EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
           //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layers[0]->findLiveScriptNode(nodeState["name"]);
           //         if (liveScriptNode) {
@@ -158,7 +157,7 @@ class NodeManager : public Module {
           // serializeJson(nodeState["controls"], xx);
           // EXT_LOGD(ML_TAG, "add %s[%d]%s[%d].%s = %s -> %s (%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), xx.c_str());
 
-          //invalidate controls
+          // invalidate controls
           if (nodeState["controls"].isNull()) {     // if controls are not set, create empty array
             nodeState["controls"].to<JsonArray>();  // clear the controls
           } else {
@@ -232,7 +231,7 @@ class NodeManager : public Module {
             //     EXT_LOGV(ML_TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
             //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]);
             //     if (liveScriptNode) liveScriptNode->kill();
-            //     else EXT_LOGW(ML_TAG, "liveScriptNode not found %s", node["name"].as<String>().c_str());
+            //     else EXT_LOGW(ML_TAG, "liveScriptNode not found %s", node["name"].as<const char*>());
             // }
             // if (!node["name"].isNull() && !node["type"].isNull()) {
             //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]); //todo: can be 2 nodes with the same name ...
@@ -246,23 +245,21 @@ class NodeManager : public Module {
         // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
         // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         if (updatedItem.index[0] < nodes->size()) {
-          EXT_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
+          EXT_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<const char*>(), updatedItem.value.as<String>().c_str(), nodes->size());
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
             nodeClass->on = updatedItem.value.as<bool>();  // set nodeclass on/off
             // EXT_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
-
             nodeClass->requestMappings();
           } else
-            EXT_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<String>().c_str());
+            EXT_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<const char*>());
         }
       }  // nodes[i].on
 
       else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value" && updatedItem.index[1] < nodeState["controls"].size()) {  // nodes[i].controls[j].value
-        // String xx;
-        // serializeJson(nodeState["controls"][updatedItem.index[1]], xx);
-        // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s (%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), xx.c_str());
-
+        // serializeJson(nodeState["controls"][updatedItem.index[1]], Serial);
+        EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        
         if (updatedItem.index[0] < nodes->size()) {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
@@ -271,7 +268,7 @@ class NodeManager : public Module {
 
             nodeClass->requestMappings();
           } else
-            EXT_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
+            EXT_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<const char*>());
         }
       }  // nodes[i].controls[j].value
       // else
