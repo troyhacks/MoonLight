@@ -106,7 +106,7 @@ class GameOfLifeEffect : public Node {
     values.add("Mazecentric B3/S1234");
     values.add("DrighLife B367/S23");
 
-    addControl(customRuleString, "customRuleString", "text", 0, 32);
+    addControl(customRuleString, "customRuleString", "text", 0, 20);
 
     addControl(speed, "GameSpeed (FPS)", "slider", 0, 100);
     addControl(lifeChance, "startingLifeDensity", "slider", 10, 90);

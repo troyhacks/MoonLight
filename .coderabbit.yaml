@@ -1,4 +1,4 @@
-language: auto
+language: "en-US"
 
 review:
   enable_review: true

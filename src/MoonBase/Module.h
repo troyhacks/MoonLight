@@ -26,11 +26,11 @@
 
 // sizeof was 160 chars -> 80 -> 68 -> 88
 struct UpdatedItem {
-  Char<16> parent[2];   // 24 -> 2*16
-  uint8_t index[2];   // 2*1
-  Char<16> name;        // 16 -> 16
-  Char<16> oldValue;    // 32 -> 16, smaller then 11 bytes mostly
-  JsonVariant value;  // 8->16->4
+  Char<16> parent[2];  // 24 -> 2*16
+  uint8_t index[2];    // 2*1
+  Char<16> name;       // 16 -> 16
+  Char<16> oldValue;   // 32 -> 16, smaller then 11 bytes mostly
+  JsonVariant value;   // 8->16->4
 
   UpdatedItem() {
     parent[0] = "";  // will be checked in onUpdate
@@ -54,6 +54,7 @@ class ModuleState {
 
   ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState constructor");
+    // std::lock_guard<std::mutex> lock(runInAppTask_mutex);
     if (!gModulesDoc) {
       EXT_LOGD(MB_TAG, "Creating doc");
       if (psramFound())
@@ -73,6 +74,7 @@ class ModuleState {
   ~ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState destructor");
     // delete data from doc
+    // std::lock_guard<std::mutex> lock(runInAppTask_mutex);
     if (!gModulesDoc) return;
     JsonArray arr = gModulesDoc->as<JsonArray>();
     for (size_t i = 0; i < arr.size(); i++) {
