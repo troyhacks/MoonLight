@@ -20,7 +20,7 @@
 class NodeManager : public Module {
  public:
   bool requestUIUpdate = false;
-  Char<16> defaultNodeName;
+  Char<20> defaultNodeName;
 
  protected:
   PsychicHttpServer* _server;
@@ -147,7 +147,7 @@ class NodeManager : public Module {
         if (!updatedItem.value.isNull()) {  // if name changed // == updatedItem.value
 
           // // if old node exists then remove it's controls
-          // if (updatedItem.oldValue != "null") {
+          // if (updatedItem.oldValue != "") {
           //   // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
           //   // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
           //   nodeState.remove("controls");  // remove the controls from the nodeState
@@ -201,7 +201,7 @@ class NodeManager : public Module {
         }
 
         // if a node existed and no new node in place, remove
-        if (updatedItem.oldValue != "null" && oldNode) {
+        if (updatedItem.oldValue != "" && oldNode) {
           // EXT_LOGD(ML_TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
           // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
           if (!newNode) {

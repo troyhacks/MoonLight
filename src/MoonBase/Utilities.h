@@ -115,9 +115,7 @@ struct Converter<Coord3D> {
     return true;
   }
 
-  static Coord3D fromJson(JsonVariantConst src) {
-    return Coord3D{src["x"], src["y"], src["z"]};
-  }
+  static Coord3D fromJson(JsonVariantConst src) { return Coord3D{src["x"], src["y"], src["z"]}; }
 
   static bool checkJson(JsonVariantConst src) { return src["x"].is<uint16_t>() && src["y"].is<uint8_t>() && src["z"].is<uint8_t>(); }
 };
@@ -165,21 +163,23 @@ struct Char {
 
   // assign
   Char& operator=(const char* rhs) {
+    // if (strlen(rhs) >= N) EXT_LOGW("Char", "Truncating '%s' from %d to %d chars", rhs, strlen(rhs), N - 1);
     strlcpy(s, rhs, sizeof(s));
     return *this;
   }
   Char& operator=(const JsonVariant rhs) {
-    if (!rhs.isNull()) strlcpy(s, rhs.as<String>().c_str(), sizeof(s)); //.as<String>().c_str() as rhs can also contain non strings 
-    return *this;
+    if (!rhs.isNull())
+      return (*this = rhs.as<String>().c_str());  //.as<String>().c_str() as rhs can also contain non strings
+    else
+      return (*this = "");
   }
   Char& operator=(const JsonString rhs) {
-    if (!rhs.isNull()) strlcpy(s, rhs.c_str(), sizeof(s));
-    return *this;
+    if (!rhs.isNull())
+      return (*this = rhs.c_str());
+    else
+      return (*this = "");
   }
-  Char& operator=(const String& rhs) {
-    strlcpy(s, rhs.c_str(), sizeof(s));
-    return *this;
-  }
+  Char& operator=(const String& rhs) { return (*this = rhs.c_str()); }
 
   // concat
   Char& operator+(const char* rhs) {
@@ -195,7 +195,7 @@ struct Char {
     return *this;
   }
   Char& operator+=(const int rhs) {  // add integer to string
-    char buffer[12];           // enough for 32-bit int
+    char buffer[12];                 // enough for 32-bit int
     snprintf(buffer, sizeof(buffer), " %d", rhs);
     strlcat(s, buffer, sizeof(s));
     return *this;

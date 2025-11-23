@@ -26,10 +26,10 @@
 
 // sizeof was 160 chars -> 80 -> 68 -> 88
 struct UpdatedItem {
-  Char<16> parent[2];  // 24 -> 2*16
+  Char<20> parent[2];  // 24 -> 2*16
   uint8_t index[2];    // 2*1
-  Char<16> name;       // 16 -> 16
-  Char<16> oldValue;   // 32 -> 16, smaller then 11 bytes mostly
+  Char<20> name;       // 16 -> 16
+  Char<20> oldValue;   // 32 -> 16, smaller then 11 bytes mostly
   JsonVariant value;   // 8->16->4
 
   UpdatedItem() {
@@ -124,7 +124,7 @@ class Module : public StatefulService<ModuleState> {
   virtual void onUpdate(const UpdatedItem& updatedItem) {};
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {};
 
-  Char<16> updateOriginId;
+  Char<20> updateOriginId;
 
  protected:
   EventSocket* _socket;

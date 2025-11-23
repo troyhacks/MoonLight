@@ -54,7 +54,7 @@ class ModuleTasks : public Module {
 
     TaskStatus_t taskStatusArray[MAX_TASKS];
     UBaseType_t taskCount;
-    uint32_t totalRunTime;
+    uint32_t totalRunTime = 1;
 
     // Get all tasks' info
     taskCount = uxTaskGetSystemState(taskStatusArray, MAX_TASKS, &totalRunTime);
@@ -96,7 +96,7 @@ class ModuleTasks : public Module {
       }
 
       Char<32> summary;
-      summary.format("%s %5.0f%% @ P%d", state, totalRunTime ? (100.0f * ts->ulRunTimeCounter) / totalRunTime : 0.0f, ts->uxCurrentPriority);
+      summary.format("%s %d%% @ P%d", state, 100 * ts->ulRunTimeCounter / totalRunTime, ts->uxCurrentPriority);
 
       task["name"] = ts->pcTaskName;
       task["summary"] = summary.c_str();

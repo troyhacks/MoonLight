@@ -17,7 +17,7 @@
     #include "MoonBase/Module.h"
 
 enum IO_PinUsage {
-  pin_Unused, // 0
+  pin_Unused,  // 0
   pin_LED_01,
   pin_LED_02,
   pin_LED_03,
@@ -385,17 +385,24 @@ class ModuleIO : public Module {
     EXT_LOGD(ML_TAG, "boardID %d", boardID);
     // serializeJson(object, Serial);Serial.println();
 
+    // updateWithoutPropagation(object, ModuleState::update);  // No originId needed
     update(object, ModuleState::update, _moduleName + "server");
   }
 
+  uint8_t newBoardID = UINT8_MAX;
+
   void onUpdate(const UpdatedItem& updatedItem) override {
-    // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    // run in appdriver task
+    //  EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+    //  if (updatedItem.oldValue == "") return;
     if (updatedItem.name == "boardPreset" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
-      setBoardPresetDefaults(updatedItem.value);
+      newBoardID = updatedItem.value;
     } else if (updatedItem.name == "modded" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
-      if (updatedItem.value == false) setBoardPresetDefaults(_state.data["boardPreset"]);
-      // set pins to default if modded is turned off
+      if (updatedItem.value == false) {
+        newBoardID = _state.data["boardPreset"];
+      }
     } else if (updatedItem.name == "usage" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
+      // set pins to default if modded is turned off
       JsonDocument doc;
       JsonObject object = doc.to<JsonObject>();
       object["modded"] = true;
@@ -418,6 +425,13 @@ class ModuleIO : public Module {
       return "STRONGEST";
     default:
       return "UNKNOWN";
+    }
+  }
+
+  void loop() {
+    if (newBoardID != UINT8_MAX) {
+      setBoardPresetDefaults(newBoardID);  // run from sveltekit task
+      newBoardID = UINT8_MAX;
     }
   }
 };

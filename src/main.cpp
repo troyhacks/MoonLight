@@ -315,6 +315,7 @@ void setup() {
 
   // run UI stuff in the sveltekit task
   esp32sveltekit.addLoopFunction([]() {
+    moduleIO.loop();
 
   #if FT_ENABLED(FT_MOONLIGHT)
     moduleEffects.loop();        // requestUIUpdate

@@ -176,7 +176,7 @@ class ModuleLightsControl : public Module {
     } else if (updatedItem.name == "preset") {
       // copy /.config/effects.json to the hidden folder /.config/presets/preset[x].json
       // do not set preset at boot...
-      if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
+      if (updatedItem.oldValue != "" && !updatedItem.value["action"].isNull()) {
         uint16_t select = updatedItem.value["select"];
         Char<32> presetFile;
         presetFile.format("/.config/presets/preset%02d.json", select);

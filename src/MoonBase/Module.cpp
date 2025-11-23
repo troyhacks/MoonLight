@@ -129,14 +129,19 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
 }
 
 void Module::execOnUpdate(const UpdatedItem& updatedItem) {
-  if (updatedItem.oldValue != "null" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
-    if (!updateOriginId.contains("server")) {                             // only triggered by updates from front end
+  if (updatedItem.oldValue != "" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
+    if (!updateOriginId.contains("server")) {                         // only triggered by updates from front end
       // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s (oID:%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updateOriginId.c_str());
       saveNeeded = true;
     }
   }
 
   // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+  // while (runInAppTask.size() > 10) {
+  //   // Serial.print(".");
+  // };
+
+  // if (updatedItem.parent[0] != "pins")
   #if FT_ENABLED(FT_MOONLIGHT)
   // runInAppTask_mutexChecker++;
   // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
