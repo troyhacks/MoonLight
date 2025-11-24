@@ -112,7 +112,7 @@ public:
         root["subnet_mask"] = settings.subnetMask.toString();
     }
 
-    static StateUpdateResult update(JsonObject &root, APSettings &settings)
+    static StateUpdateResult update(JsonObject &root, APSettings &settings, const String &originId) // 🌙 add originID
     {
         APSettings newSettings = {};
         newSettings.provisionMode = root["provision_mode"] | FACTORY_AP_PROVISION_MODE;

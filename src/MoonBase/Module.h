@@ -56,6 +56,8 @@ class ModuleState {
   SemaphoreHandle_t updateReadySem;
   SemaphoreHandle_t updateProcessedSem;
 
+  static Char<20> updateOriginId;
+
   ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState constructor");
     updateReadySem = xSemaphoreCreateBinary();
@@ -80,17 +82,20 @@ class ModuleState {
 
   ~ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState destructor");
+
     // delete data from doc
-    if (!gModulesDoc) return;
-    JsonArray arr = gModulesDoc->as<JsonArray>();
-    for (size_t i = 0; i < arr.size(); i++) {
-      JsonObject obj = arr[i];
-      if (obj == data) {  // same object (identity check)
-        EXT_LOGD(MB_TAG, "Deleting data from doc");
-        arr.remove(i);
-        break;  // optional, if only one match
+    if (gModulesDoc) {
+      JsonArray arr = gModulesDoc->as<JsonArray>();
+      for (size_t i = 0; i < arr.size(); i++) {
+        JsonObject obj = arr[i];
+        if (obj == data) {  // same object (identity check)
+          EXT_LOGD(MB_TAG, "Deleting data from doc");
+          arr.remove(i);
+          break;  // optional, if only one match
+        }
       }
     }
+
     if (updateReadySem) vSemaphoreDelete(updateReadySem);
     if (updateProcessedSem) vSemaphoreDelete(updateProcessedSem);
   }
@@ -108,7 +113,7 @@ class ModuleState {
   std::function<void(const UpdatedItem&)> processUpdatedItem = nullptr;
 
   static void read(ModuleState& state, JsonObject& root);
-  static StateUpdateResult update(JsonObject& root, ModuleState& state);
+  static StateUpdateResult update(JsonObject& root, ModuleState& state, const String& originId);  //, const String& originId
 
   ReadHook readHook = nullptr;  // called when the UI requests the state, can be used to update the state before sending it to the UI
 
@@ -139,8 +144,10 @@ class Module : public StatefulService<ModuleState> {
 
   Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
 
+  // any Module that overrides begin() must continue to call Module::begin() (e.g., at the start of its own begin()
   virtual void begin();
 
+  // any Module that overrides loop() must continue to call Module::loop() (e.g., at the start of its own loop()
   virtual void loop() {
     // run in sveltekit task
 
@@ -155,7 +162,7 @@ class Module : public StatefulService<ModuleState> {
       saveNeeded = true;
     } else {
       if (updatedItem.oldValue != "" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
-        if (!updateOriginId.contains("server")) {                         // only triggered by updates from front end
+        if (!_state.updateOriginId.contains("server")) {                  // only triggered by updates from front end
           saveNeeded = true;
         }
       }
@@ -171,8 +178,6 @@ class Module : public StatefulService<ModuleState> {
   // called from compareRecursive
   virtual void onUpdate(const UpdatedItem& updatedItem) {};
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {};
-
-  Char<20> updateOriginId;
 
  protected:
   EventSocket* _socket;
@@ -200,8 +205,6 @@ class Module : public StatefulService<ModuleState> {
   WebSocketServer<ModuleState> _webSocketServer;
   FSPersistence<ModuleState> _fsPersistence;
   PsychicHttpServer* _server;
-
-  void updateHandler(const String& originId);
 };
 
 #endif

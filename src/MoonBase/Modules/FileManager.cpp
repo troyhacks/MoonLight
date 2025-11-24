@@ -55,7 +55,7 @@ void FilesState::read(FilesState& state, JsonObject& root) {
   EXT_LOGI(MB_TAG, "");
 }
 
-StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
+StateUpdateResult FilesState::update(JsonObject& root, FilesState& state, const String &originId) {
   bool changed = false;
 
   if (root["showHidden"] != state.showHidden) {

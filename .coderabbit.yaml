@@ -5,5 +5,5 @@ review:
   enable_fix_suggestions: true
   enable_tests_generation: false
 
-  context:
-    timeout_ms: 900000   # 15 minutes max
+context:
+  timeout_ms: 900000   # 15 minutes max

@@ -35,6 +35,8 @@ void setDefaults(JsonObject root, JsonArray definition) {
   }
 }
 
+Char<20> ModuleState::updateOriginId;
+
 void ModuleState::setupData() {
   // only if no file ...
   if (data.size() == 0) {
@@ -232,8 +234,8 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
           changed = true;
           updatedItem.name = key;
           updatedItem.oldValue = stateValue;
-          stateData[updatedItem.name.c_str()] = newValue;           // update the value in stateData, should not be done in runLoopTask as FS update then misses the change!!
-          updatedItem.value = stateData[updatedItem.name.c_str()];  // store the stateData item (convenience)
+          stateData[key.c_str()] = newValue;           // update the value in stateData, should not be done in runLoopTask as FS update then misses the change!!
+          updatedItem.value = stateData[key.c_str()];  // store the stateData item (convenience)
 
           // EXT_LOGD(MB_TAG, "kv %s.%s v: %s d: %d", parent.c_str(), key.c_str(), newValue.as<String>().c_str(), depth);
           // EXT_LOGD(MB_TAG, "kv %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
@@ -249,8 +251,10 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
   return changed;
 }
 
-StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state) {
-  // if (state.data.isNull()) EXT_LOGD(ML_TAG, "state data is null %d %d", root.size(), root != state.data); // state.data never null here
+StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state, const String& originId) {  //, const String& originId
+                                                                                                       // if (state.data.isNull()) EXT_LOGD(ML_TAG, "state data is null %d %d", root.size(), root != state.data); // state.data never null here
+
+  updateOriginId = originId;
 
   if (root.size() != 0) {  // in case of empty file
 
@@ -299,8 +303,6 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
   _state.processUpdatedItem = [&](const UpdatedItem& updatedItem) {
     processUpdatedItem(updatedItem);  // Ensure updatedItem is of type UpdatedItem&
   };
-
-  addUpdateHandler([&](const String& originId) { updateHandler(originId); }, false);
 }
 
 void Module::begin() {
@@ -310,8 +312,6 @@ void Module::begin() {
   _eventEndpoint.begin();
   _webSocketServer.begin();
   _fsPersistence.readFromFS();  // overwrites the default settings in state
-
-  updateOriginId = _moduleName + "server";  // checked by setupDefinition -> compareRecursive -> execOnUpdate -> onUpdate
 
   // no virtual functions in constructor so this is in begin()
   _state.setupDefinition = [&](JsonArray root) {
@@ -332,12 +332,6 @@ void Module::begin() {
 
     return response.send();
   });
-}
-
-// called when ModuleState::update returns changed. if something has changed, process these changes: compare, onUpdate...
-void Module::updateHandler(const String& originId) {
-  // EXT_LOGD(MB_TAG, "originId: %s", originId.c_str());
-  updateOriginId = originId;
 }
 
 // heap-optimization: request heap optimization review
