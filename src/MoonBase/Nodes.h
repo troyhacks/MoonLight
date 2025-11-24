@@ -142,6 +142,7 @@ class Node {
 
     if (newControl) {
       Char<20> oldValue;
+      oldValue = "";
       // updateControl(oldValue, control);
       onUpdate(oldValue, control);  // custom onUpdate for the node
     }

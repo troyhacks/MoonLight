@@ -385,21 +385,20 @@ class ModuleIO : public Module {
     EXT_LOGD(ML_TAG, "boardID %d", boardID);
     // serializeJson(object, Serial);Serial.println();
 
-    // updateWithoutPropagation(object, ModuleState::update);  // No originId needed
     update(object, ModuleState::update, _moduleName + "server");
   }
 
   uint8_t newBoardID = UINT8_MAX;
 
   void onUpdate(const UpdatedItem& updatedItem) override {
-    // run in appdriver task
+    // run in sveltekit task
     //  EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     //  if (updatedItem.oldValue == "") return;
     if (updatedItem.name == "boardPreset" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
-      newBoardID = updatedItem.value;
+      newBoardID = updatedItem.value; //run in sveltekit task
     } else if (updatedItem.name == "modded" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
       if (updatedItem.value == false) {
-        newBoardID = _state.data["boardPreset"];
+        newBoardID = _state.data["boardPreset"]; //run in sveltekit task
       }
     } else if (updatedItem.name == "usage" && !updateOriginId.contains("server")) {  // not done by this module: done by UI
       // set pins to default if modded is turned off
@@ -428,7 +427,9 @@ class ModuleIO : public Module {
     }
   }
 
-  void loop() {
+  void loop() override {
+    //run in sveltekit task
+    Module::loop();
     if (newBoardID != UINT8_MAX) {
       setBoardPresetDefaults(newBoardID);  // run from sveltekit task
       newBoardID = UINT8_MAX;

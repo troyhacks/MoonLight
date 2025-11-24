@@ -61,7 +61,7 @@ void setupDefinition(JsonArray root) override{
 
 * Implement function **onUpdate** to define what happens if data changes
     * struct UpdatedItem defines the update (parent control (including index in case of multiple records), name of control and value)
-    * This runs in the httpd / webserver task. To run it in another task (application task) use runInAppTask - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
+    * UpdatedItems are created in the httpd / webserver task and via the loop() function sent to onUpdate running on the Sveltekit task. e.g. see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
 
 ```cpp
     void onUpdate(const UpdatedItem &updatedItem) override

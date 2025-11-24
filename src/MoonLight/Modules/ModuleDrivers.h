@@ -66,11 +66,11 @@ class ModuleDrivers : public NodeManager {
     });
   }
 
-  void begin() {
+  void begin() override {
     defaultNodeName = getNameAndTags<PanelLayout>();
 
-    NodeManager::begin();
     nodes = &layerP.nodes;
+    NodeManager::begin();
 
     _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
   }
@@ -174,7 +174,7 @@ class ModuleDrivers : public NodeManager {
 
   bool initPins = false;
 
-  void loop() {
+  void loop() override {
     // if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
     //     layerP.loop(); //run all the effects of all virtual layers (currently only one)
 

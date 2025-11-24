@@ -26,10 +26,10 @@
 
 // sizeof was 160 chars -> 80 -> 68 -> 88
 struct UpdatedItem {
-  Char<20> parent[2];  // 24 -> 2*16
+  Char<20> parent[2];  // 24 -> 2*20
   uint8_t index[2];    // 2*1
-  Char<20> name;       // 16 -> 16
-  Char<20> oldValue;   // 32 -> 16, smaller then 11 bytes mostly
+  Char<20> name;       // 16 -> 16 -> 20
+  Char<20> oldValue;   // 32 -> 16 -> 20, smaller then 11 bytes mostly
   JsonVariant value;   // 8->16->4
 
   UpdatedItem() {
@@ -52,9 +52,16 @@ class ModuleState {
  public:
   JsonObject data = JsonObject();  // isNull()
 
+  UpdatedItem updatedItem;
+  SemaphoreHandle_t updateReadySem;
+  SemaphoreHandle_t updateProcessedSem;
+
   ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState constructor");
-    // std::lock_guard<std::mutex> lock(runInAppTask_mutex);
+    updateReadySem = xSemaphoreCreateBinary();
+    updateProcessedSem = xSemaphoreCreateBinary();
+    xSemaphoreGive(updateProcessedSem);  // Ready for first update
+
     if (!gModulesDoc) {
       EXT_LOGD(MB_TAG, "Creating doc");
       if (psramFound())
@@ -74,7 +81,6 @@ class ModuleState {
   ~ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState destructor");
     // delete data from doc
-    // std::lock_guard<std::mutex> lock(runInAppTask_mutex);
     if (!gModulesDoc) return;
     JsonArray arr = gModulesDoc->as<JsonArray>();
     for (size_t i = 0; i < arr.size(); i++) {
@@ -85,6 +91,8 @@ class ModuleState {
         break;  // optional, if only one match
       }
     }
+    if (updateReadySem) vSemaphoreDelete(updateReadySem);
+    if (updateProcessedSem) vSemaphoreDelete(updateProcessedSem);
   }
 
   std::function<void(JsonArray root)> setupDefinition = nullptr;
@@ -97,13 +105,32 @@ class ModuleState {
   // called from ModuleState::update
   bool checkReOrderSwap(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
 
-  std::function<void(const UpdatedItem&)> execOnUpdate = nullptr;
-  std::function<void(uint8_t, uint8_t)> onReOrderSwap = nullptr;
+  std::function<void(const UpdatedItem&)> processUpdatedItem = nullptr;
 
   static void read(ModuleState& state, JsonObject& root);
   static StateUpdateResult update(JsonObject& root, ModuleState& state);
 
   ReadHook readHook = nullptr;  // called when the UI requests the state, can be used to update the state before sending it to the UI
+
+  void postUpdate(const UpdatedItem& updatedItem) {
+    const char* taskName = pcTaskGetName(xTaskGetCurrentTaskHandle());
+
+    if (contains(taskName, "SvelteKit") || contains(taskName, "loopTask")) {  // at boot,  the loopTask starts, after that the loopTask is destroyed
+      if (processUpdatedItem) processUpdatedItem(updatedItem);
+    } else {
+      xSemaphoreTake(updateProcessedSem, portMAX_DELAY);
+      this->updatedItem = updatedItem;
+      xSemaphoreGive(updateReadySem);
+    }
+  }
+  // Called by consumer side
+  bool getUpdate() {
+    if (xSemaphoreTake(updateReadySem, 0) == pdTRUE) {
+      xSemaphoreGive(updateProcessedSem);
+      return true;  // Update retrieved
+    }
+    return false;  // Timeout
+  }
 };
 
 class Module : public StatefulService<ModuleState> {
@@ -112,7 +139,29 @@ class Module : public StatefulService<ModuleState> {
 
   Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
 
-  void begin();
+  virtual void begin();
+
+  virtual void loop() {
+    // run in sveltekit task
+
+    if (_state.getUpdate()) {
+      processUpdatedItem(_state.updatedItem);
+    }
+  }
+
+  void processUpdatedItem(const UpdatedItem& updatedItem) {
+    if (updatedItem.name == "swap") {
+      onReOrderSwap(updatedItem.index[0], updatedItem.index[1]);
+      saveNeeded = true;
+    } else {
+      if (updatedItem.oldValue != "" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
+        if (!updateOriginId.contains("server")) {                         // only triggered by updates from front end
+          saveNeeded = true;
+        }
+      }
+      onUpdate(updatedItem);
+    }
+  }
 
   virtual void setupDefinition(JsonArray root);
 
@@ -120,7 +169,6 @@ class Module : public StatefulService<ModuleState> {
 
   // called in compareRecursive->execOnUpdate
   // called from compareRecursive
-  void execOnUpdate(const UpdatedItem& updatedItem);
   virtual void onUpdate(const UpdatedItem& updatedItem) {};
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {};
 

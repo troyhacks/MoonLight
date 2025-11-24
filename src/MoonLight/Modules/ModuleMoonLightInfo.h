@@ -97,7 +97,7 @@ class ModuleMoonLightInfo : public Module {
     }
   }
 
-  void begin() {
+  void begin() override {
     Module::begin();
 
     _state.readHook = [&](JsonObject data) {

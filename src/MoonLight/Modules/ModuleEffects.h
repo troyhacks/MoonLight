@@ -24,11 +24,11 @@ class ModuleEffects : public NodeManager {
  public:
   ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit, fileManager) { EXT_LOGV(ML_TAG, "constructor"); }
 
-  void begin() {
+  void begin() override {
     defaultNodeName = getNameAndTags<RandomEffect>();
-    NodeManager::begin();
-
     nodes = &(layerP.layers[0]->nodes);  // to do add nodes from all layers...
+
+    NodeManager::begin();
 
   #if FT_ENABLED(FT_MONITOR)
     _socket->registerEvent("monitor");
@@ -293,7 +293,7 @@ class ModuleEffects : public NodeManager {
   }
 
   // run effects
-  void loop() { NodeManager::loop(); }
+  void loop() override { NodeManager::loop(); }
 
 };  // class ModuleEffects
 

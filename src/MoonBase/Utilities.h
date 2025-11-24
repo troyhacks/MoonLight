@@ -380,12 +380,6 @@ void freeMBObject(T* obj) {
   freeMB(obj, "object");
 }
 
-#if FT_MOONLIGHT
-extern std::vector<std::function<void()>> runInAppTask;  // functions to be called in main loopTask (to avoid https to run out of stack space). No , VectorRAMAllocator<std::function<void()> see main.cpp
-extern std::mutex runInAppTask_mutex;                    // protect the runInAppTask vectors
-// extern int runInAppTask_mutexChecker;
-#endif
-
 // to use in effect and on display
 #if USE_M5UNIFIED
 extern unsigned char moonmanpng[];

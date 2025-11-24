@@ -34,7 +34,7 @@ class ModuleLightsControl : public Module {
     _moduleIO = moduleIO;
   }
 
-  void begin() {
+  void begin() override {
     Module::begin();
 
     EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
@@ -65,7 +65,7 @@ class ModuleLightsControl : public Module {
       });
     });
     moduleIO.addUpdateHandler([&](const String& originId) { readPins(); }, false);
-    readPins(); //initially
+    readPins();  // initially
   }
 
   void readPins() {
@@ -235,15 +235,15 @@ class ModuleLightsControl : public Module {
 
   unsigned long lastPresetTime = 0;
 
-  void loop() {
+  void loop() override {
+    Module::loop();
     // process presetLoop
     uint8_t presetLoop = _state.data["presetLoop"];
     if (presetLoop && millis() - lastPresetTime > presetLoop * 1000) {  // every presetLoop seconds
       lastPresetTime = millis();
 
       // bugfix;
-      //  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-      //  runInAppTask.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
+      //  runInAppTask.push_back([&]() {
       //  load the xth preset from FS
       JsonArray presetList = _state.data["preset"]["list"];
 

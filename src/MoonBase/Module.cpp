@@ -105,16 +105,12 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
               if (stateIndex == parkedFromIndex)  // e.g. parkedFromIndex ==1
                 newStateIndex = parkedAtIndex;    // e.g. 1 is stored in 0
 
-              if (newStateIndex != newIndex && onReOrderSwap) {
-  #if FT_ENABLED(FT_MOONLIGHT)
-                // runInAppTask_mutexChecker++;
-                // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
-                std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-                runInAppTask.push_back([this, stateIndex, newIndex]() { onReOrderSwap(stateIndex, newIndex); });
-                  // runInAppTask_mutexChecker--;
-  #else
-                onReOrderSwap(stateIndex, newIndex);
-  #endif
+              if (newStateIndex != newIndex) {
+                UpdatedItem updatedItem;
+                updatedItem.name = "swap";
+                updatedItem.index[0] = stateIndex;
+                updatedItem.index[1] = newIndex;
+                postUpdate(updatedItem);
               }
 
               if (parkedFromIndex == UINT8_MAX) parkedFromIndex = newIndex;  // the index of value in the array stored in the parking spot
@@ -126,31 +122,6 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
     }
   }
   return changed;
-}
-
-void Module::execOnUpdate(const UpdatedItem& updatedItem) {
-  if (updatedItem.oldValue != "" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
-    if (!updateOriginId.contains("server")) {                         // only triggered by updates from front end
-      // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s (oID:%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), updateOriginId.c_str());
-      saveNeeded = true;
-    }
-  }
-
-  // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-  // while (runInAppTask.size() > 10) {
-  //   // Serial.print(".");
-  // };
-
-  // if (updatedItem.parent[0] != "pins")
-  #if FT_ENABLED(FT_MOONLIGHT)
-  // runInAppTask_mutexChecker++;
-  // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
-  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-  runInAppTask.push_back([this, updatedItem]() { onUpdate(updatedItem); });
-  // runInAppTask_mutexChecker--;
-  #else
-  onUpdate(updatedItem);
-  #endif
 }
 
 bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
@@ -217,9 +188,10 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
               // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
               updatedItem.name = property.key();
               updatedItem.oldValue = property.value();
-              updatedItem.value = JsonVariant();            // Assign an empty JsonVariant
-              stateArray[i].remove(property.key());         // remove the property from the state row so onUpdate see it as empty
-              if (execOnUpdate) execOnUpdate(updatedItem);  // async in other task
+              updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
+              stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
+
+              postUpdate(updatedItem);
             }
 
             // String tt;
@@ -266,7 +238,7 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
           // EXT_LOGD(MB_TAG, "kv %s.%s v: %s d: %d", parent.c_str(), key.c_str(), newValue.as<String>().c_str(), depth);
           // EXT_LOGD(MB_TAG, "kv %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
-          if (execOnUpdate) execOnUpdate(updatedItem);
+          postUpdate(updatedItem);
         }
         // else {
         //     EXT_LOGD(MB_TAG, "do not update %s", key.c_str());
@@ -324,12 +296,8 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
   EXT_LOGV(MB_TAG, "constructor %s", moduleName.c_str());
   _server = server;
 
-  _state.execOnUpdate = [&](const UpdatedItem& updatedItem) {
-    execOnUpdate(updatedItem);  // Ensure updatedItem is of type UpdatedItem&
-  };
-
-  _state.onReOrderSwap = [&](uint8_t stateIndex, uint8_t newIndex) {
-    onReOrderSwap(stateIndex, newIndex);  // Ensure updatedItem is of type UpdatedItem&
+  _state.processUpdatedItem = [&](const UpdatedItem& updatedItem) {
+    processUpdatedItem(updatedItem);  // Ensure updatedItem is of type UpdatedItem&
   };
 
   addUpdateHandler([&](const String& originId) { updateHandler(originId); }, false);

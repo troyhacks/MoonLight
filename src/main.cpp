@@ -75,8 +75,6 @@ void operator delete[](void* ptr, size_t size) noexcept {
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
 
-#include "MoonBase/Utilities.h"  // for runInAppTask
-
 #define SERIAL_BAUD_RATE 115200
 
 PsychicHttpServer server;
@@ -160,16 +158,6 @@ void driverTask(void* pvParameters) {
 
     xSemaphoreGive(effectSemaphore);
 
-    std::vector<std::function<void()>> tasks;
-    {
-      // runInAppTask_mutexChecker++;
-      // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
-      std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-      tasks.swap(runInAppTask);  // move all into local vector
-      // runInAppTask_mutexChecker--;
-    }
-    for (auto& task : tasks) task();  // run the tasks
-
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
 }
@@ -201,6 +189,8 @@ uint8_t pinVoltage = -1;
 uint8_t pinCurrent = -1;
 uint8_t pinBattery = -1;
 
+std::vector<Module*> modules;
+
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
   esp_log_set_vprintf(custom_vprintf);
@@ -209,8 +199,6 @@ void setup() {
 
   // start serial and filesystem
   Serial.begin(SERIAL_BAUD_RATE);
-
-  // delay(5000);  // 🌙 to capture all the serial output
 
   // 🌙 safeMode
   if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) {  // see verbosePrintResetReason
@@ -252,13 +240,27 @@ void setup() {
   // start ESP32-SvelteKit
   esp32sveltekit.begin();
 
-// MoonBase
-#if FT_ENABLED(FT_MOONBASE)
+  modules.push_back(&moduleDevices);
+  modules.push_back(&moduleTasks);
+  modules.push_back(&moduleIO);
+// modules.push_back(&fileManager);
+// MoonLight
+#if FT_ENABLED(FT_MOONLIGHT)
+  modules.push_back(&moduleEffects);
+  modules.push_back(&moduleDrivers);
+  modules.push_back(&moduleLightsControl);
+  modules.push_back(&moduleChannels);
+  modules.push_back(&moduleMoonLightInfo);
+  #if FT_ENABLED(FT_LIVESCRIPT)
+  modules.push_back(&moduleLiveScripts);
+  #endif
+
+  // MoonBase
+  #if FT_ENABLED(FT_MOONBASE)
   fileManager.begin();
-  moduleDevices.begin();
-  moduleTasks.begin();
-  moduleIO.begin();
-  #if FT_BATTERY
+  for (Module* module : modules) module->begin();
+
+    #if FT_BATTERY
   moduleIO.addUpdateHandler(
       [&](const String& originId) {
         moduleIO.read([&](ModuleState& state) {
@@ -279,16 +281,6 @@ void setup() {
         });
       },
       false);
-  #endif
-  // MoonLight
-  #if FT_ENABLED(FT_MOONLIGHT)
-  moduleEffects.begin();
-  moduleDrivers.begin();
-  moduleLightsControl.begin();
-  moduleChannels.begin();
-  moduleMoonLightInfo.begin();
-    #if FT_ENABLED(FT_LIVESCRIPT)
-  moduleLiveScripts.begin();
     #endif
 
   xSemaphoreGive(effectSemaphore);  // Allow effectTask to run first
@@ -305,7 +297,7 @@ void setup() {
 
   xTaskCreateUniversal(driverTask,                     // task function
                        "AppDriverTask",                // name
-                       (psramFound() ? 6 : 4) * 1024,  // d0-tuning... stack size
+                       (psramFound() ? 6 : 3) * 1024,  // d0-tuning... stack size
                        NULL,                           // parameter
                        3,                              // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                        &driverTaskHandle,              // task handle
@@ -315,13 +307,7 @@ void setup() {
 
   // run UI stuff in the sveltekit task
   esp32sveltekit.addLoopFunction([]() {
-    moduleIO.loop();
-
-  #if FT_ENABLED(FT_MOONLIGHT)
-    moduleEffects.loop();        // requestUIUpdate
-    moduleDrivers.loop();        // requestUIUpdate
-    moduleLightsControl.loop();  // monitor
-  #endif
+    for (Module* module : modules) module->loop();
 
     // every second
     static unsigned long lastSecond = 0;
@@ -399,7 +385,7 @@ void loop() {
   M5.update();
   delay(100);
 #else
-  // Delete Arduino loop task, as it is not needed in this example
+  // Delete Arduino loop task, as it is not needed
   vTaskDelete(NULL);
 #endif
 }

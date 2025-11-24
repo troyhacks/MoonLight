@@ -33,7 +33,7 @@ class ModuleLiveScripts : public Module {
     _moduleDrivers = moduleDrivers;
   }
 
-  void begin() {
+  void begin() override {
     Module::begin();
     #if FT_ENABLED(FT_LIVESCRIPT)
     // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager

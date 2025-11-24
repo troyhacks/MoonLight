@@ -258,7 +258,7 @@ class NodeManager : public Module {
 
       else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value" && updatedItem.index[1] < nodeState["controls"].size()) {  // nodes[i].controls[j].value
         // serializeJson(nodeState["controls"][updatedItem.index[1]], Serial);
-        EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         
         if (updatedItem.index[0] < nodes->size()) {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
@@ -294,7 +294,8 @@ class NodeManager : public Module {
     nodeN->requestMappings();
   }
 
-  void loop() {
+  void loop() override {
+    Module::loop();
     if (requestUIUpdate) {
       requestUIUpdate = false;  // reset the flag
       // EXT_LOGD(ML_TAG, "requestUIUpdate");
