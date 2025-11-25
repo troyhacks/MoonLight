@@ -1,43 +1,76 @@
-// lib/framework/SharedFSPersistence.h
+// src/MoonBase/SharedFSPersistence.h
 #ifndef SharedFSPersistence_h
 #define SharedFSPersistence_h
 
 #include <FS.h>
 #include <StatefulService.h>
 
-#include <map>
-
 #include "Module.h"
+
+// ADDED: Global delayed writes queue (matches templated version)
+inline std::vector<std::function<void(char)>> sharedDelayedWrites;
 
 class SharedFSPersistence {
  private:
   FS* _fs;
-//   size_t _bufferSize;
+  struct ModuleInfo {
+    Module* module;
+    String filePath;
+    bool delayedWriting;
+    bool hasDelayedWrite;
+    update_handler_id_t updateHandlerId;
+
+    ModuleInfo() : module(nullptr), delayedWriting(false), hasDelayedWrite(false), updateHandlerId(0) {}
+  };
+  std::map<String, ModuleInfo> _modules;  // moduleName -> info
 
  public:
-//   SharedFSPersistence(FS* fs, size_t bufferSize = DEFAULT_BUFFER_SIZE) : _fs(fs), _bufferSize(bufferSize) {}
   SharedFSPersistence(FS* fs) : _fs(fs) {}
 
-  // Register a module with its filesystem path
-  void registerModule(Module* module) {
+  // ADDED: Support for delayed writing parameter
+  void registerModule(Module* module, bool delayedWriting = false) {
+    ModuleInfo info;
+    info.module = module;
+    info.filePath = "/.config/" + module->_moduleName + ".json";
+    info.delayedWriting = delayedWriting;
+    info.hasDelayedWrite = false;
 
-    // Register this module for state updates - write to FS when state changes
-    module->addUpdateHandler([this, module](const String& originId) { writeToFS(String("/.config/" + module->_moduleName + ".json").c_str()); }, false);
+    // Register update handler
+    info.updateHandlerId = module->addUpdateHandler([this, moduleName = module->_moduleName](const String& originId) { writeToFS(moduleName); }, false);
 
-    // Read initial state from filesystem after registration
-    readFromFS(String("/.config/" + module->_moduleName + ".json").c_str());
+    _modules[module->_moduleName] = info;
+
+    // Read initial state from filesystem
+    readFromFS(module->_moduleName);
   }
 
   void begin() {
-    // No additional setup needed - reading happens during registerModule
+    // All setup happens in registerModule
   }
 
-  // Public method to trigger read for a specific module (if needed)
-  void readFromFS(const String& filePath) {
-    Module* module = findModule(filePath);
-    if (!module) return;
+  // ADDED: Enable/disable update handler for specific module
+  void disableUpdateHandler(const String& moduleName) {
+    auto it = _modules.find(moduleName);
+    if (it != _modules.end() && it->second.updateHandlerId) {
+      it->second.module->removeUpdateHandler(it->second.updateHandlerId);
+      it->second.updateHandlerId = 0;
+    }
+  }
 
-    File file = _fs->open(filePath.c_str(), "r");
+  void enableUpdateHandler(const String& moduleName) {
+    auto it = _modules.find(moduleName);
+    if (it != _modules.end() && !it->second.updateHandlerId) {
+      it->second.updateHandlerId = it->second.module->addUpdateHandler([this, moduleName](const String& originId) { writeToFS(moduleName); }, false);
+    }
+  }
+
+  void readFromFS(const String& moduleName) {
+    auto it = _modules.find(moduleName);
+    if (it == _modules.end()) return;
+
+    ModuleInfo& info = it->second;
+    File file = _fs->open(info.filePath.c_str(), "r");
+
     if (file) {
       JsonDocument doc;
       DeserializationError error = deserializeJson(doc, file);
@@ -45,32 +78,101 @@ class SharedFSPersistence {
 
       if (!error && doc.is<JsonObject>()) {
         JsonObject obj = doc.as<JsonObject>();
-        // Use updateWithoutPropagation to avoid triggering write during read
-        module->updateWithoutPropagation(obj, ModuleState::update);
+        info.module->updateWithoutPropagation(obj, ModuleState::update);
+        return;
+      }
+    }
+
+    // ADDED: Apply defaults if file doesn't exist or is corrupted
+    applyDefaults(info);
+    writeToFSNow(moduleName);
+  }
+
+  void writeToFS(const String& moduleName) {
+    auto it = _modules.find(moduleName);
+    if (it == _modules.end()) return;
+
+    ModuleInfo& info = it->second;
+
+    // ADDED: Delayed write support
+    if (info.delayedWriting) {
+      if (!info.hasDelayedWrite) {
+        ESP_LOGD(SVK_TAG, "delayedWrites: Add %s", info.filePath.c_str());
+
+        sharedDelayedWrites.push_back([this, moduleName](char writeOrCancel) {
+          auto it = _modules.find(moduleName);
+          if (it == _modules.end()) return;
+
+          ESP_LOGD(SVK_TAG, "delayedWrites: %c %s", writeOrCancel, it->second.filePath.c_str());
+
+          if (writeOrCancel == 'W') {
+            this->writeToFSNow(moduleName);
+          } else {
+            // Cancel: read old state back from FS
+            this->readFromFS(moduleName);
+            // Update UI with restored state
+            it->second.module->update([](ModuleState& state) { return StateUpdateResult::CHANGED; }, SVK_TAG);
+          }
+          it->second.hasDelayedWrite = false;
+        });
+
+        info.hasDelayedWrite = true;
+      }
+    } else {
+      writeToFSNow(moduleName);
+    }
+  }
+
+  bool writeToFSNow(const String& moduleName) {
+    auto it = _modules.find(moduleName);
+    if (it == _modules.end()) return false;
+
+    ModuleInfo& info = it->second;
+
+    // ADDED: Create directories if needed
+    mkdirs(info.filePath);
+
+    // Create JSON document
+    JsonDocument doc;
+    JsonObject root = doc.to<JsonObject>();
+    info.module->read(root, ModuleState::read);
+
+    // Write to file
+    File file = _fs->open(info.filePath.c_str(), "w");
+    if (!file) return false;
+
+    serializeJson(doc, file);
+    file.close();
+    return true;
+  }
+
+  // ADDED: Static method to process all delayed writes
+  static void writeToFSDelayed(char writeOrCancel) {
+    ESP_LOGD(SVK_TAG, "calling %d writeFuncs from delayedWrites", sharedDelayedWrites.size());
+
+    for (auto& writeFunc : sharedDelayedWrites) {
+      writeFunc(writeOrCancel);
+    }
+    sharedDelayedWrites.clear();
+  }
+
+ private:
+  // ADDED: Create directories if they don't exist
+  void mkdirs(const String& filePath) {
+    int index = 0;
+    while ((index = filePath.indexOf('/', index + 1)) != -1) {
+      String segment = filePath.substring(0, index);
+      if (!_fs->exists(segment)) {
+        _fs->mkdir(segment);
       }
     }
   }
 
-  // Public method to trigger write for a specific module (if needed)
-  void writeToFS(const String& filePath) {
-    Module* module = findModule(filePath);
-    if (!module) return;
-
-    File file = _fs->open(filePath.c_str(), "w");
-    if (file) {
-      JsonDocument doc;
-      JsonObject root = doc.to<JsonObject>();
-      module->read(root, ModuleState::read);
-      serializeJson(doc, file);
-      file.close();
-    }
-  }
-
- private:
-  Module* findModule(const String& filePath) {
-    for (Module* module : modules) {
-      if (contains(path.c_str(), module->_moduleName.c_str())) return module;
-    }
+  // ADDED: Apply defaults from empty object
+  void applyDefaults(ModuleInfo& info) {
+    JsonDocument doc;
+    JsonObject obj = doc.as<JsonObject>();
+    info.module->updateWithoutPropagation(obj, ModuleState::update);
   }
 };
 

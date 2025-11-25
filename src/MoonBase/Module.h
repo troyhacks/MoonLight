@@ -15,8 +15,6 @@
 #if FT_MOONBASE == 1
 
   #include <ESP32SvelteKit.h>
-  #include <EventEndpoint.h>
-  #include <EventSocket.h>
   #include <FSPersistence.h>
   #include <PsychicHttp.h>
 
@@ -198,7 +196,6 @@ class Module : public StatefulService<ModuleState> {
   // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
   // This module class is used for each module, about 15 times, 1144 bytes each (allocated in main.cpp, in global memory area) + each class allocates it's own heap
 
-  EventEndpoint<ModuleState> _eventEndpoint;
   FSPersistence<ModuleState> _fsPersistence;
   PsychicHttpServer* _server;
 };

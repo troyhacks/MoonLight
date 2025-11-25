@@ -190,15 +190,15 @@ uint8_t pinCurrent = -1;
 uint8_t pinBattery = -1;
 
 std::vector<Module*> modules;
-#include "MoonBase/SharedHttpRouter.h"
-#include "MoonBase/SharedWebSocketRouter.h"
-// #include "MoonBase/SharedEventRouter.h"
+#include "MoonBase/SharedEventEndpoint.h"
+#include "MoonBase/SharedHttpEndpoint.h"
+#include "MoonBase/SharedWebSocketServer.h"
 // #include "MoonBase/SharedFSPersistence.h"
 
 // ADDED: Shared routers (one instance each)
-SharedHttpRouter* sharedHttpRouter = nullptr;
-SharedWebSocketRouter* sharedWsRouter = nullptr;
-// SharedEventRouter* sharedEventRouter = nullptr;
+SharedHttpEndpoint* sharedHttpEndpoint = nullptr;
+SharedWebSocketServer* sharedWebSocketServer = nullptr;
+SharedEventEndpoint* sharedEventEndpoint = nullptr;
 // SharedFSPersistence* sharedFsPersistence = nullptr;
 
 void setup() {
@@ -220,44 +220,51 @@ void setup() {
   }
 
   // check sizes ...
-  //   sizeof(esp32sveltekit);                // 4152
-  //   sizeof(WiFiSettingsService);           // 456
-  //   sizeof(SystemStatus);                  // 16
-  //   sizeof(UploadFirmwareService);         // 32
-  //   sizeof(HttpEndpoint<ModuleState>);     // 152
-  //   sizeof(EventEndpoint<ModuleState>);    // 112
-  //   sizeof(WebSocketServer<ModuleState>);  // 488
-  //   sizeof(FSPersistence<ModuleState>);    // 128
-  //   sizeof(PsychicHttpServer*);            // 8
-  //   sizeof(HttpEndpoint<APSettings>);      // 152
-  //   sizeof(FSPersistence<APSettings>);     // 128
-  //   sizeof(APSettingsService);             // 600;
-  //   sizeof(PsychicWebSocketHandler);       // 336
-  //   sizeof(fileManager);                   // 864
-  //   sizeof(Module);                        // 1144
-  //   sizeof(moduleDevices);                 // 1320
-  //   sizeof(moduleIO);                      // 1144
-  // #if FT_ENABLED(FT_MOONLIGHT)
-  //   sizeof(moduleEffects);        // 1208
-  //   sizeof(moduleDrivers);        // 1216
-  //   sizeof(moduleLightsControl);  // 1176
-  //   #if FT_ENABLED(FT_LIVESCRIPT)
-  //   sizeof(moduleLiveScripts);  // 1176
-  //   #endif
-  //   sizeof(moduleChannels);        // 1144
-  //   sizeof(moduleMoonLightInfo);   // 1144
-  //   sizeof(layerP.lights);         // 56
-  //   sizeof(layerP.lights.header);  // 40
-  // #endif
+  sizeof(esp32sveltekit);                // 4152
+  sizeof(WiFiSettingsService);           // 456
+  sizeof(SystemStatus);                  // 16
+  sizeof(UploadFirmwareService);         // 32
+  sizeof(HttpEndpoint<ModuleState>);     // 152
+  sizeof(EventEndpoint<ModuleState>);    // 112
+  sizeof(SharedEventEndpoint);             // 8
+  sizeof(WebSocketServer<ModuleState>);  // 488
+  sizeof(SharedWebSocketServer);         // 352
+  sizeof(FSPersistence<ModuleState>);    // 128
+  sizeof(PsychicHttpServer*);            // 8
+  sizeof(HttpEndpoint<APSettings>);      // 152
+  sizeof(SharedHttpEndpoint);              // 16
+  sizeof(FSPersistence<APSettings>);     // 128
+  sizeof(APSettingsService);             // 600;
+  sizeof(PsychicWebSocketHandler);       // 336
+  sizeof(fileManager);                   // 864
+  sizeof(Module);                        // 1144 -> 472
+  sizeof(moduleDevices);                 // 1320
+  sizeof(moduleIO);                      // 1144
+#if FT_ENABLED(FT_MOONLIGHT)
+  sizeof(moduleEffects);        // 1208
+  sizeof(moduleDrivers);        // 1216
+  sizeof(moduleLightsControl);  // 1176
+  #if FT_ENABLED(FT_LIVESCRIPT)
+  sizeof(moduleLiveScripts);  // 1176
+  #endif
+  sizeof(moduleChannels);        // 1144
+  sizeof(moduleMoonLightInfo);   // 1144
+  sizeof(layerP.lights);         // 56
+  sizeof(layerP.lights.header);  // 40
+#endif
 
   // start ESP32-SvelteKit
   esp32sveltekit.begin();
 
   // Create shared routers (one-time)
-  sharedHttpRouter = new SharedHttpRouter(&server, esp32sveltekit.getSecurityManager());
-  sharedWsRouter = new SharedWebSocketRouter(&server, esp32sveltekit.getSecurityManager());
-  // sharedEventRouter = new SharedEventRouter(esp32sveltekit->getSocket());
+  sharedHttpEndpoint = new SharedHttpEndpoint(&server, esp32sveltekit.getSecurityManager());
+  sharedWebSocketServer = new SharedWebSocketServer(&server, esp32sveltekit.getSecurityManager());
+  sharedEventEndpoint = new SharedEventEndpoint(esp32sveltekit.getSocket());
   // sharedFsPersistence = new SharedFSPersistence(esp32sveltekit.getFS());
+  if (!sharedHttpEndpoint || !sharedWebSocketServer || !sharedEventEndpoint) {
+    EXT_LOGE(ML_TAG, "Failed to allocate shared routers, rebooting");
+    esp_restart();  // or another hard-fail strategy appropriate for your platform
+  }
 
   modules.push_back(&moduleDevices);
   modules.push_back(&moduleTasks);
@@ -276,16 +283,16 @@ void setup() {
 
   // Register all modules with shared routers
   for (Module* module : modules) {
-    sharedHttpRouter->registerModule(module);
-    sharedWsRouter->registerModule(module);
-    // sharedEventRouter->registerModule(module);
+    sharedHttpEndpoint->registerModule(module);
+    sharedWebSocketServer->registerModule(module);
+    sharedEventEndpoint->registerModule(module);
     // sharedFsPersistence->registerModule(module);
   }
 
   // Begin shared routers (one-time setup)
-  sharedHttpRouter->begin();
-  sharedWsRouter->begin();
-  // sharedEventRouter->begin();
+  sharedHttpEndpoint->begin();
+  sharedWebSocketServer->begin();
+  sharedEventEndpoint->begin();
   // sharedFsPersistence->begin();
 
   // MoonBase
