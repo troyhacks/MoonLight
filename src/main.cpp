@@ -190,6 +190,16 @@ uint8_t pinCurrent = -1;
 uint8_t pinBattery = -1;
 
 std::vector<Module*> modules;
+#include "MoonBase/SharedHttpRouter.h"
+#include "MoonBase/SharedWebSocketRouter.h"
+// #include "MoonBase/SharedEventRouter.h"
+// #include "MoonBase/SharedFSPersistence.h"
+
+// ADDED: Shared routers (one instance each)
+SharedHttpRouter* sharedHttpRouter = nullptr;
+SharedWebSocketRouter* sharedWsRouter = nullptr;
+// SharedEventRouter* sharedEventRouter = nullptr;
+// SharedFSPersistence* sharedFsPersistence = nullptr;
 
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
@@ -200,7 +210,10 @@ void setup() {
   // start serial and filesystem
   Serial.begin(SERIAL_BAUD_RATE);
 
-  // 🌙 safeMode
+  // delay(5000);  // 🌙 to capture all the serial output
+
+  Serial.printf("C++ Standard: %ld\n", __cplusplus);  // 202002L  // 🌙 safeMode
+
   if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) {  // see verbosePrintResetReason
     // ESP_RST_USB is after usb flashing! since esp-idf5
     safeModeMB = true;
@@ -240,6 +253,12 @@ void setup() {
   // start ESP32-SvelteKit
   esp32sveltekit.begin();
 
+  // Create shared routers (one-time)
+  sharedHttpRouter = new SharedHttpRouter(&server, esp32sveltekit.getSecurityManager());
+  sharedWsRouter = new SharedWebSocketRouter(&server, esp32sveltekit.getSecurityManager());
+  // sharedEventRouter = new SharedEventRouter(esp32sveltekit->getSocket());
+  // sharedFsPersistence = new SharedFSPersistence(esp32sveltekit.getFS());
+
   modules.push_back(&moduleDevices);
   modules.push_back(&moduleTasks);
   modules.push_back(&moduleIO);
@@ -254,6 +273,20 @@ void setup() {
   #if FT_ENABLED(FT_LIVESCRIPT)
   modules.push_back(&moduleLiveScripts);
   #endif
+
+  // Register all modules with shared routers
+  for (Module* module : modules) {
+    sharedHttpRouter->registerModule(module);
+    sharedWsRouter->registerModule(module);
+    // sharedEventRouter->registerModule(module);
+    // sharedFsPersistence->registerModule(module);
+  }
+
+  // Begin shared routers (one-time setup)
+  sharedHttpRouter->begin();
+  sharedWsRouter->begin();
+  // sharedEventRouter->begin();
+  // sharedFsPersistence->begin();
 
   // MoonBase
   #if FT_ENABLED(FT_MOONBASE)

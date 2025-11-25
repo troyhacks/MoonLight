@@ -138,7 +138,7 @@ PsychicEndpoint* PsychicHttpServer::on(const char* uri, http_method method, Psyc
   // Register endpoint with ESP-IDF server
   esp_err_t ret = httpd_register_uri_handler(this->server, &my_uri);
   if (ret != ESP_OK)
-    ESP_LOGE(PH_TAG, "Add endpoint failed (%s)", esp_err_to_name(ret));
+    ESP_LOGE(PH_TAG, "Add endpoint %s failed (%s)", uri, esp_err_to_name(ret)); // 🌙 add uri
 
   //save it for later
   _endpoints.push_back(endpoint);
