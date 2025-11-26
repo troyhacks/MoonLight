@@ -292,8 +292,7 @@ StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state, cons
 // For each Module (about 15 in total, a number of endpoints and websocketserver is created)
 
 Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
-    : _eventEndpoint(ModuleState::read, ModuleState::update, this, sveltekit->getSocket(), moduleName.c_str()),
-      _socket(sveltekit->getSocket()),
+    : _socket(sveltekit->getSocket()),
       _fsPersistence(ModuleState::read, ModuleState::update, this, sveltekit->getFS(), String("/.config/" + moduleName + ".json").c_str(), true)  // 🌙 true: delayedWrites
 {
   _moduleName = moduleName;
@@ -309,7 +308,6 @@ Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sve
 void Module::begin() {
   EXT_LOGV(MB_TAG, "");
 
-  _eventEndpoint.begin();
   _fsPersistence.readFromFS();  // overwrites the default settings in state
 
   // no virtual functions in constructor so this is in begin()
