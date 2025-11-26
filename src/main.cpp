@@ -190,15 +190,15 @@ uint8_t pinCurrent = -1;
 uint8_t pinBattery = -1;
 
 std::vector<Module*> modules;
-#include "MoonBase/SharedHttpRouter.h"
-#include "MoonBase/SharedWebSocketRouter.h"
-// #include "MoonBase/SharedEventRouter.h"
+#include "MoonBase/SharedHttpEndpoint.h"
+#include "MoonBase/SharedWebSocketServer.h"
+// #include "MoonBase/SharedEventEndpoint.h"
 // #include "MoonBase/SharedFSPersistence.h"
 
 // ADDED: Shared routers (one instance each)
-SharedHttpRouter* sharedHttpRouter = nullptr;
-SharedWebSocketRouter* sharedWsRouter = nullptr;
-// SharedEventRouter* sharedEventRouter = nullptr;
+SharedHttpEndpoint* sharedHttpEndpoint = nullptr;
+SharedWebSocketServer* sharedWebSocketServer = nullptr;
+// SharedEventEndpoint* sharedEventEndpoint = nullptr;
 // SharedFSPersistence* sharedFsPersistence = nullptr;
 
 void setup() {
@@ -254,9 +254,9 @@ void setup() {
   esp32sveltekit.begin();
 
   // Create shared routers (one-time)
-  sharedHttpRouter = new SharedHttpRouter(&server, esp32sveltekit.getSecurityManager());
-  sharedWsRouter = new SharedWebSocketRouter(&server, esp32sveltekit.getSecurityManager());
-  // sharedEventRouter = new SharedEventRouter(esp32sveltekit->getSocket());
+  sharedHttpEndpoint = new SharedHttpEndpoint(&server, esp32sveltekit.getSecurityManager());
+  sharedWebSocketServer = new SharedWebSocketServer(&server, esp32sveltekit.getSecurityManager());
+  // sharedEventEndpoint = new SharedEventEndpoint(esp32sveltekit->getSocket());
   // sharedFsPersistence = new SharedFSPersistence(esp32sveltekit.getFS());
 
   modules.push_back(&moduleDevices);
@@ -276,16 +276,16 @@ void setup() {
 
   // Register all modules with shared routers
   for (Module* module : modules) {
-    sharedHttpRouter->registerModule(module);
-    sharedWsRouter->registerModule(module);
-    // sharedEventRouter->registerModule(module);
+    sharedHttpEndpoint->registerModule(module);
+    sharedWebSocketServer->registerModule(module);
+    // sharedEventEndpoint->registerModule(module);
     // sharedFsPersistence->registerModule(module);
   }
 
   // Begin shared routers (one-time setup)
-  sharedHttpRouter->begin();
-  sharedWsRouter->begin();
-  // sharedEventRouter->begin();
+  sharedHttpEndpoint->begin();
+  sharedWebSocketServer->begin();
+  // sharedEventEndpoint->begin();
   // sharedFsPersistence->begin();
 
   // MoonBase

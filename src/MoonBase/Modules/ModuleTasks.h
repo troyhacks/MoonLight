@@ -48,7 +48,7 @@ class ModuleTasks : public Module {
 
   void loop1s() {
     if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
 
   #define MAX_TASKS 30
 

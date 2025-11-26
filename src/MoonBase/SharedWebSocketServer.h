@@ -1,6 +1,6 @@
-// In lib/framework/SharedWebSocketRouter.h
-#ifndef SharedWebSocketRouter_h
-#define SharedWebSocketRouter_h
+// In lib/framework/SharedWebSocketServer.h
+#ifndef SharedWebSocketServer_h
+#define SharedWebSocketServer_h
 
 #include <PsychicHttp.h>
 
@@ -9,7 +9,7 @@
 
 #include "Module.h"
 
-class SharedWebSocketRouter {
+class SharedWebSocketServer {
  private:
 //   std::map<String, Module*> _modulesByPath;  // "/ws/moduleName" -> Module*
   std::set<int> _initializedSockets;         // Sockets that have received initial data
@@ -18,7 +18,7 @@ class SharedWebSocketRouter {
   SecurityManager* _securityManager;
 
  public:
-  SharedWebSocketRouter(PsychicHttpServer* server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {}
+  SharedWebSocketServer(PsychicHttpServer* server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {}
 
   void registerModule(Module* module) {
     EXT_LOGD(ML_TAG, "%s", module->_moduleName.c_str());

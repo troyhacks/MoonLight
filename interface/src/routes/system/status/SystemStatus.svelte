@@ -161,7 +161,16 @@
 	{/snippet}
 	{#snippet title()}
 		<span>System Status</span>
-		<div class="absolute right-5"><a href="https://{page.data.github.split("/")[0]}.github.io/{page.data.github.split("/")[1]}{page.url.pathname}" target="_blank" title="Documentation"><Help  class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a></div> <!-- 🌙 link to docs -->
+		<div class="absolute right-5">
+			<a
+				href="https://{page.data.github.split('/')[0]}.github.io/{page.data.github.split(
+					'/'
+				)[1]}{page.url.pathname}"
+				target="_blank"
+				title="Documentation"><Help class="lex-shrink-0 mr-2 h-6 w-6 self-end" /></a
+			>
+		</div>
+		<!-- 🌙 link to docs -->
 	{/snippet}
 
 	<div class="w-full overflow-x-auto">
@@ -191,39 +200,39 @@
 					<div>
 						<div class="font-bold">Performance</div>
 						<div class="text-sm opacity-75">
-							{systemInformation.lps} loops/s  <!-- 🌙 -->
+							{systemInformation.lps} loops/s <!-- 🌙 -->
 						</div>
 					</div>
 				</div>
 
-				{#if page.data.features.battery && ($telemetry.battery.soc>=0 || $telemetry.battery.voltage>=0 || $telemetry.battery.current>=0)}
+				{#if page.data.features.battery && ($telemetry.battery.soc >= 0 || $telemetry.battery.voltage >= 0 || $telemetry.battery.current >= 0)}
 					<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 						<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
 							<Battery class="text-primary-content h-auto w-full scale-75" />
 						</div>
-						{#if $telemetry.battery.soc>=0}
-						<div>
-							<div class="font-bold">Battery</div>
-							<div class="text-sm opacity-75">
-								{$telemetry.battery.soc} %
+						{#if $telemetry.battery.soc >= 0}
+							<div>
+								<div class="font-bold">Battery</div>
+								<div class="text-sm opacity-75">
+									{$telemetry.battery.soc} %
+								</div>
 							</div>
-						</div>
 						{/if}
-						{#if $telemetry.battery.voltage>=0}
-						<div>
-							<div class="font-bold">Voltage</div>
-							<div class="text-sm opacity-75">
-								{$telemetry.battery.voltage.toFixed(1)} V <!-- // 🌙 -->
+						{#if $telemetry.battery.voltage >= 0}
+							<div>
+								<div class="font-bold">Voltage</div>
+								<div class="text-sm opacity-75">
+									{$telemetry.battery.voltage.toFixed(1)} V <!-- // 🌙 -->
+								</div>
 							</div>
-						</div>
 						{/if}
-						{#if $telemetry.battery.current>=0}
-						<div>
-							<div class="font-bold">Current</div>
-							<div class="text-sm opacity-75">
-								{$telemetry.battery.current.toFixed(1)} A <!-- // 🌙 -->
+						{#if $telemetry.battery.current >= 0}
+							<div>
+								<div class="font-bold">Current</div>
+								<div class="text-sm opacity-75">
+									{$telemetry.battery.current.toFixed(1)} A <!-- // 🌙 -->
+								</div>
 							</div>
-						</div>
 						{/if}
 					</div>
 				{/if}
@@ -246,6 +255,32 @@
 								>({Math.round(systemInformation.free_heap / 1000).toLocaleString('en-US')} KB free, Max
 								alloc {Math.round(systemInformation.max_alloc_heap / 1000).toLocaleString('en-US')} KB)</span
 							>
+						</div>
+					</div>
+				</div>
+
+				<!-- 🌙 -->
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<Heap class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">App RAM</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.heap_info_app}
+						</div>
+					</div>
+				</div>
+
+				<!-- 🌙 -->
+				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+						<Heap class="text-primary-content h-auto w-full scale-75" />
+					</div>
+					<div>
+						<div class="font-bold">DMA RAM</div>
+						<div class="text-sm opacity-75">
+							{systemInformation.heap_info_dma}
 						</div>
 					</div>
 				</div>
@@ -322,7 +357,8 @@
 						<Sketch class="text-primary-content h-auto w-full scale-75" />
 					</div>
 					<div>
-						<div class="font-bold">Firmware Size</div> <!-- 🌙 -->
+						<div class="font-bold">Firmware Size</div>
+						<!-- 🌙 -->
 						<div class="flex flex-wrap justify-start gap-1 text-sm opacity-75">
 							<span>
 								{(

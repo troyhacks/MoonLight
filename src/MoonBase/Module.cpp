@@ -181,20 +181,23 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
 
             // set all the values to null
             //  UpdatedItem updatedItem; //create local updatedItem
-            updatedItem.parent[1] = "";  // reset deeper levels when coming back from recursion (repeat in loop)
-            updatedItem.index[1] = UINT8_MAX;
-            updatedItem.parent[(uint8_t)(depth + 1)] = key;
-            updatedItem.index[(uint8_t)(depth + 1)] = i;
-            for (JsonPair property : stateArray[i].as<JsonObject>()) {
-              // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<const char*>());
-              // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
-              updatedItem.name = property.key();
-              updatedItem.oldValue = property.value();
-              updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
-              stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
+            if (depth + 1 < 2) {
+              updatedItem.parent[1] = "";  // reset deeper levels when coming back from recursion (repeat in loop)
+              updatedItem.index[1] = UINT8_MAX;
+              updatedItem.parent[(uint8_t)(depth + 1)] = key;
+              updatedItem.index[(uint8_t)(depth + 1)] = i;
+              for (JsonPair property : stateArray[i].as<JsonObject>()) {
+                // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<const char*>());
+                // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
+                updatedItem.name = property.key();
+                updatedItem.oldValue = property.value();
+                updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
+                stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
 
-              postUpdate(updatedItem);
-            }
+                postUpdate(updatedItem);
+              }
+            } else
+              EXT_LOGD(MB_TAG, "dev depth + 1 >= 2 %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);  // to check
 
             // String tt;
             // serializeJson(stateArray, tt);

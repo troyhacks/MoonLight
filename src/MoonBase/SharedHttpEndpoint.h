@@ -1,6 +1,6 @@
-// In a new file: lib/framework/SharedHttpRouter.h
-#ifndef SharedHttpRouter_h
-#define SharedHttpRouter_h
+// In a new file: lib/framework/SharedHttpEndpoint.h
+#ifndef SharedHttpEndpoint_h
+#define SharedHttpEndpoint_h
 
 #include <PsychicHttp.h>
 #include <SecurityManager.h>
@@ -9,14 +9,14 @@
 
 #include "Module.h"
 
-class SharedHttpRouter {
+class SharedHttpEndpoint {
  private:
 //   std::map<String, Module*> _modulesByPath;  // "/rest/moduleName" -> Module*
   PsychicHttpServer* _server;
   SecurityManager* _securityManager;
 
  public:
-  SharedHttpRouter(PsychicHttpServer* server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {}
+  SharedHttpEndpoint(PsychicHttpServer* server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {}
 
   // Register a module with its path
   void registerModule(Module* module) { 
