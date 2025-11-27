@@ -301,12 +301,13 @@ class NodeManager : public Module {
       requestUIUpdate = false;  // reset the flag
       // EXT_LOGD(ML_TAG, "requestUIUpdate");
 
+      //disable for the time being (locks _accessMutex), need to check if this is needed at all
       // update state to UI
-      update(
-          [&](ModuleState& state) {
-            return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
-          },
-          _moduleName);
+      // update(
+      //     [&](ModuleState& state) {
+      //       return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
+      //     },
+      //     _moduleName);
     }
   }
 

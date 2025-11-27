@@ -181,23 +181,28 @@ bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, Jso
 
             // set all the values to null
             //  UpdatedItem updatedItem; //create local updatedItem
-            if (depth + 1 < 2) {
-              updatedItem.parent[1] = "";  // reset deeper levels when coming back from recursion (repeat in loop)
-              updatedItem.index[1] = UINT8_MAX;
+            updatedItem.parent[1] = "";  // reset deeper levels when coming back from recursion (repeat in loop)
+            updatedItem.index[1] = UINT8_MAX;
+            // depth 255: set parent en index 0
+            // depth 0: set parent en index 1
+            // depth 1: set parent en index 2 not possible yet
+            if ((uint8_t)(depth + 1) < 2) {
+              // EXT_LOGD(MB_TAG, "kv %s.%s v: %s d: %d", parent.c_str(), key.c_str(), newValue.as<String>().c_str(), depth);
+              // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
               updatedItem.parent[(uint8_t)(depth + 1)] = key;
               updatedItem.index[(uint8_t)(depth + 1)] = i;
-              for (JsonPair property : stateArray[i].as<JsonObject>()) {
-                // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<const char*>());
-                // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
-                updatedItem.name = property.key();
-                updatedItem.oldValue = property.value();
-                updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
-                stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
+            }
+            // }
+            for (JsonPair property : stateArray[i].as<JsonObject>()) {
+              // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<const char*>());
+              // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
+              updatedItem.name = property.key();
+              updatedItem.oldValue = property.value();
+              updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
+              stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
 
-                postUpdate(updatedItem);
-              }
-            } else
-              EXT_LOGD(MB_TAG, "dev depth + 1 >= 2 %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);  // to check
+              postUpdate(updatedItem);
+            }
 
             // String tt;
             // serializeJson(stateArray, tt);

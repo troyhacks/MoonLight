@@ -127,6 +127,8 @@ class ModuleState {
   // Called by consumer side
   bool getUpdate() {
     if (xSemaphoreTake(updateReadySem, 0) == pdTRUE) {
+      if (processUpdatedItem) processUpdatedItem(updatedItem);
+
       xSemaphoreGive(updateProcessedSem);
       return true;  // Update retrieved
     }
@@ -147,9 +149,7 @@ class Module : public StatefulService<ModuleState> {
   virtual void loop() {
     // run in sveltekit task
 
-    if (_state.getUpdate()) {
-      processUpdatedItem(_state.updatedItem);
-    }
+    _state.getUpdate();
   }
 
   void processUpdatedItem(const UpdatedItem& updatedItem) {
