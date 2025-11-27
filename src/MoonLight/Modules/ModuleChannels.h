@@ -64,17 +64,16 @@ class ModuleChannels : public Module {
       if (!group) count *= layerP.lights.header.channelsPerLight;
       if (count > 512) count = 512;
       if (count != _state.data["channel"]["count"]) {
-        _state.data["channel"]["count"] = count;
         EXT_LOGD(ML_TAG, "set count %d", count);
 
-        // update state to UI
-        update(
-            [&](ModuleState& state) {
-              return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
-            },
-            _moduleName);
+        JsonDocument doc;
+        JsonObject newState = doc.to<JsonObject>();
+        newState["channel"]["count"] = count;
+
+        update(newState, ModuleState::update, _moduleName + "server");
       }
     } else if (updatedItem.name == "channel") {
+      // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       // copy the file to the hidden folder...
       if (updatedItem.oldValue != "" && !updatedItem.value["action"].isNull() && updatedItem.value["action"] != "") {
         EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());

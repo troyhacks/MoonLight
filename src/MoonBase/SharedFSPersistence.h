@@ -36,7 +36,7 @@ class SharedFSPersistence {
     info.hasDelayedWrite = false;
 
     // Register update handler
-    info.updateHandlerId = module->addUpdateHandler([this, moduleName = module->_moduleName](const String& originId) { writeToFS(moduleName); }, false);
+    info.updateHandlerId = module->addUpdateHandler([this, module](const String& originId) { writeToFS(module->_moduleName); }, false);
 
     _modules[module->_moduleName] = info;
 
@@ -99,17 +99,17 @@ class SharedFSPersistence {
       if (!info.hasDelayedWrite) {
         ESP_LOGD(SVK_TAG, "delayedWrites: Add %s", info.filePath.c_str());
 
-        sharedDelayedWrites.push_back([this, moduleName](char writeOrCancel) {
-          auto it = _modules.find(moduleName);
+        sharedDelayedWrites.push_back([this, module = info.module ](char writeOrCancel) {
+          auto it = _modules.find(module->_moduleName);
           if (it == _modules.end()) return;
 
           ESP_LOGD(SVK_TAG, "delayedWrites: %c %s", writeOrCancel, it->second.filePath.c_str());
 
           if (writeOrCancel == 'W') {
-            this->writeToFSNow(moduleName);
+            this->writeToFSNow(module->_moduleName);
           } else {
             // Cancel: read old state back from FS
-            this->readFromFS(moduleName);
+            this->readFromFS(module->_moduleName);
             // Update UI with restored state
             it->second.module->update([](ModuleState& state) { return StateUpdateResult::CHANGED; }, SVK_TAG);
           }

@@ -180,7 +180,7 @@ class ModuleLiveScripts : public Module {
   // update scripts / read only values in the UI
   void loop1s() {
     if (!_socket->getConnectedClients()) return;
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
 
     JsonDocument newData;                                    // to only send updatedData
     JsonArray scripts = newData["scripts"].to<JsonArray>();  // to: remove old array

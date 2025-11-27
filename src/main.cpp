@@ -190,9 +190,9 @@ uint8_t pinCurrent = -1;
 uint8_t pinBattery = -1;
 
 std::vector<Module*> modules;
-#include "MoonBase/SharedEventEndpoint.h"
 #include "MoonBase/SharedHttpEndpoint.h"
 #include "MoonBase/SharedWebSocketServer.h"
+#include "MoonBase/SharedEventEndpoint.h"
 // #include "MoonBase/SharedFSPersistence.h"
 
 // ADDED: Shared routers (one instance each)
@@ -266,6 +266,7 @@ void setup() {
     esp_restart();  // or another hard-fail strategy appropriate for your platform
   }
 
+  modules.reserve(12);  // Adjust based on actual module count
   modules.push_back(&moduleDevices);
   modules.push_back(&moduleTasks);
   modules.push_back(&moduleIO);

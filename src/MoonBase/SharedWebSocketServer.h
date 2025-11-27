@@ -11,12 +11,14 @@
 
 class SharedWebSocketServer {
  private:
+  std::set<int> _initializedSockets;  // Sockets that have received initial data
   PsychicWebSocketHandler _handler;
   PsychicHttpServer* _server;
   SecurityManager* _securityManager;
+  AuthenticationPredicate _authenticationPredicate;
 
  public:
-  SharedWebSocketServer(PsychicHttpServer* server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {}
+  SharedWebSocketServer(PsychicHttpServer* server, SecurityManager* securityManager, AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN) : _server(server), _securityManager(securityManager), _authenticationPredicate(authenticationPredicate) {}
 
   void registerModule(Module* module) {
     EXT_LOGD(ML_TAG, "%s", module->_moduleName.c_str());
@@ -25,10 +27,12 @@ class SharedWebSocketServer {
   }
 
   void begin() {
-    _handler.setFilter(_securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+    _handler.setFilter(_securityManager->filterRequest(_authenticationPredicate));
 
     _handler.onOpen([this](PsychicWebSocketClient* client) {
       transmitId(client);
+      // transmitData in onFrame !
+
       ESP_LOGI(SVK_TAG, "ws[%s][%u] connect", client->remoteIP().toString().c_str(), client->socket());
     });
 
@@ -36,6 +40,13 @@ class SharedWebSocketServer {
       ESP_LOGV(SVK_TAG, "ws[%s][%u] opcode[%d]", request->client()->remoteIP().toString().c_str(), request->client()->socket(), frame->type);
 
       int socket = request->client()->socket();
+
+      // Check if this is the first frame for this socket
+      if (_initializedSockets.find(socket) == _initializedSockets.end()) {
+        _initializedSockets.insert(socket);
+        // Send initial state
+        transmitData(request->url(), request->client(), WEB_SOCKET_ORIGIN);
+      }
 
       // Handle incoming frame data
       if (frame->type == HTTPD_WS_TYPE_TEXT) {
@@ -47,6 +58,7 @@ class SharedWebSocketServer {
           if (!error && doc.is<JsonObject>()) {
             JsonObject obj = doc.as<JsonObject>();
             module->update(obj, ModuleState::update, "wsserver");
+            return ESP_OK;
           }
         }
       }
@@ -54,14 +66,25 @@ class SharedWebSocketServer {
     });
 
     // ADDED: Better logging in onClose
-    _handler.onClose([this](PsychicWebSocketClient* client) {
-      ESP_LOGI(SVK_TAG, "ws[%s][%u] disconnect", client->remoteIP().toString().c_str(), client->socket());
-    });
+    _handler.onClose([this](PsychicWebSocketClient* client) { ESP_LOGI(SVK_TAG, "ws[%s][%u] disconnect", client->remoteIP().toString().c_str(), client->socket()); });
 
     _server->on("/ws/*", &_handler);
   }
 
+  String clientId(PsychicWebSocketClient* client) { return WEB_SOCKET_ORIGIN_CLIENT_ID_PREFIX + String(client->socket()); }
+
  private:
+  void transmitId(PsychicWebSocketClient* client) {
+    JsonDocument doc;
+    JsonObject root = doc.to<JsonObject>();
+    root["type"] = "id";
+    root["id"] = clientId(client);
+
+    String buffer;
+    serializeJson(doc, buffer);
+    client->sendMessage(buffer.c_str());
+  }
+
   void transmitData(const String& path, PsychicWebSocketClient* client, const String& originId) {
     Module* module = findModule(path);
     if (!module) return;
@@ -78,19 +101,6 @@ class SharedWebSocketServer {
       _handler.sendAll(buffer.c_str());
     }
   }
-
-  void transmitId(PsychicWebSocketClient* client) {
-    JsonDocument doc;
-    JsonObject root = doc.to<JsonObject>();
-    root["type"] = "id";
-    root["id"] = clientId(client);
-
-    String buffer;
-    serializeJson(doc, buffer);
-    client->sendMessage(buffer.c_str());
-  }
-
-  String clientId(PsychicWebSocketClient* client) { return WEB_SOCKET_ORIGIN_CLIENT_ID_PREFIX + String(client->socket()); }
 
   Module* findModule(const String& path) {
     for (Module* module : modules) {

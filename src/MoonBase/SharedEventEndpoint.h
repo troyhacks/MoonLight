@@ -40,11 +40,13 @@ class SharedEventEndpoint {
     if (!_socket->getConnectedClients()) return;
 
     JsonDocument doc;
-    JsonObject root = doc.to<JsonObject>();
-    module->read(root, ModuleState::read);
 
     // CHANGED: Use JsonObject overload, not buffer
-    _socket->emitEvent(module->_moduleName.c_str(), root, originId.c_str(), sync);
+    doc["event"] = module->_moduleName;
+    JsonObject root = doc["data"].to<JsonObject>();
+    module->read(root, ModuleState::read);
+
+    _socket->emitEvent(doc, originId.c_str(), sync);
   }
 };
 

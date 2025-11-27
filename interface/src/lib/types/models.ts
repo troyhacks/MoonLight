@@ -40,18 +40,6 @@ export type NetworkItem = {
 	encryption_type: number;
 };
 
-export type EthernetStatus = {
-	status: number;
-	ip_address: string;
-	mac_address: string;
-};
-
-export type EthernetSettings = {
-	local_ip: string;
-	gateway_ip: string;
-	subnet_mask: string;
-};
-
 export type ApStatus = {
 	status: number;
 	ip_address: string;
@@ -152,6 +140,8 @@ export type StaticSystemInformation = {
 	flash_chip_size: number;
 	flash_chip_speed: number;
 	cpu_reset_reason: string;
+	heap_info_app: string;
+	heap_info_dma: string;
 };
 
 export type SystemInformation = Analytics & StaticSystemInformation;

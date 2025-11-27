@@ -58,7 +58,7 @@ class ArtNetInDriver : public Node {
   bool init = false;
 
   void loop() override {
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
     if (!init) {
       if (ddp)
         ddpUdp.begin(port);

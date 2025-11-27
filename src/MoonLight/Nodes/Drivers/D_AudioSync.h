@@ -24,8 +24,8 @@ class AudioSyncDriver : public Node {
   bool init = false;
 
   void loop() override {
-    if (!WiFi.localIP()) {
-      // make WLED Audio Sync network failure resilient
+    if (!WiFi.isConnected() && !ETH.connected()) {
+      // make WLED Audio Sync network failure resilient - WIP
       init = false;
       return;
     }

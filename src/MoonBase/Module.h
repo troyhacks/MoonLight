@@ -52,13 +52,13 @@ class ModuleState {
   SemaphoreHandle_t updateReadySem;
   SemaphoreHandle_t updateProcessedSem;
 
-  static Char<20> updateOriginId;
+  static Char<20> updateOriginId;  // static, written by ModuleState::update, no mutex needed as written by one process at a time (http mostly, sveltekit sometimes recursively)
 
   ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState constructor");
-    updateReadySem = xSemaphoreCreateBinary();
-    updateProcessedSem = xSemaphoreCreateBinary();
-    xSemaphoreGive(updateProcessedSem);  // Ready for first update
+    updateReadySem = xSemaphoreCreateBinary();      // assuming this will be successful
+    updateProcessedSem = xSemaphoreCreateBinary();  // assuming this will be successful
+    xSemaphoreGive(updateProcessedSem);             // Ready for first update
 
     if (!gModulesDoc) {
       EXT_LOGD(MB_TAG, "Creating doc");
@@ -119,14 +119,17 @@ class ModuleState {
     if (contains(taskName, "SvelteKit") || contains(taskName, "loopTask")) {  // at boot,  the loopTask starts, after that the loopTask is destroyed
       if (processUpdatedItem) processUpdatedItem(updatedItem);
     } else {
-      xSemaphoreTake(updateProcessedSem, portMAX_DELAY);
-      this->updatedItem = updatedItem;
-      xSemaphoreGive(updateReadySem);
+      if (xSemaphoreTake(updateProcessedSem, portMAX_DELAY) == pdTRUE) {
+        this->updatedItem = updatedItem;
+        xSemaphoreGive(updateReadySem);
+      }
     }
   }
   // Called by consumer side
   bool getUpdate() {
     if (xSemaphoreTake(updateReadySem, 0) == pdTRUE) {
+      if (processUpdatedItem) processUpdatedItem(updatedItem);
+
       xSemaphoreGive(updateProcessedSem);
       return true;  // Update retrieved
     }
@@ -147,9 +150,7 @@ class Module : public StatefulService<ModuleState> {
   virtual void loop() {
     // run in sveltekit task
 
-    if (_state.getUpdate()) {
-      processUpdatedItem(_state.updatedItem);
-    }
+    _state.getUpdate();
   }
 
   void processUpdatedItem(const UpdatedItem& updatedItem) {

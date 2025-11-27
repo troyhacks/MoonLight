@@ -13,9 +13,10 @@ class SharedHttpEndpoint {
  private:
   PsychicHttpServer* _server;
   SecurityManager* _securityManager;
+  AuthenticationPredicate _authenticationPredicate;
 
  public:
-  SharedHttpEndpoint(PsychicHttpServer* server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {}
+  SharedHttpEndpoint(PsychicHttpServer* server, SecurityManager* securityManager, AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN) : _server(server), _securityManager(securityManager), _authenticationPredicate(authenticationPredicate) {}
 
   // Register a module with its path
   void registerModule(Module* module) {
@@ -27,19 +28,15 @@ class SharedHttpEndpoint {
 #endif
 
     // GET handler
-    _server->on(path.c_str(), HTTP_GET, _securityManager->wrapRequest([this](PsychicRequest* request) { return handleGet(request); }, AuthenticationPredicates::IS_ADMIN));
+    _server->on(path.c_str(), HTTP_GET, _securityManager->wrapRequest([this](PsychicRequest* request) { return handleGet(request); }, _authenticationPredicate));
 
     // POST handler
-    _server->on(path.c_str(), HTTP_POST, _securityManager->wrapCallback([this](PsychicRequest* request, JsonVariant& json) { return handlePost(request, json); }, AuthenticationPredicates::IS_ADMIN));
+    _server->on(path.c_str(), HTTP_POST, _securityManager->wrapCallback([this](PsychicRequest* request, JsonVariant& json) { return handlePost(request, json); }, _authenticationPredicate));
 
     ESP_LOGV(SVK_TAG, "Registered HTTP endpoint: %s", path.c_str());
   }
 
   void begin() {
-    // Single wildcard handler for all modules
-    // _server->on("/rest/*", HTTP_GET, _securityManager->wrapRequest([this](PsychicRequest* request) { return handleGet(request); }, AuthenticationPredicates::IS_ADMIN));
-
-    // _server->on("/rest/*", HTTP_POST, _securityManager->wrapCallback([this](PsychicRequest* request, JsonVariant& json) { return handlePost(request, json); }, AuthenticationPredicates::IS_ADMIN));
   }
 
  private:
