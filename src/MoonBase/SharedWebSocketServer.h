@@ -11,48 +11,41 @@
 
 class SharedWebSocketServer {
  private:
-//   std::map<String, Module*> _modulesByPath;  // "/ws/moduleName" -> Module*
-  std::set<int> _initializedSockets;         // Sockets that have received initial data
+  std::set<int> _initializedSockets;  // Sockets that have received initial data
   PsychicWebSocketHandler _handler;
   PsychicHttpServer* _server;
   SecurityManager* _securityManager;
+  AuthenticationPredicate _authenticationPredicate;
 
  public:
-  SharedWebSocketServer(PsychicHttpServer* server, SecurityManager* securityManager) : _server(server), _securityManager(securityManager) {}
+  SharedWebSocketServer(PsychicHttpServer* server, SecurityManager* securityManager, AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN) : _server(server), _securityManager(securityManager), _authenticationPredicate(authenticationPredicate) {}
 
   void registerModule(Module* module) {
     EXT_LOGD(ML_TAG, "%s", module->_moduleName.c_str());
-    // _modulesByPath[path] = module;
     // Register this module for state updates
     module->addUpdateHandler([this, module](const String& originId) { transmitData(String("/rest/" + module->_moduleName).c_str(), nullptr, originId); }, false);
   }
 
   void begin() {
-    _handler.setFilter(_securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+    _handler.setFilter(_securityManager->filterRequest(_authenticationPredicate));
 
     _handler.onOpen([this](PsychicWebSocketClient* client) {
-      // Just note that this socket is new (not initialized yet)
-      // Don't add to _initializedSockets - let onFrame handle it
+      transmitId(client);
+      // transmitData in onFrame !
+
+      ESP_LOGI(SVK_TAG, "ws[%s][%u] connect", client->remoteIP().toString().c_str(), client->socket());
     });
 
     _handler.onFrame([this](PsychicWebSocketRequest* request, httpd_ws_frame* frame) {
+      ESP_LOGV(SVK_TAG, "ws[%s][%u] opcode[%d]", request->client()->remoteIP().toString().c_str(), request->client()->socket(), frame->type);
+
       int socket = request->client()->socket();
 
       // Check if this is the first frame for this socket
       if (_initializedSockets.find(socket) == _initializedSockets.end()) {
         _initializedSockets.insert(socket);
-
         // Send initial state
-        EXT_LOGD(ML_TAG, "search module %s", request->path().c_str());
-        Module* module = findModule(request->url());
-        if (module) {
-          JsonDocument doc;
-          JsonObject root = doc.to<JsonObject>();
-          module->read(root, ModuleState::read);
-          String buffer;
-          serializeJson(doc, buffer);
-          request->client()->sendMessage(buffer.c_str());
-        }
+        transmitData(request->url(), request->client(), WEB_SOCKET_ORIGIN);
       }
 
       // Handle incoming frame data
@@ -65,20 +58,33 @@ class SharedWebSocketServer {
           if (!error && doc.is<JsonObject>()) {
             JsonObject obj = doc.as<JsonObject>();
             module->update(obj, ModuleState::update, "wsserver");
+            return ESP_OK;
           }
         }
       }
       return ESP_OK;
     });
 
-    _handler.onClose([this](PsychicWebSocketClient* client) {
-      _initializedSockets.erase(client->socket());  // Clean up
-    });
+    // ADDED: Better logging in onClose
+    _handler.onClose([this](PsychicWebSocketClient* client) { ESP_LOGI(SVK_TAG, "ws[%s][%u] disconnect", client->remoteIP().toString().c_str(), client->socket()); });
 
     _server->on("/ws/*", &_handler);
   }
 
+  String clientId(PsychicWebSocketClient* client) { return WEB_SOCKET_ORIGIN_CLIENT_ID_PREFIX + String(client->socket()); }
+
  private:
+  void transmitId(PsychicWebSocketClient* client) {
+    JsonDocument doc;
+    JsonObject root = doc.to<JsonObject>();
+    root["type"] = "id";
+    root["id"] = clientId(client);
+
+    String buffer;
+    serializeJson(doc, buffer);
+    client->sendMessage(buffer.c_str());
+  }
+
   void transmitData(const String& path, PsychicWebSocketClient* client, const String& originId) {
     Module* module = findModule(path);
     if (!module) return;
@@ -97,13 +103,10 @@ class SharedWebSocketServer {
   }
 
   Module* findModule(const String& path) {
-    for (Module *module:modules){
-        if (contains(path.c_str(), module->_moduleName.c_str()))
-            return module;
+    for (Module* module : modules) {
+      if (contains(path.c_str(), module->_moduleName.c_str())) return module;
     }
     return nullptr;
-    // auto it = _modulesByPath.find(path);
-    // return (it != _modulesByPath.end()) ? it->second : nullptr;
   }
 };
 
