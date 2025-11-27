@@ -180,16 +180,6 @@ class Module : public StatefulService<ModuleState> {
   EventSocket* _socket;
   void readFromFS() {             // used in ModuleEffects, for live scripts...
     _fsPersistence.readFromFS();  // overwrites the default settings in state
-    // sizeof(StatefulService<ModuleState>);  // 200
-    // sizeof(_server);                       // 8
-    // sizeof(HttpEndpoint<ModuleState>);     // 152
-    //   sizeof(EventEndpoint<ModuleState>);    // 112
-    //   sizeof(WebSocketServer<ModuleState>);  // 488
-    //   sizeof(FSPersistence<ModuleState>);    // 128
-    //   sizeof(PsychicHttpServer*);            // 8
-    //   sizeof(HttpEndpoint<APSettings>);      // 152
-    //   sizeof(FSPersistence<APSettings>);     // 128
-    //   sizeof(Module);                        // 1144
   }
 
  private:

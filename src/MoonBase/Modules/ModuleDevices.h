@@ -127,9 +127,10 @@ class ModuleDevices : public Module {
       message.name = esp32sveltekit.getWiFiSettingsService()->getHostname().c_str();
       deviceUDP.write((uint8_t*)&message, sizeof(message));
       deviceUDP.endPacket();
-      // EXT_LOGD(MB_TAG, "UDP packet written (%s -> %d)", message.name.c_str(), WiFi.localIP()[3]);
 
-      updateDevices(message.name.c_str(), WiFi.localIP());
+      IPAddress activeIP = WiFi.localIP() ? WiFi.localIP() : ETH.localIP();
+      // EXT_LOGD(MB_TAG, "UDP packet written (%s -> %d)", message.name.c_str(), activeIP[3]);
+      updateDevices(message.name.c_str(), activeIP);
     }
   }
 };

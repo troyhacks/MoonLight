@@ -1,4 +1,14 @@
-// In a new file: lib/framework/SharedHttpEndpoint.h
+/**
+    @title     MoonBase
+    @file      SharedHttpEndpoint.h
+    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
+    @Authors   https://github.com/MoonModules/MoonLight/commits/main
+    @Doc       https://moonmodules.org/MoonLight/moonbase/overview/
+    @Copyright © 2025 Github MoonLight Commit Authors
+    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
+**/
+
 #ifndef SharedHttpEndpoint_h
 #define SharedHttpEndpoint_h
 

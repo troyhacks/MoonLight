@@ -50,7 +50,7 @@
 #endif
 
 #ifndef FACTORY_AP_CHANNEL
-#define FACTORY_AP_CHANNEL 1
+#define FACTORY_AP_CHANNEL 6 // 🌙: See https://github.com/wled/WLED/commit/fc7993f4a7241739d1878df25fd4600100abc506
 #endif
 
 #ifndef FACTORY_AP_SSID_HIDDEN

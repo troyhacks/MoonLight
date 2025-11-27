@@ -1,4 +1,14 @@
-// src/MoonBase/SharedFSPersistence.h
+/**
+    @title     MoonBase
+    @file      SharedFSPersistence.h
+    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
+    @Authors   https://github.com/MoonModules/MoonLight/commits/main
+    @Doc       https://moonmodules.org/MoonLight/moonbase/overview/
+    @Copyright © 2025 Github MoonLight Commit Authors
+    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
+**/
+
 #ifndef SharedFSPersistence_h
 #define SharedFSPersistence_h
 
@@ -60,7 +70,7 @@ class SharedFSPersistence {
   void enableUpdateHandler(const String& moduleName) {
     auto it = _modules.find(moduleName);
     if (it != _modules.end() && !it->second.updateHandlerId) {
-      it->second.updateHandlerId = it->second.module->addUpdateHandler([this, moduleName](const String& originId) { writeToFS(moduleName); }, false);
+      it->second.updateHandlerId = it->second.module->addUpdateHandler([this, module = it->second.module](const String& originId) { writeToFS(module->_moduleName); }, false);
     }
   }
 

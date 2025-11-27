@@ -96,7 +96,7 @@ class ModuleTasks : public Module {
       }
 
       Char<32> summary;
-      summary.format("%s %d%% @ P%d", state, 100 * ts->ulRunTimeCounter / totalRunTime, ts->uxCurrentPriority);
+      summary.format("%s %d%% @ P%d", state, (uint32_t)(100ULL * ts->ulRunTimeCounter / totalRunTime), ts->uxCurrentPriority);
 
       task["name"] = ts->pcTaskName;
       task["summary"] = summary.c_str();

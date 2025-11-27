@@ -261,12 +261,13 @@ class ScrollingTextEffect : public Node {
         choice = (millis() / 1000 % 9) + 1;
     }
 
+    IPAddress activeIP = WiFi.localIP() ? WiFi.localIP() : ETH.localIP();
     switch (choice) {
     case 1:
       text.format("%s", textIn);
       break;
     case 2:
-      text.format(".%d", WiFi.localIP()[3]);
+      text.format(".%d", activeIP[3]);
       break;
     case 3:
       text.format("%ds", sharedData.fps);
