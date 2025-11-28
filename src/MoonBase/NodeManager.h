@@ -28,7 +28,7 @@ class NodeManager : public Module {
 
   std::vector<Node*, VectorRAMAllocator<Node*>>* nodes;
 
-  NodeManager(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module(moduleName, server, sveltekit) {
+  NodeManager(const String& moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module(moduleName, server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
@@ -76,12 +76,12 @@ class NodeManager : public Module {
     });
   }
 
-  virtual void addNodes(JsonArray values) {}
+  virtual void addNodes(const JsonArray& values) const {}
 
-  virtual Node* addNode(const uint8_t index, const char* name, const JsonArray controls) { return nullptr; }
+  virtual Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const { return nullptr; }
 
   // define the data model
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;       // state.data has one or more properties
     JsonArray details = root;  // if a property is an array, this is the details of the array

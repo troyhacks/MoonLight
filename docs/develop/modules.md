@@ -38,7 +38,7 @@ ModuleDemo(PsychicHttpServer *server
     * Initialy create the module data
 
 ```cpp
-void setupDefinition(JsonArray root) override{
+void setupDefinition(const JsonArray& root) override{
     JsonObject control; // state.data has one or more properties
     JsonArray details; // if a control is an array, this is the details of the array
     JsonArray values; // if a control is a select, this is the values of the select

@@ -75,7 +75,7 @@ class ModuleDrivers : public NodeManager {
     _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
   }
 
-  void addNodes(JsonArray values) override {
+  void addNodes(const JsonArray& values) const override {
     // Layouts, Most used first
     values.add(getNameAndTags<PanelLayout>());
     values.add(getNameAndTags<PanelsLayout>());
@@ -101,7 +101,7 @@ class ModuleDrivers : public NodeManager {
     values.add(getNameAndTags<SE16Layout>());
   }
 
-  Node* addNode(const uint8_t index, const char* name, const JsonArray controls) override {
+  Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {
     Node* node = nullptr;
 
     // Layouts, most used first

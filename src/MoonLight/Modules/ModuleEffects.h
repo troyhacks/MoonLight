@@ -57,7 +57,7 @@ class ModuleEffects : public NodeManager {
     };
   }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;  // state.data has one or more properties
     JsonArray values;     // if a property is a select, this is the values of the select
@@ -87,7 +87,7 @@ class ModuleEffects : public NodeManager {
     NodeManager::setupDefinition(root);
   }
 
-  void addNodes(JsonArray values) override {
+  void addNodes(const JsonArray& values) const override {
     // keep the order the same as in https://moonmodules.org/MoonLight/moonlight/effects
 
     // MoonLight effects, Solid first then alphabetically
@@ -159,7 +159,7 @@ class ModuleEffects : public NodeManager {
     rootFolder.close();
   }
 
-  Node* addNode(const uint8_t index, const char* name, const JsonArray controls) override {
+  Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {
     Node* node = nullptr;
 
     // MoonLight effects, Solid first then alphabetically

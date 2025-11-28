@@ -67,7 +67,7 @@ class SharedWebSocketServer {
           DeserializationError error = deserializeJson(doc, (char*)frame->payload, frame->len);
           if (!error && doc.is<JsonObject>()) {
             JsonObject obj = doc.as<JsonObject>();
-            module->update(obj, ModuleState::update, "wsserver");
+            module->update(obj, ModuleState::update, WEB_SOCKET_ORIGIN);
             return ESP_OK;
           }
         }

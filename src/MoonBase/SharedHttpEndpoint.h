@@ -46,8 +46,7 @@ class SharedHttpEndpoint {
     ESP_LOGV(SVK_TAG, "Registered HTTP endpoint: %s", path.c_str());
   }
 
-  void begin() {
-  }
+  void begin() {}
 
  private:
   esp_err_t handleGet(PsychicRequest* request) {

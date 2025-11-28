@@ -30,7 +30,7 @@ class ExampleEffect : public Node {
     addControl(intensity, "intensity", "slider");
   }
 
-  void onSizeChanged(Coord3D prevSize) override {}  // e.g. realloc variables
+  void onSizeChanged(const Coord3D& prevSize) override {}  // e.g. realloc variables
 
   void onUpdate(const Char<20>& oldValue, const JsonObject control) {
     // add your custom onUpdate code here

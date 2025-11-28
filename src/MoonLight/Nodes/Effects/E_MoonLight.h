@@ -1234,7 +1234,7 @@ class MoonManEffect : public Node {
 
   void setup() override { canvas = new M5Canvas(&M5.Display); }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     // Create canvas for processing
     canvas->deleteSprite();
     canvas->createSprite(layer->size.x, layer->size.y);

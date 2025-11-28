@@ -16,7 +16,7 @@
   #include "MoonBase/Utilities.h"
 
 // recursively fill a fileArray with all files and folders on the FS
-void addFolder(File folder, bool showHidden, JsonArray fileArray) {
+void addFolder(File folder, bool showHidden, const JsonArray& fileArray) {
   folder.rewindDirectory();
   while (true) {
     File file = folder.openNextFile();

@@ -30,7 +30,7 @@ class BouncingBallsEffect : public Node {
 
   ~BouncingBallsEffect() override { freeMB(balls); }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     freeMB(balls);
     balls = allocMB<Ball[maxNumBalls]>(layer->size.y);
 
@@ -337,7 +337,7 @@ class GEQEffect : public Node {
     Node::~Node();
   }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     freeMB(previousBarHeight);
     previousBarHeight = allocMB<uint16_t>(layer->size.x);
     if (!previousBarHeight) {

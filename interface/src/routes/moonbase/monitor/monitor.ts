@@ -6,8 +6,8 @@ import { mat4 } from 'gl-matrix';
 let uMVPLocation: WebGLUniformLocation | null = null;
 
 let gl: WebGLRenderingContext | null = null;
-let program: WebGLProgram | null = null;
-let positionBuffer: WebGLBuffer | null = null;
+let program: WebGLProgram;
+let positionBuffer: WebGLBuffer;
 
 export let vertices: number[] = [];
 export let colors: number[] = [];
@@ -16,20 +16,20 @@ export let colors: number[] = [];
 let matrixWidth: number = 1;
 let matrixHeight: number = 1;
 
-let colorBuffer: WebGLBuffer | null = null; // Buffer for color data
+let colorBuffer: WebGLBuffer; // Buffer for color data
 
 export function createScene(el: HTMLCanvasElement) {
-      // Initialize WebGL
-      gl = el.getContext("webgl");
-      if (!gl) {
-          console.error("WebGL not supported");
-          return;
-      }
+  // Initialize WebGL
+  gl = el.getContext("webgl");
+  if (!gl) {
+    console.error("WebGL not supported");
+    return;
+  }
 
-      clearVertices();
+  clearVertices();
 
-      // Set up shaders
-      const vertexShaderSource = `
+  // Set up shaders
+  const vertexShaderSource = `
   precision mediump float;
   attribute vec3 aPosition;
   attribute vec4 aColor; // Color attribute
@@ -42,7 +42,7 @@ export function createScene(el: HTMLCanvasElement) {
     vColor = aColor; // Pass the color to the fragment shader
   }
   `;
-      const fragmentShaderSource = `
+  const fragmentShaderSource = `
   precision mediump float;
     varying vec4 vColor;
 
@@ -51,47 +51,48 @@ export function createScene(el: HTMLCanvasElement) {
     }
       `;
 
-      const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-      const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-      program = createProgram(gl, vertexShader, fragmentShader);
-      gl.useProgram(program);
+  program = createProgram(gl, vertexShader, fragmentShader);
+  gl.useProgram(program);
 
-      uMVPLocation = gl.getUniformLocation(program, "uMVP");
+  uMVPLocation = gl.getUniformLocation(program, "uMVP");
 
-      // Set up position buffer
-      positionBuffer = gl.createBuffer();
-      const positionAttributeLocation = gl.getAttribLocation(program, "aPosition");
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      gl.enableVertexAttribArray(positionAttributeLocation);
-      gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+  // Set up position buffer
+  positionBuffer = gl.createBuffer();
+  const positionAttributeLocation = gl.getAttribLocation(program, "aPosition");
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.enableVertexAttribArray(positionAttributeLocation);
+  gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 
-      // Set up color buffer
-      colorBuffer = gl.createBuffer();
-      const colorAttributeLocation = gl.getAttribLocation(program, "aColor");
-      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-      gl.enableVertexAttribArray(colorAttributeLocation);
-      gl.vertexAttribPointer(colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
+  // Set up color buffer
+  colorBuffer = gl.createBuffer();
+  const colorAttributeLocation = gl.getAttribLocation(program, "aColor");
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.enableVertexAttribArray(colorAttributeLocation);
+  gl.vertexAttribPointer(colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
 
-      // Set up WebGL viewport
-      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-      gl.clearColor(0, 0, 0, 1);
-      gl.enable(gl.DEPTH_TEST);
+  // Set up WebGL viewport
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.clearColor(0, 0, 0, 1);
+  gl.enable(gl.DEPTH_TEST);
 }
 
 const createShader = (gl: WebGLRenderingContext, type: number, source: string): WebGLShader => {
   const shader = gl.createShader(type);
-  if (!shader) {
-    throw new Error("Unable to create shader");
-  }
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+  if (shader) {
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       console.error(gl.getShaderInfoLog(shader));
       gl.deleteShader(shader);
       throw new Error("Shader compilation failed");
+    }
+    return shader;
   }
-  return shader;
+  else
+    throw new Error("Unable to create shader");
 };
 
 const createProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram => {
@@ -100,9 +101,9 @@ const createProgram = (gl: WebGLRenderingContext, vertexShader: WebGLShader, fra
   gl.attachShader(program, fragmentShader);
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error(gl.getProgramInfoLog(program));
-      gl.deleteProgram(program);
-      throw new Error("Program linking failed");
+    console.error(gl.getProgramInfoLog(program));
+    gl.deleteProgram(program);
+    throw new Error("Program linking failed");
   }
   return program;
 };
@@ -122,13 +123,11 @@ export function setMatrixDimensions(width: number, height: number) {
 }
 
 export const updateScene = (vertices: number[], colors: number[]) => {
-  if (!gl || !positionBuffer || !colorBuffer) return; 
+  if (!gl) return;
 
-    // Set the MVP matrix
+  // Set the MVP matrix
   const mvp = getMVPMatrix();
-  if (uMVPLocation) {
-    gl.uniformMatrix4fv(uMVPLocation, false, mvp);
-  }
+  gl.uniformMatrix4fv(uMVPLocation, false, mvp);
 
   // Bind the position buffer and upload the vertex data
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -148,6 +147,7 @@ export const updateScene = (vertices: number[], colors: number[]) => {
 function getMVPMatrix(): mat4 {
   const canvas = gl!.canvas as HTMLCanvasElement;
   const canvasAspect = canvas.width / canvas.height;
+
   const fov = Math.PI / 6; // 30 degrees
   const near = 0.1;
   const far = 100.0;
@@ -155,28 +155,24 @@ function getMVPMatrix(): mat4 {
   const projection = mat4.create();
   mat4.perspective(projection, fov, canvasAspect, near, far);
 
+  // Normalize the matrix dimensions to a unit square/rectangle
+  // Use the larger dimension as the base
+  const maxDim = Math.max(matrixWidth, matrixHeight);
+  const normalizedWidth = matrixWidth / maxDim;
+  const normalizedHeight = matrixHeight / maxDim;
+
   // Calculate the required camera distance to fit the matrix in view
-  const matrixAspect = matrixWidth / matrixHeight;
-  
-  // The object will be scaled by matrixAspect in X direction and 1 in Y direction
-  // We need to fit the larger dimension in the view
-  // Calculate the size of the object after scaling
-  const objectWidth = matrixAspect;
-  const objectHeight = 1;
-  
   // Determine which dimension is limiting based on canvas aspect
-  // The vertical FOV determines how much we see vertically
-  // The horizontal FOV is: horizontal = 2 * atan(tan(vertical/2) * aspect)
-  const verticalSize = objectHeight;
-  const horizontalSize = objectWidth;
-  
+  const verticalSize = normalizedHeight;
+  const horizontalSize = normalizedWidth;
+
   // Calculate required distance for vertical fit
   const distanceForHeight = verticalSize / (2 * Math.tan(fov / 2));
-  
+
   // Calculate required distance for horizontal fit
   const horizontalFov = 2 * Math.atan(Math.tan(fov / 2) * canvasAspect);
   const distanceForWidth = horizontalSize / (2 * Math.tan(horizontalFov / 2));
-  
+
   // Use the larger distance to ensure both dimensions fit
   const cameraDistance = Math.max(distanceForHeight, distanceForWidth) * 2.5; // 1.2 adds some padding
 
@@ -184,9 +180,9 @@ function getMVPMatrix(): mat4 {
   mat4.lookAt(view, [0, 0, cameraDistance], [0, 0, 0], [0, 1, 0]);
 
   const model = mat4.create();
-  
-  // Scale by the matrix aspect ratio to get correct proportions
-  mat4.scale(model, model, [matrixAspect, 1, 1]);
+
+  // Scale by the normalized dimensions to get correct proportions
+  mat4.scale(model, model, [normalizedWidth, normalizedHeight, 1]);
 
   const mvp = mat4.create();
   mat4.multiply(mvp, projection, view);

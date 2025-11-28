@@ -179,7 +179,7 @@ class GameOfLifeEffect : public Node {
     freeMB(cellColors);
   }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     dataSize = ((layer->size.x * layer->size.y * layer->size.z + 7) / 8);
 
     freeMB(cells);

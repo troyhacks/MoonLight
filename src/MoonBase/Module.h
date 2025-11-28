@@ -101,10 +101,10 @@ class ModuleState {
   void setupData();
 
   // called from ModuleState::update and ModuleState::setupData()
-  bool compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
+  bool compareRecursive(const JsonString& parent, const JsonVariant& oldData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
 
   // called from ModuleState::update
-  bool checkReOrderSwap(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
+  bool checkReOrderSwap(const JsonString& parent, const JsonVariant& oldData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
 
   std::function<void(const UpdatedItem&)> processUpdatedItem = nullptr;
 
@@ -129,7 +129,6 @@ class ModuleState {
   bool getUpdate() {
     if (xSemaphoreTake(updateReadySem, 0) == pdTRUE) {
       if (processUpdatedItem) processUpdatedItem(updatedItem);
-
       xSemaphoreGive(updateProcessedSem);
       return true;  // Update retrieved
     }
@@ -141,7 +140,7 @@ class Module : public StatefulService<ModuleState> {
  public:
   String _moduleName = "";
 
-  Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
+  Module(const String& moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
 
   // any Module that overrides begin() must continue to call Module::begin() (e.g., at the start of its own begin()
   virtual void begin();
@@ -167,9 +166,9 @@ class Module : public StatefulService<ModuleState> {
     }
   }
 
-  virtual void setupDefinition(JsonArray root);
+  virtual void setupDefinition(const JsonArray& root);
 
-  JsonObject addControl(JsonArray root, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
+  JsonObject addControl(const JsonArray& root, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
 
   // called in compareRecursive->execOnUpdate
   // called from compareRecursive

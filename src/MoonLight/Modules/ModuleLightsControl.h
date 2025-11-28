@@ -82,7 +82,7 @@ class ModuleLightsControl : public Module {
   }
 
   // define the data model
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;       // state.data has one or more properties
     JsonArray details = root;  // if a property is an array, this is the details of the array

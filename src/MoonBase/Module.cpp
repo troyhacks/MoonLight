@@ -66,7 +66,7 @@ void ModuleState::read(ModuleState& state, JsonObject& root) {
   root.set(state.data);  // copy
 }
 
-bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
+bool ModuleState::checkReOrderSwap(const JsonString& parent, const JsonVariant& stateData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
   bool changed = false;
   // check if root is a reordering of state
   // if so reorder state, no comparison with updates needed
@@ -126,7 +126,7 @@ bool ModuleState::checkReOrderSwap(JsonString parent, JsonVariant stateData, Jso
   return changed;
 }
 
-bool ModuleState::compareRecursive(JsonString parent, JsonVariant stateData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
+bool ModuleState::compareRecursive(const JsonString& parent, const JsonVariant& stateData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
   bool changed = false;
   for (JsonPair newProperty : newData.as<JsonObject>()) {
     if (stateData[newProperty.key()].isNull()) {
@@ -296,7 +296,7 @@ StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state, cons
 // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
 // For each Module (about 15 in total, a number of endpoints and websocketserver is created)
 
-Module::Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
+Module::Module(const String& moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
     : _socket(sveltekit->getSocket()),
       _fsPersistence(ModuleState::read, ModuleState::update, this, sveltekit->getFS(), String("/.config/" + moduleName + ".json").c_str(), true)  // 🌙 true: delayedWrites
 {
@@ -340,7 +340,7 @@ void Module::begin() {
 // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
 // setupDefinition defines for each module, the json info of all fields
 
-void Module::setupDefinition(JsonArray root) {  // virtual so it can be overriden in derived classes
+void Module::setupDefinition(const JsonArray& root) {  // virtual so it can be overriden in derived classes
   EXT_LOGW(MB_TAG, "not implemented");
   JsonObject property;  // state.data has one or more properties
   JsonArray details;    // if a property is an array, this is the details of the array
@@ -352,7 +352,7 @@ void Module::setupDefinition(JsonArray root) {  // virtual so it can be override
   property["default"] = "MoonLight";
 }
 
-JsonObject Module::addControl(JsonArray root, const char* name, const char* type, int min, int max, bool ro, const char* desc) {
+JsonObject Module::addControl(const JsonArray& root, const char* name, const char* type, int min, int max, bool ro, const char* desc) {
   JsonObject control = root.add<JsonObject>();
   control["name"] = name;
   control["type"] = type;

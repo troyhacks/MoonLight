@@ -58,7 +58,7 @@ struct Coord3D {
   }
 
   // comparisons
-  bool operator!=(Coord3D rhs) {
+  bool operator!=(const Coord3D& rhs) {
     return x != rhs.x || y != rhs.y || z != rhs.z;
     // return !(*this==rhs);
   }
@@ -161,7 +161,15 @@ template <size_t N>
 struct Char {
   char s[N] = "";
 
-  // assign
+  // Constructors
+  Char() = default;                                      // Keep default constructor
+  Char(const char* str) { strlcpy(s, str, sizeof(s)); }  // Constructor to allow initialization from string literal
+  template <size_t M>
+  Char(const Char<M>& other) {  // Converting constructor from different-sized Char
+    strlcpy(s, other.c_str(), sizeof(s));
+  }
+
+  // assign operators
   Char& operator=(const char* rhs) {
     // if (strlen(rhs) >= N) EXT_LOGW("Char", "Truncating '%s' from %d to %d chars", rhs, strlen(rhs), N - 1);
     strlcpy(s, rhs, sizeof(s));
@@ -180,15 +188,30 @@ struct Char {
       return (*this = "");
   }
   Char& operator=(const String& rhs) { return (*this = rhs.c_str()); }
-
-  // concat
-  Char& operator+(const char* rhs) {
-    strlcat(s, rhs, sizeof(s));
-    return *this;
+  // FIX: Make this accept ANY size Char, not just same size
+  template <size_t M>
+  Char& operator=(const Char<M>& rhs) {
+    return (*this = rhs.c_str());
   }
-  Char& operator+(const String& rhs) {
-    strlcat(s, rhs.c_str(), sizeof(s));
-    return *this;
+
+  // conversion
+  // operator const char*() const { return s; }
+  // Or explicit to avoid implicit conversions:
+  explicit operator const char*() const { return s; }
+
+  // concat operators
+  // Char& operator+(const char* rhs) {
+  //   strlcat(s, rhs, sizeof(s));
+  //   return *this;
+  // }
+  // Char& operator+(const String& rhs) {
+  //   strlcat(s, rhs.c_str(), sizeof(s));
+  //   return *this;
+  // }
+  Char operator+(const char* rhs) const {
+    Char result(*this);
+    result += rhs;
+    return result;
   }
   Char& operator+=(const char* rhs) {
     strlcat(s, rhs, sizeof(s));
@@ -205,19 +228,15 @@ struct Char {
     return *this;
   }
 
-  // compare
+  // compare operators
   bool operator==(const char* rhs) const { return strcmp(s, rhs) == 0; }
   bool operator==(const Char& rhs) const { return strcmp(s, rhs.s) == 0; }
   bool operator!=(const char* rhs) const { return strcmp(s, rhs) != 0; }
 
-  bool contains(const char* rhs) { return strnstr(s, rhs, sizeof(s)) != nullptr; }
+  char operator[](const uint16_t indexV) const { return s[indexV]; }
 
-  size_t indexOf(const char* token) { return strnstr(s, token, sizeof(s)) - s; }
-
-  char operator[](const uint16_t indexV) { return s[indexV]; }
-
-  Char<32> substring(uint16_t begin, uint16_t end = sizeof(s) - 1) {
-    Char<32> sub;
+  Char<N> substring(uint16_t begin, uint16_t end = sizeof(s) - 1) {
+    Char<N> sub;
     if (begin >= sizeof(s) || end >= sizeof(s))
       sub = "";
     else {
@@ -226,10 +245,15 @@ struct Char {
     return sub;
   }
 
-  size_t length() { return strnlen(s, sizeof(s)); }
-
-  int toInt() { return atoi(s); }
-  float toFloat() { return atof(s); }
+  size_t length() const { return strnlen(s, sizeof(s)); }
+  int toInt() const { return atoi(s); }
+  float toFloat() const { return atof(s); }
+  bool contains(const char* rhs) const { return strnstr(s, rhs, sizeof(s)) != nullptr; }
+  size_t indexOf(const char* token) const {
+    const char* pos = strnstr(s, token, sizeof(s));
+    return pos ? (pos - s) : std::string::npos;  // or SIZE_MAX
+  }
+  const char* c_str() const { return s; }
 
   Char& format(const char* format, ...) {
     va_list args;
@@ -238,8 +262,6 @@ struct Char {
     va_end(args);
     return *this;
   }
-
-  const char* c_str() const { return s; }
 
   void split(const char* splitter, std::function<void(const char*, uint8_t)> callback) {
     char savedS[N];
@@ -264,6 +286,16 @@ struct Char {
     return nullptr;
   }
 };
+
+// ADD: Non-member operator+ for string + Char
+// template outside the class
+template <size_t N>
+Char<N> operator+(const char* lhs, const Char<N>& rhs) {
+  Char<N> result;
+  strlcpy(result.s, lhs, sizeof(result.s));
+  strlcat(result.s, rhs.c_str(), sizeof(result.s));
+  return result;
+}
 
 // Example of split:
 // Char<32> test;

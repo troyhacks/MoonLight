@@ -30,7 +30,7 @@ class ModuleDevices : public Module {
 
   ModuleDevices(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("devices", server, sveltekit) { EXT_LOGV(MB_TAG, "constructor"); }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more properties
     JsonArray details;   // if a control is an array, this is the details of the array

@@ -21,7 +21,7 @@ class ModuleChannels : public Module {
  public:
   ModuleChannels(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("channels", server, sveltekit) { EXT_LOGV(ML_TAG, "constructor"); }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
 
     JsonObject property;  // state.data has one or more properties

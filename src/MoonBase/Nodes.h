@@ -72,7 +72,7 @@ class Node {
   // effect, layout and modifier
 
   template <class ControlType>
-  JsonObject addControl(ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr) {
+  JsonObject addControl(const ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr) {
     uint32_t pointer = (uint32_t)&variable;
 
     bool newControl = false;  // flag to check if control is new or already exists
@@ -169,7 +169,7 @@ class Node {
   // effect, layout and modifier (?)
   virtual void loop() {}
   virtual void loop20ms() {}
-  virtual void onSizeChanged(Coord3D oldSize) {}  // virtual/effect nodes: virtual size, physical/driver nodes: physical size
+  virtual void onSizeChanged(const Coord3D& oldSize) {}  // virtual/effect nodes: virtual size, physical/driver nodes: physical size
 
   // layout
   virtual void onLayout() {}  // the definition of the layout, called by mapLayout()

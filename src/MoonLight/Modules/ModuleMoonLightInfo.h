@@ -19,7 +19,7 @@ class ModuleMoonLightInfo : public Module {
  public:
   ModuleMoonLightInfo(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("moonlightinfo", server, sveltekit) { EXT_LOGV(ML_TAG, "constructor"); }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;  // state.data has one or more properties
     JsonArray details;    // if a property is an array, this is the details of the array
