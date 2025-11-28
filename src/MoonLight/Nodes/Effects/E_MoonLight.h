@@ -113,7 +113,7 @@ class LinesEffect : public Node {
   void setup() override { addControl(bpm, "bpm", "slider"); }
 
   void loop() override {
-    int frameNr;
+    int frameNr = 0;
 
     layer->fadeToBlackBy(255);
 
@@ -261,7 +261,7 @@ class ScrollingTextEffect : public Node {
         choice = (millis() / 1000 % 9) + 1;
     }
 
-    IPAddress activeIP = WiFi.localIP() ? WiFi.localIP() : ETH.localIP();
+    IPAddress activeIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
     switch (choice) {
     case 1:
       text.format("%s", textIn);
@@ -614,10 +614,10 @@ class FreqSawsEffect : public Node {
     values.add("Chaos fix");
     values.add("BandPhases");
 
-    memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
-    memset(bandPhase, 0, NUM_GEQ_CHANNELS);
-    memset(lastBpm, 0, NUM_GEQ_CHANNELS);
-    memset(phaseOffset, 0, NUM_GEQ_CHANNELS);
+    memset(bandSpeed, 0, sizeof(bandSpeed));
+    memset(bandPhase, 0, sizeof(bandPhase));
+    memset(lastBpm, 0, sizeof(lastBpm));
+    memset(phaseOffset, 0, sizeof(phaseOffset));
 
     lastTime = millis();
   }

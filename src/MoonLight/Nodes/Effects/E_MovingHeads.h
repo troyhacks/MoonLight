@@ -346,7 +346,7 @@ class AmbientMoveEffect : public Node {
     addControl(panBPM, "panBPM", "slider");
     addControl(invert, "invert", "checkbox");
 
-    memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
+    memset(bandSpeed, 0, sizeof(bandSpeed));
   }
 
   uint16_t bandSpeed[NUM_GEQ_CHANNELS];

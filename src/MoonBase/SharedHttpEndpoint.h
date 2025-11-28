@@ -89,7 +89,7 @@ class SharedHttpEndpoint {
 
   Module* findModule(const String& path) {
     for (Module* module : modules) {
-      if (contains(path.c_str(), module->_moduleName.c_str())) return module;
+      if (path.endsWith(module->_moduleName.c_str())) return module;
     }
     return nullptr;
   }

@@ -94,12 +94,14 @@ class FastLEDDriver : public Node {
       //     return;
       // }
 
-      if (layerP.nrOfLedPins == 0) return;
+      uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
 
-      EXT_LOGD(ML_TAG, "nrOfLedPins #:%d", layerP.nrOfLedPins);
+      if (nrOfPins == 0) return;
+
+      EXT_LOGD(ML_TAG, "nrOfLedPins #:%d", nrOfPins);
 
       uint16_t startLed = 0;
-      for (uint8_t pinIndex = 0; pinIndex < layerP.nrOfLedPins && pinIndex < 4; pinIndex++) {  // FastLED RMT supports max 4 pins!
+      for (uint8_t pinIndex = 0; pinIndex < nrOfPins && pinIndex < 4; pinIndex++) {  // FastLED RMT supports max 4 pins!
         EXT_LOGD(ML_TAG, "ledPin s:%d #:%d p:%d", pinIndex, layerP.ledsPerPin[pinIndex]);
 
         uint16_t nrOfLights = layerP.ledsPerPin[pinIndex];

@@ -78,8 +78,8 @@ class GameOfLifeEffect : public Node {
     else if (ruleset == 6)
       ruleString = "B367/S23";  // DrighLife
 
-    memset(birthNumbers, 0, sizeof(bool) * 9);
-    memset(surviveNumbers, 0, sizeof(bool) * 9);
+    memset(birthNumbers, 0, sizeof(birthNumbers));
+    memset(surviveNumbers, 0, sizeof(surviveNumbers));
 
     // Rule String Parsing
     int slashIndex = ruleString.indexOf('/');

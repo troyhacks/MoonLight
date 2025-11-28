@@ -37,7 +37,7 @@ class AudioSyncDriver : public Node {
     }
 
     if (sync.read()) {
-      memcpy(sharedData.bands, sync.fftResult, NUM_GEQ_CHANNELS);
+      memcpy(sharedData.bands, sync.fftResult, sizeof(sharedData.bands));
       sharedData.volume = sync.volumeSmth;
       sharedData.volumeRaw = sync.volumeRaw;
       sharedData.majorPeak = sync.FFT_MajorPeak;

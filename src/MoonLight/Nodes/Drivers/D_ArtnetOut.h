@@ -84,7 +84,7 @@ class ArtNetOutDriver : public DriverNode {
     LightsHeader* header = &layer->layerP->lights.header;
 
     // continue with Art-Net code
-    IPAddress activeIP = WiFi.localIP() ? WiFi.localIP() : ETH.localIP();
+    IPAddress activeIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
     controllerIP = activeIP;
     controllerIP[3] = controllerIP3;
     if (!controllerIP) return;

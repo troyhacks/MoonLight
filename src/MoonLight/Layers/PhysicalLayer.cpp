@@ -75,7 +75,7 @@ void PhysicalLayer::loop20ms() {
 }
 
 void PhysicalLayer::loopDrivers() {
-  //run mapping in the driver task
+  // run mapping in the driver task
 
   if (requestMapPhysical) {
     EXT_LOGD(ML_TAG, "mapLayout physical requested");
@@ -133,7 +133,7 @@ void PhysicalLayer::onLayoutPre() {
     memset(lights.channels, 0, lights.maxChannels);  // set all the channels to 0
     // dealloc pins
     if (!monitorPass) {
-      memset(ledsPerPin, UINT16_MAX, sizeof(ledsPerPin));
+      memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX
     }
   } else if (pass == 2) {
     indexP = 0;
@@ -176,14 +176,15 @@ void PhysicalLayer::nextPin() {
   if (pass == 1 && !monitorPass) {
     uint16_t prevNrOfLights = 0;
     uint8_t i = 0;
-    while (ledsPerPin[i] != UINT16_MAX && i < sizeof(ledsPerPin)) {
+    while (i < MAXLEDPINS && ledsPerPin[i] != UINT16_MAX) {
       prevNrOfLights += ledsPerPin[i];
       i++;
     }
     // ledsPerPin[i] is the first empty slot
-    if (i < sizeof(ledsPerPin)) {
+    if (i < MAXLEDPINS) {
       ledsPerPin[i] = lights.header.nrOfLights - prevNrOfLights;
-      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d", i, ledsPerPin[i]);
+      nrOfAssignedPins = i + 1;
+      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d of %d", i, ledsPerPin[i], MAXLEDPINS);
     }
   }
 }

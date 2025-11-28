@@ -76,7 +76,10 @@ class SharedWebSocketServer {
     });
 
     // ADDED: Better logging in onClose
-    _handler.onClose([this](PsychicWebSocketClient* client) { ESP_LOGI(SVK_TAG, "ws[%s][%u] disconnect", client->remoteIP().toString().c_str(), client->socket()); });
+    _handler.onClose([this](PsychicWebSocketClient* client) {
+      ESP_LOGI(SVK_TAG, "ws[%s][%u] disconnect", client->remoteIP().toString().c_str(), client->socket());
+      _initializedSockets.erase(client->socket());
+    });
 
     _server->on("/ws/*", &_handler);
   }
@@ -114,7 +117,7 @@ class SharedWebSocketServer {
 
   Module* findModule(const String& path) {
     for (Module* module : modules) {
-      if (contains(path.c_str(), module->_moduleName.c_str())) return module;
+      if (path.endsWith(module->_moduleName.c_str())) return module;
     }
     return nullptr;
   }

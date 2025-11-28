@@ -37,7 +37,7 @@ class NodeManager : public Module {
   void begin() {
     Module::begin();
     // if (false)
-    //if file changes, read the file and bring into state
+    // if file changes, read the file and bring into state
     // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
     _fileManager->addUpdateHandler([&](const String& originId) {
       EXT_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
@@ -148,11 +148,11 @@ class NodeManager : public Module {
         if (!updatedItem.value.isNull()) {  // if name changed // == updatedItem.value
 
           // // if old node exists then remove it's controls
-          // if (updatedItem.oldValue != "") {
-          //   // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
-          //   // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-          //   nodeState.remove("controls");  // remove the controls from the nodeState
-          // }
+          if (updatedItem.oldValue != "") {
+            // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
+            // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            nodeState.remove("controls");  // remove the controls from the nodeState
+          }
 
           // String xx;
           // serializeJson(nodeState["controls"], xx);
@@ -260,7 +260,7 @@ class NodeManager : public Module {
       else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value" && updatedItem.index[1] < nodeState["controls"].size()) {  // nodes[i].controls[j].value
         // serializeJson(nodeState["controls"][updatedItem.index[1]], Serial);
         // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-        
+
         if (updatedItem.index[0] < nodes->size()) {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
@@ -301,13 +301,12 @@ class NodeManager : public Module {
       requestUIUpdate = false;  // reset the flag
       // EXT_LOGD(ML_TAG, "requestUIUpdate");
 
-      //disable for the time being (locks _accessMutex), need to check if this is needed at all
       // update state to UI
-      // update(
-      //     [&](ModuleState& state) {
-      //       return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
-      //     },
-      //     _moduleName);
+      update(
+          [&](ModuleState& state) {
+            return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
+          },
+          _moduleName);
     }
   }
 

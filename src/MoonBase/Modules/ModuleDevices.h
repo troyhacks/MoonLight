@@ -128,7 +128,7 @@ class ModuleDevices : public Module {
       deviceUDP.write((uint8_t*)&message, sizeof(message));
       deviceUDP.endPacket();
 
-      IPAddress activeIP = WiFi.localIP() ? WiFi.localIP() : ETH.localIP();
+      IPAddress activeIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
       // EXT_LOGD(MB_TAG, "UDP packet written (%s -> %d)", message.name.c_str(), activeIP[3]);
       updateDevices(message.name.c_str(), activeIP);
     }
