@@ -30,7 +30,7 @@ class BouncingBallsEffect : public Node {
 
   ~BouncingBallsEffect() override { freeMB(balls); }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     freeMB(balls);
     balls = allocMB<Ball[maxNumBalls]>(layer->size.y);
 
@@ -143,11 +143,9 @@ class BlurzEffect : public Node {
 
     if (freqMap) {  // FreqMap mode : blob location by major frequency
       int freqLocn;
-      unsigned maxLen = (geqScanner) ? MAX(1, layer->size.x * layer->size.y * layer->size.z - 16)
-                                     : layer->size.x * layer->size.y * layer->size.z;  // usable segment length - leave 16 pixels when embedding "GEQ scan"
-      freqLocn = roundf((log10f((float)sharedData.majorPeak) - 1.78f) * float(maxLen) /
-                        (MAX_FREQ_LOG10 - 1.78f));  // log10 frequency range is from 1.78 to 3.71. Let's scale to layer->size.x * layer->size.y * layer->size.z. // WLEDMM proper rounding
-      if (freqLocn < 1) freqLocn = 0;               // avoid underflow
+      unsigned maxLen = (geqScanner) ? MAX(1, layer->size.x * layer->size.y * layer->size.z - 16) : layer->size.x * layer->size.y * layer->size.z;  // usable segment length - leave 16 pixels when embedding "GEQ scan"
+      freqLocn = roundf((log10f((float)sharedData.majorPeak) - 1.78f) * float(maxLen) / (MAX_FREQ_LOG10 - 1.78f));                                  // log10 frequency range is from 1.78 to 3.71. Let's scale to layer->size.x * layer->size.y * layer->size.z. // WLEDMM proper rounding
+      if (freqLocn < 1) freqLocn = 0;                                                                                                               // avoid underflow
       segLoc = (geqScanner) ? freqLocn + freqBand : freqLocn;
     } else if (geqScanner) {  // GEQ Scanner mode: blob location is defined by frequency band + random offset
       float bandWidth = float(layer->size.x * layer->size.y * layer->size.z) / 16.0f;
@@ -339,7 +337,7 @@ class GEQEffect : public Node {
     Node::~Node();
   }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     freeMB(previousBarHeight);
     previousBarHeight = allocMB<uint16_t>(layer->size.x);
     if (!previousBarHeight) {
@@ -377,12 +375,11 @@ class GEQEffect : public Node {
       if (remaining < 1) {
         band++;
         remaining += bandwidth;
-      }             // increase remaining but keep the current remaining
+      }  // increase remaining but keep the current remaining
       remaining--;  // consume remaining
 
       // EXT_LOGD(ML_TAG, "x %d b %d n %d w %f %f\n", x, band, NUM_BANDS, bandwidth, remaining);
-      uint8_t frBand =
-          ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS) : band;  // always use full range. comment out this line to get the previous behaviour.
+      uint8_t frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(band, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS) : band;  // always use full range. comment out this line to get the previous behaviour.
       // frBand = constrain(frBand, 0, NUM_GEQ_CHANNELS-1); //WLEDMM can never be out of bounds (I think...)
       uint16_t colorIndex = frBand * 17;               // WLEDMM 0.255
       uint16_t bandHeight = sharedData.bands[frBand];  // WLEDMM we use the original ffResult, to preserve accuracy
@@ -391,9 +388,8 @@ class GEQEffect : public Node {
       if ((pos.x > 0) && (pos.x < (layer->size.x - 1)) && (smoothBars)) {
         // get height of next (right side) bar
         uint8_t nextband = (remaining < 1) ? band + 1 : band;
-        nextband = constrain(nextband, 0, NUM_GEQ_CHANNELS - 1);  // just to be sure
-        frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(nextband, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS)
-                                                                     : nextband;  // always use full range. comment out this line to get the previous behaviour.
+        nextband = constrain(nextband, 0, NUM_GEQ_CHANNELS - 1);                                                                       // just to be sure
+        frBand = ((NUM_BANDS < NUM_GEQ_CHANNELS) && (NUM_BANDS > 1)) ? ::map(nextband, 0, NUM_BANDS, 0, NUM_GEQ_CHANNELS) : nextband;  // always use full range. comment out this line to get the previous behaviour.
         uint16_t nextBandHeight = sharedData.bands[frBand];
         // smooth Band height
         bandHeight = (7 * bandHeight + 3 * lastBandHeight + 3 * nextBandHeight) / 12;  // yeees, its 12 not 13 (10% amplification)
@@ -570,7 +566,7 @@ class PopCornEffect : public Node {
         if (useaudio) {
           if ((sharedData.volume > 1.0f)  // no pops in silence
                                           // &&((audioSync->sync.samplePeak > 0) || (audioSync->sync.volumeRaw > 128))  // try to pop at onsets (our peek detector still sucks)
-              && (random8() < 4))  // stay somewhat random
+              && (random8() < 4))         // stay somewhat random
             doPopCorn = true;
         } else {
           if (random8() < 2) doPopCorn = true;  // default POP!!!

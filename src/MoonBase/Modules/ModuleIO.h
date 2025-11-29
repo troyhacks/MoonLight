@@ -17,7 +17,7 @@
     #include "MoonBase/Module.h"
 
 enum IO_PinUsage {
-  pin_Unused, // 0
+  pin_Unused,  // 0
   pin_LED_01,
   pin_LED_02,
   pin_LED_03,
@@ -106,7 +106,7 @@ class ModuleIO : public Module {
     // #endif
   }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more controls
     JsonArray details;   // if a control is an array, this is the details of the array
@@ -388,22 +388,29 @@ class ModuleIO : public Module {
     update(object, ModuleState::update, _moduleName + "server");
   }
 
-  void onUpdate(UpdatedItem& updatedItem) override {
-    // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-    if (updatedItem.name == "boardPreset" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
-      setBoardPresetDefaults(updatedItem.value);
-    } else if (updatedItem.name == "modded" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
-      if (updatedItem.value == false) setBoardPresetDefaults(_state.data["boardPreset"]);
+  uint8_t newBoardID = UINT8_MAX;
+
+  void onUpdate(const UpdatedItem& updatedItem) override {
+    if (updatedItem.name == "boardPreset" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+      // if booting and modded is false or ! booting
+      if ((updatedItem.oldValue == "" && _state.data["modded"] == false) || updatedItem.oldValue != "") {  // only update unmodded
+        EXT_LOGD(MB_TAG, "%s %s[%d]%s[%d].%s = %s -> %s", _state.updateOriginId.c_str(), updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        newBoardID = updatedItem.value;  // run in sveltekit task
+      }
+    } else if (updatedItem.name == "modded" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+      if (updatedItem.value == false) {
+        EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+        newBoardID = _state.data["boardPreset"];  // run in sveltekit task
+      }
+    } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+      // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       // set pins to default if modded is turned off
-    } else if (updatedItem.name == "usage" && !contains(updateOriginId.c_str(), "server")) {  // not done by this module: done by UI
       JsonDocument doc;
       JsonObject object = doc.to<JsonObject>();
       object["modded"] = true;
-      update(object, ModuleState::update, _moduleName);
+      update(object, ModuleState::update, _moduleName + "server");
     }
   }
-
-  // void updateHandler(const String& originId) override { EXT_LOGD(MB_TAG, "originId: %s", originId.c_str()); }
 
   // Function to convert drive capability to string
   const char* drive_cap_to_string(gpio_drive_cap_t cap) {
@@ -418,6 +425,15 @@ class ModuleIO : public Module {
       return "STRONGEST";
     default:
       return "UNKNOWN";
+    }
+  }
+
+  void loop() override {
+    // run in sveltekit task
+    Module::loop();
+    if (newBoardID != UINT8_MAX) {
+      setBoardPresetDefaults(newBoardID);  // run from sveltekit task
+      newBoardID = UINT8_MAX;
     }
   }
 };

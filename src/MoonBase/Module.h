@@ -15,22 +15,18 @@
 #if FT_MOONBASE == 1
 
   #include <ESP32SvelteKit.h>
-  #include <EventEndpoint.h>
-  #include <EventSocket.h>
   #include <FSPersistence.h>
-  #include <HttpEndpoint.h>
   #include <PsychicHttp.h>
-  #include <WebSocketServer.h>
 
   #include "Utilities.h"
 
-// sizeof was 160 chars -> 80 -> 68
+// sizeof was 160 chars -> 80 -> 68 -> 88
 struct UpdatedItem {
-  String parent[2];   // 24 -> 32
-  uint8_t index[2];   // 2x1 = 2
-  String name;        // 16 -> 16
-  String oldValue;    // 32 -> 16, smaller then 11 bytes mostly
-  JsonVariant value;  // 8->16->4
+  Char<20> parent[2];  // 24 -> 2*20
+  uint8_t index[2];    // 2*1
+  Char<20> name;       // 16 -> 16 -> 20
+  Char<20> oldValue;   // 32 -> 16 -> 20, smaller then 11 bytes mostly
+  JsonVariant value;   // 8->16->4
 
   UpdatedItem() {
     parent[0] = "";  // will be checked in onUpdate
@@ -42,24 +38,38 @@ struct UpdatedItem {
 
 typedef std::function<void(JsonObject data)> ReadHook;
 
-static JsonDocument* doc = nullptr;  // shared document for all modules, to save RAM
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// JsonDocument* doc is used to store all definitions of fields in the modules used (about 15 modules in total). doc is a JsonArray with JsonObjects, one for each module
+
+extern JsonDocument* gModulesDoc;  // shared document for all modules, to save RAM
 
 class ModuleState {
  public:
   JsonObject data = JsonObject();  // isNull()
 
+  UpdatedItem updatedItem;
+  SemaphoreHandle_t updateReadySem;
+  SemaphoreHandle_t updateProcessedSem;
+
+  static Char<20> updateOriginId;  // static, written by ModuleState::update, no mutex needed as written by one process at a time (http mostly, sveltekit sometimes recursively)
+
   ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState constructor");
-    if (!doc) {
+    updateReadySem = xSemaphoreCreateBinary();      // assuming this will be successful
+    updateProcessedSem = xSemaphoreCreateBinary();  // assuming this will be successful
+    xSemaphoreGive(updateProcessedSem);             // Ready for first update
+
+    if (!gModulesDoc) {
       EXT_LOGD(MB_TAG, "Creating doc");
       if (psramFound())
-        doc = new JsonDocument(JsonRAMAllocator::instance());  // crashed on non psram esp32-d0
+        gModulesDoc = new JsonDocument(JsonRAMAllocator::instance());  // crashed on non psram esp32-d0
       else
-        doc = new JsonDocument();
+        gModulesDoc = new JsonDocument();
     }
-    if (doc) {
+    if (gModulesDoc) {
       // doc = new JsonDocument();
-      data = doc->add<JsonObject>();
+      data = gModulesDoc->add<JsonObject>();
       // data = doc->to<JsonObject>();
     } else {
       EXT_LOGE(MB_TAG, "Failed to create doc");
@@ -68,16 +78,22 @@ class ModuleState {
 
   ~ModuleState() {
     EXT_LOGD(MB_TAG, "ModuleState destructor");
+
     // delete data from doc
-    JsonArray arr = doc->as<JsonArray>();
-    for (size_t i = 0; i < arr.size(); i++) {
-      JsonObject obj = arr[i];
-      if (obj == data) {  // same object (identity check)
-        EXT_LOGD(MB_TAG, "Deleting data from doc");
-        arr.remove(i);
-        break;  // optional, if only one match
+    if (gModulesDoc) {
+      JsonArray arr = gModulesDoc->as<JsonArray>();
+      for (size_t i = 0; i < arr.size(); i++) {
+        JsonObject obj = arr[i];
+        if (obj == data) {  // same object (identity check)
+          EXT_LOGD(MB_TAG, "Deleting data from doc");
+          arr.remove(i);
+          break;  // optional, if only one match
+        }
       }
     }
+
+    if (updateReadySem) vSemaphoreDelete(updateReadySem);
+    if (updateProcessedSem) vSemaphoreDelete(updateProcessedSem);
   }
 
   std::function<void(JsonArray root)> setupDefinition = nullptr;
@@ -85,60 +101,93 @@ class ModuleState {
   void setupData();
 
   // called from ModuleState::update and ModuleState::setupData()
-  bool compareRecursive(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
+  bool compareRecursive(const JsonString& parent, const JsonVariant& oldData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
 
   // called from ModuleState::update
-  bool checkReOrderSwap(JsonString parent, JsonVariant oldData, JsonVariant newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
+  bool checkReOrderSwap(const JsonString& parent, const JsonVariant& oldData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth = UINT8_MAX, uint8_t index = UINT8_MAX);
 
-  std::function<void(UpdatedItem&)> execOnUpdate = nullptr;
-  std::function<void(uint8_t, uint8_t)> onReOrderSwap = nullptr;
+  std::function<void(const UpdatedItem&)> processUpdatedItem = nullptr;
 
   static void read(ModuleState& state, JsonObject& root);
-  static StateUpdateResult update(JsonObject& root, ModuleState& state);
+  static StateUpdateResult update(JsonObject& root, ModuleState& state, const String& originId);  //, const String& originId
 
   ReadHook readHook = nullptr;  // called when the UI requests the state, can be used to update the state before sending it to the UI
+
+  void postUpdate(const UpdatedItem& updatedItem) {
+    const char* taskName = pcTaskGetName(xTaskGetCurrentTaskHandle());
+
+    if (contains(taskName, "SvelteKit") || contains(taskName, "loopTask")) {  // at boot,  the loopTask starts, after that the loopTask is destroyed
+      if (processUpdatedItem) processUpdatedItem(updatedItem);
+    } else {
+      if (xSemaphoreTake(updateProcessedSem, portMAX_DELAY) == pdTRUE) {
+        this->updatedItem = updatedItem;
+        xSemaphoreGive(updateReadySem);
+      }
+    }
+  }
+  // Called by consumer side
+  bool getUpdate() {
+    if (xSemaphoreTake(updateReadySem, 0) == pdTRUE) {
+      if (processUpdatedItem) processUpdatedItem(updatedItem);
+      xSemaphoreGive(updateProcessedSem);
+      return true;  // Update retrieved
+    }
+    return false;  // Timeout
+  }
 };
 
 class Module : public StatefulService<ModuleState> {
  public:
   String _moduleName = "";
 
-  Module(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
+  Module(const String& moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
 
-  void begin();
+  // any Module that overrides begin() must continue to call Module::begin() (e.g., at the start of its own begin()
+  virtual void begin();
 
-  virtual void setupDefinition(JsonArray root);
+  // any Module that overrides loop() must continue to call Module::loop() (e.g., at the start of its own loop()
+  virtual void loop() {
+    // run in sveltekit task
 
-  JsonObject addControl(JsonArray root, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
+    _state.getUpdate();
+  }
+
+  void processUpdatedItem(const UpdatedItem& updatedItem) {
+    if (updatedItem.name == "swap") {
+      onReOrderSwap(updatedItem.index[0], updatedItem.index[1]);
+      saveNeeded = true;
+    } else {
+      if (updatedItem.oldValue != "" && updatedItem.name != "channel") {  // todo: fix the problem at channel, not here...
+        if (!_state.updateOriginId.contains("server")) {                  // only triggered by updates from front end
+          saveNeeded = true;
+        }
+      }
+      onUpdate(updatedItem);
+    }
+  }
+
+  virtual void setupDefinition(const JsonArray& root);
+
+  JsonObject addControl(const JsonArray& root, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
 
   // called in compareRecursive->execOnUpdate
   // called from compareRecursive
-  void execOnUpdate(UpdatedItem& updatedItem);
-  virtual void onUpdate(UpdatedItem& updatedItem) {};
+  virtual void onUpdate(const UpdatedItem& updatedItem) {};
   virtual void onReOrderSwap(uint8_t stateIndex, uint8_t newIndex) {};
-
-  String updateOriginId;
 
  protected:
   EventSocket* _socket;
   void readFromFS() {             // used in ModuleEffects, for live scripts...
     _fsPersistence.readFromFS();  // overwrites the default settings in state
-    //  sizeof(StatefulService<ModuleState>);
-    //  sizeof(_httpEndpoint);
-    //  sizeof(_eventEndpoint);
-    //  sizeof(_webSocketServer);
-    //  sizeof(_fsPersistence);
-    //  sizeof(_server);
   }
 
  private:
-  HttpEndpoint<ModuleState> _httpEndpoint;
-  EventEndpoint<ModuleState> _eventEndpoint;
-  WebSocketServer<ModuleState> _webSocketServer;
+  // heap-optimization: request heap optimization review
+  // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+  // This module class is used for each module, about 15 times, 1144 bytes each (allocated in main.cpp, in global memory area) + each class allocates it's own heap
+
   FSPersistence<ModuleState> _fsPersistence;
   PsychicHttpServer* _server;
-
-  void updateHandler(const String& originId);
 };
 
 #endif

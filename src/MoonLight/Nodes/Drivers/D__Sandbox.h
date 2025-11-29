@@ -28,10 +28,10 @@ class ExampleDriver : public Node {
     addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT-1);
   }
 
-  void onUpdate(String& oldValue, JsonObject control) {
+  void onUpdate(const Char<20>& oldValue, const JsonObject control) {
     // add your custom onUpdate code here
     if (control["name"] == "pin") {
-      if (control["value"] = 0) {
+      if (control["value"] == 0) {
       }
     }
   }

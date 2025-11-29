@@ -30,7 +30,7 @@ class ModuleDevices : public Module {
 
   ModuleDevices(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("devices", server, sveltekit) { EXT_LOGV(MB_TAG, "constructor"); }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more properties
     JsonArray details;   // if a control is an array, this is the details of the array
@@ -49,7 +49,7 @@ class ModuleDevices : public Module {
 
   void loop1s() {
     if (!_socket->getConnectedClients()) return;
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
 
     if (!deviceUDPConnected) return;
 
@@ -58,7 +58,7 @@ class ModuleDevices : public Module {
 
   void loop10s() {
     if (!_socket->getConnectedClients()) return;
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
 
     if (!deviceUDPConnected) {
       deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
@@ -92,7 +92,7 @@ class ModuleDevices : public Module {
     device["time"] = time(nullptr);  // time will change
 
     if (!_socket->getConnectedClients()) return;
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
 
     // sort in vector
     std::vector<JsonObject> v;
@@ -127,9 +127,10 @@ class ModuleDevices : public Module {
       message.name = esp32sveltekit.getWiFiSettingsService()->getHostname().c_str();
       deviceUDP.write((uint8_t*)&message, sizeof(message));
       deviceUDP.endPacket();
-      // EXT_LOGD(MB_TAG, "UDP packet written (%s -> %d)", message.name.c_str(), WiFi.localIP()[3]);
 
-      updateDevices(message.name.c_str(), WiFi.localIP());
+      IPAddress activeIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
+      // EXT_LOGD(MB_TAG, "UDP packet written (%s -> %d)", message.name.c_str(), activeIP[3]);
+      updateDevices(message.name.c_str(), activeIP);
     }
   }
 };

@@ -176,7 +176,7 @@ protected:
     virtual void applyDefaults()
     {
         JsonDocument jsonDocument;
-        JsonObject jsonObject = jsonDocument.as<JsonObject>();
+        JsonObject jsonObject = jsonDocument.to<JsonObject>(); // 🌙: to instead of as
         _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
     }
 };

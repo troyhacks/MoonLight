@@ -40,7 +40,7 @@ class FilesState {
 
   static void read(FilesState& settings, JsonObject& root);
 
-  static StateUpdateResult update(JsonObject& root, FilesState& filesState);
+  static StateUpdateResult update(JsonObject& root, FilesState& filesState, const String &originId);
 };
 
 class FileManager : public StatefulService<FilesState> {

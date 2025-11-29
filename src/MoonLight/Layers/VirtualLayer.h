@@ -27,6 +27,10 @@ enum mapType {
   m_count  // keep as last entry
 };
 
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// Physmap is used by mappingTable, see below
+
 struct PhysMap {
   union {
     struct {                // condensed rgb
@@ -55,6 +59,12 @@ class VirtualLayer {
   uint16_t nrOfLights = 256;
   Coord3D size = {16, 16, 1};                                    // not 0,0,0 to prevent div0 eg in Octopus2D
   Coord3D start = {0, 0, 0}, middle = size / 2, end = size - 1;  //{UINT16_MAX,UINT16_MAX,UINT16_MAX}; //default
+
+  // heap-optimization: request heap optimization review
+  // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+  // for virtual mapping mappingTable and mappingTableIndexes is used
+  // mappingTable is per default same size as the number of LEDs/lights (stored in lights.channels), see Physical layer, goal is also here to support 12288 LEDs on non PSRAM boards at least for non PSRAM board
+  // mappingTableIndexes is used of the mapping of effects to lights.channel is not 1:1 but 1:M
 
   // they will be reused to avoid fragmentation
   std::vector<PhysMap, VectorRAMAllocator<PhysMap>> mappingTable;
@@ -269,7 +279,7 @@ class VirtualLayer {
 
   void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX);
 
-  void drawLine3D(Coord3D a, Coord3D b, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) { drawLine3D(a.x, a.y, a.z, b.x, b.y, b.z, color, soft, depth); }
+  void drawLine3D(const Coord3D& a, Coord3D b, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX) { drawLine3D(a.x, a.y, a.z, b.x, b.y, b.z, color, soft, depth); }
   // to do: merge with drawLine to support 2D and 3D
   void drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, CRGB color, bool soft = false, uint8_t depth = UINT8_MAX);
 
@@ -279,7 +289,6 @@ class VirtualLayer {
   void drawCharacter(unsigned char chr, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0, uint16_t shiftChr = 0);
 
   void drawText(const char* text, int x = 0, int y = 0, uint8_t font = 0, CRGB col = CRGB::Red, uint16_t shiftPixel = 0);
-
 };
 
 #endif

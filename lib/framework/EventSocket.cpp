@@ -108,36 +108,51 @@ esp_err_t EventSocket::onFrame(PsychicWebSocketRequest *request, httpd_ws_frame 
     return ESP_OK;
 }
 
-void EventSocket::emitEvent(String event, JsonObject &jsonObject, const char *originId, bool onlyToSameOrigin)
+void EventSocket::emitEvent(const String& event, const JsonObject &jsonObject, const char *originId, bool onlyToSameOrigin)
 {
     JsonDocument doc;
     doc["event"] = event;
     doc["data"] = jsonObject;
 
-#if FT_ENABLED(EVENT_USE_JSON)
-    size_t len = measureJson(doc);
-#else
-    size_t len = measureMsgPack(doc);
-#endif
+    emitEvent(doc, originId, onlyToSameOrigin);
+}
 
-    char *output = new char[len + 1];
+// 🌙 extracted from above function so the caller can prepare the JsonDocument, which saves on heap usage
+void EventSocket::emitEvent(const JsonDocument &doc, const char *originId, bool onlyToSameOrigin)
+{
+    #if FT_ENABLED(EVENT_USE_JSON)
+        static String outBuffer;      // reused across calls to avoid repeated allocation
+        outBuffer.clear();            // keep capacity, reset length
+        outBuffer.reserve(measureJson(doc)); // pre-reserve exact size (optional, improves speed for large JSON)
+        serializeJson(doc, outBuffer);
 
-#if FT_ENABLED(EVENT_USE_JSON)
-    serializeJson(doc, output, len + 1);
-#else
-    serializeMsgPack(doc, output, len);
-#endif
+        emitEvent(doc["event"], outBuffer.c_str(), outBuffer.length(), originId, onlyToSameOrigin);
+    #else
+        // --- MsgPack path ---
+        struct VecWriter {
+            std::vector<uint8_t> &v;
+            size_t write(uint8_t c) {
+                v.push_back(c);
+                return 1;
+            }
+            size_t write(const uint8_t *buf, size_t size) {
+                v.insert(v.end(), buf, buf + size);
+                return size;
+            }
+        };
 
-    // null terminate the string
-    output[len] = '\0';
+        static std::vector<uint8_t> outBuffer;   // reuse across calls
+        outBuffer.clear();                        // reset length but keep capacity
+        outBuffer.reserve(measureMsgPack(doc));// optional: pre-reserve based on measureMsgPack
+        VecWriter writer{outBuffer};
+        serializeMsgPack(doc, writer);
 
-    emitEvent(event, output, len, originId, onlyToSameOrigin); // 🌙
-
-    delete[] output;
+        emitEvent(doc["event"], (char *)outBuffer.data(), outBuffer.size(), originId, onlyToSameOrigin);
+    #endif
 }
 
 // 🌙 extracted from above function for FT_MONITOR, which uses char *output
-void EventSocket::emitEvent(String event, char *output, size_t len, const char *originId, bool onlyToSameOrigin)
+void EventSocket::emitEvent(const String& event, const char *output, size_t len, const char *originId, bool onlyToSameOrigin)
 {
     // Only process valid events
     if (!isEventValid(event))

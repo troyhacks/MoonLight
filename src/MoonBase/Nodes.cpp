@@ -14,37 +14,45 @@
 
   #include <ESP32SvelteKit.h>  //for safeModeMB
 
-void Node::updateControl(String& oldValue, JsonObject control) {
-  // EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<String>().c_str());
-  if (oldValue == "") return;                                                              // newControl, value already set
+void Node::updateControl(const Char<20>& oldValue, const JsonObject control) {
+  // EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<const char*>());
+  // if (oldValue == "") return;                                                              // newControl, value already set
   if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) {  // name and type can be null if control is removed in compareRecursive
     int pointer = control["p"];
-    EXT_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<String>().c_str(), control["value"].as<String>().c_str(), control["type"].as<String>().c_str(), pointer);
+    EXT_LOGD(ML_TAG, "%s = %s t:%s p:%p", control["name"].as<const char*>(), control["value"].as<String>().c_str(), control["type"].as<const char*>(), (void*)pointer);
 
     if (pointer) {
       if (control["type"] == "slider" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
         if (control["size"] == 8) {
           uint8_t* valuePointer = (uint8_t*)pointer;
           *valuePointer = control["value"];
-          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<const char*>(), *valuePointer);
         } else if (control["size"] == 16) {
           uint16_t* valuePointer = (uint16_t*)pointer;
           *valuePointer = control["value"];
-          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<const char*>(), *valuePointer);
         } else if (control["size"] == 32) {
           int* valuePointer = (int*)pointer;
           *valuePointer = control["value"];
-          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<const char*>(), *valuePointer);
         } else if (control["size"] == 33) {
           float* valuePointer = (float*)pointer;
           *valuePointer = control["value"];
-          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<String>().c_str(), *valuePointer);
+          // EXT_LOGV(ML_TAG, "%s = %d", control["name"].as<const char*>(), *valuePointer);
         } else {
-          EXT_LOGW(ML_TAG, "size not supported or not set for %s: %d", control["name"].as<String>().c_str(), control["size"].as<int>());
+          EXT_LOGW(ML_TAG, "size not supported or not set for %s: %d", control["name"].as<const char*>(), control["size"].as<int>());
         }
       } else if (control["type"] == "selectFile" || control["type"] == "text") {
         char* valuePointer = (char*)pointer;
-        strncpy(valuePointer, control["value"].as<String>().c_str(), control["max"].isNull() ? 32 : control["max"]);
+        size_t maxLen = control["max"].isNull() ? 32 : control["max"].as<size_t>();
+        const char* src = control["value"].as<const char*>();
+        size_t copyLen = maxLen > 0 ? maxLen - 1 : 0;
+        if (copyLen > 0 && src) {
+          strncpy(valuePointer, src, copyLen);
+          valuePointer[copyLen] = '\0';
+        } else {
+          valuePointer[0] = '\0';
+        }
       } else if (control["type"] == "checkbox" && control["size"] == sizeof(bool)) {
         bool* valuePointer = (bool*)pointer;
         *valuePointer = control["value"].as<bool>();
@@ -52,7 +60,7 @@ void Node::updateControl(String& oldValue, JsonObject control) {
         Coord3D* valuePointer = (Coord3D*)pointer;
         *valuePointer = control["value"].as<Coord3D>();
       } else
-        EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
+        EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<const char*>(), control["type"].as<const char*>(), control["size"].as<uint8_t>());
     }
   }
 };
@@ -219,7 +227,6 @@ void LiveScriptNode::compileAndRun() {
   // send UI spinner
 
   // run the recompile not in httpd but in main loopTask (otherwise we run out of stack space)
-  //  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
   //  runInAppTask.push_back([&, animation, type, error] {
   EXT_LOGV(ML_TAG, "%s", animation);
   File file = ESPFS.open(animation);
@@ -391,10 +398,10 @@ void DriverNode::loop() {
   #endif
 }
 
-void DriverNode::onUpdate(String& oldValue, JsonObject control) {
+void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject control) {
   LightsHeader* header = &layer->layerP->lights.header;
 
-  EXT_LOGD(ML_TAG, "%s: %s ", control["name"].as<String>().c_str(), control["value"].as<String>().c_str());
+  EXT_LOGD(ML_TAG, "%s: %s ", control["name"].as<const char*>(), control["value"].as<String>().c_str());
 
   if (control["name"] == "lightPreset") {
     uint8_t oldChannelsPerLight = header->channelsPerLight;

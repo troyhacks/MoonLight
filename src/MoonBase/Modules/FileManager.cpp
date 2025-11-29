@@ -16,7 +16,7 @@
   #include "MoonBase/Utilities.h"
 
 // recursively fill a fileArray with all files and folders on the FS
-void addFolder(File folder, bool showHidden, JsonArray fileArray) {
+void addFolder(File folder, bool showHidden, const JsonArray& fileArray) {
   folder.rewindDirectory();
   while (true) {
     File file = folder.openNextFile();
@@ -55,7 +55,7 @@ void FilesState::read(FilesState& state, JsonObject& root) {
   EXT_LOGI(MB_TAG, "");
 }
 
-StateUpdateResult FilesState::update(JsonObject& root, FilesState& state) {
+StateUpdateResult FilesState::update(JsonObject& root, FilesState& state, const String &originId) {
   bool changed = false;
 
   if (root["showHidden"] != state.showHidden) {
@@ -150,6 +150,7 @@ FileManager::FileManager(PsychicHttpServer* server, ESP32SvelteKit* sveltekit)
 void FileManager::begin() {
   _httpEndpoint.begin();
   _eventEndpoint.begin();
+  _webSocketServer.begin();
 
   // setup the file server
   _server->serveStatic("/rest/file", ESPFS, "/");

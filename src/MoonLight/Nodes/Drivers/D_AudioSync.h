@@ -24,14 +24,20 @@ class AudioSyncDriver : public Node {
   bool init = false;
 
   void loop() override {
-    if (!WiFi.localIP()) return;
+    if (!WiFi.isConnected() && !ETH.connected()) {
+      // make WLED Audio Sync network failure resilient - WIP
+      init = false;
+      return;
+    }
+
     if (!init) {
       sync.begin();
       init = true;
-      EXT_LOGV(ML_TAG, "AudioSync: Initialized");
+      EXT_LOGI(ML_TAG, "AudioSync: Initialized");
     }
+
     if (sync.read()) {
-      memcpy(sharedData.bands, sync.fftResult, NUM_GEQ_CHANNELS);
+      memcpy(sharedData.bands, sync.fftResult, sizeof(sharedData.bands));
       sharedData.volume = sync.volumeSmth;
       sharedData.volumeRaw = sync.volumeRaw;
       sharedData.majorPeak = sync.FFT_MajorPeak;

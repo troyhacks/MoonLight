@@ -50,7 +50,7 @@
 #endif
 
 #ifndef FACTORY_AP_CHANNEL
-#define FACTORY_AP_CHANNEL 1
+#define FACTORY_AP_CHANNEL 6 // 🌙: See https://github.com/wled/WLED/commit/fc7993f4a7241739d1878df25fd4600100abc506
 #endif
 
 #ifndef FACTORY_AP_SSID_HIDDEN
@@ -112,7 +112,7 @@ public:
         root["subnet_mask"] = settings.subnetMask.toString();
     }
 
-    static StateUpdateResult update(JsonObject &root, APSettings &settings)
+    static StateUpdateResult update(JsonObject &root, APSettings &settings, const String &originId) // 🌙 add originID
     {
         APSettings newSettings = {};
         newSettings.provisionMode = root["provision_mode"] | FACTORY_AP_PROVISION_MODE;

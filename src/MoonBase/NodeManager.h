@@ -20,7 +20,7 @@
 class NodeManager : public Module {
  public:
   bool requestUIUpdate = false;
-  String defaultNodeName = "";
+  Char<20> defaultNodeName;
 
  protected:
   PsychicHttpServer* _server;
@@ -28,7 +28,7 @@ class NodeManager : public Module {
 
   std::vector<Node*, VectorRAMAllocator<Node*>>* nodes;
 
-  NodeManager(String moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module(moduleName, server, sveltekit) {
+  NodeManager(const String& moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : Module(moduleName, server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
@@ -37,6 +37,7 @@ class NodeManager : public Module {
   void begin() {
     Module::begin();
     // if (false)
+    // if file changes, read the file and bring into state
     // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
     _fileManager->addUpdateHandler([&](const String& originId) {
       EXT_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
@@ -54,9 +55,8 @@ class NodeManager : public Module {
           }
           // uint8_t index = 0;
           // for (JsonObject nodeState: _state.data["nodes"].as<JsonArray>()) {
-          //     String name = nodeState["name"];
 
-          //     if (updatedItem == name) {
+          //     if (updatedItem == nodeState["name"]) {
           //         EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
           //         LiveScriptNode *liveScriptNode = (LiveScriptNode *)layerP.layers[0]->findLiveScriptNode(nodeState["name"]);
           //         if (liveScriptNode) {
@@ -76,12 +76,12 @@ class NodeManager : public Module {
     });
   }
 
-  virtual void addNodes(JsonArray values) {}
+  virtual void addNodes(const JsonArray& values) const {}
 
-  virtual Node* addNode(const uint8_t index, const char* name, const JsonArray controls) { return nullptr; }
+  virtual Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const { return nullptr; }
 
   // define the data model
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;       // state.data has one or more properties
     JsonArray details = root;  // if a property is an array, this is the details of the array
@@ -131,7 +131,7 @@ class NodeManager : public Module {
   }
 
   // implement business logic
-  void onUpdate(UpdatedItem& updatedItem) override {
+  void onUpdate(const UpdatedItem& updatedItem) override {
     // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
     // handle nodes
@@ -148,17 +148,17 @@ class NodeManager : public Module {
         if (!updatedItem.value.isNull()) {  // if name changed // == updatedItem.value
 
           // // if old node exists then remove it's controls
-          // if (updatedItem.oldValue != "null") {
-          //   // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
-          //   // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-          //   nodeState.remove("controls");  // remove the controls from the nodeState
-          // }
+          if (updatedItem.oldValue != "") {
+            // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
+            // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            nodeState.remove("controls");  // remove the controls from the nodeState
+          }
 
           // String xx;
           // serializeJson(nodeState["controls"], xx);
           // EXT_LOGD(ML_TAG, "add %s[%d]%s[%d].%s = %s -> %s (%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), xx.c_str());
 
-          //invalidate controls
+          // invalidate controls
           if (nodeState["controls"].isNull()) {     // if controls are not set, create empty array
             nodeState["controls"].to<JsonArray>();  // clear the controls
           } else {
@@ -202,7 +202,7 @@ class NodeManager : public Module {
         }
 
         // if a node existed and no new node in place, remove
-        if (updatedItem.oldValue != "null" && oldNode) {
+        if (updatedItem.oldValue != "" && oldNode) {
           // EXT_LOGD(ML_TAG, "remove %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
           // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
           if (!newNode) {
@@ -232,7 +232,7 @@ class NodeManager : public Module {
             //     EXT_LOGV(ML_TAG, "delete %s %s ...", updatedItem.name.c_str(), updatedItem.oldValue.c_str());
             //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]);
             //     if (liveScriptNode) liveScriptNode->kill();
-            //     else EXT_LOGW(ML_TAG, "liveScriptNode not found %s", node["name"].as<String>().c_str());
+            //     else EXT_LOGW(ML_TAG, "liveScriptNode not found %s", node["name"].as<const char*>());
             // }
             // if (!node["name"].isNull() && !node["type"].isNull()) {
             //     LiveScriptNode *liveScriptNode = findLiveScriptNode(node["name"]); //todo: can be 2 nodes with the same name ...
@@ -246,22 +246,20 @@ class NodeManager : public Module {
         // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(),
         // updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         if (updatedItem.index[0] < nodes->size()) {
-          EXT_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<String>().c_str(), updatedItem.value.as<String>().c_str(), nodes->size());
+          EXT_LOGD(ML_TAG, "%s on: %s (#%d)", nodeState["name"].as<const char*>(), updatedItem.value.as<String>().c_str(), nodes->size());
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
             nodeClass->on = updatedItem.value.as<bool>();  // set nodeclass on/off
             // EXT_LOGD(ML_TAG, "  nodeclass 🔘:%d 🚥:%d 💎:%d", nodeClass->on, nodeClass->hasOnLayout(), nodeClass->hasModifier());
-
             nodeClass->requestMappings();
           } else
-            EXT_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<String>().c_str());
+            EXT_LOGW(ML_TAG, "Nodeclass %s not found", nodeState["name"].as<const char*>());
         }
       }  // nodes[i].on
 
       else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value" && updatedItem.index[1] < nodeState["controls"].size()) {  // nodes[i].controls[j].value
-        // String xx;
-        // serializeJson(nodeState["controls"][updatedItem.index[1]], xx);
-        // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s (%s)", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str(), xx.c_str());
+        // serializeJson(nodeState["controls"][updatedItem.index[1]], Serial);
+        // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
         if (updatedItem.index[0] < nodes->size()) {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
@@ -271,7 +269,7 @@ class NodeManager : public Module {
 
             nodeClass->requestMappings();
           } else
-            EXT_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<String>().c_str());
+            EXT_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<const char*>());
         }
       }  // nodes[i].controls[j].value
       // else
@@ -297,7 +295,8 @@ class NodeManager : public Module {
     nodeN->requestMappings();
   }
 
-  void loop() {
+  void loop() override {
+    Module::loop();
     if (requestUIUpdate) {
       requestUIUpdate = false;  // reset the flag
       // EXT_LOGD(ML_TAG, "requestUIUpdate");

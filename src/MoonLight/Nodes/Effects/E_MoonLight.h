@@ -34,7 +34,7 @@ class SolidEffect : public Node {
   void loop() override {
     layer->fill_solid(CRGB(red * brightness / 255, green * brightness / 255, blue * brightness / 255));
     if (layer->layerP->lights.header.offsetWhite != UINT8_MAX && white > 0)
-      for (int index; index < layer->nrOfLights; index++) layer->setWhite(index, white * brightness / 255);
+      for (int index = 0; index < layer->nrOfLights; index++) layer->setWhite(index, white * brightness / 255);
   }
 };
 
@@ -113,7 +113,7 @@ class LinesEffect : public Node {
   void setup() override { addControl(bpm, "bpm", "slider"); }
 
   void loop() override {
-    int frameNr;
+    int frameNr = 0;
 
     layer->fadeToBlackBy(255);
 
@@ -261,12 +261,13 @@ class ScrollingTextEffect : public Node {
         choice = (millis() / 1000 % 9) + 1;
     }
 
+    IPAddress activeIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
     switch (choice) {
     case 1:
       text.format("%s", textIn);
       break;
     case 2:
-      text.format(".%d", WiFi.localIP()[3]);
+      text.format(".%d", activeIP[3]);
       break;
     case 3:
       text.format("%ds", sharedData.fps);
@@ -613,10 +614,10 @@ class FreqSawsEffect : public Node {
     values.add("Chaos fix");
     values.add("BandPhases");
 
-    memset(bandSpeed, 0, NUM_GEQ_CHANNELS);
-    memset(bandPhase, 0, NUM_GEQ_CHANNELS);
-    memset(lastBpm, 0, NUM_GEQ_CHANNELS);
-    memset(phaseOffset, 0, NUM_GEQ_CHANNELS);
+    memset(bandSpeed, 0, sizeof(bandSpeed));
+    memset(bandPhase, 0, sizeof(bandPhase));
+    memset(lastBpm, 0, sizeof(lastBpm));
+    memset(phaseOffset, 0, sizeof(phaseOffset));
 
     lastTime = millis();
   }
@@ -922,7 +923,7 @@ class RubiksCubeEffect : public Node {
   }
 
   bool doInit = false;
-  void onUpdate(String& oldValue, JsonObject control) override {
+  void onUpdate(const Char<20>& oldValue, const JsonObject control) override {
     if (control["name"] == "cubeSize" || control["name"] == "randomTurning") {
       doInit = true;
     }
@@ -1118,7 +1119,7 @@ class ParticlesEffect : public Node {
     // addControl(bool, "Debug Print",             layer->effectData.write<bool>(0));
   }
 
-  void onUpdate(String& oldValue, JsonObject control) override {
+  void onUpdate(const Char<20>& oldValue, const JsonObject control) override {
     if (control["name"] == "number of Particles" || control["name"] == "barriers") {
       settingUpParticles();
     }
@@ -1233,7 +1234,7 @@ class MoonManEffect : public Node {
 
   void setup() override { canvas = new M5Canvas(&M5.Display); }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     // Create canvas for processing
     canvas->deleteSprite();
     canvas->createSprite(layer->size.x, layer->size.y);
@@ -1353,6 +1354,5 @@ class SpiralFireEffect : public Node {
       }
     }
   }
-
 };
 #endif

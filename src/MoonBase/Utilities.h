@@ -58,8 +58,7 @@ struct Coord3D {
   }
 
   // comparisons
-  bool operator!=(Coord3D rhs) {
-    // ppf("Coord3D compare%d %d %d %d %d %d\n", x, y, z, rhs.x, rhs.y, rhs.z);
+  bool operator!=(const Coord3D& rhs) {
     return x != rhs.x || y != rhs.y || z != rhs.z;
     // return !(*this==rhs);
   }
@@ -110,18 +109,13 @@ namespace ArduinoJson {
 template <>
 struct Converter<Coord3D> {
   static bool toJson(const Coord3D& src, JsonVariant dst) {
-    // JsonObject obj = dst.to<JsonObject>();
     dst["x"] = src.x;
     dst["y"] = src.y;
     dst["z"] = src.z;
-    // ppf("Coord3D toJson %d,%d,%d -> %s\n", src.x, src.y, src.z, dst.as<String>().c_str());
     return true;
   }
 
-  static Coord3D fromJson(JsonVariantConst src) {
-    // ppf("Coord3D fromJson %s\n", src.as<String>().c_str());
-    return Coord3D{src["x"], src["y"], src["z"]};
-  }
+  static Coord3D fromJson(JsonVariantConst src) { return Coord3D{src["x"], src["y"], src["z"]}; }
 
   static bool checkJson(JsonVariantConst src) { return src["x"].is<uint16_t>() && src["y"].is<uint8_t>() && src["z"].is<uint8_t>(); }
 };
@@ -167,57 +161,82 @@ template <size_t N>
 struct Char {
   char s[N] = "";
 
-  // assign
+  // Constructors
+  Char() = default;                                      // Keep default constructor
+  Char(const char* str) { strlcpy(s, str, sizeof(s)); }  // Constructor to allow initialization from string literal
+  template <size_t M>
+  Char(const Char<M>& other) {  // Converting constructor from different-sized Char
+    strlcpy(s, other.c_str(), sizeof(s));
+  }
+
+  // assign operators
   Char& operator=(const char* rhs) {
+    // if (strlen(rhs) >= N) EXT_LOGW("Char", "Truncating '%s' from %d to %d chars", rhs, strlen(rhs), N - 1);
     strlcpy(s, rhs, sizeof(s));
     return *this;
   }
   Char& operator=(const JsonVariant rhs) {
-    if (!rhs.isNull()) strlcpy(s, rhs.as<String>().c_str(), sizeof(s));
-    return *this;
+    if (!rhs.isNull())
+      return (*this = rhs.as<String>().c_str());  //.as<String>().c_str() as rhs can also contain non strings
+    else
+      return (*this = "");
   }
   Char& operator=(const JsonString rhs) {
-    if (!rhs.isNull()) strlcpy(s, rhs.c_str(), sizeof(s));
-    return *this;
+    if (!rhs.isNull())
+      return (*this = rhs.c_str());
+    else
+      return (*this = "");
+  }
+  Char& operator=(const String& rhs) { return (*this = rhs.c_str()); }
+  // FIX: Make this accept ANY size Char, not just same size
+  template <size_t M>
+  Char& operator=(const Char<M>& rhs) {
+    return (*this = rhs.c_str());
   }
 
-  // concat
-  Char& operator+(const char* rhs) {
-    strlcat(s, rhs, sizeof(s));
-    return *this;
-  }
-  Char& operator+(String rhs) {
-    strlcat(s, rhs.c_str(), sizeof(s));
-    return *this;
+  // conversion
+  // operator const char*() const { return s; }
+  // Or explicit to avoid implicit conversions:
+  explicit operator const char*() const { return s; }
+
+  // concat operators
+  // Char& operator+(const char* rhs) {
+  //   strlcat(s, rhs, sizeof(s));
+  //   return *this;
+  // }
+  // Char& operator+(const String& rhs) {
+  //   strlcat(s, rhs.c_str(), sizeof(s));
+  //   return *this;
+  // }
+  Char operator+(const char* rhs) const {
+    Char result(*this);
+    result += rhs;
+    return result;
   }
   Char& operator+=(const char* rhs) {
     strlcat(s, rhs, sizeof(s));
     return *this;
   }
-  Char& operator+=(int rhs) {  // add integer to string
-    char buffer[12];           // enough for 32-bit int
+  Char& operator+=(const int rhs) {  // add integer to string
+    char buffer[12];                 // enough for 32-bit int
     snprintf(buffer, sizeof(buffer), " %d", rhs);
     strlcat(s, buffer, sizeof(s));
     return *this;
   }
-  Char& operator+=(String rhs) {
+  Char& operator+=(const String& rhs) {
     strlcat(s, rhs.c_str(), sizeof(s));
     return *this;
   }
 
-  // compare
-  bool operator==(const char* rhs) { return strcmp(s, rhs) == 0; }
-  bool operator==(Char& rhs) { return strcmp(s, rhs.s) == 0; }
-  bool operator!=(const char* rhs) { return strcmp(s, rhs) != 0; }
+  // compare operators
+  bool operator==(const char* rhs) const { return strcmp(s, rhs) == 0; }
+  bool operator==(const Char& rhs) const { return strcmp(s, rhs.s) == 0; }
+  bool operator!=(const char* rhs) const { return strcmp(s, rhs) != 0; }
 
-  bool contains(const char* rhs) { return strnstr(s, rhs, sizeof(s)) != nullptr; }
+  char operator[](const uint16_t indexV) const { return s[indexV]; }
 
-  size_t indexOf(const char* token) { return strnstr(s, token, sizeof(s)) - s; }
-
-  char operator[](const uint16_t indexV) { return s[indexV]; }
-
-  Char<32> substring(uint16_t begin, uint16_t end = sizeof(s) - 1) {
-    Char<32> sub;
+  Char<N> substring(uint16_t begin, uint16_t end = sizeof(s) - 1) {
+    Char<N> sub;
     if (begin >= sizeof(s) || end >= sizeof(s))
       sub = "";
     else {
@@ -226,10 +245,15 @@ struct Char {
     return sub;
   }
 
-  size_t length() { return strnlen(s, sizeof(s)); }
-
-  int toInt() { return atoi(s); }
-  float toFloat() { return atof(s); }
+  size_t length() const { return strnlen(s, sizeof(s)); }
+  int toInt() const { return atoi(s); }
+  float toFloat() const { return atof(s); }
+  bool contains(const char* rhs) const { return strnstr(s, rhs, sizeof(s)) != nullptr; }
+  size_t indexOf(const char* token) const {
+    const char* pos = strnstr(s, token, sizeof(s));
+    return pos ? (pos - s) : std::string::npos;  // or SIZE_MAX
+  }
+  const char* c_str() const { return s; }
 
   Char& format(const char* format, ...) {
     va_list args;
@@ -238,8 +262,6 @@ struct Char {
     va_end(args);
     return *this;
   }
-
-  const char* c_str() { return s; }
 
   void split(const char* splitter, std::function<void(const char*, uint8_t)> callback) {
     char savedS[N];
@@ -264,6 +286,16 @@ struct Char {
     return nullptr;
   }
 };
+
+// ADD: Non-member operator+ for string + Char
+// template outside the class
+template <size_t N>
+Char<N> operator+(const char* lhs, const Char<N>& rhs) {
+  Char<N> result;
+  strlcpy(result.s, lhs, sizeof(result.s));
+  strlcat(result.s, rhs.c_str(), sizeof(result.s));
+  return result;
+}
 
 // Example of split:
 // Char<32> test;
@@ -380,12 +412,12 @@ void freeMBObject(T* obj) {
   freeMB(obj, "object");
 }
 
-extern std::vector<std::function<void()>> runInAppTask;  // functions to be called in main loopTask (to avoid https to run out of stack space). No , VectorRAMAllocator<std::function<void()> see main.cpp
-extern std::mutex runInAppTask_mutex;                    // protect the runInAppTask vectors
-// extern int runInAppTask_mutexChecker;
-
 // to use in effect and on display
 #if USE_M5UNIFIED
 extern unsigned char moonmanpng[];
 extern unsigned int moonmanpng_len;
 #endif
+
+static inline uint32_t fastDiv255(uint32_t x) { //3–4 cycles
+    return (x * 0x8081u) >> 23;
+}

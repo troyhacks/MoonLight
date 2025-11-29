@@ -33,7 +33,7 @@ class ModuleLiveScripts : public Module {
     _moduleDrivers = moduleDrivers;
   }
 
-  void begin() {
+  void begin() override {
     Module::begin();
     #if FT_ENABLED(FT_LIVESCRIPT)
     // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
@@ -47,10 +47,9 @@ class ModuleLiveScripts : public Module {
           uint8_t index = 0;
           _moduleEffects->read([&](ModuleState& effectsState) {
             for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
-              String name = nodeState["name"];
 
-              if (updatedItem == name) {
-                EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+              if (updatedItem == nodeState["name"]) {
+                EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
                   liveScriptNode->compileAndRun();
@@ -60,17 +59,16 @@ class ModuleLiveScripts : public Module {
                   _moduleEffects->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
               }
               index++;
             }
           });
-          _moduleDrivers->read([&](ModuleState& effectsState) {
-            for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
-              String name = nodeState["name"];
+          _moduleDrivers->read([&](ModuleState& driversState) {
+            for (JsonObject nodeState : driversState.data["nodes"].as<JsonArray>()) {
 
-              if (updatedItem == name) {
-                EXT_LOGV(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
+              if (updatedItem == nodeState["name"]) {
+                EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(nodeState["name"]);
                 if (liveScriptNode) {
                   liveScriptNode->compileAndRun();
@@ -80,7 +78,7 @@ class ModuleLiveScripts : public Module {
                   _moduleDrivers->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGV(ML_TAG, "update due to new node %s done", name.c_str());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
               }
               index++;
             }
@@ -92,7 +90,7 @@ class ModuleLiveScripts : public Module {
   }
 
   // define the data model
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;       // state.data has one or more properties
     JsonArray details = root;  // if a property is an array, this is the details of the array
@@ -152,12 +150,12 @@ class ModuleLiveScripts : public Module {
   }
 
   // implement business logic
-  void onUpdate(UpdatedItem& updatedItem) override {
+  void onUpdate(const UpdatedItem& updatedItem) override {
     // scripts
     if (updatedItem.parent[0] == "scripts") {
       JsonVariant scriptState = _state.data["scripts"][updatedItem.index[0]];
       EXT_LOGV(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-      if (updatedItem.oldValue != "null") {  // do not run at boot!
+      if (updatedItem.oldValue != "") {  // do not run at boot!
         LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(scriptState["name"]);
         if (!liveScriptNode) {
           // try drivers
@@ -171,7 +169,7 @@ class ModuleLiveScripts : public Module {
           if (updatedItem.name == "delete") liveScriptNode->killAndDelete();
           // updatedItem.value = 0;
         } else
-          EXT_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<String>().c_str());
+          EXT_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<const char*>());
       }
     }
     // else
@@ -182,7 +180,7 @@ class ModuleLiveScripts : public Module {
   // update scripts / read only values in the UI
   void loop1s() {
     if (!_socket->getConnectedClients()) return;
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
 
     JsonDocument newData;                                    // to only send updatedData
     JsonArray scripts = newData["scripts"].to<JsonArray>();  // to: remove old array

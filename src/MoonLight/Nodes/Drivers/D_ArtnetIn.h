@@ -47,10 +47,10 @@ class ArtNetInDriver : public Node {
     }
   }
 
-  void onUpdate(String& oldValue, JsonObject control) {
+  void onUpdate(const Char<20>& oldValue, const JsonObject control) override {
     // add your custom onUpdate code here
     if (control["name"] == "ddp") {
-      if (control["value"] = 0) {
+      if (control["value"] == 0) {
       }
     }
   }
@@ -58,7 +58,7 @@ class ArtNetInDriver : public Node {
   bool init = false;
 
   void loop() override {
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
     if (!init) {
       if (ddp)
         ddpUdp.begin(port);

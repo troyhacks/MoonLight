@@ -72,7 +72,7 @@ class Node {
   // effect, layout and modifier
 
   template <class ControlType>
-  JsonObject addControl(ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr) {
+  JsonObject addControl(const ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr) {
     uint32_t pointer = (uint32_t)&variable;
 
     bool newControl = false;  // flag to check if control is new or already exists
@@ -138,11 +138,12 @@ class Node {
       } else
         control["size"] = sizeof(Coord3D);
     } else
-      EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<String>().c_str(), control["type"].as<String>().c_str(), control["size"].as<uint8_t>());
+      EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<const char*>(), control["type"].as<const char*>(), control["size"].as<uint8_t>());
 
     if (newControl) {
-      String oldValue = "";
-      updateControl(oldValue, control);
+      Char<20> oldValue;
+      oldValue = "";
+      // updateControl(oldValue, control);
       onUpdate(oldValue, control);  // custom onUpdate for the node
     }
 
@@ -150,9 +151,9 @@ class Node {
   }
 
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  virtual void updateControl(String& oldValue, JsonObject control);  // see Nodes.cpp for implementation
+  virtual void updateControl(const Char<20>& oldValue, const JsonObject control);  // see Nodes.cpp for implementation
 
-  virtual void onUpdate(String& oldValue, JsonObject control) {}
+  virtual void onUpdate(const Char<20>& oldValue, const JsonObject control) {}
 
   void requestMappings() {
     if (hasModifier() || hasOnLayout()) {
@@ -168,7 +169,7 @@ class Node {
   // effect, layout and modifier (?)
   virtual void loop() {}
   virtual void loop20ms() {}
-  virtual void onSizeChanged(Coord3D oldSize) {}  // virtual/effect nodes: virtual size, physical/driver nodes: physical size
+  virtual void onSizeChanged(const Coord3D& oldSize) {}  // virtual/effect nodes: virtual size, physical/driver nodes: physical size
 
   // layout
   virtual void onLayout() {}  // the definition of the layout, called by mapLayout()
@@ -264,7 +265,7 @@ class DriverNode : public Node {
   void reOrderAndDimRGBW(uint8_t* packetRGBChannel, uint8_t* lightsRGBChannel);
 
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  void onUpdate(String& oldValue, JsonObject control) override;
+  void onUpdate(const Char<20>& oldValue, const JsonObject control) override;
 };
 
 // Helper function to generate a triangle wave similar to beat16

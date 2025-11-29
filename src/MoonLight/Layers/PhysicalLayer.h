@@ -133,6 +133,7 @@ class PhysicalLayer {
   uint8_t ledPins[MAXLEDPINS];
   uint16_t ledsPerPin[MAXLEDPINS];
   uint8_t nrOfLedPins = 0;
+  uint8_t nrOfAssignedPins = 0;
   uint16_t maxPower = 0;
 
   // an effect is using a virtual layer: tell the effect in which layer to run...

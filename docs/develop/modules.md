@@ -38,7 +38,7 @@ ModuleDemo(PsychicHttpServer *server
     * Initialy create the module data
 
 ```cpp
-void setupDefinition(JsonArray root) override{
+void setupDefinition(const JsonArray& root) override{
     JsonObject control; // state.data has one or more properties
     JsonArray details; // if a control is an array, this is the details of the array
     JsonArray values; // if a control is a select, this is the values of the select
@@ -61,10 +61,10 @@ void setupDefinition(JsonArray root) override{
 
 * Implement function **onUpdate** to define what happens if data changes
     * struct UpdatedItem defines the update (parent control (including index in case of multiple records), name of control and value)
-    * This runs in the httpd / webserver task. To run it in another task (application task) use runInAppTask - see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
+    * UpdatedItems are created in the httpd / webserver task and via the loop() function sent to onUpdate running in the Sveltekit task. e.g. see [ModuleLightsControl](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/ModuleLightsControl.h)
 
 ```cpp
-    void onUpdate(UpdatedItem &updatedItem) override
+    void onUpdate(const UpdatedItem &updatedItem) override
     {
         if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
             EXT_LOGD(MB_TAG, "handle %s = %s -> %s", updatedItem.name, updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
@@ -76,7 +76,7 @@ void setupDefinition(JsonArray root) override{
             if (updatedItem.value.as<String>().length())
                 compileAndRun(updatedItem.value);
         } else
-            EXT_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0], updatedItem.name, updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
+            EXT_LOGD(MB_TAG, "no handle for %s.%s[%d] = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.name.c_str(), updatedItem.index[0], updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     }
 ```
 

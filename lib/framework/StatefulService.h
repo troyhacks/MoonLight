@@ -31,7 +31,7 @@ enum class StateUpdateResult
 };
 
 template <typename T>
-using JsonStateUpdater = std::function<StateUpdateResult(JsonObject &root, T &settings)>;
+using JsonStateUpdater = std::function<StateUpdateResult(JsonObject &root, T &settings, const String &originId)>; // 🌙 add originID
 
 template <typename T>
 using JsonStateReader = std::function<void(T &settings, JsonObject &root)>;
@@ -144,7 +144,7 @@ public:
     StateUpdateResult update(JsonObject &jsonObject, JsonStateUpdater<T> stateUpdater, const String &originId)
     {
         beginTransaction();
-        StateUpdateResult result = stateUpdater(jsonObject, _state);
+        StateUpdateResult result = stateUpdater(jsonObject, _state, originId); // 🌙 add originID
         endTransaction();
         callHookHandlers(originId, result);
         if (result == StateUpdateResult::CHANGED)
@@ -157,7 +157,7 @@ public:
     StateUpdateResult updateWithoutPropagation(JsonObject &jsonObject, JsonStateUpdater<T> stateUpdater)
     {
         beginTransaction();
-        StateUpdateResult result = stateUpdater(jsonObject, _state);
+        StateUpdateResult result = stateUpdater(jsonObject, _state, "originID"); // 🌙 add originID: todo: add as argument from updateWithoutPropagation
         endTransaction();
         return result;
     }

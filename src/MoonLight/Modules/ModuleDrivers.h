@@ -66,16 +66,16 @@ class ModuleDrivers : public NodeManager {
     });
   }
 
-  void begin() {
+  void begin() override {
     defaultNodeName = getNameAndTags<PanelLayout>();
 
-    NodeManager::begin();
     nodes = &layerP.nodes;
+    NodeManager::begin();
 
     _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
   }
 
-  void addNodes(JsonArray values) override {
+  void addNodes(const JsonArray& values) const override {
     // Layouts, Most used first
     values.add(getNameAndTags<PanelLayout>());
     values.add(getNameAndTags<PanelsLayout>());
@@ -101,7 +101,7 @@ class ModuleDrivers : public NodeManager {
     values.add(getNameAndTags<SE16Layout>());
   }
 
-  Node* addNode(const uint8_t index, const char* name, const JsonArray controls) override {
+  Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {
     Node* node = nullptr;
 
     // Layouts, most used first
@@ -155,6 +155,8 @@ class ModuleDrivers : public NodeManager {
   #endif
 
     if (node) {
+      EXT_LOGD(ML_TAG, "%s (p:%p pr:%d)", name, node, isInPSRAM(node));
+
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node (C++ constructors are not inherited, so declare it as normal functions)
       node->moduleControl = _moduleLightsControl;     // to access global lights control functions if needed
       node->moduleIO = _moduleIO;                     // to access global lights control functions if needed
@@ -174,7 +176,7 @@ class ModuleDrivers : public NodeManager {
 
   bool initPins = false;
 
-  void loop() {
+  void loop() override {
     // if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
     //     layerP.loop(); //run all the effects of all virtual layers (currently only one)
 

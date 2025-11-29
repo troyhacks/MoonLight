@@ -75,13 +75,15 @@ void operator delete[](void* ptr, size_t size) noexcept {
 #include <ESP32SvelteKit.h>
 #include <PsychicHttpServer.h>
 
-#include "MoonBase/Utilities.h"  // for runInAppTask
-
 #define SERIAL_BAUD_RATE 115200
 
 PsychicHttpServer server;
 
 ESP32SvelteKit esp32sveltekit(&server, NROF_END_POINTS);  // 🌙 pio variable
+
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// The module class is used for each module, about 15 times, 1144 bytes each (allocated in main.cpp, in global memory area) + each class allocates it's own heap
 
 // 🌙
 #if FT_ENABLED(FT_MOONBASE)
@@ -156,16 +158,6 @@ void driverTask(void* pvParameters) {
 
     xSemaphoreGive(effectSemaphore);
 
-    std::vector<std::function<void()>> tasks;
-    {
-      // runInAppTask_mutexChecker++;
-      // if (runInAppTask_mutexChecker > 1) EXT_LOGE(MB_TAG, "runInAppTask_mutexChecker %d", runInAppTask_mutexChecker);
-      std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-      tasks.swap(runInAppTask);  // move all into local vector
-      // runInAppTask_mutexChecker--;
-    }
-    for (auto& task : tasks) task();  // run the tasks
-
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
 }
@@ -197,6 +189,18 @@ uint8_t pinVoltage = -1;
 uint8_t pinCurrent = -1;
 uint8_t pinBattery = -1;
 
+std::vector<Module*> modules;
+#include "MoonBase/SharedHttpEndpoint.h"
+#include "MoonBase/SharedWebSocketServer.h"
+#include "MoonBase/SharedEventEndpoint.h"
+// #include "MoonBase/SharedFSPersistence.h"
+
+// ADDED: Shared routers (one instance each)
+SharedHttpEndpoint* sharedHttpEndpoint = nullptr;
+SharedWebSocketServer* sharedWebSocketServer = nullptr;
+SharedEventEndpoint* sharedEventEndpoint = nullptr;
+// SharedFSPersistence* sharedFsPersistence = nullptr;
+
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
   esp_log_set_vprintf(custom_vprintf);
@@ -208,53 +212,96 @@ void setup() {
 
   // delay(5000);  // 🌙 to capture all the serial output
 
-  // 🌙 safeMode
+  Serial.printf("C++ Standard: %ld\n", __cplusplus);  // 202002L  // 🌙 safeMode
+
   if (esp_reset_reason() != ESP_RST_UNKNOWN && esp_reset_reason() != ESP_RST_POWERON && esp_reset_reason() != ESP_RST_SW && esp_reset_reason() != ESP_RST_USB) {  // see verbosePrintResetReason
     // ESP_RST_USB is after usb flashing! since esp-idf5
     safeModeMB = true;
   }
 
   // check sizes ...
-  //   sizeof(esp32sveltekit);                // 4152
-  //   sizeof(WiFiSettingsService);           // 456
-  //   sizeof(SystemStatus);                  // 16
-  //   sizeof(UploadFirmwareService);         // 32
-  //   sizeof(HttpEndpoint<ModuleState>);     // 152
-  //   sizeof(EventEndpoint<ModuleState>);    // 112
-  //   sizeof(WebSocketServer<ModuleState>);  // 488
-  //   sizeof(FSPersistence<ModuleState>);    // 128
-  //   sizeof(PsychicHttpServer*);            // 8
-  //   sizeof(HttpEndpoint<APSettings>);      // 152
-  //   sizeof(FSPersistence<APSettings>);     // 128
-  //   sizeof(APSettingsService);             // 600;
-  //   sizeof(PsychicWebSocketHandler);       // 336
-  //   sizeof(fileManager);                   // 864
-  //   sizeof(Module);                        // 1144
-  //   sizeof(moduleDevices);                 // 1320
-  //   sizeof(moduleIO);                      // 1144
-  // #if FT_ENABLED(FT_MOONLIGHT)
-  //   sizeof(moduleEffects);        // 1208
-  //   sizeof(moduleDrivers);        // 1216
-  //   sizeof(moduleLightsControl);  // 1176
-  //   #if FT_ENABLED(FT_LIVESCRIPT)
-  //   sizeof(moduleLiveScripts);  // 1176
-  //   #endif
-  //   sizeof(moduleChannels);        // 1144
-  //   sizeof(moduleMoonLightInfo);   // 1144
-  //   sizeof(layerP.lights);         // 56
-  //   sizeof(layerP.lights.header);  // 40
-  // #endif
+  sizeof(esp32sveltekit);                // 4152
+  sizeof(WiFiSettingsService);           // 456
+  sizeof(SystemStatus);                  // 16
+  sizeof(UploadFirmwareService);         // 32
+  sizeof(HttpEndpoint<ModuleState>);     // 152
+  sizeof(EventEndpoint<ModuleState>);    // 112
+  sizeof(SharedEventEndpoint);             // 8
+  sizeof(WebSocketServer<ModuleState>);  // 488
+  sizeof(SharedWebSocketServer);         // 352
+  sizeof(FSPersistence<ModuleState>);    // 128
+  sizeof(PsychicHttpServer*);            // 8
+  sizeof(HttpEndpoint<APSettings>);      // 152
+  sizeof(SharedHttpEndpoint);              // 16
+  sizeof(FSPersistence<APSettings>);     // 128
+  sizeof(APSettingsService);             // 600;
+  sizeof(PsychicWebSocketHandler);       // 336
+  sizeof(fileManager);                   // 864
+  sizeof(Module);                        // 1144 -> 472
+  sizeof(moduleDevices);                 // 1320
+  sizeof(moduleIO);                      // 1144
+#if FT_ENABLED(FT_MOONLIGHT)
+  sizeof(moduleEffects);        // 1208
+  sizeof(moduleDrivers);        // 1216
+  sizeof(moduleLightsControl);  // 1176
+  #if FT_ENABLED(FT_LIVESCRIPT)
+  sizeof(moduleLiveScripts);  // 1176
+  #endif
+  sizeof(moduleChannels);        // 1144
+  sizeof(moduleMoonLightInfo);   // 1144
+  sizeof(layerP.lights);         // 56
+  sizeof(layerP.lights.header);  // 40
+#endif
 
   // start ESP32-SvelteKit
   esp32sveltekit.begin();
 
-// MoonBase
-#if FT_ENABLED(FT_MOONBASE)
+  // Create shared routers (one-time)
+  sharedHttpEndpoint = new SharedHttpEndpoint(&server, esp32sveltekit.getSecurityManager());
+  sharedWebSocketServer = new SharedWebSocketServer(&server, esp32sveltekit.getSecurityManager());
+  sharedEventEndpoint = new SharedEventEndpoint(esp32sveltekit.getSocket());
+  // sharedFsPersistence = new SharedFSPersistence(esp32sveltekit.getFS());
+  if (!sharedHttpEndpoint || !sharedWebSocketServer || !sharedEventEndpoint) {
+    EXT_LOGE(ML_TAG, "Failed to allocate shared routers, rebooting");
+    esp_restart();  // or another hard-fail strategy appropriate for your platform
+  }
+
+  modules.reserve(12);  // Adjust based on actual module count
+  modules.push_back(&moduleDevices);
+  modules.push_back(&moduleTasks);
+  modules.push_back(&moduleIO);
+// modules.push_back(&fileManager);
+// MoonLight
+#if FT_ENABLED(FT_MOONLIGHT)
+  modules.push_back(&moduleEffects);
+  modules.push_back(&moduleDrivers);
+  modules.push_back(&moduleLightsControl);
+  modules.push_back(&moduleChannels);
+  modules.push_back(&moduleMoonLightInfo);
+  #if FT_ENABLED(FT_LIVESCRIPT)
+  modules.push_back(&moduleLiveScripts);
+  #endif
+
+  // Register all modules with shared routers
+  for (Module* module : modules) {
+    sharedHttpEndpoint->registerModule(module);
+    sharedWebSocketServer->registerModule(module);
+    sharedEventEndpoint->registerModule(module);
+    // sharedFsPersistence->registerModule(module);
+  }
+
+  // Begin shared routers (one-time setup)
+  sharedHttpEndpoint->begin();
+  sharedWebSocketServer->begin();
+  sharedEventEndpoint->begin();
+  // sharedFsPersistence->begin();
+
+  // MoonBase
+  #if FT_ENABLED(FT_MOONBASE)
   fileManager.begin();
-  moduleDevices.begin();
-  moduleTasks.begin();
-  moduleIO.begin();
-  #if FT_BATTERY
+  for (Module* module : modules) module->begin();
+
+    #if FT_BATTERY
   moduleIO.addUpdateHandler(
       [&](const String& originId) {
         moduleIO.read([&](ModuleState& state) {
@@ -275,48 +322,33 @@ void setup() {
         });
       },
       false);
-  #endif
-  // MoonLight
-  #if FT_ENABLED(FT_MOONLIGHT)
-  moduleEffects.begin();
-  moduleDrivers.begin();
-  moduleLightsControl.begin();
-  moduleChannels.begin();
-  moduleMoonLightInfo.begin();
-    #if FT_ENABLED(FT_LIVESCRIPT)
-  moduleLiveScripts.begin();
     #endif
 
   xSemaphoreGive(effectSemaphore);  // Allow effectTask to run first
 
   // 🌙
-  xTaskCreateUniversal(effectTask,                     // task function
-                       "AppEffectTask",                // name
-                       (psramFound() ? 6 : 4) * 1024,  // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
-                       NULL,                           // parameter
-                       3,                              // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
-                       &effectTaskHandle,              // task handle
-                       1                               // core (0 or 1)
+  xTaskCreateUniversal(effectTask,                          // task function
+                       "AppEffectTask",                     // name
+                       psramFound() ? 4 * 1024 : 3 * 1024,  // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
+                       NULL,                                // parameter
+                       3,                                   // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                       &effectTaskHandle,                   // task handle
+                       1                                    // core (0 or 1)
   );
 
-  xTaskCreateUniversal(driverTask,                     // task function
-                       "AppDriverTask",                // name
-                       (psramFound() ? 6 : 3) * 1024,  // d0-tuning... stack size
-                       NULL,                           // parameter
-                       3,                              // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
-                       &driverTaskHandle,              // task handle
-                       1                               // core (0 or 1)
+  xTaskCreateUniversal(driverTask,                          // task function
+                       "AppDriverTask",                     // name
+                       psramFound() ? 4 * 1024 : 3 * 1024,  // d0-tuning... stack size
+                       NULL,                                // parameter
+                       3,                                   // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                       &driverTaskHandle,                   // task handle
+                       1                                    // core (0 or 1)
   );
   #endif
 
   // run UI stuff in the sveltekit task
   esp32sveltekit.addLoopFunction([]() {
-
-  #if FT_ENABLED(FT_MOONLIGHT)
-    moduleEffects.loop();        // requestUIUpdate
-    moduleDrivers.loop();        // requestUIUpdate
-    moduleLightsControl.loop();  // monitor
-  #endif
+    for (Module* module : modules) module->loop();
 
     // every second
     static unsigned long lastSecond = 0;
@@ -394,7 +426,7 @@ void loop() {
   M5.update();
   delay(100);
 #else
-  // Delete Arduino loop task, as it is not needed in this example
+  // Delete Arduino loop task, as it is not needed
   vTaskDelete(NULL);
 #endif
 }

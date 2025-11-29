@@ -35,6 +35,7 @@ private:
     PsychicHttpServer *_server;
     SecurityManager *_securityManager;
     esp_err_t systemStatus(PsychicRequest *request);
+    void heapHealth(JsonVariant variant, uint32_t caps); // 🌙
 };
 
 #endif // end SystemStatus_h

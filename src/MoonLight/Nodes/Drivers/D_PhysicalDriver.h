@@ -49,10 +49,12 @@ class PhysicalDriver : public DriverNode {
     if (layer->layerP->lights.header.isPositions == 0) {
       DriverNode::loop();
 
+      uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
+
     #ifndef CONFIG_IDF_TARGET_ESP32P4
       if (ledsDriver.total_leds > 0) ledsDriver.showPixels(WAIT);
     #else
-      show_parlio(layer->layerP->ledPins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels, ledsDriver._brightness, layer->layerP->lights.header.channelsPerLight == 4, layer->layerP->nrOfLedPins, layer->layerP->ledsPerPin[0],  // different ledsPerPin not supported yet
+      show_parlio(layer->layerP->ledPins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels, ledsDriver._brightness, layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0],  // different ledsPerPin not supported yet
                   layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
     #endif
     }
@@ -71,20 +73,21 @@ class PhysicalDriver : public DriverNode {
   void onLayout() override {
   #if HP_ALL_DRIVERS
     if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) {  // physical
+      uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
 
-      if (!lightPresetSaved || layer->layerP->nrOfLedPins == 0) {  //|| initDone can be done multiple times now...
-        EXT_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, layer->layerP->nrOfLedPins);
+      if (!lightPresetSaved || nrOfPins == 0) {  //|| initDone can be done multiple times now...
+        EXT_LOGD(ML_TAG, "return: lightpresetsaved:%d initDone:%d #:%d", lightPresetSaved, initDone, nrOfPins);
         return;
       }
 
-      EXT_LOGD(ML_TAG, "nrOfLedPins %d", layer->layerP->nrOfLedPins);
+      EXT_LOGD(ML_TAG, "nrOfLedPins %d", nrOfPins);
       if (safeModeMB) {
         EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
         return;
       }
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
-      EXT_LOGD(ML_TAG, "onLayout %d %d %d", layer->layerP->ledPins[0], layer->layerP->ledsPerPin[0], layer->layerP->nrOfLedPins);
+      for (int i = 0; i < nrOfPins; i++) EXT_LOGD(ML_TAG, "onLayout pin#%d: %d %d %d", i, layer->layerP->ledPins[i], layer->layerP->ledsPerPin[i], nrOfPins);
 
       if (!initDone) {
         __NB_DMA_BUFFER = dmaBuffer;  // __NB_DMA_BUFFER is a variable
@@ -92,7 +95,7 @@ class PhysicalDriver : public DriverNode {
         uint8_t savedBrightness = ledsDriver._brightness;  //(initLed sets it to 255 and thats not what we want)
 
         EXT_LOGD(ML_TAG, "init Physical Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
-        ledsDriver.initled(layer->layerP->lights.channels, layer->layerP->ledPins, layer->layerP->ledsPerPin, layer->layerP->nrOfLedPins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        ledsDriver.initled(layer->layerP->lights.channels, layer->layerP->ledPins, layer->layerP->ledsPerPin, nrOfPins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
 
         ledsDriver.setBrightness(savedBrightness);  //(initLed sets it to 255 and thats not what we want)
 
@@ -105,7 +108,7 @@ class PhysicalDriver : public DriverNode {
         // don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
         EXT_LOGD(ML_TAG, "update Physical Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
-        ledsDriver.updateDriver(layer->layerP->ledPins, layer->layerP->ledsPerPin, layer->layerP->nrOfLedPins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        ledsDriver.updateDriver(layer->layerP->ledPins, layer->layerP->ledsPerPin, nrOfPins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
       }
 
     #else  // P4: Parlio Troy Driver

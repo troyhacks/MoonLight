@@ -31,13 +31,17 @@ PhysicalLayer::PhysicalLayer() {
   layers[0]->layerP = this;
 }
 
+// heap-optimization: request heap optimization review
+// on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
+// goal is to have lights.channels as large as possible, preferable 12288 at least for boards without PSRAM
+
 void PhysicalLayer::setup() {
   // allocate lights.channels
 
   if (psramFound())
     lights.maxChannels = MIN(ESP.getPsramSize() / 2, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
   else
-    lights.maxChannels = 1024 * 3;  // esp32-d0: max 1024->2048 Leds ATM
+    lights.maxChannels = 4096 * 3;  // esp32-d0: max 1024->2048->4096 Leds ATM
 
   lights.channels = allocMB<uint8_t>(lights.maxChannels);
 
@@ -71,8 +75,8 @@ void PhysicalLayer::loop20ms() {
 }
 
 void PhysicalLayer::loopDrivers() {
-  //run mapping in the driver task
-  
+  // run mapping in the driver task
+
   if (requestMapPhysical) {
     EXT_LOGD(ML_TAG, "mapLayout physical requested");
 
@@ -129,7 +133,7 @@ void PhysicalLayer::onLayoutPre() {
     memset(lights.channels, 0, lights.maxChannels);  // set all the channels to 0
     // dealloc pins
     if (!monitorPass) {
-      memset(ledsPerPin, UINT16_MAX, sizeof(ledsPerPin));
+      memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX
     }
   } else if (pass == 2) {
     indexP = 0;
@@ -172,14 +176,15 @@ void PhysicalLayer::nextPin() {
   if (pass == 1 && !monitorPass) {
     uint16_t prevNrOfLights = 0;
     uint8_t i = 0;
-    while (ledsPerPin[i] != UINT16_MAX && i < sizeof(ledsPerPin)) {
+    while (i < MAXLEDPINS && ledsPerPin[i] != UINT16_MAX) {
       prevNrOfLights += ledsPerPin[i];
       i++;
     }
     // ledsPerPin[i] is the first empty slot
-    if (i < sizeof(ledsPerPin)) {
+    if (i < MAXLEDPINS) {
       ledsPerPin[i] = lights.header.nrOfLights - prevNrOfLights;
-      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d", i, ledsPerPin[i]);
+      nrOfAssignedPins = i + 1;
+      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d of %d", i, ledsPerPin[i], MAXLEDPINS);
     }
   }
 }

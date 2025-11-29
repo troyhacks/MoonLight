@@ -33,7 +33,7 @@
 
 #define ETHERNET_EVENT_DELAY 500
 
-#define ETHERNET_SETTINGS_FILE "/config/ethernetSettings.json"
+#define ETHERNET_SETTINGS_FILE "/.config/ethernetSettings.json"
 #define ETHERNET_SETTINGS_SERVICE_PATH "/rest/ethernetSettings"
 
 #define EVENT_ETHERNET "ethernet"
@@ -69,7 +69,7 @@ public:
         ESP_LOGV(SVK_TAG, "Ethernet Settings read");
     }
 
-    static StateUpdateResult update(JsonObject &root, EthernetSettings &settings)
+    static StateUpdateResult update(JsonObject &root, EthernetSettings &settings, const String &originId) // 🌙 add originID
     {
         settings.hostname = root["hostname"] | SettingValue::format(FACTORY_ETHERNET_HOSTNAME);
         settings.ethernetSettings.staticIPConfig = root["static_ip_config"] | false;

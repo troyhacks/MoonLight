@@ -40,9 +40,10 @@ public:
 
     void onSubscribe(String event, SubscribeCallback callback);
 
-  void emitEvent(String event, JsonObject &jsonObject, const char *originId = "", bool onlyToSameOrigin = false);
-  // if onlyToSameOrigin == true, the message will be sent to the originId only, otherwise it will be broadcasted to all clients except the originId
-  void emitEvent(String event, char *output, size_t len, const char *originId = "", bool onlyToSameOrigin = false); // 🌙
+    void emitEvent(const String& event, const JsonObject& jsonObject, const char *originId = "", bool onlyToSameOrigin = false);
+    void emitEvent(const JsonDocument &doc, const char *originId = "", bool onlyToSameOrigin = false); // 🌙 jsonDocument contains event
+    // if onlyToSameOrigin == true, the message will be sent to the originId only, otherwise it will be broadcasted to all clients except the originId
+    void emitEvent(const String& event, const char *output, size_t len, const char *originId = "", bool onlyToSameOrigin = false); // 🌙 char output directly emitted
 
     unsigned int getConnectedClients();
 

@@ -163,10 +163,6 @@ void setBitValue(uint8_t* byteArray, size_t n, bool value) {
     byteArray[byteIndex] &= ~(1 << bitIndex);
 }
 
-std::vector<std::function<void()>> runInAppTask;  // see .h
-std::mutex runInAppTask_mutex;                    // see .h
-// int runInAppTask_mutexChecker = 0;
-
 #if USE_M5UNIFIED
   #include "moonmanpng.h"
 #endif

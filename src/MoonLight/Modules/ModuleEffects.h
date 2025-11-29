@@ -24,11 +24,11 @@ class ModuleEffects : public NodeManager {
  public:
   ModuleEffects(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager) : NodeManager("effects", server, sveltekit, fileManager) { EXT_LOGV(ML_TAG, "constructor"); }
 
-  void begin() {
+  void begin() override {
     defaultNodeName = getNameAndTags<RandomEffect>();
-    NodeManager::begin();
-
     nodes = &(layerP.layers[0]->nodes);  // to do add nodes from all layers...
+
+    NodeManager::begin();
 
   #if FT_ENABLED(FT_MONITOR)
     _socket->registerEvent("monitor");
@@ -57,7 +57,7 @@ class ModuleEffects : public NodeManager {
     };
   }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;  // state.data has one or more properties
     JsonArray values;     // if a property is a select, this is the values of the select
@@ -87,7 +87,7 @@ class ModuleEffects : public NodeManager {
     NodeManager::setupDefinition(root);
   }
 
-  void addNodes(JsonArray values) override {
+  void addNodes(const JsonArray& values) const override {
     // keep the order the same as in https://moonmodules.org/MoonLight/moonlight/effects
 
     // MoonLight effects, Solid first then alphabetically
@@ -159,7 +159,7 @@ class ModuleEffects : public NodeManager {
     rootFolder.close();
   }
 
-  Node* addNode(const uint8_t index, const char* name, const JsonArray controls) override {
+  Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {
     Node* node = nullptr;
 
     // MoonLight effects, Solid first then alphabetically
@@ -293,7 +293,7 @@ class ModuleEffects : public NodeManager {
   }
 
   // run effects
-  void loop() { NodeManager::loop(); }
+  void loop() override { NodeManager::loop(); }
 
 };  // class ModuleEffects
 

@@ -34,7 +34,7 @@ class ModuleLightsControl : public Module {
     _moduleIO = moduleIO;
   }
 
-  void begin() {
+  void begin() override {
     Module::begin();
 
     EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
@@ -65,7 +65,7 @@ class ModuleLightsControl : public Module {
       });
     });
     moduleIO.addUpdateHandler([&](const String& originId) { readPins(); }, false);
-    readPins(); //initially
+    readPins();  // initially
   }
 
   void readPins() {
@@ -82,7 +82,7 @@ class ModuleLightsControl : public Module {
   }
 
   // define the data model
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject property;       // state.data has one or more properties
     JsonArray details = root;  // if a property is an array, this is the details of the array
@@ -134,7 +134,7 @@ class ModuleLightsControl : public Module {
   }
 
   // implement business logic
-  void onUpdate(UpdatedItem& updatedItem) override {
+  void onUpdate(const UpdatedItem& updatedItem) override {
     // EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
     if (updatedItem.name == "red") {
       layerP.lights.header.red = _state.data["red"];
@@ -149,7 +149,6 @@ class ModuleLightsControl : public Module {
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
-      // String value = _state.data["palette"];//updatedItem.oldValue;
       if (updatedItem.value == 0)
         layerP.palette = CloudColors_p;
       else if (updatedItem.value == 1)
@@ -177,7 +176,7 @@ class ModuleLightsControl : public Module {
     } else if (updatedItem.name == "preset") {
       // copy /.config/effects.json to the hidden folder /.config/presets/preset[x].json
       // do not set preset at boot...
-      if (updatedItem.oldValue != "null" && !updatedItem.value["action"].isNull()) {
+      if (updatedItem.oldValue != "" && !updatedItem.value["action"].isNull()) {
         uint16_t select = updatedItem.value["select"];
         Char<32> presetFile;
         presetFile.format("/.config/presets/preset%02d.json", select);
@@ -236,15 +235,15 @@ class ModuleLightsControl : public Module {
 
   unsigned long lastPresetTime = 0;
 
-  void loop() {
+  void loop() override {
+    Module::loop();
     // process presetLoop
     uint8_t presetLoop = _state.data["presetLoop"];
     if (presetLoop && millis() - lastPresetTime > presetLoop * 1000) {  // every presetLoop seconds
       lastPresetTime = millis();
 
       // bugfix;
-      //  std::lock_guard<std::mutex> lock(runInAppTask_mutex);
-      //  runInAppTask.push_back([&]() mutable { //mutable as updatedItem is called by reference (&)
+      //  runInAppTask.push_back([&]() {
       //  load the xth preset from FS
       JsonArray presetList = _state.data["preset"]["list"];
 

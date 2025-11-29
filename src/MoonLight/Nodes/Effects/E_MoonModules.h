@@ -78,8 +78,8 @@ class GameOfLifeEffect : public Node {
     else if (ruleset == 6)
       ruleString = "B367/S23";  // DrighLife
 
-    memset(birthNumbers, 0, sizeof(bool) * 9);
-    memset(surviveNumbers, 0, sizeof(bool) * 9);
+    memset(birthNumbers, 0, sizeof(birthNumbers));
+    memset(surviveNumbers, 0, sizeof(surviveNumbers));
 
     // Rule String Parsing
     int slashIndex = ruleString.indexOf('/');
@@ -106,7 +106,7 @@ class GameOfLifeEffect : public Node {
     values.add("Mazecentric B3/S1234");
     values.add("DrighLife B367/S23");
 
-    addControl(customRuleString, "customRuleString", "text", 0, 32);
+    addControl(customRuleString, "customRuleString", "text", 0, 20);
 
     addControl(speed, "GameSpeed (FPS)", "slider", 0, 100);
     addControl(lifeChance, "startingLifeDensity", "slider", 10, 90);
@@ -118,7 +118,7 @@ class GameOfLifeEffect : public Node {
     addControl(blur, "blur", "slider", 0, 255);
   }
 
-  void onUpdate(String& oldValue, JsonObject control) override {
+  void onUpdate(const Char<20>& oldValue, const JsonObject control) override {
     if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
       setBirthAndSurvive();
     }
@@ -179,7 +179,7 @@ class GameOfLifeEffect : public Node {
     freeMB(cellColors);
   }
 
-  void onSizeChanged(Coord3D prevSize) override {
+  void onSizeChanged(const Coord3D& prevSize) override {
     dataSize = ((layer->size.x * layer->size.y * layer->size.z + 7) / 8);
 
     freeMB(cells);

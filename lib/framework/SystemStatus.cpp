@@ -170,5 +170,64 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
     root["cpu_reset_reason"] = verbosePrintResetReason(esp_reset_reason());
     root["uptime"] = millis() / 1000;
 
+    heapHealth(root["heap_info_app"].to<JsonVariant>(), MALLOC_CAP_INTERNAL);
+    heapHealth(root["heap_info_dma"].to<JsonVariant>(), MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
+
     return response.send();
+}
+
+ // 🌙
+void SystemStatus::heapHealth(JsonVariant variant, uint32_t caps) {
+    multi_heap_info_t mhi;
+    heap_caps_get_info(&mhi, caps);
+
+    // Normalize everything to 0–1
+    float f1 = mhi.largest_free_block / 8192.0;   // ideal largest block: ≥ 8 KB
+    float f2 = mhi.total_free_bytes / 16384.0;  // ideal free heap: ≥ 16 KB
+    float f3 = mhi.minimum_free_bytes / 8192.0;   // ideal minimum free: ≥ 8 KB
+
+    // Clamp
+    if (f1 > 1) f1 = 1;
+    if (f2 > 1) f2 = 1;
+    if (f3 > 1) f3 = 1;
+
+    uint8_t health1 = 100 * (f1 + f2 + f3) / 3;
+
+    // largest_free_block → fragmentation
+    // total_free_bytes → headroom
+    // minimum_free_bytes → how close you came to death
+
+    // Condition	Meaning
+    // lfb < 5 KB	Heavy fragmentation → unstable
+    // tfb < 10–15 KB	malloc/WiFi/TLS failures possible
+    // mfb < 8 KB	You were close to crashing before
+
+    // So the formula gives:
+    // GOOD (🟢) → plenty of room & low fragmentation
+    // WARNING (🟠) → danger if load spikes
+    // BAD (🔴) → fragmentation or low RAM already dangerous
+
+    uint8_t health2 = 100 * mhi.largest_free_block / mhi.total_free_bytes;
+
+    // Interpretation:
+    // ≥ 66% → 🟢 good
+    // < 33% → 🔴 bad
+    // else → 🟠 okay
+
+    char s[128];
+    snprintf(s, sizeof(s),
+        "%s %zu+%zu=%zu🧱| %d+%d=%d KB |🔹%dKB→%d%%%s (🔻%dKB)",
+        health1>66?"🟢":(health1<33?"🔴":"🟠"),
+        mhi.allocated_blocks,
+        mhi.free_blocks,
+        mhi.total_blocks,
+        mhi.total_allocated_bytes / 1024,
+        mhi.total_free_bytes / 1024,
+        (mhi.total_allocated_bytes +mhi.total_free_bytes) / 1024,
+        mhi.largest_free_block / 1024,
+        health2,
+        health2>66?"🟢":(health2<33?"🔴":"🟠"),
+        mhi.minimum_free_bytes / 1024
+    );
+    variant.set(s);
 }

@@ -20,11 +20,11 @@ class ModuleTasks : public Module {
  public:
   ModuleTasks(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("tasks", server, sveltekit) { EXT_LOGV(MB_TAG, "constructor"); }
 
-  void setupDefinition(JsonArray root) override {
+  void setupDefinition(const JsonArray& root) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more properties
-    JsonArray details;    // if a control is an array, this is the details of the array
-    JsonArray values;     // if a control is a select, this is the values of the select
+    JsonArray details;   // if a control is an array, this is the details of the array
+    JsonArray values;    // if a control is a select, this is the values of the select
 
   #ifndef CONFIG_IDF_TARGET_ESP32C3
     control = addControl(root, "core0", "text", 0, 32, true);
@@ -48,13 +48,13 @@ class ModuleTasks : public Module {
 
   void loop1s() {
     if (!_socket->getConnectedClients()) return;  // 🌙 No need for UI tasks
-    if (!WiFi.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) return;
 
   #define MAX_TASKS 30
 
     TaskStatus_t taskStatusArray[MAX_TASKS];
     UBaseType_t taskCount;
-    uint32_t totalRunTime;
+    uint32_t totalRunTime = 1;
 
     // Get all tasks' info
     taskCount = uxTaskGetSystemState(taskStatusArray, MAX_TASKS, &totalRunTime);
@@ -96,7 +96,7 @@ class ModuleTasks : public Module {
       }
 
       Char<32> summary;
-      summary.format("%s %5.0f%% @ P%d", state, totalRunTime ? (100.0f * ts->ulRunTimeCounter) / totalRunTime : 0.0f, ts->uxCurrentPriority);
+      summary.format("%s %d%% @ P%d", state, (uint32_t)(100ULL * ts->ulRunTimeCounter / totalRunTime), ts->uxCurrentPriority);
 
       task["name"] = ts->pcTaskName;
       task["summary"] = summary.c_str();
@@ -104,7 +104,7 @@ class ModuleTasks : public Module {
       // task["cpu"] = cpu_percent.c_str();
       // task["prio"] = ts->uxCurrentPriority;
       task["stack"] = ts->usStackHighWaterMark;
-      task["runtime"] = ts->ulRunTimeCounter;
+      task["runtime"] = ts->ulRunTimeCounter / 1000000;  // in seconds
       task["core"] = ts->xCoreID == tskNO_AFFINITY ? -1 : ts->xCoreID;
 
       // printf("%-12s %-10s %4u\t%5u\t%10lu\t%s\t%d\n",
