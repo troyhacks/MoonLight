@@ -256,12 +256,19 @@ class SingleLineLayout : public Node {
   uint16_t width = 30;
   uint16_t yposition = 0;
   bool reversed_order = false;
+  uint8_t ledPinDIO;
 
   void setup() override {
     addControl(start_x, "starting X", "slider", 0, 255);
     addControl(width, "width", "number", 1, 1000);
     addControl(yposition, "Y position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
+    addControl(ledPinDIO, "LED pin DIO", "select");
+    Char<8> text;
+    for (int i = 0; i < 20; i++) {
+      text.format("LED %02d", i + 1);
+      addControlValue(text.c_str());
+    }
   }
 
   bool hasOnLayout() const override { return true; }
@@ -275,7 +282,7 @@ class SingleLineLayout : public Node {
         addLight(Coord3D(x, yposition, 0));
       }
     }
-    nextPin();  // all lights to one pin
+    nextPin(ledPinDIO);  // all lights to one pin
   }
 };
 
@@ -289,12 +296,19 @@ class SingleRowLayout : public Node {
   uint16_t height = 30;
   uint16_t xposition = 0;
   bool reversed_order = false;
+  uint8_t ledPinDIO;
 
   void setup() override {
     addControl(start_y, "starting Y", "slider", 0, 255);
     addControl(height, "height", "number", 1, 1000);
     addControl(xposition, "X position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
+    addControl(ledPinDIO, "LED pin DIO", "select");
+    Char<8> text;
+    for (int i = 0; i < 20; i++) {
+      text.format("LED %02d", i + 1);
+      addControlValue(text.c_str());
+    }
   }
 
   bool hasOnLayout() const override { return true; }
@@ -308,7 +322,7 @@ class SingleRowLayout : public Node {
         addLight(Coord3D(xposition, y, 0));
       }
     }
-    nextPin();  // all lights to one pin
+    nextPin(ledPinDIO);  // all lights to one pin
   }
 };
 

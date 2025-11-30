@@ -87,7 +87,15 @@ class PhysicalDriver : public DriverNode {
       }
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
-      for (int i = 0; i < nrOfPins; i++) EXT_LOGD(ML_TAG, "onLayout pin#%d: %d %d %d", i, layer->layerP->ledPins[i], layer->layerP->ledsPerPin[i], nrOfPins);
+      uint8_t pins[MAX_PINS];
+      for (int i = 0; i < nrOfPins; i++) {
+        uint8_t assignedPin = layerP.ledPinsAssigned[i];
+        if (assignedPin < MAX_PINS)
+          pins[i] = layerP.ledPins[assignedPin];
+        else
+          pins[i] = layerP.ledPins[i];
+        EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: %d -> %d #%d", i, nrOfPins, layer->layerP->ledPins[i], pins[i], layer->layerP->ledsPerPin[i]);
+      }
 
       if (!initDone) {
         __NB_DMA_BUFFER = dmaBuffer;  // __NB_DMA_BUFFER is a variable
@@ -95,7 +103,7 @@ class PhysicalDriver : public DriverNode {
         uint8_t savedBrightness = ledsDriver._brightness;  //(initLed sets it to 255 and thats not what we want)
 
         EXT_LOGD(ML_TAG, "init Physical Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
-        ledsDriver.initled(layer->layerP->lights.channels, layer->layerP->ledPins, layer->layerP->ledsPerPin, nrOfPins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        ledsDriver.initled(layer->layerP->lights.channels, pins, layer->layerP->ledsPerPin, nrOfPins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
 
         ledsDriver.setBrightness(savedBrightness);  //(initLed sets it to 255 and thats not what we want)
 
@@ -108,7 +116,7 @@ class PhysicalDriver : public DriverNode {
         // don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
         EXT_LOGD(ML_TAG, "update Physical Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
-        ledsDriver.updateDriver(layer->layerP->ledPins, layer->layerP->ledsPerPin, nrOfPins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        ledsDriver.updateDriver(pins, layer->layerP->ledsPerPin, nrOfPins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
       }
 
     #else  // P4: Parlio Troy Driver

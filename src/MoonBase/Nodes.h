@@ -150,6 +150,13 @@ class Node {
     return control;
   }
 
+  void addControlValue(JsonString value) {
+    JsonObject control = controls[controls.size() - 1];
+    if (control["values"].isNull()) control["values"].to<JsonArray>();
+    JsonArray values = control["values"];
+    values.add(value);
+  }
+
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
   virtual void updateControl(const Char<20>& oldValue, const JsonObject control);  // see Nodes.cpp for implementation
 
@@ -178,7 +185,7 @@ class Node {
   void addLight(Coord3D position) { layer->layerP->addLight(position); }
 
   // convenience function for next pin
-  void nextPin() { layer->layerP->nextPin(); }
+  void nextPin(uint8_t ledPinDIO = UINT8_MAX) { layer->layerP->nextPin(ledPinDIO); }
 
   // modifier
   virtual void modifySize() {}

@@ -172,7 +172,7 @@ void PhysicalLayer::addLight(Coord3D position) {
   }
 }
 
-void PhysicalLayer::nextPin() {
+void PhysicalLayer::nextPin(uint8_t ledPinDIO) {
   if (pass == 1 && !monitorPass) {
     uint16_t prevNrOfLights = 0;
     uint8_t i = 0;
@@ -183,6 +183,10 @@ void PhysicalLayer::nextPin() {
     // ledsPerPin[i] is the first empty slot
     if (i < MAXLEDPINS) {
       ledsPerPin[i] = lights.header.nrOfLights - prevNrOfLights;
+      if (ledPinDIO != UINT8_MAX)
+        ledPinsAssigned[i] = ledPinDIO; //override order
+      else
+        ledPinsAssigned[i] = i; //default order
       nrOfAssignedPins = i + 1;
       EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d of %d", i, ledsPerPin[i], MAXLEDPINS);
     }
