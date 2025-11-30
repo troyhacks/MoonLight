@@ -25,7 +25,8 @@ class ModuleLightsControl : public Module {
   PsychicHttpServer* _server;
   FileManager* _fileManager;
   ModuleIO* _moduleIO;
-  uint8_t pinRelaisBrightness = -1;
+  uint8_t pinRelaisBrightness = UINT8_MAX;
+  uint8_t pinToggleOnOff = UINT8_MAX;
 
   ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
@@ -70,11 +71,16 @@ class ModuleLightsControl : public Module {
 
   void readPins() {
     moduleIO.read([&](ModuleState& state) {
+      pinRelaisBrightness = UINT8_MAX;
+      pinToggleOnOff = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
         if (usage == pin_Relais_Brightness) {
           pinRelaisBrightness = pinObject["GPIO"];
           EXT_LOGD(ML_TAG, "pinRelaisBrightness found %d", pinRelaisBrightness);
+        } else if (usage == pin_Button_OnOff) {
+          pinToggleOnOff = pinObject["GPIO"];
+          EXT_LOGD(ML_TAG, "pinToggleOnOff found %d", pinToggleOnOff);
         }
       }
       // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
@@ -277,8 +283,20 @@ class ModuleLightsControl : public Module {
         if (newState.size()) {
           // serializeJson(doc, Serial);
           // Serial.println();
-          update(newState, ModuleState::update, _moduleName);
+          update(newState, ModuleState::update, _moduleName + "server");
         }
+      }
+    }
+
+    if (pinToggleOnOff != UINT8_MAX) {
+      static int lastState = HIGH;
+      int state = digitalRead(pinToggleOnOff);
+      if (state != lastState) {
+        JsonDocument doc;
+        JsonObject newState = doc.to<JsonObject>();
+        newState["lightsOn"] = !_state.data["lightsOn"];
+        update(newState, ModuleState::update, _moduleName + "server");
+        lastState = state;
       }
     }
 

@@ -73,6 +73,7 @@ enum IO_PinUsage {
   pin_Serial_RX,
   pin_Reserved,
   pin_Ethernet,
+  pin_Button_OnOff,
   pin_count
 };
 
@@ -271,7 +272,7 @@ class ModuleIO : public Module {
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
       pins[0]["usage"] = pin_Button_01;
       pins[45]["usage"] = pin_Button_02;
-      pins[46]["usage"] = pin_Button_03;
+      pins[46]["usage"] = pin_Button_OnOff;
       pins[8]["usage"] = pin_Voltage;
       pins[9]["usage"] = pin_Current;
       pins[5]["usage"] = pin_Infrared;
@@ -376,6 +377,11 @@ class ModuleIO : public Module {
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
       pins[16]["usage"] = pin_LED_01;
+      pins[4]["usage"] = pin_LED_02;
+      pins[5]["usage"] = pin_LED_03;
+      pins[6]["usage"] = pin_LED_04;
+      pins[7]["usage"] = pin_LED_05;
+      pins[8]["usage"] = pin_LED_06;
     }
     // String xxx;
     // serializeJson(_state.data, xxx);
