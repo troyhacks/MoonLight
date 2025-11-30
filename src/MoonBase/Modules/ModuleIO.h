@@ -204,6 +204,7 @@ class ModuleIO : public Module {
       values.add("Serial RX");
       values.add("Reserved");
       values.add("Ethernet");
+      values.add("Button OnOff");
 
       control = addControl(details, "summary", "text", 0, 32, true);  // ro
       // control = details.add<JsonObject>(); control["name"] = "Valid"; control["type"] = "checkbox"; control["ro"] = true;

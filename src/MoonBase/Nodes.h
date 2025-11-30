@@ -150,9 +150,11 @@ class Node {
     return control;
   }
 
-  void addControlValue(JsonString value) {
-    JsonObject control = controls[controls.size() - 1];
-    if (control["values"].isNull()) control["values"].to<JsonArray>();
+  template <typename T>
+  void addControlValue(const T& value) {
+    if (controls.size() == 0) return;                                   // guard against empty controls
+    JsonObject control = controls[controls.size() - 1];                 // last control
+    if (control["values"].isNull()) control["values"].to<JsonArray>();  // add array of values
     JsonArray values = control["values"];
     values.add(value);
   }

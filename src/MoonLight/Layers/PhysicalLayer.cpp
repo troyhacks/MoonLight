@@ -133,7 +133,8 @@ void PhysicalLayer::onLayoutPre() {
     memset(lights.channels, 0, lights.maxChannels);  // set all the channels to 0
     // dealloc pins
     if (!monitorPass) {
-      memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX
+      memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX is 2 * 0xFF
+      memset(ledPinsAssigned, 0, sizeof(ledPinsAssigned));
     }
   } else if (pass == 2) {
     indexP = 0;
@@ -184,11 +185,11 @@ void PhysicalLayer::nextPin(uint8_t ledPinDIO) {
     if (i < MAXLEDPINS) {
       ledsPerPin[i] = lights.header.nrOfLights - prevNrOfLights;
       if (ledPinDIO != UINT8_MAX)
-        ledPinsAssigned[i] = ledPinDIO; //override order
+        ledPinsAssigned[i] = ledPinDIO;  // override order
       else
-        ledPinsAssigned[i] = i; //default order
+        ledPinsAssigned[i] = i;  // default order
       nrOfAssignedPins = i + 1;
-      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d of %d", i, ledsPerPin[i], MAXLEDPINS);
+      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d of %d assigned:%d", i, ledsPerPin[i], MAXLEDPINS, ledPinsAssigned[i]);
     }
   }
 }

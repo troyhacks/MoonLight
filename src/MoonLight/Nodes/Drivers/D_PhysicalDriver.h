@@ -90,7 +90,7 @@ class PhysicalDriver : public DriverNode {
       uint8_t pins[MAX_PINS];
       for (int i = 0; i < nrOfPins; i++) {
         uint8_t assignedPin = layerP.ledPinsAssigned[i];
-        if (assignedPin < MAX_PINS)
+        if (assignedPin < layerP.nrOfLedPins)
           pins[i] = layerP.ledPins[assignedPin];
         else
           pins[i] = layerP.ledPins[i];

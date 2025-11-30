@@ -256,7 +256,7 @@ class SingleLineLayout : public Node {
   uint16_t width = 30;
   uint16_t yposition = 0;
   bool reversed_order = false;
-  uint8_t ledPinDIO;
+  uint8_t ledPinDIO = 0;  // default
 
   void setup() override {
     addControl(start_x, "starting X", "slider", 0, 255);
@@ -264,8 +264,9 @@ class SingleLineLayout : public Node {
     addControl(yposition, "Y position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(ledPinDIO, "LED pin DIO", "select");
+    addControlValue("Default");
     Char<8> text;
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < MAXLEDPINS; i++) {
       text.format("LED %02d", i + 1);
       addControlValue(text.c_str());
     }
@@ -282,7 +283,7 @@ class SingleLineLayout : public Node {
         addLight(Coord3D(x, yposition, 0));
       }
     }
-    nextPin(ledPinDIO);  // all lights to one pin
+    nextPin(ledPinDIO == 0 ? UINT8_MAX : ledPinDIO - 1);  // all lights to one pin, default: use default
   }
 };
 
@@ -296,7 +297,7 @@ class SingleRowLayout : public Node {
   uint16_t height = 30;
   uint16_t xposition = 0;
   bool reversed_order = false;
-  uint8_t ledPinDIO;
+  uint8_t ledPinDIO = 0;  // default
 
   void setup() override {
     addControl(start_y, "starting Y", "slider", 0, 255);
@@ -304,8 +305,9 @@ class SingleRowLayout : public Node {
     addControl(xposition, "X position", "number", 0, 255);
     addControl(reversed_order, "reversed order", "checkbox");
     addControl(ledPinDIO, "LED pin DIO", "select");
+    addControlValue("Default");
     Char<8> text;
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < MAXLEDPINS; i++) {
       text.format("LED %02d", i + 1);
       addControlValue(text.c_str());
     }
@@ -322,7 +324,7 @@ class SingleRowLayout : public Node {
         addLight(Coord3D(xposition, y, 0));
       }
     }
-    nextPin(ledPinDIO);  // all lights to one pin
+    nextPin(ledPinDIO == 0 ? UINT8_MAX : ledPinDIO - 1);  // all lights to one pin, default: use default
   }
 };
 

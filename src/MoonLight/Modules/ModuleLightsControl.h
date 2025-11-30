@@ -80,6 +80,7 @@ class ModuleLightsControl : public Module {
           EXT_LOGD(ML_TAG, "pinRelaisBrightness found %d", pinRelaisBrightness);
         } else if (usage == pin_Button_OnOff) {
           pinToggleOnOff = pinObject["GPIO"];
+          pinMode(pinToggleOnOff, INPUT_PULLUP);
           EXT_LOGD(ML_TAG, "pinToggleOnOff found %d", pinToggleOnOff);
         }
       }
@@ -289,13 +290,19 @@ class ModuleLightsControl : public Module {
     }
 
     if (pinToggleOnOff != UINT8_MAX) {
+      static unsigned long lastDebounceTime = 0;
+      const unsigned long debounceDelay = 50;  // 50ms debounce
       static int lastState = HIGH;
       int state = digitalRead(pinToggleOnOff);
-      if (state != lastState) {
-        JsonDocument doc;
-        JsonObject newState = doc.to<JsonObject>();
-        newState["lightsOn"] = !_state.data["lightsOn"];
-        update(newState, ModuleState::update, _moduleName + "server");
+      if (state != lastState && (millis() - lastDebounceTime) > debounceDelay) {
+        lastDebounceTime = millis();
+        // Trigger only on button press (HIGH to LOW transition for INPUT_PULLUP)
+        if (state == LOW) {
+          JsonDocument doc;
+          JsonObject newState = doc.to<JsonObject>();
+          newState["lightsOn"] = !_state.data["lightsOn"];
+          update(newState, ModuleState::update, _moduleName + "server");
+        }
         lastState = state;
       }
     }
