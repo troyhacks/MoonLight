@@ -227,6 +227,12 @@ struct Char {
     strlcat(s, rhs.c_str(), sizeof(s));
     return *this;
   }
+ template <size_t M>
+  Char& operator+=(const Char<M>& rhs) {
+    strlcat(s, rhs.c_str(), sizeof(s));
+    return *this;
+  }
+
 
   // compare operators
   bool operator==(const char* rhs) const { return strcmp(s, rhs) == 0; }

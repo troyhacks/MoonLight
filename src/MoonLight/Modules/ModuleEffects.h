@@ -280,6 +280,9 @@ class ModuleEffects : public NodeManager {
       EXT_LOGD(ML_TAG, "%s (p:%p pr:%d)", name, node, isInPSRAM(node));
 
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node
+      // node->moduleControl = _moduleLightsControl;     // to access global lights control functions if needed
+      // node->moduleIO = _moduleIO;                     // to get pin allocations
+      node->moduleNodes = (Module*)this;              // to request UI update
       node->setup();                                  // run the setup of the effect
       node->onSizeChanged(Coord3D());
       // layers[0]->nodes.reserve(index+1);

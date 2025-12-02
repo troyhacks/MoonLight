@@ -14,7 +14,7 @@
 
   #include <ESP32SvelteKit.h>  //for safeModeMB
 
-void Node::updateControl(const Char<20>& oldValue, const JsonObject control) {
+void Node::updateControl(const JsonObject& control) {
   // EXT_LOGD(ML_TAG, "onUpdate %s", control["name"].as<const char*>());
   // if (oldValue == "") return;                                                              // newControl, value already set
   if (!control["name"].isNull() && !control["type"].isNull() && !control["p"].isNull()) {  // name and type can be null if control is removed in compareRecursive
@@ -398,7 +398,7 @@ void DriverNode::loop() {
   #endif
 }
 
-void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject control) {
+void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
   LightsHeader* header = &layer->layerP->lights.header;
 
   EXT_LOGD(ML_TAG, "%s: %s ", control["name"].as<const char*>(), control["value"].as<String>().c_str());

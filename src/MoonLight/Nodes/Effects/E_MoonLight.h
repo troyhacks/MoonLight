@@ -923,7 +923,7 @@ class RubiksCubeEffect : public Node {
   }
 
   bool doInit = false;
-  void onUpdate(const Char<20>& oldValue, const JsonObject control) override {
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) override {
     if (control["name"] == "cubeSize" || control["name"] == "randomTurning") {
       doInit = true;
     }
@@ -1119,7 +1119,7 @@ class ParticlesEffect : public Node {
     // addControl(bool, "Debug Print",             layer->effectData.write<bool>(0));
   }
 
-  void onUpdate(const Char<20>& oldValue, const JsonObject control) override {
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) override {
     if (control["name"] == "number of Particles" || control["name"] == "barriers") {
       settingUpParticles();
     }

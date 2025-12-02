@@ -26,7 +26,8 @@ class PhysicalDriver : public DriverNode {
   static const char* tags() { return "☸️"; }
 
   #if HP_ALL_DRIVERS
-  char version[30] = HP_ALL_VERSION;
+  Char<32> version = HP_ALL_VERSION;
+  Char<32> status = "ok";
     #ifndef BOARD_HAS_PSRAM
   uint8_t dmaBuffer = 6;
     #else
@@ -38,7 +39,9 @@ class PhysicalDriver : public DriverNode {
     DriverNode::setup();
   #if HP_ALL_DRIVERS
     addControl(dmaBuffer, "dmaBuffer", "slider", 1, 100);
-    addControl(version, "Version", "text", 0, 30, true);  // read only
+    addControl(version, "version", "text", 0, 32, true);  // read only
+    addControl(status, "status", "text", 0, 32, true);    // read only
+    updateControl("version", HP_ALL_VERSION);             // update also if node already exists
   #endif
   }
 
@@ -80,7 +83,7 @@ class PhysicalDriver : public DriverNode {
         return;
       }
 
-      EXT_LOGD(ML_TAG, "nrOfLedPins %d", nrOfPins);
+      EXT_LOGD(ML_TAG, "nrOfLedPins %d %d %d", nrOfPins, layerP.nrOfLedPins, layerP.nrOfAssignedPins);
       if (safeModeMB) {
         EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
         return;
@@ -88,6 +91,7 @@ class PhysicalDriver : public DriverNode {
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
       uint8_t pins[MAX_PINS];
+      Char<32> statusString = "";
       for (int i = 0; i < nrOfPins; i++) {
         uint8_t assignedPin = layerP.ledPinsAssigned[i];
         if (assignedPin < layerP.nrOfLedPins)
@@ -95,7 +99,14 @@ class PhysicalDriver : public DriverNode {
         else
           pins[i] = layerP.ledPins[i];
         EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: %d -> %d #%d", i, nrOfPins, layer->layerP->ledPins[i], pins[i], layer->layerP->ledsPerPin[i]);
+        Char<12> tmp;
+        tmp.format(" %d#%d", pins[i], layer->layerP->ledsPerPin[i]);
+        statusString += tmp;
       }
+      EXT_LOGD(ML_TAG, "status: %s", statusString.c_str());
+
+      updateControl("status", statusString.c_str());
+      moduleNodes->requestUIUpdate = true;
 
       if (!initDone) {
         __NB_DMA_BUFFER = dmaBuffer;  // __NB_DMA_BUFFER is a variable

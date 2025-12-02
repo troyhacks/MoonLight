@@ -51,7 +51,7 @@ class ModuleDrivers : public NodeManager {
       // Remove all UINT8_MAX values by compacting the array
       layerP.nrOfLedPins = 0;
       for (int readPos = 0; readPos < sizeof(layerP.ledPins); readPos++) {
-        if (layerP.ledPins[readPos] != UINT8_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != UINT16_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != 0) {  // only pins which have a nrOfLedPins
+        if (layerP.ledPins[readPos] != UINT8_MAX) {  // only pins which have a nrOfLedPins // && layerP.ledsPerPin[layerP.nrOfLedPins] != UINT16_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != 0
           layerP.ledPins[layerP.nrOfLedPins++] = layerP.ledPins[readPos];
         }
       }
@@ -159,7 +159,8 @@ class ModuleDrivers : public NodeManager {
 
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node (C++ constructors are not inherited, so declare it as normal functions)
       node->moduleControl = _moduleLightsControl;     // to access global lights control functions if needed
-      node->moduleIO = _moduleIO;                     // to access global lights control functions if needed
+      node->moduleIO = _moduleIO;                     // to get pin allocations
+      node->moduleNodes = (Module*)this;              // to request UI update
       node->setup();                                  // run the setup of the effect
       node->onSizeChanged(Coord3D());
       // layers[0]->nodes.reserve(index+1);

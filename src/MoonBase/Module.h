@@ -139,6 +139,7 @@ class ModuleState {
 class Module : public StatefulService<ModuleState> {
  public:
   String _moduleName = "";
+  bool requestUIUpdate = false;
 
   Module(const String& moduleName, PsychicHttpServer* server, ESP32SvelteKit* sveltekit);
 
@@ -150,6 +151,18 @@ class Module : public StatefulService<ModuleState> {
     // run in sveltekit task
 
     _state.getUpdate();
+
+    if (requestUIUpdate) {
+      requestUIUpdate = false;  // reset the flag
+      EXT_LOGD(ML_TAG, "requestUIUpdate");
+
+      // update state to UI
+      update(
+          [&](ModuleState& state) {
+            return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
+          },
+          _moduleName + "server");
+    }
   }
 
   void processUpdatedItem(const UpdatedItem& updatedItem) {

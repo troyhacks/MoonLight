@@ -312,7 +312,7 @@ void WiFiSettingsService::manageSTA()
     }
 
     // Connect or reconnect as required
-    // if ((WiFi.getMode() & WIFI_STA) == 0) //🌙 commented, see https://github.com/theelims/ESP32-sveltekit/issues/109
+    if ((WiFi.getMode() & WIFI_STA) == 0) // 🌙 , see https://github.com/theelims/ESP32-sveltekit/issues/109 🚧
     {
 #ifdef SERIAL_INFO
         Serial.println("Connecting to WiFi...");

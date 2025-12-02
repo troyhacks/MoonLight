@@ -19,7 +19,6 @@
 
 class NodeManager : public Module {
  public:
-  bool requestUIUpdate = false;
   Char<20> defaultNodeName;
 
  protected:
@@ -258,19 +257,21 @@ class NodeManager : public Module {
       }  // nodes[i].on
 
       else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value" && updatedItem.index[1] < nodeState["controls"].size()) {  // nodes[i].controls[j].value
-        // serializeJson(nodeState["controls"][updatedItem.index[1]], Serial);
+        JsonObject control = nodeState["controls"][updatedItem.index[1]];
+        // serializeJson(control, Serial);
         // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
         if (updatedItem.index[0] < nodes->size()) {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
-            nodeClass->updateControl(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);
-            nodeClass->onUpdate(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);  // custom onUpdate for the node
+            nodeClass->updateControl(control);
+            nodeClass->onUpdate(updatedItem.oldValue, control);  // custom onUpdate for the node
 
             nodeClass->requestMappings();
           } else
             EXT_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<const char*>());
         }
+
       }  // nodes[i].controls[j].value
       // else
       //     EXT_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
@@ -293,21 +294,6 @@ class NodeManager : public Module {
     // modifiers and layouts trigger remaps
     nodeS->requestMappings();
     nodeN->requestMappings();
-  }
-
-  void loop() override {
-    Module::loop();
-    if (requestUIUpdate) {
-      requestUIUpdate = false;  // reset the flag
-      // EXT_LOGD(ML_TAG, "requestUIUpdate");
-
-      // update state to UI
-      update(
-          [&](ModuleState& state) {
-            return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
-          },
-          _moduleName);
-    }
   }
 
  public:

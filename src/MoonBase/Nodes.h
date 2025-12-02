@@ -53,6 +53,7 @@ class Node {
   JsonArray controls;
   Module* moduleControl = nullptr;  // to access global lights control functions if needed
   Module* moduleIO = nullptr;       // to access io pins if needed
+  Module* moduleNodes = nullptr;    // to request UI update if needed
 
   virtual bool isLiveScriptNode() const { return false; }
   virtual bool hasOnLayout() const { return false; }  // run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2)
@@ -61,7 +62,7 @@ class Node {
   bool on = false;  // onUpdate will set it on
 
   // C++ constructors are not inherited, so declare it as normal functions
-  virtual void constructor(VirtualLayer* layer, JsonArray controls) {
+  virtual void constructor(VirtualLayer* layer, const JsonArray& controls) {
     this->layer = layer;
     this->controls = controls;
   }
@@ -77,7 +78,7 @@ class Node {
 
     bool newControl = false;  // flag to check if control is new or already exists
     // if control already exists only update it's pointer
-    JsonObject control;
+    JsonObject control = JsonObject();
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
         // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
@@ -141,9 +142,7 @@ class Node {
       EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<const char*>(), control["type"].as<const char*>(), control["size"].as<uint8_t>());
 
     if (newControl) {
-      Char<20> oldValue;
-      oldValue = "";
-      // updateControl(oldValue, control);
+      Char<20> oldValue = "";
       onUpdate(oldValue, control);  // custom onUpdate for the node
     }
 
@@ -160,9 +159,19 @@ class Node {
   }
 
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  virtual void updateControl(const Char<20>& oldValue, const JsonObject control);  // see Nodes.cpp for implementation
+  void updateControl(const JsonObject& control);  // see Nodes.cpp for implementation
+  template <typename T>
+  void updateControl(const char* name, const T value) {
+    for (JsonObject control : controls) {
+      if (control["name"] == name) {
+        control["value"] = value;
+        updateControl(control);
+        break;
+      }
+    }
+  }
 
-  virtual void onUpdate(const Char<20>& oldValue, const JsonObject control) {}
+  virtual void onUpdate(const Char<20>& oldValue, const JsonObject& control) {}
 
   void requestMappings() {
     if (hasModifier() || hasOnLayout()) {
@@ -274,7 +283,7 @@ class DriverNode : public Node {
   void reOrderAndDimRGBW(uint8_t* packetRGBChannel, uint8_t* lightsRGBChannel);
 
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  void onUpdate(const Char<20>& oldValue, const JsonObject control) override;
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) override;
 };
 
 // Helper function to generate a triangle wave similar to beat16

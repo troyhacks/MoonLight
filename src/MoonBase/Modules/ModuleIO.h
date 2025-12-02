@@ -378,11 +378,12 @@ class ModuleIO : public Module {
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
       pins[16]["usage"] = pin_LED_01;
-      pins[4]["usage"] = pin_LED_02;
-      pins[5]["usage"] = pin_LED_03;
-      pins[6]["usage"] = pin_LED_04;
-      pins[7]["usage"] = pin_LED_05;
-      pins[8]["usage"] = pin_LED_06;
+      // trying to add more pins, but these pins not liked by esp32-d0-16MB ... 🚧
+      // pins[4]["usage"] = pin_LED_02;
+      // pins[5]["usage"] = pin_LED_03;
+      // pins[6]["usage"] = pin_LED_04;
+      // pins[7]["usage"] = pin_LED_05;
+      // pins[8]["usage"] = pin_LED_06;
     }
     // String xxx;
     // serializeJson(_state.data, xxx);
