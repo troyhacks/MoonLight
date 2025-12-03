@@ -345,21 +345,20 @@ I2SClocklessLedDriver ledsDriver;
   #endif
 
 void DriverNode::setup() {
-  JsonObject property = addControl(lightPreset, "lightPreset", "select");
-  JsonArray values = property["values"].to<JsonArray>();
-  values.add("RGB");
-  values.add("RBG");
-  values.add("GRB");  // default WS2812
-  values.add("GBR");
-  values.add("BRG");
-  values.add("BGR");
-  values.add("RGBW");                    // e.g. 4 channel par/dmx light
-  values.add("GRBW");                    // rgbw LED eg. sk6812
-  values.add("GRB6");                    // some LED curtains
-  values.add("RGBWYP");                  // 6 channel par/dmx light with UV etc
-  values.add("MHBeeEyes150W-15 🐺");     // 15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
-  values.add("MHBeTopper19x15W-32 🐺");  // 32 channels moving head
-  values.add("MH19x15W-24");             // 24 channels moving heads
+  addControl(lightPreset, "lightPreset", "select");
+  addControlValue("RGB");
+  addControlValue("RBG");
+  addControlValue("GRB");  // default WS2812
+  addControlValue("GBR");
+  addControlValue("BRG");
+  addControlValue("BGR");
+  addControlValue("RGBW");                    // e.g. 4 channel par/dmx light
+  addControlValue("GRBW");                    // rgbw LED eg. sk6812
+  addControlValue("GRB6");                    // some LED curtains
+  addControlValue("RGBWYP");                  // 6 channel par/dmx light with UV etc
+  addControlValue("MHBeeEyes150W-15 🐺");     // 15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
+  addControlValue("MHBeTopper19x15W-32 🐺");  // 32 channels moving head
+  addControlValue("MH19x15W-24");             // 24 channels moving heads
 }
 
 void DriverNode::loop() {

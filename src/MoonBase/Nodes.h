@@ -106,8 +106,6 @@ class Node {
 
     control["valid"] = true;  // invalid controls will be deleted
 
-    // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
-
     if (newControl) control["value"] = variable;  // set default
 
     // setValue
@@ -145,6 +143,10 @@ class Node {
       Char<20> oldValue = "";
       onUpdate(oldValue, control);  // custom onUpdate for the node
     }
+
+    // String sss;
+    // serializeJson(control, sss);
+    // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d %s", name, type, pointer, sizeof(ControlType), sss.c_str());
 
     return control;
   }

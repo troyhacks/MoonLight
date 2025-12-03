@@ -38,9 +38,9 @@ class FilesState {
   std::vector<String> updatedItems;
   bool showHidden = false;
 
-  static void read(FilesState& settings, JsonObject& root);
+  static void read(FilesState& settings, JsonObject& stateJson);
 
-  static StateUpdateResult update(JsonObject& root, FilesState& filesState, const String &originId);
+  static StateUpdateResult update(JsonObject& newData, FilesState& filesState, const String &originId);
 };
 
 class FileManager : public StatefulService<FilesState> {

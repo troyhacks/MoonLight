@@ -57,103 +57,90 @@ class ModuleEffects : public NodeManager {
     };
   }
 
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;  // state.data has one or more properties
-    JsonArray values;     // if a property is a select, this is the values of the select
-    property = root.add<JsonObject>();
-    property["name"] = "layer";
-    property["type"] = "select";
-    property["default"] = 0;
-    values = property["values"].to<JsonArray>();
+    JsonObject control;  // state.data has one or more properties
+    control = addControl(controls, "layer", "select");
+    control["default"] = 0;
     uint8_t i = 0;
     for (VirtualLayer* layer : layerP.layers) {
-      values.add(i);
+      addControlValue(control, i);
       i++;
     }
-    property = root.add<JsonObject>();
-    property["name"] = "start";
-    property["type"] = "coord3D";
-    property["ro"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "end";
-    property["type"] = "coord3D";
-    property["ro"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "brightness";
-    property["type"] = "slider";
-    property["ro"] = true;
+    addControl(controls, "start", "coord3D", 0, UINT16_MAX, true);
+    addControl(controls, "end", "coord3D", 0, UINT16_MAX, true);
+    addControl(controls, "brightness", "slider", 0, UINT8_MAX, true);
 
-    NodeManager::setupDefinition(root);
+    NodeManager::setupDefinition(controls);
   }
 
-  void addNodes(const JsonArray& values) const override {
+  void addNodes(const JsonObject& control) override {
     // keep the order the same as in https://moonmodules.org/MoonLight/moonlight/effects
 
     // MoonLight effects, Solid first then alphabetically
-    values.add(getNameAndTags<SolidEffect>());
-    values.add(getNameAndTags<LinesEffect>());
-    values.add(getNameAndTags<FixedRectangleEffect>());
-    values.add(getNameAndTags<ParticlesEffect>());
-    values.add(getNameAndTags<PraxisEffect>());
+    addControlValue(control, getNameAndTags<SolidEffect>());
+    addControlValue(control, getNameAndTags<LinesEffect>());
+    addControlValue(control, getNameAndTags<FixedRectangleEffect>());
+    addControlValue(control, getNameAndTags<ParticlesEffect>());
+    addControlValue(control, getNameAndTags<PraxisEffect>());
   #if USE_M5UNIFIED
-    values.add(getNameAndTags<MoonManEffect>());
+    addControlValue(control, getNameAndTags<MoonManEffect>());
   #endif
-    values.add(getNameAndTags<FreqSawsEffect>());
-    values.add(getNameAndTags<RainbowEffect>());
-    values.add(getNameAndTags<RandomEffect>());
-    values.add(getNameAndTags<RipplesEffect>());
-    values.add(getNameAndTags<RubiksCubeEffect>());
-    values.add(getNameAndTags<ScrollingTextEffect>());
-    values.add(getNameAndTags<SinusEffect>());
-    values.add(getNameAndTags<SphereMoveEffect>());
-    values.add(getNameAndTags<StarFieldEffect>());
-    values.add(getNameAndTags<WaveEffect>());
-    values.add(getNameAndTags<SpiralFireEffect>());
+    addControlValue(control, getNameAndTags<FreqSawsEffect>());
+    addControlValue(control, getNameAndTags<RainbowEffect>());
+    addControlValue(control, getNameAndTags<RandomEffect>());
+    addControlValue(control, getNameAndTags<RipplesEffect>());
+    addControlValue(control, getNameAndTags<RubiksCubeEffect>());
+    addControlValue(control, getNameAndTags<ScrollingTextEffect>());
+    addControlValue(control, getNameAndTags<SinusEffect>());
+    addControlValue(control, getNameAndTags<SphereMoveEffect>());
+    addControlValue(control, getNameAndTags<StarFieldEffect>());
+    addControlValue(control, getNameAndTags<WaveEffect>());
+    addControlValue(control, getNameAndTags<SpiralFireEffect>());
 
     // MoonModules effects, alphabetically
-    values.add(getNameAndTags<GameOfLifeEffect>());
-    values.add(getNameAndTags<GEQ3DEffect>());
-    values.add(getNameAndTags<PaintBrushEffect>());
+    addControlValue(control, getNameAndTags<GameOfLifeEffect>());
+    addControlValue(control, getNameAndTags<GEQ3DEffect>());
+    addControlValue(control, getNameAndTags<PaintBrushEffect>());
 
     // WLED effects, alphabetically
-    values.add(getNameAndTags<BlackholeEffect>());
-    values.add(getNameAndTags<BouncingBallsEffect>());
-    values.add(getNameAndTags<BlurzEffect>());
-    values.add(getNameAndTags<DistortionWavesEffect>());
-    values.add(getNameAndTags<FreqMatrixEffect>());
-    values.add(getNameAndTags<GEQEffect>());
-    values.add(getNameAndTags<LissajousEffect>());
-    values.add(getNameAndTags<Noise2DEffect>());
-    values.add(getNameAndTags<NoiseMeterEffect>());
-    values.add(getNameAndTags<PopCornEffect>());
-    values.add(getNameAndTags<WaverlyEffect>());
+    addControlValue(control, getNameAndTags<BlackholeEffect>());
+    addControlValue(control, getNameAndTags<BouncingBallsEffect>());
+    addControlValue(control, getNameAndTags<BlurzEffect>());
+    addControlValue(control, getNameAndTags<DistortionWavesEffect>());
+    addControlValue(control, getNameAndTags<FreqMatrixEffect>());
+    addControlValue(control, getNameAndTags<GEQEffect>());
+    addControlValue(control, getNameAndTags<LissajousEffect>());
+    addControlValue(control, getNameAndTags<Noise2DEffect>());
+    addControlValue(control, getNameAndTags<NoiseMeterEffect>());
+    addControlValue(control, getNameAndTags<PopCornEffect>());
+    addControlValue(control, getNameAndTags<WaverlyEffect>());
 
     // Moving head effects, alphabetically
-    values.add(getNameAndTags<AmbientMoveEffect>());
-    values.add(getNameAndTags<FreqColorsEffect>());
-    values.add(getNameAndTags<Troy1ColorEffect>());
-    values.add(getNameAndTags<Troy1MoveEffect>());
-    values.add(getNameAndTags<Troy2ColorEffect>());
-    values.add(getNameAndTags<Troy2MoveEffect>());
-    values.add(getNameAndTags<WowiMoveEffect>());
+    addControlValue(control, getNameAndTags<AmbientMoveEffect>());
+    addControlValue(control, getNameAndTags<FreqColorsEffect>());
+    addControlValue(control, getNameAndTags<Troy1ColorEffect>());
+    addControlValue(control, getNameAndTags<Troy1MoveEffect>());
+    addControlValue(control, getNameAndTags<Troy2ColorEffect>());
+    addControlValue(control, getNameAndTags<Troy2MoveEffect>());
+    addControlValue(control, getNameAndTags<WowiMoveEffect>());
 
     // Modifiers, most used first
-    values.add(getNameAndTags<MultiplyModifier>());
-    values.add(getNameAndTags<MirrorModifier>());
-    values.add(getNameAndTags<TransposeModifier>());
-    values.add(getNameAndTags<CircleModifier>());
-    values.add(getNameAndTags<RotateModifier>());
-    values.add(getNameAndTags<CheckerboardModifier>());
-    values.add(getNameAndTags<PinwheelModifier>());
-    values.add(getNameAndTags<RippleYZModifier>());
+    addControlValue(control, getNameAndTags<MultiplyModifier>());
+    addControlValue(control, getNameAndTags<MirrorModifier>());
+    addControlValue(control, getNameAndTags<TransposeModifier>());
+    addControlValue(control, getNameAndTags<CircleModifier>());
+    addControlValue(control, getNameAndTags<RotateModifier>());
+    addControlValue(control, getNameAndTags<CheckerboardModifier>());
+    addControlValue(control, getNameAndTags<PinwheelModifier>());
+    addControlValue(control, getNameAndTags<RippleYZModifier>());
 
     // find all the .sc files on FS
     File rootFolder = ESPFS.open("/");
     walkThroughFiles(rootFolder, [&](File folder, File file) {
       if (strstr(file.name(), ".sc")) {
         // EXT_LOGV(ML_TAG, "found file %s", file.path());
-        values.add((char*)file.path());
+        addControlValue(control, (char*)file.path());
       }
     });
     rootFolder.close();

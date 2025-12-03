@@ -90,62 +90,26 @@ class ModuleLiveScripts : public Module {
   }
 
   // define the data model
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;       // state.data has one or more properties
-    JsonArray details = root;  // if a property is an array, this is the details of the array
-    JsonArray values;          // if a property is a select, this is the values of the select
+    JsonObject control;       // state.data has one or more properties
+    JsonArray rows = controls;  // if a control is an array, this is the rows of the array
 
-    property = root.add<JsonObject>();
-    property["name"] = "scripts";
-    property["type"] = "rows";
-    details = property["n"].to<JsonArray>();
+    control = addControl(controls, "scripts", "rows");
+    rows = control["n"].to<JsonArray>();
     {
-      property = details.add<JsonObject>();
-      property["name"] = "name";
-      property["type"] = "text";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "isRunning";
-      property["type"] = "checkbox";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "isHalted";
-      property["type"] = "checkbox";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "exeExist";
-      property["type"] = "checkbox";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "handle";
-      property["type"] = "number";
-      property["ro"] = true;
-      property["max"] = 65536;
-      property = details.add<JsonObject>();
-      property["name"] = "binary_size";
-      property["type"] = "number";
-      property["ro"] = true;
-      property["max"] = 65536;
-      property = details.add<JsonObject>();
-      property["name"] = "data_size";
-      property["type"] = "number";
-      property["ro"] = true;
-      property["max"] = 65536;
-      property = details.add<JsonObject>();
-      property["name"] = "error";
-      property["type"] = "text";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "stop";
-      property["type"] = "button";
-      property = details.add<JsonObject>();
-      property["name"] = "start";
-      property["type"] = "button";
-      // property = details.add<JsonObject>(); property["name"] = "free"; property["type"] = "button";
-      property = details.add<JsonObject>();
-      property["name"] = "delete";
-      property["type"] = "button";
+      addControl(rows, "name", "text", 0, 32, true);
+      addControl(rows, "isRunning", "checkbox", false, true, true);
+      addControl(rows, "isHalted", "checkbox", false, true, true);
+      addControl(rows, "exeExist", "checkbox", false, true, true);
+      addControl(rows, "handle", "number", 0, 65535, true);
+      addControl(rows, "binary_size", "number", 0, 65535, true);
+      addControl(rows, "data_size", "number", 0, 65535, true);
+      addControl(rows, "error", "text", 0, 32, true);
+      addControl(rows, "stop", "button");
+      addControl(rows, "start", "button");
+      // addControl(rows, "free", "button");
+      addControl(rows, "delete", "button");
     }
   }
 

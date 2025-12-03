@@ -48,7 +48,7 @@ class FastLEDDriver : public Node {
   #endif
 
   void setup() override {
-    addControl(version, "Version", "text", 0, 20, true);
+    addControl(version, "version", "text", 0, 20, true);
     addControl(chipSet, "chipSet", "text", 0, 20, true);
     addControl(colorOrder, "colorOrder", "text", 0, 20, true);
     addControl(usesI2S, "usesI2S", "checkbox", 0, 20, true);

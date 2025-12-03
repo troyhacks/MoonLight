@@ -220,28 +220,24 @@ class ScrollingTextEffect : public Node {
   Coord3D ctest;
 
   void setup() override {
-    JsonObject property;
-    JsonArray values;
-    property = addControl(font, "font", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("4x6");
-    values.add("5x8");
-    values.add("5x12");
-    values.add("6x8");
-    values.add("7x9");
+    addControl(font, "font", "select");
+    addControlValue("4x6");
+    addControlValue("5x8");
+    addControlValue("5x12");
+    addControlValue("6x8");
+    addControlValue("7x9");
 
-    property = addControl(preset, "preset", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("Auto");
-    values.add("Text");
-    values.add("IP");
-    values.add("FPS");
-    values.add("Time");
-    values.add("Up");
-    values.add("Status 🛜");
-    values.add("Clients 🛜");
-    values.add("Connected 🛜");
-    values.add("Free memory");
+    addControl(preset, "preset", "select");
+    addControlValue("Auto");
+    addControlValue("Text");
+    addControlValue("IP");
+    addControlValue("FPS");
+    addControlValue("Time");
+    addControlValue("Up");
+    addControlValue("Status 🛜");
+    addControlValue("Clients 🛜");
+    addControlValue("Connected 🛜");
+    addControlValue("Free memory");
 
     addControl(textIn, "text", "text", 1, sizeof(textIn));  // size needed to protect char array!
 
@@ -530,14 +526,13 @@ class WaveEffect : public Node {
   void setup() override {
     addControl(bpm, "bpm", "slider");
     addControl(fade, "fade", "slider");
-    JsonObject property = addControl(type, "type", "select");
-    JsonArray values = property["values"].to<JsonArray>();
-    values.add("Saw");
-    values.add("Triangle");
-    values.add("Sinus");
-    values.add("Square");
-    values.add("Sin3");  // with @pathightree
-    values.add("Noise");
+    addControl(type, "type", "select");
+    addControlValue("Saw");
+    addControlValue("Triangle");
+    addControlValue("Sinus");
+    addControlValue("Square");
+    addControlValue("Sin3");  // with @pathightree
+    addControlValue("Noise");
   }
 
   void loop() override {
@@ -608,11 +603,10 @@ class FreqSawsEffect : public Node {
     addControl(bpmMax, "bpmMax", "slider");
     addControl(invert, "invert", "checkbox");
     addControl(keepOn, "keepOn", "checkbox");
-    JsonObject property = addControl(method, "method", "select");
-    JsonArray values = property["values"].to<JsonArray>();
-    values.add("Chaos");
-    values.add("Chaos fix");
-    values.add("BandPhases");
+    addControl(method, "method", "select");
+    addControlValue("Chaos");
+    addControlValue("Chaos fix");
+    addControlValue("BandPhases");
 
     memset(bandSpeed, 0, sizeof(bandSpeed));
     memset(bandPhase, 0, sizeof(bandPhase));

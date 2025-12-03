@@ -96,7 +96,7 @@ class ModuleState {
     if (updateProcessedSem) vSemaphoreDelete(updateProcessedSem);
   }
 
-  std::function<void(JsonArray root)> setupDefinition = nullptr;
+  std::function<void(const JsonArray& controls)> setupDefinition = nullptr;
 
   void setupData();
 
@@ -108,8 +108,8 @@ class ModuleState {
 
   std::function<void(const UpdatedItem&)> processUpdatedItem = nullptr;
 
-  static void read(ModuleState& state, JsonObject& root);
-  static StateUpdateResult update(JsonObject& root, ModuleState& state, const String& originId);  //, const String& originId
+  static void read(ModuleState& state, JsonObject& stateJson);
+  static StateUpdateResult update(JsonObject& newData, ModuleState& state, const String& originId);  //, const String& originId
 
   ReadHook readHook = nullptr;  // called when the UI requests the state, can be used to update the state before sending it to the UI
 
@@ -179,9 +179,15 @@ class Module : public StatefulService<ModuleState> {
     }
   }
 
-  virtual void setupDefinition(const JsonArray& root);
+  virtual void setupDefinition(const JsonArray& controls);
 
-  JsonObject addControl(const JsonArray& root, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
+  JsonObject addControl(const JsonArray& controls, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr);
+  template <typename T>
+  void addControlValue(const JsonObject& control, const T& value) {
+    if (control["values"].isNull()) control["values"].to<JsonArray>();  // add array of values
+    JsonArray values = control["values"];
+    values.add(value);
+  }
 
   // called in compareRecursive->execOnUpdate
   // called from compareRecursive

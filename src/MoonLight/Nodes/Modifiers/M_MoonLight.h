@@ -276,11 +276,10 @@ class RotateModifier : public Node {
   uint16_t staticAngle = 0;
 
   void setup() override {
-    JsonObject property = addControl(direction, "direction", "select");
-    JsonArray values = property["values"].to<JsonArray>();
-    values.add("Clockwise");
-    values.add("Counter-Clockwise");
-    values.add("Alternate");
+    addControl(direction, "direction", "select");
+    addControlValue("Clockwise");
+    addControlValue("Counter-Clockwise");
+    addControlValue("Alternate");
 
     addControl(rotateBPM, "rotateBPM", "slider");
     addControl(staticAngle, "staticAngle", "number", 0, 359);

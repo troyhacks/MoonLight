@@ -89,15 +89,11 @@ class PanelLayout : public Node {
   ;  // 16x16 panel, increasing over the axis, snake on the Y-axis
 
   void setup() override {
-    JsonObject property;
-    JsonArray values;
-
     addControl(panel.size[0], "panelWidth", "number", 1, 65536);
     addControl(panel.size[1], "panelHeight", "number", 1, 65536);
-    property = addControl(panel.wiringOrder, "wiringOrder", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("XY");
-    values.add("YX");
+    addControl(panel.wiringOrder, "wiringOrder", "select");
+    addControlValue("XY");
+    addControlValue("YX");
     addControl(panel.inc[0], "X++", "checkbox");
     addControl(panel.inc[1], "Y++", "checkbox");
     addControl(panel.snake[1], "snake", "checkbox");
@@ -132,29 +128,27 @@ class PanelsLayout : public Node {
   Wiring panels = {{2, 2, 1}, 1, {true, true, true}, {false, false, false}};  // 2x2 panels, increasing over the axis,
   Wiring panel = {{16, 16, 1}, 1, {true, true, true}, {false, true, false}};  // 16x16 panel, increasing over the axis, snake on the Y-axis
 
-  void setup() override {
-    JsonObject property;
-    JsonArray values;
+  uint8_t panelsPerPin = 1;
 
+  void setup() override {
     addControl(panels.size[0], "horizontalPanels", "number", 1, 32);
     addControl(panels.size[1], "verticalPanels", "number", 1, 32);
-    property = addControl(panels.wiringOrder, "wiringOrderP", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("XY");
-    values.add("YX");
+    addControl(panels.wiringOrder, "wiringOrderP", "select");
+    addControlValue("XY");
+    addControlValue("YX");
     addControl(panels.inc[0], "X++P", "checkbox");
     addControl(panels.inc[1], "Y++P", "checkbox");
     addControl(panels.snake[1], "snakeP", "checkbox");
 
     addControl(panel.size[0], "panelWidth", "number", 1, 65536);
     addControl(panel.size[1], "panelHeight", "number", 1, 65536);
-    property = addControl(panel.wiringOrder, "wiringOrder", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("XY");
-    values.add("YX");
+    addControl(panel.wiringOrder, "wiringOrder", "select");
+    addControlValue("XY");
+    addControlValue("YX");
     addControl(panel.inc[0], "X++", "checkbox");
     addControl(panel.inc[1], "Y++", "checkbox");
     addControl(panel.snake[1], "snake", "checkbox");
+    addControl(panelsPerPin, "panelsPerPin", "number");
   }
 
   bool hasOnLayout() const override { return true; }
@@ -165,6 +159,7 @@ class PanelsLayout : public Node {
     };
 
     panels.axes = axisOrders[panels.wiringOrder];  // choose one of the orders
+    uint8_t nrOfPanels = 0;
     panels.iterate(0, 0, [&](uint16_t a) {
       panels.iterate(1, a, [&](uint16_t b) {
         int coordsP[2];
@@ -181,7 +176,9 @@ class PanelsLayout : public Node {
           });
         });
 
-        nextPin();  // each panel it's own pin
+        nrOfPanels++;
+
+        if (nrOfPanels % panelsPerPin == 0) nextPin();  // each panelsPerPin it's own pin
       });
     });
   }
@@ -200,16 +197,13 @@ class CubeLayout : public Node {
     addControl(panels.size[0], "width", "number", 1, 128);
     addControl(panels.size[1], "height", "number", 1, 128);
     addControl(panels.size[2], "depth", "number", 1, 128);
-    JsonObject property;
-    JsonArray values;
-    property = addControl(panels.wiringOrder, "wiringOrder", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("XYZ");
-    values.add("YXZ");
-    values.add("XZY");
-    values.add("YZX");
-    values.add("ZXY");
-    values.add("ZYX");
+    addControl(panels.wiringOrder, "wiringOrder", "select");
+    addControlValue("XYZ");
+    addControlValue("YXZ");
+    addControlValue("XZY");
+    addControlValue("YZX");
+    addControlValue("ZXY");
+    addControlValue("ZYX");
     addControl(panels.inc[0], "X++", "checkbox");
     addControl(panels.inc[1], "Y++", "checkbox");
     addControl(panels.inc[2], "Z++", "checkbox");

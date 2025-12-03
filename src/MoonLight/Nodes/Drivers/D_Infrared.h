@@ -83,13 +83,10 @@ class IRDriver : public Node {
   }
 
   void setup() override {
-    JsonObject property;
-    JsonArray values;
-    property = addControl(irPreset, "irPreset", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("Swiss remote");
-    values.add("Athom"); //see https://www.athom.tech/blank-1/wled-esp32-music-addressable-led-strip-controller
-    values.add("Luxceo");
+    addControl(irPreset, "irPreset", "select");
+    addControlValue("Swiss remote");
+    addControlValue("Athom"); //see https://www.athom.tech/blank-1/wled-esp32-music-addressable-led-strip-controller
+    addControlValue("Luxceo");
 
     moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
     readPins();  // initially

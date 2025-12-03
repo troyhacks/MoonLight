@@ -15,22 +15,22 @@
 
 JsonDocument* gModulesDoc = nullptr;
 
-void setDefaults(JsonObject root, JsonArray definition) {
-  for (JsonObject property : definition) {
-    // if (property["type"] == "coord3Dxx") {
-    //     EXT_LOGD(ML_TAG, "coord3D %d %d %d",  property["default"]["x"].as<int>(),  property["default"]["y"].as<int>(),  property["default"]["z"].as<int>());
-    //     JsonObject object = root[property["name"]].to<JsonObject>();
-    //     root[property["name"]]["x"] = property["default"]["x"];
-    //     root[property["name"]]["y"] = property["default"]["y"];
-    //     root[property["name"]]["z"] = property["default"]["z"];
+void setDefaults(JsonObject controls, JsonArray definition) {
+  for (JsonObject control : definition) {
+    // if (control["type"] == "coord3Dxx") {
+    //     EXT_LOGD(ML_TAG, "coord3D %d %d %d",  control["default"]["x"].as<int>(),  control["default"]["y"].as<int>(),  control["default"]["z"].as<int>());
+    //     JsonObject object = controls[control["name"]].to<JsonObject>();
+    //     controls[control["name"]]["x"] = control["default"]["x"];
+    //     controls[control["name"]]["y"] = control["default"]["y"];
+    //     controls[control["name"]]["z"] = control["default"]["z"];
     // } else
-    if (property["type"] != "rows") {
-      root[property["name"]] = property["default"];
+    if (control["type"] != "rows") {
+      controls[control["name"]] = control["default"];
     } else {
-      // JsonArray array = root[property["name"]].to<JsonArray>();
-      // //loop over detail propertys (recursive)
+      // JsonArray array = controls[control["name"]].to<JsonArray>();
+      // //loop over detail controls (recursive)
       // JsonObject object = array.add<JsonObject>(); // add one row
-      // setDefaults(object, property["n"].as<JsonArray>());
+      // setDefaults(object, control["n"].as<JsonArray>());
     }
   }
 }
@@ -60,21 +60,21 @@ void ModuleState::setupData() {
   // to do: check if the file matches the definition
 }
 
-void ModuleState::read(ModuleState& state, JsonObject& root) {
+void ModuleState::read(ModuleState& state, JsonObject& stateJson) {
   if (state.readHook) state.readHook(state.data);
 
-  root.set(state.data);  // copy
+  stateJson.set(state.data);  // copy
 }
 
 bool ModuleState::checkReOrderSwap(const JsonString& parent, const JsonVariant& stateData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
   bool changed = false;
-  // check if root is a reordering of state
+  // check if newData is a reordering of state
   // if so reorder state, no comparison with updates needed
-  for (JsonPair newProperty : newData.as<JsonObject>()) {
-    if (newProperty.value().is<JsonArray>()) {
+  for (JsonPair newControl : newData.as<JsonObject>()) {
+    if (newControl.value().is<JsonArray>()) {
       // bool reorderedRows = false;
-      JsonArray newArray = newProperty.value();
-      JsonArray stateArray = stateData[newProperty.key()];
+      JsonArray newArray = newControl.value();
+      JsonArray stateArray = stateData[newControl.key()];
       // check each row with each row of stateArray and check if same row found
 
       // only pure swaps, no add or remove of rows
@@ -128,15 +128,15 @@ bool ModuleState::checkReOrderSwap(const JsonString& parent, const JsonVariant& 
 
 bool ModuleState::compareRecursive(const JsonString& parent, const JsonVariant& stateData, const JsonVariant& newData, UpdatedItem& updatedItem, uint8_t depth, uint8_t index) {
   bool changed = false;
-  for (JsonPair newProperty : newData.as<JsonObject>()) {
-    if (stateData[newProperty.key()].isNull()) {
-      stateData[newProperty.key()] = nullptr;  // Initialize the key in stateData if it doesn't exist todo: run in loopTask ?
+  for (JsonPair newControl : newData.as<JsonObject>()) {
+    if (stateData[newControl.key()].isNull()) {
+      stateData[newControl.key()] = nullptr;  // Initialize the key in stateData if it doesn't exist todo: run in loopTask ?
     }
   }
 
   // loop over all properties in stateData
-  for (JsonPair stateProperty : stateData.as<JsonObject>()) {
-    JsonString key = stateProperty.key();
+  for (JsonPair stateControl : stateData.as<JsonObject>()) {
+    JsonString key = stateControl.key();
     JsonVariant stateValue = stateData[key.c_str()];
     JsonVariant newValue = newData[key.c_str()];
     if (!newValue.isNull() && stateValue != newValue) {  // if value changed, don't update if not defined in newValue
@@ -150,7 +150,7 @@ bool ModuleState::compareRecursive(const JsonString& parent, const JsonVariant& 
         updatedItem.index[i] = UINT8_MAX;
       }
 
-      if (stateValue.is<JsonArray>() || newValue.is<JsonArray>()) {  // if the property is an array
+      if (stateValue.is<JsonArray>() || newValue.is<JsonArray>()) {  // if the control is an array
         if (stateValue.isNull()) {
           stateData[key.c_str()].to<JsonArray>();
           stateValue = stateData[key.c_str()];
@@ -193,23 +193,32 @@ bool ModuleState::compareRecursive(const JsonString& parent, const JsonVariant& 
               updatedItem.index[(uint8_t)(depth + 1)] = i;
             }
             // }
-            for (JsonPair property : stateArray[i].as<JsonObject>()) {
-              // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, property.key().c_str(), property.value().as<const char*>());
-              // newArray[i][property.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
-              updatedItem.name = property.key();
-              updatedItem.oldValue = property.value();
-              updatedItem.value = JsonVariant();     // Assign an empty JsonVariant
-              stateArray[i].remove(property.key());  // remove the property from the state row so onUpdate see it as empty
+            // Node controls need not to be removed if they just have been added by Node::addControl via Nodemanager.h - which sets a valid status to a control
+            // Don't remove array items marked as valid (e.g., controls added in setup() that don't exist in persisted state yet)
+            bool isValid = !stateArray[i]["valid"].isNull() && stateArray[i]["valid"].as<bool>();
+            if (!isValid) {
+              for (JsonPair control : stateArray[i].as<JsonObject>()) {
+                // EXT_LOGD(MB_TAG, "     remove %s[%d] %s %s", key.c_str(), i, control.key().c_str(), control.value().as<const char*>());
+                // newArray[i][control.key()] = nullptr; // Initialize the keys in newArray so comparerecusive can compare them
+                updatedItem.name = control.key();
+                updatedItem.oldValue = control.value();
+                updatedItem.value = JsonVariant();    // Assign an empty JsonVariant
+                stateArray[i].remove(control.key());  // remove the control from the state row so onUpdate see it as empty
 
-              postUpdate(updatedItem);
+                postUpdate(updatedItem);
+              }
+
+              // String dbg;
+              // serializeJson(stateArray[i], dbg);
+              // EXT_LOGD(MB_TAG, "remove %s.%s[%d] d: %d (%s)", parent.c_str(), key.c_str(), i, depth, dbg.c_str());
+
+              stateArray.remove(i);  // remove the state row entirely
+                                     // ([{"name":"xFrequency","type":"slider","default":64,"p":1009144377,"value":173,"size":8},{"name":"fadeRate","type":"slider","default":128,"p":1009144378,"value":128,"size":8},{"name":"speed","type":"slider","default":128,"p":1009144379,"value":128,"size":8},{"name":"brightness","type":"slider","default":255,"p":1009144380,"value":255,"size":8}])
+            } else {
+              // String dbg;
+              // serializeJson(stateArray[i], dbg);
+              EXT_LOGD(MB_TAG, "skip remove %s.%s[%d] d: %d", parent.c_str(), key.c_str(), i, depth);
             }
-
-            // String tt;
-            // serializeJson(stateArray, tt);
-            // EXT_LOGD(MB_TAG, "remove %s.%s[%d] d: %d (%s)", parent.c_str(), key.c_str(), i, depth, tt.c_str());
-
-            stateArray.remove(i);  // remove the state row entirely
-            // ([{"name":"xFrequency","type":"slider","default":64,"p":1009144377,"value":173,"size":8},{"name":"fadeRate","type":"slider","default":128,"p":1009144378,"value":128,"size":8},{"name":"speed","type":"slider","default":128,"p":1009144379,"value":128,"size":8},{"name":"brightness","type":"slider","default":255,"p":1009144380,"value":255,"size":8}])
           } else {  // row already exists
 
             // if node has changed, remove the controls
@@ -225,7 +234,7 @@ bool ModuleState::compareRecursive(const JsonString& parent, const JsonVariant& 
             //   serializeJson(newArray[i], sr);
             //   EXT_LOGD(MB_TAG, "remove %s node controls new %s (%s)", parent.c_str(), key.c_str(), sr.c_str());
             // }
-            // else  // compare the details (not for node controls)
+            // else  // compare the rows (not for node controls)
             // old node with empty controls, new node with new controls
             // updatedItem.parent[0] = parent.c_str();
             // updatedItem.index[0] = i;
@@ -237,7 +246,7 @@ bool ModuleState::compareRecursive(const JsonString& parent, const JsonVariant& 
             changed = compareRecursive(key, stateArray[i], newArray[i], updatedItem, depth + 1, i) || changed;
           }
         }
-      } else {  // if property is key/value
+      } else {  // if control is key/value
         if (key != "p") {
           changed = true;
           updatedItem.name = key;
@@ -259,27 +268,27 @@ bool ModuleState::compareRecursive(const JsonString& parent, const JsonVariant& 
   return changed;
 }
 
-StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state, const String& originId) {  //, const String& originId
-                                                                                                       // if (state.data.isNull()) EXT_LOGD(ML_TAG, "state data is null %d %d", root.size(), root != state.data); // state.data never null here
+StateUpdateResult ModuleState::update(JsonObject& newData, ModuleState& state, const String& originId) {  //, const String& originId
+                                                                                                          // if (state.data.isNull()) EXT_LOGD(ML_TAG, "state data is null %d %d", newData.size(), newData != state.data); // state.data never null here
 
   updateOriginId = originId;
 
-  if (root.size() != 0) {  // in case of empty file
+  if (newData.size() != 0) {  // in case of empty file
 
-    // check which propertys have updated
-    if (root != state.data) {
+    // check which controls have updated
+    if (newData != state.data) {
       UpdatedItem updatedItem;
 
       // bool isNew = state.data.isNull();  // device is starting , not useful as state.data never null here
 
-      bool changed = state.checkReOrderSwap("", state.data, root, updatedItem);
+      bool changed = state.checkReOrderSwap("", state.data, newData, updatedItem);
 
       // EXT_LOGD(ML_TAG, "update isNew %d changed %d", isNew, changed);
       // serializeJson(state.data, Serial);Serial.println();
-      // serializeJson(root, Serial);Serial.println();
+      // serializeJson(newData, Serial);Serial.println();
 
-      if (state.compareRecursive("", state.data, root, updatedItem)) {
-        if (changed) EXT_LOGW(ML_TAG, "checkReOrderSwap changed, compareRecursive also changed?");
+      if (state.compareRecursive("", state.data, newData, updatedItem)) {
+        if (changed) EXT_LOGW(ML_TAG, "checkReOrderSwap changed, compareRecursive also changed? %s", originId.c_str());
         changed = true;
       }
 
@@ -287,7 +296,7 @@ StateUpdateResult ModuleState::update(JsonObject& root, ModuleState& state, cons
     } else
       return StateUpdateResult::UNCHANGED;
   } else {
-    EXT_LOGD(MB_TAG, "empty root");
+    EXT_LOGW(MB_TAG, "empty newData %s", originId.c_str());
     return StateUpdateResult::UNCHANGED;
   }
 }
@@ -316,20 +325,20 @@ void Module::begin() {
   _fsPersistence.readFromFS();  // overwrites the default settings in state
 
   // no virtual functions in constructor so this is in begin()
-  _state.setupDefinition = [&](JsonArray root) {
-    this->setupDefinition(root);  // using here means setupDefinition must be virtual ...
+  _state.setupDefinition = [&](const JsonArray& controls) {
+    this->setupDefinition(controls);  // using here means setupDefinition must be virtual ...
   };
   // _state.setupDefinition = this->setupDefinition;
   _state.setupData();  // if no data readFromFS, using overridden virtual function setupDefinition
 
   _server->on(String("/rest/" + _moduleName + "Def").c_str(), HTTP_GET, [&](PsychicRequest* request) {
     PsychicJsonResponse response = PsychicJsonResponse(request, false);
-    JsonArray root = response.getRoot().to<JsonArray>();
+    JsonArray controls = response.getRoot().to<JsonArray>();
 
-    setupDefinition(root);  // virtual function
+    setupDefinition(controls);  // virtual function
 
     // char buffer[2048];
-    // serializeJson(root, buffer, sizeof(buffer));
+    // serializeJson(controls, buffer, sizeof(buffer));
     // EXT_LOGD(MB_TAG, "server->on %s moduleDef %s", request->url().c_str(), buffer);
 
     return response.send();
@@ -340,20 +349,17 @@ void Module::begin() {
 // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
 // setupDefinition defines for each module, the json info of all fields
 
-void Module::setupDefinition(const JsonArray& root) {  // virtual so it can be overriden in derived classes
+void Module::setupDefinition(const JsonArray& controls) {  // virtual so it can be overriden in derived classes
   EXT_LOGW(MB_TAG, "not implemented");
-  JsonObject property;  // state.data has one or more properties
-  JsonArray details;    // if a property is an array, this is the details of the array
-  JsonArray values;     // if a property is a select, this is the values of the select
+  JsonObject control;  // state.data has one or more properties
+  JsonArray rows;      // if a control is an array, this is the rows of the array
 
-  property = root.add<JsonObject>();
-  property["name"] = "text";
-  property["type"] = "text";
-  property["default"] = "MoonLight";
+  control = addControl(controls, "text", "text");
+  control["default"] = "MoonLight";
 }
 
-JsonObject Module::addControl(const JsonArray& root, const char* name, const char* type, int min, int max, bool ro, const char* desc) {
-  JsonObject control = root.add<JsonObject>();
+JsonObject Module::addControl(const JsonArray& controls, const char* name, const char* type, int min, int max, bool ro, const char* desc) {
+  JsonObject control = controls.add<JsonObject>();
   control["name"] = name;
   control["type"] = type;
   if (min != 0) control["min"] = min;

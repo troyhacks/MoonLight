@@ -89,54 +89,51 @@ class ModuleLightsControl : public Module {
   }
 
   // define the data model
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;       // state.data has one or more properties
-    JsonArray details = root;  // if a property is an array, this is the details of the array
-    JsonArray values;          // if a property is a select, this is the values of the select
+    JsonObject control;       // state.data has one or more properties
 
-    property = addControl(root, "lightsOn", "checkbox");
-    property["default"] = true;
-    property = addControl(root, "brightness", "slider");
-    property["default"] = 10;
-    property = addControl(root, "red", "slider");
-    property["default"] = 255;
-    property["color"] = "Red";
-    property = addControl(root, "green", "slider");
-    property["default"] = 255;
-    property["color"] = "Green";
-    property = addControl(root, "blue", "slider");
-    property["default"] = 255;
-    property["color"] = "Blue";
-    property = addControl(root, "palette", "select");
-    property["default"] = 6;
-    values = property["values"].to<JsonArray>();
-    values.add("CloudColors");
-    values.add("LavaColors");
-    values.add("OceanColors");
-    values.add("ForestColors");
-    values.add("RainbowColors");
-    values.add("RainbowStripeColors");
-    values.add("PartyColors");
-    values.add("HeatColors");
-    values.add("RandomColors");
-    property = addControl(root, "preset", "pad");
-    property["width"] = 8;
-    property["size"] = 18;
-    property["default"].to<JsonObject>();  // clear the preset array before adding new presets
-    property["default"]["list"].to<JsonArray>();
-    property["default"]["count"] = 64;
+    control = addControl(controls, "lightsOn", "checkbox");
+    control["default"] = true;
+    control = addControl(controls, "brightness", "slider");
+    control["default"] = 10;
+    control = addControl(controls, "red", "slider");
+    control["default"] = 255;
+    control["color"] = "Red";
+    control = addControl(controls, "green", "slider");
+    control["default"] = 255;
+    control["color"] = "Green";
+    control = addControl(controls, "blue", "slider");
+    control["default"] = 255;
+    control["color"] = "Blue";
+    control = addControl(controls, "palette", "select");
+    control["default"] = 6;
+    addControlValue(control, "CloudColors");
+    addControlValue(control, "LavaColors");
+    addControlValue(control, "OceanColors");
+    addControlValue(control, "ForestColors");
+    addControlValue(control, "RainbowColors");
+    addControlValue(control, "RainbowStripeColors");
+    addControlValue(control, "PartyColors");
+    addControlValue(control, "HeatColors");
+    addControlValue(control, "RandomColors");
+    control = addControl(controls, "preset", "pad");
+    control["width"] = 8;
+    control["size"] = 18;
+    control["default"].to<JsonObject>();  // clear the preset array before adding new presets
+    control["default"]["list"].to<JsonArray>();
+    control["default"]["count"] = 64;
 
-    property = addControl(root, "presetLoop", "slider");
-    property["default"] = 0;
-    property = addControl(root, "firstPreset", "slider", 1, 64);
-    property["default"] = 1;
-    property = addControl(root, "lastPreset", "slider", 1, 64);
-    property["default"] = 64;
+    control = addControl(controls, "presetLoop", "slider");
+    control["default"] = 0;
+    control = addControl(controls, "firstPreset", "slider", 1, 64);
+    control["default"] = 1;
+    control = addControl(controls, "lastPreset", "slider", 1, 64);
+    control["default"] = 64;
 
   #if FT_ENABLED(FT_MONITOR)
-    property = addControl(root, "monitorOn", "checkbox");
-    property["default"] = true;
+    control = addControl(controls, "monitorOn", "checkbox");
+    control["default"] = true;
   #endif
   }
 

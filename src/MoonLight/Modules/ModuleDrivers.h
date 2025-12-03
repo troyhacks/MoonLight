@@ -75,30 +75,30 @@ class ModuleDrivers : public NodeManager {
     _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
   }
 
-  void addNodes(const JsonArray& values) const override {
+  void addNodes(const JsonObject& control) override {
     // Layouts, Most used first
-    values.add(getNameAndTags<PanelLayout>());
-    values.add(getNameAndTags<PanelsLayout>());
-    values.add(getNameAndTags<CubeLayout>());
-    values.add(getNameAndTags<HumanSizedCubeLayout>());
-    values.add(getNameAndTags<RingsLayout>());
-    values.add(getNameAndTags<WheelLayout>());
-    values.add(getNameAndTags<SpiralLayout>());
-    values.add(getNameAndTags<SingleLineLayout>());
-    values.add(getNameAndTags<SingleRowLayout>());
+    addControlValue(control, getNameAndTags<PanelLayout>());
+    addControlValue(control, getNameAndTags<PanelsLayout>());
+    addControlValue(control, getNameAndTags<CubeLayout>());
+    addControlValue(control, getNameAndTags<HumanSizedCubeLayout>());
+    addControlValue(control, getNameAndTags<RingsLayout>());
+    addControlValue(control, getNameAndTags<WheelLayout>());
+    addControlValue(control, getNameAndTags<SpiralLayout>());
+    addControlValue(control, getNameAndTags<SingleLineLayout>());
+    addControlValue(control, getNameAndTags<SingleRowLayout>());
 
     // Drivers, Most used first
-    values.add(getNameAndTags<PhysicalDriver>());
-    values.add(getNameAndTags<FastLEDDriver>());
-    values.add(getNameAndTags<ArtNetInDriver>());
-    values.add(getNameAndTags<ArtNetOutDriver>());
-    values.add(getNameAndTags<AudioSyncDriver>());
-    values.add(getNameAndTags<IRDriver>());
-    values.add(getNameAndTags<VirtualDriver>());
-    values.add(getNameAndTags<HUB75Driver>());
+    addControlValue(control, getNameAndTags<PhysicalDriver>());
+    addControlValue(control, getNameAndTags<FastLEDDriver>());
+    addControlValue(control, getNameAndTags<ArtNetInDriver>());
+    addControlValue(control, getNameAndTags<ArtNetOutDriver>());
+    addControlValue(control, getNameAndTags<AudioSyncDriver>());
+    addControlValue(control, getNameAndTags<IRDriver>());
+    addControlValue(control, getNameAndTags<VirtualDriver>());
+    addControlValue(control, getNameAndTags<HUB75Driver>());
 
     // custom
-    values.add(getNameAndTags<SE16Layout>());
+    addControlValue(control, getNameAndTags<SE16Layout>());
   }
 
   Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {

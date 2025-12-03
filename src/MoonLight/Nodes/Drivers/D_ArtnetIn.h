@@ -33,23 +33,20 @@ class ArtNetInDriver : public Node {
   void setup() override {
     addControl(ddp, "DDP", "checkbox");
     addControl(port, "port", "number", 0, 65538);
-    JsonObject property;
-    JsonArray values;
-    property = addControl(view, "view", "select");
-    values = property["values"].to<JsonArray>();
-    values.add("Physical layer");
+    addControl(view, "view", "select");
+    addControlValue("Physical layer");
     uint8_t i = 0;
     for (VirtualLayer* layer : layerP.layers) {
       Char<32> layerName;
       layerName.format("Layer %d", i);
-      values.add(layerName.c_str());
+      addControlValue(layerName.c_str());
       i++;
     }
   }
 
   void onUpdate(const Char<20>& oldValue, const JsonObject& control) override {
     // add your custom onUpdate code here
-    if (control["name"] == "ddp") {
+    if (control["name"] == "DDP") {
       if (control["value"] == 0) {
       }
     }
