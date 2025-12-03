@@ -148,7 +148,7 @@ class PanelsLayout : public Node {
     addControl(panel.inc[0], "X++", "checkbox");
     addControl(panel.inc[1], "Y++", "checkbox");
     addControl(panel.snake[1], "snake", "checkbox");
-    addControl(panelsPerPin, "panelsPerPin", "number");
+    addControl(panelsPerPin, "panelsPerPin", "number", 1);  // minimal 1
   }
 
   bool hasOnLayout() const override { return true; }
@@ -181,6 +181,7 @@ class PanelsLayout : public Node {
         if (nrOfPanels % panelsPerPin == 0) nextPin();  // each panelsPerPin it's own pin
       });
     });
+    if (nrOfPanels % panelsPerPin != 0) nextPin();  // If there is a final partial group, still assign it to a pin
   }
 };
 

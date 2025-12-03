@@ -93,7 +93,7 @@ class ModuleLiveScripts : public Module {
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject control;       // state.data has one or more properties
-    JsonArray rows = controls;  // if a control is an array, this is the rows of the array
+    JsonArray rows;  // if a control is an array, this is the rows of the array
 
     control = addControl(controls, "scripts", "rows");
     rows = control["n"].to<JsonArray>();

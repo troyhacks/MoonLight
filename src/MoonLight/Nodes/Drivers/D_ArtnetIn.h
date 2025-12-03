@@ -117,17 +117,17 @@ class ArtNetInDriver : public Node {
           // Process if it's our universe
 
           // if (universe == artnetUniverse) { // all universes welcome
-            uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
+          uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
-            // Map DMX channels to LEDs (3 channels per LED: RGB)
-            int numPixels = min((uint16_t)(dataLength / 3), (uint16_t)(layer->layerP->lights.header.nrOfLights));
+          // Map DMX channels to LEDs (3 channels per LED: RGB)
+          int numPixels = min((uint16_t)(dataLength / 3), (uint16_t)(layer->layerP->lights.header.nrOfLights));
 
-            for (int i = 0; i < numPixels; i++) {
-              memcpy(&layer->layerP->lights.channels[i * layer->layerP->lights.header.channelsPerLight], &dmxData[i * layer->layerP->lights.header.channelsPerLight], layer->layerP->lights.header.channelsPerLight);
-            }
+          for (int i = 0; i < numPixels; i++) {
+            memcpy(&layer->layerP->lights.channels[i * layer->layerP->lights.header.channelsPerLight], &dmxData[i * layer->layerP->lights.header.channelsPerLight], layer->layerP->lights.header.channelsPerLight);
+          }
 
-            // FastLED.show();
-            // Serial.println("Art-Net: " + String(numPixels) + " pixels updated");
+          // FastLED.show();
+          // Serial.println("Art-Net: " + String(numPixels) + " pixels updated");
           // }
         }
       }
@@ -163,10 +163,9 @@ class ArtNetInDriver : public Node {
         for (int i = 0; i < numPixels; i++) {
           int ledIndex = startPixel + i;
           if (ledIndex < layer->layerP->lights.header.nrOfLights) {
-            memcpy(&layer->layerP->lights.channels[i * layer->layerP->lights.header.channelsPerLight], &pixelData[i * layer->layerP->lights.header.channelsPerLight], layer->layerP->lights.header.channelsPerLight);
+            memcpy(&layer->layerP->lights.channels[ledIndex * layer->layerP->lights.header.channelsPerLight], &pixelData[i * layer->layerP->lights.header.channelsPerLight], layer->layerP->lights.header.channelsPerLight);
           }
         }
-
         // Only update display if push flag is set
         if (pushFlag) {
           // FastLED.show();

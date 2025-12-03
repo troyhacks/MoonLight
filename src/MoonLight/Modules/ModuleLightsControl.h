@@ -91,7 +91,7 @@ class ModuleLightsControl : public Module {
   // define the data model
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject control;       // state.data has one or more properties
+    JsonObject control;  // state.data has one or more properties
 
     control = addControl(controls, "lightsOn", "checkbox");
     control["default"] = true;
@@ -238,6 +238,10 @@ class ModuleLightsControl : public Module {
   }
 
   unsigned long lastPresetTime = 0;
+  //see pinToggleOnOff
+  unsigned long lastDebounceTime = 0;
+  #define debounceDelay 50  // 50ms debounce
+  int lastState = HIGH;
 
   void loop() override {
     Module::loop();
@@ -287,9 +291,6 @@ class ModuleLightsControl : public Module {
     }
 
     if (pinToggleOnOff != UINT8_MAX) {
-      static unsigned long lastDebounceTime = 0;
-      const unsigned long debounceDelay = 50;  // 50ms debounce
-      static int lastState = HIGH;
       int state = digitalRead(pinToggleOnOff);
       if (state != lastState && (millis() - lastDebounceTime) > debounceDelay) {
         lastDebounceTime = millis();

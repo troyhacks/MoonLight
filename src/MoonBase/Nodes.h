@@ -132,10 +132,11 @@ class Node {
       } else
         control["size"] = sizeof(bool);
     } else if (control["type"] == "coord3D") {
-      if (!sizeof(!std::is_same<ControlType, Coord3D>::value)) {
+      if (!std::is_same<ControlType, Coord3D>::value) {
         EXT_LOGE(ML_TAG, "type for %s is not Coord3D", name);
-      } else
+      } else {
         control["size"] = sizeof(Coord3D);
+      }
     } else
       EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<const char*>(), control["type"].as<const char*>(), control["size"].as<uint8_t>());
 

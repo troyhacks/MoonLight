@@ -53,8 +53,10 @@ void setupDefinition(const JsonArray& controls) override{
     control = addControl(controls, "savedNetworks", "rows"); 
     rows = control["n"].to<JsonArray>();
     {
-        addControl(rows, "SSID", "text", 3, 32); control["default"] = "ewtr";
-        addControl(rows, "Password", "password"); control["default"] = "";
+        control = addControl(rows, "SSID", "text", 3, 32); 
+        control["default"] = "ewtr";
+        control = addControl(rows, "Password", "password"); 
+        control["default"] = "";
     }
 }
 
