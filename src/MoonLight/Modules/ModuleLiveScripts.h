@@ -47,7 +47,6 @@ class ModuleLiveScripts : public Module {
           uint8_t index = 0;
           _moduleEffects->read([&](ModuleState& effectsState) {
             for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
-
               if (updatedItem == nodeState["name"]) {
                 EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(nodeState["name"]);
@@ -59,14 +58,13 @@ class ModuleLiveScripts : public Module {
                   _moduleEffects->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char*>());
               }
               index++;
             }
           });
           _moduleDrivers->read([&](ModuleState& driversState) {
             for (JsonObject nodeState : driversState.data["nodes"].as<JsonArray>()) {
-
               if (updatedItem == nodeState["name"]) {
                 EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(nodeState["name"]);
@@ -78,7 +76,7 @@ class ModuleLiveScripts : public Module {
                   _moduleDrivers->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char*>());
               }
               index++;
             }
@@ -92,8 +90,8 @@ class ModuleLiveScripts : public Module {
   // define the data model
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject control;       // state.data has one or more properties
-    JsonArray rows;  // if a control is an array, this is the rows of the array
+    JsonObject control;  // state.data has one or more properties
+    JsonArray rows;      // if a control is an array, this is the rows of the array
 
     control = addControl(controls, "scripts", "rows");
     rows = control["n"].to<JsonArray>();
@@ -126,11 +124,11 @@ class ModuleLiveScripts : public Module {
           liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(scriptState["name"]);
         }
         if (liveScriptNode) {
-          if (updatedItem.name == "stop") liveScriptNode->kill();
-          if (updatedItem.name == "start") liveScriptNode->execute();
+          if (updatedItem.name == "stop") liveScriptNode->kill();      // stop matches kill
+          if (updatedItem.name == "start") liveScriptNode->execute();  // start matches execute
           // if (equal(updatedItem.name, "free"))
           //     liveScriptNode->free();
-          if (updatedItem.name == "delete") liveScriptNode->killAndDelete();
+          if (updatedItem.name == "delete") liveScriptNode->killAndDelete();  // delete matches killAndDelete
           // updatedItem.value = 0;
         } else
           EXT_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<const char*>());

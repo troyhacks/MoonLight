@@ -93,7 +93,7 @@ class NodeManager : public Module {
       // values = control["values"].to<JsonArray>();
       addNodes(control);
 
-      addControl(rows, "on", "checkbox", false, true, true);
+      addControl(rows, "on", "checkbox", false, true);
       control = addControl(rows, "controls", "controls");
       rows = control["n"].to<JsonArray>();
       {

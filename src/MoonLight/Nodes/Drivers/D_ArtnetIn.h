@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      AudioSync.h
+    @file      ArtnetIn.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
@@ -95,7 +95,7 @@ class ArtNetInDriver : public Node {
   };
 
   void handleArtNet() {
-    // LightsHeader* header = &layer->layerP->lights.header;
+    // LightsHeader* header = &layerP.lights.header;
 
     int packetSize = artnetUdp.parsePacket();
 
@@ -120,10 +120,10 @@ class ArtNetInDriver : public Node {
           uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
           // Map DMX channels to LEDs (3 channels per LED: RGB)
-          int numPixels = min((uint16_t)(dataLength / 3), (uint16_t)(layer->layerP->lights.header.nrOfLights));
+          int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights));
 
           for (int i = 0; i < numPixels; i++) {
-            memcpy(&layer->layerP->lights.channels[i * layer->layerP->lights.header.channelsPerLight], &dmxData[i * layer->layerP->lights.header.channelsPerLight], layer->layerP->lights.header.channelsPerLight);
+            memcpy(&layerP.lights.channels[i * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
           }
 
           // FastLED.show();
@@ -156,14 +156,14 @@ class ArtNetInDriver : public Node {
         uint8_t* pixelData = packetBuffer + sizeof(DDPHeader);
 
         // Calculate starting pixel from byte offset (3 bytes per pixel)
-        int startPixel = offset / 3;
-        int numPixels = min((uint16_t)(dataLen / 3), (uint16_t)(layer->layerP->lights.header.nrOfLights - startPixel));
+        int startPixel = offset / layerP.lights.header.channelsPerLight;
+        int numPixels = min((uint16_t)(dataLen / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
         // Update LEDs
         for (int i = 0; i < numPixels; i++) {
           int ledIndex = startPixel + i;
-          if (ledIndex < layer->layerP->lights.header.nrOfLights) {
-            memcpy(&layer->layerP->lights.channels[ledIndex * layer->layerP->lights.header.channelsPerLight], &pixelData[i * layer->layerP->lights.header.channelsPerLight], layer->layerP->lights.header.channelsPerLight);
+          if (ledIndex < layerP.lights.header.nrOfLights) {
+            memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &pixelData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
           }
         }
         // Only update display if push flag is set

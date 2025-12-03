@@ -7,7 +7,8 @@
 * Make changes
 * Document your change
 * Submit a pull request
-* Develop principles: Checklist before submitting a request.
+
+[Standards and Guidelines](https://moonmodules.org/MoonLight/develop/standardsguidelines/). Check before submitting a request!
 
 ## Create a branch
 
@@ -123,14 +124,3 @@ There are 3 files to consider when making a ESP32-device definition.
 	boards/BOARD_NAME.csv
 	boards/BOARD_NAME.JSON
 	firmware/BOARD_TYPE_NAME.ini (e.g. esp32dev, esp32-s3), contains different boards
-
-## Develop principles
-
-* One firmware per board containing everything, to keep management of firmware simple - for everybody. 3MB flash space to allow for this.
-* Clang-format and Prettier for unified layout of code (right click format document in VSCode)
-* Part of submitting a change via a pull request is updated documentation. Functionality and documentation should be in one Pull Request 
-* Make minimal changes in upstream (Sveltekit) code, as we need to stay in sync as easy as possible. Add // 🌙 to show a change has been made.
-* The main branch is the source to branch and merge to, no direct code commits to the main branch. As the main branch docs folder is the source for the website, doc changes can be made directly to main. 
-* The dev branch is used for latest updates between releases. Optionally branch from dev if latest updates are needed for a change.
-* The src folder is for all MoonBase and MoonLight Nodes and Modules development. No need for UI changes as that is generated for Nodes and Modules. The lib folder is for upstream (Sveltekit). The interface folder is for UI, mainly Sveltekit and Modules and Nodes generic functions.
-* A pull request should contain compilable code and tested to not crash the system at minimal and support also boards without PSRAM, e.g. ESP32-D0. Code may be work in progress.

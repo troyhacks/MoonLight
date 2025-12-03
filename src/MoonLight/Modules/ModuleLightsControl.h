@@ -238,9 +238,9 @@ class ModuleLightsControl : public Module {
   }
 
   unsigned long lastPresetTime = 0;
-  //see pinToggleOnOff
+  // see pinToggleOnOff
   unsigned long lastDebounceTime = 0;
-  #define debounceDelay 50  // 50ms debounce
+  static constexpr unsigned long debounceDelay = 50;  // 50ms debounce
   int lastState = HIGH;
 
   void loop() override {

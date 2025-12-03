@@ -91,7 +91,9 @@ class PhysicalDriver : public DriverNode {
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
       uint8_t pins[MAX_PINS];
-      Char<32> statusString = "";
+      Char<32> statusString = "#";
+      statusString += nrOfPins;
+      statusString += ": ";
       for (int i = 0; i < nrOfPins; i++) {
         uint8_t assignedPin = layerP.ledPinsAssigned[i];
         if (assignedPin < layerP.nrOfLedPins)
