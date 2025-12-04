@@ -8,9 +8,6 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		output: {
-			bundleStrategy: 'single'
-		},
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',
@@ -20,8 +17,10 @@ const config = {
 		}),
 		alias: {
 			$src: './src'
-		}
-		//prerender: { default: true },
+		},
+        output: {
+            bundleStrategy: 'single'
+        }
 	}
 };
 

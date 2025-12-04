@@ -70,7 +70,7 @@ class SharedHttpEndpoint {
     JsonObject jsonObject = json.as<JsonObject>();
 
     // CHANGED: Use updateWithoutPropagation pattern
-    StateUpdateResult outcome = module->updateWithoutPropagation(jsonObject, ModuleState::update);
+    StateUpdateResult outcome = module->updateWithoutPropagation(jsonObject, ModuleState::update, module->_moduleName);
 
     if (outcome == StateUpdateResult::ERROR) {
       return request->reply(400);

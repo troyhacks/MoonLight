@@ -24,3 +24,4 @@ ssl_certs/cacert.pem
 /scripts/__pycache__
 /site
 .DS_Store
+*.bak
