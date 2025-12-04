@@ -94,6 +94,7 @@ class ModuleLiveScripts : public Module {
     JsonArray rows;      // if a control is an array, this is the rows of the array
 
     control = addControl(controls, "scripts", "rows");
+    control["crud"] = "ru";
     rows = control["n"].to<JsonArray>();
     {
       addControl(rows, "name", "text", 0, 32, true);

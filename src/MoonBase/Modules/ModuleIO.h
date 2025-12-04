@@ -139,6 +139,8 @@ class ModuleIO : public Module {
 
     control = addControl(controls, "pins", "rows");
     control["filter"] = "!Unused";
+    control["crud"] = "ru";
+
     rows = control["n"].to<JsonArray>();
     {
       control = addControl(rows, "GPIO", "number", 0, SOC_GPIO_PIN_COUNT - 1, true);  // ro

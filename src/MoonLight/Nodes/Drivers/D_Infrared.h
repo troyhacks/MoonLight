@@ -85,7 +85,7 @@ class IRDriver : public Node {
   void setup() override {
     addControl(irPreset, "irPreset", "select");
     addControlValue("Swiss remote");
-    addControlValue("Athom"); //see https://www.athom.tech/blank-1/wled-esp32-music-addressable-led-strip-controller
+    addControlValue("Athom");  // see https://www.athom.tech/blank-1/wled-esp32-music-addressable-led-strip-controller
     addControlValue("Luxceo");
 
     moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
@@ -405,7 +405,7 @@ class IRDriver : public Node {
   void loop() override {
     if (receive_queue) {
       if (xQueueReceive(receive_queue, &rx_data, 0) == pdPASS) {
-        EXT_LOGD(IR_DRIVER_TAG, "Received symbols: #%d", rx_data.num_symbols);
+        if (rx_data.num_symbols != 1) EXT_LOGD(IR_DRIVER_TAG, "Received symbols: #%d", rx_data.num_symbols); // will not be processed (only 34 and 2)
         // parse the receive symbols and print the result
         parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
         // start receive again

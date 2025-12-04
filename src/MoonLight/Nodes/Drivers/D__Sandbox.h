@@ -25,7 +25,7 @@ class ExampleDriver : public Node {
   void setup() override {
     // controls will show in the UI
     // for different type of controls see other Nodes
-    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT-1);
+    addControl(pin, "pin", "slider", 1, SOC_GPIO_PIN_COUNT - 1);
   }
 
   void onUpdate(const Char<20>& oldValue, const JsonObject& control) {
@@ -37,7 +37,7 @@ class ExampleDriver : public Node {
   }
 
   bool hasOnLayout() const override { return true; }  // so the mapping system knows this node has onLayout, eg each time a modifier changes
-  void onLayout() override {};
+  void onLayout() override {};                        // onLayout for drivers is used to init or update the driver based on the layouts, a driver will use the layout nodes which are defined before the driver node, so order matters
 
   // use for continuous actions, e.g. reading data from sensors or sending data to lights (e.g. LED drivers or Art-Net)
   void loop() override {

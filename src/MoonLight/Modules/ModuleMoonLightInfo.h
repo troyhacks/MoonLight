@@ -31,6 +31,7 @@ class ModuleMoonLightInfo : public Module {
     addControl(controls, "nodes#", "number", 0, 65535, true);
 
     control = addControl(controls, "layers", "rows");
+    control["crud"] = "r";
     rows = control["n"].to<JsonArray>();
     {
       addControl(rows, "nrOfLights", "number", 0, 65535, true);

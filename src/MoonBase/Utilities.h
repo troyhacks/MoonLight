@@ -14,9 +14,8 @@
 #include <Arduino.h>
 #include <ESPFS.h>
 
-#include "Char.h"
-
 #include "ArduinoJson.h"
+#include "Char.h"
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)  // e.g. for pio.ini settings (see ML_CHIPSET)
@@ -24,17 +23,57 @@
 // add task and stacksize to logging
 // if USE_ESP_IDF_LOG: USE_ESP_IDF_LOG is not showing __FILE__), __LINE__, __FUNCTION__ so add that
 #ifdef USE_ESP_IDF_LOG
-  #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #if CORE_DEBUG_LEVEL >= 1
+    #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGE(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 2
+    #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGW(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 3
+    #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGI(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 4
+    #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGD(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 5
+    #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGV(tag, fmt, ...)
+  #endif
 #else
-  #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #if CORE_DEBUG_LEVEL >= 1
+    #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGE(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 2
+    #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGW(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 3
+    #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGI(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 4
+    #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGD(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 5
+    #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGV(tag, fmt, ...)
+  #endif
 #endif
 
 #define MB_TAG "🌙"
@@ -227,6 +266,6 @@ extern unsigned char moonmanpng[];
 extern unsigned int moonmanpng_len;
 #endif
 
-static inline uint32_t fastDiv255(uint32_t x) { //3–4 cycles
-    return (x * 0x8081u) >> 23;
+static inline uint32_t fastDiv255(uint32_t x) {  // 3–4 cycles
+  return (x * 0x8081u) >> 23;
 }

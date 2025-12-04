@@ -32,6 +32,7 @@ class ModuleTasks : public Module {
 
     control = addControl(controls, "tasks", "rows");
     control["filter"] = "";
+    control["crud"] = "r";
     rows = control["n"].to<JsonArray>();
     {
       addControl(rows, "name", "text", 0, 32, true);

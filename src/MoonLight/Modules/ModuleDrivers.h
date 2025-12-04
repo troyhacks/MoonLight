@@ -94,7 +94,6 @@ class ModuleDrivers : public NodeManager {
     addControlValue(control, getNameAndTags<ArtNetOutDriver>());
     addControlValue(control, getNameAndTags<AudioSyncDriver>());
     addControlValue(control, getNameAndTags<IRDriver>());
-    addControlValue(control, getNameAndTags<VirtualDriver>());
     addControlValue(control, getNameAndTags<HUB75Driver>());
 
     // custom
@@ -137,8 +136,6 @@ class ModuleDrivers : public NodeManager {
       node = allocMBObject<AudioSyncDriver>();
     else if (equalAZaz09(name, IRDriver::name()))
       node = allocMBObject<IRDriver>();
-    else if (equalAZaz09(name, VirtualDriver::name()))
-      node = allocMBObject<VirtualDriver>();
     else if (equalAZaz09(name, HUB75Driver::name()))
       node = allocMBObject<HUB75Driver>();
 

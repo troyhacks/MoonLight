@@ -74,39 +74,47 @@ class Node {
 
   template <class ControlType>
   JsonObject addControl(const ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr) {
-    uint32_t pointer = (uint32_t)&variable;
-
     bool newControl = false;  // flag to check if control is new or already exists
     // if control already exists only update it's pointer
     JsonObject control = JsonObject();
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
         // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
-        control1["p"] = pointer;
         control = control1;  // set control to the found one
         break;
       }
     }
 
-    if (control.isNull()) {  // if control not found, create a new one
+    // if control not found, create a new one
+    if (control.isNull()) {
       control = controls.add<JsonObject>();
       control["name"] = name;
-      control["type"] = type;
-      control["default"] = variable;
-
-      control["p"] = pointer;
-
-      if (ro) control["ro"] = true;                // else if (!control["ro"].isNull()) control.remove("ro");
-      if (min != 0) control["min"] = min;          // else if (!control["min"].isNull()) control.remove("min");
-      if (max != UINT8_MAX) control["max"] = max;  // else if (!control["max"].isNull()) control.remove("max");
-      if (desc) control["desc"] = desc;
-
-      newControl = true;  // set flag to true, as control is new
+      control["value"] = variable;  // set default
+      newControl = true;            // set flag to true, as control is new
     }
 
-    control["valid"] = true;  // invalid controls will be deleted
-
-    if (newControl) control["value"] = variable;  // set default
+    // update the control definition (see also setupDefinition...)
+    control["type"] = type;
+    control["default"] = variable;
+    control["p"] = (uint32_t)&variable;  // pointer to variable
+    control["valid"] = true;             // invalid controls will be deleted
+    // optional properties
+    if (ro)
+      control["ro"] = true;
+    else if (!control["ro"].isNull())
+      control.remove("ro");
+    if (min != 0)
+      control["min"] = min;
+    else if (!control["min"].isNull())
+      control.remove("min");
+    if (max != UINT8_MAX)
+      control["max"] = max;
+    else if (!control["max"].isNull())
+      control.remove("max");
+    if (desc)
+      control["desc"] = desc;
+    else if (!control["desc"].isNull())
+      control.remove("desc");
 
     // setValue
     if (control["type"] == "slider" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
@@ -328,7 +336,6 @@ static struct SharedData {
   #include "MoonLight/Nodes/Drivers/D_Hub75.h"
   #include "MoonLight/Nodes/Drivers/D_Infrared.h"
   #include "MoonLight/Nodes/Drivers/D_PhysicalDriver.h"
-  #include "MoonLight/Nodes/Drivers/D_VirtualDriver.h"
   #include "MoonLight/Nodes/Drivers/D__Sandbox.h"
   #include "MoonLight/Nodes/Effects/E_FastLED.h"
   #include "MoonLight/Nodes/Effects/E_MoonLight.h"

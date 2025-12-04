@@ -136,6 +136,7 @@ void PhysicalLayer::onLayoutPre() {
       memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX is 2 * 0xFF
       memset(ledPinsAssigned, 0, sizeof(ledPinsAssigned));
     }
+    nrOfAssignedPins = 0;
   } else if (pass == 2) {
     indexP = 0;
     for (VirtualLayer* layer : layers) {

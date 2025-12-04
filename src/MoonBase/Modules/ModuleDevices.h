@@ -37,6 +37,7 @@ class ModuleDevices : public Module {
 
     control = addControl(controls, "devices", "rows");
     control["filter"] = "";
+    control["crud"] = "r";
     rows = control["n"].to<JsonArray>();
     {
       addControl(rows, "name", "mdnsName", 0, 32, true);
