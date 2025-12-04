@@ -266,6 +266,6 @@ extern unsigned char moonmanpng[];
 extern unsigned int moonmanpng_len;
 #endif
 
-static inline uint32_t fastDiv255(uint32_t x) {  // 3–4 cycles
+inline uint32_t fastDiv255(uint32_t x) {  // 3–4 cycles
   return (x * 0x8081u) >> 23;
 }

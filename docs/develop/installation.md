@@ -180,7 +180,7 @@ Before changing code, test if the current download of MoonLight is running fine.
 
 ### Install nodejs
 
-nodejs is needed if changes on the frontend (UI) are made (interface folder). On each file change, ☑️ or ➡️ will rebuild the UI using nodejs.
+nodejs is needed if changes on the front-end (UI) are made (interface folder). On each file change, ☑️ or ➡️ will rebuild the UI using nodejs.
 
 * Windows: if nodejs is not on your system you will get this error:
 

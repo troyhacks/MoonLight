@@ -129,7 +129,7 @@ struct Char {
 
   void split(const char* splitter, std::function<void(const char*, uint8_t)> callback) {
     char savedS[N];
-    strncpy(savedS, s, N);              // save s
+    strlcpy(savedS, s, N);              // save s
     char* token = strtok(s, splitter);  // eat s
     uint8_t sequence = 0;
     while (token != nullptr) {
@@ -137,7 +137,7 @@ struct Char {
       sequence++;
       token = strtok(nullptr, splitter);
     }
-    strncpy(s, savedS, N);  // restore s
+    strlcpy(s, savedS, N);  // restore s
   }
 
   void formatTime(time_t time, const char* format) {
@@ -169,7 +169,7 @@ Char<N> operator+(const char* lhs, const Char<N>& rhs) {
 // });
 
 // convenience function to compare two char strings
-static bool equal(const char* a, const char* b) {
+inline bool equal(const char* a, const char* b) {
   if (a == nullptr || b == nullptr) {
     return false;
   }
@@ -177,7 +177,7 @@ static bool equal(const char* a, const char* b) {
 }
 
 // compare two char strings, ignoring non-alphanumeric characters
-static bool equalAZaz09(const char* a, const char* b) {
+inline bool equalAZaz09(const char* a, const char* b) {
   if (a == nullptr || b == nullptr) return false;
 
   while (*a || *b) {
@@ -192,7 +192,7 @@ static bool equalAZaz09(const char* a, const char* b) {
   return true;
 }
 
-static bool contains(const char* a, const char* b) {
+inline bool contains(const char* a, const char* b) {
   if (a == nullptr || b == nullptr) {
     return false;
   }

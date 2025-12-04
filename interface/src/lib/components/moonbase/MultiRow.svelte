@@ -48,9 +48,14 @@
 		}
 	}
 
-	function handleReorder(reorderedItems: any[]) {
+	function handleReorder(reorderedItems: { item: any; originalIndex: number }[]) {
 		console.log('handleReorder', property.name, reorderedItems);
-		data[property.name] = reorderedItems.map((wrapper: any) => wrapper.item);
+		const full = [...data[property.name]];
+		reorderedItems.forEach(({ item }, pos) => {
+			const originalIndex = filteredItems[pos].originalIndex;
+			full[originalIndex] = item;
+		});
+		data[property.name] = full;
 		onChange();
 	}
 
@@ -98,11 +103,15 @@
 		const query = (isNegated ? filterValue.slice(1) : filterValue).toLowerCase();
 
 		// No filter or empty query → return items directly
-		if (!query) return data[property.name].map((item: any) => ({ item }));
+		if (!query)
+			return data[property.name].map((item: any, index: number) => ({
+				item,
+				originalIndex: index
+			}));
 
 		// Filtered items
 		return data[property.name]
-			.map((item: any) => ({ item }))
+			.map((item: any, index: number) => ({ item, originalIndex: index }))
 			.filter(({ item }: { item: any }) => {
 				const matchFound = property.n.slice(0, 3).some((propertyN: any) => {
 					let valueStr;
