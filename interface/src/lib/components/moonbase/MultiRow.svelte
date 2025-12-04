@@ -48,9 +48,16 @@
 		}
 	}
 
-	function handleReorder(reorderedItems: any[]) {
+	function handleReorder(reorderedItems: { item: any; originalIndex: number }[]) {
 		console.log('handleReorder', property.name, reorderedItems);
-		data[property.name] = reorderedItems.map((wrapper: any) => wrapper.item);
+		const full = [...data[property.name]];
+		// Capture the current filteredItems mapping before any potential state changes
+		const indexMap = filteredItems.map((f: any) => f.originalIndex);
+		reorderedItems.forEach(({ item }, pos) => {
+			const originalIndex = indexMap[pos];
+			full[originalIndex] = item;
+		});
+		data[property.name] = full;
 		onChange();
 	}
 
@@ -98,13 +105,17 @@
 		const query = (isNegated ? filterValue.slice(1) : filterValue).toLowerCase();
 
 		// No filter or empty query → return items directly
-		if (!query) return data[property.name].map((item:any) => ({ item }));
+		if (!query)
+			return data[property.name].map((item: any, index: number) => ({
+				item,
+				originalIndex: index
+			}));
 
 		// Filtered items
 		return data[property.name]
-			.map((item:any) => ({ item }))
+			.map((item: any, index: number) => ({ item, originalIndex: index }))
 			.filter(({ item }: { item: any }) => {
-				const matchFound = property.n.slice(0, 3).some((propertyN:any) => {
+				const matchFound = property.n.slice(0, 3).some((propertyN: any) => {
 					let valueStr;
 
 					if (
@@ -143,24 +154,26 @@
 <div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
 	{initCap(property.name)}
 </div>
-<div class="relative w-full overflow-visible">
-	<!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->
-	<button
-		class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
-		onclick={() => {
-			addItem(property.name);
+{#if findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('c')}
+	<div class="relative w-full overflow-visible">
+		<!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->
+		<button
+			class="btn btn-primary text-primary-content btn-md absolute -top-14 right-0"
+			onclick={() => {
+				addItem(property.name);
 
-			//add the new item to the data
-			data[property.name].push(dataEditable);
-			onChange();
-		}}
-	>
-		<Add class="h-6 w-6" /></button
-	>
-</div>
+				//add the new item to the data
+				data[property.name].push(dataEditable);
+				onChange();
+			}}
+		>
+			<Add class="h-6 w-6" /></button
+		>
+	</div>
+{/if}
 
 <!-- Search Filter -->
-{#if findItemInDefinition.filter != null}
+{#if findItemInDefinition?.filter != null}
 	<MultiInput
 		property={propertyFilter}
 		bind:value={data[property.name + '_filter']}
@@ -178,11 +191,18 @@
 {/if}
 
 <div class="overflow-x-auto space-y-1" transition:slide|local={{ duration: 300, easing: cubicOut }}>
-	<DraggableList items={filteredItems} onReorder={handleReorder} class="space-y-2">
+	<DraggableList
+		items={filteredItems}
+		onReorder={handleReorder}
+		class="space-y-2"
+		dragDisabled={!(findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s'))}
+	>
 		{#snippet children({ item: itemWrapper }: { item: any })}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
-				<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
+				{#if findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s')}
+					<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
+				{/if}
 				<!-- Show the first 3 fields -->
 				{#each property.n.slice(0, 3) as propertyN}
 					{#if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
@@ -217,14 +237,16 @@
 						>
 							<SearchIcon class="h-6 w-6" /></button
 						>
-						<button
-							class="btn btn-ghost btn-sm"
-							onclick={() => {
-								deleteItem(property.name, itemWrapper.item);
-							}}
-						>
-							<Delete class="text-error h-6 w-6" />
-						</button>
+						{#if findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('d')}
+							<button
+								class="btn btn-ghost btn-sm"
+								onclick={() => {
+									deleteItem(property.name, itemWrapper.item);
+								}}
+							>
+								<Delete class="text-error h-6 w-6" />
+							</button>
+						{/if}
 					</div>
 				{/if}
 			</div>

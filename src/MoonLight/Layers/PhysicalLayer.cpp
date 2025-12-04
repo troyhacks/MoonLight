@@ -41,7 +41,7 @@ void PhysicalLayer::setup() {
   if (psramFound())
     lights.maxChannels = MIN(ESP.getPsramSize() / 2, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
   else
-    lights.maxChannels = 4096 * 3;  // esp32-d0: max 1024->2048->4096 Leds ATM
+    lights.maxChannels = 8192 * 3;  // esp32-d0: max 1024->2048->4096->8192 Leds ATM
 
   lights.channels = allocMB<uint8_t>(lights.maxChannels);
 
@@ -133,8 +133,10 @@ void PhysicalLayer::onLayoutPre() {
     memset(lights.channels, 0, lights.maxChannels);  // set all the channels to 0
     // dealloc pins
     if (!monitorPass) {
-      memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX
+      memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX is 2 * 0xFF
+      memset(ledPinsAssigned, 0, sizeof(ledPinsAssigned));
     }
+    nrOfAssignedPins = 0;
   } else if (pass == 2) {
     indexP = 0;
     for (VirtualLayer* layer : layers) {
@@ -172,7 +174,7 @@ void PhysicalLayer::addLight(Coord3D position) {
   }
 }
 
-void PhysicalLayer::nextPin() {
+void PhysicalLayer::nextPin(uint8_t ledPinDIO) {
   if (pass == 1 && !monitorPass) {
     uint16_t prevNrOfLights = 0;
     uint8_t i = 0;
@@ -183,8 +185,12 @@ void PhysicalLayer::nextPin() {
     // ledsPerPin[i] is the first empty slot
     if (i < MAXLEDPINS) {
       ledsPerPin[i] = lights.header.nrOfLights - prevNrOfLights;
+      if (ledPinDIO != UINT8_MAX)
+        ledPinsAssigned[i] = ledPinDIO;  // override order
+      else
+        ledPinsAssigned[i] = i;  // default order
       nrOfAssignedPins = i + 1;
-      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d of %d", i, ledsPerPin[i], MAXLEDPINS);
+      EXT_LOGD(ML_TAG, "nextPin #%d ledsPerPin:%d of %d assigned:%d", i, ledsPerPin[i], MAXLEDPINS, ledPinsAssigned[i]);
     }
   }
 }

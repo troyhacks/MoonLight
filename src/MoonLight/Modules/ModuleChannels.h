@@ -21,38 +21,36 @@ class ModuleChannels : public Module {
  public:
   ModuleChannels(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("channels", server, sveltekit) { EXT_LOGV(ML_TAG, "constructor"); }
 
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
 
-    JsonObject property;  // state.data has one or more properties
-    JsonArray values;     // if a property is a select, this is the values of the select
+    JsonObject control;  // state.data has one or more properties
 
-    property = addControl(root, "view", "select");
-    property["default"] = 0;
-    values = property["values"].to<JsonArray>();
-    values.add("Physical layer");
+    control = addControl(controls, "view", "select");
+    control["default"] = 0;
+    addControlValue(control, "Physical layer");
     uint8_t i = 0;
     for (VirtualLayer* layer : layerP.layers) {
       Char<32> layerName;
       layerName.format("Layer %d", i);
-      values.add(layerName.c_str());
+      addControlValue(control, layerName.c_str());
       i++;
     }
 
-    property = addControl(root, "group", "checkbox");
-    property["default"] = true;
+    control = addControl(controls, "group", "checkbox");
+    control["default"] = true;
 
-    // property = addControl(root, "universe", "number");
-    // property["default"] = 0;
+    // control = addControl(controls, "universe", "number");
+    // control["default"] = 0;
 
-    property = addControl(root, "channel", "pad");
-    property["width"] = 12;
-    property["hoverToServer"] = true;
-    property["size"] = 10;
-    property["default"]["select"] = 0;
-    property["default"]["action"] = "";
-    property["default"]["list"].to<JsonArray>();
-    property["default"]["count"] = 512;
+    control = addControl(controls, "channel", "pad");
+    control["width"] = 12;
+    control["hoverToServer"] = true;
+    control["size"] = 10;
+    control["default"]["select"] = 0;
+    control["default"]["action"] = "";
+    control["default"]["list"].to<JsonArray>();
+    control["default"]["count"] = 512;
   }
 
   void onUpdate(const UpdatedItem& updatedItem) override {
@@ -76,10 +74,11 @@ class ModuleChannels : public Module {
       // EXT_LOGD(ML_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       // copy the file to the hidden folder...
       if (updatedItem.oldValue != "" && !updatedItem.value["action"].isNull() && updatedItem.value["action"] != "") {
+        if (!layerP.lights.channels) return; // to avoid crash during init
         EXT_LOGD(ML_TAG, "handle %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         uint16_t select = updatedItem.value["select"];
         uint8_t value = updatedItem.value["action"] == "mouseenter" ? 255 : 0;
-        if (view == 0) {
+        if (view == 0) {  // physical layer
           if (group)
             for (uint8_t i = 0; i < layerP.lights.header.channelsPerLight; i++) layerP.lights.channels[select * layerP.lights.header.channelsPerLight + i] = value;
           else

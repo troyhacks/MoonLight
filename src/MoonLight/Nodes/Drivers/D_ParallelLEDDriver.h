@@ -1,6 +1,6 @@
 /**
     @title     MoonLight
-    @file      PhysicalDriver.h
+    @file      D_ParallelLEDDriver.h
     @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
     @Authors   https://github.com/MoonModules/MoonLight/commits/main
     @Doc       https://moonmodules.org/MoonLight/moonlight/overview/
@@ -19,14 +19,15 @@
     #include "parlio.h"
   #endif
 
-class PhysicalDriver : public DriverNode {
+class ParallelLEDDriver : public DriverNode {
  public:
-  static const char* name() { return "Physical Driver"; }
+  static const char* name() { return "Parallel LED Driver"; }
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️"; }
 
   #if HP_ALL_DRIVERS
-  char version[30] = HP_ALL_VERSION;
+  Char<32> version = HP_ALL_VERSION;
+  Char<32> status = "ok";
     #ifndef BOARD_HAS_PSRAM
   uint8_t dmaBuffer = 6;
     #else
@@ -38,7 +39,9 @@ class PhysicalDriver : public DriverNode {
     DriverNode::setup();
   #if HP_ALL_DRIVERS
     addControl(dmaBuffer, "dmaBuffer", "slider", 1, 100);
-    addControl(version, "Version", "text", 0, 30, true);  // read only
+    addControl(version, "version", "text", 0, 32, true);  // read only
+    addControl(status, "status", "text", 0, 32, true);    // read only
+    updateControl("version", HP_ALL_VERSION);             // update also if node already exists
   #endif
   }
 
@@ -72,7 +75,7 @@ class PhysicalDriver : public DriverNode {
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
   #if HP_ALL_DRIVERS
-    if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) {  // physical
+    if (layer->layerP->pass == 1 && !layer->layerP->monitorPass) {
       uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
 
       if (!lightPresetSaved || nrOfPins == 0) {  //|| initDone can be done multiple times now...
@@ -80,22 +83,40 @@ class PhysicalDriver : public DriverNode {
         return;
       }
 
-      EXT_LOGD(ML_TAG, "nrOfLedPins %d", nrOfPins);
+      EXT_LOGD(ML_TAG, "nrOfLedPins %d %d %d", nrOfPins, layerP.nrOfLedPins, layerP.nrOfAssignedPins);
       if (safeModeMB) {
-        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
+        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Parallel LED Driver");
         return;
       }
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
-      for (int i = 0; i < nrOfPins; i++) EXT_LOGD(ML_TAG, "onLayout pin#%d: %d %d %d", i, layer->layerP->ledPins[i], layer->layerP->ledsPerPin[i], nrOfPins);
+      uint8_t pins[MAX_PINS];
+      Char<32> statusString = "#";
+      statusString += nrOfPins;
+      statusString += ": ";
+      for (int i = 0; i < nrOfPins; i++) {
+        uint8_t assignedPin = layerP.ledPinsAssigned[i];
+        if (assignedPin < layerP.nrOfLedPins)
+          pins[i] = layerP.ledPins[assignedPin];
+        else
+          pins[i] = layerP.ledPins[i];
+        EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: %d -> %d #%d", i, nrOfPins, layer->layerP->ledPins[i], pins[i], layer->layerP->ledsPerPin[i]);
+        Char<12> tmp;
+        tmp.format(" %d#%d", pins[i], layer->layerP->ledsPerPin[i]);
+        statusString += tmp;
+      }
+      EXT_LOGD(ML_TAG, "status: %s", statusString.c_str());
+
+      updateControl("status", statusString.c_str());
+      moduleNodes->requestUIUpdate = true;
 
       if (!initDone) {
         __NB_DMA_BUFFER = dmaBuffer;  // __NB_DMA_BUFFER is a variable
 
         uint8_t savedBrightness = ledsDriver._brightness;  //(initLed sets it to 255 and thats not what we want)
 
-        EXT_LOGD(ML_TAG, "init Physical Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
-        ledsDriver.initled(layer->layerP->lights.channels, layer->layerP->ledPins, layer->layerP->ledsPerPin, nrOfPins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        EXT_LOGD(ML_TAG, "init Parallel LED Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        ledsDriver.initled(layer->layerP->lights.channels, pins, layer->layerP->ledsPerPin, nrOfPins, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
 
         ledsDriver.setBrightness(savedBrightness);  //(initLed sets it to 255 and thats not what we want)
 
@@ -107,8 +128,8 @@ class PhysicalDriver : public DriverNode {
       } else {
         // don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
-        EXT_LOGD(ML_TAG, "update Physical Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
-        ledsDriver.updateDriver(layer->layerP->ledPins, layer->layerP->ledsPerPin, nrOfPins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        EXT_LOGD(ML_TAG, "update Parallel LED Driver %d %d %d %d", layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+        ledsDriver.updateDriver(pins, layer->layerP->ledsPerPin, nrOfPins, dmaBuffer, layer->layerP->lights.header.channelsPerLight, layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
       }
 
     #else  // P4: Parlio Troy Driver
@@ -118,10 +139,10 @@ class PhysicalDriver : public DriverNode {
   #else  // ESP32_LEDSDRIVER
     if (!lightPresetSaved || ledsDriver.initLedsDone || layer->layerP->sortedPins.size() == 0) return;
 
-    if (layer->layerP->pass == 1) {  // physical
+    if (layer->layerP->pass == 1) {
       EXT_LOGD(ML_TAG, "sortedPins #:%d", layer->layerP->sortedPins.size());
       if (safeModeMB) {
-        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Physical driver");
+        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding Parallel LED Driver");
         return;
       }
 
@@ -155,13 +176,13 @@ class PhysicalDriver : public DriverNode {
   #endif
   }
 
-  ~PhysicalDriver() override {
+  ~ParallelLEDDriver() override {
   #if HP_ALL_DRIVERS
     EXT_LOGD(ML_TAG, "Destroy %d + 1 dma buffers", __NB_DMA_BUFFER);
 
     ledsDriver.deleteDriver();
 
-      // if recreating the Physical driver later, still initled cannot be done again ?
+      // if recreating the Parallel LED Driver later, still initled cannot be done again ?
   #endif
   }
 };

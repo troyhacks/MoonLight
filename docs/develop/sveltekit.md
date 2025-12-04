@@ -64,7 +64,7 @@ Below lists are ordered in terms of likelyhood to be accepted:
 
 ## Steps made to make Sveltekit ready for MoonLight
 
-This is a checklist, More info on most of the items can be found in the ESP32-Sveltekit specific documentation [ESP32 SvelteKit](https://moonmodules.org/MoonLight/esp32sveltekit/), [Build Tools](https://moonmodules.org/MoonLight/gettingstarted/), [Front end](https://moonmodules.org/MoonLight/sveltekit/) and [Back End](https://moonmodules.org/MoonLight/statefulservice/)
+This is a checklist, More info on most of the items can be found in the ESP32-Sveltekit specific documentation [ESP32 SvelteKit](https://moonmodules.org/MoonLight/esp32sveltekit/), [Build Tools](https://moonmodules.org/MoonLight/gettingstarted/), [Front-end](https://moonmodules.org/MoonLight/sveltekit/) and [Back-end](https://moonmodules.org/MoonLight/statefulservice/)
 
 * {custom} = MoonLight or name of a forked repo
 

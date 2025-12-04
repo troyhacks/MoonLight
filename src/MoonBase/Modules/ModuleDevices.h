@@ -30,20 +30,20 @@ class ModuleDevices : public Module {
 
   ModuleDevices(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("devices", server, sveltekit) { EXT_LOGV(MB_TAG, "constructor"); }
 
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more properties
-    JsonArray details;   // if a control is an array, this is the details of the array
-    JsonArray values;    // if a control is a select, this is the values of the select
+    JsonArray rows;   // if a control is an array, this is the rows of the array
 
-    control = addControl(root, "devices", "rows");
+    control = addControl(controls, "devices", "rows");
     control["filter"] = "";
-    details = control["n"].to<JsonArray>();
+    control["crud"] = "r";
+    rows = control["n"].to<JsonArray>();
     {
-      control = addControl(details, "name", "mdnsName", 0, 32, true);
-      control = addControl(details, "ip", "ip", 0, 32, true);
-      control = addControl(details, "time", "time", 0, 32, true);
-      control = addControl(details, "mac", "text", 0, 32, true);
+      addControl(rows, "name", "mdnsName", 0, 32, true);
+      addControl(rows, "ip", "ip", 0, 32, true);
+      addControl(rows, "time", "time", 0, 32, true);
+      addControl(rows, "mac", "text", 0, 32, true);
     }
   }
 

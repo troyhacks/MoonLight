@@ -47,7 +47,6 @@ class ModuleLiveScripts : public Module {
           uint8_t index = 0;
           _moduleEffects->read([&](ModuleState& effectsState) {
             for (JsonObject nodeState : effectsState.data["nodes"].as<JsonArray>()) {
-
               if (updatedItem == nodeState["name"]) {
                 EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleEffects->findLiveScriptNode(nodeState["name"]);
@@ -59,14 +58,13 @@ class ModuleLiveScripts : public Module {
                   _moduleEffects->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char*>());
               }
               index++;
             }
           });
           _moduleDrivers->read([&](ModuleState& driversState) {
             for (JsonObject nodeState : driversState.data["nodes"].as<JsonArray>()) {
-
               if (updatedItem == nodeState["name"]) {
                 EXT_LOGD(ML_TAG, "updateHandler equals current item -> livescript compile %s", updatedItem.c_str());
                 LiveScriptNode* liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(nodeState["name"]);
@@ -78,7 +76,7 @@ class ModuleLiveScripts : public Module {
                   _moduleDrivers->requestUIUpdate = true;  // update the Effects UI
                 }
 
-                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char *>());
+                EXT_LOGD(ML_TAG, "update due to new node %s done", nodeState["name"].as<const char*>());
               }
               index++;
             }
@@ -90,62 +88,27 @@ class ModuleLiveScripts : public Module {
   }
 
   // define the data model
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;       // state.data has one or more properties
-    JsonArray details = root;  // if a property is an array, this is the details of the array
-    JsonArray values;          // if a property is a select, this is the values of the select
+    JsonObject control;  // state.data has one or more properties
+    JsonArray rows;      // if a control is an array, this is the rows of the array
 
-    property = root.add<JsonObject>();
-    property["name"] = "scripts";
-    property["type"] = "rows";
-    details = property["n"].to<JsonArray>();
+    control = addControl(controls, "scripts", "rows");
+    control["crud"] = "ru";
+    rows = control["n"].to<JsonArray>();
     {
-      property = details.add<JsonObject>();
-      property["name"] = "name";
-      property["type"] = "text";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "isRunning";
-      property["type"] = "checkbox";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "isHalted";
-      property["type"] = "checkbox";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "exeExist";
-      property["type"] = "checkbox";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "handle";
-      property["type"] = "number";
-      property["ro"] = true;
-      property["max"] = 65536;
-      property = details.add<JsonObject>();
-      property["name"] = "binary_size";
-      property["type"] = "number";
-      property["ro"] = true;
-      property["max"] = 65536;
-      property = details.add<JsonObject>();
-      property["name"] = "data_size";
-      property["type"] = "number";
-      property["ro"] = true;
-      property["max"] = 65536;
-      property = details.add<JsonObject>();
-      property["name"] = "error";
-      property["type"] = "text";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "stop";
-      property["type"] = "button";
-      property = details.add<JsonObject>();
-      property["name"] = "start";
-      property["type"] = "button";
-      // property = details.add<JsonObject>(); property["name"] = "free"; property["type"] = "button";
-      property = details.add<JsonObject>();
-      property["name"] = "delete";
-      property["type"] = "button";
+      addControl(rows, "name", "text", 0, 32, true);
+      addControl(rows, "isRunning", "checkbox", false, true, true);
+      addControl(rows, "isHalted", "checkbox", false, true, true);
+      addControl(rows, "exeExist", "checkbox", false, true, true);
+      addControl(rows, "handle", "number", 0, 65535, true);
+      addControl(rows, "binary_size", "number", 0, 65535, true);
+      addControl(rows, "data_size", "number", 0, 65535, true);
+      addControl(rows, "error", "text", 0, 32, true);
+      addControl(rows, "stop", "button");
+      addControl(rows, "start", "button");
+      // addControl(rows, "free", "button");
+      addControl(rows, "delete", "button");
     }
   }
 
@@ -162,11 +125,11 @@ class ModuleLiveScripts : public Module {
           liveScriptNode = (LiveScriptNode*)_moduleDrivers->findLiveScriptNode(scriptState["name"]);
         }
         if (liveScriptNode) {
-          if (updatedItem.name == "stop") liveScriptNode->kill();
-          if (updatedItem.name == "start") liveScriptNode->execute();
+          if (updatedItem.name == "stop") liveScriptNode->kill();      // stop matches kill
+          if (updatedItem.name == "start") liveScriptNode->execute();  // start matches execute
           // if (equal(updatedItem.name, "free"))
           //     liveScriptNode->free();
-          if (updatedItem.name == "delete") liveScriptNode->killAndDelete();
+          if (updatedItem.name == "delete") liveScriptNode->killAndDelete();  // delete matches killAndDelete
           // updatedItem.value = 0;
         } else
           EXT_LOGW(ML_TAG, "liveScriptNode not found %s", scriptState["name"].as<const char*>());

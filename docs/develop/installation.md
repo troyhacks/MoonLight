@@ -38,7 +38,7 @@ The development environment consists of
 
     <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
-    * The main branch will be checked out per default. To run / test latest developments, switch to the dev branch
+    * The main branch will be checked out per default. Latest development will be done in branches from main, merged back into main when done.
 
 ## Install and setup VSCode
 
@@ -110,7 +110,7 @@ Before changing code, test if the current download of MoonLight is running fine.
 
 * If you are developing or updating existing MoonLight installations MoonLight might be outdated or not show up correctly in the browser or not even appear. Two reasons
 
-    * Sometimes the latest front end code is not generated yet (WWWData.h). This is how to set it right: 
+    * Sometimes the latest front-end code is not generated yet (WWWData.h). This is how to set it right: 
         * Open platformIO new terminal (>_)
         * touch ./interface/src/app.html so the build process will be triggered to create a new WWWData.h
         * build the project (✔) - if nodejs is not installed (yet) you will get errors. See troubleshooting
@@ -180,7 +180,7 @@ Before changing code, test if the current download of MoonLight is running fine.
 
 ### Install nodejs
 
-nodejs is needed if changes on the frontend (UI) are made (interface folder). On each file change, ☑️ or ➡️ will rebuild the UI using nodejs.
+nodejs is needed if changes on the front-end (UI) are made (interface folder). On each file change, ☑️ or ➡️ will rebuild the UI using nodejs.
 
 * Windows: if nodejs is not on your system you will get this error:
 

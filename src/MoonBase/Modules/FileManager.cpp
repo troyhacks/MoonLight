@@ -42,31 +42,31 @@ void addFolder(File folder, bool showHidden, const JsonArray& fileArray) {
   }
 }
 
-void FilesState::read(FilesState& state, JsonObject& root) {
-  root["name"] = "/";
+void FilesState::read(FilesState& state, JsonObject& stateJson) {
+  stateJson["name"] = "/";
   // crashes for some reason: ???
-  root["fs_total"] = ESPFS.totalBytes();
-  root["fs_used"] = ESPFS.usedBytes();
-  root["showHidden"] = state.showHidden;
+  stateJson["fs_total"] = ESPFS.totalBytes();
+  stateJson["fs_used"] = ESPFS.usedBytes();
+  stateJson["showHidden"] = state.showHidden;
   File folder = ESPFS.open("/");
-  addFolder(folder, state.showHidden, root["files"].to<JsonArray>());
+  addFolder(folder, state.showHidden, stateJson["files"].to<JsonArray>());
   folder.close();
-  // print->printJson("FilesState::read", root);
+  // print->printJson("FilesState::read", stateJson);
   EXT_LOGI(MB_TAG, "");
 }
 
-StateUpdateResult FilesState::update(JsonObject& root, FilesState& state, const String &originId) {
+StateUpdateResult FilesState::update(JsonObject& newData, FilesState& state, const String &originId) {
   bool changed = false;
 
-  if (root["showHidden"] != state.showHidden) {
-    state.showHidden = root["showHidden"];
+  if (newData["showHidden"] != state.showHidden) {
+    state.showHidden = newData["showHidden"];
     EXT_LOGD(MB_TAG, "showHidden %d", state.showHidden);
     changed = true;
   }
 
   state.updatedItems.clear();
 
-  JsonArray deletes = root["deletes"].as<JsonArray>();
+  JsonArray deletes = newData["deletes"].as<JsonArray>();
   if (!deletes.isNull()) {
     for (JsonObject var : deletes) {
       EXT_LOGI(MB_TAG, "delete %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
@@ -80,7 +80,7 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state, const 
     }
   }
 
-  JsonArray news = root["news"].as<JsonArray>();
+  JsonArray news = newData["news"].as<JsonArray>();
   if (!news.isNull()) {
     for (JsonObject var : news) {
       EXT_LOGI(MB_TAG, "new %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");
@@ -101,7 +101,7 @@ StateUpdateResult FilesState::update(JsonObject& root, FilesState& state, const 
     }
   }
 
-  JsonArray updates = root["updates"].as<JsonArray>();
+  JsonArray updates = newData["updates"].as<JsonArray>();
   if (!updates.isNull()) {
     for (JsonObject var : updates) {
       EXT_LOGI(MB_TAG, "update %s %s", var["path"].as<const char*>(), var["isFile"] ? "File" : "Folder");

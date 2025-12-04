@@ -8,7 +8,7 @@ The Drivers module defines layers and drivers.
 
 * Layout 🚥: A layout (🚥) defines the positions of the lights to control. See [Layouts](https://moonmodules.org/MoonLight/moonlight/layouts/)
 * Driver ☸️: A driver is a link between MoonLight to hardware or the network. Drivers can both input data or output data. Examples:
-    * LED drivers (FastLED, Physical and Virtual drivers, hub75 panels)
+    * LED drivers (FastLED, Parallel LED Drivers, hub75 panels)
     * Light driver (Art-Net / DMX)
     * Audio driver
     * Sensor drivers (microphone, gyro, MIDI controller)
@@ -30,17 +30,20 @@ Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLig
 
 | Name | Preview | Controls | Remarks
 | ---- | ----- | ---- | ---- |
-| Physical LED Driver | <img width="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90"/> | <img width="320" alt="Physical" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | Drive multiple LED types, all devices including ESP32-P4(-nano) supported<br>Max Power and Light preset: See below<br>DMA buffer: set higher when LEDs flicker |
+| Parallel LED Driver | <img width="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90"/> | <img width="320" alt="Parallel" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | Drive multiple LED types, all devices including ESP32-P4(-nano) supported<br>Max Power and Light preset: See below<br>DMA buffer: set higher when LEDs flicker<br>Virtual LED Driver will be part of the Parallel LED driver.|
 | FastLED Driver | <img width="100" src="https://avatars.githubusercontent.com/u/5899270?s=48&v=4"/> | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | Most used LED driver. Drive most common LEDs (WS2812).<br>Max Power: See below |
 | Art-Net | <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | Drive LEDS and DMX lights over the network. See below |
 | AudioSync | <img width="100" src="https://github.com/user-attachments/assets/bfedf80b-6596-41e7-a563-ba7dd58cc476"/> | No controls | Listens to audio sent over the local network by WLED-AC or WLED-MM and allows audio reactive effects (♪ & ♫) to use audio data (volume and bands (FFT)) |
-| Virtual LED Driver | <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/> | <img width="100" src="https://github.com/user-attachments/assets/c81d2f56-00d1-4424-a716-8e3c30e76636"/> | Driving max 120! outputs. E.g. 48 panels of 256 LEDs each run at 50-100 FPS using shift registers<br>Not implemented yet |
 | HUB75 Driver | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | <img width="100" src="https://github.com/user-attachments/assets/4d386045-9526-4a5a-aa31-638058b31f32"/> | Drive HUB75 panels<br>Not implemented yet |
 | IR Driver 🆕🚧 | <img width="100" src="../../media/moonlight/IRDriver.jpeg"/> |  | Receive IR commands and [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/) |
 
+* The Parallel LED driver uses different hardware peripherals depending on the MCU type: ESP32-D0: I2S, ESP32-S3: LCD_CAM, ESP32-P4: Parallel IO (ParLIO).
+* Virtual LED Driver: Driving max 120! outputs (E.g. 48 panels of 256 LEDs each run at 50-100 FPS) using shift registers. Integrated within the Parallel LED Driver architecture. Not implemented yet
+<img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/><img width="100" src="https://github.com/user-attachments/assets/c81d2f56-00d1-4424-a716-8e3c30e76636"/>
+
 ### Max Power and Light Preset
 
-* **Max Power**: max amount of power in watts to send to LEDs. Default 10: 5V * 2A = 10W (so it runs fine on USB)
+* **Max Power**: max amount of power in watts to send to LEDs. Default 10: 5V * 2A = 10W (so it runs fine on USB). 🆕: Moved to board presets in [Module IO](https://moonmodules.org/MoonLight/moonbase/inputoutput/).
 
 * **Light preset**: Defines the channels per light and color order
 

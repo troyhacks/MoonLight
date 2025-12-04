@@ -19,7 +19,6 @@
 
 class NodeManager : public Module {
  public:
-  bool requestUIUpdate = false;
   Char<20> defaultNodeName;
 
  protected:
@@ -76,56 +75,38 @@ class NodeManager : public Module {
     });
   }
 
-  virtual void addNodes(const JsonArray& values) const {}
+  virtual void addNodes(const JsonObject& control) {}
 
   virtual Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const { return nullptr; }
 
   // define the data model
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;       // state.data has one or more properties
-    JsonArray details = root;  // if a property is an array, this is the details of the array
-    JsonArray values;          // if a property is a select, this is the values of the select
+    JsonObject control;  // state.data has one or more properties
+    JsonArray rows;      // if a control is an array, this is the rows of the array
 
-    property = root.add<JsonObject>();
-    property["name"] = "nodes";
-    property["type"] = "rows";
-    details = property["n"].to<JsonArray>();
+    control = addControl(controls, "nodes", "rows");
+    rows = control["n"].to<JsonArray>();
     {
-      property = details.add<JsonObject>();
-      property["name"] = "name";
-      property["type"] = "selectFile";
-      values = property["values"].to<JsonArray>();
-      property["default"] = defaultNodeName.c_str();
+      control = addControl(rows, "name", "selectFile");
+      control["default"] = defaultNodeName.c_str();
+      // values = control["values"].to<JsonArray>();
+      addNodes(control);
 
-      addNodes(values);
-
-      property = details.add<JsonObject>();
-      property["name"] = "on";
-      property["type"] = "checkbox";
-      property["default"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "controls";
-      property["type"] = "controls";
-      details = property["n"].to<JsonArray>();
+      addControl(rows, "on", "checkbox");
+      control = addControl(rows, "controls", "controls");
+      rows = control["n"].to<JsonArray>();
       {
-        property = details.add<JsonObject>();
-        property["name"] = "name";
-        property["type"] = "text";
-        property["default"] = "speed";
-        property = details.add<JsonObject>();
-        property["name"] = "type";
-        property["type"] = "select";
-        property["default"] = "Number";
-        values = property["values"].to<JsonArray>();
-        values.add("number");
-        values.add("slider");
-        values.add("text");
-        values.add("coordinate");
-        property = details.add<JsonObject>();
-        property["name"] = "value";
-        property["type"] = "text";
-        property["default"] = "128";
+        control = addControl(rows, "name", "text");
+        control["default"] = "speed";
+        control = addControl(rows, "type", "select");
+        control["default"] = "number";
+        addControlValue(control, "number");
+        addControlValue(control, "slider");
+        addControlValue(control, "text");
+        addControlValue(control, "coordinate");
+        control = addControl(rows, "value", "text");
+        control["default"] = "128";
       }
     }
   }
@@ -152,6 +133,18 @@ class NodeManager : public Module {
             // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
             // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             nodeState.remove("controls");  // remove the controls from the nodeState
+          }
+
+          // migration 20251204
+          if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
+            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+            nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
+            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
+          }
+          if (contains(updatedItem.value.as<const char*>(), "IR Driver")) {
+            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+            nodeState["name"] = getNameAndTags<IRDriver>();  // set to current combination of name and tags
+            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
           }
 
           // String xx;
@@ -258,19 +251,21 @@ class NodeManager : public Module {
       }  // nodes[i].on
 
       else if (updatedItem.parent[1] == "controls" && updatedItem.name == "value" && updatedItem.index[1] < nodeState["controls"].size()) {  // nodes[i].controls[j].value
-        // serializeJson(nodeState["controls"][updatedItem.index[1]], Serial);
+        JsonObject control = nodeState["controls"][updatedItem.index[1]];
+        // serializeJson(control, Serial);
         // EXT_LOGD(ML_TAG, "handle control value %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
 
         if (updatedItem.index[0] < nodes->size()) {
           Node* nodeClass = (*nodes)[updatedItem.index[0]];
           if (nodeClass != nullptr) {
-            nodeClass->updateControl(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);
-            nodeClass->onUpdate(updatedItem.oldValue, nodeState["controls"][updatedItem.index[1]]);  // custom onUpdate for the node
+            nodeClass->updateControl(control);
+            nodeClass->onUpdate(updatedItem.oldValue, control);  // custom onUpdate for the node
 
             nodeClass->requestMappings();
           } else
             EXT_LOGW(ML_TAG, "nodeClass not found %s", nodeState["name"].as<const char*>());
         }
+
       }  // nodes[i].controls[j].value
       // else
       //     EXT_LOGD(ML_TAG, "no handle for %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
@@ -293,21 +288,6 @@ class NodeManager : public Module {
     // modifiers and layouts trigger remaps
     nodeS->requestMappings();
     nodeN->requestMappings();
-  }
-
-  void loop() override {
-    Module::loop();
-    if (requestUIUpdate) {
-      requestUIUpdate = false;  // reset the flag
-      // EXT_LOGD(ML_TAG, "requestUIUpdate");
-
-      // update state to UI
-      update(
-          [&](ModuleState& state) {
-            return StateUpdateResult::CHANGED;  // notify StatefulService by returning CHANGED
-          },
-          _moduleName);
-    }
   }
 
  public:

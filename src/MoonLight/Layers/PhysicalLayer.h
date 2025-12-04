@@ -22,7 +22,7 @@
 
 // #include "VirtualLayer.h"
 
-  #define MAXLEDPINS 20  // max strips for physical driver
+  #define MAXLEDPINS 20  // max strips for Parallel LED Driver
 
 class VirtualLayer;  // Forward as PhysicalLayer refers back to VirtualLayer
 class Node;          // Forward as PhysicalLayer refers back to Node
@@ -126,11 +126,12 @@ class PhysicalLayer {
   bool monitorPass = false;
   void onLayoutPre();
   void addLight(Coord3D position);
-  void nextPin();  // if more pins are defined, the next lights will be assigned to the next pin
+  void nextPin(uint8_t ledPin = UINT8_MAX);  // if more pins are defined, the next lights will be assigned to the next pin
   void onLayoutPost();
 
   //from board presets
   uint8_t ledPins[MAXLEDPINS];
+  uint8_t ledPinsAssigned[MAXLEDPINS];
   uint16_t ledsPerPin[MAXLEDPINS];
   uint8_t nrOfLedPins = 0;
   uint8_t nrOfAssignedPins = 0;

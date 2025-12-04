@@ -51,7 +51,7 @@ class ModuleDrivers : public NodeManager {
       // Remove all UINT8_MAX values by compacting the array
       layerP.nrOfLedPins = 0;
       for (int readPos = 0; readPos < sizeof(layerP.ledPins); readPos++) {
-        if (layerP.ledPins[readPos] != UINT8_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != UINT16_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != 0) {  // only pins which have a nrOfLedPins
+        if (layerP.ledPins[readPos] != UINT8_MAX) {  // only pins which have a nrOfLedPins // && layerP.ledsPerPin[layerP.nrOfLedPins] != UINT16_MAX && layerP.ledsPerPin[layerP.nrOfLedPins] != 0
           layerP.ledPins[layerP.nrOfLedPins++] = layerP.ledPins[readPos];
         }
       }
@@ -75,30 +75,29 @@ class ModuleDrivers : public NodeManager {
     _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
   }
 
-  void addNodes(const JsonArray& values) const override {
+  void addNodes(const JsonObject& control) override {
     // Layouts, Most used first
-    values.add(getNameAndTags<PanelLayout>());
-    values.add(getNameAndTags<PanelsLayout>());
-    values.add(getNameAndTags<CubeLayout>());
-    values.add(getNameAndTags<HumanSizedCubeLayout>());
-    values.add(getNameAndTags<RingsLayout>());
-    values.add(getNameAndTags<WheelLayout>());
-    values.add(getNameAndTags<SpiralLayout>());
-    values.add(getNameAndTags<SingleLineLayout>());
-    values.add(getNameAndTags<SingleRowLayout>());
+    addControlValue(control, getNameAndTags<PanelLayout>());
+    addControlValue(control, getNameAndTags<PanelsLayout>());
+    addControlValue(control, getNameAndTags<CubeLayout>());
+    addControlValue(control, getNameAndTags<HumanSizedCubeLayout>());
+    addControlValue(control, getNameAndTags<RingsLayout>());
+    addControlValue(control, getNameAndTags<WheelLayout>());
+    addControlValue(control, getNameAndTags<SpiralLayout>());
+    addControlValue(control, getNameAndTags<SingleLineLayout>());
+    addControlValue(control, getNameAndTags<SingleRowLayout>());
 
     // Drivers, Most used first
-    values.add(getNameAndTags<PhysicalDriver>());
-    values.add(getNameAndTags<FastLEDDriver>());
-    values.add(getNameAndTags<ArtNetInDriver>());
-    values.add(getNameAndTags<ArtNetOutDriver>());
-    values.add(getNameAndTags<AudioSyncDriver>());
-    values.add(getNameAndTags<IRDriver>());
-    values.add(getNameAndTags<VirtualDriver>());
-    values.add(getNameAndTags<HUB75Driver>());
+    addControlValue(control, getNameAndTags<ParallelLEDDriver>());
+    addControlValue(control, getNameAndTags<FastLEDDriver>());
+    addControlValue(control, getNameAndTags<ArtNetInDriver>());
+    addControlValue(control, getNameAndTags<ArtNetOutDriver>());
+    addControlValue(control, getNameAndTags<AudioSyncDriver>());
+    addControlValue(control, getNameAndTags<IRDriver>());
+    addControlValue(control, getNameAndTags<HUB75Driver>());
 
     // custom
-    values.add(getNameAndTags<SE16Layout>());
+    addControlValue(control, getNameAndTags<SE16Layout>());
   }
 
   Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {
@@ -125,8 +124,8 @@ class ModuleDrivers : public NodeManager {
       node = allocMBObject<SingleRowLayout>();
 
     // Drivers most used first
-    else if (equalAZaz09(name, PhysicalDriver::name()))
-      node = allocMBObject<PhysicalDriver>();
+    else if (equalAZaz09(name, ParallelLEDDriver::name()))
+      node = allocMBObject<ParallelLEDDriver>();
     else if (equalAZaz09(name, FastLEDDriver::name()))
       node = allocMBObject<FastLEDDriver>();
     else if (equalAZaz09(name, ArtNetInDriver::name()))
@@ -137,8 +136,6 @@ class ModuleDrivers : public NodeManager {
       node = allocMBObject<AudioSyncDriver>();
     else if (equalAZaz09(name, IRDriver::name()))
       node = allocMBObject<IRDriver>();
-    else if (equalAZaz09(name, VirtualDriver::name()))
-      node = allocMBObject<VirtualDriver>();
     else if (equalAZaz09(name, HUB75Driver::name()))
       node = allocMBObject<HUB75Driver>();
 
@@ -159,7 +156,8 @@ class ModuleDrivers : public NodeManager {
 
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node (C++ constructors are not inherited, so declare it as normal functions)
       node->moduleControl = _moduleLightsControl;     // to access global lights control functions if needed
-      node->moduleIO = _moduleIO;                     // to access global lights control functions if needed
+      node->moduleIO = _moduleIO;                     // to get pin allocations
+      node->moduleNodes = (Module*)this;              // to request UI update
       node->setup();                                  // run the setup of the effect
       node->onSizeChanged(Coord3D());
       // layers[0]->nodes.reserve(index+1);

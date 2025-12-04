@@ -25,7 +25,8 @@ class ModuleLightsControl : public Module {
   PsychicHttpServer* _server;
   FileManager* _fileManager;
   ModuleIO* _moduleIO;
-  uint8_t pinRelaisBrightness = -1;
+  uint8_t pinRelayBrightness = UINT8_MAX;
+  uint8_t pinToggleOnOff = UINT8_MAX;
 
   ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
@@ -70,11 +71,17 @@ class ModuleLightsControl : public Module {
 
   void readPins() {
     moduleIO.read([&](ModuleState& state) {
+      pinRelayBrightness = UINT8_MAX;
+      pinToggleOnOff = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
-        if (usage == pin_Relais_Brightness) {
-          pinRelaisBrightness = pinObject["GPIO"];
-          EXT_LOGD(ML_TAG, "pinRelaisBrightness found %d", pinRelaisBrightness);
+        if (usage == pin_Relay_Brightness) {
+          pinRelayBrightness = pinObject["GPIO"];
+          EXT_LOGD(ML_TAG, "pinRelayBrightness found %d", pinRelayBrightness);
+        } else if (usage == pin_Button_OnOff) {
+          pinToggleOnOff = pinObject["GPIO"];
+          pinMode(pinToggleOnOff, INPUT_PULLUP);
+          EXT_LOGD(ML_TAG, "pinToggleOnOff found %d", pinToggleOnOff);
         }
       }
       // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
@@ -82,54 +89,51 @@ class ModuleLightsControl : public Module {
   }
 
   // define the data model
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;       // state.data has one or more properties
-    JsonArray details = root;  // if a property is an array, this is the details of the array
-    JsonArray values;          // if a property is a select, this is the values of the select
+    JsonObject control;  // state.data has one or more properties
 
-    property = addControl(root, "lightsOn", "checkbox");
-    property["default"] = true;
-    property = addControl(root, "brightness", "slider");
-    property["default"] = 10;
-    property = addControl(root, "red", "slider");
-    property["default"] = 255;
-    property["color"] = "Red";
-    property = addControl(root, "green", "slider");
-    property["default"] = 255;
-    property["color"] = "Green";
-    property = addControl(root, "blue", "slider");
-    property["default"] = 255;
-    property["color"] = "Blue";
-    property = addControl(root, "palette", "select");
-    property["default"] = 6;
-    values = property["values"].to<JsonArray>();
-    values.add("CloudColors");
-    values.add("LavaColors");
-    values.add("OceanColors");
-    values.add("ForestColors");
-    values.add("RainbowColors");
-    values.add("RainbowStripeColors");
-    values.add("PartyColors");
-    values.add("HeatColors");
-    values.add("RandomColors");
-    property = addControl(root, "preset", "pad");
-    property["width"] = 8;
-    property["size"] = 18;
-    property["default"].to<JsonObject>();  // clear the preset array before adding new presets
-    property["default"]["list"].to<JsonArray>();
-    property["default"]["count"] = 64;
+    control = addControl(controls, "lightsOn", "checkbox");
+    control["default"] = true;
+    control = addControl(controls, "brightness", "slider");
+    control["default"] = 10;
+    control = addControl(controls, "red", "slider");
+    control["default"] = 255;
+    control["color"] = "Red";
+    control = addControl(controls, "green", "slider");
+    control["default"] = 255;
+    control["color"] = "Green";
+    control = addControl(controls, "blue", "slider");
+    control["default"] = 255;
+    control["color"] = "Blue";
+    control = addControl(controls, "palette", "select");
+    control["default"] = 6;
+    addControlValue(control, "CloudColors");
+    addControlValue(control, "LavaColors");
+    addControlValue(control, "OceanColors");
+    addControlValue(control, "ForestColors");
+    addControlValue(control, "RainbowColors");
+    addControlValue(control, "RainbowStripeColors");
+    addControlValue(control, "PartyColors");
+    addControlValue(control, "HeatColors");
+    addControlValue(control, "RandomColors");
+    control = addControl(controls, "preset", "pad");
+    control["width"] = 8;
+    control["size"] = 18;
+    control["default"].to<JsonObject>();  // clear the preset array before adding new presets
+    control["default"]["list"].to<JsonArray>();
+    control["default"]["count"] = 64;
 
-    property = addControl(root, "presetLoop", "slider");
-    property["default"] = 0;
-    property = addControl(root, "firstPreset", "slider", 1, 64);
-    property["default"] = 1;
-    property = addControl(root, "lastPreset", "slider", 1, 64);
-    property["default"] = 64;
+    control = addControl(controls, "presetLoop", "slider");
+    control["default"] = 0;
+    control = addControl(controls, "firstPreset", "slider", 1, 64);
+    control["default"] = 1;
+    control = addControl(controls, "lastPreset", "slider", 1, 64);
+    control["default"] = 64;
 
   #if FT_ENABLED(FT_MONITOR)
-    property = addControl(root, "monitorOn", "checkbox");
-    property["default"] = true;
+    control = addControl(controls, "monitorOn", "checkbox");
+    control["default"] = true;
   #endif
   }
 
@@ -144,8 +148,8 @@ class ModuleLightsControl : public Module {
       layerP.lights.header.blue = _state.data["blue"];
     } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
       uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
-      if (!!layerP.lights.header.brightness != !!newBri && pinRelaisBrightness != UINT8_MAX) {
-        EXT_LOGD(ML_TAG, "pinRelaisBrightness %s", !!newBri ? "On" : "Off");
+      if (!!layerP.lights.header.brightness != !!newBri && pinRelayBrightness != UINT8_MAX) {
+        EXT_LOGD(ML_TAG, "pinRelayBrightness %s", !!newBri ? "On" : "Off");
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
@@ -234,6 +238,10 @@ class ModuleLightsControl : public Module {
   }
 
   unsigned long lastPresetTime = 0;
+  // see pinToggleOnOff
+  unsigned long lastDebounceTime = 0;
+  static constexpr unsigned long debounceDelay = 50;  // 50ms debounce
+  int lastState = HIGH;
 
   void loop() override {
     Module::loop();
@@ -277,8 +285,23 @@ class ModuleLightsControl : public Module {
         if (newState.size()) {
           // serializeJson(doc, Serial);
           // Serial.println();
-          update(newState, ModuleState::update, _moduleName);
+          update(newState, ModuleState::update, _moduleName + "server");
         }
+      }
+    }
+
+    if (pinToggleOnOff != UINT8_MAX) {
+      int state = digitalRead(pinToggleOnOff);
+      if (state != lastState && (millis() - lastDebounceTime) > debounceDelay) {
+        lastDebounceTime = millis();
+        // Trigger only on button press (HIGH to LOW transition for INPUT_PULLUP)
+        if (state == LOW) {
+          JsonDocument doc;
+          JsonObject newState = doc.to<JsonObject>();
+          newState["lightsOn"] = !_state.data["lightsOn"];
+          update(newState, ModuleState::update, _moduleName + "server");
+        }
+        lastState = state;
       }
     }
 

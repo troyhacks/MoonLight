@@ -96,15 +96,14 @@ class GameOfLifeEffect : public Node {
 
   void setup() override {
     addControl(bgC, "backgroundColor", "coord3D", 0, 255);
-    JsonObject property = addControl(ruleset, "ruleset", "select");
-    JsonArray values = property["values"].to<JsonArray>();
-    values.add("Custom B/S");
-    values.add("Conway's Game of Life B3/S23");
-    values.add("HighLife B36/S23");
-    values.add("InverseLife B0123478/S34678");
-    values.add("Maze B3/S12345");
-    values.add("Mazecentric B3/S1234");
-    values.add("DrighLife B367/S23");
+    addControl(ruleset, "ruleset", "select");
+    addControlValue("Custom B/S");
+    addControlValue("Conway's Game of Life B3/S23");
+    addControlValue("HighLife B36/S23");
+    addControlValue("InverseLife B0123478/S34678");
+    addControlValue("Maze B3/S12345");
+    addControlValue("Mazecentric B3/S1234");
+    addControlValue("DrighLife B367/S23");
 
     addControl(customRuleString, "customRuleString", "text", 0, 20);
 
@@ -118,7 +117,7 @@ class GameOfLifeEffect : public Node {
     addControl(blur, "blur", "slider", 0, 255);
   }
 
-  void onUpdate(const Char<20>& oldValue, const JsonObject control) override {
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) override {
     if (control["name"] == "ruleset" || control["name"] == "customRuleString") {
       setBirthAndSurvive();
     }

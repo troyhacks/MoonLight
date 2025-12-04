@@ -20,29 +20,29 @@ class ModuleTasks : public Module {
  public:
   ModuleTasks(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("tasks", server, sveltekit) { EXT_LOGV(MB_TAG, "constructor"); }
 
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more properties
-    JsonArray details;   // if a control is an array, this is the details of the array
-    JsonArray values;    // if a control is a select, this is the values of the select
+    JsonArray rows;   // if a control is an array, this is the rows of the array
 
   #ifndef CONFIG_IDF_TARGET_ESP32C3
-    control = addControl(root, "core0", "text", 0, 32, true);
-    control = addControl(root, "core1", "text", 0, 32, true);
+    addControl(controls, "core0", "text", 0, 32, true);
+    addControl(controls, "core1", "text", 0, 32, true);
   #endif
 
-    control = addControl(root, "tasks", "rows");
+    control = addControl(controls, "tasks", "rows");
     control["filter"] = "";
-    details = control["n"].to<JsonArray>();
+    control["crud"] = "r";
+    rows = control["n"].to<JsonArray>();
     {
-      control = addControl(details, "name", "text", 0, 32, true);
-      control = addControl(details, "summary", "text", 0, 32, true);
-      // control = details.add<JsonObject>(); control["name"] = "state"; control["type"] = "text"; control["ro"] = true;
-      // control = details.add<JsonObject>(); control["name"] = "cpu"; control["type"] = "text"; control["ro"] = true;
-      // control = details.add<JsonObject>(); control["name"] = "prio"; control["type"] = "number"; control["ro"] = true;
-      control = addControl(details, "stack", "number", 0, 65538, true);
-      control = addControl(details, "runtime", "text", 0, 32, true);
-      control = addControl(details, "core", "number", 0, 65538, true);
+      addControl(rows, "name", "text", 0, 32, true);
+      addControl(rows, "summary", "text", 0, 32, true);
+      // addControl(rows, "state", "text", 0, 32, true);
+      // addControl(rows, "cpu", "text", 0, 32, true);
+      // addControl(rows, "prio", "number", 0, 255, true);
+      addControl(rows, "stack", "number", 0, 65538, true);
+      addControl(rows, "runtime", "text", 0, 32, true);
+      addControl(rows, "core", "number", 0, 65538, true);
     }
   }
 
@@ -65,11 +65,12 @@ class ModuleTasks : public Module {
     // printf("Found %d tasks\n", taskCount);
     // printf("Name\t\tState\tPrio\tStack\tRun Time\tCPU %%\tCore\n");
 
-    JsonDocument root;
-    root["tasks"].to<JsonArray>();
+    JsonDocument doc;
+    doc["tasks"].to<JsonArray>();
+    JsonObject controls = doc.as<JsonObject>();
 
     for (UBaseType_t i = 0; i < taskCount; i++) {
-      JsonObject task = root["tasks"].as<JsonArray>().add<JsonObject>();
+      JsonObject task = controls["tasks"].as<JsonArray>().add<JsonObject>();
 
       TaskStatus_t* ts = &taskStatusArray[i];
 
@@ -120,16 +121,15 @@ class ModuleTasks : public Module {
     TaskHandle_t current0 = xTaskGetCurrentTaskHandleForCore(0);
     TaskHandle_t current1 = xTaskGetCurrentTaskHandleForCore(1);
 
-    root["core0"] = pcTaskGetName(current0);
-    root["core1"] = pcTaskGetName(current1);
+    controls["core0"] = pcTaskGetName(current0);
+    controls["core1"] = pcTaskGetName(current1);
   #endif
 
     // UpdatedItem updatedItem;
-    // _state.compareRecursive("", _state.data, root, updatedItem); //fill data with doc
+    // _state.compareRecursive("", _state.data, controls, updatedItem); //fill data with doc
 
-    JsonObject object = root.as<JsonObject>();
-    // _socket->emitEvent(_moduleName, object);
-    update(object, ModuleState::update, _moduleName + "server");
+    // _socket->emitEvent(_moduleName, controls);
+    update(controls, ModuleState::update, _moduleName + "server");
   }
 };
 

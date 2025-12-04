@@ -38,23 +38,26 @@ ModuleDemo(PsychicHttpServer *server
     * Initialy create the module data
 
 ```cpp
-void setupDefinition(const JsonArray& root) override{
+void setupDefinition(const JsonArray& controls) override{
     JsonObject control; // state.data has one or more properties
-    JsonArray details; // if a control is an array, this is the details of the array
-    JsonArray values; // if a control is a select, this is the values of the select
+    JsonArray rows; // if a control is an array, this is the rows of the array
 
-    control = root.add<JsonObject>(); control["name"] = "hostName"; control["type"] = "text"; control["default"] = "MoonLight";
-    control = root.add<JsonObject>(); control["name"] = "connectionMode"; control["type"] = "select"; control["default"] = "Signal Strength"; values = control["values"].to<JsonArray>();
-    values.add("Offline");
-    values.add("Signal Strength");
-    values.add("Priority");
+    control = addControl(controls, "hostName", "text"); 
+    control["default"] = "MoonLight";
+    control = addControl(controls, "connectionMode", "select"); 
+    control["default"] = "Signal Strength";
+    addControlValue(control, "Offline");
+    addControlValue(control, "Signal Strength");
+    addControlValue(control, "Priority");
 
-    control = root.add<JsonObject>(); control["name"] = "savedNetworks"; control["type"] = "rows"; details = control["n"].to<JsonArray>();
+    control = addControl(controls, "savedNetworks", "rows"); 
+    rows = control["n"].to<JsonArray>();
     {
-        control = details.add<JsonObject>(); control["name"] = "SSID"; control["type"] = "text"; control["default"] = "ewtr"; control["min"] = 3; control["max"] = 32; 
-        control = details.add<JsonObject>(); control["name"] = "Password"; control["type"] = "password"; control["default"] = "";
+        control = addControl(rows, "SSID", "text", 3, 32); 
+        control["default"] = "ewtr";
+        control = addControl(rows, "Password", "password"); 
+        control["default"] = "";
     }
-
 }
 
 ```

@@ -57,7 +57,6 @@
 	// let offsetRed:number;
 	// let offsetGreen:number;
 	// let offsetBlue:number;
-	// let offsetWhite:number;
 
 	const handleHeader = (header: Uint8Array) => {
 		console.log('Monitor.handleHeader', header);

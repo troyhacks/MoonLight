@@ -15,6 +15,7 @@
 #include <ESPFS.h>
 
 #include "ArduinoJson.h"
+#include "Char.h"
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)  // e.g. for pio.ini settings (see ML_CHIPSET)
@@ -22,17 +23,57 @@
 // add task and stacksize to logging
 // if USE_ESP_IDF_LOG: USE_ESP_IDF_LOG is not showing __FILE__), __LINE__, __FUNCTION__ so add that
 #ifdef USE_ESP_IDF_LOG
-  #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
-  #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #if CORE_DEBUG_LEVEL >= 1
+    #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGE(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 2
+    #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGW(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 3
+    #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGI(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 4
+    #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGD(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 5
+    #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) [%s:%d] %s: " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), pathToFileName(__FILE__), __LINE__, __FUNCTION__, ##__VA_ARGS__)
+  #else
+    #define EXT_LOGV(tag, fmt, ...)
+  #endif
 #else
-  #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
-  #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #if CORE_DEBUG_LEVEL >= 1
+    #define EXT_LOGE(tag, fmt, ...) ESP_LOGE(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGE(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 2
+    #define EXT_LOGW(tag, fmt, ...) ESP_LOGW(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGW(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 3
+    #define EXT_LOGI(tag, fmt, ...) ESP_LOGI(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGI(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 4
+    #define EXT_LOGD(tag, fmt, ...) ESP_LOGD(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGD(tag, fmt, ...)
+  #endif
+  #if CORE_DEBUG_LEVEL >= 5
+    #define EXT_LOGV(tag, fmt, ...) ESP_LOGV(tag, "%s (%d) " fmt, pcTaskGetName(xTaskGetCurrentTaskHandle()), uxTaskGetStackHighWaterMark(xTaskGetCurrentTaskHandle()), ##__VA_ARGS__)
+  #else
+    #define EXT_LOGV(tag, fmt, ...)
+  #endif
 #endif
 
 #define MB_TAG "🌙"
@@ -124,199 +165,6 @@ struct Converter<Coord3D> {
 // ArduinoJson functions
 bool arrayContainsValue(JsonArray array, int value);
 int getNextItemInArray(JsonArray array, size_t currentValue, bool backwards = false);
-
-// convenience function to compare two char strings
-static bool equal(const char* a, const char* b) {
-  if (a == nullptr || b == nullptr) {
-    return false;
-  }
-  return strcmp(a, b) == 0;
-}
-
-// compare two char strings, ignoring non-alphanumeric characters
-static bool equalAZaz09(const char* a, const char* b) {
-  if (a == nullptr || b == nullptr) return false;
-
-  while (*a || *b) {
-    while (*a && !((*a >= '0' && *a <= '9') || (*a >= 'A' && *a <= 'Z') || (*a >= 'a' && *a <= 'z'))) a++;
-    while (*b && !((*b >= '0' && *b <= '9') || (*b >= 'A' && *b <= 'Z') || (*b >= 'a' && *b <= 'z'))) b++;
-    if (*a != *b) return false;
-    if (*a) {
-      a++;
-      b++;
-    }
-  }
-  return true;
-}
-
-static bool contains(const char* a, const char* b) {
-  if (a == nullptr || b == nullptr) {
-    return false;
-  }
-  return strstr(a, b) != nullptr;
-}
-
-// See https://discord.com/channels/473448917040758787/718943978636050542/1357670679196991629
-template <size_t N>
-struct Char {
-  char s[N] = "";
-
-  // Constructors
-  Char() = default;                                      // Keep default constructor
-  Char(const char* str) { strlcpy(s, str, sizeof(s)); }  // Constructor to allow initialization from string literal
-  template <size_t M>
-  Char(const Char<M>& other) {  // Converting constructor from different-sized Char
-    strlcpy(s, other.c_str(), sizeof(s));
-  }
-
-  // assign operators
-  Char& operator=(const char* rhs) {
-    // if (strlen(rhs) >= N) EXT_LOGW("Char", "Truncating '%s' from %d to %d chars", rhs, strlen(rhs), N - 1);
-    strlcpy(s, rhs, sizeof(s));
-    return *this;
-  }
-  Char& operator=(const JsonVariant rhs) {
-    if (!rhs.isNull())
-      return (*this = rhs.as<String>().c_str());  //.as<String>().c_str() as rhs can also contain non strings
-    else
-      return (*this = "");
-  }
-  Char& operator=(const JsonString rhs) {
-    if (!rhs.isNull())
-      return (*this = rhs.c_str());
-    else
-      return (*this = "");
-  }
-  Char& operator=(const String& rhs) { return (*this = rhs.c_str()); }
-  // FIX: Make this accept ANY size Char, not just same size
-  template <size_t M>
-  Char& operator=(const Char<M>& rhs) {
-    return (*this = rhs.c_str());
-  }
-
-  // conversion
-  // operator const char*() const { return s; }
-  // Or explicit to avoid implicit conversions:
-  explicit operator const char*() const { return s; }
-
-  // concat operators
-  // Char& operator+(const char* rhs) {
-  //   strlcat(s, rhs, sizeof(s));
-  //   return *this;
-  // }
-  // Char& operator+(const String& rhs) {
-  //   strlcat(s, rhs.c_str(), sizeof(s));
-  //   return *this;
-  // }
-  Char operator+(const char* rhs) const {
-    Char result(*this);
-    result += rhs;
-    return result;
-  }
-  Char& operator+=(const char* rhs) {
-    strlcat(s, rhs, sizeof(s));
-    return *this;
-  }
-  Char& operator+=(const int rhs) {  // add integer to string
-    char buffer[12];                 // enough for 32-bit int
-    snprintf(buffer, sizeof(buffer), " %d", rhs);
-    strlcat(s, buffer, sizeof(s));
-    return *this;
-  }
-  Char& operator+=(const String& rhs) {
-    strlcat(s, rhs.c_str(), sizeof(s));
-    return *this;
-  }
-
-  // compare operators
-  bool operator==(const char* rhs) const { return strcmp(s, rhs) == 0; }
-  bool operator==(const Char& rhs) const { return strcmp(s, rhs.s) == 0; }
-  bool operator!=(const char* rhs) const { return strcmp(s, rhs) != 0; }
-
-  char operator[](const uint16_t indexV) const { return s[indexV]; }
-
-  Char<N> substring(uint16_t begin, uint16_t end = sizeof(s) - 1) {
-    Char<N> sub;
-    if (begin >= sizeof(s) || end >= sizeof(s))
-      sub = "";
-    else {
-      strlcpy(sub.s, s + begin, end - begin + 1);
-    }
-    return sub;
-  }
-
-  size_t length() const { return strnlen(s, sizeof(s)); }
-  int toInt() const { return atoi(s); }
-  float toFloat() const { return atof(s); }
-  bool contains(const char* rhs) const { return strnstr(s, rhs, sizeof(s)) != nullptr; }
-  size_t indexOf(const char* token) const {
-    const char* pos = strnstr(s, token, sizeof(s));
-    return pos ? (pos - s) : std::string::npos;  // or SIZE_MAX
-  }
-  const char* c_str() const { return s; }
-
-  Char& format(const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    size_t len = vsnprintf(s, sizeof(s), format, args);
-    va_end(args);
-    return *this;
-  }
-
-  void split(const char* splitter, std::function<void(const char*, uint8_t)> callback) {
-    char savedS[N];
-    strncpy(savedS, s, N);              // save s
-    char* token = strtok(s, splitter);  // eat s
-    uint8_t sequence = 0;
-    while (token != nullptr) {
-      callback(token, sequence);
-      sequence++;
-      token = strtok(nullptr, splitter);
-    }
-    strncpy(s, savedS, N);  // restore s
-  }
-
-  void formatTime(time_t time, const char* format) {
-    strftime(s, N, format, localtime(&time));  // or gmtime
-  }
-
-  // for parsing strings
-  const char* eat() {
-    // todo
-    return nullptr;
-  }
-};
-
-// ADD: Non-member operator+ for string + Char
-// template outside the class
-template <size_t N>
-Char<N> operator+(const char* lhs, const Char<N>& rhs) {
-  Char<N> result;
-  strlcpy(result.s, lhs, sizeof(result.s));
-  strlcat(result.s, rhs.c_str(), sizeof(result.s));
-  return result;
-}
-
-// Example of split:
-// Char<32> test;
-// test = "one - two - three";
-// test.split(" - ", [](const char *token) {
-//     EXT_LOGV(MB_TAG, "token: %s", token);
-// });
-
-// not tested yet
-struct CharHeap : public Char<1> {
-  char* s = nullptr;  // is the superclass char[N] not allocated?
-  size_t size = 0;    // test how to deal with sizeof... implement overloaded function to return the size ?
-
-  CharHeap(size_t size) {
-    this->size = size;
-    s = new char[size];
-    s[0] = '\0';
-  }
-
-  ~CharHeap() { delete[] s; }
-};
 
 float distance(float x1, float y1, float z1, float x2, float y2, float z2);
 
@@ -418,6 +266,6 @@ extern unsigned char moonmanpng[];
 extern unsigned int moonmanpng_len;
 #endif
 
-static inline uint32_t fastDiv255(uint32_t x) { //3–4 cycles
-    return (x * 0x8081u) >> 23;
+inline uint32_t fastDiv255(uint32_t x) {  // 3–4 cycles
+  return (x * 0x8081u) >> 23;
 }

@@ -37,8 +37,10 @@ String getNameAndTags() {
   else if (dim == _3D)
     result += " 🧊";
 
-  result += " ";
-  result += T::tags();
+  if (strlen(T::tags())) {
+    result += " ";
+    result += T::tags();
+  }
 
   return result;
 }
@@ -53,6 +55,7 @@ class Node {
   JsonArray controls;
   Module* moduleControl = nullptr;  // to access global lights control functions if needed
   Module* moduleIO = nullptr;       // to access io pins if needed
+  Module* moduleNodes = nullptr;    // to request UI update if needed
 
   virtual bool isLiveScriptNode() const { return false; }
   virtual bool hasOnLayout() const { return false; }  // run map on monitor (pass1) and modifier new Node, on/off, control changed or layout setup, on/off or control changed (pass1 and 2)
@@ -61,7 +64,7 @@ class Node {
   bool on = false;  // onUpdate will set it on
 
   // C++ constructors are not inherited, so declare it as normal functions
-  virtual void constructor(VirtualLayer* layer, JsonArray controls) {
+  virtual void constructor(VirtualLayer* layer, const JsonArray& controls) {
     this->layer = layer;
     this->controls = controls;
   }
@@ -73,41 +76,47 @@ class Node {
 
   template <class ControlType>
   JsonObject addControl(const ControlType& variable, const char* name, const char* type, int min = 0, int max = UINT8_MAX, bool ro = false, const char* desc = nullptr) {
-    uint32_t pointer = (uint32_t)&variable;
-
     bool newControl = false;  // flag to check if control is new or already exists
     // if control already exists only update it's pointer
-    JsonObject control;
+    JsonObject control = JsonObject();
     for (JsonObject control1 : controls) {
       if (control1["name"] == name) {
         // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
-        control1["p"] = pointer;
         control = control1;  // set control to the found one
         break;
       }
     }
 
-    if (control.isNull()) {  // if control not found, create a new one
+    // if control not found, create a new one
+    if (control.isNull()) {
       control = controls.add<JsonObject>();
       control["name"] = name;
-      control["type"] = type;
-      control["default"] = variable;
-
-      control["p"] = pointer;
-
-      if (ro) control["ro"] = true;                // else if (!control["ro"].isNull()) control.remove("ro");
-      if (min != 0) control["min"] = min;          // else if (!control["min"].isNull()) control.remove("min");
-      if (max != UINT8_MAX) control["max"] = max;  // else if (!control["max"].isNull()) control.remove("max");
-      if (desc) control["desc"] = desc;
-
-      newControl = true;  // set flag to true, as control is new
+      control["value"] = variable;  // set default
+      newControl = true;            // set flag to true, as control is new
     }
 
-    control["valid"] = true;  // invalid controls will be deleted
-
-    // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d", name, type, pointer, sizeof(ControlType));
-
-    if (newControl) control["value"] = variable;  // set default
+    // update the control definition (see also setupDefinition...)
+    control["type"] = type;
+    control["default"] = variable;
+    control["p"] = (uint32_t)&variable;  // pointer to variable
+    control["valid"] = true;             // invalid controls will be deleted
+    // optional properties
+    if (ro)
+      control["ro"] = true;
+    else if (!control["ro"].isNull())
+      control.remove("ro");
+    if (min != 0)
+      control["min"] = min;
+    else if (!control["min"].isNull())
+      control.remove("min");
+    if (max != UINT8_MAX)
+      control["max"] = max;
+    else if (!control["max"].isNull())
+      control.remove("max");
+    if (desc)
+      control["desc"] = desc;
+    else if (!control["desc"].isNull())
+      control.remove("desc");
 
     // setValue
     if (control["type"] == "slider" || control["type"] == "select" || control["type"] == "pin" || control["type"] == "number") {
@@ -133,27 +142,49 @@ class Node {
       } else
         control["size"] = sizeof(bool);
     } else if (control["type"] == "coord3D") {
-      if (!sizeof(!std::is_same<ControlType, Coord3D>::value)) {
+      if (!std::is_same<ControlType, Coord3D>::value) {
         EXT_LOGE(ML_TAG, "type for %s is not Coord3D", name);
-      } else
+      } else {
         control["size"] = sizeof(Coord3D);
+      }
     } else
       EXT_LOGE(ML_TAG, "type of %s not compatible: %s (%d)", control["name"].as<const char*>(), control["type"].as<const char*>(), control["size"].as<uint8_t>());
 
     if (newControl) {
-      Char<20> oldValue;
-      oldValue = "";
-      // updateControl(oldValue, control);
+      Char<20> oldValue = "";
       onUpdate(oldValue, control);  // custom onUpdate for the node
     }
+
+    // String sss;
+    // serializeJson(control, sss);
+    // EXT_LOGD(ML_TAG, "%s t:%s p:%p ps:%d %s", name, type, pointer, sizeof(ControlType), sss.c_str());
 
     return control;
   }
 
-  // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  virtual void updateControl(const Char<20>& oldValue, const JsonObject control);  // see Nodes.cpp for implementation
+  template <typename T>
+  void addControlValue(const T& value) {
+    if (controls.size() == 0) return;                                   // guard against empty controls
+    JsonObject control = controls[controls.size() - 1];                 // last control
+    if (control["values"].isNull()) control["values"].to<JsonArray>();  // add array of values
+    JsonArray values = control["values"];
+    values.add(value);
+  }
 
-  virtual void onUpdate(const Char<20>& oldValue, const JsonObject control) {}
+  // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
+  void updateControl(const JsonObject& control);  // see Nodes.cpp for implementation
+  template <typename T>
+  void updateControl(const char* name, const T value) {
+    for (JsonObject control : controls) {
+      if (control["name"] == name) {
+        control["value"] = value;
+        updateControl(control);
+        break;
+      }
+    }
+  }
+
+  virtual void onUpdate(const Char<20>& oldValue, const JsonObject& control) {}
 
   void requestMappings() {
     if (hasModifier() || hasOnLayout()) {
@@ -178,7 +209,7 @@ class Node {
   void addLight(Coord3D position) { layer->layerP->addLight(position); }
 
   // convenience function for next pin
-  void nextPin() { layer->layerP->nextPin(); }
+  void nextPin(uint8_t ledPinDIO = UINT8_MAX) { layer->layerP->nextPin(ledPinDIO); }
 
   // modifier
   virtual void modifySize() {}
@@ -265,7 +296,7 @@ class DriverNode : public Node {
   void reOrderAndDimRGBW(uint8_t* packetRGBChannel, uint8_t* lightsRGBChannel);
 
   // called in addControl (oldValue = "") and in NodeManager onUpdate nodes[i].control[j]
-  void onUpdate(const Char<20>& oldValue, const JsonObject control) override;
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) override;
 };
 
 // Helper function to generate a triangle wave similar to beat16
@@ -306,8 +337,7 @@ static struct SharedData {
   #include "MoonLight/Nodes/Drivers/D_FastLED.h"
   #include "MoonLight/Nodes/Drivers/D_Hub75.h"
   #include "MoonLight/Nodes/Drivers/D_Infrared.h"
-  #include "MoonLight/Nodes/Drivers/D_PhysicalDriver.h"
-  #include "MoonLight/Nodes/Drivers/D_VirtualDriver.h"
+  #include "MoonLight/Nodes/Drivers/D_ParallelLEDDriver.h"
   #include "MoonLight/Nodes/Drivers/D__Sandbox.h"
   #include "MoonLight/Nodes/Effects/E_FastLED.h"
   #include "MoonLight/Nodes/Effects/E_MoonLight.h"

@@ -8,6 +8,9 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
+		output: {
+			bundleStrategy: 'single'
+		},
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',

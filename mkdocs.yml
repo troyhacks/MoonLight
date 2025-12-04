@@ -36,6 +36,7 @@ nav:
     - develop/overview.md
     - develop/installation.md
     - develop/development.md
+    - develop/standardsguidelines.md
     - develop/nodes.md
     - develop/modules.md
     - develop/layers.md

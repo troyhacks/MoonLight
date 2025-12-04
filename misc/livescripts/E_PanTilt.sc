@@ -9,7 +9,7 @@ void setup() {
     addControl(&pan, "pan", "slider", 0, 255);
     addControl(&tilt, "tilt", "slider", 0, 255);
     addControl(&range, "range", "slider", 0, 255);
-    addControl(&invert, "invert", "checkbox", false, true);
+    addControl(&invert, "invert", "checkbox");
 }
 void loop() {
   for (int x = 0; x < width; x++) {

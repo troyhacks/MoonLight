@@ -19,81 +19,29 @@ class ModuleMoonLightInfo : public Module {
  public:
   ModuleMoonLightInfo(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("moonlightinfo", server, sveltekit) { EXT_LOGV(ML_TAG, "constructor"); }
 
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject property;  // state.data has one or more properties
-    JsonArray details;    // if a property is an array, this is the details of the array
-    // JsonArray values; // if a property is a select, this is the values of the select
+    JsonObject control;  // state.data has one or more properties
+    JsonArray rows;    // if a control is an array, this is the rows of the array
 
-    property = root.add<JsonObject>();
-    property["name"] = "nrOfLights";
-    property["type"] = "number";
-    property["max"] = 65536;
-    property["ro"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "channelsPerLight";
-    property["type"] = "number";
-    property["max"] = 65536;
-    property["ro"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "maxChannels";
-    property["type"] = "number";
-    property["max"] = 65538;
-    property["ro"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "size";
-    property["type"] = "coord3D";
-    property["ro"] = true;
-    property = root.add<JsonObject>();
-    property["name"] = "nodes#";
-    property["type"] = "number";
-    property["max"] = 65536;
-    property["ro"] = true;
+    addControl(controls, "nrOfLights", "number", 0, 65535, true);
+    addControl(controls, "channelsPerLight", "number", 0, 65535, true);
+    addControl(controls, "maxChannels", "number", 0, 65535, true);
+    addControl(controls, "size", "coord3D", 0, UINT16_MAX, true);
+    addControl(controls, "nodes#", "number", 0, 65535, true);
 
-    property = root.add<JsonObject>();
-    property["name"] = "layers";
-    property["type"] = "rows";
-    details = property["n"].to<JsonArray>();
+    control = addControl(controls, "layers", "rows");
+    control["crud"] = "r";
+    rows = control["n"].to<JsonArray>();
     {
-      property = details.add<JsonObject>();
-      property["name"] = "nrOfLights";
-      property["type"] = "number";
-      property["max"] = 65536;
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "size";
-      property["type"] = "coord3D";
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "mappingTable#";
-      property["type"] = "number";
-      property["max"] = 65536;
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "nrOfZeroLights";
-      property["type"] = "number";
-      property["max"] = 65536;
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "nrOfOneLight";
-      property["type"] = "number";
-      property["max"] = 65536;
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "mappingTableIndexes#";
-      property["type"] = "number";
-      property["max"] = 65536;
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "nrOfMoreLights";
-      property["type"] = "number";
-      property["max"] = 65536;
-      property["ro"] = true;
-      property = details.add<JsonObject>();
-      property["name"] = "nodes#";
-      property["type"] = "number";
-      property["max"] = 65536;
-      property["ro"] = true;
+      addControl(rows, "nrOfLights", "number", 0, 65535, true);
+      addControl(rows, "size", "coord3D", 0, UINT16_MAX, true);
+      addControl(rows, "mappingTable#", "number", 0, 65535, true);
+      addControl(rows, "nrOfZeroLights", "number", 0, 65535, true);
+      addControl(rows, "nrOfOneLight", "number", 0, 65535, true);
+      addControl(rows, "mappingTableIndexes#", "number", 0, 65535, true);
+      addControl(rows, "nrOfMoreLights", "number", 0, 65535, true);
+      addControl(rows, "nodes#", "number", 0, 65535, true);
     }
   }
 

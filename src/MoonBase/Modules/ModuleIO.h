@@ -40,9 +40,9 @@ enum IO_PinUsage {
   pin_LED_20,  // LED pins
   pin_LED_CW,
   pin_LED_WW,
-  pin_LED_B,
-  pin_LED_G,
   pin_LED_R,
+  pin_LED_G,
+  pin_LED_B,
   pin_I2S_SD,
   pin_I2S_WS,
   pin_I2S_SCK,
@@ -55,8 +55,8 @@ enum IO_PinUsage {
   pin_Voltage,
   pin_Current,
   pin_Infrared,
-  pin_Relais,
-  pin_Relais_Brightness,
+  pin_Relay,
+  pin_Relay_Brightness,
   pin_DMX,
   pin_OnBoardLed,
   pin_OnBoardKey,
@@ -73,6 +73,7 @@ enum IO_PinUsage {
   pin_Serial_RX,
   pin_Reserved,
   pin_Ethernet,
+  pin_Button_OnOff,
   pin_count
 };
 
@@ -106,111 +107,111 @@ class ModuleIO : public Module {
     // #endif
   }
 
-  void setupDefinition(const JsonArray& root) override {
+  void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more controls
-    JsonArray details;   // if a control is an array, this is the details of the array
-    JsonArray values;    // if a control is a select, this is the values of the select
+    JsonArray rows;   // if a control is an array, this is the rows of the array
 
-    control = addControl(root, "boardPreset", "select");
+    control = addControl(controls, "boardPreset", "select");
     control["default"] = 0;
-    values = control["values"].to<JsonArray>();
-    values.add(BUILD_TARGET);  // 0 none
-    values.add("QuinLED Dig Uno v3");
-    values.add("QuinLED Dig Quad v3");
-    values.add("QuinLED Dig Octa v2");
-    values.add("QuinLED Penta");
-    values.add("QuinLED Penta Plus");
-    values.add("Serg Universal Shield v5");
-    values.add("Serg Mini Shield");
-    values.add("Mathieu SE16 v1");
-    values.add("Wladi D0");
-    values.add("Wladi P4 Nano");
-    values.add("Yves V48");
-    values.add("Troy P4 Nano");
-    values.add("Atom S3R");
-    values.add("Luxceo Mood1 Xiao Mod");
-    values.add("Cube202010");
+    addControlValue(control, BUILD_TARGET);  // 0 none
+    addControlValue(control, "QuinLED Dig Uno v3");
+    addControlValue(control, "QuinLED Dig Quad v3");
+    addControlValue(control, "QuinLED Dig Octa v2");
+    addControlValue(control, "QuinLED Penta");
+    addControlValue(control, "QuinLED Penta Plus");
+    addControlValue(control, "Serg Universal Shield v5");
+    addControlValue(control, "Serg Mini Shield");
+    addControlValue(control, "Mathieu SE16 v1");
+    addControlValue(control, "Wladi D0");
+    addControlValue(control, "Wladi P4 Nano");
+    addControlValue(control, "Yves V48");
+    addControlValue(control, "Troy P4 Nano");
+    addControlValue(control, "Atom S3R");
+    addControlValue(control, "Luxceo Mood1 Xiao Mod");
+    addControlValue(control, "Cube202010");
 
-    control = addControl(root, "modded", "checkbox");
+    control = addControl(controls, "modded", "checkbox");
     control["default"] = false;
 
-    control = addControl(root, "maxPower", "number", 0, 500, false, "Watt");
+    control = addControl(controls, "maxPower", "number", 0, 500, false, "Watt");
     control["default"] = 10;
 
-    control = addControl(root, "pins", "rows");
+    control = addControl(controls, "pins", "rows");
     control["filter"] = "!Unused";
-    details = control["n"].to<JsonArray>();
+    control["crud"] = "ru";
+
+    rows = control["n"].to<JsonArray>();
     {
-      control = addControl(details, "GPIO", "number", 0, SOC_GPIO_PIN_COUNT - 1, true);  // ro
+      control = addControl(rows, "GPIO", "number", 0, SOC_GPIO_PIN_COUNT - 1, true);  // ro
 
-      control = addControl(details, "usage", "select");
+      control = addControl(rows, "usage", "select");
       control["default"] = 0;
-      values = control["values"].to<JsonArray>();
-      values.add("Unused");  // 0
-      values.add("LED 01");
-      values.add("LED 02");
-      values.add("LED 03");
-      values.add("LED 04");
-      values.add("LED 05");
-      values.add("LED 06");
-      values.add("LED 07");
-      values.add("LED 08");
-      values.add("LED 09");
-      values.add("LED 10");
-      values.add("LED 11");
-      values.add("LED 12");
-      values.add("LED 13");
-      values.add("LED 14");
-      values.add("LED 15");
-      values.add("LED 16");
-      values.add("LED 17");
-      values.add("LED 18");
-      values.add("LED 19");
-      values.add("LED 20");
-      values.add("LED CW");
-      values.add("LED WW");
-      values.add("LED R");
-      values.add("LED G");
-      values.add("LED B");
-      values.add("I2S SD");
-      values.add("I2S WS");
-      values.add("I2S SCK");
-      values.add("I2S MCLK");
-      values.add("I2C SDA");
-      values.add("I2C SCL");
-      values.add("Button 01");
-      values.add("Button 02");
-      values.add("Button 03");
-      values.add("Voltage");
-      values.add("Current");
-      values.add("IR");
-      values.add("Relais");
-      values.add("Relais Brightness");
-      values.add("DMX");
-      values.add("On Board LED");
-      values.add("On Board Key");
-      values.add("Battery");
-      values.add("Temperature");
-      values.add("Exposed");
-      values.add("SDIO_PIN_CMD");
-      values.add("SDIO_PIN_CLK");
-      values.add("SDIO_PIN_D0");
-      values.add("SDIO_PIN_D2");
-      values.add("SDIO_PIN_D3");
-      values.add("SDIO_PIN_D1");
-      values.add("Serial TX");
-      values.add("Serial RX");
-      values.add("Reserved");
-      values.add("Ethernet");
+      addControlValue(control, "Unused");  // 0
+      addControlValue(control, "LED 01");
+      addControlValue(control, "LED 02");
+      addControlValue(control, "LED 03");
+      addControlValue(control, "LED 04");
+      addControlValue(control, "LED 05");
+      addControlValue(control, "LED 06");
+      addControlValue(control, "LED 07");
+      addControlValue(control, "LED 08");
+      addControlValue(control, "LED 09");
+      addControlValue(control, "LED 10");
+      addControlValue(control, "LED 11");
+      addControlValue(control, "LED 12");
+      addControlValue(control, "LED 13");
+      addControlValue(control, "LED 14");
+      addControlValue(control, "LED 15");
+      addControlValue(control, "LED 16");
+      addControlValue(control, "LED 17");
+      addControlValue(control, "LED 18");
+      addControlValue(control, "LED 19");
+      addControlValue(control, "LED 20");
+      addControlValue(control, "LED CW");
+      addControlValue(control, "LED WW");
+      addControlValue(control, "LED R");
+      addControlValue(control, "LED G");
+      addControlValue(control, "LED B");
+      addControlValue(control, "I2S SD");
+      addControlValue(control, "I2S WS");
+      addControlValue(control, "I2S SCK");
+      addControlValue(control, "I2S MCLK");
+      addControlValue(control, "I2C SDA");
+      addControlValue(control, "I2C SCL");
+      addControlValue(control, "Button 01");
+      addControlValue(control, "Button 02");
+      addControlValue(control, "Button 03");
+      addControlValue(control, "Voltage");
+      addControlValue(control, "Current");
+      addControlValue(control, "Infrared");
+      addControlValue(control, "Relay");
+      addControlValue(control, "Relay Brightness");
+      addControlValue(control, "DMX in");
+      addControlValue(control, "On Board LED");
+      addControlValue(control, "On Board Key");
+      addControlValue(control, "Battery");
+      addControlValue(control, "Temperature");
+      addControlValue(control, "Exposed");
+      addControlValue(control, "SDIO_PIN_CMD");
+      addControlValue(control, "SDIO_PIN_CLK");
+      addControlValue(control, "SDIO_PIN_D0");
+      addControlValue(control, "SDIO_PIN_D2");
+      addControlValue(control, "SDIO_PIN_D3");
+      addControlValue(control, "SDIO_PIN_D1");
+      addControlValue(control, "Serial TX");
+      addControlValue(control, "Serial RX");
+      addControlValue(control, "Reserved");
+      addControlValue(control, "Ethernet");
+      addControlValue(control, "Button On/Off");
 
-      control = addControl(details, "summary", "text", 0, 32, true);  // ro
-      // control = details.add<JsonObject>(); control["name"] = "Valid"; control["type"] = "checkbox"; control["ro"] = true;
-      // control = details.add<JsonObject>(); control["name"] = "Output"; control["type"] = "checkbox"; control["ro"] = true;
-      // control = details.add<JsonObject>(); control["name"] = "RTC"; control["type"] = "checkbox"; control["ro"] = true;
+      addControl(rows, "summary", "text", 0, 32, true);  // ro
+      // addControl(rows, "Valid", "checkbox", false, true, true);
+      // addControl(rows, "Output", "checkbox", false, true, true);
+      // addControl(rows, "RTC", "checkbox", false, true, true);
 
-      control = addControl(details, "Level", "text", 0, 32, true);     // ro
-      control = addControl(details, "DriveCap", "text", 0, 32, true);  // ro
+      addControl(rows, "Level", "text", 0, 32, true);     // ro
+      addControl(rows, "DriveCap", "text", 0, 32, true);  // ro
     }
   }
 
@@ -271,7 +272,7 @@ class ModuleIO : public Module {
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
       pins[0]["usage"] = pin_Button_01;
       pins[45]["usage"] = pin_Button_02;
-      pins[46]["usage"] = pin_Button_03;
+      pins[46]["usage"] = pin_Button_OnOff;
       pins[8]["usage"] = pin_Voltage;
       pins[9]["usage"] = pin_Current;
       pins[5]["usage"] = pin_Infrared;
@@ -318,7 +319,7 @@ class ModuleIO : public Module {
       pins[34]["usage"] = pin_Button_03;
       pins[15]["usage"] = pin_I2C_SDA;
       pins[16]["usage"] = pin_I2C_SCL;
-      pins[13]["usage"] = pin_Relais_Brightness;
+      pins[13]["usage"] = pin_Relay_Brightness;
       pins[05]["usage"] = pin_LED_01;
     } else if (boardID == board_SergMiniShield) {
       object["maxPower"] = 50;  // 10A Fuse ...
@@ -328,7 +329,7 @@ class ModuleIO : public Module {
       object["maxPower"] = 50;  // 10A Fuse ...
       pins[1]["usage"] = pin_LED_01;
       pins[3]["usage"] = pin_LED_02;
-      pins[19]["usage"] = pin_Relais_Brightness;
+      pins[19]["usage"] = pin_Relay_Brightness;
     } else if (boardID == board_WladiD0) {
       pins[3]["usage"] = pin_Voltage;
     } else if (boardID == board_WladiP4Nano) {                                           // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
@@ -376,6 +377,12 @@ class ModuleIO : public Module {
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
       pins[16]["usage"] = pin_LED_01;
+      // trying to add more pins, but these pins not liked by esp32-d0-16MB ... 🚧
+      // pins[4]["usage"] = pin_LED_02;
+      // pins[5]["usage"] = pin_LED_03;
+      // pins[6]["usage"] = pin_LED_04;
+      // pins[7]["usage"] = pin_LED_05;
+      // pins[8]["usage"] = pin_LED_06;
     }
     // String xxx;
     // serializeJson(_state.data, xxx);

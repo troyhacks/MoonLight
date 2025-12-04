@@ -139,11 +139,11 @@ Keep this page visible until installation complete.
 !!! tip "Choose driver"
     FastLED driver is best to start with if you have a normal (ws2812) LED strip or panel. 
 
-    Choose the Physical driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...). Other drivers (Virtual, Hub,) not supported yet.
+    Choose the Parallel LED Driver if you have more then 4 LED strips or panels or non standard LEDS (e.g. RGBW lights, curtains...). Other drivers (Virtual, Hub,) not supported yet.
 
     In some cases restart the device to make layout changes effective is needed.
     
-    For ESP32-P4-Nano, choose Physical driver, using the Parallel IO driver by @Troyhacks. Easy quick start: choose Pin 37 and connect a LED strip or panel as follows (Note: the pins on the board the jst connector is plugged in are in order +, Ground, Data !!! - Ignore the wire colors!):
+    For ESP32-P4-Nano, choose Parallel LED Driver, using the Parallel IO driver by @Troyhacks. Easy quick start: choose Pin 37 and connect a LED strip or panel as follows (Note: the pins on the board the jst connector is plugged in are in order +, Ground, Data !!! - Ignore the wire colors!):
   
     <img width="200" src="../../media/moonlight/esp32-p4-nano-quickstart.jpeg"/>
 
