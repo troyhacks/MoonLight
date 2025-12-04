@@ -37,8 +37,8 @@ Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLig
 | HUB75 Driver | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | <img width="100" src="https://github.com/user-attachments/assets/4d386045-9526-4a5a-aa31-638058b31f32"/> | Drive HUB75 panels<br>Not implemented yet |
 | IR Driver 🆕🚧 | <img width="100" src="../../media/moonlight/IRDriver.jpeg"/> |  | Receive IR commands and [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/) |
 
-
-Virtual LED Driver: Driving max 120! outputs. E.g. 48 panels of 256 LEDs each run at 50-100 FPS using shift registers. Not implemented yet
+* The Parallel LED driver uses different hardware peripherals depending on the MCU type: ESP32-D0: I2S, ESP32-S3: LCD_CAM, ESP32-P4: Parallel IO (ParLIO).
+* Virtual LED Driver: Driving max 120! outputs (E.g. 48 panels of 256 LEDs each run at 50-100 FPS) using shift registers. Integrated within the Parallel LED Driver architecture. Not implemented yet
 <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/><img width="100" src="https://github.com/user-attachments/assets/c81d2f56-00d1-4424-a716-8e3c30e76636"/>
 
 ### Max Power and Light Preset

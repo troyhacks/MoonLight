@@ -115,7 +115,7 @@ struct Char {
   bool contains(const char* rhs) const { return strnstr(s, rhs, sizeof(s)) != nullptr; }
   size_t indexOf(const char* token) const {
     const char* pos = strnstr(s, token, sizeof(s));
-    return pos ? (pos - s) : std::string::npos;  // or SIZE_MAX
+    return pos ? (pos - s) : SIZE_MAX;
   }
   const char* c_str() const { return s; }
 
@@ -167,20 +167,6 @@ Char<N> operator+(const char* lhs, const Char<N>& rhs) {
 // test.split(" - ", [](const char *token) {
 //     EXT_LOGV(MB_TAG, "token: %s", token);
 // });
-
-// not tested yet
-struct CharHeap : public Char<1> {
-  char* s = nullptr;  // is the superclass char[N] not allocated?
-  size_t size = 0;    // test how to deal with sizeof... implement overloaded function to return the size ?
-
-  CharHeap(size_t size) {
-    this->size = size;
-    s = new char[size];
-    s[0] = '\0';
-  }
-
-  ~CharHeap() { delete[] s; }
-};
 
 // convenience function to compare two char strings
 static bool equal(const char* a, const char* b) {

@@ -40,9 +40,9 @@ enum IO_PinUsage {
   pin_LED_20,  // LED pins
   pin_LED_CW,
   pin_LED_WW,
-  pin_LED_B,
-  pin_LED_G,
   pin_LED_R,
+  pin_LED_G,
+  pin_LED_B,
   pin_I2S_SD,
   pin_I2S_WS,
   pin_I2S_SCK,
@@ -55,8 +55,8 @@ enum IO_PinUsage {
   pin_Voltage,
   pin_Current,
   pin_Infrared,
-  pin_Relais,
-  pin_Relais_Brightness,
+  pin_Relay,
+  pin_Relay_Brightness,
   pin_DMX,
   pin_OnBoardLed,
   pin_OnBoardKey,
@@ -185,8 +185,8 @@ class ModuleIO : public Module {
       addControlValue(control, "Voltage");
       addControlValue(control, "Current");
       addControlValue(control, "Infrared");
-      addControlValue(control, "Relais");
-      addControlValue(control, "Relais Brightness");
+      addControlValue(control, "Relay");
+      addControlValue(control, "Relay Brightness");
       addControlValue(control, "DMX in");
       addControlValue(control, "On Board LED");
       addControlValue(control, "On Board Key");
@@ -319,7 +319,7 @@ class ModuleIO : public Module {
       pins[34]["usage"] = pin_Button_03;
       pins[15]["usage"] = pin_I2C_SDA;
       pins[16]["usage"] = pin_I2C_SCL;
-      pins[13]["usage"] = pin_Relais_Brightness;
+      pins[13]["usage"] = pin_Relay_Brightness;
       pins[05]["usage"] = pin_LED_01;
     } else if (boardID == board_SergMiniShield) {
       object["maxPower"] = 50;  // 10A Fuse ...
@@ -329,7 +329,7 @@ class ModuleIO : public Module {
       object["maxPower"] = 50;  // 10A Fuse ...
       pins[1]["usage"] = pin_LED_01;
       pins[3]["usage"] = pin_LED_02;
-      pins[19]["usage"] = pin_Relais_Brightness;
+      pins[19]["usage"] = pin_Relay_Brightness;
     } else if (boardID == board_WladiD0) {
       pins[3]["usage"] = pin_Voltage;
     } else if (boardID == board_WladiP4Nano) {                                           // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027

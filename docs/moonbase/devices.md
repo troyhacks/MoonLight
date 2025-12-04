@@ -6,4 +6,4 @@ Shows which other MoonLight devices are connected to your local network.
 
 * Device name: name of this device (set the name in the [WiFi station module](https://moonmodules.org/MoonLight/network/sta/))
 * Devices: Devices found on the network
-    * Click on IP to jump to the device
+  * Click on IP to jump to the device

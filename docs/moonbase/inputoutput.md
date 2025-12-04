@@ -36,7 +36,7 @@ For each board the following presets are defined:
     * Button On/Off
   * Planned soon
     * Battery
-    * Relais brightness
+    * Relay brightness
     * DMX (in)
   * Planned later
     * I2S for microphone and line in

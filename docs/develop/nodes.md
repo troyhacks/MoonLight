@@ -53,8 +53,8 @@ A node implements the following (overloaded) functions:
         * Regular patterns (CRGB as default but also others like Moving Head ...)
 
 * See [Modules](../modules)
-* Upon changing a pin, driver.init will rerun (FastLED.addLeds, PD and VD driver.init)
-* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is choosen
+* Upon changing a pin, driver.init will rerun (FastLED.addLeds, Parallel LED Driver.init)
+* Uses ESPLiveScripts, see compileAndRun. compileAndRun is started when in Nodes a file.sc is chosen
     * To do: kill running scripts, e.g. when changing effects
 * [Nodes.h](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): class Node (constructor, destructor, setup, loop, hasFunctions, map, modify, addControl(s), onUpdate)
 * [Nodes.cpp](https://github.com/MoonModules/MoonLight/blob/main/src/MoonLight/Nodes.cpp): implement LiveScriptNode
@@ -106,7 +106,7 @@ This is the current list of supported lights ranging from 3 channels per light (
 * MHBeTopper19x15W-32 🐺: 32 channels moving head
 * MH19x15W-24: 24 channels moving heads
 
-Based on the choosen value, the channels per light and the offsets will be set e.g. for GRB: header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2;. Drivers should not make this mapping, the code calling drivers should do.
+Based on the chosen value, the channels per light and the offsets will be set e.g. for GRB: header->channelsPerLight = 3; header->offsetRed = 1; header->offsetGreen = 0; header->offsetBlue = 2;. Drivers should not make this mapping, the code calling drivers should do.
 
 The RGB and W offsets needs to be re-ordered and brightness corrected from the channel array. Not only Art-Net but  also a LEDs driver need to accept channel arrays with more then 4 channels per light. Eg GRB6 is a type of led curtain some of us have, which a Chinese manufacturer screwed up: 6 channels per light but only rgb is used, 3 channels do nothing
 

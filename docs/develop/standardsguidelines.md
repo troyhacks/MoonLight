@@ -35,7 +35,7 @@ Github will pick up the changes so your PR stays up-to-date.
 
 > [!CAUTION]
 > Do not use "force-push" while your PR is open!
-> It has many subtle and unexpected consequences on our github reposistory.
+> It has many subtle and unexpected consequences on our github repository.
 > For example, we regularly lost review comments when the PR author force-pushes code changes. So, pretty please, do not force-push.
 
 You can find a collection of very useful tips and tricks here: https://github.com/wled-dev/WLED/wiki/How-to-properly-submit-a-PR
@@ -62,7 +62,7 @@ You can find a collection of very useful tips and tricks here: https://github.co
 
 ### Code
 
-We use Clang-format for c-files (see .clang-format in the repo for the definition) and Prettier for front end files.
+We use Clang-format for c-files (see .clang-format in the repo for the definition) and Prettier for front-end files.
 
 Right click Format Document on each file you edit before committing.
 
@@ -72,7 +72,7 @@ Comments are used for technical documentation, always document your changes, eac
 (Functional documentation must be done on the MoonLight website, see above)
 
 Examples:  
-```
+```markdown
 // This is a comment.
 
 /* This is a CSS inline comment */

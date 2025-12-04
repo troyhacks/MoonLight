@@ -110,7 +110,7 @@ Before changing code, test if the current download of MoonLight is running fine.
 
 * If you are developing or updating existing MoonLight installations MoonLight might be outdated or not show up correctly in the browser or not even appear. Two reasons
 
-    * Sometimes the latest front end code is not generated yet (WWWData.h). This is how to set it right: 
+    * Sometimes the latest front-end code is not generated yet (WWWData.h). This is how to set it right: 
         * Open platformIO new terminal (>_)
         * touch ./interface/src/app.html so the build process will be triggered to create a new WWWData.h
         * build the project (✔) - if nodejs is not installed (yet) you will get errors. See troubleshooting

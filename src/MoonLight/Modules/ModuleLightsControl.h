@@ -25,7 +25,7 @@ class ModuleLightsControl : public Module {
   PsychicHttpServer* _server;
   FileManager* _fileManager;
   ModuleIO* _moduleIO;
-  uint8_t pinRelaisBrightness = UINT8_MAX;
+  uint8_t pinRelayBrightness = UINT8_MAX;
   uint8_t pinToggleOnOff = UINT8_MAX;
 
   ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
@@ -71,13 +71,13 @@ class ModuleLightsControl : public Module {
 
   void readPins() {
     moduleIO.read([&](ModuleState& state) {
-      pinRelaisBrightness = UINT8_MAX;
+      pinRelayBrightness = UINT8_MAX;
       pinToggleOnOff = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
-        if (usage == pin_Relais_Brightness) {
-          pinRelaisBrightness = pinObject["GPIO"];
-          EXT_LOGD(ML_TAG, "pinRelaisBrightness found %d", pinRelaisBrightness);
+        if (usage == pin_Relay_Brightness) {
+          pinRelayBrightness = pinObject["GPIO"];
+          EXT_LOGD(ML_TAG, "pinRelayBrightness found %d", pinRelayBrightness);
         } else if (usage == pin_Button_OnOff) {
           pinToggleOnOff = pinObject["GPIO"];
           pinMode(pinToggleOnOff, INPUT_PULLUP);
@@ -148,8 +148,8 @@ class ModuleLightsControl : public Module {
       layerP.lights.header.blue = _state.data["blue"];
     } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
       uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
-      if (!!layerP.lights.header.brightness != !!newBri && pinRelaisBrightness != UINT8_MAX) {
-        EXT_LOGD(ML_TAG, "pinRelaisBrightness %s", !!newBri ? "On" : "Off");
+      if (!!layerP.lights.header.brightness != !!newBri && pinRelayBrightness != UINT8_MAX) {
+        EXT_LOGD(ML_TAG, "pinRelayBrightness %s", !!newBri ? "On" : "Off");
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {

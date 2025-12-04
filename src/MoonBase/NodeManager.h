@@ -93,7 +93,7 @@ class NodeManager : public Module {
       // values = control["values"].to<JsonArray>();
       addNodes(control);
 
-      addControl(rows, "on", "checkbox", false, true);
+      addControl(rows, "on", "checkbox");
       control = addControl(rows, "controls", "controls");
       rows = control["n"].to<JsonArray>();
       {
@@ -135,7 +135,7 @@ class NodeManager : public Module {
             nodeState.remove("controls");  // remove the controls from the nodeState
           }
 
-          // conversion 20251204
+          // migration 20251204
           if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
             EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
             nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
