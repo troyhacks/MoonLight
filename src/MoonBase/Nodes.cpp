@@ -174,7 +174,7 @@ void LiveScriptNode::setup() {
   //   addExternal(    "void modifyPosition(Coord3D &position)", (void *)_modifyPosition);
   //   addExternal(    "void modifyXYZ(uint16_t,uint16_t,uint16_t)", (void *)_modifyXYZ);
 
-  // MoonLight physical and virtual driver vars
+  // MoonLight Parallel LED Driver vars
   //   but keep enabled to avoid compile errors when used in non virtual context
   //   addExternal( "uint8_t colorOrder", &layer->layerP->ledsDriver.colorOrder);
   //   addExternal( "uint8_t clockPin", &layer->layerP->ledsDriver.clockPin);

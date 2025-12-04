@@ -22,7 +22,7 @@
 
 // #include "VirtualLayer.h"
 
-  #define MAXLEDPINS 20  // max strips for physical driver
+  #define MAXLEDPINS 20  // max strips for Parallel LED Driver
 
 class VirtualLayer;  // Forward as PhysicalLayer refers back to VirtualLayer
 class Node;          // Forward as PhysicalLayer refers back to Node

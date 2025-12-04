@@ -88,7 +88,7 @@ class ModuleDrivers : public NodeManager {
     addControlValue(control, getNameAndTags<SingleRowLayout>());
 
     // Drivers, Most used first
-    addControlValue(control, getNameAndTags<PhysicalDriver>());
+    addControlValue(control, getNameAndTags<ParallelLEDDriver>());
     addControlValue(control, getNameAndTags<FastLEDDriver>());
     addControlValue(control, getNameAndTags<ArtNetInDriver>());
     addControlValue(control, getNameAndTags<ArtNetOutDriver>());
@@ -124,8 +124,8 @@ class ModuleDrivers : public NodeManager {
       node = allocMBObject<SingleRowLayout>();
 
     // Drivers most used first
-    else if (equalAZaz09(name, PhysicalDriver::name()))
-      node = allocMBObject<PhysicalDriver>();
+    else if (equalAZaz09(name, ParallelLEDDriver::name()))
+      node = allocMBObject<ParallelLEDDriver>();
     else if (equalAZaz09(name, FastLEDDriver::name()))
       node = allocMBObject<FastLEDDriver>();
     else if (equalAZaz09(name, ArtNetInDriver::name()))

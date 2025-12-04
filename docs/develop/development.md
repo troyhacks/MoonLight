@@ -14,7 +14,7 @@
 
 * Want to make changes: fork the repo (see installation)and submit pull requests, see [creating-a-pull-request-from-a-fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork):
 
-    * Press Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
+    * Only branch from the main branch! Press Branches, press New Branch, give it a name e.g. background-script and press Create new Branch, click on background-script
       
       <img width="90" src="https://github.com/user-attachments/assets/588d0854-bac1-4b70-8931-ba6db4c94248" />
 

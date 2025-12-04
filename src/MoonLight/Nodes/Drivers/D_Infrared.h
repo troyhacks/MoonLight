@@ -30,9 +30,9 @@
 
 class IRDriver : public Node {
  public:
-  static const char* name() { return "IR Driver"; }
+  static const char* name() { return "Infrared Driver"; }
   static uint8_t dim() { return _NoD; }
-  static const char* tags() { return "☸️🚧"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
+  static const char* tags() { return "☸️"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, ☸️ for drivers
 
   uint8_t pinInfrared = UINT8_MAX;
   uint8_t irPreset = 1;

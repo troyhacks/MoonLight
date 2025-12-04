@@ -38,7 +38,7 @@ The development environment consists of
 
     <img width="320" src="https://github.com/user-attachments/assets/74928dac-d59b-4489-b97b-759c6d792b77" />
 
-    * The main branch will be checked out per default. To run / test latest developments, switch to the dev branch
+    * The main branch will be checked out per default. Latest development will be done in branches from main, merged back into main when done.
 
 ## Install and setup VSCode
 

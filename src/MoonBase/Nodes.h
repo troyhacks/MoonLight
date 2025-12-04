@@ -37,8 +37,10 @@ String getNameAndTags() {
   else if (dim == _3D)
     result += " 🧊";
 
-  result += " ";
-  result += T::tags();
+  if (strlen(T::tags())) {
+    result += " ";
+    result += T::tags();
+  }
 
   return result;
 }
@@ -335,7 +337,7 @@ static struct SharedData {
   #include "MoonLight/Nodes/Drivers/D_FastLED.h"
   #include "MoonLight/Nodes/Drivers/D_Hub75.h"
   #include "MoonLight/Nodes/Drivers/D_Infrared.h"
-  #include "MoonLight/Nodes/Drivers/D_PhysicalDriver.h"
+  #include "MoonLight/Nodes/Drivers/D_ParallelLEDDriver.h"
   #include "MoonLight/Nodes/Drivers/D__Sandbox.h"
   #include "MoonLight/Nodes/Effects/E_FastLED.h"
   #include "MoonLight/Nodes/Effects/E_MoonLight.h"

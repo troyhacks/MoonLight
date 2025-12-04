@@ -184,10 +184,10 @@ class ModuleIO : public Module {
       addControlValue(control, "Button 03");
       addControlValue(control, "Voltage");
       addControlValue(control, "Current");
-      addControlValue(control, "IR");
+      addControlValue(control, "Infrared");
       addControlValue(control, "Relais");
       addControlValue(control, "Relais Brightness");
-      addControlValue(control, "DMX");
+      addControlValue(control, "DMX in");
       addControlValue(control, "On Board LED");
       addControlValue(control, "On Board Key");
       addControlValue(control, "Battery");
@@ -203,7 +203,7 @@ class ModuleIO : public Module {
       addControlValue(control, "Serial RX");
       addControlValue(control, "Reserved");
       addControlValue(control, "Ethernet");
-      addControlValue(control, "Button OnOff");
+      addControlValue(control, "Button On/Off");
 
       addControl(rows, "summary", "text", 0, 32, true);  // ro
       // addControl(rows, "Valid", "checkbox", false, true, true);

@@ -82,8 +82,8 @@ class NodeManager : public Module {
   // define the data model
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
-    JsonObject control;         // state.data has one or more properties
-    JsonArray rows;  // if a control is an array, this is the rows of the array
+    JsonObject control;  // state.data has one or more properties
+    JsonArray rows;      // if a control is an array, this is the rows of the array
 
     control = addControl(controls, "nodes", "rows");
     rows = control["n"].to<JsonArray>();
@@ -133,6 +133,18 @@ class NodeManager : public Module {
             // EXT_LOGD(ML_TAG, "remove controls %s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1],
             // updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
             nodeState.remove("controls");  // remove the controls from the nodeState
+          }
+
+          // conversion 20251204
+          if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
+            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+            nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
+            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
+          }
+          if (contains(updatedItem.value.as<const char*>(), "IR Driver")) {
+            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+            nodeState["name"] = getNameAndTags<IRDriver>();  // set to current combination of name and tags
+            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
           }
 
           // String xx;

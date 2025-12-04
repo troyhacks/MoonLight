@@ -88,7 +88,7 @@ class FastLEDDriver : public Node {
 
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
-    if (layerP.pass == 1 && !layerP.monitorPass) {  // physical
+    if (layerP.pass == 1 && !layerP.monitorPass) { 
       // if (safeModeMB) {
       //     EXT_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
       //     return;

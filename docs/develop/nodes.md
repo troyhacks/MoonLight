@@ -65,19 +65,19 @@ A node implements the following (overloaded) functions:
 
 ### Initless drivers
 
-Initless means there is no addLeds (like in FastLed) or initLed (like in physical and virtual driver): 
+Initless means there is no addLeds (like in FastLed) or initLed (like in Parallel LED Driver): 
 
 * a Context (see below) will be set
 * Driver.show (see below) will use this context to set the right data to the right output.
 * The context can dynamically change without needing to reboot or recompile! e.g. changes in pin allocations, leds per pin, RGB or RGBW, or DMX lights like moving heads.
 
-The Art-Net driver is currently working like this, to be added to physical and virtual driver and parallel IO (P4).
+The Art-Net driver is currently working like this, to be added to Parallel LED Driver and parallel IO (P4).
 
 The advantages of dynamic context change are:
 
 * No need to recompile any changed configs (e.g. colorOrder is fully flexible, not a setting in platformio.ini)
 * No need to restart while setting up a specific installation. Just change layouts until it works as intended.
-* Allows for a flexible mix of different outputs e.g. send the first 1024 leds to physical driver, next to virtual driver, next to spi, next to one Art-Net device, next to another Art-Net device. 
+* Allows for a flexible mix of different outputs e.g. send the first 1024 leds to Parallel LED Driver, next to SPI, next to one Art-Net device, next to another Art-Net device. 
 
 #### Context
 

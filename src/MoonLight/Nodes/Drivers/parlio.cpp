@@ -9,7 +9,7 @@
     @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
 **/
 
-#include "parlio.h"  //so it is compiled before PhysicalDriver use it
+#include "parlio.h"  //so it is compiled before Parallel LED Driver use it
 
 #ifdef SOC_PARLIO_SUPPORTED
 
