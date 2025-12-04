@@ -12,6 +12,7 @@
 #pragma once
 
 #include <Arduino.h>
+
 #include "ArduinoJson.h"
 
 // See https://discord.com/channels/473448917040758787/718943978636050542/1357670679196991629
@@ -57,15 +58,6 @@ struct Char {
   // Or explicit to avoid implicit conversions:
   explicit operator const char*() const { return s; }
 
-  // concat operators
-  // Char& operator+(const char* rhs) {
-  //   strlcat(s, rhs, sizeof(s));
-  //   return *this;
-  // }
-  // Char& operator+(const String& rhs) {
-  //   strlcat(s, rhs.c_str(), sizeof(s));
-  //   return *this;
-  // }
   Char operator+(const char* rhs) const {
     Char result(*this);
     result += rhs;
@@ -85,23 +77,22 @@ struct Char {
     strlcat(s, rhs.c_str(), sizeof(s));
     return *this;
   }
- template <size_t M>
+  template <size_t M>
   Char& operator+=(const Char<M>& rhs) {
     strlcat(s, rhs.c_str(), sizeof(s));
     return *this;
   }
-
 
   // compare operators
   bool operator==(const char* rhs) const { return strcmp(s, rhs) == 0; }
   bool operator==(const Char& rhs) const { return strcmp(s, rhs.s) == 0; }
   bool operator!=(const char* rhs) const { return strcmp(s, rhs) != 0; }
 
-  char operator[](const uint16_t indexV) const { return s[indexV]; }
+  char operator[](const uint16_t indexV) const { return (indexV < sizeof(s)) ? s[indexV] : '\0'; }
 
   Char<N> substring(uint16_t begin, uint16_t end = sizeof(s) - 1) {
     Char<N> sub;
-    if (begin >= sizeof(s) || end >= sizeof(s))
+    if (begin >= sizeof(s) || end >= sizeof(s) || end < begin)
       sub = "";
     else {
       strlcpy(sub.s, s + begin, end - begin + 1);

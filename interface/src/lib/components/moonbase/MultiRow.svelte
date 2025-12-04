@@ -51,8 +51,10 @@
 	function handleReorder(reorderedItems: { item: any; originalIndex: number }[]) {
 		console.log('handleReorder', property.name, reorderedItems);
 		const full = [...data[property.name]];
+		// Capture the current filteredItems mapping before any potential state changes
+		const indexMap = filteredItems.map((f: any) => f.originalIndex);
 		reorderedItems.forEach(({ item }, pos) => {
-			const originalIndex = filteredItems[pos].originalIndex;
+			const originalIndex = indexMap[pos];
 			full[originalIndex] = item;
 		});
 		data[property.name] = full;
@@ -152,7 +154,7 @@
 <div class="h-16 flex w-full items-center justify-between space-x-3 p-0 text-xl font-medium">
 	{initCap(property.name)}
 </div>
-{#if findItemInDefinition?.crud == null || findItemInDefinition.crud.includes('c')}
+{#if findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('c')}
 	<div class="relative w-full overflow-visible">
 		<!-- <div class="mx-4 mb-4 flex flex-wrap justify-end gap-2"> -->
 		<button
@@ -193,12 +195,12 @@
 		items={filteredItems}
 		onReorder={handleReorder}
 		class="space-y-2"
-		dragDisabled={!(findItemInDefinition?.crud == null || findItemInDefinition.crud.includes('s'))}
+		dragDisabled={!(findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s'))}
 	>
 		{#snippet children({ item: itemWrapper }: { item: any })}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
-				{#if findItemInDefinition?.crud == null || findItemInDefinition.crud.includes('s')}
+				{#if findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s')}
 					<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
 				{/if}
 				<!-- Show the first 3 fields -->
@@ -235,7 +237,7 @@
 						>
 							<SearchIcon class="h-6 w-6" /></button
 						>
-						{#if findItemInDefinition?.crud == null || findItemInDefinition.crud.includes('d')}
+						{#if findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('d')}
 							<button
 								class="btn btn-ghost btn-sm"
 								onclick={() => {
