@@ -484,7 +484,7 @@ class ModuleIO : public Module {
       EXT_LOGW(MB_TAG, "ESS PTR = %p\n", (void*)ess);
       return;
     }
-  #if CONFIG_IDF_TARGET_ESP32S3
+  #ifdef CONFIG_IDF_TARGET_ESP32S3
     ess->v_ETH_SPI_SCK = UINT8_MAX;
     ess->v_ETH_SPI_MISO = UINT8_MAX;
     ess->v_ETH_SPI_MOSI = UINT8_MAX;

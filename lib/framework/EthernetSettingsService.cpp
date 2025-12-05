@@ -84,13 +84,16 @@ void EthernetSettingsService::configureNetwork(ethernet_settings_t &network)
     }
 // (re)start ethernet
 // 🌙 compiler directives to variables
-#if CONFIG_IDF_TARGET_ESP32S3 
+#ifdef CONFIG_IDF_TARGET_ESP32S3 
     if (v_ETH_SPI_SCK != UINT8_MAX) {
         // For SPI based ethernet modules like W5500, ENC28J60 etc.
         SPI.begin(v_ETH_SPI_SCK, v_ETH_SPI_MISO, v_ETH_SPI_MOSI);
         ETH.begin(v_ETH_PHY_TYPE, v_ETH_PHY_ADDR, v_ETH_PHY_CS, v_ETH_PHY_IRQ, v_ETH_PHY_RST, SPI);
     }
-#elif CONFIG_IDF_TARGET_ESP32P4 // 🌙 todo: setup in P4
+    else 
+        ETH.begin();
+#elif defined(CONFIG_IDF_TARGET_ESP32P4)
+    ETH.begin(); // for the time being, todo: setup in P4
 #else // CONFIG_IDF_TARGET_ESP32, what about S2/C3 ...
     // ESP32 chips with built-in ethernet MAC/PHY
     ETH.begin();

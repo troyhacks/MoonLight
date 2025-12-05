@@ -111,7 +111,7 @@ public:
     String getIP();
 
     // 🌙 compiler directives to variables
-    #if CONFIG_IDF_TARGET_ESP32S3 
+    #ifdef CONFIG_IDF_TARGET_ESP32S3 
         uint8_t v_ETH_SPI_SCK = UINT8_MAX; //42; v_ETH_SPI_SCK is check if configured, see configureNetwork and ModuleIO
         uint8_t v_ETH_SPI_MISO = 44;
         uint8_t v_ETH_SPI_MOSI = 43;
