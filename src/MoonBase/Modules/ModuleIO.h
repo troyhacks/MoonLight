@@ -10,11 +10,11 @@
 **/
 
 #ifndef ModuleIO_h
-  #define ModuleIO_h
+#define ModuleIO_h
 
-  #if FT_MOONBASE == 1
+#if FT_MOONBASE == 1
 
-    #include "MoonBase/Module.h"
+  #include "MoonBase/Module.h"
 
 enum IO_PinUsage {
   pin_Unused,  // 0
@@ -74,6 +74,11 @@ enum IO_PinUsage {
   pin_Reserved,
   pin_Ethernet,
   pin_Button_OnOff,
+  pin_SPI_SCK,
+  pin_SPI_MISO,
+  pin_SPI_MOSI,
+  pin_PHY_CS,
+  pin_PHY_IRQ,
   pin_count
 };
 
@@ -105,12 +110,14 @@ class ModuleIO : public Module {
     // #if CONFIG_IDF_TARGET_ESP32
     //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
     // #endif
+
+    addUpdateHandler([&](const String& originId) { readPins(sveltekit); }, false);
   }
 
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more controls
-    JsonArray rows;   // if a control is an array, this is the rows of the array
+    JsonArray rows;      // if a control is an array, this is the rows of the array
 
     control = addControl(controls, "boardPreset", "select");
     control["default"] = 0;
@@ -136,6 +143,8 @@ class ModuleIO : public Module {
 
     control = addControl(controls, "maxPower", "number", 0, 500, false, "Watt");
     control["default"] = 10;
+
+    control = addControl(controls, "jumper1", "checkbox");
 
     control = addControl(controls, "pins", "rows");
     control["filter"] = "!Unused";
@@ -204,6 +213,11 @@ class ModuleIO : public Module {
       addControlValue(control, "Reserved");
       addControlValue(control, "Ethernet");
       addControlValue(control, "Button On/Off");
+      addControlValue(control, "SPI_SCK");
+      addControlValue(control, "SPI_MISO");
+      addControlValue(control, "SPI_MOSI");
+      addControlValue(control, "PHY_CS");
+      addControlValue(control, "PHY_IRQ");
 
       addControl(rows, "summary", "text", 0, 32, true);  // ro
       // addControl(rows, "Valid", "checkbox", false, true, true);
@@ -241,11 +255,11 @@ class ModuleIO : public Module {
 
       // For RTC GPIOs, can also use RTC-specific read
       int rtc_level = -1;
-    #ifndef CONFIG_IDF_TARGET_ESP32C3
+  #ifndef CONFIG_IDF_TARGET_ESP32C3
       if (is_rtc_gpio) {
         rtc_level = rtc_gpio_get_level((gpio_num_t)gpio_num);  // to do find c3 alternative
       }
-    #endif
+  #endif
 
       // Get drive capability (if output capable)
       gpio_drive_cap_t drive_cap = GPIO_DRIVE_CAP_DEFAULT;
@@ -275,18 +289,35 @@ class ModuleIO : public Module {
       pins[46]["usage"] = pin_Button_OnOff;
       pins[8]["usage"] = pin_Voltage;
       pins[9]["usage"] = pin_Current;
-      pins[5]["usage"] = pin_Infrared;
+
+      if (_state.data["jumper1"]) {
+        pins[5]["usage"] = pin_Infrared;
+      } else {
+        pins[5]["usage"] = pin_SPI_MISO;
+        pins[6]["usage"] = pin_SPI_MOSI;
+        pins[7]["usage"] = pin_SPI_SCK;
+        pins[15]["usage"] = pin_PHY_CS;
+        pins[18]["usage"] = pin_PHY_IRQ;
+      }
+
     } else if (boardID == board_QuinLEDDigUnoV3) {
-      object["maxPower"] = 75;
-      pins[0]["usage"] = pin_Button_01;
-      pins[1]["usage"] = pin_LED_01;
+      // Dig-Uno-V3
+      // esp32-d0 (4MB)
+      // erase flash first
+      // Lolin Wifi fix no -> add as board preset
+      // you might need to reset your router if you first run WLED on the same MCU
+      // remove fuse then flash, Nice !!!
+      object["maxPower"] = 50;  // max 75, but 10A fuse
+      pins[16]["usage"] = pin_LED_01;
       pins[3]["usage"] = pin_LED_02;
-      pins[2]["usage"] = pin_I2S_SD;
-      pins[12]["usage"] = pin_I2S_WS;
-      pins[13]["usage"] = pin_Temperature;
-      pins[15]["usage"] = pin_I2S_SCK;
-      pins[16]["usage"] = pin_LED_03;
-      pins[32]["usage"] = pin_Exposed;
+      pins[0]["usage"] = pin_Button_01;
+      pins[15]["usage"] = pin_Relay;
+      // pins[2]["usage"] = pin_I2S_SD;
+      // pins[12]["usage"] = pin_I2S_WS;
+      // pins[13]["usage"] = pin_Temperature;
+      // pins[15]["usage"] = pin_I2S_SCK;
+      // pins[16]["usage"] = pin_LED_03;
+      // pins[32]["usage"] = pin_Exposed;
     } else if (boardID == board_QuinLEDDigQuadV3) {
       object["maxPower"] = 150;
       uint8_t ledPins[4] = {16, 3, 1, 4};  // LED_PINS
@@ -438,32 +469,49 @@ class ModuleIO : public Module {
   void loop() override {
     // run in sveltekit task
     Module::loop();
+
     if (newBoardID != UINT8_MAX) {
       setBoardPresetDefaults(newBoardID);  // run from sveltekit task
       newBoardID = UINT8_MAX;
     }
   }
+
+  void readPins(ESP32SvelteKit* sveltekit) {
+    EXT_LOGD(MB_TAG, "Try to configure ethernet");
+    EthernetSettingsService* ess = sveltekit->getEthernetSettingsService();
+    if ((uintptr_t)ess < 0x3FC00000) {
+      EXT_LOGW(MB_TAG, "EthernetSettingsService not available");
+      EXT_LOGW(MB_TAG, "ESS PTR = %p\n", (void*)ess);
+      return;
+    }
+  #if CONFIG_IDF_TARGET_ESP32S3
+    ess->v_ETH_SPI_SCK = UINT8_MAX;
+    ess->v_ETH_SPI_MISO = UINT8_MAX;
+    ess->v_ETH_SPI_MOSI = UINT8_MAX;
+    ess->v_ETH_PHY_CS = UINT8_MAX;
+    ess->v_ETH_PHY_IRQ = UINT8_MAX;
+    // if ethernet pins change
+    // find the pins needed
+    for (JsonObject pinObject : _state.data["pins"].as<JsonArray>()) {
+      uint8_t usage = pinObject["usage"];
+      uint8_t gpio  = pinObject["GPIO"];
+      if (usage == pin_SPI_SCK) ess->v_ETH_SPI_SCK = gpio;
+      if (usage == pin_SPI_MISO) ess->v_ETH_SPI_MISO = gpio;
+      if (usage == pin_SPI_MOSI) ess->v_ETH_SPI_MOSI = gpio;
+      if (usage == pin_PHY_CS) ess->v_ETH_PHY_CS = gpio;
+      if (usage == pin_PHY_IRQ) ess->v_ETH_PHY_IRQ = gpio;
+    }
+
+    // allocate the pins found
+    if (ess->v_ETH_SPI_SCK != UINT8_MAX && ess->v_ETH_SPI_MISO != UINT8_MAX && ess->v_ETH_SPI_MOSI != UINT8_MAX && ess->v_ETH_PHY_CS != UINT8_MAX && ess->v_ETH_PHY_IRQ != UINT8_MAX) {
+      // ess->v_ETH_PHY_TYPE = ETH_PHY_W5500;
+      // ess->v_ETH_PHY_ADDR = 1;
+      ess->v_ETH_PHY_RST = -1;  // not wired
+      ess->initEthernet();      // restart ethernet
+    }
+  #endif
+  }
 };
 
-  #endif
 #endif
-
-// format:
-// {
-//   "pins": [
-//     {
-//       "GPIO": 0,
-//       "Valid": true,
-//       "Output": true,
-//       "RTC": true,
-//       "Level": "HIGH",
-//       "DriveCap": "MEDIUM",
-//     },
-//     {
-//       "GPIO": 1,
-//       "Valid": true,
-//       "Output": true,
-//       "RTC": false,
-//       "Level": "HIGH",
-//       "DriveCap": "MEDIUM",
-//     },
+#endif

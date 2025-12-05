@@ -369,7 +369,7 @@ void VirtualLayer::drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, CRGB
     if (depth < 2) {
       x1 = x0;
       y1 = y0;
-    }       // single pixel
+    }  // single pixel
     else {  // shorten line
       x0 *= 2;
       y0 *= 2;                                                 // we do everything "*2" for better rounding
@@ -450,7 +450,7 @@ void VirtualLayer::drawLine3D(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, ui
       x2 = x1;
       y2 = y1;
       z2 = z1;
-    }       // single pixel
+    }  // single pixel
     else {  // shorten line
       x1 *= 2;
       y1 *= 2;
