@@ -104,6 +104,8 @@ enum IO_Boards {
 
 class ModuleIO : public Module {
  public:
+  ESP32SvelteKit* _sveltekit;
+
   ModuleIO(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("inputoutput", server, sveltekit) {
     EXT_LOGV(MB_TAG, "constructor");
 
@@ -111,7 +113,9 @@ class ModuleIO : public Module {
     //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
     // #endif
 
-    addUpdateHandler([&](const String& originId) { readPins(sveltekit); }, false);
+    _sveltekit = sveltekit;
+
+    addUpdateHandler([&](const String& originId) { readPins(); }, false);
   }
 
   void setupDefinition(const JsonArray& controls) override {
@@ -476,15 +480,11 @@ class ModuleIO : public Module {
     }
   }
 
-  void readPins(ESP32SvelteKit* sveltekit) {
+  void readPins() {
+  #if FT_ENABLED(FT_ETHERNET)
     EXT_LOGD(MB_TAG, "Try to configure ethernet");
-    EthernetSettingsService* ess = sveltekit->getEthernetSettingsService();
-    if ((uintptr_t)ess < 0x3FC00000) {
-      EXT_LOGW(MB_TAG, "EthernetSettingsService not available");
-      EXT_LOGW(MB_TAG, "ESS PTR = %p\n", (void*)ess);
-      return;
-    }
-  #ifdef CONFIG_IDF_TARGET_ESP32S3
+    EthernetSettingsService* ess = _sveltekit->getEthernetSettingsService();
+    #ifdef CONFIG_IDF_TARGET_ESP32S3
     ess->v_ETH_SPI_SCK = UINT8_MAX;
     ess->v_ETH_SPI_MISO = UINT8_MAX;
     ess->v_ETH_SPI_MOSI = UINT8_MAX;
@@ -494,7 +494,7 @@ class ModuleIO : public Module {
     // find the pins needed
     for (JsonObject pinObject : _state.data["pins"].as<JsonArray>()) {
       uint8_t usage = pinObject["usage"];
-      uint8_t gpio  = pinObject["GPIO"];
+      uint8_t gpio = pinObject["GPIO"];
       if (usage == pin_SPI_SCK) ess->v_ETH_SPI_SCK = gpio;
       if (usage == pin_SPI_MISO) ess->v_ETH_SPI_MISO = gpio;
       if (usage == pin_SPI_MOSI) ess->v_ETH_SPI_MOSI = gpio;
@@ -509,6 +509,7 @@ class ModuleIO : public Module {
       ess->v_ETH_PHY_RST = -1;  // not wired
       ess->initEthernet();      // restart ethernet
     }
+    #endif
   #endif
   }
 };
