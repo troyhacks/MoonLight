@@ -149,6 +149,7 @@ class ModuleIO : public Module {
     control["default"] = 10;
 
     control = addControl(controls, "jumper1", "checkbox");
+    control["default"] = false;
 
     control = addControl(controls, "pins", "rows");
     control["filter"] = "!Unused";
@@ -296,7 +297,7 @@ class ModuleIO : public Module {
 
       if (_state.data["jumper1"]) {
         pins[5]["usage"] = pin_Infrared;
-      } else {
+      } else {  // default
         pins[5]["usage"] = pin_SPI_MISO;
         pins[6]["usage"] = pin_SPI_MOSI;
         pins[7]["usage"] = pin_SPI_SCK;
@@ -323,15 +324,18 @@ class ModuleIO : public Module {
       // pins[16]["usage"] = pin_LED_03;
       // pins[32]["usage"] = pin_Exposed;
     } else if (boardID == board_QuinLEDDigQuadV3) {
+      // Dig-Quad-V3
       object["maxPower"] = 150;
       uint8_t ledPins[4] = {16, 3, 1, 4};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
       pins[0]["usage"] = pin_Button_01;
-      pins[2]["usage"] = pin_I2S_SD;
-      pins[12]["usage"] = pin_I2S_WS;
-      pins[13]["usage"] = pin_Temperature;
-      pins[15]["usage"] = pin_I2S_SCK;
-      pins[32]["usage"] = pin_Exposed;
+      pins[15]["usage"] = pin_Relay;
+
+      // pins[2]["usage"] = pin_I2S_SD;
+      // pins[12]["usage"] = pin_I2S_WS;
+      // pins[13]["usage"] = pin_Temperature;
+      // pins[15]["usage"] = pin_I2S_SCK;
+      // pins[32]["usage"] = pin_Exposed;
     } else if (boardID == board_QuinLEDDigOctoV2) {
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
