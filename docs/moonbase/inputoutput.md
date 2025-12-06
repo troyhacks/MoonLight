@@ -47,7 +47,7 @@ For each board the following presets are defined:
 
 - MicroController (MCU): The ESP32 chip
 - MCU-Board (MCB): MCU on a PCB
-- Carrier Board (CRB): board that the MCU-board plugs into (Or shield or controller board or interfae board)
+- Carrier Board (CRB): board that the MCU-board plugs into (Or shield or controller board or interface board)
 - Device (DVC): All of the above in a box with connectors
 
 ## Board details
@@ -62,4 +62,4 @@ For each board the following presets are defined:
 
 ### SE16 v1
 
-* Set jumper1 the same as you set it on the board: Jumper1: on: Infrared, off: Ethernet
+* Set jumper1 the same as you set it on the board: on: Infrared, off: Ethernet

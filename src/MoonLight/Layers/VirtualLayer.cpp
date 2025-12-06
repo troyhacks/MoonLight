@@ -327,17 +327,18 @@ void VirtualLayer::onLayoutPre() {
     mappingTableIndex.clear();
   }
 
-  if (mappingTableSize < size.x * size.y * size.z) {
-    mappingTable = reallocMB<PhysMap>(mappingTable, size.x * size.y * size.z);
-    if (mappingTable) {
+  if (mappingTableSize != size.x * size.y * size.z) {
+
+    PhysMap* newTable = reallocMB<PhysMap>(mappingTable, size.x * size.y * size.z);
+    if (newTable) {
+      mappingTable = newTable;
       EXT_LOGD(ML_TAG, "realloc mappingTable %d -> %dx%dx%d", mappingTableSize, size.x, size.y, size.z);
       mappingTableSize = size.x * size.y * size.z;
     } else {
-      EXT_LOGW(ML_TAG, "realloc mappingTable failed %dx%dx%d", size.x, size.y, size.z);
-      mappingTableSize = 0;
+      EXT_LOGW(ML_TAG, "realloc mappingTable failed keeping oldSize %d", mappingTableSize);
     }
   }
-  for (int i = 0; i < mappingTableSize; i++) mappingTable[i] = PhysMap();
+  memset(mappingTable, 0, mappingTableSize * sizeof(PhysMap)); // set mappingTable to default PhysMap
 }
 
 void VirtualLayer::addLight(Coord3D position) {
