@@ -115,21 +115,25 @@
 		return data[property.name]
 			.map((item: any, index: number) => ({ item, originalIndex: index }))
 			.filter(({ item }: { item: any }) => {
-				const matchFound = property.n.slice(0, 3).some((propertyN: any) => {
-					let valueStr;
+				const matchFound = property.n
+					.filter((propertyN: any, index: number) => {
+						return index < 3 || propertyN.show === true;
+					})
+					.some((propertyN: any) => {
+						let valueStr;
 
-					if (
-						propertyN.values &&
-						Array.isArray(propertyN.values) &&
-						isNumber(item[propertyN.name])
-					) {
-						valueStr = propertyN.values[item[propertyN.name]];
-					} else {
-						valueStr = item[propertyN.name];
-					}
+						if (
+							propertyN.values &&
+							Array.isArray(propertyN.values) &&
+							isNumber(item[propertyN.name])
+						) {
+							valueStr = propertyN.values[item[propertyN.name]];
+						} else {
+							valueStr = item[propertyN.name];
+						}
 
-					return String(valueStr).toLowerCase().includes(query);
-				});
+						return String(valueStr).toLowerCase().includes(query);
+					});
 
 				return isNegated ? !matchFound : matchFound;
 			});

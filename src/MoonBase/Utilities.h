@@ -211,7 +211,7 @@ T* reallocMB(T* p, size_t n, const char* name = nullptr) {
 
 // free memory
 template <typename T>
-void freeMB(T* p, const char* name = nullptr) {
+void freeMB(T*& p, const char* name = nullptr) {
   if (p) {
     totalAllocatedMB -= heap_caps_get_allocated_size(p);
     // EXT_LOGD(MB_TAG, "free %s: x x %d bytes in %s, s:%d (tot:%d)", name?name:"", sizeof(T), isInPSRAM(p)?"PSRAM":"RAM", heap_caps_get_allocated_size(p), totalAllocatedMB);
@@ -235,7 +235,7 @@ struct VectorRAMAllocator {
 struct JsonRAMAllocator : ArduinoJson::Allocator {
   //(uint8_t*): simulate 1 byte
   void* allocate(size_t n) override { return allocMB<uint8_t>(n, "json"); }
-  void deallocate(void* p) override { freeMB<uint8_t>((uint8_t*)p, "json"); }
+  void deallocate(void* p) override { freeMB(p, "json"); }
   void* reallocate(void* p, size_t n) override { return reallocMB<uint8_t>((uint8_t*)p, n, "json"); }
   static Allocator* instance() {
     static JsonRAMAllocator allocator;
@@ -256,7 +256,7 @@ T* allocMBObject(Args&&... args) {
 
 // free object
 template <typename T>
-void freeMBObject(T* obj) {
+void freeMBObject(T*& obj) {
   freeMB(obj, "object");
 }
 

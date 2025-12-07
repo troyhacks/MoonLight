@@ -295,10 +295,6 @@ class ModuleIO : public Module {
     } else if (boardID == board_QuinLEDDigUnoV3) {
       // Dig-Uno-V3
       // esp32-d0 (4MB)
-      // erase flash first
-      // Lolin Wifi fix no -> add as board preset
-      // you might need to reset your router if you first run WLED on the same MCU
-      // remove fuse then flash, Nice !!!
       object["maxPower"] = 50;  // max 75, but 10A fuse
       pinAssigner.assignPin(16, pin_LED);
       pinAssigner.assignPin(3, pin_LED);
@@ -312,6 +308,7 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(32, pin_Exposed);
     } else if (boardID == board_QuinLEDDigQuadV3) {
       // Dig-Quad-V3
+      // esp32-d0 (4MB)
       object["maxPower"] = 150;
       uint8_t ledPins[4] = {16, 3, 1, 4};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);

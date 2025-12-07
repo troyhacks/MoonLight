@@ -23,21 +23,6 @@ void fastled_fill_rainbow(struct CRGB* targetArray, int numToFill, uint8_t initi
 
 VirtualLayer::VirtualLayer() {
   EXT_LOGV(ML_TAG, "constructor");
-
-  // not needed ATM, might be needed to claim more space at boot
-  //  // allocate a default space
-  //  if (psramFound())
-  //    mappingTableSize = MIN(ESP.getPsramSize() / 6, 61440);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
-  //  else
-  //    mappingTableSize = 8192;  // esp32-d0: max 1024->2048->4096->8192 Leds ATM
-  //  mappingTable = allocMB<PhysMap>(mappingTableSize);
-
-  // if (mappingTable) {
-  //   EXT_LOGD(ML_TAG, "allocated %d bytes in %s", mappingTableSize* sizeof(PhysMap), isInPSRAM(mappingTable) ? "PSRAM" : "RAM");
-  // } else {
-  //   EXT_LOGE(ML_TAG, "failed to allocated %d bytes of RAM or PSRAM", mappingTableSize * sizeof(PhysMap));
-  //   mappingTableSize = 0;
-  // }
 }
 
 VirtualLayer::~VirtualLayer() {
@@ -337,7 +322,8 @@ void VirtualLayer::onLayoutPre() {
       EXT_LOGW(ML_TAG, "realloc mappingTable failed keeping oldSize %d", mappingTableSize);
     }
   }
-  if (mappingTable && mappingTableSize) memset(mappingTable, 0, mappingTableSize * sizeof(PhysMap));  // set mappingTable to default PhysMap
+
+  if (mappingTable && mappingTableSize) memset(mappingTable, 0, mappingTableSize * sizeof(PhysMap));  // on layout, set mappingTable to default PhysMap
 }
 
 void VirtualLayer::addLight(Coord3D position) {

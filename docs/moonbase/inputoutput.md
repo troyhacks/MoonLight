@@ -17,7 +17,8 @@ For each board the following presets are defined:
 
 * Per pin:
     * GPIO = gpio_num;
-    * Usage: Can be updated, see below
+    * Usage: See below
+    * Index: specify first, second, third, ... usage output, e.g. LED D01 to LED D16
     * Summary
        * Valid (✅)
        * Output (💡)
@@ -30,11 +31,11 @@ For each board the following presets are defined:
 ## Pin usage
 
   * Supported
-    * LEDs DIO 01 to 20
+    * LEDs
     * Voltage
     * Current
     * Infrared
-    * Button On/Off
+    * Button LightsOn: sets on/off in [Light Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
   * Planned soon
     * Battery
     * Relay brightness
@@ -54,12 +55,14 @@ For each board the following presets are defined:
 
 ### QuinLed boards
 
-* esp32-d0 (4MB)
-* erase flash first as MoonLight uses a partition scheme with 3MB of flash and no ota.
-* Lolin Wifi fix no -> add as board preset
-* you might need to reset your router if you first run WLED on the same MCU
-* remove fuse then flash
+* Choose the esp32-d0 (4MB) board in the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
+* On first install, erase flash first as MoonLight uses a partition scheme with 3MB of flash (no ota at the moment).
+* You might need to reset your router if you first run WLED on the same MCU and no new IP is assigned.
+
+!!! Tip
+  Dig Uno: Remove fuse to connect USB cable to flash the board.
 
 ### SE16 v1
 
+* Choose the esp32-s3-devkitc-1-n8r8v board in the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
 * Set jumper1 the same as you set it on the board: on: Infrared, off: Ethernet
