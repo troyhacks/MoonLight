@@ -58,7 +58,7 @@ For each board the following presets are defined:
 * erase flash first as MoonLight uses a partition scheme with 3MB of flash and no ota.
 * Lolin Wifi fix no -> add as board preset
 * you might need to reset your router if you first run WLED on the same MCU
-* remove fuse then flash, Nice !!!
+* remove fuse then flash
 
 ### SE16 v1
 

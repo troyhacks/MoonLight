@@ -195,7 +195,9 @@
 		items={filteredItems}
 		onReorder={handleReorder}
 		class="space-y-2"
-		dragDisabled={!(findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s'))}
+		dragDisabled={!(
+			findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s')
+		)}
 	>
 		{#snippet children({ item: itemWrapper }: { item: any })}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -204,7 +206,9 @@
 					<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
 				{/if}
 				<!-- Show the first 3 fields -->
-				{#each property.n.slice(0, 3) as propertyN}
+				{#each property.n.filter((propertyN: any, index: any) => {
+					return index < 3 || propertyN.show === true;
+				}) as propertyN}
 					{#if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
 						<MultiInput
 							property={propertyN}

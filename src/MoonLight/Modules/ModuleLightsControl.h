@@ -40,7 +40,7 @@ class ModuleLightsControl : public Module {
 
     EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
-    EXT_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(layerP.layers[0]->mappingTable), isInPSRAM(&layerP.layers[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
+    EXT_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(layerP.layers[0]->mappingTable), isInPSRAM(layerP.layers[0]->mappingTableIndexes.data()), isInPSRAM(layerP.lights.channels));
 
     setPresetsFromFolder();  // set the right values during boot
 
@@ -75,10 +75,10 @@ class ModuleLightsControl : public Module {
       pinToggleOnOff = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
-        if (usage == pin_Relay_Brightness) {
+        if (usage == pin_Relay_LightsOn) {
           pinRelayBrightness = pinObject["GPIO"];
           EXT_LOGD(ML_TAG, "pinRelayBrightness found %d", pinRelayBrightness);
-        } else if (usage == pin_Button_OnOff) {
+        } else if (usage == pin_Button_LightsOn) {
           pinToggleOnOff = pinObject["GPIO"];
           pinMode(pinToggleOnOff, INPUT_PULLUP);
           EXT_LOGD(ML_TAG, "pinToggleOnOff found %d", pinToggleOnOff);
