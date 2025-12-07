@@ -73,7 +73,7 @@ class ModuleDrivers : public NodeManager {
     nodes = &layerP.nodes;
     NodeManager::begin();
 
-    _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    _moduleIO->addUpdateHandler([this](const String& originId) { readPins(); }, false);
   }
 
   void addNodes(const JsonObject& control) override {

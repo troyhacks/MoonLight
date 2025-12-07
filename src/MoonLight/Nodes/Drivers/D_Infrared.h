@@ -90,7 +90,7 @@ class IRDriver : public Node {
     addControlValue("Athom");  // see https://www.athom.tech/blank-1/wled-esp32-music-addressable-led-strip-controller
     addControlValue("Luxceo");
 
-    moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    moduleIO->addUpdateHandler([this](const String& originId) { readPins(); }, false);
     readPins();  // initially
   }
 

@@ -38,7 +38,7 @@ class NodeManager : public Module {
     // if (false)
     // if file changes, read the file and bring into state
     // create a handler which recompiles the live script when the file of a current running live script changes in the File Manager
-    _fileManager->addUpdateHandler([&](const String& originId) {
+    _fileManager->addUpdateHandler([this](const String& originId) {
       EXT_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
       // read the file state (read all files and folders on FS and collect changes)
       _fileManager->read([&](FilesState& filesState) {

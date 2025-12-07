@@ -45,7 +45,7 @@ class ModuleLightsControl : public Module {
     setPresetsFromFolder();  // set the right values during boot
 
     // update presets if files changed in presets folder
-    _fileManager->addUpdateHandler([&](const String& originId) {
+    _fileManager->addUpdateHandler([this](const String& originId) {
       EXT_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
       // read the file state (read all files and folders on FS and collect changes)
       _fileManager->read([&](FilesState& filesState) {
@@ -65,7 +65,7 @@ class ModuleLightsControl : public Module {
         }
       });
     });
-    moduleIO.addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    moduleIO.addUpdateHandler([this](const String& originId) { readPins(); }, false);
     readPins();  // initially
   }
 
@@ -156,6 +156,8 @@ class ModuleLightsControl : public Module {
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
+      const size_t nrOfPaletteEntries = sizeof(layerP.palette.entries) / sizeof(CRGB);
+
       if (updatedItem.value == 0)
         layerP.palette = CloudColors_p;
       else if (updatedItem.value == 1)
@@ -177,14 +179,12 @@ class ModuleLightsControl : public Module {
           layerP.palette[i] = CHSV(random8(), 255, 255);  // take the max saturation, max brightness of the colorwheel
         }
       } else if (updatedItem.value == 9) {  // Quin palette
-        size_t size = sizeof(layerP.palette.entries) / sizeof(CRGB);
-        for (int i = 0; i < size; i++) {
-          layerP.palette[i] = CRGB(map(i, 0, size - 1, 255, 0), map(i, 0, size - 1, 31, 0), map(i, 0, size - 1, 0, 255));  // from orange to blue
+        for (int i = 0; i < nrOfPaletteEntries; i++) {
+          layerP.palette[i] = CRGB(map(i, 0, nrOfPaletteEntries - 1, 255, 0), map(i, 0, nrOfPaletteEntries - 1, 31, 0), map(i, 0, nrOfPaletteEntries - 1, 0, 255));  // from orange to blue
         }
       } else if (updatedItem.value == 10) {  // Orange palette
-        size_t size = sizeof(layerP.palette.entries) / sizeof(CRGB);
-        for (int i = 0; i < size; i++) {
-          layerP.palette[i] = CRGB(255, map(i, 0, size - 1, 0, 255), 0);  // from orange to blue
+        for (int i = 0; i < nrOfPaletteEntries; i++) {
+          layerP.palette[i] = CRGB(255, map(i, 0, nrOfPaletteEntries - 1, 0, 255), 0);  // from red via orange to yellow
         }
       } else {
         layerP.palette = PartyColors_p;  // should never occur

@@ -84,8 +84,6 @@ enum IO_Boards {
 
 class ModuleIO : public Module {
  public:
-  ESP32SvelteKit* _sveltekit;
-
   ModuleIO(PsychicHttpServer* server, ESP32SvelteKit* sveltekit) : Module("inputoutput", server, sveltekit) {
     EXT_LOGV(MB_TAG, "constructor");
 
@@ -95,7 +93,7 @@ class ModuleIO : public Module {
 
     _sveltekit = sveltekit;
 
-    addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    addUpdateHandler([this](const String& originId) { readPins(); }, false);
   }
 
   void setupDefinition(const JsonArray& controls) override {
@@ -322,7 +320,7 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(15, pin_I2S_SCK;
       // pinAssigner.assignPin(32, pin_Exposed;
     } else if (boardID == board_QuinLEDDigOctoV2) {
-      //Dig-Octa-32-8L
+      // Dig-Octa-32-8L
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(33, pin_Relay);
@@ -506,6 +504,9 @@ class ModuleIO : public Module {
     #endif
   #endif
   }
+
+ private:
+  ESP32SvelteKit* _sveltekit;
 };
 
 #endif
