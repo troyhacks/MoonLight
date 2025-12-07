@@ -322,8 +322,12 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(15, pin_I2S_SCK;
       // pinAssigner.assignPin(32, pin_Exposed;
     } else if (boardID == board_QuinLEDDigOctoV2) {
+      //Dig-Octa-32-8L
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(33, pin_Relay);
+      pinAssigner.assignPin(34, pin_ButtonPush);
+
     } else if (boardID == board_QuinLEDPenta) {
       uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);

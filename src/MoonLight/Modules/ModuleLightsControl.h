@@ -96,7 +96,7 @@ class ModuleLightsControl : public Module {
     control = addControl(controls, "lightsOn", "checkbox");
     control["default"] = true;
     control = addControl(controls, "brightness", "slider");
-    control["default"] = 10;
+    control["default"] = 20;
     control = addControl(controls, "red", "slider");
     control["default"] = 255;
     control["color"] = "Red";
@@ -108,15 +108,18 @@ class ModuleLightsControl : public Module {
     control["color"] = "Blue";
     control = addControl(controls, "palette", "select");
     control["default"] = 6;
-    addControlValue(control, "CloudColors");
-    addControlValue(control, "LavaColors");
-    addControlValue(control, "OceanColors");
-    addControlValue(control, "ForestColors");
-    addControlValue(control, "RainbowColors");
-    addControlValue(control, "RainbowStripeColors");
-    addControlValue(control, "PartyColors");
-    addControlValue(control, "HeatColors");
-    addControlValue(control, "RandomColors");
+    addControlValue(control, "Cloud");
+    addControlValue(control, "Lava");
+    addControlValue(control, "Ocean");
+    addControlValue(control, "Forest");
+    addControlValue(control, "Rainbow");
+    addControlValue(control, "RainbowStripe");
+    addControlValue(control, "Party");
+    addControlValue(control, "Heat");
+    addControlValue(control, "Random");
+    addControlValue(control, "Quin");
+    addControlValue(control, "Orange");
+
     control = addControl(controls, "preset", "pad");
     control["width"] = 8;
     control["size"] = 18;
@@ -172,6 +175,16 @@ class ModuleLightsControl : public Module {
       else if (updatedItem.value == 8) {
         for (int i = 0; i < sizeof(layerP.palette.entries) / sizeof(CRGB); i++) {
           layerP.palette[i] = CHSV(random8(), 255, 255);  // take the max saturation, max brightness of the colorwheel
+        }
+      } else if (updatedItem.value == 9) {  // Quin palette
+        size_t size = sizeof(layerP.palette.entries) / sizeof(CRGB);
+        for (int i = 0; i < size; i++) {
+          layerP.palette[i] = CRGB(map(i, 0, size - 1, 255, 0), map(i, 0, size - 1, 31, 0), map(i, 0, size - 1, 0, 255));  // from orange to blue
+        }
+      } else if (updatedItem.value == 10) {  // Orange palette
+        size_t size = sizeof(layerP.palette.entries) / sizeof(CRGB);
+        for (int i = 0; i < size; i++) {
+          layerP.palette[i] = CRGB(255, map(i, 0, size - 1, 0, 255), 0);  // from orange to blue
         }
       } else {
         layerP.palette = PartyColors_p;  // should never occur
