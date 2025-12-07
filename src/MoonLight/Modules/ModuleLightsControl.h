@@ -40,12 +40,12 @@ class ModuleLightsControl : public Module {
 
     EXT_LOGI(ML_TAG, "Lights:%d(Header:%d) L-H:%d Node:%d PL:%d(PL-L:%d) VL:%d PM:%d C3D:%d", sizeof(Lights), sizeof(LightsHeader), sizeof(Lights) - sizeof(LightsHeader), sizeof(Node), sizeof(PhysicalLayer), sizeof(PhysicalLayer) - sizeof(Lights), sizeof(VirtualLayer), sizeof(PhysMap), sizeof(Coord3D));
 
-    EXT_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(&layerP.layers[0]->mappingTable), isInPSRAM(&layerP.layers[0]->mappingTableIndexes), isInPSRAM(layerP.lights.channels));
+    EXT_LOGI(ML_TAG, "isInPSRAM: mt:%d mti:%d ch:%d", isInPSRAM(layerP.layers[0]->mappingTable), isInPSRAM(layerP.layers[0]->mappingTableIndexes.data()), isInPSRAM(layerP.lights.channels));
 
     setPresetsFromFolder();  // set the right values during boot
 
     // update presets if files changed in presets folder
-    _fileManager->addUpdateHandler([&](const String& originId) {
+    _fileManager->addUpdateHandler([this](const String& originId) {
       EXT_LOGV(ML_TAG, "FileManager::updateHandler %s", originId.c_str());
       // read the file state (read all files and folders on FS and collect changes)
       _fileManager->read([&](FilesState& filesState) {
@@ -65,7 +65,7 @@ class ModuleLightsControl : public Module {
         }
       });
     });
-    moduleIO.addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    moduleIO.addUpdateHandler([this](const String& originId) { readPins(); }, false);
     readPins();  // initially
   }
 
@@ -75,10 +75,10 @@ class ModuleLightsControl : public Module {
       pinToggleOnOff = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
-        if (usage == pin_Relay_Brightness) {
+        if (usage == pin_Relay_LightsOn) {
           pinRelayBrightness = pinObject["GPIO"];
           EXT_LOGD(ML_TAG, "pinRelayBrightness found %d", pinRelayBrightness);
-        } else if (usage == pin_Button_OnOff) {
+        } else if (usage == pin_Button_LightsOn) {
           pinToggleOnOff = pinObject["GPIO"];
           pinMode(pinToggleOnOff, INPUT_PULLUP);
           EXT_LOGD(ML_TAG, "pinToggleOnOff found %d", pinToggleOnOff);
@@ -96,7 +96,7 @@ class ModuleLightsControl : public Module {
     control = addControl(controls, "lightsOn", "checkbox");
     control["default"] = true;
     control = addControl(controls, "brightness", "slider");
-    control["default"] = 10;
+    control["default"] = 20;
     control = addControl(controls, "red", "slider");
     control["default"] = 255;
     control["color"] = "Red";
@@ -108,15 +108,18 @@ class ModuleLightsControl : public Module {
     control["color"] = "Blue";
     control = addControl(controls, "palette", "select");
     control["default"] = 6;
-    addControlValue(control, "CloudColors");
-    addControlValue(control, "LavaColors");
-    addControlValue(control, "OceanColors");
-    addControlValue(control, "ForestColors");
-    addControlValue(control, "RainbowColors");
-    addControlValue(control, "RainbowStripeColors");
-    addControlValue(control, "PartyColors");
-    addControlValue(control, "HeatColors");
-    addControlValue(control, "RandomColors");
+    addControlValue(control, "Cloud");
+    addControlValue(control, "Lava");
+    addControlValue(control, "Ocean");
+    addControlValue(control, "Forest");
+    addControlValue(control, "Rainbow");
+    addControlValue(control, "RainbowStripe");
+    addControlValue(control, "Party");
+    addControlValue(control, "Heat");
+    addControlValue(control, "Random");
+    addControlValue(control, "Quin");
+    addControlValue(control, "Orange");
+
     control = addControl(controls, "preset", "pad");
     control["width"] = 8;
     control["size"] = 18;
@@ -153,6 +156,8 @@ class ModuleLightsControl : public Module {
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
+      const size_t nrOfPaletteEntries = sizeof(layerP.palette.entries) / sizeof(CRGB);
+
       if (updatedItem.value == 0)
         layerP.palette = CloudColors_p;
       else if (updatedItem.value == 1)
@@ -172,6 +177,14 @@ class ModuleLightsControl : public Module {
       else if (updatedItem.value == 8) {
         for (int i = 0; i < sizeof(layerP.palette.entries) / sizeof(CRGB); i++) {
           layerP.palette[i] = CHSV(random8(), 255, 255);  // take the max saturation, max brightness of the colorwheel
+        }
+      } else if (updatedItem.value == 9) {  // Quin palette
+        for (int i = 0; i < nrOfPaletteEntries; i++) {
+          layerP.palette[i] = CRGB(map(i, 0, nrOfPaletteEntries - 1, 255, 0), map(i, 0, nrOfPaletteEntries - 1, 31, 0), map(i, 0, nrOfPaletteEntries - 1, 0, 255));  // from orange to blue
+        }
+      } else if (updatedItem.value == 10) {  // Orange palette
+        for (int i = 0; i < nrOfPaletteEntries; i++) {
+          layerP.palette[i] = CRGB(255, map(i, 0, nrOfPaletteEntries - 1, 0, 255), 0);  // from red via orange to yellow
         }
       } else {
         layerP.palette = PartyColors_p;  // should never occur

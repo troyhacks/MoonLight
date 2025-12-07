@@ -10,34 +10,15 @@
 **/
 
 #ifndef ModuleIO_h
-  #define ModuleIO_h
+#define ModuleIO_h
 
-  #if FT_MOONBASE == 1
+#if FT_MOONBASE == 1
 
-    #include "MoonBase/Module.h"
+  #include "MoonBase/Module.h"
 
 enum IO_PinUsage {
   pin_Unused,  // 0
-  pin_LED_01,
-  pin_LED_02,
-  pin_LED_03,
-  pin_LED_04,
-  pin_LED_05,
-  pin_LED_06,
-  pin_LED_07,
-  pin_LED_08,
-  pin_LED_09,
-  pin_LED_10,
-  pin_LED_11,
-  pin_LED_12,
-  pin_LED_13,
-  pin_LED_14,
-  pin_LED_15,
-  pin_LED_16,
-  pin_LED_17,
-  pin_LED_18,
-  pin_LED_19,  // LED pins
-  pin_LED_20,  // LED pins
+  pin_LED,
   pin_LED_CW,
   pin_LED_WW,
   pin_LED_R,
@@ -49,14 +30,14 @@ enum IO_PinUsage {
   pin_I2S_MCLK,
   pin_I2C_SDA,
   pin_I2C_SCL,
-  pin_Button_01,
-  pin_Button_02,
-  pin_Button_03,
+  pin_ButtonPush,
+  pin_ButtonToggle,
+  pin_Button_LightsOn,
+  pin_Relay,
+  pin_Relay_LightsOn,
   pin_Voltage,
   pin_Current,
   pin_Infrared,
-  pin_Relay,
-  pin_Relay_Brightness,
   pin_DMX,
   pin_OnBoardLed,
   pin_OnBoardKey,
@@ -71,9 +52,13 @@ enum IO_PinUsage {
   pin_SDIO_PIN_D1,
   pin_Serial_TX,
   pin_Serial_RX,
-  pin_Reserved,
   pin_Ethernet,
-  pin_Button_OnOff,
+  pin_SPI_SCK,
+  pin_SPI_MISO,
+  pin_SPI_MOSI,
+  pin_PHY_CS,
+  pin_PHY_IRQ,
+  pin_Reserved,
   pin_count
 };
 
@@ -105,12 +90,16 @@ class ModuleIO : public Module {
     // #if CONFIG_IDF_TARGET_ESP32
     //     pinMode(19, OUTPUT); digitalWrite(19, HIGH); // for serg shield boards: to be done: move to new pin manager module, switch off for S3!!!! tbd: add pin manager
     // #endif
+
+    _sveltekit = sveltekit;
+
+    addUpdateHandler([this](const String& originId) { readPins(); }, false);
   }
 
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(MB_TAG, "");
     JsonObject control;  // state.data has one or more controls
-    JsonArray rows;   // if a control is an array, this is the rows of the array
+    JsonArray rows;      // if a control is an array, this is the rows of the array
 
     control = addControl(controls, "boardPreset", "select");
     control["default"] = 0;
@@ -137,6 +126,9 @@ class ModuleIO : public Module {
     control = addControl(controls, "maxPower", "number", 0, 500, false, "Watt");
     control["default"] = 10;
 
+    control = addControl(controls, "jumper1", "checkbox");
+    control["default"] = false;
+
     control = addControl(controls, "pins", "rows");
     control["filter"] = "!Unused";
     control["crud"] = "ru";
@@ -148,26 +140,7 @@ class ModuleIO : public Module {
       control = addControl(rows, "usage", "select");
       control["default"] = 0;
       addControlValue(control, "Unused");  // 0
-      addControlValue(control, "LED 01");
-      addControlValue(control, "LED 02");
-      addControlValue(control, "LED 03");
-      addControlValue(control, "LED 04");
-      addControlValue(control, "LED 05");
-      addControlValue(control, "LED 06");
-      addControlValue(control, "LED 07");
-      addControlValue(control, "LED 08");
-      addControlValue(control, "LED 09");
-      addControlValue(control, "LED 10");
-      addControlValue(control, "LED 11");
-      addControlValue(control, "LED 12");
-      addControlValue(control, "LED 13");
-      addControlValue(control, "LED 14");
-      addControlValue(control, "LED 15");
-      addControlValue(control, "LED 16");
-      addControlValue(control, "LED 17");
-      addControlValue(control, "LED 18");
-      addControlValue(control, "LED 19");
-      addControlValue(control, "LED 20");
+      addControlValue(control, "LED");
       addControlValue(control, "LED CW");
       addControlValue(control, "LED WW");
       addControlValue(control, "LED R");
@@ -179,33 +152,41 @@ class ModuleIO : public Module {
       addControlValue(control, "I2S MCLK");
       addControlValue(control, "I2C SDA");
       addControlValue(control, "I2C SCL");
-      addControlValue(control, "Button 01");
-      addControlValue(control, "Button 02");
-      addControlValue(control, "Button 03");
+      addControlValue(control, "Button Push");
+      addControlValue(control, "Button Toggle");
+      addControlValue(control, "Button LightOn");
+      addControlValue(control, "Relay");
+      addControlValue(control, "Relay LightOn");
       addControlValue(control, "Voltage");
       addControlValue(control, "Current");
       addControlValue(control, "Infrared");
-      addControlValue(control, "Relay");
-      addControlValue(control, "Relay Brightness");
       addControlValue(control, "DMX in");
-      addControlValue(control, "On Board LED");
-      addControlValue(control, "On Board Key");
+      addControlValue(control, "Onboard LED");
+      addControlValue(control, "Onboard Key");
       addControlValue(control, "Battery");
       addControlValue(control, "Temperature");
       addControlValue(control, "Exposed");
-      addControlValue(control, "SDIO_PIN_CMD");
-      addControlValue(control, "SDIO_PIN_CLK");
-      addControlValue(control, "SDIO_PIN_D0");
-      addControlValue(control, "SDIO_PIN_D2");
-      addControlValue(control, "SDIO_PIN_D3");
-      addControlValue(control, "SDIO_PIN_D1");
+      addControlValue(control, "SDIO CMD");
+      addControlValue(control, "SDIO CLK");
+      addControlValue(control, "SDIO D0");
+      addControlValue(control, "SDIO D2");
+      addControlValue(control, "SDIO D3");
+      addControlValue(control, "SDIO D1");
       addControlValue(control, "Serial TX");
       addControlValue(control, "Serial RX");
-      addControlValue(control, "Reserved");
       addControlValue(control, "Ethernet");
-      addControlValue(control, "Button On/Off");
+      addControlValue(control, "SPI SCK");
+      addControlValue(control, "SPI MISO");
+      addControlValue(control, "SPI MOSI");
+      addControlValue(control, "PHY CS");
+      addControlValue(control, "PHY IRQ");
+      addControlValue(control, "Reserved");
 
-      addControl(rows, "summary", "text", 0, 32, true);  // ro
+      control = addControl(rows, "index", "number", 1, 32);  // max 32 of one type, e.g 32 led pins
+      control["default"] = UINT8_MAX;
+
+      control = addControl(rows, "summary", "text", 0, 32, true);  // ro
+      control["show"] = true;                                      // only the first 3 are shown in multirows, allow here the 4th to be shown as well
       // addControl(rows, "Valid", "checkbox", false, true, true);
       // addControl(rows, "Output", "checkbox", false, true, true);
       // addControl(rows, "RTC", "checkbox", false, true, true);
@@ -215,6 +196,26 @@ class ModuleIO : public Module {
     }
   }
 
+  class PinAssigner {
+   public:
+    JsonArray pins;
+
+    PinAssigner(const JsonArray& pins) { this->pins = pins; }
+
+    void assignPin(uint8_t pinNr, uint8_t usage) {
+      if (lastUsage != usage) {
+        argCounter = 1;
+        lastUsage = usage;
+      }
+      pins[pinNr]["usage"] = usage;
+      pins[pinNr]["index"] = argCounter++;
+    }
+
+   private:
+    uint8_t argCounter = 0;
+    uint8_t lastUsage = UINT8_MAX;
+  };
+
   void setBoardPresetDefaults(uint8_t boardID) {
     JsonDocument doc;
     JsonObject object = doc.to<JsonObject>();
@@ -222,11 +223,14 @@ class ModuleIO : public Module {
 
     JsonArray pins = object["pins"].to<JsonArray>();
 
+    PinAssigner pinAssigner(pins);
+
     // reset all pins
     for (int gpio_num = 0; gpio_num < SOC_GPIO_PIN_COUNT; gpio_num++) {
       JsonObject pin = pins.add<JsonObject>();
       pin["GPIO"] = gpio_num;
       pin["usage"] = 0;
+      pin["index"] = 0;
 
       // Check if GPIO is valid
       bool is_valid = GPIO_IS_VALID_GPIO(gpio_num);
@@ -241,11 +245,11 @@ class ModuleIO : public Module {
 
       // For RTC GPIOs, can also use RTC-specific read
       int rtc_level = -1;
-    #ifndef CONFIG_IDF_TARGET_ESP32C3
+  #ifndef CONFIG_IDF_TARGET_ESP32C3
       if (is_rtc_gpio) {
         rtc_level = rtc_gpio_get_level((gpio_num_t)gpio_num);  // to do find c3 alternative
       }
-    #endif
+  #endif
 
       // Get drive capability (if output capable)
       gpio_drive_cap_t drive_cap = GPIO_DRIVE_CAP_DEFAULT;
@@ -269,98 +273,120 @@ class ModuleIO : public Module {
     if (boardID == board_SE16V1) {
       object["maxPower"] = 500;
       uint8_t ledPins[16] = {47, 48, 21, 38, 14, 39, 13, 40, 12, 41, 11, 42, 10, 2, 3, 1};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
-      pins[0]["usage"] = pin_Button_01;
-      pins[45]["usage"] = pin_Button_02;
-      pins[46]["usage"] = pin_Button_OnOff;
-      pins[8]["usage"] = pin_Voltage;
-      pins[9]["usage"] = pin_Current;
-      pins[5]["usage"] = pin_Infrared;
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(0, pin_ButtonPush);
+      pinAssigner.assignPin(45, pin_ButtonPush);
+      pinAssigner.assignPin(46, pin_Button_LightsOn);
+      pinAssigner.assignPin(8, pin_Voltage);
+      pinAssigner.assignPin(9, pin_Current);
+
+      if (_state.data["jumper1"]) {
+        pinAssigner.assignPin(5, pin_Infrared);
+      } else {  // default
+        pinAssigner.assignPin(5, pin_SPI_MISO);
+        pinAssigner.assignPin(6, pin_SPI_MOSI);
+        pinAssigner.assignPin(7, pin_SPI_SCK);
+        pinAssigner.assignPin(15, pin_PHY_CS);
+        pinAssigner.assignPin(18, pin_PHY_IRQ);
+      }
+
     } else if (boardID == board_QuinLEDDigUnoV3) {
-      object["maxPower"] = 75;
-      pins[0]["usage"] = pin_Button_01;
-      pins[1]["usage"] = pin_LED_01;
-      pins[3]["usage"] = pin_LED_02;
-      pins[2]["usage"] = pin_I2S_SD;
-      pins[12]["usage"] = pin_I2S_WS;
-      pins[13]["usage"] = pin_Temperature;
-      pins[15]["usage"] = pin_I2S_SCK;
-      pins[16]["usage"] = pin_LED_03;
-      pins[32]["usage"] = pin_Exposed;
+      // Dig-Uno-V3
+      // esp32-d0 (4MB)
+      object["maxPower"] = 50;  // max 75, but 10A fuse
+      pinAssigner.assignPin(16, pin_LED);
+      pinAssigner.assignPin(3, pin_LED);
+      pinAssigner.assignPin(0, pin_ButtonPush);
+      pinAssigner.assignPin(15, pin_Relay);
+      // pinAssigner.assignPin(2, pin_I2S_SD);
+      // pinAssigner.assignPin(12, pin_I2S_WS);
+      // pinAssigner.assignPin(13, pin_Temperature);
+      // pinAssigner.assignPin(15, pin_I2S_SCK);
+      // pinAssigner.assignPin(16, pin_LED_03);
+      // pinAssigner.assignPin(32, pin_Exposed);
     } else if (boardID == board_QuinLEDDigQuadV3) {
+      // Dig-Quad-V3
+      // esp32-d0 (4MB)
       object["maxPower"] = 150;
       uint8_t ledPins[4] = {16, 3, 1, 4};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
-      pins[0]["usage"] = pin_Button_01;
-      pins[2]["usage"] = pin_I2S_SD;
-      pins[12]["usage"] = pin_I2S_WS;
-      pins[13]["usage"] = pin_Temperature;
-      pins[15]["usage"] = pin_I2S_SCK;
-      pins[32]["usage"] = pin_Exposed;
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(0, pin_ButtonPush);
+
+      pinAssigner.assignPin(15, pin_Relay);
+
+      // pinAssigner.assignPin(2, pin_I2S_SD;
+      // pinAssigner.assignPin(12, pin_I2S_WS;
+      // pinAssigner.assignPin(13, pin_Temperature;
+      // pinAssigner.assignPin(15, pin_I2S_SCK;
+      // pinAssigner.assignPin(32, pin_Exposed;
     } else if (boardID == board_QuinLEDDigOctoV2) {
+      // Dig-Octa-32-8L
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(33, pin_Relay);
+      pinAssigner.assignPin(34, pin_ButtonPush);
+
     } else if (boardID == board_QuinLEDPenta) {
       uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
-      pins[34]["usage"] = pin_Button_01;
-      pins[35]["usage"] = pin_Button_02;
-      pins[39]["usage"] = pin_Button_03;
-      pins[1]["usage"] = pin_I2C_SDA;
-      pins[3]["usage"] = pin_I2C_SCL;
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(34, pin_ButtonPush);
+      pinAssigner.assignPin(35, pin_ButtonPush);
+      pinAssigner.assignPin(39, pin_ButtonPush);
+      pinAssigner.assignPin(1, pin_I2C_SDA);
+      pinAssigner.assignPin(3, pin_I2C_SCL);
     } else if (boardID == board_QuinLEDPentaPlus) {
-      pins[33]["usage"] = pin_LED_CW;
-      pins[32]["usage"] = pin_LED_WW;
-      pins[2]["usage"] = pin_LED_R;
-      pins[4]["usage"] = pin_LED_G;
-      pins[12]["usage"] = pin_LED_B;
-      pins[36]["usage"] = pin_Button_01;
-      pins[39]["usage"] = pin_Button_02;
-      pins[34]["usage"] = pin_Button_03;
-      pins[15]["usage"] = pin_I2C_SDA;
-      pins[16]["usage"] = pin_I2C_SCL;
-      pins[13]["usage"] = pin_Relay_Brightness;
-      pins[05]["usage"] = pin_LED_01;
+      pinAssigner.assignPin(33, pin_LED_CW);
+      pinAssigner.assignPin(32, pin_LED_WW);
+      pinAssigner.assignPin(2, pin_LED_R);
+      pinAssigner.assignPin(4, pin_LED_G);
+      pinAssigner.assignPin(12, pin_LED_B);
+      pinAssigner.assignPin(36, pin_ButtonPush);
+      pinAssigner.assignPin(39, pin_ButtonPush);
+      pinAssigner.assignPin(33, pin_ButtonPush);
+      pinAssigner.assignPin(15, pin_I2C_SDA);
+      pinAssigner.assignPin(16, pin_I2C_SCL);
+      pinAssigner.assignPin(13, pin_Relay_LightsOn);
+      pinAssigner.assignPin(5, pin_LED);
     } else if (boardID == board_SergMiniShield) {
       object["maxPower"] = 50;  // 10A Fuse ...
-      pins[1]["usage"] = pin_LED_01;
-      pins[3]["usage"] = pin_LED_02;
+      pinAssigner.assignPin(1, pin_LED);
+      pinAssigner.assignPin(3, pin_LED);
     } else if (boardID == board_SergUniShieldV5) {
       object["maxPower"] = 50;  // 10A Fuse ...
-      pins[1]["usage"] = pin_LED_01;
-      pins[3]["usage"] = pin_LED_02;
-      pins[19]["usage"] = pin_Relay_Brightness;
+      pinAssigner.assignPin(1, pin_LED);
+      pinAssigner.assignPin(3, pin_LED);
+      pinAssigner.assignPin(19, pin_Relay_LightsOn);
     } else if (boardID == board_WladiD0) {
-      pins[3]["usage"] = pin_Voltage;
+      pinAssigner.assignPin(3, pin_Voltage);
     } else if (boardID == board_WladiP4Nano) {                                           // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
       object["maxPower"] = 10;                                                           // USB compliant
       uint8_t ledPins[16] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
     } else if (boardID == board_YvesV48) {
-      pins[3]["usage"] = pin_LED_01;
+      pinAssigner.assignPin(3, pin_LED);
     } else if (boardID == board_TroyP4Nano) {
       object["maxPower"] = 10;                                                            // USB compliant
       uint8_t ledPins[16] = {2, 3, 4, 5, 6, 20, 21, 22, 23, 26, 27, 32, 33, 36, 47, 48};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
-      pins[7]["usage"] = pin_I2C_SDA;
-      pins[8]["usage"] = pin_I2C_SCL;
-      pins[9]["usage"] = pin_Reserved;  // I2S Sound Output Pin
-      pins[10]["usage"] = pin_I2S_WS;
-      pins[11]["usage"] = pin_I2S_SD;
-      pins[12]["usage"] = pin_I2S_SCK;
-      pins[13]["usage"] = pin_I2S_MCLK;
-      pins[14]["usage"] = pin_SDIO_PIN_D0;   // ESP-Hosted WiFi pins
-      pins[15]["usage"] = pin_SDIO_PIN_D1;   // ESP-Hosted WiFi pins
-      pins[16]["usage"] = pin_SDIO_PIN_D2;   // ESP-Hosted WiFi pins
-      pins[17]["usage"] = pin_SDIO_PIN_D3;   // ESP-Hosted WiFi pins
-      pins[18]["usage"] = pin_SDIO_PIN_CLK;  // ESP-Hosted WiFi pins
-      pins[19]["usage"] = pin_SDIO_PIN_CMD;  // ESP-Hosted WiFi pins
-      pins[24]["usage"] = pin_Reserved;      // USB Pins
-      pins[25]["usage"] = pin_Reserved;      // USB Pins
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(7, pin_I2C_SDA);
+      pinAssigner.assignPin(8, pin_I2C_SCL);
+      pinAssigner.assignPin(9, pin_Reserved);  // I2S Sound Output Pin
+      pinAssigner.assignPin(10, pin_I2S_WS);
+      pinAssigner.assignPin(11, pin_I2S_SD);
+      pinAssigner.assignPin(12, pin_I2S_SCK);
+      pinAssigner.assignPin(13, pin_I2S_MCLK);
+      pinAssigner.assignPin(14, pin_SDIO_PIN_D0);   // ESP-Hosted WiFi pins
+      pinAssigner.assignPin(15, pin_SDIO_PIN_D1);   // ESP-Hosted WiFi pins
+      pinAssigner.assignPin(16, pin_SDIO_PIN_D2);   // ESP-Hosted WiFi pins
+      pinAssigner.assignPin(17, pin_SDIO_PIN_D3);   // ESP-Hosted WiFi pins
+      pinAssigner.assignPin(18, pin_SDIO_PIN_CLK);  // ESP-Hosted WiFi pins
+      pinAssigner.assignPin(19, pin_SDIO_PIN_CMD);  // ESP-Hosted WiFi pins
+      pinAssigner.assignPin(24, pin_Reserved);      // USB Pins
+      pinAssigner.assignPin(25, pin_Reserved);      // USB Pins
       uint8_t ethernetPins[6] = {28, 29, 30, 31, 34, 35};
-      for (int i = 0; i < sizeof(ethernetPins); i++) pins[ethernetPins[i]]["usage"] = pin_Ethernet;  // Ethernet Pins
-      pins[37]["usage"] = pin_Serial_TX;
-      pins[38]["usage"] = pin_Serial_RX;
+      for (int i = 0; i < sizeof(ethernetPins); i++) pinAssigner.assignPin(ethernetPins[i], pin_Ethernet);  // Ethernet Pins
+      pinAssigner.assignPin(37, pin_Serial_TX);
+      pinAssigner.assignPin(38, pin_Serial_RX);
       // 24-25 is is USB, but so is 26-27 but they're exposed on the header and work OK for pin outout.
       // 6 is C5 wakeup - but works fine for pin outout.
       // 45 is SD power but it's NC without hacking the board.
@@ -368,21 +394,22 @@ class ModuleIO : public Module {
       // 54 is "C4 EN pin" so I guess we shouldn't fuck with that.
     } else if (boardID == board_AtomS3) {
       uint8_t ledPins[4] = {5, 6, 7, 8};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
     } else if (boardID == board_Cube202010) {
       object["maxPower"] = 50;
       uint8_t ledPins[10] = {22, 21, 14, 18, 5, 4, 2, 15, 13, 12};  // LED_PINS
                                                                     // char pins[80] = "2,3,4,16,17,18,19,21,22,23,25,26,27,32,33";  //(D0), more pins possible. to do: complete list.
-      for (int i = 0; i < sizeof(ledPins); i++) pins[ledPins[i]]["usage"] = pin_LED_01 + i;
+      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
-      pins[16]["usage"] = pin_LED_01;
+      pinAssigner.assignPin(16, pin_LED);
+
       // trying to add more pins, but these pins not liked by esp32-d0-16MB ... 🚧
-      // pins[4]["usage"] = pin_LED_02;
-      // pins[5]["usage"] = pin_LED_03;
-      // pins[6]["usage"] = pin_LED_04;
-      // pins[7]["usage"] = pin_LED_05;
-      // pins[8]["usage"] = pin_LED_06;
+      // pinAssigner.assignPin(4, pin_LED_02;
+      // pinAssigner.assignPin(5, pin_LED_03;
+      // pinAssigner.assignPin(6, pin_LED_04;
+      // pinAssigner.assignPin(7, pin_LED_05;
+      // pinAssigner.assignPin(8, pin_LED_06;
     }
     // String xxx;
     // serializeJson(_state.data, xxx);
@@ -438,32 +465,49 @@ class ModuleIO : public Module {
   void loop() override {
     // run in sveltekit task
     Module::loop();
+
     if (newBoardID != UINT8_MAX) {
       setBoardPresetDefaults(newBoardID);  // run from sveltekit task
       newBoardID = UINT8_MAX;
     }
   }
+
+  void readPins() {
+  #if FT_ENABLED(FT_ETHERNET)
+    EXT_LOGD(MB_TAG, "Try to configure ethernet");
+    EthernetSettingsService* ess = _sveltekit->getEthernetSettingsService();
+    #ifdef CONFIG_IDF_TARGET_ESP32S3
+    ess->v_ETH_SPI_SCK = UINT8_MAX;
+    ess->v_ETH_SPI_MISO = UINT8_MAX;
+    ess->v_ETH_SPI_MOSI = UINT8_MAX;
+    ess->v_ETH_PHY_CS = UINT8_MAX;
+    ess->v_ETH_PHY_IRQ = UINT8_MAX;
+    // if ethernet pins change
+    // find the pins needed
+    for (JsonObject pinObject : _state.data["pins"].as<JsonArray>()) {
+      uint8_t usage = pinObject["usage"];
+      uint8_t gpio = pinObject["GPIO"];
+      if (usage == pin_SPI_SCK) ess->v_ETH_SPI_SCK = gpio;
+      if (usage == pin_SPI_MISO) ess->v_ETH_SPI_MISO = gpio;
+      if (usage == pin_SPI_MOSI) ess->v_ETH_SPI_MOSI = gpio;
+      if (usage == pin_PHY_CS) ess->v_ETH_PHY_CS = gpio;
+      if (usage == pin_PHY_IRQ) ess->v_ETH_PHY_IRQ = gpio;
+    }
+
+    // allocate the pins found
+    if (ess->v_ETH_SPI_SCK != UINT8_MAX && ess->v_ETH_SPI_MISO != UINT8_MAX && ess->v_ETH_SPI_MOSI != UINT8_MAX && ess->v_ETH_PHY_CS != UINT8_MAX && ess->v_ETH_PHY_IRQ != UINT8_MAX) {
+      // ess->v_ETH_PHY_TYPE = ETH_PHY_W5500;
+      // ess->v_ETH_PHY_ADDR = 1;
+      ess->v_ETH_PHY_RST = -1;  // not wired
+      ess->initEthernet();      // restart ethernet
+    }
+    #endif
+  #endif
+  }
+
+ private:
+  ESP32SvelteKit* _sveltekit;
 };
 
-  #endif
 #endif
-
-// format:
-// {
-//   "pins": [
-//     {
-//       "GPIO": 0,
-//       "Valid": true,
-//       "Output": true,
-//       "RTC": true,
-//       "Level": "HIGH",
-//       "DriveCap": "MEDIUM",
-//     },
-//     {
-//       "GPIO": 1,
-//       "Valid": true,
-//       "Output": true,
-//       "RTC": false,
-//       "Level": "HIGH",
-//       "DriveCap": "MEDIUM",
-//     },
+#endif

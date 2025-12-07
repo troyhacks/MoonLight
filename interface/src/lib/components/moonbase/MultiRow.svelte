@@ -115,21 +115,25 @@
 		return data[property.name]
 			.map((item: any, index: number) => ({ item, originalIndex: index }))
 			.filter(({ item }: { item: any }) => {
-				const matchFound = property.n.slice(0, 3).some((propertyN: any) => {
-					let valueStr;
+				const matchFound = property.n
+					.filter((propertyN: any, index: number) => {
+						return index < 3 || propertyN.show === true;
+					})
+					.some((propertyN: any) => {
+						let valueStr;
 
-					if (
-						propertyN.values &&
-						Array.isArray(propertyN.values) &&
-						isNumber(item[propertyN.name])
-					) {
-						valueStr = propertyN.values[item[propertyN.name]];
-					} else {
-						valueStr = item[propertyN.name];
-					}
+						if (
+							propertyN.values &&
+							Array.isArray(propertyN.values) &&
+							isNumber(item[propertyN.name])
+						) {
+							valueStr = propertyN.values[item[propertyN.name]];
+						} else {
+							valueStr = item[propertyN.name];
+						}
 
-					return String(valueStr).toLowerCase().includes(query);
-				});
+						return String(valueStr).toLowerCase().includes(query);
+					});
 
 				return isNegated ? !matchFound : matchFound;
 			});
@@ -195,7 +199,9 @@
 		items={filteredItems}
 		onReorder={handleReorder}
 		class="space-y-2"
-		dragDisabled={!(findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s'))}
+		dragDisabled={!(
+			findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('s')
+		)}
 	>
 		{#snippet children({ item: itemWrapper }: { item: any })}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -204,7 +210,9 @@
 					<Grip class="h-6 w-6 text-base-content/30 cursor-grab flex-shrink-0" />
 				{/if}
 				<!-- Show the first 3 fields -->
-				{#each property.n.slice(0, 3) as propertyN}
+				{#each property.n.filter((propertyN: any, index: any) => {
+					return index < 3 || propertyN.show === true;
+				}) as propertyN}
 					{#if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
 						<MultiInput
 							property={propertyN}

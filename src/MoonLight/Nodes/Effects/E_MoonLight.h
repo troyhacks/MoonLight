@@ -160,13 +160,13 @@ class RandomEffect : public Node {
  public:
   static const char* name() { return "Random"; }
   static uint8_t dim() { return _3D; }
-  static const char* tags() { return "🔥"; }
+  static const char* tags() { return "🔥🎨"; }
 
   uint8_t fade = 70;
   void setup() { addControl(fade, "fade", "slider"); }
   void loop() override {
     layer->fadeToBlackBy(fade);
-    layer->setRGB(random16(layer->nrOfLights), CRGB(255, random8(), 0));
+    layer->setRGB(random16(layer->nrOfLights), ColorFromPalette(layer->layerP->palette, random8()));
   }
 };
 

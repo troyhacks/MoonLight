@@ -43,8 +43,9 @@ class ModuleDrivers : public NodeManager {
       // assign pins (valid only)
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
-        if (usage >= pin_LED_01 && usage <= pin_LED_20 && GPIO_IS_VALID_OUTPUT_GPIO(pinObject["GPIO"].as<uint8_t>())) {
-          layerP.ledPins[usage - 1] = pinObject["GPIO"];
+        uint8_t index = pinObject["index"];
+        if (usage == pin_LED && index >=1 && index <= 20 && GPIO_IS_VALID_OUTPUT_GPIO(pinObject["GPIO"].as<uint8_t>())) {
+          layerP.ledPins[index-1] = pinObject["GPIO"];
         }
       }
 
@@ -72,7 +73,7 @@ class ModuleDrivers : public NodeManager {
     nodes = &layerP.nodes;
     NodeManager::begin();
 
-    _moduleIO->addUpdateHandler([&](const String& originId) { readPins(); }, false);
+    _moduleIO->addUpdateHandler([this](const String& originId) { readPins(); }, false);
   }
 
   void addNodes(const JsonObject& control) override {
