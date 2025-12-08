@@ -69,7 +69,6 @@ class ModuleDrivers : public NodeManager {
 
   void begin() override {
     defaultNodeName = getNameAndTags<PanelLayout>();
-
     nodes = &layerP.nodes;
     NodeManager::begin();
 

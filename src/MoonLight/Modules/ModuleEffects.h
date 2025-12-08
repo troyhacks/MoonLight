@@ -27,7 +27,6 @@ class ModuleEffects : public NodeManager {
   void begin() override {
     defaultNodeName = getNameAndTags<RandomEffect>();
     nodes = &(layerP.layers[0]->nodes);  // to do add nodes from all layers...
-
     NodeManager::begin();
 
   #if FT_ENABLED(FT_MONITOR)

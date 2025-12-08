@@ -353,7 +353,7 @@ class IRDriver : public Node {
         if (combined_code == codeOff || combined_code == codeOn) {  // Lights on/off
           newState["lightsOn"] = state.data["lightsOn"].as<bool>() ? false : true;
         } else if (combined_code == codePaletteInc) {                             // palette increase
-          newState["palette"] = min(state.data["palette"].as<uint8_t>() + 1, 8);  // to do: replace 8 with max palette count
+          newState["palette"] = min(state.data["palette"].as<uint8_t>() + 1, 10);  // to do: replace 8 with max palette count
         } else if (combined_code == codePaletteDec) {                             // palette decrease
           newState["palette"] = max(state.data["palette"].as<uint8_t>() - 1, 0);
         } else if (combined_code == codePresetDec) {  // next button - go to previous preset

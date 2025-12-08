@@ -16,7 +16,7 @@
 
 class AudioSyncDriver : public Node {
  public:
-  static const char* name() { return "AudioSync"; }
+  static const char* name() { return "Audio Sync"; }
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️♫"; }
 
@@ -26,6 +26,12 @@ class AudioSyncDriver : public Node {
   void loop() override {
     if (!WiFi.isConnected() && !ETH.connected()) {
       // make WLED Audio Sync network failure resilient - WIP
+      if (init) EXT_LOGI(ML_TAG, "Audio Sync: stopped");
+      //set all data to 0
+      memset(sharedData.bands, 0, sizeof(sharedData.bands));
+      sharedData.volume = 0;
+      sharedData.volumeRaw = 0;
+      sharedData.majorPeak = 0;
       init = false;
       return;
     }
@@ -33,7 +39,7 @@ class AudioSyncDriver : public Node {
     if (!init) {
       sync.begin();
       init = true;
-      EXT_LOGI(ML_TAG, "AudioSync: Initialized");
+      EXT_LOGI(ML_TAG, "Audio Sync: Initialized");
     }
 
     if (sync.read()) {
@@ -42,7 +48,7 @@ class AudioSyncDriver : public Node {
       sharedData.volumeRaw = sync.volumeRaw;
       sharedData.majorPeak = sync.FFT_MajorPeak;
       // if (audio.bands[0] > 0) {
-      //   EXT_LOGV(ML_TAG, "AudioSync: %d %f", audio.bands[0], audio.volume);
+      //   EXT_LOGV(ML_TAG, "Audio Sync: %d %f", audio.bands[0], audio.volume);
       // }
     }
   }

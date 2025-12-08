@@ -66,7 +66,8 @@ enum IO_Boards {
   board_none,  //
   board_QuinLEDDigUnoV3,
   board_QuinLEDDigQuadV3,
-  board_QuinLEDDigOctoV2,
+  board_QuinLEDDigOctaV2,
+  board_QuinLEDDig2Go,
   board_QuinLEDPenta,
   board_QuinLEDPentaPlus,
   board_SergUniShieldV5,
@@ -107,6 +108,7 @@ class ModuleIO : public Module {
     addControlValue(control, "QuinLED Dig Uno v3");
     addControlValue(control, "QuinLED Dig Quad v3");
     addControlValue(control, "QuinLED Dig Octa v2");
+    addControlValue(control, "QuinLED Dig 2Go");
     addControlValue(control, "QuinLED Penta");
     addControlValue(control, "QuinLED Penta Plus");
     addControlValue(control, "Serg Universal Shield v5");
@@ -230,7 +232,7 @@ class ModuleIO : public Module {
       JsonObject pin = pins.add<JsonObject>();
       pin["GPIO"] = gpio_num;
       pin["usage"] = 0;
-      pin["index"] = 0;
+      pin["index"] = 1;
 
       // Check if GPIO is valid
       bool is_valid = GPIO_IS_VALID_GPIO(gpio_num);
@@ -319,13 +321,26 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(13, pin_Temperature;
       // pinAssigner.assignPin(15, pin_I2S_SCK;
       // pinAssigner.assignPin(32, pin_Exposed;
-    } else if (boardID == board_QuinLEDDigOctoV2) {
+    } else if (boardID == board_QuinLEDDigOctaV2) {
       // Dig-Octa-32-8L
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(33, pin_Relay);
       pinAssigner.assignPin(34, pin_ButtonPush);
-
+    } else if (boardID == board_QuinLEDDig2Go) {
+      // dig2go
+      pinAssigner.assignPin(0, pin_Button_LightsOn);
+      pinAssigner.assignPin(5, pin_Infrared);
+      pinAssigner.assignPin(16, pin_LED);
+      pinAssigner.assignPin(12, pin_Relay_LightsOn);
+      pinAssigner.assignPin(19, pin_I2S_SD);
+      pinAssigner.assignPin(4, pin_I2S_WS);
+      pinAssigner.assignPin(18, pin_I2S_SCK);
+      pinAssigner.assignPin(21, pin_I2C_SDA);
+      pinAssigner.assignPin(22, pin_I2C_SCL);
+      pinAssigner.assignPin(23, pin_Exposed);
+      pinAssigner.assignPin(25, pin_Exposed);
+      // pinAssigner.assignPin(xx, pin_I2S_MCLK);
     } else if (boardID == board_QuinLEDPenta) {
       uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);

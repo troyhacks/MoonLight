@@ -25,8 +25,8 @@ class ModuleLightsControl : public Module {
   PsychicHttpServer* _server;
   FileManager* _fileManager;
   ModuleIO* _moduleIO;
-  uint8_t pinRelayBrightness = UINT8_MAX;
-  uint8_t pinToggleOnOff = UINT8_MAX;
+  uint8_t pinRelayLightsOn = UINT8_MAX;
+  uint8_t pinButtonLightsOn = UINT8_MAX;
 
   ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
@@ -71,17 +71,20 @@ class ModuleLightsControl : public Module {
 
   void readPins() {
     moduleIO.read([&](ModuleState& state) {
-      pinRelayBrightness = UINT8_MAX;
-      pinToggleOnOff = UINT8_MAX;
+      pinRelayLightsOn = UINT8_MAX;
+      pinButtonLightsOn = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
         if (usage == pin_Relay_LightsOn) {
-          pinRelayBrightness = pinObject["GPIO"];
-          EXT_LOGD(ML_TAG, "pinRelayBrightness found %d", pinRelayBrightness);
+          pinRelayLightsOn = pinObject["GPIO"];
+          pinMode(pinRelayLightsOn, OUTPUT);
+          uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
+          digitalWrite(pinRelayLightsOn, newBri>0?HIGH:LOW);
+          EXT_LOGD(ML_TAG, "pinRelayLightsOn found %d", pinRelayLightsOn);
         } else if (usage == pin_Button_LightsOn) {
-          pinToggleOnOff = pinObject["GPIO"];
-          pinMode(pinToggleOnOff, INPUT_PULLUP);
-          EXT_LOGD(ML_TAG, "pinToggleOnOff found %d", pinToggleOnOff);
+          pinButtonLightsOn = pinObject["GPIO"];
+          pinMode(pinButtonLightsOn, INPUT_PULLUP);
+          EXT_LOGD(ML_TAG, "pinButtonLightsOn found %d", pinButtonLightsOn);
         }
       }
       // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
@@ -151,8 +154,9 @@ class ModuleLightsControl : public Module {
       layerP.lights.header.blue = _state.data["blue"];
     } else if (updatedItem.name == "lightsOn" || updatedItem.name == "brightness") {
       uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
-      if (!!layerP.lights.header.brightness != !!newBri && pinRelayBrightness != UINT8_MAX) {
-        EXT_LOGD(ML_TAG, "pinRelayBrightness %s", !!newBri ? "On" : "Off");
+      if (!!layerP.lights.header.brightness != !!newBri && pinRelayLightsOn != UINT8_MAX) {
+        EXT_LOGD(ML_TAG, "pinRelayLightsOn %s", !!newBri ? "On" : "Off");
+        digitalWrite(pinRelayLightsOn, newBri>0?HIGH:LOW);
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {
@@ -251,7 +255,7 @@ class ModuleLightsControl : public Module {
   }
 
   unsigned long lastPresetTime = 0;
-  // see pinToggleOnOff
+  // see pinButtonLightsOn
   unsigned long lastDebounceTime = 0;
   static constexpr unsigned long debounceDelay = 50;  // 50ms debounce
   int lastState = HIGH;
@@ -303,8 +307,8 @@ class ModuleLightsControl : public Module {
       }
     }
 
-    if (pinToggleOnOff != UINT8_MAX) {
-      int state = digitalRead(pinToggleOnOff);
+    if (pinButtonLightsOn != UINT8_MAX) {
+      int state = digitalRead(pinButtonLightsOn);
       if (state != lastState && (millis() - lastDebounceTime) > debounceDelay) {
         lastDebounceTime = millis();
         // Trigger only on button press (HIGH to LOW transition for INPUT_PULLUP)
@@ -326,7 +330,7 @@ class ModuleLightsControl : public Module {
           _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * 3, layerP.lights.maxChannels));  //*3 is for 3 bytes position
         }
         memset(layerP.lights.channels, 0, layerP.lights.maxChannels);  // set all the channels to 0 //cleaning the positions
-        EXT_LOGD(ML_TAG, "positions sent to monitor (2 -> 3, noL:%d noC:%d)", layerP.lights.header.nrOfLights, layerP.lights.maxChannels);
+        EXT_LOGD(ML_TAG, "positions sent to monitor (2 -> 3, #L:%d maxC:%d)", layerP.lights.header.nrOfLights, layerP.lights.maxChannels);
         layerP.lights.header.isPositions = 3;
       });
     } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
