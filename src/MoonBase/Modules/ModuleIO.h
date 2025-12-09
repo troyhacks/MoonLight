@@ -451,7 +451,11 @@ class ModuleIO : public Module {
         EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         newBoardID = _state.data["boardPreset"];  // run in sveltekit task
       }
-    } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+    } else if (updatedItem.name == "jumper1" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+                                                                                              // rebuild with new jumper setting
+      _state.data["modded"] = false;
+      newBoardID = _state.data["boardPreset"];                                                // run in sveltekit task
+    } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {    // not done by this module: done by UI
       // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       // set pins to default if modded is turned off
       JsonDocument doc;

@@ -95,86 +95,77 @@ class ArtNetInDriver : public Node {
   };
 
   void handleArtNet() {
-    int packetSize = artnetUdp.parsePacket();
+    // Process ALL available packets in the buffer
+    while (int packetSize = artnetUdp.parsePacket()) {
+      if (packetSize >= sizeof(ArtNetHeader)) {
+        artnetUdp.read(packetBuffer, min(packetSize, (int)sizeof(packetBuffer)));
 
-    if (packetSize >= sizeof(ArtNetHeader)) {
-      artnetUdp.read(packetBuffer, packetSize);
+        EXT_LOGD(ML_TAG, "size:%d", packetSize);
 
-      // Verify Art-Net packet
-      if (memcmp(packetBuffer, "Art-Net", 7) == 0) {
-        ArtNetHeader* header = (ArtNetHeader*)packetBuffer;
-        uint16_t opcode = header->opcode;
-        //
-        EXT_LOGD(ML_TAG, "size:%d universe:%d", packetSize, header->universe);
+        // Verify Art-Net packet
+        if (memcmp(packetBuffer, "Art-Net", 7) == 0) {
+          ArtNetHeader* header = (ArtNetHeader*)packetBuffer;
+          uint16_t opcode = header->opcode;
 
-        // Check if it's a DMX packet (opcode 0x5000)
-        if (opcode == 0x5000) {
-          uint16_t universe = header->universe;
-          uint16_t dataLength = (header->length >> 8) | (header->length << 8);  // Swap bytes
+          EXT_LOGD(ML_TAG, "size:%d universe:%d", packetSize, header->universe);
 
-          // Process if it's our universe
+          // Check if it's a DMX packet (opcode 0x5000)
+          if (opcode == 0x5000) {
+            uint16_t universe = header->universe;
+            uint16_t dataLength = (header->length >> 8) | (header->length << 8);
 
-          // if (universe == artnetUniverse) { // all universes welcome
-          uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
+            uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
-          // Map DMX channels to LEDs (3 channels per LED: RGB)
-          // Calculate starting LED position based on universe
-          // Each Art-Net universe supports up to 512 DMX channels
-          int startPixel = universe * (512 / layerP.lights.header.channelsPerLight);
-          int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
+            int startPixel = universe * (512 / layerP.lights.header.channelsPerLight);
+            int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
-          // Write to the correct offset
-          for (int i = 0; i < numPixels; i++) {
-            int ledIndex = startPixel + i;
-            if (ledIndex < layerP.lights.header.nrOfLights) {
-              memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+            for (int i = 0; i < numPixels; i++) {
+              int ledIndex = startPixel + i;
+              if (ledIndex < layerP.lights.header.nrOfLights) {
+                if (view == 0) {
+                  memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+                } else {
+                  layerP.layers[view - 1]->setLight(ledIndex, &dmxData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
+                }
+              }
             }
           }
-
-          // FastLED.show();
-          // Serial.println("Art-Net: " + String(numPixels) + " pixels updated");
-          // }
         }
       }
     }
   }
 
   void handleDDP() {
-    int packetSize = ddpUdp.parsePacket();
+    // drain all packets
+    while (int packetSize = ddpUdp.parsePacket()) {
+      if (packetSize >= sizeof(DDPHeader)) {
+        ddpUdp.read(packetBuffer, min(packetSize, (int)sizeof(packetBuffer)));
 
-    if (packetSize >= sizeof(DDPHeader)) {
-      ddpUdp.read(packetBuffer, packetSize);
+        DDPHeader* header = (DDPHeader*)packetBuffer;
 
-      DDPHeader* header = (DDPHeader*)packetBuffer;
+        bool pushFlag = (header->flags & 0x80) != 0;
+        uint8_t dataType = header->dataType;
 
-      // Extract header fields
-      bool pushFlag = (header->flags & 0x80) != 0;  // Bit 7
-      uint8_t dataType = header->dataType;
+        uint32_t offset = (header->offset >> 24) | ((header->offset >> 8) & 0xFF00) | ((header->offset << 8) & 0xFF0000) | (header->offset << 24);
+        uint16_t dataLen = (header->dataLen >> 8) | (header->dataLen << 8);
 
-      // Convert big-endian offset and length
-      uint32_t offset = (header->offset >> 24) | ((header->offset >> 8) & 0xFF00) | ((header->offset << 8) & 0xFF0000) | (header->offset << 24);
+        if (dataType == 0x01) {
+          uint8_t* pixelData = packetBuffer + sizeof(DDPHeader);
 
-      uint16_t dataLen = (header->dataLen >> 8) | (header->dataLen << 8);
+          int startPixel = offset / layerP.lights.header.channelsPerLight;
+          int numPixels = min((uint16_t)(dataLen / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
-      // Validate data type (0x01 = RGB)
-      if (dataType == 0x01) {
-        uint8_t* pixelData = packetBuffer + sizeof(DDPHeader);
-
-        // Calculate starting pixel from byte offset (3 bytes per pixel)
-        int startPixel = offset / layerP.lights.header.channelsPerLight;
-        int numPixels = min((uint16_t)(dataLen / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
-
-        // Update LEDs
-        for (int i = 0; i < numPixels; i++) {
-          int ledIndex = startPixel + i;
-          if (ledIndex < layerP.lights.header.nrOfLights) {
-            memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &pixelData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+          for (int i = 0; i < numPixels; i++) {
+            int ledIndex = startPixel + i;
+            if (ledIndex < layerP.lights.header.nrOfLights) {
+              memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &pixelData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+              if (view == 0) {
+                memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &pixelData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+              } else {
+                layerP.layers[view - 1]->setLight(ledIndex, &pixelData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
+              }
+            }
           }
-        }
-        // Only update display if push flag is set
-        if (pushFlag) {
-          // FastLED.show();
-          // Serial.println("DDP: " + String(numPixels) + " pixels updated (offset: " + String(startPixel) + ")");
         }
       }
     }

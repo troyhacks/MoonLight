@@ -91,7 +91,6 @@ class ModuleLightsControl : public Module {
     });
   }
 
-  uint8_t nrOfPalettes = 0;
   // define the data model
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
@@ -123,7 +122,6 @@ class ModuleLightsControl : public Module {
     addControlValue(control, "Random");
     addControlValue(control, "Quin");
     addControlValue(control, "Orange");
-    nrOfPalettes = control["values"].as<JsonArray>().size();
 
     control = addControl(controls, "preset", "pad");
     control["width"] = 8;
