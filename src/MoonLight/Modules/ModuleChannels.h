@@ -29,7 +29,7 @@ class ModuleChannels : public Module {
     control = addControl(controls, "view", "select");
     control["default"] = 0;
     addControlValue(control, "Physical layer");
-    uint8_t i = 0;
+    uint8_t i = 1; //start with 1
     for (VirtualLayer* layer : layerP.layers) {
       Char<32> layerName;
       layerName.format("Layer %d", i);

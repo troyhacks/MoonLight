@@ -79,7 +79,7 @@ class ModuleLightsControl : public Module {
           pinRelayLightsOn = pinObject["GPIO"];
           pinMode(pinRelayLightsOn, OUTPUT);
           uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
-          digitalWrite(pinRelayLightsOn, newBri>0?HIGH:LOW);
+          digitalWrite(pinRelayLightsOn, newBri > 0 ? HIGH : LOW);
           EXT_LOGD(ML_TAG, "pinRelayLightsOn found %d", pinRelayLightsOn);
         } else if (usage == pin_Button_LightsOn) {
           pinButtonLightsOn = pinObject["GPIO"];
@@ -91,6 +91,7 @@ class ModuleLightsControl : public Module {
     });
   }
 
+  uint8_t nrOfPalettes = 0;
   // define the data model
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
@@ -122,6 +123,7 @@ class ModuleLightsControl : public Module {
     addControlValue(control, "Random");
     addControlValue(control, "Quin");
     addControlValue(control, "Orange");
+    nrOfPalettes = control["values"].as<JsonArray>().size();
 
     control = addControl(controls, "preset", "pad");
     control["width"] = 8;
@@ -156,7 +158,7 @@ class ModuleLightsControl : public Module {
       uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
       if (!!layerP.lights.header.brightness != !!newBri && pinRelayLightsOn != UINT8_MAX) {
         EXT_LOGD(ML_TAG, "pinRelayLightsOn %s", !!newBri ? "On" : "Off");
-        digitalWrite(pinRelayLightsOn, newBri>0?HIGH:LOW);
+        digitalWrite(pinRelayLightsOn, newBri > 0 ? HIGH : LOW);
       };
       layerP.lights.header.brightness = newBri;
     } else if (updatedItem.name == "palette") {

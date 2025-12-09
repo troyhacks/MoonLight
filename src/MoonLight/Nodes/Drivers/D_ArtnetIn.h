@@ -27,7 +27,7 @@ class ArtNetInDriver : public Node {
   uint8_t packetBuffer[1500];
 
   bool ddp = false;
-  uint8_t view = 0;
+  uint8_t view = 0;  // physical layer
   uint16_t port = 6454;
 
   void setup() override {
@@ -35,7 +35,7 @@ class ArtNetInDriver : public Node {
     addControl(port, "port", "number", 0, 65538);
     addControl(view, "view", "select");
     addControlValue("Physical layer");
-    uint8_t i = 0;
+    uint8_t i = 1;  // start with one
     for (VirtualLayer* layer : layerP.layers) {
       Char<32> layerName;
       layerName.format("Layer %d", i);
@@ -95,8 +95,6 @@ class ArtNetInDriver : public Node {
   };
 
   void handleArtNet() {
-    // LightsHeader* header = &layerP.lights.header;
-
     int packetSize = artnetUdp.parsePacket();
 
     if (packetSize >= sizeof(ArtNetHeader)) {
@@ -107,7 +105,7 @@ class ArtNetInDriver : public Node {
         ArtNetHeader* header = (ArtNetHeader*)packetBuffer;
         uint16_t opcode = header->opcode;
         //
-        // EXT_LOGD(ML_TAG, "%d", header->universe);
+        EXT_LOGD(ML_TAG, "size:%d universe:%d", packetSize, header->universe);
 
         // Check if it's a DMX packet (opcode 0x5000)
         if (opcode == 0x5000) {
@@ -120,10 +118,17 @@ class ArtNetInDriver : public Node {
           uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
           // Map DMX channels to LEDs (3 channels per LED: RGB)
-          int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights));
+          // Calculate starting LED position based on universe
+          // Each Art-Net universe supports up to 512 DMX channels
+          int startPixel = universe * (512 / layerP.lights.header.channelsPerLight);
+          int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
+          // Write to the correct offset
           for (int i = 0; i < numPixels; i++) {
-            memcpy(&layerP.lights.channels[i * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+            int ledIndex = startPixel + i;
+            if (ledIndex < layerP.lights.header.nrOfLights) {
+              memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+            }
           }
 
           // FastLED.show();
@@ -177,5 +182,3 @@ class ArtNetInDriver : public Node {
 };
 
 #endif
-
-// #include <WiFi.h>
