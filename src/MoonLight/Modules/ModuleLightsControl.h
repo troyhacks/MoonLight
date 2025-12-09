@@ -77,14 +77,20 @@ class ModuleLightsControl : public Module {
         uint8_t usage = pinObject["usage"];
         if (usage == pin_Relay_LightsOn) {
           pinRelayLightsOn = pinObject["GPIO"];
-          pinMode(pinRelayLightsOn, OUTPUT);
-          uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
-          digitalWrite(pinRelayLightsOn, newBri > 0 ? HIGH : LOW);
-          EXT_LOGD(ML_TAG, "pinRelayLightsOn found %d", pinRelayLightsOn);
+          if (GPIO_IS_VALID_OUTPUT_GPIO(pinRelayLightsOn)) {
+            pinMode(pinRelayLightsOn, OUTPUT);
+            uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
+            digitalWrite(pinRelayLightsOn, newBri > 0 ? HIGH : LOW);
+            EXT_LOGD(ML_TAG, "pinRelayLightsOn found %d", pinRelayLightsOn);
+          } else
+            EXT_LOGE(MB_TAG, "gpio %d not valid", pinRelayLightsOn);
         } else if (usage == pin_Button_LightsOn) {
           pinButtonLightsOn = pinObject["GPIO"];
-          pinMode(pinButtonLightsOn, INPUT_PULLUP);
-          EXT_LOGD(ML_TAG, "pinButtonLightsOn found %d", pinButtonLightsOn);
+          if (GPIO_IS_VALID_GPIO(pinButtonLightsOn)) {
+            pinMode(pinButtonLightsOn, INPUT_PULLUP);
+            EXT_LOGD(ML_TAG, "pinButtonLightsOn found %d", pinButtonLightsOn);
+          } else
+            EXT_LOGE(MB_TAG, "gpio %d not valid", pinButtonLightsOn);
         }
       }
       // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);

@@ -454,8 +454,8 @@ class ModuleIO : public Module {
     } else if (updatedItem.name == "jumper1" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
                                                                                               // rebuild with new jumper setting
       _state.data["modded"] = false;
-      newBoardID = _state.data["boardPreset"];                                                // run in sveltekit task
-    } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {    // not done by this module: done by UI
+      newBoardID = _state.data["boardPreset"];                                              // run in sveltekit task
+    } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
       // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       // set pins to default if modded is turned off
       JsonDocument doc;
@@ -506,11 +506,36 @@ class ModuleIO : public Module {
     for (JsonObject pinObject : _state.data["pins"].as<JsonArray>()) {
       uint8_t usage = pinObject["usage"];
       uint8_t gpio = pinObject["GPIO"];
-      if (usage == pin_SPI_SCK) ess->v_ETH_SPI_SCK = gpio;
-      if (usage == pin_SPI_MISO) ess->v_ETH_SPI_MISO = gpio;
-      if (usage == pin_SPI_MOSI) ess->v_ETH_SPI_MOSI = gpio;
-      if (usage == pin_PHY_CS) ess->v_ETH_PHY_CS = gpio;
-      if (usage == pin_PHY_IRQ) ess->v_ETH_PHY_IRQ = gpio;
+      if (usage == pin_SPI_SCK) {
+        if (GPIO_IS_VALID_GPIO(gpio))
+          ess->v_ETH_SPI_SCK = gpio;
+        else
+          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+      }
+      if (usage == pin_SPI_MISO) {
+        if (GPIO_IS_VALID_GPIO(gpio))
+          ess->v_ETH_SPI_MISO = gpio;
+        else
+          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+      }
+      if (usage == pin_SPI_MOSI) {
+        if (GPIO_IS_VALID_GPIO(gpio))
+          ess->v_ETH_SPI_MOSI = gpio;
+        else
+          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+      }
+      if (usage == pin_PHY_CS) {
+        if (GPIO_IS_VALID_GPIO(gpio))
+          ess->v_ETH_PHY_CS = gpio;
+        else
+          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+      }
+      if (usage == pin_PHY_IRQ) {
+        if (GPIO_IS_VALID_GPIO(gpio))
+          ess->v_ETH_PHY_IRQ = gpio;
+        else
+          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+      }
     }
 
     // allocate the pins found

@@ -26,13 +26,15 @@ class AudioSyncDriver : public Node {
   void loop() override {
     if (!WiFi.isConnected() && !ETH.connected()) {
       // make WLED Audio Sync network failure resilient - WIP
-      if (init) EXT_LOGI(ML_TAG, "Audio Sync: stopped");
-      //set all data to 0
-      memset(sharedData.bands, 0, sizeof(sharedData.bands));
-      sharedData.volume = 0;
-      sharedData.volumeRaw = 0;
-      sharedData.majorPeak = 0;
-      init = false;
+      if (init) {
+        // set all data to 0
+        memset(sharedData.bands, 0, sizeof(sharedData.bands));
+        sharedData.volume = 0;
+        sharedData.volumeRaw = 0;
+        sharedData.majorPeak = 0;
+        init = false;
+        EXT_LOGI(ML_TAG, "Audio Sync: stopped");
+      }
       return;
     }
 

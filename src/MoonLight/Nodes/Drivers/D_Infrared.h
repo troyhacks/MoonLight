@@ -44,7 +44,10 @@ class IRDriver : public Node {
         uint8_t usage = pinObject["usage"];
         if (usage == pin_Infrared) {
           pinInfrared = pinObject["GPIO"];
-          EXT_LOGD(ML_TAG, "pin_Infrared found %d", pinInfrared);
+          if (GPIO_IS_VALID_GPIO(pinInfrared)) {
+            EXT_LOGD(ML_TAG, "pin_Infrared found %d", pinInfrared);
+          } else
+            EXT_LOGE(MB_TAG, "gpio %d not valid", pinInfrared);
         }
       }
       if (pinInfrared != UINT8_MAX) {
@@ -352,9 +355,9 @@ class IRDriver : public Node {
       if (nec_repeat == false) {
         if (combined_code == codeOff || combined_code == codeOn) {  // Lights on/off
           newState["lightsOn"] = state.data["lightsOn"].as<bool>() ? false : true;
-        } else if (combined_code == codePaletteInc) {                                            // palette increase
+        } else if (combined_code == codePaletteInc) {                              // palette increase
           newState["palette"] = MIN(state.data["palette"].as<uint8_t>() + 1, 11);  // to do: replace 8 with max palette count
-        } else if (combined_code == codePaletteDec) {                                            // palette decrease
+        } else if (combined_code == codePaletteDec) {                              // palette decrease
           newState["palette"] = MAX(state.data["palette"].as<uint8_t>() - 1, 0);
         } else if (combined_code == codePresetDec) {  // next button - go to previous preset
           newState["preset"] = state.data["preset"];
