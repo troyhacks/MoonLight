@@ -32,7 +32,7 @@ Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLig
 | ---- | ----- | ---- | ---- |
 | Parallel LED Driver | <img width="100" src="https://github.com/user-attachments/assets/9cbe487e-f330-40a5-8b40-6663c83e5d90"/> | <img width="320" alt="Parallel" src="https://github.com/user-attachments/assets/0c6f1543-623a-45bf-98d7-f5ddd072a1c6" /> | Drive multiple LED types, all devices including ESP32-P4(-nano) supported<br>Light preset: See below<br>DMA buffer: set higher when LEDs flicker<br>Virtual LED Driver will be part of the Parallel LED driver.|
 | FastLED Driver | <img width="100" src="https://avatars.githubusercontent.com/u/5899270?s=48&v=4"/> | <img width="320" alt="FastLed" src="https://github.com/user-attachments/assets/d5ea1510-9766-4687-895a-b68c82575b8f" /> | Most used LED driver. Drive most common LEDs (WS2812). |
-| Art-Net In 🆕 | <img width="100" src="https://avatars.githubusercontent.com/u/1458252?s=200&v=4"> | DDP: Yes/No<br>Port<br>Universe Min-Max<br>View: Layers | Receive Art-Net (or DDP) packages e.g. from Touch Designer. See [below](#art-net-in) |
+| Art-Net In 🆕 | <img width="100" src="../../media/moonlight/Art-Net-In.png"> | DDP: Yes/No<br>Port<br>Universe Min-Max<br>View: Layers | Receive Art-Net (or DDP) packages e.g. from [Resolume](https://resolume.com/) or Touch Designer. See [below](#art-net-in) |
 | Art-Net Out| <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | Send Art-Net to Drive LEDS and DMX lights over the network. See [below](#art-net-out) |
 | Audio Sync | <img width="100" src="https://github.com/user-attachments/assets/bfedf80b-6596-41e7-a563-ba7dd58cc476"/> | No controls | Listens to audio sent over the local network by WLED-AC or WLED-MM and allows audio reactive effects (♪ & ♫) to use audio data (volume and bands (FFT)) |
 | HUB75 Driver | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | <img width="100" src="https://github.com/user-attachments/assets/4d386045-9526-4a5a-aa31-638058b31f32"/> | Drive HUB75 panels<br>Not implemented yet |
@@ -75,7 +75,7 @@ Receives Art-Net data from the network.
 * Universe Min-Max: Filters Universes (Art-Net only).
 * View: 
     * Select physical layer to directly store the received channels into the physical layer
-    * Select one of the (virtual layers) to take mapping into account (using layout specification and modifiers specified , see [Modifiers](https://moonmodules.org/MoonLight/moonlight/modifiers/), part of the [Effects Module](https://moonmodules.org/MoonLight/moonlight/effects/))
+    * Select one of the (virtual layers) to take mapping into account (using layout specification and modifiers specified (recommended), see [Modifiers](https://moonmodules.org/MoonLight/moonlight/modifiers/), part of the [Effects Module](https://moonmodules.org/MoonLight/moonlight/effects/))
 
 !!! tip "Running effects and Art-Net In"
     Effects can run at the same time, disable or delete them if you only want to run Art-Net In.
