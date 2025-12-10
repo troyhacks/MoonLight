@@ -29,7 +29,7 @@ class ArtNetInDriver : public Node {
   uint8_t view = 0;  // physical layer
   uint16_t port = 6454;
   uint16_t universeMin = 0;
-  uint16_t universeMax = 255;
+  uint16_t universeMax = 32767;
 
   void setup() override {
     addControl(ddp, "DDP", "checkbox");

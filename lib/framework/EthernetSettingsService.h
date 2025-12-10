@@ -112,7 +112,7 @@ public:
 
     // 🌙 compiler directives to variables
     #ifdef CONFIG_IDF_TARGET_ESP32S3 
-        int8_t v_ETH_SPI_SCK = INT8_MAX; //42; v_ETH_SPI_SCK is check if configured, see configureNetwork and ModuleIO
+        int8_t v_ETH_SPI_SCK = -1; //42; v_ETH_SPI_SCK is check if configured, see configureNetwork and ModuleIO
         int8_t v_ETH_SPI_MISO = 44;
         int8_t v_ETH_SPI_MOSI = 43;
 

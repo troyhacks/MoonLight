@@ -498,11 +498,11 @@ class ModuleIO : public Module {
     EXT_LOGD(MB_TAG, "Try to configure ethernet");
     EthernetSettingsService* ess = _sveltekit->getEthernetSettingsService();
     #ifdef CONFIG_IDF_TARGET_ESP32S3
-    ess->v_ETH_SPI_SCK = INT8_MAX;
-    ess->v_ETH_SPI_MISO = INT8_MAX;
-    ess->v_ETH_SPI_MOSI = INT8_MAX;
-    ess->v_ETH_PHY_CS = INT8_MAX;
-    ess->v_ETH_PHY_IRQ = INT8_MAX;
+    ess->v_ETH_SPI_SCK = -1;
+    ess->v_ETH_SPI_MISO = -1;
+    ess->v_ETH_SPI_MOSI = -1;
+    ess->v_ETH_PHY_CS = -1;
+    ess->v_ETH_PHY_IRQ = -1;
 
     auto assignIfValid = [](uint8_t gpio, uint8_t usage, int8_t& target) {
       if (GPIO_IS_VALID_GPIO(gpio))
@@ -534,7 +534,7 @@ class ModuleIO : public Module {
     }
 
     // allocate the pins found
-    if (ess->v_ETH_SPI_SCK != INT8_MAX && ess->v_ETH_SPI_MISO != INT8_MAX && ess->v_ETH_SPI_MOSI != INT8_MAX && ess->v_ETH_PHY_CS != INT8_MAX && ess->v_ETH_PHY_IRQ != INT8_MAX) {
+    if (ess->v_ETH_SPI_SCK != -1 && ess->v_ETH_SPI_MISO != -1 && ess->v_ETH_SPI_MOSI != -1 && ess->v_ETH_PHY_CS != -1 && ess->v_ETH_PHY_IRQ != -1) {
       // ess->v_ETH_PHY_TYPE = ETH_PHY_W5500;
       // ess->v_ETH_PHY_ADDR = 1;
       ess->v_ETH_PHY_RST = -1;  // not wired
