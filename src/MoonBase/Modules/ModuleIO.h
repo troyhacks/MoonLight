@@ -66,7 +66,8 @@ enum IO_Boards {
   board_none,  //
   board_QuinLEDDigUnoV3,
   board_QuinLEDDigQuadV3,
-  board_QuinLEDDigOctoV2,
+  board_QuinLEDDigOctaV2,
+  board_QuinLEDDig2Go,
   board_QuinLEDPenta,
   board_QuinLEDPentaPlus,
   board_SergUniShieldV5,
@@ -107,6 +108,7 @@ class ModuleIO : public Module {
     addControlValue(control, "QuinLED Dig Uno v3");
     addControlValue(control, "QuinLED Dig Quad v3");
     addControlValue(control, "QuinLED Dig Octa v2");
+    addControlValue(control, "QuinLED Dig 2Go");
     addControlValue(control, "QuinLED Penta");
     addControlValue(control, "QuinLED Penta Plus");
     addControlValue(control, "Serg Universal Shield v5");
@@ -230,7 +232,7 @@ class ModuleIO : public Module {
       JsonObject pin = pins.add<JsonObject>();
       pin["GPIO"] = gpio_num;
       pin["usage"] = 0;
-      pin["index"] = 0;
+      pin["index"] = 1;
 
       // Check if GPIO is valid
       bool is_valid = GPIO_IS_VALID_GPIO(gpio_num);
@@ -319,13 +321,28 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(13, pin_Temperature;
       // pinAssigner.assignPin(15, pin_I2S_SCK;
       // pinAssigner.assignPin(32, pin_Exposed;
-    } else if (boardID == board_QuinLEDDigOctoV2) {
+    } else if (boardID == board_QuinLEDDigOctaV2) {
       // Dig-Octa-32-8L
+      object["maxPower"] = 400;                         // 10A Fuse * 8 ... 400 W
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(33, pin_Relay);
       pinAssigner.assignPin(34, pin_ButtonPush);
-
+    } else if (boardID == board_QuinLEDDig2Go) {
+      // dig2go
+      object["maxPower"] = 10;  // USB powered: 2A / 10W
+      pinAssigner.assignPin(0, pin_Button_LightsOn);
+      pinAssigner.assignPin(5, pin_Infrared);
+      pinAssigner.assignPin(16, pin_LED);
+      pinAssigner.assignPin(12, pin_Relay_LightsOn);
+      pinAssigner.assignPin(19, pin_I2S_SD);
+      pinAssigner.assignPin(4, pin_I2S_WS);
+      pinAssigner.assignPin(18, pin_I2S_SCK);
+      pinAssigner.assignPin(21, pin_I2C_SDA);
+      pinAssigner.assignPin(22, pin_I2C_SCL);
+      pinAssigner.assignPin(23, pin_Exposed);
+      pinAssigner.assignPin(25, pin_Exposed);
+      // pinAssigner.assignPin(xx, pin_I2S_MCLK);
     } else if (boardID == board_QuinLEDPenta) {
       uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
@@ -436,6 +453,10 @@ class ModuleIO : public Module {
         EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         newBoardID = _state.data["boardPreset"];  // run in sveltekit task
       }
+    } else if (updatedItem.name == "jumper1" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+                                                                                              // rebuild with new jumper setting
+      _state.data["modded"] = false;
+      newBoardID = _state.data["boardPreset"];                                              // run in sveltekit task
     } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
       // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
       // set pins to default if modded is turned off
@@ -477,25 +498,43 @@ class ModuleIO : public Module {
     EXT_LOGD(MB_TAG, "Try to configure ethernet");
     EthernetSettingsService* ess = _sveltekit->getEthernetSettingsService();
     #ifdef CONFIG_IDF_TARGET_ESP32S3
-    ess->v_ETH_SPI_SCK = UINT8_MAX;
-    ess->v_ETH_SPI_MISO = UINT8_MAX;
-    ess->v_ETH_SPI_MOSI = UINT8_MAX;
-    ess->v_ETH_PHY_CS = UINT8_MAX;
-    ess->v_ETH_PHY_IRQ = UINT8_MAX;
+    ess->v_ETH_SPI_SCK = -1;
+    ess->v_ETH_SPI_MISO = -1;
+    ess->v_ETH_SPI_MOSI = -1;
+    ess->v_ETH_PHY_CS = -1;
+    ess->v_ETH_PHY_IRQ = -1;
+
+    auto assignIfValid = [](uint8_t gpio, uint8_t usage, int8_t& target) {
+      if (GPIO_IS_VALID_GPIO(gpio))
+        target = gpio;
+      else
+        EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+    };
+
     // if ethernet pins change
     // find the pins needed
     for (JsonObject pinObject : _state.data["pins"].as<JsonArray>()) {
       uint8_t usage = pinObject["usage"];
       uint8_t gpio = pinObject["GPIO"];
-      if (usage == pin_SPI_SCK) ess->v_ETH_SPI_SCK = gpio;
-      if (usage == pin_SPI_MISO) ess->v_ETH_SPI_MISO = gpio;
-      if (usage == pin_SPI_MOSI) ess->v_ETH_SPI_MOSI = gpio;
-      if (usage == pin_PHY_CS) ess->v_ETH_PHY_CS = gpio;
-      if (usage == pin_PHY_IRQ) ess->v_ETH_PHY_IRQ = gpio;
+      if (usage == pin_SPI_SCK) {
+        assignIfValid(gpio, usage, ess->v_ETH_SPI_SCK);
+      }
+      if (usage == pin_SPI_MISO) {
+        assignIfValid(gpio, usage, ess->v_ETH_SPI_MISO);
+      }
+      if (usage == pin_SPI_MOSI) {
+        assignIfValid(gpio, usage, ess->v_ETH_SPI_MOSI);
+      }
+      if (usage == pin_PHY_CS) {
+        assignIfValid(gpio, usage, ess->v_ETH_PHY_CS);
+      }
+      if (usage == pin_PHY_IRQ) {
+        assignIfValid(gpio, usage, ess->v_ETH_PHY_IRQ);
+      }
     }
 
     // allocate the pins found
-    if (ess->v_ETH_SPI_SCK != UINT8_MAX && ess->v_ETH_SPI_MISO != UINT8_MAX && ess->v_ETH_SPI_MOSI != UINT8_MAX && ess->v_ETH_PHY_CS != UINT8_MAX && ess->v_ETH_PHY_IRQ != UINT8_MAX) {
+    if (ess->v_ETH_SPI_SCK != -1 && ess->v_ETH_SPI_MISO != -1 && ess->v_ETH_SPI_MOSI != -1 && ess->v_ETH_PHY_CS != -1 && ess->v_ETH_PHY_IRQ != -1) {
       // ess->v_ETH_PHY_TYPE = ETH_PHY_W5500;
       // ess->v_ETH_PHY_ADDR = 1;
       ess->v_ETH_PHY_RST = -1;  // not wired

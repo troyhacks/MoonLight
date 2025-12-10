@@ -23,19 +23,22 @@ class ArtNetInDriver : public Node {
   // uint16_t ARTNET_PORT = 6454;
   // uint16_t DDP_PORT = 4048;
   WiFiUDP artnetUdp;
-  WiFiUDP ddpUdp;
   uint8_t packetBuffer[1500];
 
   bool ddp = false;
-  uint8_t view = 0;
+  uint8_t view = 0;  // physical layer
   uint16_t port = 6454;
+  uint16_t universeMin = 0;
+  uint16_t universeMax = 32767;
 
   void setup() override {
     addControl(ddp, "DDP", "checkbox");
     addControl(port, "port", "number", 0, 65538);
+    addControl(universeMin, "universeMin", "number", 0, 32767);
+    addControl(universeMax, "universeMax", "number", 0, 32767);
     addControl(view, "view", "select");
     addControlValue("Physical layer");
-    uint8_t i = 0;
+    uint8_t i = 1;  // start with one
     for (VirtualLayer* layer : layerP.layers) {
       Char<32> layerName;
       layerName.format("Layer %d", i);
@@ -55,19 +58,34 @@ class ArtNetInDriver : public Node {
   bool init = false;
 
   void loop() override {
-    if (!WiFi.localIP() && !ETH.localIP()) return;
+    if (!WiFi.localIP() && !ETH.localIP()) {
+      if (init) {
+        EXT_LOGI(ML_TAG, "Stop Listening for %s on port %d", ddp ? "DDP" : "Art-Net", port);
+        artnetUdp.stop();
+        init = false;
+      }
+      return;
+    }
+
     if (!init) {
-      if (ddp)
-        ddpUdp.begin(port);
-      else
-        artnetUdp.begin(port);
-      EXT_LOGD(ML_TAG, "Listening for %s on port %d", ddp ? "DDP" : "Art-Net", port);
+      artnetUdp.begin(port);
+      EXT_LOGI(ML_TAG, "Listening for %s on port %d", ddp ? "DDP" : "Art-Net", port);
       init = true;
     }
-    if (ddp)
-      handleDDP();
-    else
-      handleArtNet();
+
+    while (int packetSize = artnetUdp.parsePacket()) {
+      if (packetSize < sizeof(ArtNetHeader) || packetSize > sizeof(packetBuffer)) {
+        artnetUdp.clear();  // drains all available packets
+        continue;
+      }
+
+      artnetUdp.read(packetBuffer, min(packetSize, (int)sizeof(packetBuffer)));
+
+      if (ddp)
+        handleDDP();
+      else
+        handleArtNet();
+    }
   }
 
   // Art-Net Configuration
@@ -95,81 +113,62 @@ class ArtNetInDriver : public Node {
   };
 
   void handleArtNet() {
-    // LightsHeader* header = &layerP.lights.header;
+    // Verify Art-Net packet
+    if (memcmp(packetBuffer, "Art-Net", 7) == 0) {
+      ArtNetHeader* header = (ArtNetHeader*)packetBuffer;
+      uint16_t opcode = header->opcode;
 
-    int packetSize = artnetUdp.parsePacket();
+      // EXT_LOGD(ML_TAG, "size:%d universe:%d", packetSize, header->universe);
 
-    if (packetSize >= sizeof(ArtNetHeader)) {
-      artnetUdp.read(packetBuffer, packetSize);
+      // Check if it's a DMX packet (opcode 0x5000)
+      if (opcode == 0x5000) {
+        uint16_t universe = header->universe;
+        if (universe >= universeMin && universe <= universeMax) {
+          uint16_t dataLength = (header->length >> 8) | (header->length << 8);
 
-      // Verify Art-Net packet
-      if (memcmp(packetBuffer, "Art-Net", 7) == 0) {
-        ArtNetHeader* header = (ArtNetHeader*)packetBuffer;
-        uint16_t opcode = header->opcode;
-        //
-        // EXT_LOGD(ML_TAG, "%d", header->universe);
-
-        // Check if it's a DMX packet (opcode 0x5000)
-        if (opcode == 0x5000) {
-          uint16_t universe = header->universe;
-          uint16_t dataLength = (header->length >> 8) | (header->length << 8);  // Swap bytes
-
-          // Process if it's our universe
-
-          // if (universe == artnetUniverse) { // all universes welcome
           uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
-          // Map DMX channels to LEDs (3 channels per LED: RGB)
-          int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights));
+          int startPixel = (universe-universeMin) * (512 / layerP.lights.header.channelsPerLight);
+          int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
           for (int i = 0; i < numPixels; i++) {
-            memcpy(&layerP.lights.channels[i * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+            int ledIndex = startPixel + i;
+            if (ledIndex < layerP.lights.header.nrOfLights) {
+              if (view == 0) {
+                memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+              } else {
+                layerP.layers[view - 1]->setLight(ledIndex, &dmxData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
+              }
+            }
           }
-
-          // FastLED.show();
-          // Serial.println("Art-Net: " + String(numPixels) + " pixels updated");
-          // }
         }
       }
     }
   }
 
   void handleDDP() {
-    int packetSize = ddpUdp.parsePacket();
+    DDPHeader* header = (DDPHeader*)packetBuffer;
 
-    if (packetSize >= sizeof(DDPHeader)) {
-      ddpUdp.read(packetBuffer, packetSize);
+    // bool pushFlag = (header->flags & 0x80) != 0;
+    uint8_t dataType = header->dataType;
 
-      DDPHeader* header = (DDPHeader*)packetBuffer;
+    uint32_t offset = (header->offset >> 24) | ((header->offset >> 8) & 0xFF00) | ((header->offset << 8) & 0xFF0000) | (header->offset << 24);
+    uint16_t dataLen = (header->dataLen >> 8) | (header->dataLen << 8);
 
-      // Extract header fields
-      bool pushFlag = (header->flags & 0x80) != 0;  // Bit 7
-      uint8_t dataType = header->dataType;
+    if (dataType == 0x01) {
+      uint8_t* pixelData = packetBuffer + sizeof(DDPHeader);
 
-      // Convert big-endian offset and length
-      uint32_t offset = (header->offset >> 24) | ((header->offset >> 8) & 0xFF00) | ((header->offset << 8) & 0xFF0000) | (header->offset << 24);
+      int startPixel = offset / layerP.lights.header.channelsPerLight;
+      int numPixels = min((uint16_t)(dataLen / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
-      uint16_t dataLen = (header->dataLen >> 8) | (header->dataLen << 8);
-
-      // Validate data type (0x01 = RGB)
-      if (dataType == 0x01) {
-        uint8_t* pixelData = packetBuffer + sizeof(DDPHeader);
-
-        // Calculate starting pixel from byte offset (3 bytes per pixel)
-        int startPixel = offset / layerP.lights.header.channelsPerLight;
-        int numPixels = min((uint16_t)(dataLen / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
-
-        // Update LEDs
-        for (int i = 0; i < numPixels; i++) {
-          int ledIndex = startPixel + i;
-          if (ledIndex < layerP.lights.header.nrOfLights) {
+      for (int i = 0; i < numPixels; i++) {
+        int ledIndex = startPixel + i;
+        if (ledIndex < layerP.lights.header.nrOfLights) {
+          if (view == 0) {
             memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &pixelData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+          } else {
+            layerP.layers[view - 1]->setLight(ledIndex, &pixelData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
           }
-        }
-        // Only update display if push flag is set
-        if (pushFlag) {
-          // FastLED.show();
-          // Serial.println("DDP: " + String(numPixels) + " pixels updated (offset: " + String(startPixel) + ")");
         }
       }
     }
@@ -177,5 +176,3 @@ class ArtNetInDriver : public Node {
 };
 
 #endif
-
-// #include <WiFi.h>

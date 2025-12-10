@@ -22,7 +22,7 @@ class ModuleMoonLightInfo : public Module {
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
     JsonObject control;  // state.data has one or more properties
-    JsonArray rows;    // if a control is an array, this is the rows of the array
+    JsonArray rows;      // if a control is an array, this is the rows of the array
 
     addControl(controls, "nrOfLights", "number", 0, 65535, true);
     addControl(controls, "channelsPerLight", "number", 0, 65535, true);
@@ -34,6 +34,7 @@ class ModuleMoonLightInfo : public Module {
     control["crud"] = "r";
     rows = control["n"].to<JsonArray>();
     {
+      addControl(rows, "layer", "number", 0, 255, true);
       addControl(rows, "nrOfLights", "number", 0, 65535, true);
       addControl(rows, "size", "coord3D", 0, UINT16_MAX, true);
       addControl(rows, "mappingTable#", "number", 0, 65535, true);
@@ -80,6 +81,7 @@ class ModuleMoonLightInfo : public Module {
           }
         }
 
+        data["layers"][index]["layer"] = index + 1;  // start with one
         data["layers"][index]["nrOfLights"] = layer->nrOfLights;
         data["layers"][index]["size"]["x"] = layer->size.x;
         data["layers"][index]["size"]["y"] = layer->size.y;

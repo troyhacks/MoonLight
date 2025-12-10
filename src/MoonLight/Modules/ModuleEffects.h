@@ -27,7 +27,6 @@ class ModuleEffects : public NodeManager {
   void begin() override {
     defaultNodeName = getNameAndTags<RandomEffect>();
     nodes = &(layerP.layers[0]->nodes);  // to do add nodes from all layers...
-
     NodeManager::begin();
 
   #if FT_ENABLED(FT_MONITOR)
@@ -61,8 +60,8 @@ class ModuleEffects : public NodeManager {
     EXT_LOGV(ML_TAG, "");
     JsonObject control;  // state.data has one or more properties
     control = addControl(controls, "layer", "select");
-    control["default"] = 0;
-    uint8_t i = 0;
+    control["default"] = 1;
+    uint8_t i = 1; //start with 1
     for (VirtualLayer* layer : layerP.layers) {
       addControlValue(control, i);
       i++;

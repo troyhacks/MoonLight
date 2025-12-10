@@ -336,7 +336,7 @@ void VirtualLayer::addLight(Coord3D position) {
   if (position.x != UINT16_MAX) {  // can be set to UINT16_MAX by modifier todo: check multiple modifiers
     uint16_t indexV = XYZUnModified(position);
     if (indexV < mappingTableSize) {
-      nrOfLights = indexV + 1;
+      nrOfLights = MAX(nrOfLights, indexV + 1);
       addIndexP(mappingTable[indexV], layerP->indexP);
     }
   } else {
