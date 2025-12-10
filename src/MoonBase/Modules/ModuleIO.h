@@ -498,50 +498,43 @@ class ModuleIO : public Module {
     EXT_LOGD(MB_TAG, "Try to configure ethernet");
     EthernetSettingsService* ess = _sveltekit->getEthernetSettingsService();
     #ifdef CONFIG_IDF_TARGET_ESP32S3
-    ess->v_ETH_SPI_SCK = UINT8_MAX;
-    ess->v_ETH_SPI_MISO = UINT8_MAX;
-    ess->v_ETH_SPI_MOSI = UINT8_MAX;
-    ess->v_ETH_PHY_CS = UINT8_MAX;
-    ess->v_ETH_PHY_IRQ = UINT8_MAX;
+    ess->v_ETH_SPI_SCK = INT8_MAX;
+    ess->v_ETH_SPI_MISO = INT8_MAX;
+    ess->v_ETH_SPI_MOSI = INT8_MAX;
+    ess->v_ETH_PHY_CS = INT8_MAX;
+    ess->v_ETH_PHY_IRQ = INT8_MAX;
+
+    auto assignIfValid = [](uint8_t gpio, uint8_t usage, int8_t& target) {
+      if (GPIO_IS_VALID_GPIO(gpio))
+        target = gpio;
+      else
+        EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+    };
+
     // if ethernet pins change
     // find the pins needed
     for (JsonObject pinObject : _state.data["pins"].as<JsonArray>()) {
       uint8_t usage = pinObject["usage"];
       uint8_t gpio = pinObject["GPIO"];
       if (usage == pin_SPI_SCK) {
-        if (GPIO_IS_VALID_GPIO(gpio))
-          ess->v_ETH_SPI_SCK = gpio;
-        else
-          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+        assignIfValid(gpio, usage, ess->v_ETH_SPI_SCK);
       }
       if (usage == pin_SPI_MISO) {
-        if (GPIO_IS_VALID_GPIO(gpio))
-          ess->v_ETH_SPI_MISO = gpio;
-        else
-          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+        assignIfValid(gpio, usage, ess->v_ETH_SPI_MISO);
       }
       if (usage == pin_SPI_MOSI) {
-        if (GPIO_IS_VALID_GPIO(gpio))
-          ess->v_ETH_SPI_MOSI = gpio;
-        else
-          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+        assignIfValid(gpio, usage, ess->v_ETH_SPI_MOSI);
       }
       if (usage == pin_PHY_CS) {
-        if (GPIO_IS_VALID_GPIO(gpio))
-          ess->v_ETH_PHY_CS = gpio;
-        else
-          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+        assignIfValid(gpio, usage, ess->v_ETH_PHY_CS);
       }
       if (usage == pin_PHY_IRQ) {
-        if (GPIO_IS_VALID_GPIO(gpio))
-          ess->v_ETH_PHY_IRQ = gpio;
-        else
-          EXT_LOGE(MB_TAG, "%d: gpio %d not valid", usage, gpio);
+        assignIfValid(gpio, usage, ess->v_ETH_PHY_IRQ);
       }
     }
 
     // allocate the pins found
-    if (ess->v_ETH_SPI_SCK != UINT8_MAX && ess->v_ETH_SPI_MISO != UINT8_MAX && ess->v_ETH_SPI_MOSI != UINT8_MAX && ess->v_ETH_PHY_CS != UINT8_MAX && ess->v_ETH_PHY_IRQ != UINT8_MAX) {
+    if (ess->v_ETH_SPI_SCK != INT8_MAX && ess->v_ETH_SPI_MISO != INT8_MAX && ess->v_ETH_SPI_MOSI != INT8_MAX && ess->v_ETH_PHY_CS != INT8_MAX && ess->v_ETH_PHY_IRQ != INT8_MAX) {
       // ess->v_ETH_PHY_TYPE = ETH_PHY_W5500;
       // ess->v_ETH_PHY_ADDR = 1;
       ess->v_ETH_PHY_RST = -1;  // not wired

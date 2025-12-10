@@ -28,14 +28,14 @@ class ArtNetInDriver : public Node {
   bool ddp = false;
   uint8_t view = 0;  // physical layer
   uint16_t port = 6454;
-  uint8_t universeMin = 0;
-  uint8_t universeMax = 255;
+  uint16_t universeMin = 0;
+  uint16_t universeMax = 255;
 
   void setup() override {
     addControl(ddp, "DDP", "checkbox");
     addControl(port, "port", "number", 0, 65538);
-    addControl(universeMin, "universeMin", "number", 0, 65538);
-    addControl(universeMax, "universeMax", "number", 0, 65538);
+    addControl(universeMin, "universeMin", "number", 0, 32767);
+    addControl(universeMax, "universeMax", "number", 0, 32767);
     addControl(view, "view", "select");
     addControlValue("Physical layer");
     uint8_t i = 1;  // start with one
@@ -149,7 +149,7 @@ class ArtNetInDriver : public Node {
   void handleDDP() {
     DDPHeader* header = (DDPHeader*)packetBuffer;
 
-    bool pushFlag = (header->flags & 0x80) != 0;
+    // bool pushFlag = (header->flags & 0x80) != 0;
     uint8_t dataType = header->dataType;
 
     uint32_t offset = (header->offset >> 24) | ((header->offset >> 8) & 0xFF00) | ((header->offset << 8) & 0xFF0000) | (header->offset << 24);

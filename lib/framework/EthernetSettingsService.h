@@ -112,15 +112,15 @@ public:
 
     // 🌙 compiler directives to variables
     #ifdef CONFIG_IDF_TARGET_ESP32S3 
-        uint8_t v_ETH_SPI_SCK = UINT8_MAX; //42; v_ETH_SPI_SCK is check if configured, see configureNetwork and ModuleIO
-        uint8_t v_ETH_SPI_MISO = 44;
-        uint8_t v_ETH_SPI_MOSI = 43;
+        int8_t v_ETH_SPI_SCK = INT8_MAX; //42; v_ETH_SPI_SCK is check if configured, see configureNetwork and ModuleIO
+        int8_t v_ETH_SPI_MISO = 44;
+        int8_t v_ETH_SPI_MOSI = 43;
 
         eth_phy_type_t v_ETH_PHY_TYPE = ETH_PHY_W5500; //currently only one supported for S3 ...
         int32_t v_ETH_PHY_ADDR = 1;
-        int v_ETH_PHY_CS = 41;
-        int v_ETH_PHY_IRQ = 2; // -1 if you won't wire
-        int v_ETH_PHY_RST = 1; // -1 if you won't wire
+        int8_t v_ETH_PHY_CS = 41;
+        int8_t v_ETH_PHY_IRQ = 2; // -1 if you won't wire
+        int8_t v_ETH_PHY_RST = 1; // -1 if you won't wire
     #endif
 
 private:

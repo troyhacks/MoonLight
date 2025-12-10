@@ -115,7 +115,7 @@ Firmware binaries come in 2 flavours: including boot and partition (merged) and 
      * replace port and file to match your setup
      * optionally add erase-flash before write-flash
      * -b 2000000: Baud rate: lower if too high for your device
-     * use ./build/release/MoonLight_esp32-s3-devkitc-1-n16r8v_0-6-0.bin and address 0x10000 to flash only the MoonLight partition
+     * use ./build/release/MoonLight_esp32-s3-devkitc-1-n16r8v_0-6-1.bin and address 0x10000 to flash only the MoonLight partition
 
 ### Adding an ESP32 device Definition
 

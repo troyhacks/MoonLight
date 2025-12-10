@@ -178,5 +178,5 @@ ESPConnect is a browser-based control center for ESP32- and ESP8266-class boards
 * Select Flash Tools, go to Flash Firmware
 * Open a firmware.bin file. 
     * Files ending with _webflash.bin (e.g. MoonLight_esp32-d0_0-6-1_webflash.bin) also formats the partition: choose Flash offset 0x0 or recommended offsets Bootloader. webflash files can be found [here](https://github.com/MoonModules/MoonLight/tree/main/firmware/installer) and are used by the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) as well.
-    * Files ending with .bin, without _webflash (e.g. MoonLight_esp32-d0_0-6-1.bin). Choose recommended offsets App0 (Or App1?). Only use if you previously had MoonLight installed on the device, so the partitions has already been set. These files can be found in [published releases](https://github.com/MoonModules/MoonLight/releases).
+    * Files ending with .bin, without _webflash (e.g. MoonLight_esp32-d0_0-6-1.bin). Choose recommended offsets App0. Only use if you previously had MoonLight installed on the device, so the partitions has already been set. These files can be found in [published releases](https://github.com/MoonModules/MoonLight/releases).
     * Nightly builds if shared on [discord](https://discord.gg/MTn9mVUG5n).

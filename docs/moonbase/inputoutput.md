@@ -63,7 +63,7 @@ For each board the following presets are defined:
 
 * Dig 2Go, Dig Uno, Dig Quad: Choose the esp32-d0 (4MB) board in the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
 * Dig Octa: Choose the esp32-d0-16mb board in the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
-* On first install, erase flash first (Especially when other firmware like WLED was on it) as MoonLight uses a partition scheme with 3MB of flash (no ota at the moment).
+* On first install, erase flash first (Especially when other firmware like WLED was on it) as MoonLight uses a partition scheme with 3MB of flash (currently no OTA support).
 * You might need to reset your router if you first run WLED on the same MCU and no new IP is assigned.
 
 !!! Tip "Dig Uno USB"
