@@ -75,9 +75,11 @@ class ModuleLightsControl : public Module {
       pinButtonLightsOn = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
+        uint8_t gpio = pinObject["GPIO"];
+
         if (usage == pin_Relay_LightsOn) {
-          pinRelayLightsOn = pinObject["GPIO"];
-          if (GPIO_IS_VALID_OUTPUT_GPIO(pinRelayLightsOn)) {
+          if (GPIO_IS_VALID_OUTPUT_GPIO(gpio)) {
+            pinRelayLightsOn = gpio;
             pinMode(pinRelayLightsOn, OUTPUT);
             uint8_t newBri = _state.data["lightsOn"] ? _state.data["brightness"] : 0;
             digitalWrite(pinRelayLightsOn, newBri > 0 ? HIGH : LOW);
@@ -85,8 +87,8 @@ class ModuleLightsControl : public Module {
           } else
             EXT_LOGE(MB_TAG, "gpio %d not valid", pinRelayLightsOn);
         } else if (usage == pin_Button_LightsOn) {
-          pinButtonLightsOn = pinObject["GPIO"];
-          if (GPIO_IS_VALID_GPIO(pinButtonLightsOn)) {
+          if (GPIO_IS_VALID_GPIO(gpio)) {
+            pinButtonLightsOn = gpio;
             pinMode(pinButtonLightsOn, INPUT_PULLUP);
             EXT_LOGD(ML_TAG, "pinButtonLightsOn found %d", pinButtonLightsOn);
           } else

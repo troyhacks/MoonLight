@@ -28,10 +28,14 @@ class ArtNetInDriver : public Node {
   bool ddp = false;
   uint8_t view = 0;  // physical layer
   uint16_t port = 6454;
+  uint8_t universeMin = 0;
+  uint8_t universeMax = 255;
 
   void setup() override {
     addControl(ddp, "DDP", "checkbox");
     addControl(port, "port", "number", 0, 65538);
+    addControl(universeMin, "universeMin", "number", 0, 65538);
+    addControl(universeMax, "universeMax", "number", 0, 65538);
     addControl(view, "view", "select");
     addControlValue("Physical layer");
     uint8_t i = 1;  // start with one
@@ -71,18 +75,16 @@ class ArtNetInDriver : public Node {
 
     while (int packetSize = artnetUdp.parsePacket()) {
       if (packetSize < sizeof(ArtNetHeader) || packetSize > sizeof(packetBuffer)) {
-        artnetUdp.clear();
+        artnetUdp.clear();  // drains all available packets
         continue;
       }
 
-      if (packetSize >= sizeof(ArtNetHeader)) {
-        artnetUdp.read(packetBuffer, min(packetSize, (int)sizeof(packetBuffer)));
+      artnetUdp.read(packetBuffer, min(packetSize, (int)sizeof(packetBuffer)));
 
-        if (ddp)
-          handleDDP();
-        else
-          handleArtNet();
-      }
+      if (ddp)
+        handleDDP();
+      else
+        handleArtNet();
     }
   }
 
@@ -121,20 +123,22 @@ class ArtNetInDriver : public Node {
       // Check if it's a DMX packet (opcode 0x5000)
       if (opcode == 0x5000) {
         uint16_t universe = header->universe;
-        uint16_t dataLength = (header->length >> 8) | (header->length << 8);
+        if (universe >= universeMin && universe <= universeMax) {
+          uint16_t dataLength = (header->length >> 8) | (header->length << 8);
 
-        uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
+          uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
-        int startPixel = universe * (512 / layerP.lights.header.channelsPerLight);
-        int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
+          int startPixel = (universe-universeMin) * (512 / layerP.lights.header.channelsPerLight);
+          int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
-        for (int i = 0; i < numPixels; i++) {
-          int ledIndex = startPixel + i;
-          if (ledIndex < layerP.lights.header.nrOfLights) {
-            if (view == 0) {
-              memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
-            } else {
-              layerP.layers[view - 1]->setLight(ledIndex, &dmxData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
+          for (int i = 0; i < numPixels; i++) {
+            int ledIndex = startPixel + i;
+            if (ledIndex < layerP.lights.header.nrOfLights) {
+              if (view == 0) {
+                memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
+              } else {
+                layerP.layers[view - 1]->setLight(ledIndex, &dmxData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
+              }
             }
           }
         }

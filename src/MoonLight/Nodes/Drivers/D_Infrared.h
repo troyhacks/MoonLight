@@ -42,14 +42,17 @@ class IRDriver : public Node {
       pinInfrared = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
+        uint8_t gpio = pinObject["GPIO"];
         if (usage == pin_Infrared) {
-          pinInfrared = pinObject["GPIO"];
-          if (GPIO_IS_VALID_GPIO(pinInfrared)) {
+          if (GPIO_IS_VALID_GPIO(gpio)) {
+            pinInfrared = gpio;
             EXT_LOGD(ML_TAG, "pin_Infrared found %d", pinInfrared);
-          } else
+          } else {
             EXT_LOGE(MB_TAG, "gpio %d not valid", pinInfrared);
+          }
         }
       }
+      
       if (pinInfrared != UINT8_MAX) {
         EXT_LOGI(IR_DRIVER_TAG, "Changing to pin #%d", pinInfrared);
 

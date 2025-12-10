@@ -323,12 +323,14 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(32, pin_Exposed;
     } else if (boardID == board_QuinLEDDigOctaV2) {
       // Dig-Octa-32-8L
+      object["maxPower"] = 400;                         // 10A Fuse * 8 ... 400 W
       uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(33, pin_Relay);
       pinAssigner.assignPin(34, pin_ButtonPush);
     } else if (boardID == board_QuinLEDDig2Go) {
       // dig2go
+      object["maxPower"] = 10;  // USB powered: 2A / 10W
       pinAssigner.assignPin(0, pin_Button_LightsOn);
       pinAssigner.assignPin(5, pin_Infrared);
       pinAssigner.assignPin(16, pin_LED);

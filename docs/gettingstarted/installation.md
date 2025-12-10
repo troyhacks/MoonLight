@@ -165,3 +165,18 @@ Keep this page visible until installation complete.
 
 * To install the latest release, you can also use the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) (no need to erase the device if updating)
 * Upload directly from VSCode, see [Develop / Installation](https://moonmodules.org/MoonLight/develop/installation/)
+
+## Update firmware using ESPConnect
+
+ESPConnect is a browser-based control center for ESP32- and ESP8266-class boards. It runs entirely inside a modern Chromium browser so you can inspect hardware details, manage SPIFFS files, back up flash, and deploy firmware without installing desktop software. It is based on [Jason2866](https://github.com/Jason2866)'s [WebSerial ESPTool](https://github.com/Jason2866/WebSerial_ESPTool/tree/development).
+
+[ESPConnect on GitHub](https://github.com/thelastoutpostworkshop/ESPConnect)
+
+[ESPConnect](https://thelastoutpostworkshop.github.io/microcontroller_devkit/espconnect/)
+
+* Click Connect and choose your device when the browser asks for permission.
+* Select Flash Tools, go to Flash Firmware
+* Open a firmware.bin file. 
+    * Files ending with _webflash.bin (e.g. MoonLight_esp32-d0_0-6-1_webflash.bin) also formats the partition: choose Flash offset 0x0 or recommended offsets Bootloader. webflash files can be found [here](https://github.com/MoonModules/MoonLight/tree/main/firmware/installer) and are used by the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) as well.
+    * Files ending with .bin, without _webflash (e.g. MoonLight_esp32-d0_0-6-1.bin). Choose recommended offsets App0 (Or App1?). Only use if you previously had MoonLight installed on the device, so the partitions has already been set. These files can be found in [published releases](https://github.com/MoonModules/MoonLight/releases).
+    * Nightly builds if shared on [discord](https://discord.gg/MTn9mVUG5n).
