@@ -32,8 +32,13 @@
 #include "esp32c6/rom/rtc.h"
 #define ESP_TARGET "ESP32-C6";
 #elif CONFIG_IDF_TARGET_ESP32P4 // 🌙
-#include "esp32p4/rom/rtc.h"
-#define ESP_TARGET "ESP32-P4";
+    #include "esp32p4/rom/rtc.h"
+    #define ESP_TARGET "ESP32-P4";
+    #include "esp_hosted_api_types.h"
+    #include <esp_hosted.h>
+    // #include "esp_hosted_host_fw_ver.h"
+    // #include "esp_hosted_misc.h"
+    // #include "esp_hosted_ota.h"
 #else
 #error Target CONFIG_IDF_TARGET is not supported
 #endif
@@ -169,6 +174,13 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
     root["core_temp"] = temperatureRead();
     root["cpu_reset_reason"] = verbosePrintResetReason(esp_reset_reason());
     root["uptime"] = millis() / 1000;
+    #ifdef CONFIG_IDF_TARGET_ESP32P4
+        esp_hosted_coprocessor_fwver_t c6_fw_version;
+        esp_hosted_get_coprocessor_fwversion(&c6_fw_version);
+        char hfw[10];
+        snprintf(hfw, 32, "v%d.%d.%d", c6_fw_version.major1, c6_fw_version.minor1, c6_fw_version.patch1);
+        root["coprocessor"] = hfw;
+    #endif
 
     heapHealth(root["heap_info_app"].to<JsonVariant>(), MALLOC_CAP_INTERNAL);
     heapHealth(root["heap_info_dma"].to<JsonVariant>(), MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);

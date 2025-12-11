@@ -452,6 +452,21 @@
 					</div>
 				</div>
 
+				<!-- 🌙 -->
+				{#if systemInformation.coprocessor}
+					<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
+						<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
+							<CPU class="text-primary-content h-auto w-full scale-75" />
+						</div>
+						<div>
+							<div class="font-bold">Coprocessor</div>
+							<div class="text-sm opacity-75">
+								{systemInformation.coprocessor}
+							</div>
+						</div>
+					</div>
+				{/if}
+
 				<div class="rounded-box bg-base-100 flex items-center space-x-3 px-4 py-2">
 					<div class="mask mask-hexagon bg-primary h-auto w-10 flex-none">
 						<Speed class="text-primary-content h-auto w-full scale-75" />

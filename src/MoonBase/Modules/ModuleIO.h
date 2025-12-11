@@ -112,8 +112,8 @@ class ModuleIO : public Module {
     addControlValue(control, "Serg Universal Shield v5 🚧");
     addControlValue(control, "Serg Mini Shield 🚧");
     addControlValue(control, "Mathieu SE16 v1");
-    addControlValue(control, "Wladi D0 🚧");
-    addControlValue(control, "Wladi P4 Nano 🚧");
+    addControlValue(control, "MHC D0 Shield 🚧");
+    addControlValue(control, "MHC P4 Nano Shield");
     addControlValue(control, "Yves V48 🚧");
     addControlValue(control, "Troy P4 Nano 🚧");
     addControlValue(control, "Atom S3R");

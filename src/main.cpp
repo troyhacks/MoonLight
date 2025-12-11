@@ -190,9 +190,9 @@ uint8_t pinCurrent = -1;
 uint8_t pinBattery = -1;
 
 std::vector<Module*> modules;
+#include "MoonBase/SharedEventEndpoint.h"
 #include "MoonBase/SharedHttpEndpoint.h"
 #include "MoonBase/SharedWebSocketServer.h"
-#include "MoonBase/SharedEventEndpoint.h"
 // #include "MoonBase/SharedFSPersistence.h"
 
 // ADDED: Shared routers (one instance each)
@@ -226,13 +226,13 @@ void setup() {
   sizeof(UploadFirmwareService);         // 32
   sizeof(HttpEndpoint<ModuleState>);     // 152
   sizeof(EventEndpoint<ModuleState>);    // 112
-  sizeof(SharedEventEndpoint);             // 8
+  sizeof(SharedEventEndpoint);           // 8
   sizeof(WebSocketServer<ModuleState>);  // 488
   sizeof(SharedWebSocketServer);         // 352
   sizeof(FSPersistence<ModuleState>);    // 128
   sizeof(PsychicHttpServer*);            // 8
   sizeof(HttpEndpoint<APSettings>);      // 152
-  sizeof(SharedHttpEndpoint);              // 16
+  sizeof(SharedHttpEndpoint);            // 16
   sizeof(FSPersistence<APSettings>);     // 128
   sizeof(APSettingsService);             // 600;
   sizeof(PsychicWebSocketHandler);       // 336
@@ -305,6 +305,7 @@ void setup() {
   moduleIO.addUpdateHandler(
       [&](const String& originId) {
         moduleIO.read([&](ModuleState& state) {
+          // readPins
           for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
             uint8_t usage = pinObject["usage"];
             if (usage == pin_Voltage) {

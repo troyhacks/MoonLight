@@ -56,13 +56,19 @@ For each board the following presets are defined:
 ![Dig Quad](https://quinled.info/wp-content/uploads/2021/11/QuinLED-Dig-Quad-AB_v3r1-2048x1154.png){: style="width:100px"}
 ![Dig Octa](https://quinled.info/wp-content/uploads/2024/10/20240924_141857-2048x1444.png){: style="width:100px"}
 
-* Dig 2Go, Dig Uno, Dig Quad: Choose the esp32-d0 (4MB) board in the [MoonLight Installer](../../gettingstarted/installer/) 
-* Dig Octa: Choose the esp32-d0-16mb board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* [Dig 2Go](https://quinled.info/quinled-dig2go/), [Dig Uno](https://quinled.info/pre-assembled-quinled-dig-quad/), [Dig Quad](https://quinled.info/quinled-dig-octa/): Choose the esp32-d0 (4MB) board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* [Dig Octa](https://quinled.info/quinled-dig-octa/): Choose the esp32-d0-16mb board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * On first install, erase flash first (Especially when other firmware like WLED was on it) as MoonLight uses a partition scheme with 3MB of flash (currently no OTA support).
 * You might need to reset your router if you first run WLED on the same MCU and no new IP is assigned.
 
 !!! Tip "Dig Uno USB"
     Remove fuse to connect USB cable to flash the board.
+
+### MyHome-Control ESP32-P4 shield
+
+![ESP32-P4 shield](https://shop.myhome-control.de/thumbnail/87/41/c2/1762031307/WLED_ESP32_P4_Shield_02_1920x1326.jpg?ts=1762031315){: style="width:320px"}
+
+[ESP32-P4 shield](https://shop.myhome-control.de/en/ABC-WLED-ESP32-P4-shield/HW10027)
 
 ### SE16 v1
 
