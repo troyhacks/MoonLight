@@ -36,15 +36,15 @@ Want to add a Driver to MoonLight, see [develop](https://moonmodules.org/MoonLig
 | Art-Net Out| <img width="100" src="https://github.com/user-attachments/assets/9c65921c-64e9-4558-b6ef-aed2a163fd88"> | <img width="320" alt="Art-Net" src="https://github.com/user-attachments/assets/1428e990-daf7-43ba-9e50-667d51b456eb" /> | Send Art-Net to Drive LEDS and DMX lights over the network. See [below](#art-net-out) |
 | Audio Sync | <img width="100" src="https://github.com/user-attachments/assets/bfedf80b-6596-41e7-a563-ba7dd58cc476"/> | No controls | Listens to audio sent over the local network by WLED-AC or WLED-MM and allows audio reactive effects (♪ & ♫) to use audio data (volume and bands (FFT)) |
 | HUB75 Driver | <img width="100" src="https://github.com/user-attachments/assets/620f7c41-8078-4024-b2a0-39a7424f9678"/> | <img width="100" src="https://github.com/user-attachments/assets/4d386045-9526-4a5a-aa31-638058b31f32"/> | Drive HUB75 panels<br>Not implemented yet |
-| IR Driver | <img width="100" src="../../media/moonlight/IRDriver.jpeg"/> |  | Receive IR commands and [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/) |
+| IR Driver | <img width="100" src="/media/moonlight/IRDriver.jpeg"/> | <img width="100" src="/media/moonlight/irdriverpreset.png"/> | Receive IR commands and [Lights Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/) |
 
 * The Parallel LED driver uses different hardware peripherals depending on the MCU type: ESP32-D0: I2S, ESP32-S3: LCD_CAM, ESP32-P4: Parallel IO (ParLIO).
 * Virtual LED Driver: Driving max 120! outputs (E.g. 48 panels of 256 LEDs each run at 50-100 FPS) using shift registers. Integrated within the Parallel LED Driver architecture. Not implemented yet
 <img width="100" src="https://github.com/user-attachments/assets/98fb5010-7192-44db-a5c9-09602681ee15"/><img width="100" src="https://github.com/user-attachments/assets/c81d2f56-00d1-4424-a716-8e3c30e76636"/>
 
-### Max Power and Light Preset
+### Light Preset
 
-* **Max Power**: 🆕 moved to [IO Module](https://moonmodules.org/MoonLight/moonbase/inputoutput/) board presets.
+* **Max Power**: 🆕 moved to [IO Module](/moonbase/inputoutput/) board presets.
 
 * **Light preset**: Defines the channels per light and color order
 
@@ -76,6 +76,11 @@ Receives Art-Net data from the network.
 * View: 
     * Select physical layer to directly store the received channels into the physical layer
     * Select one of the (virtual layers) to take mapping into account (using layout specification and modifiers specified (recommended), see [Modifiers](https://moonmodules.org/MoonLight/moonlight/modifiers/), part of the [Effects Module](https://moonmodules.org/MoonLight/moonlight/effects/))
+
+!!! tip "Other setup"
+    * Add a Layout driver to specifify the fixture you are displaying on, e.g. Single Line for Tubes or Panel for Matrices
+    * Add the Parallel LED Driver to enable connected LEDs
+    * Go to the [IO Module](https://moonmodules.org/MoonLight/moonbase/inputoutput/) to define a board preset.
 
 !!! tip "Running effects and Art-Net In"
     Effects can run at the same time, disable or delete them if you only want to run Art-Net In.

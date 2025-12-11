@@ -28,7 +28,7 @@
 #include <vector>
 
 #ifndef FACTORY_ETHERNET_HOSTNAME
-#define FACTORY_ETHERNET_HOSTNAME "#{platform}-#{unique_id}"
+#define FACTORY_ETHERNET_HOSTNAME "ML-#{unique_id}" // 🌙 use ML
 #endif
 
 #define ETHERNET_EVENT_DELAY 500

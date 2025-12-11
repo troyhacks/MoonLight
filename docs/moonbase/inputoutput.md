@@ -1,21 +1,19 @@
 # IO Module
 
-<img width="320" height="441" alt="io11" src="https://github.com/user-attachments/assets/b5452d8e-400c-4a72-a195-d5b7a7764407" />
-<img width="320" height="77" alt="io22" src="https://github.com/user-attachments/assets/99fd135c-8d36-463b-ae3a-f06119cb8ccb" />
+<img width="320" height="441" alt="io11" src="/media/moonbase/inputoutput.png" />
 
 Defines hardware specifics per ESP32 device 🆕
+
 Currently the following boards are defined. Not all are supported yet 🚧
 
-<Image>
+<img width="320" height="441" alt="io11" src="/media/moonbase/inputoutputpresets.png" />
 
 For each board the following presets are defined:
 
 * Modded: if any change to the default preset is made.
-* Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB).
+* Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB). Used by LED drivers, see [Drivers](/moonlight/drivers/)
 * Jumper1: If the board contains a jumper, it can define pin behaviour. Eg. select between Infrared and Ethernet.
 * Pins: This module is the central place to assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
-
-* Per pin:
     * GPIO = gpio_num;
     * Usage: See below
     * Index: specify first, second, third, ... usage output, e.g. LED D01 to LED D16
@@ -26,18 +24,15 @@ For each board the following presets are defined:
     * Level (HIGH, LOW, N/A)
     * DriveCap (WEAK, STRONGER, MEDIUM, STRONGEST, N/A)
 
-<image>
-
 ## Pin usage
 
   * Supported
-    * LEDs
-    * Voltage
-    * Current
-    * Infrared
+    * LEDs: Used by LED drivers to setup LED outputs, see [Drivers](/moonlight/drivers/)
+    * Voltage and Current: Sets energy monitoring, see [System status](/system/status) and , see [System Metrics](/system/metrics)
+    * Infrared: Used by IR driver, see [Drivers](/moonlight/drivers/)
     * Button LightsOn: sets on/off in [Light Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
     * Relay LightsOn: sets on/off in [Light Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
-    * SPI_SCK, SPI_MISO, SPI_MOSI, PHY_CS, PHY_IRQ: S3 Ethernet
+    * SPI_SCK, SPI_MISO, SPI_MOSI, PHY_CS, PHY_IRQ: S3 Ethernet, Used by the Ethernet module, see [Ethernet](/network/ethernet/)
   * Planned soon
     * Battery
     * DMX (in)

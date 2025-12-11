@@ -1,5 +1,5 @@
 # Ethernet
 
-🚧
+<img width="320" src="/media/network/ethernet.png" />
 
-Not implemented yet
+See [IO module](/moonbase/inputoutput) to setup pins for Ethernet on S3 boards.

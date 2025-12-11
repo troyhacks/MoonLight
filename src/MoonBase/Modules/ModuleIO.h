@@ -68,8 +68,8 @@ enum IO_Boards {
   board_QuinLEDDigQuadV3,
   board_QuinLEDDigOctaV2,
   board_QuinLEDDig2Go,
-  board_QuinLEDPenta,
-  board_QuinLEDPentaPlus,
+  // board_QuinLEDPenta,
+  // board_QuinLEDPentaPlus,
   board_SergUniShieldV5,
   board_SergMiniShield,
   board_SE16V1,
@@ -109,18 +109,16 @@ class ModuleIO : public Module {
     addControlValue(control, "QuinLED Dig Quad v3");
     addControlValue(control, "QuinLED Dig Octa v2");
     addControlValue(control, "QuinLED Dig 2Go");
-    addControlValue(control, "QuinLED Penta");
-    addControlValue(control, "QuinLED Penta Plus");
-    addControlValue(control, "Serg Universal Shield v5");
-    addControlValue(control, "Serg Mini Shield");
+    addControlValue(control, "Serg Universal Shield v5 🚧");
+    addControlValue(control, "Serg Mini Shield 🚧");
     addControlValue(control, "Mathieu SE16 v1");
-    addControlValue(control, "Wladi D0");
-    addControlValue(control, "Wladi P4 Nano");
-    addControlValue(control, "Yves V48");
-    addControlValue(control, "Troy P4 Nano");
+    addControlValue(control, "Wladi D0 🚧");
+    addControlValue(control, "Wladi P4 Nano 🚧");
+    addControlValue(control, "Yves V48 🚧");
+    addControlValue(control, "Troy P4 Nano 🚧");
     addControlValue(control, "Atom S3R");
-    addControlValue(control, "Luxceo Mood1 Xiao Mod");
-    addControlValue(control, "Cube202010");
+    addControlValue(control, "Luxceo Mood1 Xiao Mod 🚧");
+    addControlValue(control, "Cube202010 🚧");
 
     control = addControl(controls, "modded", "checkbox");
     control["default"] = false;
@@ -343,27 +341,27 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(23, pin_Exposed);
       pinAssigner.assignPin(25, pin_Exposed);
       // pinAssigner.assignPin(xx, pin_I2S_MCLK);
-    } else if (boardID == board_QuinLEDPenta) {
-      uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
-      pinAssigner.assignPin(34, pin_ButtonPush);
-      pinAssigner.assignPin(35, pin_ButtonPush);
-      pinAssigner.assignPin(39, pin_ButtonPush);
-      pinAssigner.assignPin(1, pin_I2C_SDA);
-      pinAssigner.assignPin(3, pin_I2C_SCL);
-    } else if (boardID == board_QuinLEDPentaPlus) {
-      pinAssigner.assignPin(33, pin_LED_CW);
-      pinAssigner.assignPin(32, pin_LED_WW);
-      pinAssigner.assignPin(2, pin_LED_R);
-      pinAssigner.assignPin(4, pin_LED_G);
-      pinAssigner.assignPin(12, pin_LED_B);
-      pinAssigner.assignPin(36, pin_ButtonPush);
-      pinAssigner.assignPin(39, pin_ButtonPush);
-      pinAssigner.assignPin(33, pin_ButtonPush);
-      pinAssigner.assignPin(15, pin_I2C_SDA);
-      pinAssigner.assignPin(16, pin_I2C_SCL);
-      pinAssigner.assignPin(13, pin_Relay_LightsOn);
-      pinAssigner.assignPin(5, pin_LED);
+    // } else if (boardID == board_QuinLEDPenta) {
+    //   uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
+    //   for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+    //   pinAssigner.assignPin(34, pin_ButtonPush);
+    //   pinAssigner.assignPin(35, pin_ButtonPush);
+    //   pinAssigner.assignPin(39, pin_ButtonPush);
+    //   pinAssigner.assignPin(1, pin_I2C_SDA);
+    //   pinAssigner.assignPin(3, pin_I2C_SCL);
+    // } else if (boardID == board_QuinLEDPentaPlus) {
+    //   pinAssigner.assignPin(33, pin_LED_CW);
+    //   pinAssigner.assignPin(32, pin_LED_WW);
+    //   pinAssigner.assignPin(2, pin_LED_R);
+    //   pinAssigner.assignPin(4, pin_LED_G);
+    //   pinAssigner.assignPin(12, pin_LED_B);
+    //   pinAssigner.assignPin(36, pin_ButtonPush);
+    //   pinAssigner.assignPin(39, pin_ButtonPush);
+    //   pinAssigner.assignPin(33, pin_ButtonPush);
+    //   pinAssigner.assignPin(15, pin_I2C_SDA);
+    //   pinAssigner.assignPin(16, pin_I2C_SCL);
+    //   pinAssigner.assignPin(13, pin_Relay_LightsOn);
+    //   pinAssigner.assignPin(5, pin_LED);
     } else if (boardID == board_SergMiniShield) {
       object["maxPower"] = 50;  // 10A Fuse ...
       pinAssigner.assignPin(1, pin_LED);
