@@ -73,8 +73,8 @@ enum IO_Boards {
   board_SergUniShieldV5,
   board_SergMiniShield,
   board_SE16V1,
-  board_WladiD0,
-  board_WladiP4Nano,
+  board_MHCD0,      // by Wladi
+  board_MHCP4Nano,  // by Wladi
   board_YvesV48,
   board_TroyP4Nano,
   board_AtomS3,
@@ -341,27 +341,27 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(23, pin_Exposed);
       pinAssigner.assignPin(25, pin_Exposed);
       // pinAssigner.assignPin(xx, pin_I2S_MCLK);
-    // } else if (boardID == board_QuinLEDPenta) {
-    //   uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
-    //   for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
-    //   pinAssigner.assignPin(34, pin_ButtonPush);
-    //   pinAssigner.assignPin(35, pin_ButtonPush);
-    //   pinAssigner.assignPin(39, pin_ButtonPush);
-    //   pinAssigner.assignPin(1, pin_I2C_SDA);
-    //   pinAssigner.assignPin(3, pin_I2C_SCL);
-    // } else if (boardID == board_QuinLEDPentaPlus) {
-    //   pinAssigner.assignPin(33, pin_LED_CW);
-    //   pinAssigner.assignPin(32, pin_LED_WW);
-    //   pinAssigner.assignPin(2, pin_LED_R);
-    //   pinAssigner.assignPin(4, pin_LED_G);
-    //   pinAssigner.assignPin(12, pin_LED_B);
-    //   pinAssigner.assignPin(36, pin_ButtonPush);
-    //   pinAssigner.assignPin(39, pin_ButtonPush);
-    //   pinAssigner.assignPin(33, pin_ButtonPush);
-    //   pinAssigner.assignPin(15, pin_I2C_SDA);
-    //   pinAssigner.assignPin(16, pin_I2C_SCL);
-    //   pinAssigner.assignPin(13, pin_Relay_LightsOn);
-    //   pinAssigner.assignPin(5, pin_LED);
+      // } else if (boardID == board_QuinLEDPenta) {
+      //   uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
+      //   for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      //   pinAssigner.assignPin(34, pin_ButtonPush);
+      //   pinAssigner.assignPin(35, pin_ButtonPush);
+      //   pinAssigner.assignPin(39, pin_ButtonPush);
+      //   pinAssigner.assignPin(1, pin_I2C_SDA);
+      //   pinAssigner.assignPin(3, pin_I2C_SCL);
+      // } else if (boardID == board_QuinLEDPentaPlus) {
+      //   pinAssigner.assignPin(33, pin_LED_CW);
+      //   pinAssigner.assignPin(32, pin_LED_WW);
+      //   pinAssigner.assignPin(2, pin_LED_R);
+      //   pinAssigner.assignPin(4, pin_LED_G);
+      //   pinAssigner.assignPin(12, pin_LED_B);
+      //   pinAssigner.assignPin(36, pin_ButtonPush);
+      //   pinAssigner.assignPin(39, pin_ButtonPush);
+      //   pinAssigner.assignPin(33, pin_ButtonPush);
+      //   pinAssigner.assignPin(15, pin_I2C_SDA);
+      //   pinAssigner.assignPin(16, pin_I2C_SCL);
+      //   pinAssigner.assignPin(13, pin_Relay_LightsOn);
+      //   pinAssigner.assignPin(5, pin_LED);
     } else if (boardID == board_SergMiniShield) {
       object["maxPower"] = 50;  // 10A Fuse ...
       pinAssigner.assignPin(1, pin_LED);
@@ -371,9 +371,9 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(1, pin_LED);
       pinAssigner.assignPin(3, pin_LED);
       pinAssigner.assignPin(19, pin_Relay_LightsOn);
-    } else if (boardID == board_WladiD0) {
+    } else if (boardID == board_MHCD0) {
       pinAssigner.assignPin(3, pin_Voltage);
-    } else if (boardID == board_WladiP4Nano) {                                           // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
+    } else if (boardID == board_MHCP4Nano) {                                             // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
       object["maxPower"] = 10;                                                           // USB compliant
       uint8_t ledPins[16] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);

@@ -142,7 +142,7 @@ export type StaticSystemInformation = {
 	cpu_reset_reason: string;
 	heap_info_app: string; // 🌙
 	heap_info_dma: string; // 🌙
-	coprocessor: string; // 🌙
+	coprocessor?: string; // 🌙 optional as only for ESP32-P4
 };
 
 export type SystemInformation = Analytics & StaticSystemInformation;

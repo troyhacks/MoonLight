@@ -13,6 +13,8 @@ The Drivers module defines layers and drivers.
     * Audio driver
     * Sensor drivers (microphone, gyro, MIDI controller)
 
+Layouts need to be defined before drivers as the driver takes the layouts defined before itself, e.g. to define which LEDs to drive on which pins.
+
 ## Controls
 
 * Nodes: a list of Layouts and Drivers

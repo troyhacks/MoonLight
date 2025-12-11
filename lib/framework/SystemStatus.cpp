@@ -177,9 +177,9 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest *request)
     #ifdef CONFIG_IDF_TARGET_ESP32P4
         esp_hosted_coprocessor_fwver_t c6_fw_version;
         esp_hosted_get_coprocessor_fwversion(&c6_fw_version);
-        char hfw[10];
-        snprintf(hfw, 32, "v%d.%d.%d", c6_fw_version.major1, c6_fw_version.minor1, c6_fw_version.patch1);
-        root["coprocessor"] = hfw;
+        char coprocessor[10];
+        snprintf(coprocessor, sizeof(coprocessor), "v%d.%d.%d", c6_fw_version.major1, c6_fw_version.minor1, c6_fw_version.patch1);
+        root["coprocessor"] = coprocessor;
     #endif
 
     heapHealth(root["heap_info_app"].to<JsonVariant>(), MALLOC_CAP_INTERNAL);
