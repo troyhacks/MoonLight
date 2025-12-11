@@ -1,17 +1,17 @@
 # IO Module
 
-<img width="320" height="441" alt="io11" src="/media/moonbase/inputoutput.png" />
+<img width="320" height="441" alt="io11" src="../../media/moonbase/inputoutput.png" />
 
 Defines hardware specifics per ESP32 device 🆕
 
 Currently the following boards are defined. Not all are supported yet 🚧
 
-<img width="320" height="441" alt="io11" src="/media/moonbase/inputoutputpresets.png" />
+<img width="320" height="441" alt="io11" src="../../media/moonbase/inputoutputpresets.png" />
 
 For each board the following presets are defined:
 
 * Modded: if any change to the default preset is made.
-* Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB). Used by LED drivers, see [Drivers](/moonlight/drivers/)
+* Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB). Used by LED drivers, see [Drivers](../../moonlight/drivers/)
 * Jumper1: If the board contains a jumper, it can define pin behaviour. Eg. select between Infrared and Ethernet.
 * Pins: This module is the central place to assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
     * GPIO = gpio_num;
@@ -27,12 +27,12 @@ For each board the following presets are defined:
 ## Pin usage
 
   * Supported
-    * LEDs: Used by LED drivers to setup LED outputs, see [Drivers](/moonlight/drivers/)
-    * Voltage and Current: Sets energy monitoring, see [System status](/system/status) and , see [System Metrics](/system/metrics)
-    * Infrared: Used by IR driver, see [Drivers](/moonlight/drivers/)
-    * Button LightsOn: sets on/off in [Light Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
-    * Relay LightsOn: sets on/off in [Light Control](https://moonmodules.org/MoonLight/moonlight/lightscontrol/)
-    * SPI_SCK, SPI_MISO, SPI_MOSI, PHY_CS, PHY_IRQ: S3 Ethernet, Used by the Ethernet module, see [Ethernet](/network/ethernet/)
+    * LEDs: Used by LED drivers to setup LED outputs, see [Drivers](../../moonlight/drivers/)
+    * Voltage and Current: Sets energy monitoring, see [System status](../../system/status) and , see [System Metrics](../../system/metrics)
+    * Infrared: Used by IR driver, see [Drivers](../../moonlight/drivers/)
+    * Button LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
+    * Relay LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
+    * SPI_SCK, SPI_MISO, SPI_MOSI, PHY_CS, PHY_IRQ: S3 Ethernet, Used by the Ethernet module, see [Ethernet](../../network/ethernet/)
   * Planned soon
     * Battery
     * DMX (in)
@@ -56,8 +56,8 @@ For each board the following presets are defined:
 ![Dig Quad](https://quinled.info/wp-content/uploads/2021/11/QuinLED-Dig-Quad-AB_v3r1-2048x1154.png){: style="width:100px"}
 ![Dig Octa](https://quinled.info/wp-content/uploads/2024/10/20240924_141857-2048x1444.png){: style="width:100px"}
 
-* Dig 2Go, Dig Uno, Dig Quad: Choose the esp32-d0 (4MB) board in the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
-* Dig Octa: Choose the esp32-d0-16mb board in the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
+* Dig 2Go, Dig Uno, Dig Quad: Choose the esp32-d0 (4MB) board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* Dig Octa: Choose the esp32-d0-16mb board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * On first install, erase flash first (Especially when other firmware like WLED was on it) as MoonLight uses a partition scheme with 3MB of flash (currently no OTA support).
 * You might need to reset your router if you first run WLED on the same MCU and no new IP is assigned.
 
@@ -68,5 +68,5 @@ For each board the following presets are defined:
 
 ![SE-16p](../firmware/installer/images/esp32-s3-stephanelec-16p.jpg){: style="width:100px"}
 
-* Choose the esp32-s3-devkitc-1-n8r8v board in the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) 
+* Choose the esp32-s3-devkitc-1-n8r8v board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * Set jumper1 the same as you set it on the board: on: Infrared, off: Ethernet
