@@ -25,13 +25,12 @@ namespace LedMatrixDetail {
 
 // This intermediate step is common to all packing functions.
 // It transposes the data for 32 time-slices into a cache-friendly temporary buffer.
-inline void transpose_32_slices(uint32_t (&transposed_slices)[32],  // Output buffer (on stack)
-                                const uint8_t* input_buffer, const uint32_t pixel_in_pin, const uint32_t component_in_pixel, const uint32_t pixels_per_pin, const uint32_t num_active_pins, const uint32_t COMPONENTS_PER_PIXEL, const uint32_t* waveform_cache, const uint8_t* brightness_cache) {
+inline void transpose_32_slices(uint32_t (&transposed_slices)[32], const uint8_t* input_buffer, const uint32_t pixel_in_pin, const uint32_t input_component, const uint32_t pixels_per_pin, const uint32_t num_active_pins, const uint32_t COMPONENTS_PER_PIXEL, const uint32_t* waveform_cache, const uint8_t* brightness_cache) {
   memset(transposed_slices, 0, sizeof(uint32_t) * 32);
 
   for (uint32_t pin = 0; pin < num_active_pins; ++pin) {
     const uint32_t pixel_idx = (pin * pixels_per_pin) + pixel_in_pin;
-    const uint32_t component_idx = (pixel_idx * COMPONENTS_PER_PIXEL) + component_in_pixel;
+    const uint32_t component_idx = (pixel_idx * COMPONENTS_PER_PIXEL) + input_component;  // ← Now uses input_component!
     const uint8_t data_byte = brightness_cache[input_buffer[component_idx]];
     const uint32_t waveform = waveform_cache[data_byte];
     const uint32_t pin_bit = (1 << pin);
@@ -205,24 +204,24 @@ void create_transposed_led_output_optimized(const uint8_t* input_buffer, uint16_
 
       uint32_t transposed_slices[32];
 
-      // Select the appropriate LUT based on which INPUT channel we're processing
+      // Select LUT based on INPUT component (which color we're reading from lights.channels)
       const uint8_t* brightness_cache;
-      switch (component_in_pixel) {
+      switch (input_component) {  // ← Change 1: Use input_component
       case 0:
-        brightness_cache = ledsDriver.__red_map;
+        brightness_cache = ledsDriver.__red_map;  // Position 0 in RGB array = RED
         break;
       case 1:
-        brightness_cache = ledsDriver.__green_map;
+        brightness_cache = ledsDriver.__green_map;  // Position 1 in RGB array = GREEN
         break;
       case 2:
-        brightness_cache = ledsDriver.__blue_map;
+        brightness_cache = ledsDriver.__blue_map;  // Position 2 in RGB array = BLUE
         break;
       case 3:
         brightness_cache = ledsDriver.__white_map;
         break;
       default:
         brightness_cache = ledsDriver.__red_map;
-        break;  // Fallback
+        break;
       }
 
       LedMatrixDetail::transpose_32_slices(transposed_slices, input_buffer, pixel_in_pin, input_component, pixels_per_pin, num_active_pins, COMPONENTS_PER_PIXEL, waveform_cache, brightness_cache);
@@ -429,7 +428,7 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
   #endif
   parallel_buffer_repacked = (parallel_buffer_repacked == parallel_buffer_repacked1) ? parallel_buffer_repacked2 : parallel_buffer_repacked1;
 
-  if (after - before < 50) delayMicroseconds(20);
+  // if (after - before < 50) delayMicroseconds(20);
 
   // portENTER_CRITICAL(&parlio_spinlock);
   for (int i = 0; i < num_chunks && i < 4; ++i) {

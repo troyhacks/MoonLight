@@ -61,9 +61,7 @@ class ParallelLEDDriver : public DriverNode {
     #else
       // LUTs are accessed directly within show_parlio via extern ledsDriver
       // No brightness parameter needed
-      show_parlio(pins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels,
-                  // REMOVED: ledsDriver._brightness,
-                  layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0], layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+      show_parlio(pins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels, layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0], layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
     #endif
     }
   #else  // ESP32_LEDSDRIVER
@@ -113,6 +111,8 @@ class ParallelLEDDriver : public DriverNode {
       updateControl("status", statusString.c_str());
       moduleNodes->requestUIUpdate = true;
 
+        // ESP32-P4: Uses parlio driver with direct LUT access (no explicit init needed)
+        // Non-P4: Uses Yves driver with DMA buffer allocation and initled()
     #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
 
       if (!initDone) {

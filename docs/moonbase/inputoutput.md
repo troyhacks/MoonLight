@@ -10,7 +10,7 @@ Currently the following boards are defined. Not all are supported yet 🚧
 
 For each board the following presets are defined:
 
-* Modded: if any change to the default preset is made. Press off to go back to standard. If any pin is not default, modded will be set.
+* Modded: set when any pin differs from the selected board preset. Press off to return to the preset defaults.
 * Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB). Used by LED drivers, see [Drivers](../../moonlight/drivers/)
 * Jumper1: If the board contains a jumper, it can define pin behaviour. Eg. select between Infrared and Ethernet.
 * Pins: Assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
@@ -28,7 +28,7 @@ For each board the following presets are defined:
 
   * Supported
     * LEDs: Used by LED drivers to setup LED outputs, see [Drivers](../../moonlight/drivers/)
-    * Voltage and Current: Sets energy monitoring, see [System status](../../system/status) and , see [System Metrics](../../system/metrics)
+    * Voltage and Current: Sets energy monitoring, see [System status](../../system/status) and [System Metrics](../../system/metrics)
     * Infrared: Used by IR driver, see [Drivers](../../moonlight/drivers/)
     * Button LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
     * Relay LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
@@ -71,10 +71,10 @@ For each board the following presets are defined:
 
 * Choose the esp32-p4-nano board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * On new boards, the WiFi coprocessor needs to be updated first to a recent version, currently v2.0.17, see the link in the [MoonLight Installer](../../gettingstarted/installer/)
-* After install, select the MHC P4 shield board preset to have the pins assigned correctly.
-    * Assuming 100W LED power!! Change if not!
-    * Jumper1: off (default): 16 LED pins. On: 8 LED pins, 4 RS-485 pins and 4 exposed pins (set the switches on the board!)
-* Add the Parallel LED Driver, see [Drivers](../../moonlight/drivers/). It uses @troyhacks his parallel IO driver to drive all the 12 LED pins of the P4 shield.
+* After install, select the **MHC P4 Nano Shield** board preset to have the pins assigned correctly.
+  * Assuming 100W LED power; change if needed.
+  * Jumper1: off (default): 16 LED pins. On: 8 LED pins, 4 RS-485 pins and 4 exposed pins (set also the switches on the board).
+* Add the Parallel LED Driver, see [Drivers](../../moonlight/drivers/). It uses @troyhacks his parallel IO driver to drive all LED pins configured for the shield.
 
 ![ESP32-P4 shield](https://shop.myhome-control.de/thumbnail/87/41/c2/1762031307/WLED_ESP32_P4_Shield_02_1920x1326.jpg?ts=1762031315){: style="width:320px"}
 
