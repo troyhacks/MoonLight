@@ -45,20 +45,23 @@ class ParallelLEDDriver : public DriverNode {
   #endif
   }
 
+  uint8_t pins[MAX_PINS] = {};
+
   void loop() override {
   #if HP_ALL_DRIVERS
     if (!initDone) return;
 
     if (layer->layerP->lights.header.isPositions == 0) {
-      DriverNode::loop();
+      DriverNode::loop();  // This populates the LUT tables!
 
       uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4
       if (ledsDriver.total_leds > 0) ledsDriver.showPixels(WAIT);
     #else
-      show_parlio(layer->layerP->ledPins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels, ledsDriver._brightness, layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0],  // different ledsPerPin not supported yet
-                  layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+      // LUTs are accessed directly within show_parlio via extern ledsDriver
+      // No brightness parameter needed
+      show_parlio(pins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels, layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0], layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
     #endif
     }
   #else  // ESP32_LEDSDRIVER
@@ -89,8 +92,6 @@ class ParallelLEDDriver : public DriverNode {
         return;
       }
 
-    #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
-      uint8_t pins[MAX_PINS];
       Char<32> statusString = "#";
       statusString += nrOfPins;
       statusString += ": ";
@@ -109,6 +110,10 @@ class ParallelLEDDriver : public DriverNode {
 
       updateControl("status", statusString.c_str());
       moduleNodes->requestUIUpdate = true;
+
+        // ESP32-P4: Uses parlio driver with direct LUT access (no explicit init needed)
+        // Non-P4: Uses Yves driver with DMA buffer allocation and initled()
+    #ifndef CONFIG_IDF_TARGET_ESP32P4  // Non P4: Yves driver
 
       if (!initDone) {
         __NB_DMA_BUFFER = dmaBuffer;  // __NB_DMA_BUFFER is a variable

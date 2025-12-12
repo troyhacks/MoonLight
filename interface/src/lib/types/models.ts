@@ -140,8 +140,9 @@ export type StaticSystemInformation = {
 	flash_chip_size: number;
 	flash_chip_speed: number;
 	cpu_reset_reason: string;
-	heap_info_app: string;
-	heap_info_dma: string;
+	heap_info_app: string; // 🌙
+	heap_info_dma: string; // 🌙
+	coprocessor?: string; // 🌙 optional as only for ESP32-P4
 };
 
 export type SystemInformation = Analytics & StaticSystemInformation;

@@ -128,7 +128,7 @@ class ModuleLightsControl : public Module {
     addControlValue(control, "Party");
     addControlValue(control, "Heat");
     addControlValue(control, "Random");
-    addControlValue(control, "Quin");
+    addControlValue(control, "MoonModules");
     addControlValue(control, "Orange");
 
     control = addControl(controls, "preset", "pad");
@@ -190,7 +190,7 @@ class ModuleLightsControl : public Module {
         for (int i = 0; i < sizeof(layerP.palette.entries) / sizeof(CRGB); i++) {
           layerP.palette[i] = CHSV(random8(), 255, 255);  // take the max saturation, max brightness of the colorwheel
         }
-      } else if (updatedItem.value == 9) {  // Quin palette
+      } else if (updatedItem.value == 9) {  // MoonModules palette
         for (int i = 0; i < nrOfPaletteEntries; i++) {
           layerP.palette[i] = CRGB(map(i, 0, nrOfPaletteEntries - 1, 255, 0), map(i, 0, nrOfPaletteEntries - 1, 31, 0), map(i, 0, nrOfPaletteEntries - 1, 0, 255));  // from orange to blue
         }

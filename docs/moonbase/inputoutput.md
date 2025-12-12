@@ -10,10 +10,10 @@ Currently the following boards are defined. Not all are supported yet 🚧
 
 For each board the following presets are defined:
 
-* Modded: if any change to the default preset is made.
+* Modded: set when any pin differs from the selected board preset. Press off to return to the preset defaults.
 * Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB). Used by LED drivers, see [Drivers](../../moonlight/drivers/)
 * Jumper1: If the board contains a jumper, it can define pin behaviour. Eg. select between Infrared and Ethernet.
-* Pins: This module is the central place to assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
+* Pins: Assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
     * GPIO = gpio_num;
     * Usage: See below
     * Index: specify first, second, third, ... usage output, e.g. LED D01 to LED D16
@@ -28,7 +28,7 @@ For each board the following presets are defined:
 
   * Supported
     * LEDs: Used by LED drivers to setup LED outputs, see [Drivers](../../moonlight/drivers/)
-    * Voltage and Current: Sets energy monitoring, see [System status](../../system/status) and , see [System Metrics](../../system/metrics)
+    * Voltage and Current: Sets energy monitoring, see [System status](../../system/status) and [System Metrics](../../system/metrics)
     * Infrared: Used by IR driver, see [Drivers](../../moonlight/drivers/)
     * Button LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
     * Relay LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
@@ -56,13 +56,28 @@ For each board the following presets are defined:
 ![Dig Quad](https://quinled.info/wp-content/uploads/2021/11/QuinLED-Dig-Quad-AB_v3r1-2048x1154.png){: style="width:100px"}
 ![Dig Octa](https://quinled.info/wp-content/uploads/2024/10/20240924_141857-2048x1444.png){: style="width:100px"}
 
-* Dig 2Go, Dig Uno, Dig Quad: Choose the esp32-d0 (4MB) board in the [MoonLight Installer](../../gettingstarted/installer/) 
-* Dig Octa: Choose the esp32-d0-16mb board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* [Dig 2Go](https://quinled.info/quinled-dig2go/), [Dig Uno](https://quinled.info/pre-assembled-quinled-dig-uno/), [Dig Quad](https://quinled.info/pre-assembled-quinled-dig-quad/): Choose the esp32-d0 (4MB) board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* [Dig Octa](https://quinled.info/quinled-dig-octa/): Choose the esp32-d0-16mb board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * On first install, erase flash first (Especially when other firmware like WLED was on it) as MoonLight uses a partition scheme with 3MB of flash (currently no OTA support).
-* You might need to reset your router if you first run WLED on the same MCU and no new IP is assigned.
+* After install, select the QuinLED board preset to have the pins assigned correctly.
+
+!!! tip "Reset router"
+    You might need to reset your router if you first run WLED on the same board and no new IP is assigned.
 
 !!! Tip "Dig Uno USB"
     Remove fuse to connect USB cable to flash the board.
+
+### MyHome-Control ESP32-P4 shield
+
+![ESP32-P4 shield](https://shop.myhome-control.de/thumbnail/87/41/c2/1762031307/WLED_ESP32_P4_Shield_02_1920x1326.jpg?ts=1762031315){: style="width:320px"}
+
+* See [ESP32-P4 shield](https://shop.myhome-control.de/en/ABC-WLED-ESP32-P4-shield/HW10027). Choose the esp32-p4-nano board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* On new ESP32-P4 Nano boards, the WiFi coprocessor needs to be updated first to a recent version, currently ESP-Hosted v2.0.17, see the link in the [MoonLight Installer](../../gettingstarted/installer/)
+* After install, select the **MHC P4 Nano Shield** board preset to have the pins assigned correctly.
+    * Assuming 100W LED power; change if needed.
+    * Jumper1: off (default): 16 LED pins. On: 8 LED pins, 4 RS-485 pins and 4 exposed pins (set also the switches on the board).
+* Add the Parallel LED Driver, see [Drivers](../../moonlight/drivers/). It uses [@troyhacks](https://github.com/troyhacks) his parallel IO driver to drive all LED pins configured for the shield.
+
 
 ### SE16 v1
 

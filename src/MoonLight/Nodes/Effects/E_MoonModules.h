@@ -58,7 +58,7 @@ class GameOfLifeEffect : public Node {
   bool wrap = true;
   bool disablePause = false;
   bool colorByAge = false;
-  bool infinite = false;
+  bool infinite = true;
   uint8_t blur = 128;
 
   void setBirthAndSurvive() {

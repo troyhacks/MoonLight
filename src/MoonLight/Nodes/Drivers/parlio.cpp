@@ -16,20 +16,22 @@
   #include "driver/parlio_tx.h"
   #include "portmacro.h"
 
+// Access the global LED driver to use its LUT tables directly
+  #include "I2SClocklessLedDriver.h"
+extern I2SClocklessLedDriver ledsDriver;
+
 // --- Namespace for specialized, high-performance worker functions ---
 namespace LedMatrixDetail {
 
 // This intermediate step is common to all packing functions.
 // It transposes the data for 32 time-slices into a cache-friendly temporary buffer.
-inline void transpose_32_slices(uint32_t (&transposed_slices)[32],  // Output buffer (on stack)
-                                const uint8_t* input_buffer, const uint32_t pixel_in_pin, const uint32_t component_in_pixel, const uint32_t pixels_per_pin, const uint32_t num_active_pins,
-                                const uint32_t COMPONENTS_PER_PIXEL, const uint32_t* waveform_cache, const uint8_t* brightness_cache) {
+inline void transpose_32_slices(uint32_t (&transposed_slices)[32], const uint8_t* input_buffer, const uint32_t pixel_in_pin, const uint32_t input_component, const uint32_t pixels_per_pin, const uint32_t num_active_pins, const uint32_t COMPONENTS_PER_PIXEL, const uint32_t* waveform_cache, const uint8_t* brightness_cache) {
   memset(transposed_slices, 0, sizeof(uint32_t) * 32);
 
   for (uint32_t pin = 0; pin < num_active_pins; ++pin) {
     const uint32_t pixel_idx = (pin * pixels_per_pin) + pixel_in_pin;
-    const uint32_t component_idx = (pixel_idx * COMPONENTS_PER_PIXEL) + component_in_pixel;
-    const uint8_t data_byte = brightness_cache[input_buffer[component_idx]];  // replace by rgbw lut tables!
+    const uint32_t component_idx = (pixel_idx * COMPONENTS_PER_PIXEL) + input_component;  // ← Now uses input_component!
+    const uint8_t data_byte = brightness_cache[input_buffer[component_idx]];
     const uint32_t waveform = waveform_cache[data_byte];
     const uint32_t pin_bit = (1 << pin);
 
@@ -145,27 +147,23 @@ uint8_t gamma8(uint8_t b) {  // we do nothing with gamma for now
 }
 
 // 1. Add the RGB offsets parameter to the function signature
-void create_transposed_led_output_optimized(const uint8_t* input_buffer, uint16_t* output_buffer, const uint32_t pixels_per_pin, const uint32_t num_active_pins, const bool is_rgbw, const uint8_t bri,
-                                            const uint8_t offsetR, const uint8_t offsetG, const uint8_t offsetB) {
+void create_transposed_led_output_optimized(const uint8_t* input_buffer, uint16_t* output_buffer, const uint32_t pixels_per_pin, const uint32_t num_active_pins, const bool is_rgbw, const uint8_t offsetR, const uint8_t offsetG, const uint8_t offsetB) {
+  // Only keep waveform cache (for WS2812 protocol timing)
   static uint32_t waveform_cache[256];
-  static uint8_t brightness_cache[256];
-  static uint8_t last_bri = 0;
+  static bool waveform_cache_initialized = false;
 
   static const uint16_t bitpatterns[16] = {
-      0b1000100010001000, 0b1000100010001110, 0b1000100011101000, 0b1000100011101110, 0b1000111010001000, 0b1000111010001110, 0b1000111011101000, 0b1000111011101110,
-      0b1110100010001000, 0b1110100010001110, 0b1110100011101000, 0b1110100011101110, 0b1110111010001000, 0b1110111010001110, 0b1110111011101000, 0b1110111011101110,
+      0b1000100010001000, 0b1000100010001110, 0b1000100011101000, 0b1000100011101110, 0b1000111010001000, 0b1000111010001110, 0b1000111011101000, 0b1000111011101110, 0b1110100010001000, 0b1110100010001110, 0b1110100011101000, 0b1110100011101110, 0b1110111010001000, 0b1110111010001110, 0b1110111011101000, 0b1110111011101110,
   };
 
-  if (bri != last_bri) {
-    for (int i = 0; i < 256; ++i) {
-      brightness_cache[i] = (gamma8(i) * bri) >> 8;
-    }
+  // Initialize waveform cache ONCE (doesn't depend on brightness)
+  if (!waveform_cache_initialized) {
     for (int i = 0; i < 256; ++i) {
       const uint16_t p1 = bitpatterns[i >> 4];
       const uint16_t p2 = bitpatterns[i & 0x0F];
       waveform_cache[i] = (uint32_t(p2) << 16) | p1;
     }
-    last_bri = bri;
+    waveform_cache_initialized = true;
   }
 
   const uint32_t COMPONENTS_PER_PIXEL = is_rgbw ? 4 : 3;
@@ -191,6 +189,7 @@ void create_transposed_led_output_optimized(const uint8_t* input_buffer, uint16_
 
   uint8_t* out_base_ptr = reinterpret_cast<uint8_t*>(output_buffer);
 
+  // Component mapping for color order
   uint8_t component_map[4] = {0, 1, 2, 3};  // Default to RGB(W)
   component_map[0] = offsetR;
   component_map[1] = offsetG;
@@ -202,8 +201,30 @@ void create_transposed_led_output_optimized(const uint8_t* input_buffer, uint16_
   for (uint32_t pixel_in_pin = 0; pixel_in_pin < pixels_per_pin; ++pixel_in_pin) {
     for (uint32_t component_in_pixel = 0; component_in_pixel < COMPONENTS_PER_PIXEL; ++component_in_pixel) {
       const uint32_t input_component = component_map[component_in_pixel];
+      //component_in_pixel is always RGB(W) - looping over the input array
+      //input_component is offsetR,G,B e.g. GRB -> 102, so this loop starts with 1 / green, so green is first processed, then red, then blue
 
       uint32_t transposed_slices[32];
+
+      // Select LUT based on INPUT component (which color we're reading from lights.channels)
+      const uint8_t* brightness_cache;
+      switch (input_component) {  // ← Change 1: Use input_component
+      case 0:
+        brightness_cache = ledsDriver.__red_map;  // Position 0 in RGB array = RED
+        break;
+      case 1:
+        brightness_cache = ledsDriver.__green_map;  // Position 1 in RGB array = GREEN
+        break;
+      case 2:
+        brightness_cache = ledsDriver.__blue_map;  // Position 2 in RGB array = BLUE
+        break;
+      case 3:
+        brightness_cache = ledsDriver.__white_map;
+        break;
+      default:
+        brightness_cache = ledsDriver.__red_map;
+        break;
+      }
 
       LedMatrixDetail::transpose_32_slices(transposed_slices, input_buffer, pixel_in_pin, input_component, pixels_per_pin, num_active_pins, COMPONENTS_PER_PIXEL, waveform_cache, brightness_cache);
 
@@ -241,8 +262,7 @@ parlio_transmit_config_t transmit_config = {.idle_value = 0x00,  // the idle val
 
 static portMUX_TYPE parlio_spinlock = portMUX_INITIALIZER_UNLOCKED;
 
-uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32_t length, uint8_t* buffer_in, uint8_t bri, bool isRGBW, uint8_t outputs, uint16_t leds_per_output, uint8_t offSetR,
-                                                   uint8_t offsetG, uint8_t offsetB) {
+uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32_t length, uint8_t* buffer_in, bool isRGBW, uint8_t outputs, uint16_t leds_per_output, uint8_t offSetR, uint8_t offsetG, uint8_t offsetB) {
   if (length != outputs * leds_per_output) {
     delay(100);
     Serial.printf("Parallel IO isn't set correctly. Check length, outputs, and LEDs per output. (%d != %d x %d)\n", length, outputs, leds_per_output);
@@ -299,7 +319,7 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
     parlio_config.flags.invert_valid_out = 0;
 
     if (parlio_tx_unit != NULL) {
-      ESP_ERROR_CHECK(parlio_tx_unit_wait_all_done(parlio_tx_unit, -1));
+      ESP_ERROR_CHECK(parlio_tx_unit_wait_all_done(parlio_tx_unit, portMAX_DELAY));  // wait forever
       ESP_ERROR_CHECK(parlio_tx_unit_disable(parlio_tx_unit));
       ESP_ERROR_CHECK(parlio_del_tx_unit(parlio_tx_unit));
       parlio_tx_unit = NULL;
@@ -364,7 +384,7 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
     //  offsetB = 2;
   #endif
 
-  create_transposed_led_output_optimized(parallel_buffer_remapped, parallel_buffer_repacked, leds_per_output, outputs, isRGBW, bri, offSetR, offsetG, offsetB);
+  create_transposed_led_output_optimized(parallel_buffer_remapped, parallel_buffer_repacked, leds_per_output, outputs, isRGBW, offSetR, offsetG, offsetB);
 
   // Calculate the exact size of ONE PIXEL's data in bits and bytes.
   const uint32_t symbols_per_pixel = isRGBW ? 128 : 96;
@@ -402,7 +422,7 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
   chunk_ptrs[3] = chunk_ptrs[2] + chunk_stride_bytes;
 
   unsigned long before = micros();
-  ESP_ERROR_CHECK(parlio_tx_unit_wait_all_done(parlio_tx_unit, -1));
+  ESP_ERROR_CHECK(parlio_tx_unit_wait_all_done(parlio_tx_unit, portMAX_DELAY));
   unsigned long after = micros();
 
   #ifdef WLEDMM_REMAP_AT_OUTPUT
