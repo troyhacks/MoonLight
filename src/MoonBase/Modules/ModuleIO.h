@@ -58,6 +58,7 @@ enum IO_PinUsage {
   pin_SPI_MOSI,
   pin_PHY_CS,
   pin_PHY_IRQ,
+  pin_RS485,
   pin_Reserved,
   pin_count
 };
@@ -180,6 +181,7 @@ class ModuleIO : public Module {
       addControlValue(control, "SPI MOSI");
       addControlValue(control, "PHY CS");
       addControlValue(control, "PHY IRQ");
+      addControlValue(control, "RS-485");
       addControlValue(control, "Reserved");
 
       control = addControl(rows, "index", "number", 1, 32);  // max 32 of one type, e.g 32 led pins
@@ -377,6 +379,18 @@ class ModuleIO : public Module {
       object["maxPower"] = 10;                                                           // USB compliant
       uint8_t ledPins[16] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(33, pin_I2S_SD);
+      pinAssigner.assignPin(26, pin_I2S_WS);
+      pinAssigner.assignPin(32, pin_I2S_SCK);
+      pinAssigner.assignPin(36, pin_I2S_MCLK);
+      pinAssigner.assignPin(3, pin_RS485);
+      pinAssigner.assignPin(4, pin_RS485);
+      pinAssigner.assignPin(22, pin_RS485);
+      pinAssigner.assignPin(24, pin_RS485);
+      pinAssigner.assignPin(2, pin_Exposed);
+      pinAssigner.assignPin(46, pin_Exposed);
+      pinAssigner.assignPin(47, pin_Exposed);
+      pinAssigner.assignPin(48, pin_Exposed);
     } else if (boardID == board_YvesV48) {
       pinAssigner.assignPin(3, pin_LED);
     } else if (boardID == board_TroyP4Nano) {

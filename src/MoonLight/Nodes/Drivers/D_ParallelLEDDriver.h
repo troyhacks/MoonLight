@@ -52,15 +52,18 @@ class ParallelLEDDriver : public DriverNode {
     if (!initDone) return;
 
     if (layer->layerP->lights.header.isPositions == 0) {
-      DriverNode::loop();
+      DriverNode::loop();  // This populates the LUT tables!
 
       uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4
       if (ledsDriver.total_leds > 0) ledsDriver.showPixels(WAIT);
     #else
-      show_parlio(pins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels, ledsDriver._brightness, layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0],  // different ledsPerPin not supported yet
-                  layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
+      // Pass the LUT tables instead of brightness
+      // No brightness parameter - LUTs are accessed directly!
+      show_parlio(pins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels,
+                  // REMOVED: ledsDriver._brightness,
+                  layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0], layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);
     #endif
     }
   #else  // ESP32_LEDSDRIVER

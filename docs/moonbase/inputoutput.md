@@ -10,10 +10,10 @@ Currently the following boards are defined. Not all are supported yet 🚧
 
 For each board the following presets are defined:
 
-* Modded: if any change to the default preset is made.
+* Modded: if any change to the default preset is made. Press off to go back to standard. If any pin is not default, modded will be set.
 * Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB). Used by LED drivers, see [Drivers](../../moonlight/drivers/)
 * Jumper1: If the board contains a jumper, it can define pin behaviour. Eg. select between Infrared and Ethernet.
-* Pins: This module is the central place to assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
+* Pins: Assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
     * GPIO = gpio_num;
     * Usage: See below
     * Index: specify first, second, third, ... usage output, e.g. LED D01 to LED D16
@@ -59,12 +59,20 @@ For each board the following presets are defined:
 * [Dig 2Go](https://quinled.info/quinled-dig2go/), [Dig Uno](https://quinled.info/pre-assembled-quinled-dig-uno/), [Dig Quad](https://quinled.info/pre-assembled-quinled-dig-quad/): Choose the esp32-d0 (4MB) board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * [Dig Octa](https://quinled.info/quinled-dig-octa/): Choose the esp32-d0-16mb board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * On first install, erase flash first (Especially when other firmware like WLED was on it) as MoonLight uses a partition scheme with 3MB of flash (currently no OTA support).
-* You might need to reset your router if you first run WLED on the same MCU and no new IP is assigned.
+* After install, select the QuinLED board preset to have the pins assigned correctly.
+
+!!! tip "Reset router"
+    You might need to reset your router if you first run WLED on the same board and no new IP is assigned.
 
 !!! Tip "Dig Uno USB"
     Remove fuse to connect USB cable to flash the board.
 
 ### MyHome-Control ESP32-P4 shield
+
+* Choose the esp32-p4-nano board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* On new boards, the WiFi coprocessor needs to be updated first to a recent version, currently v2.0.17, see the link in the [MoonLight Installer](../../gettingstarted/installer/)
+* After install, select the MHC P4 shield board preset to have the pins assigned correctly.
+* Add the Parallel LED Driver, see [Drivers](). It uses @troyhacks his parallel IO driver to drive all the 12 LED pins of the P4 shield.
 
 ![ESP32-P4 shield](https://shop.myhome-control.de/thumbnail/87/41/c2/1762031307/WLED_ESP32_P4_Shield_02_1920x1326.jpg?ts=1762031315){: style="width:320px"}
 
