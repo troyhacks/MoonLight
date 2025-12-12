@@ -375,22 +375,28 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(19, pin_Relay_LightsOn);
     } else if (boardID == board_MHCD0) {
       pinAssigner.assignPin(3, pin_Voltage);
-    } else if (boardID == board_MHCP4Nano) {                                             // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
-      object["maxPower"] = 10;                                                           // USB compliant
-      uint8_t ledPins[16] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+    } else if (boardID == board_MHCP4Nano) {                  // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
+      object["maxPower"] = 100;                               // Assuming decent LED power!!
+      if (_state.data["jumper1"]) {                           // on
+        uint8_t ledPins[8] = {21, 20, 25, 5, 7, 23, 8, 27};  // 8 LED_PINS
+        for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+        // per default used as LED Pins
+        pinAssigner.assignPin(3, pin_RS485);
+        pinAssigner.assignPin(4, pin_RS485);
+        pinAssigner.assignPin(22, pin_RS485);
+        pinAssigner.assignPin(24, pin_RS485);
+        pinAssigner.assignPin(2, pin_Exposed);
+        pinAssigner.assignPin(46, pin_Exposed);
+        pinAssigner.assignPin(47, pin_Exposed);
+        pinAssigner.assignPin(48, pin_Exposed);
+      } else {                                                                             // off - default
+        uint8_t ledPins[16] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // 16 LED_PINS
+        for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      }
       pinAssigner.assignPin(33, pin_I2S_SD);
       pinAssigner.assignPin(26, pin_I2S_WS);
       pinAssigner.assignPin(32, pin_I2S_SCK);
       pinAssigner.assignPin(36, pin_I2S_MCLK);
-      pinAssigner.assignPin(3, pin_RS485);
-      pinAssigner.assignPin(4, pin_RS485);
-      pinAssigner.assignPin(22, pin_RS485);
-      pinAssigner.assignPin(24, pin_RS485);
-      pinAssigner.assignPin(2, pin_Exposed);
-      pinAssigner.assignPin(46, pin_Exposed);
-      pinAssigner.assignPin(47, pin_Exposed);
-      pinAssigner.assignPin(48, pin_Exposed);
     } else if (boardID == board_YvesV48) {
       pinAssigner.assignPin(3, pin_LED);
     } else if (boardID == board_TroyP4Nano) {

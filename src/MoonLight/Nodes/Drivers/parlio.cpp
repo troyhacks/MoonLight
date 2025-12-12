@@ -32,7 +32,7 @@ inline void transpose_32_slices(uint32_t (&transposed_slices)[32],  // Output bu
   for (uint32_t pin = 0; pin < num_active_pins; ++pin) {
     const uint32_t pixel_idx = (pin * pixels_per_pin) + pixel_in_pin;
     const uint32_t component_idx = (pixel_idx * COMPONENTS_PER_PIXEL) + component_in_pixel;
-    const uint8_t data_byte = brightness_cache[input_buffer[component_idx]];  // replace by rgbw lut tables!
+    const uint8_t data_byte = brightness_cache[input_buffer[component_idx]];
     const uint32_t waveform = waveform_cache[data_byte];
     const uint32_t pin_bit = (1 << pin);
 

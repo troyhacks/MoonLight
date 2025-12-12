@@ -59,8 +59,8 @@ class ParallelLEDDriver : public DriverNode {
     #ifndef CONFIG_IDF_TARGET_ESP32P4
       if (ledsDriver.total_leds > 0) ledsDriver.showPixels(WAIT);
     #else
-      // Pass the LUT tables instead of brightness
-      // No brightness parameter - LUTs are accessed directly!
+      // LUTs are accessed directly within show_parlio via extern ledsDriver
+      // No brightness parameter needed
       show_parlio(pins, layer->layerP->lights.header.nrOfLights, layer->layerP->lights.channels,
                   // REMOVED: ledsDriver._brightness,
                   layer->layerP->lights.header.channelsPerLight == 4, nrOfPins, layer->layerP->ledsPerPin[0], layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue);

@@ -72,7 +72,9 @@ For each board the following presets are defined:
 * Choose the esp32-p4-nano board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * On new boards, the WiFi coprocessor needs to be updated first to a recent version, currently v2.0.17, see the link in the [MoonLight Installer](../../gettingstarted/installer/)
 * After install, select the MHC P4 shield board preset to have the pins assigned correctly.
-* Add the Parallel LED Driver, see [Drivers](). It uses @troyhacks his parallel IO driver to drive all the 12 LED pins of the P4 shield.
+    * Assuming 100W LED power!! Change if not!
+    * Jumper1: off (default): 16 LED pins. On: 8 LED pins, 4 RS-485 pins and 4 exposed pins (set the switches on the board!)
+* Add the Parallel LED Driver, see [Drivers](../../moonlight/drivers/). It uses @troyhacks his parallel IO driver to drive all the 12 LED pins of the P4 shield.
 
 ![ESP32-P4 shield](https://shop.myhome-control.de/thumbnail/87/41/c2/1762031307/WLED_ESP32_P4_Shield_02_1920x1326.jpg?ts=1762031315){: style="width:320px"}
 
