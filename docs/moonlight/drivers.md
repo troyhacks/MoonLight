@@ -46,7 +46,7 @@ Want to add a Driver to MoonLight, see [develop](../../develop/overview/). See a
 
 ### Light Preset
 
-* **Max Power**: 🆕 moved to [IO Module](../../moonbase/inputoutput/) board presets.
+* **Max Power**: 🆕 moved to [IO Module](../../moonbase/inputoutput) board presets.
 
 * **Light preset**: Defines the channels per light and color order
 
@@ -82,7 +82,7 @@ Receives Art-Net data from the network.
 !!! tip "Other setup"
     * Add a Layout driver to specifify the fixture you are displaying on, e.g. Single Line for Tubes or Panel for Matrices
     * Add the Parallel LED Driver to enable connected LEDs
-    * Go to the [IO Module](../../moonbase/inputoutput/) to define a board preset.
+    * Go to the [IO Module](../../moonbase/inputoutput) to define a board preset.
 
 !!! tip "Running effects and Art-Net In"
     Effects can run at the same time, disable or delete them if you only want to run Art-Net In.

@@ -45,7 +45,7 @@ class ParallelLEDDriver : public DriverNode {
   #endif
   }
 
-  uint8_t pins[MAX_PINS];
+  uint8_t pins[MAX_PINS] = {};
 
   void loop() override {
   #if HP_ALL_DRIVERS

@@ -201,6 +201,8 @@ void create_transposed_led_output_optimized(const uint8_t* input_buffer, uint16_
   for (uint32_t pixel_in_pin = 0; pixel_in_pin < pixels_per_pin; ++pixel_in_pin) {
     for (uint32_t component_in_pixel = 0; component_in_pixel < COMPONENTS_PER_PIXEL; ++component_in_pixel) {
       const uint32_t input_component = component_map[component_in_pixel];
+      //component_in_pixel is always RGB(W) - looping over the input array
+      //input_component is offsetR,G,B e.g. GRB -> 102, so this loop starts with 1 / green, so green is first processed, then red, then blue
 
       uint32_t transposed_slices[32];
 
@@ -420,7 +422,7 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
   chunk_ptrs[3] = chunk_ptrs[2] + chunk_stride_bytes;
 
   unsigned long before = micros();
-  ESP_ERROR_CHECK(parlio_tx_unit_wait_all_done(parlio_tx_unit, -1));
+  ESP_ERROR_CHECK(parlio_tx_unit_wait_all_done(parlio_tx_unit, portMAX_DELAY));
   unsigned long after = micros();
 
   #ifdef WLEDMM_REMAP_AT_OUTPUT
@@ -428,7 +430,7 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
   #endif
   parallel_buffer_repacked = (parallel_buffer_repacked == parallel_buffer_repacked1) ? parallel_buffer_repacked2 : parallel_buffer_repacked1;
 
-  // if (after - before < 50) delayMicroseconds(20);
+  if (after - before < 50) delayMicroseconds(20);
 
   // portENTER_CRITICAL(&parlio_spinlock);
   for (int i = 0; i < num_chunks && i < 4; ++i) {
