@@ -118,7 +118,7 @@ class ModuleLightsControl : public Module {
     control["default"] = 255;
     control["color"] = "Blue";
     control = addControl(controls, "palette", "select");
-    control["default"] = 6;
+    control["default"] = 9;
     addControlValue(control, "Cloud");
     addControlValue(control, "Lava");
     addControlValue(control, "Ocean");
