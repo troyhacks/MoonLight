@@ -59,8 +59,8 @@ enum IO_PinUsage {
   pin_PHY_CS,
   pin_PHY_IRQ,
   pin_RS485_TX,
-  pin_RS485_RX, 
-  pin_Dig_Input, // Digital Input pin type. May contains some protection circuit
+  pin_RS485_RX,
+  pin_Dig_Input,  // Digital Input pin type. May contains some protection circuit
   pin_Reserved,
   pin_count
 };
@@ -76,7 +76,7 @@ enum IO_Boards {
   board_SergUniShieldV5,
   board_SergMiniShield,
   board_SE16V1,
-  board_MHCV43,      // by Wladi
+  board_MHCV43,       // by Wladi
   board_MHCP4NanoV1,  // by Wladi V1.0
   board_YvesV48,
   board_TroyP4Nano,
@@ -129,10 +129,10 @@ class ModuleIO : public Module {
     control = addControl(controls, "maxPower", "number", 0, 500, false, "Watt");
     control["default"] = 10;
 
-    control = addControl(controls, "jumper1", "checkbox");
+    control = addControl(controls, "switch1", "checkbox");
     control["default"] = false;
-	
-	control = addControl(controls, "UseLineIn", "checkbox");
+
+    control = addControl(controls, "switch2", "checkbox");
     control["default"] = false;
 
     control = addControl(controls, "pins", "rows");
@@ -187,8 +187,8 @@ class ModuleIO : public Module {
       addControlValue(control, "PHY CS");
       addControlValue(control, "PHY IRQ");
       addControlValue(control, "RS-485 TX");
-	  addControlValue(control, "RS-485 RX");
-	  addControlValue(control, "Digital Input");
+      addControlValue(control, "RS-485 RX");
+      addControlValue(control, "Digital Input");
       addControlValue(control, "Reserved");
 
       control = addControl(rows, "index", "number", 1, 32);  // max 32 of one type, e.g 32 led pins
@@ -289,7 +289,7 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(8, pin_Voltage);
       pinAssigner.assignPin(9, pin_Current);
 
-      if (_state.data["jumper1"]) {
+      if (_state.data["switch1"]) {
         pinAssigner.assignPin(5, pin_Infrared);
       } else {  // default
         pinAssigner.assignPin(5, pin_SPI_MISO);
@@ -380,27 +380,22 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(1, pin_LED);
       pinAssigner.assignPin(3, pin_LED);
       pinAssigner.assignPin(19, pin_Relay_LightsOn);
-    } else if (boardID == board_MHCV43) {	// https://shop.myhome-control.de/ABC-WLED-Controller-Board-5-24V/HW10015
-      object["maxPower"] = 75; // 15A Fuse @ 5V
-      pinAssigner.assignPin(12, pin_LED);
-      pinAssigner.assignPin(13, pin_LED);
-      pinAssigner.assignPin(16, pin_LED);
-      pinAssigner.assignPin(18, pin_LED);
-      uint8_t ledPins[4] = {12, 13, 16, 18};  // 4 LED_PINS
+    } else if (boardID == board_MHCV43) {    // https://shop.myhome-control.de/ABC-WLED-Controller-Board-5-24V/HW10015
+      object["maxPower"] = 75;               // 15A Fuse @ 5V
+      uint8_t ledPins[] = {12, 13, 16, 18};  // 4 LED_PINS
       for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
-	  pinAssigner.assignPin(32, pin_I2S_SD);
+      pinAssigner.assignPin(32, pin_I2S_SD);
       pinAssigner.assignPin(15, pin_I2S_WS);
       pinAssigner.assignPin(14, pin_I2S_SCK);
       pinAssigner.assignPin(0, pin_I2S_MCLK);
-	  uint8_t exposedPins[11] = {4, 5, 17, 19, 21, 22, 23, 25, 26, 27, 33};
+      uint8_t exposedPins[] = {4, 5, 17, 19, 21, 22, 23, 25, 26, 27, 33};
       for (int i = 0; i < sizeof(exposedPins); i++) pinAssigner.assignPin(exposedPins[i], pin_Exposed);  // Ethernet Pins
-	  
-    } else if (boardID == board_MHCP4NanoV1) {                  // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
-      object["maxPower"] = 100;                               // Assuming decent LED power!!
-	    uint8_t ledPins[6] = {21, 20, 25, 5, 23, 27};  // Always LED Pins independend from switches
+    } else if (boardID == board_MHCP4NanoV1) {                                                           // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
+      object["maxPower"] = 100;                                                                          // Assuming decent LED power!!
+
+      if (_state.data["switch1"]) {                         // on
+        uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27};  // 8 LED pins in this order
         for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
-      if (_state.data["jumper1"]) {// on
-        // per default used as LED Pins
         pinAssigner.assignPin(3, pin_RS485_TX);
         pinAssigner.assignPin(4, pin_RS485_TX);
         pinAssigner.assignPin(22, pin_RS485_TX);
@@ -409,28 +404,25 @@ class ModuleIO : public Module {
         pinAssigner.assignPin(46, pin_Dig_Input);
         pinAssigner.assignPin(47, pin_Dig_Input);
         pinAssigner.assignPin(48, pin_Dig_Input);
-      } else { // off - default
-        uint8_t ledPins[8] = {3, 22, 24, 4, 46, 47, 2, 48};  // 8 LED_PINS
+      } else {                                                                           // off - default
+        uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // 16 LED_PINS in this order
         for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       }
-      if (_state.data["UseLineIn"]) {
-		// pins used for Line-In 
-    	pinAssigner.assignPin(33, pin_I2S_SD);
+
+      if (_state.data["switch2"]) {
+        // pins used for Line-In
+        pinAssigner.assignPin(33, pin_I2S_SD);
         pinAssigner.assignPin(26, pin_I2S_WS);
         pinAssigner.assignPin(32, pin_I2S_SCK);
         pinAssigner.assignPin(36, pin_I2S_MCLK);
-		pinAssigner.assignPin(7, pin_LED);
-		pinAssigner.assignPin(8, pin_LED);
-      } else {
-		// Pins used for build-in Mic over I2S
-    	pinAssigner.assignPin(10, pin_I2S_WS);
+      } else {  // default
+        // Pins used for build-in Mic over I2S
+        pinAssigner.assignPin(10, pin_I2S_WS);
         pinAssigner.assignPin(11, pin_I2S_SD);
         pinAssigner.assignPin(12, pin_I2S_SCK);
         pinAssigner.assignPin(13, pin_I2S_MCLK);
-		pinAssigner.assignPin(7, pin_I2C_SDA);
-        pinAssigner.assignPin(8, pin_I2C_SCL);
       }
-      
+
     } else if (boardID == board_YvesV48) {
       pinAssigner.assignPin(3, pin_LED);
     } else if (boardID == board_TroyP4Nano) {
@@ -505,8 +497,8 @@ class ModuleIO : public Module {
         EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         newBoardID = _state.data["boardPreset"];  // run in sveltekit task
       }
-    } else if ( (updatedItem.name == "jumper1" || updatedItem.name == "UseLineIn") && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
-                                                                                              // rebuild with new jumper setting
+    } else if ((updatedItem.name == "switch1" || updatedItem.name == "switch2") && !_state.updateOriginId.contains("server")) {
+      // rebuild with new switch setting
       _state.data["modded"] = false;
       newBoardID = _state.data["boardPreset"];                                              // run in sveltekit task
     } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
