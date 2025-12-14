@@ -54,6 +54,8 @@
 	let offsetRGB: number;
 	let offsetWhite: number;
 	let isPositions: boolean = false;
+	let lightPreset: number = 2;
+	let nrOfChannels: number = 0;
 	// let offsetRed:number;
 	// let offsetGreen:number;
 	// let offsetBlue:number;
@@ -70,10 +72,12 @@
 		// offsetBlue    = (header[6] >> 6) & 0x3; // bits 6-7
 		// offsetWhite   = header[13];
 
-		nrOfLights = view.getUint16(12, true); //  header[12] + 256 * header[13];
-		channelsPerLight = view.getUint8(19); //header[19];
-		offsetRGB = view.getUint8(20); //header[20];
-		offsetWhite = view.getUint8(21); //header[21];
+		nrOfLights = view.getUint16(12, true);
+		channelsPerLight = view.getUint8(19);
+		offsetRGB = view.getUint8(20);
+		offsetWhite = view.getUint8(21);
+		nrOfChannels = view.getUint16(32, true);
+		lightPreset = view.getUint8(34);
 
 		//rebuild scene
 		createScene(el);
@@ -95,17 +99,18 @@
 			depth,
 			nrOfLights,
 			channelsPerLight,
-			offsetRGB
+			offsetRGB,
+			nrOfChannels
 		);
 	};
 
 	const handlePositions = (positions: Uint8Array) => {
 		console.log('Monitor.handlePositions', positions);
 
-		for (let index = 0; index < nrOfLights * 3; index += 3) {
-			let x = positions[index];
-			let y = positions[index + 1];
-			let z = positions[index + 2];
+		for (let indexP = 0; indexP < nrOfLights; indexP++) {
+			let x = positions[indexP * 3];
+			let y = positions[indexP * 3 + 1];
+			let z = positions[indexP * 3 + 2];
 
 			//set to -1,1 coordinate system of webGL
 			//width -1 etc as 0,0 should be top left, not bottom right
@@ -124,17 +129,20 @@
 			done = true;
 		}
 		clearColors();
+		let rgb2040 = lightPreset == 13;
 		//max size supported is 255x255x255 (index < width * height * depth) ... todo: only any of the component < 255
-		for (let index = 0; index < nrOfLights * channelsPerLight; index += channelsPerLight) {
-			// && index < width * height * depth
-			// colorLed(index/3, data[index]/255, data[index+1]/255, data[index+2]/255);
-			const r = channels[index + offsetRGB + 0] / 255;
-			const g = channels[index + offsetRGB + 1] / 255;
-			const b = channels[index + offsetRGB + 2] / 255;
-			let w = 0;
-			if (offsetWhite != 255) w = channels[index + offsetRGB + 3] / 255; //add white channel if present
-			const a = 1.0; // Full opacity
-			colors.push(r + w, g + w, b + w, a);
+		for (let index = 0; index < nrOfChannels; index += channelsPerLight) {
+			if (!rgb2040 || Math.floor(index / 60) % 2 == 0) {
+				// RGB2040 Skip the empty channels
+				// && index < width * height * depth
+				const r = channels[index + offsetRGB + 0] / 255;
+				const g = channels[index + offsetRGB + 1] / 255;
+				const b = channels[index + offsetRGB + 2] / 255;
+				let w = 0;
+				if (offsetWhite != 255) w = channels[index + offsetRGB + 3] / 255; //add white channel if present
+				const a = 1.0; // Full opacity
+				colors.push(r + w, g + w, b + w, a);
+			}
 		}
 
 		updateScene(vertices, colors);

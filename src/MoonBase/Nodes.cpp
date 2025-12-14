@@ -345,7 +345,7 @@ I2SClocklessLedDriver ledsDriver;
   #endif
 
 void DriverNode::setup() {
-  addControl(lightPreset, "lightPreset", "select");
+  addControl(layerP.lights.header.lightPreset, "lightPreset", "select");
   addControlValue("RGB");
   addControlValue("RBG");
   addControlValue("GRB");  // default WS2812
@@ -359,6 +359,7 @@ void DriverNode::setup() {
   addControlValue("MHBeeEyes150W-15 🐺");     // 15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
   addControlValue("MHBeTopper19x15W-32 🐺");  // 32 channels moving head
   addControlValue("MH19x15W-24");             // 24 channels moving heads
+  addControlValue("RGB2040");                 // curtain 2040
 }
 
 void DriverNode::loop() {
@@ -407,7 +408,7 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
 
     header->resetOffsets();
 
-    switch (lightPreset) {
+    switch (header->lightPreset) {
     case 0:
       header->channelsPerLight = 3;
       header->offsetRed = 0;
@@ -511,9 +512,15 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
       layer->layerP->lights.header.offsetRGB2 = 12;
       layer->layerP->lights.header.offsetZoom = 17;
       break;
+    case 13:  // curtain RGB2040
+      header->channelsPerLight = 3;
+      header->offsetRed = 0;
+      header->offsetGreen = 1;
+      header->offsetBlue = 2;
+      break;  
     }
 
-    EXT_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
+    EXT_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", header->lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
 
     // FASTLED_ASSERT(true, "oki");
 

@@ -122,7 +122,7 @@ class ArtNetOutDriver : public DriverNode {
       if (header->offsetRGB2 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB2], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB2]);
       if (header->offsetRGB3 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB3], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB3]);
 
-      if (lightPreset == 9 && indexP < 72)  // RGBWYP this config assumes a mix of 4 channels and 6 channels per light !!!!
+      if (header->lightPreset == 9 && indexP < 72)  // RGBWYP this config assumes a mix of 4 channels and 6 channels per light !!!!
         packetSize += 4;
       else
         packetSize += header->channelsPerLight;
@@ -131,7 +131,7 @@ class ArtNetOutDriver : public DriverNode {
 
       // if packet_buffer full, or output full, send the buffer
       if (packetSize + header->channelsPerLight > ARTNET_CHANNELS_PER_PACKET || channels_remaining < header->channelsPerLight) {  // next light will not fit in the package, so send what we got
-        // Serial.printf("; %d %d %d", header->nrOfLights, packetSize+18, header->nrOfLights*header->channelsPerLight);
+        // Serial.printf("; %d %d %d", header->nrOfLights, packetSize+18, header->nrOfLights * header->channelsPerLight);
 
         if (!writePackage()) return;  // resets packagesize
 
@@ -145,7 +145,7 @@ class ArtNetOutDriver : public DriverNode {
 
     // send the last partially filled package
     if (packetSize > 0) {
-      // Serial.printf(", %d %d %d", header->nrOfLights, packetSize+18, header->nrOfLights*header->channelsPerLight);
+      // Serial.printf(", %d %d %d", header->nrOfLights, packetSize+18, header->nrOfLights * header->channelsPerLight);
 
       writePackage();  // remaining
     }

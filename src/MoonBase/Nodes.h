@@ -285,9 +285,6 @@ class DriverNode : public Node {
   bool initDone = false;
   #endif
 
- protected:
-  uint8_t lightPreset = 2;  // GRB
-
  public:
   void setup() override;
 

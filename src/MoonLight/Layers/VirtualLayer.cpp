@@ -21,9 +21,7 @@ void fastled_fadeToBlackBy(CRGB* leds, uint16_t num_leds, uint8_t fadeBy) { fade
 void fastled_fill_solid(struct CRGB* targetArray, int numToFill, const CRGB& color) { fill_solid(targetArray, numToFill, color); }
 void fastled_fill_rainbow(struct CRGB* targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue) { fill_rainbow(targetArray, numToFill, initialhue, deltahue); }
 
-VirtualLayer::VirtualLayer() {
-  EXT_LOGV(ML_TAG, "constructor");
-}
+VirtualLayer::VirtualLayer() { EXT_LOGV(ML_TAG, "constructor"); }
 
 VirtualLayer::~VirtualLayer() {
   EXT_LOGV(ML_TAG, "destructor");
@@ -138,12 +136,19 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
     }
     case m_oneLight: {
       uint16_t indexP = mappingTable[indexV].indexP;
+      if (layerP->lights.header.lightPreset == 13) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
+        indexP = (indexP / 20 * 40 + indexP % 20);
+      }
       memcpy(&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset], channels, length);
+
       break;
     }
     case m_moreLights:
       if (mappingTable[indexV].indexes < mappingTableIndexes.size())
         for (uint16_t indexP : mappingTableIndexes[mappingTable[indexV].indexes]) {
+          if (layerP->lights.header.lightPreset == 13) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
+            indexP = (indexP / 20 * 40 + indexP % 20);
+          }
           memcpy(&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset], channels, length);
         }
       else
@@ -161,7 +166,11 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
   if (indexV < mappingTableSize) {
     switch (mappingTable[indexV].mapType) {
     case m_oneLight: {
-      T* result = (T*)&layerP->lights.channels[mappingTable[indexV].indexP * layerP->lights.header.channelsPerLight + offset];
+      uint16_t indexP = mappingTable[indexV].indexP;
+      if (layerP->lights.header.lightPreset == 13) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
+        indexP = (indexP / 20 * 40 + indexP % 20);
+      }
+      T* result = (T*)&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset];
       return *result;  // return the color as CRGB
       break;
     }
@@ -208,7 +217,7 @@ void VirtualLayer::fadeToBlackMin() {
     //   }
     // } else
     if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) {  // CRGB lights
-      fastled_fadeToBlackBy((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfLights, fadeBy);
+      fastled_fadeToBlackBy((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels, fadeBy);
     } else {  // multichannel lights
       for (uint16_t index = 0; index < nrOfLights; index++) {
         CRGB color = getRGB(index);  // direct access to the channels
@@ -250,7 +259,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
   //   }
   // } else
   if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) {  // faster, else manual
-    fastled_fill_solid((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfLights, color);
+    fastled_fill_solid((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels, color);
   } else {
     for (uint16_t index = 0; index < nrOfLights; index++) setRGB(index, color);
   }
@@ -270,7 +279,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   //   }
   // } else
   if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) {  // faster, else manual
-    fastled_fill_rainbow((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfLights, initialhue, deltahue);
+    fastled_fill_rainbow((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels, initialhue, deltahue); // RGB2040 has empty channels
   } else {
     CHSV hsv;
     hsv.hue = initialhue;

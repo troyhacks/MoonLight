@@ -344,7 +344,7 @@ class ModuleLightsControl : public Module {
     } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
       EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
         read([&](ModuleState& _state) {
-          if (_socket->getConnectedClients() && _state.data["monitorOn"]) _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfLights * layerP.lights.header.channelsPerLight, layerP.lights.maxChannels));
+          if (_socket->getConnectedClients() && _state.data["monitorOn"]) _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfChannels, layerP.lights.maxChannels));
         });
       }
     }
