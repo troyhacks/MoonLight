@@ -184,7 +184,7 @@ void PhysicalLayer::nextPin(uint8_t ledPinDIO) {
     }
     // ledsPerPin[i] is the first empty slot
     if (i < MAXLEDPINS) {
-      ledsPerPin[i] = (lights.header.nrOfLights - prevNrOfLights) * ((lights.header.lightPreset == 13) ? 2 : 1);  // RGB2040 has empty channels
+      ledsPerPin[i] = (lights.header.nrOfLights - prevNrOfLights) * ((lights.header.lightPreset == lightPreset_RGB2040) ? 2 : 1);  // RGB2040 has empty channels
       if (ledPinDIO != UINT8_MAX)
         ledPinsAssigned[i] = ledPinDIO;  // override order
       else
@@ -198,7 +198,7 @@ void PhysicalLayer::nextPin(uint8_t ledPinDIO) {
 void PhysicalLayer::onLayoutPost() {
   if (pass == 1) {
     lights.header.size += Coord3D{1, 1, 1};
-    lights.header.nrOfChannels = lights.header.nrOfLights * lights.header.channelsPerLight * ((lights.header.lightPreset == 13) ? 2 : 1);  // RGB2040 has empty channels
+    lights.header.nrOfChannels = lights.header.nrOfLights * lights.header.channelsPerLight * ((lights.header.lightPreset == lightPreset_RGB2040) ? 2 : 1);  // RGB2040 has empty channels
     EXT_LOGD(ML_TAG, "pass %d mp:%d #:%d / %d s:%d,%d,%d", pass, monitorPass, lights.header.nrOfLights, lights.header.nrOfChannels, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     // send the positions to the UI _socket_emit
     EXT_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights ? 2 : 3);

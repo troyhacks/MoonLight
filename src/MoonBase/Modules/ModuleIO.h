@@ -16,7 +16,7 @@
 
   #include "MoonBase/Module.h"
 
-enum IO_PinUsage {
+enum IO_PinUsageEnum {
   pin_Unused,  // 0
   pin_LED,
   pin_LED_CW,
@@ -63,7 +63,7 @@ enum IO_PinUsage {
   pin_count
 };
 
-enum IO_Boards {
+enum IO_BoardsEnum {
   board_none,  //
   board_QuinLEDDigUnoV3,
   board_QuinLEDDigQuadV3,
@@ -275,7 +275,7 @@ class ModuleIO : public Module {
     if (boardID == board_SE16V1) {
       object["maxPower"] = 500;
       uint8_t ledPins[] = {47, 48, 21, 38, 14, 39, 13, 40, 12, 41, 11, 42, 10, 2, 3, 1};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(0, pin_ButtonPush);
       pinAssigner.assignPin(45, pin_ButtonPush);
       pinAssigner.assignPin(46, pin_Button_LightsOn);
@@ -311,7 +311,7 @@ class ModuleIO : public Module {
       // esp32-d0 (4MB)
       object["maxPower"] = 150;
       uint8_t ledPins[] = {16, 3, 1, 4};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(0, pin_ButtonPush);
 
       pinAssigner.assignPin(15, pin_Relay);
@@ -325,7 +325,7 @@ class ModuleIO : public Module {
       // Dig-Octa-32-8L
       object["maxPower"] = 400;                        // 10A Fuse * 8 ... 400 W
       uint8_t ledPins[] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(33, pin_Relay);
       pinAssigner.assignPin(34, pin_ButtonPush);
     } else if (boardID == board_QuinLEDDig2Go) {
@@ -345,7 +345,7 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(xx, pin_I2S_MCLK);
       // } else if (boardID == board_QuinLEDPenta) {
       //   uint8_t ledPins[] = {14, 13, 12, 4, 2};  // LED_PINS
-      //   for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      //   for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       //   pinAssigner.assignPin(34, pin_ButtonPush);
       //   pinAssigner.assignPin(35, pin_ButtonPush);
       //   pinAssigner.assignPin(39, pin_ButtonPush);
@@ -412,7 +412,7 @@ class ModuleIO : public Module {
       object["maxPower"] = 100;                             // Assuming decent LED power!!
       if (_state.data["jumper1"]) {                         // on
         uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27};  // 8 LED_PINS
-        for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+        for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
         // per default used as LED Pins
         pinAssigner.assignPin(3, pin_RS485);
         pinAssigner.assignPin(4, pin_RS485);
@@ -424,7 +424,7 @@ class ModuleIO : public Module {
         pinAssigner.assignPin(48, pin_Exposed);
       } else {                                                                           // off - default
         uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // 16 LED_PINS
-        for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+        for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       }
       pinAssigner.assignPin(33, pin_I2S_SD);
       pinAssigner.assignPin(26, pin_I2S_WS);
@@ -435,7 +435,7 @@ class ModuleIO : public Module {
     } else if (boardID == board_TroyP4Nano) {
       object["maxPower"] = 10;                                                          // USB compliant
       uint8_t ledPins[] = {2, 3, 4, 5, 6, 20, 21, 22, 23, 26, 27, 32, 33, 36, 47, 48};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(7, pin_I2C_SDA);
       pinAssigner.assignPin(8, pin_I2C_SCL);
       pinAssigner.assignPin(9, pin_Reserved);  // I2S Sound Output Pin
@@ -462,12 +462,12 @@ class ModuleIO : public Module {
       // 54 is "C4 EN pin" so I guess we shouldn't fuck with that.
     } else if (boardID == board_AtomS3) {
       uint8_t ledPins[] = {5, 6, 7, 8};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
     } else if (boardID == board_Cube202010) {
       object["maxPower"] = 50;
       uint8_t ledPins[] = {22, 21, 14, 18, 5, 4, 2, 15, 13, 12};  // LED_PINS
                                                                   // char pins[80] = "2,3,4,16,17,18,19,21,22,23,25,26,27,32,33";  //(D0), more pins possible. to do: complete list.
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
   #ifdef CONFIG_IDF_TARGET_ESP32P4

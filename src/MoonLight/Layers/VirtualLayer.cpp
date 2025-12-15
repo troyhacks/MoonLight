@@ -136,8 +136,8 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
     }
     case m_oneLight: {
       uint16_t indexP = mappingTable[indexV].indexP;
-      if (layerP->lights.header.lightPreset == 13) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
-        indexP = (indexP / 20 * 40 + indexP % 20);
+      if (layerP->lights.header.lightPreset == lightPreset_RGB2040) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
+        indexP += (indexP / 20) * 20;
       }
       memcpy(&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset], channels, length);
 
@@ -146,8 +146,8 @@ void VirtualLayer::setLight(const uint16_t indexV, const uint8_t* channels, uint
     case m_moreLights:
       if (mappingTable[indexV].indexes < mappingTableIndexes.size())
         for (uint16_t indexP : mappingTableIndexes[mappingTable[indexV].indexes]) {
-          if (layerP->lights.header.lightPreset == 13) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
-            indexP = (indexP / 20 * 40 + indexP % 20);
+          if (layerP->lights.header.lightPreset == lightPreset_RGB2040) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
+            indexP += (indexP / 20) * 20;
           }
           memcpy(&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset], channels, length);
         }
@@ -167,16 +167,20 @@ T VirtualLayer::getLight(const uint16_t indexV, uint8_t offset) const {
     switch (mappingTable[indexV].mapType) {
     case m_oneLight: {
       uint16_t indexP = mappingTable[indexV].indexP;
-      if (layerP->lights.header.lightPreset == 13) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
-        indexP = (indexP / 20 * 40 + indexP % 20);
+      if (layerP->lights.header.lightPreset == lightPreset_RGB2040) {  // RGB2040 has empty channels: Skip the 20..39 range, so adjust group mapping
+        indexP += (indexP / 20) * 20;
       }
       T* result = (T*)&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset];
       return *result;  // return the color as CRGB
       break;
     }
     case m_moreLights: {
-      T* result = (T*)&layerP->lights.channels[mappingTableIndexes[mappingTable[indexV].indexes][0] * layerP->lights.header.channelsPerLight + offset];  // any will do as they are all the same
-      return *result;                                                                                                                                    // return the color as CRGB
+      uint16_t indexP = mappingTableIndexes[mappingTable[indexV].indexes][0];  // any will do as they are all the same
+      if (layerP->lights.header.lightPreset == lightPreset_RGB2040) {          // RGB2040 has empty channels
+        indexP += (indexP / 20) * 20;
+      }
+      T* result = (T*)&layerP->lights.channels[indexP * layerP->lights.header.channelsPerLight + offset];
+      return *result;  // return the color as CRGB
       break;
     }
     default:                                              // m_zeroLights:
@@ -217,7 +221,7 @@ void VirtualLayer::fadeToBlackMin() {
     //   }
     // } else
     if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) {  // CRGB lights
-      fastled_fadeToBlackBy((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels, fadeBy);
+      fastled_fadeToBlackBy((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels / sizeof(CRGB), fadeBy);
     } else {  // multichannel lights
       for (uint16_t index = 0; index < nrOfLights; index++) {
         CRGB color = getRGB(index);  // direct access to the channels
@@ -259,7 +263,7 @@ void VirtualLayer::fill_solid(const CRGB& color) {
   //   }
   // } else
   if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) {  // faster, else manual
-    fastled_fill_solid((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels, color);
+    fastled_fill_solid((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels / sizeof(CRGB), color);
   } else {
     for (uint16_t index = 0; index < nrOfLights; index++) setRGB(index, color);
   }
@@ -279,7 +283,7 @@ void VirtualLayer::fill_rainbow(const uint8_t initialhue, const uint8_t deltahue
   //   }
   // } else
   if (layerP->lights.header.channelsPerLight == 3 && layerP->layers.size() == 1) {  // faster, else manual
-    fastled_fill_rainbow((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels, initialhue, deltahue); // RGB2040 has empty channels
+    fastled_fill_rainbow((CRGB*)layerP->lights.channels, layerP->lights.header.nrOfChannels / sizeof(CRGB), initialhue, deltahue);
   } else {
     CHSV hsv;
     hsv.hue = initialhue;

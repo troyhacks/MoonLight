@@ -352,14 +352,14 @@ void DriverNode::setup() {
   addControlValue("GBR");
   addControlValue("BRG");
   addControlValue("BGR");
-  addControlValue("RGBW");                    // e.g. 4 channel par/dmx light
-  addControlValue("GRBW");                    // rgbw LED eg. sk6812
-  addControlValue("GRB6");                    // some LED curtains
-  addControlValue("RGBWYP");                  // 6 channel par/dmx light with UV etc
-  addControlValue("MHBeeEyes150W-15 🐺");     // 15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
-  addControlValue("MHBeTopper19x15W-32 🐺");  // 32 channels moving head
-  addControlValue("MH19x15W-24");             // 24 channels moving heads
-  addControlValue("RGB2040");                 // curtain 2040
+  addControlValue("RGBW");                      // e.g. 4 channel par/dmx light
+  addControlValue("GRBW");                      // rgbw LED eg. sk6812
+  addControlValue("Curtain GRB6");              // some LED curtains
+  addControlValue("Curtain RGB2040");           // curtain RGB2040
+  addControlValue("Lightbar RGBWYP");           // 6 channel par/dmx light with UV etc
+  addControlValue("MH BeeEyes 150W-15 🐺");     // 15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
+  addControlValue("MH BeTopper 19x15W-32 🐺");  // 32 channels moving head
+  addControlValue("MH 19x15W-24");              // 24 channels moving heads
 }
 
 void DriverNode::loop() {
@@ -409,70 +409,91 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
     header->resetOffsets();
 
     switch (header->lightPreset) {
-    case 0:
+    case lightPreset_RGB:
       header->channelsPerLight = 3;
       header->offsetRed = 0;
       header->offsetGreen = 1;
       header->offsetBlue = 2;
-      break;  // RGB
-    case 1:
+      break;
+    case lightPreset_RBG:
       header->channelsPerLight = 3;
       header->offsetRed = 0;
       header->offsetGreen = 2;
       header->offsetBlue = 1;
-      break;  // RBG
-    case 2:
+      break;
+    case lightPreset_GRB:
       header->channelsPerLight = 3;
       header->offsetRed = 1;
       header->offsetGreen = 0;
       header->offsetBlue = 2;
-      break;  // GRB
-    case 3:
+      break;
+    case lightPreset_GBR:
       header->channelsPerLight = 3;
       header->offsetRed = 2;
       header->offsetGreen = 0;
       header->offsetBlue = 1;
-      break;  // GBR
-    case 4:
+      break;
+    case lightPreset_BRG:
       header->channelsPerLight = 3;
       header->offsetRed = 1;
       header->offsetGreen = 2;
       header->offsetBlue = 0;
-      break;  // BRG
-    case 5:
+      break;
+    case lightPreset_BGR:
       header->channelsPerLight = 3;
       header->offsetRed = 2;
       header->offsetGreen = 1;
       header->offsetBlue = 0;
-      break;  // BGR
-    case 6:
+      break;
+    case lightPreset_RGBW:
       header->channelsPerLight = 4;
       header->offsetRed = 0;
       header->offsetGreen = 1;
       header->offsetBlue = 2;
       header->offsetWhite = 3;
-      break;  // RGBW - Par Lights
-    case 7:
+      break;
+    case lightPreset_GRBW:
       header->channelsPerLight = 4;
       header->offsetRed = 1;
       header->offsetGreen = 0;
       header->offsetBlue = 2;
       header->offsetWhite = 3;
-      break;  // GRBW - RGBW Leds
-    case 8:
+      break;
+    case lightPreset_GRB6:
       header->channelsPerLight = 6;
       header->offsetRed = 1;
       header->offsetGreen = 0;
       header->offsetBlue = 2;
-      break;  // GRB6
-    case 9:
+      break;
+    case lightPreset_RGB2040:
+      // RGB2040 uses standard RGB offsets but has special channel remapping
+      // for dual-channel-group architecture (handled in VirtualLayer)
+      header->channelsPerLight = 3;
+      header->offsetRed = 0;
+      header->offsetGreen = 1;
+      header->offsetBlue = 2;
+      break;
+    case lightPreset_RGBWYP:
       header->channelsPerLight = 6;
       header->offsetRed = 0;
       header->offsetGreen = 1;
       header->offsetBlue = 2;
       header->offsetWhite = 3;
-      break;  // RGBWYP - 6 channel Par/DMX Lights with UV etc
-    case 10:  // MHBeTopper19x15W-32
+      break;
+    case lightPreset_MHBeeEyes150W15:
+      layer->layerP->lights.header.channelsPerLight = 15;  // set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
+      header->offsetRed = 0;
+      header->offsetGreen = 1;
+      header->offsetBlue = 2;
+      layer->layerP->lights.header.offsetRGB = 10;  // set offset for RGB lights in DMX map
+      layer->layerP->lights.header.offsetPan = 0;
+      layer->layerP->lights.header.offsetTilt = 1;
+      layer->layerP->lights.header.offsetZoom = 7;
+      layer->layerP->lights.header.offsetBrightness = 8;   // set offset for brightness
+      layer->layerP->lights.header.offsetGobo = 5;         // set offset for color wheel in DMX map
+      layer->layerP->lights.header.offsetBrightness2 = 3;  // set offset for color wheel brightness in DMX map    } //BGR
+      break;
+    case lightPreset_MHBeTopper19x15W32:
       layer->layerP->lights.header.channelsPerLight = 32;
       header->offsetRed = 0;
       header->offsetGreen = 1;
@@ -486,20 +507,7 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
       layer->layerP->lights.header.offsetZoom = 5;
       layer->layerP->lights.header.offsetBrightness = 6;
       break;
-    case 11:                                               // MHBeeEyes150W-15
-      layer->layerP->lights.header.channelsPerLight = 15;  // set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
-      header->offsetRed = 0;
-      header->offsetGreen = 1;
-      header->offsetBlue = 2;
-      layer->layerP->lights.header.offsetRGB = 10;  // set offset for RGB lights in DMX map
-      layer->layerP->lights.header.offsetPan = 0;
-      layer->layerP->lights.header.offsetTilt = 1;
-      layer->layerP->lights.header.offsetZoom = 7;
-      layer->layerP->lights.header.offsetBrightness = 8;   // set offset for brightness
-      layer->layerP->lights.header.offsetGobo = 5;         // set offset for color wheel in DMX map
-      layer->layerP->lights.header.offsetBrightness2 = 3;  // set offset for color wheel brightness in DMX map    } //BGR
-      break;
-    case 12:  // MH19x15W-24
+    case lightPreset_MH19x15W24:
       layer->layerP->lights.header.channelsPerLight = 24;
       header->offsetRed = 0;
       header->offsetGreen = 1;
@@ -512,12 +520,6 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
       layer->layerP->lights.header.offsetRGB2 = 12;
       layer->layerP->lights.header.offsetZoom = 17;
       break;
-    case 13:  // curtain RGB2040
-      header->channelsPerLight = 3;
-      header->offsetRed = 0;
-      header->offsetGreen = 1;
-      header->offsetBlue = 2;
-      break;  
     }
 
     EXT_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", header->lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);

@@ -28,6 +28,7 @@ class VirtualLayer;  // Forward as PhysicalLayer refers back to VirtualLayer
 class Node;          // Forward as PhysicalLayer refers back to Node
 class Modifier;      // Forward as PhysicalLayer refers back to Modifier
 
+// make changes to LightsHeader carefully as the alignment of this struct must be preserved as Monitor.svelte is depending on it
 struct LightsHeader {
   Coord3D size = Coord3D(16, 16, 1);  // 0 max position of light, counted by onLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint16_t nrOfLights = 256;          // 12 nr of physical lights, counted by addLight
@@ -58,7 +59,7 @@ struct LightsHeader {
   uint8_t lightPreset;                    // 34, so we can deal with exceptional cases e.g. RGB2040
   // =============
   // 35 bytes total
-  uint8_t fill[5];  //->37 max (prime number)!!! needed so pack up until 40
+  uint8_t fill[5];  // padding to align struct to 40 bytes total. lightsControl will send 37 bytes (prime number)!!! so Monitor.svelte can recognize this
   // support for more channels, like white, pan, tilt etc.
 
   void resetOffsets() {
@@ -78,7 +79,7 @@ struct LightsHeader {
     offsetRGB2 = UINT8_MAX;
     offsetRGB3 = UINT8_MAX;
     offsetBrightness2 = UINT8_MAX;
-    // lightPreset = 2; // don't reset as managed by Drivers
+    // lightPreset = lightPreset_GRB; // don't reset as managed by Drivers
     nrOfChannels = 0;
     memset(fill, 0, sizeof(fill));  // set to 0
   }

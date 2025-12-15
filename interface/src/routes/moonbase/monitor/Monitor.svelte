@@ -54,11 +54,12 @@
 	let offsetRGB: number;
 	let offsetWhite: number;
 	let isPositions: boolean = false;
-	let lightPreset: number = 2;
+	let lightPreset: number;
 	let nrOfChannels: number = 0;
 	// let offsetRed:number;
 	// let offsetGreen:number;
 	// let offsetBlue:number;
+	const lightPreset_RGB2040 = 9;
 
 	const handleHeader = (header: Uint8Array) => {
 		console.log('Monitor.handleHeader', header);
@@ -129,11 +130,11 @@
 			done = true;
 		}
 		clearColors();
-		let rgb2040 = lightPreset == 13;
+		const groupSize = 20 * channelsPerLight; // RGB2040 groups: 20 lights per physical group (will be 3 channelsPerLight)
 		//max size supported is 255x255x255 (index < width * height * depth) ... todo: only any of the component < 255
 		for (let index = 0; index < nrOfChannels; index += channelsPerLight) {
-			if (!rgb2040 || Math.floor(index / 60) % 2 == 0) {
-				// RGB2040 Skip the empty channels
+			if (lightPreset != lightPreset_RGB2040 || Math.floor(index / groupSize) % 2 == 0) {
+				// Math.floor: RGB2040 Skip the empty channels
 				// && index < width * height * depth
 				const r = channels[index + offsetRGB + 0] / 255;
 				const g = channels[index + offsetRGB + 1] / 255;
