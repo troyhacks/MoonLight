@@ -184,7 +184,7 @@
 	{:else if property.type == 'number'}
 		<input
 			type="number"
-			style="width: {String(property.max || 255).length + 4}ch"
+			style="width: {String(property.max || 255).length + 5}ch"
 			min={property.min ? property.min : 0}
 			max={property.max ? property.max : 255}
 			class="input invalid:border-error invalid:border-2"

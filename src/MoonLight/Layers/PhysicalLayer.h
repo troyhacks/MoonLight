@@ -28,6 +28,7 @@ class VirtualLayer;  // Forward as PhysicalLayer refers back to VirtualLayer
 class Node;          // Forward as PhysicalLayer refers back to Node
 class Modifier;      // Forward as PhysicalLayer refers back to Modifier
 
+// make changes to LightsHeader carefully as the alignment of this struct must be preserved as Monitor.svelte is depending on it
 struct LightsHeader {
   Coord3D size = Coord3D(16, 16, 1);  // 0 max position of light, counted by onLayoutPre/Post and addLight. 12 bytes not 0,0,0 to prevent div0 eg in Octopus2D
   uint16_t nrOfLights = 256;          // 12 nr of physical lights, counted by addLight
@@ -54,11 +55,11 @@ struct LightsHeader {
   uint8_t offsetRGB2 = UINT8_MAX;
   uint8_t offsetRGB3 = UINT8_MAX;
   uint8_t offsetBrightness2 = UINT8_MAX;  // 31
-  // 19 + 9? bytes until here
-  // uint8_t ledFactor = 1; //factor to multiply the positions with
-  // uint8_t ledSize = 4; //mm size of each light, used in monitor ...
-  // 32 bytes total
-  uint8_t fill[8];  //->37 needed so pack up until 40
+  uint16_t nrOfChannels;                  // 32,  so we can deal with exceptional cases e.g. RGB2040 make sure it starts at even position!!! for alignment!!!
+  uint8_t lightPreset = UINT8_MAX;        // 34, so we can deal with exceptional cases e.g. RGB2040
+  // =============
+  // 35 bytes total
+  uint8_t fill[5];  // padding to align struct to 40 bytes total. lightsControl will send 37 bytes (prime number)!!! so Monitor.svelte can recognize this
   // support for more channels, like white, pan, tilt etc.
 
   void resetOffsets() {
@@ -78,6 +79,8 @@ struct LightsHeader {
     offsetRGB2 = UINT8_MAX;
     offsetRGB3 = UINT8_MAX;
     offsetBrightness2 = UINT8_MAX;
+    // lightPreset = lightPreset_GRB; // don't reset as managed by Drivers
+    nrOfChannels = 0;
     memset(fill, 0, sizeof(fill));  // set to 0
   }
 
@@ -129,7 +132,7 @@ class PhysicalLayer {
   void nextPin(uint8_t ledPin = UINT8_MAX);  // if more pins are defined, the next lights will be assigned to the next pin
   void onLayoutPost();
 
-  //from board presets
+  // from board presets
   uint8_t ledPins[MAXLEDPINS];
   uint8_t ledPinsAssigned[MAXLEDPINS];
   uint16_t ledsPerPin[MAXLEDPINS];

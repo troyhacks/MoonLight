@@ -16,7 +16,7 @@
 
   #include "MoonBase/Module.h"
 
-enum IO_PinUsage {
+enum IO_PinUsageEnum {
   pin_Unused,  // 0
   pin_LED,
   pin_LED_CW,
@@ -65,7 +65,7 @@ enum IO_PinUsage {
   pin_count
 };
 
-enum IO_Boards {
+enum IO_BoardsEnum {
   board_none,  //
   board_QuinLEDDigUnoV3,
   board_QuinLEDDigQuadV3,
@@ -112,8 +112,8 @@ class ModuleIO : public Module {
     addControlValue(control, "QuinLED Dig Quad v3");
     addControlValue(control, "QuinLED Dig Octa v2");
     addControlValue(control, "QuinLED Dig 2Go");
-    addControlValue(control, "Serg Universal Shield v5 🚧");
-    addControlValue(control, "Serg Mini Shield 🚧");
+    addControlValue(control, "Serg Universal Shield");
+    addControlValue(control, "Serg Mini Shield");
     addControlValue(control, "Mathieu SE16 v1");
     addControlValue(control, "MyHome-Control V43 controller");
     addControlValue(control, "MyHome-Control P4 Nano Shield V1.0");
@@ -281,8 +281,8 @@ class ModuleIO : public Module {
 
     if (boardID == board_SE16V1) {
       object["maxPower"] = 500;
-      uint8_t ledPins[16] = {47, 48, 21, 38, 14, 39, 13, 40, 12, 41, 11, 42, 10, 2, 3, 1};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      uint8_t ledPins[] = {47, 48, 21, 38, 14, 39, 13, 40, 12, 41, 11, 42, 10, 2, 3, 1};  // LED_PINS
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(0, pin_ButtonPush);
       pinAssigner.assignPin(45, pin_ButtonPush);
       pinAssigner.assignPin(46, pin_Button_LightsOn);
@@ -317,8 +317,8 @@ class ModuleIO : public Module {
       // Dig-Quad-V3
       // esp32-d0 (4MB)
       object["maxPower"] = 150;
-      uint8_t ledPins[4] = {16, 3, 1, 4};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      uint8_t ledPins[] = {16, 3, 1, 4};  // LED_PINS
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(0, pin_ButtonPush);
 
       pinAssigner.assignPin(15, pin_Relay);
@@ -330,9 +330,9 @@ class ModuleIO : public Module {
       // pinAssigner.assignPin(32, pin_Exposed;
     } else if (boardID == board_QuinLEDDigOctaV2) {
       // Dig-Octa-32-8L
-      object["maxPower"] = 400;                         // 10A Fuse * 8 ... 400 W
-      uint8_t ledPins[8] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      object["maxPower"] = 400;                        // 10A Fuse * 8 ... 400 W
+      uint8_t ledPins[] = {0, 1, 2, 3, 4, 5, 12, 13};  // LED_PINS
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(33, pin_Relay);
       pinAssigner.assignPin(34, pin_ButtonPush);
     } else if (boardID == board_QuinLEDDig2Go) {
@@ -351,8 +351,8 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(25, pin_Exposed);
       // pinAssigner.assignPin(xx, pin_I2S_MCLK);
       // } else if (boardID == board_QuinLEDPenta) {
-      //   uint8_t ledPins[5] = {14, 13, 12, 4, 2};  // LED_PINS
-      //   for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      //   uint8_t ledPins[] = {14, 13, 12, 4, 2};  // LED_PINS
+      //   for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       //   pinAssigner.assignPin(34, pin_ButtonPush);
       //   pinAssigner.assignPin(35, pin_ButtonPush);
       //   pinAssigner.assignPin(39, pin_ButtonPush);
@@ -373,12 +373,31 @@ class ModuleIO : public Module {
       //   pinAssigner.assignPin(5, pin_LED);
     } else if (boardID == board_SergMiniShield) {
       object["maxPower"] = 50;  // 10A Fuse ...
-      pinAssigner.assignPin(1, pin_LED);
-      pinAssigner.assignPin(3, pin_LED);
+      pinAssigner.assignPin(16, pin_LED);
+      // pinAssigner.assignPin(17, pin_LED); // e.g. apa102...
+
+      // pinAssigner.assignPin(??, pin_Button_LightsOn); // which pin ?
+      pinAssigner.assignPin(19, pin_Relay_LightsOn); // optional
+
+      // e.g. for mic
+      pinAssigner.assignPin(32, pin_I2S_SD);
+      pinAssigner.assignPin(15, pin_I2S_WS);
+      pinAssigner.assignPin(14, pin_I2S_SCK);
+      // pinAssigner.assignPin(36, nc/ao...);
+
+      // e.g. for 4 line display
+      pinAssigner.assignPin(21, pin_I2C_SDA);
+      pinAssigner.assignPin(22, pin_I2C_SCL);
     } else if (boardID == board_SergUniShieldV5) {
       object["maxPower"] = 50;  // 10A Fuse ...
-      pinAssigner.assignPin(1, pin_LED);
-      pinAssigner.assignPin(3, pin_LED);
+
+      pinAssigner.assignPin(16, pin_LED);  // first pin
+      if (_state.data["jumper1"])
+        pinAssigner.assignPin(1, pin_LED);
+      else  // default
+        pinAssigner.assignPin(3, pin_LED);
+
+      pinAssigner.assignPin(17, pin_Button_LightsOn);
       pinAssigner.assignPin(19, pin_Relay_LightsOn);
     } else if (boardID == board_MHCV43) {    // https://shop.myhome-control.de/ABC-WLED-Controller-Board-5-24V/HW10015
       object["maxPower"] = 75;               // 15A Fuse @ 5V
@@ -407,6 +426,39 @@ class ModuleIO : public Module {
       } else {                                                                           // off - default
         uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // 16 LED_PINS in this order
         for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      pinAssigner.assignPin(18, pin_Infrared);
+
+      // e.g. for mic
+      pinAssigner.assignPin(32, pin_I2S_SD);
+      pinAssigner.assignPin(15, pin_I2S_WS);
+      pinAssigner.assignPin(14, pin_I2S_SCK);
+      // pinAssigner.assignPin(36, nc/ao...);
+
+      // e.g. for 4 line display
+      pinAssigner.assignPin(21, pin_I2C_SDA);
+      pinAssigner.assignPin(22, pin_I2C_SCL);
+
+      // pinAssigner.assignPin(?, pin_Temperature); // todo: check temp pin
+
+    } else if (boardID == board_MHCD0) {
+      pinAssigner.assignPin(3, pin_Voltage);
+    } else if (boardID == board_MHCP4Nano) {                // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
+      object["maxPower"] = 100;                             // Assuming decent LED power!!
+      if (_state.data["jumper1"]) {                         // on
+        uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27};  // 8 LED_PINS
+        for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+        // per default used as LED Pins
+        pinAssigner.assignPin(3, pin_RS485);
+        pinAssigner.assignPin(4, pin_RS485);
+        pinAssigner.assignPin(22, pin_RS485);
+        pinAssigner.assignPin(24, pin_RS485);
+        pinAssigner.assignPin(2, pin_Exposed);
+        pinAssigner.assignPin(46, pin_Exposed);
+        pinAssigner.assignPin(47, pin_Exposed);
+        pinAssigner.assignPin(48, pin_Exposed);
+      } else {                                                                           // off - default
+        uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // 16 LED_PINS
+        for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       }
 
       if (_state.data["switch2"]) {
@@ -426,9 +478,9 @@ class ModuleIO : public Module {
     } else if (boardID == board_YvesV48) {
       pinAssigner.assignPin(3, pin_LED);
     } else if (boardID == board_TroyP4Nano) {
-      object["maxPower"] = 10;                                                            // USB compliant
-      uint8_t ledPins[16] = {2, 3, 4, 5, 6, 20, 21, 22, 23, 26, 27, 32, 33, 36, 47, 48};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      object["maxPower"] = 10;                                                          // USB compliant
+      uint8_t ledPins[] = {2, 3, 4, 5, 6, 20, 21, 22, 23, 26, 27, 32, 33, 36, 47, 48};  // LED_PINS
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
       pinAssigner.assignPin(7, pin_I2C_SDA);
       pinAssigner.assignPin(8, pin_I2C_SCL);
       pinAssigner.assignPin(9, pin_Reserved);  // I2S Sound Output Pin
@@ -454,16 +506,20 @@ class ModuleIO : public Module {
       // 53 is for PA enable but it's exposed on header and works for WLED pin output. Best to not use it but left available.
       // 54 is "C4 EN pin" so I guess we shouldn't fuck with that.
     } else if (boardID == board_AtomS3) {
-      uint8_t ledPins[4] = {5, 6, 7, 8};  // LED_PINS
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      uint8_t ledPins[] = {5, 6, 7, 8};  // LED_PINS
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
     } else if (boardID == board_Cube202010) {
       object["maxPower"] = 50;
-      uint8_t ledPins[10] = {22, 21, 14, 18, 5, 4, 2, 15, 13, 12};  // LED_PINS
-                                                                    // char pins[80] = "2,3,4,16,17,18,19,21,22,23,25,26,27,32,33";  //(D0), more pins possible. to do: complete list.
-      for (int i = 0; i < sizeof(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
+      uint8_t ledPins[] = {22, 21, 14, 18, 5, 4, 2, 15, 13, 12};  // LED_PINS
+                                                                  // char pins[80] = "2,3,4,16,17,18,19,21,22,23,25,26,27,32,33";  //(D0), more pins possible. to do: complete list.
+      for (int i = 0; i < std::size(ledPins); i++) pinAssigner.assignPin(ledPins[i], pin_LED);
     } else {                    // default
       object["maxPower"] = 10;  // USB compliant
+  #ifdef CONFIG_IDF_TARGET_ESP32P4
+      pinAssigner.assignPin(37, pin_LED);
+  #else
       pinAssigner.assignPin(16, pin_LED);
+  #endif
 
       // trying to add more pins, but these pins not liked by esp32-d0-16MB ... 🚧
       // pinAssigner.assignPin(4, pin_LED_02;

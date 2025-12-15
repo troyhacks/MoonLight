@@ -20,7 +20,7 @@
 
   #include "PhysicalLayer.h"
 
-enum mapType {
+enum MapTypeEnum {
   m_zeroLights,
   m_oneLight,
   m_moreLights,
