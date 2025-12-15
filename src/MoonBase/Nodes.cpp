@@ -520,6 +520,15 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
       layer->layerP->lights.header.offsetRGB2 = 12;
       layer->layerP->lights.header.offsetZoom = 17;
       break;
+    default:
+      EXT_LOGW(ML_TAG, "Invalid lightPreset value: %d", header->lightPreset);
+      // Fall back to GRB (most common default)
+      header->lightPreset = lightPreset_GRB;
+      header->channelsPerLight = 3;
+      header->offsetRed = 1;
+      header->offsetGreen = 0;
+      header->offsetBlue = 2;
+      break;
     }
 
     EXT_LOGI(ML_TAG, "setLightPreset %d (cPL:%d, o:%d,%d,%d,%d)", header->lightPreset, header->channelsPerLight, header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);

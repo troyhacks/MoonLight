@@ -56,7 +56,7 @@ struct LightsHeader {
   uint8_t offsetRGB3 = UINT8_MAX;
   uint8_t offsetBrightness2 = UINT8_MAX;  // 31
   uint16_t nrOfChannels;                  // 32,  so we can deal with exceptional cases e.g. RGB2040 make sure it starts at even position!!! for alignment!!!
-  uint8_t lightPreset;                    // 34, so we can deal with exceptional cases e.g. RGB2040
+  uint8_t lightPreset = UINT8_MAX;        // 34, so we can deal with exceptional cases e.g. RGB2040
   // =============
   // 35 bytes total
   uint8_t fill[5];  // padding to align struct to 40 bytes total. lightsControl will send 37 bytes (prime number)!!! so Monitor.svelte can recognize this
