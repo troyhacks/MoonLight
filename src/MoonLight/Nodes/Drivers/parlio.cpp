@@ -201,8 +201,8 @@ void create_transposed_led_output_optimized(const uint8_t* input_buffer, uint16_
   for (uint32_t pixel_in_pin = 0; pixel_in_pin < pixels_per_pin; ++pixel_in_pin) {
     for (uint32_t component_in_pixel = 0; component_in_pixel < COMPONENTS_PER_PIXEL; ++component_in_pixel) {
       const uint32_t input_component = component_map[component_in_pixel];
-      //component_in_pixel is always RGB(W) - looping over the input array
-      //input_component is offsetR,G,B e.g. GRB -> 102, so this loop starts with 1 / green, so green is first processed, then red, then blue
+      // component_in_pixel is always RGB(W) - looping over the input array
+      // input_component is offsetR,G,B e.g. GRB -> 102, so this loop starts with 1 / green, so green is first processed, then red, then blue
 
       uint32_t transposed_slices[32];
 
@@ -295,7 +295,7 @@ uint8_t IRAM_ATTR __attribute__((hot)) show_parlio(uint8_t* parallelPins, uint32
     parlio_config.valid_gpio_num = gpio_num_t(-1);
     parlio_config.clk_out_gpio_num = gpio_num_t(-1);
     for (int i = 0; i < SOC_PARLIO_TX_UNIT_MAX_DATA_WIDTH; ++i) {
-      parlio_config.data_gpio_nums[i] = gpio_num_t(parallelPins[i]);
+      parlio_config.data_gpio_nums[i] = (i < outputs) ? gpio_num_t(parallelPins[i]) : gpio_num_t(-1);  // @troyhacks update 20251015
     }
   #ifdef PARLIO_AUTO_OVERCLOCK  // This has caused minor annoying glitching.
     if (leds_per_output <= 256) {

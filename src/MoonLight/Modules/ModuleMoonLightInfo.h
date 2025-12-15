@@ -26,6 +26,7 @@ class ModuleMoonLightInfo : public Module {
 
     addControl(controls, "nrOfLights", "number", 0, 65535, true);
     addControl(controls, "channelsPerLight", "number", 0, 65535, true);
+    addControl(controls, "nrOfChannels", "number", 0, 65535, true);
     addControl(controls, "maxChannels", "number", 0, 65535, true);
     addControl(controls, "size", "coord3D", 0, UINT16_MAX, true);
     addControl(controls, "nodes#", "number", 0, 65535, true);
@@ -54,6 +55,7 @@ class ModuleMoonLightInfo : public Module {
       // this should be updated each time the UI queries for it ... (now only at boot)
       data["nrOfLights"] = layerP.lights.header.nrOfLights;
       data["channelsPerLight"] = layerP.lights.header.channelsPerLight;
+      data["nrOfChannels"] = layerP.lights.header.nrOfChannels;
       data["maxChannels"] = layerP.lights.maxChannels;
       data["size"]["x"] = layerP.lights.header.size.x;
       data["size"]["y"] = layerP.lights.header.size.y;

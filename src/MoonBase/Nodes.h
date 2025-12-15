@@ -18,6 +18,24 @@
   #include "MoonBase/Modules/ModuleIO.h"      // Includes also Module.h but also enum IO_Pins
   #include "MoonLight/Layers/VirtualLayer.h"  //VirtualLayer.h will include PhysicalLayer.h
 
+enum LightPresetsEnum {
+  lightPreset_RGB,
+  lightPreset_RBG,
+  lightPreset_GRB,  // default WS2812
+  lightPreset_GBR,
+  lightPreset_BRG,
+  lightPreset_BGR,
+  lightPreset_RGBW,                // e.g. 4 channel par/dmx light
+  lightPreset_GRBW,                // rgbw LED eg. sk6812
+  lightPreset_GRB6,                // some LED curtains
+  lightPreset_RGB2040,             // curtain 2040
+  lightPreset_RGBWYP,              // 6 channel par/dmx light with UV etc
+  lightPreset_MHBeeEyes150W15,     // 15 channels moving head, see https://moonmodules.org/MoonLight/moonlight/drivers/#art-net
+  lightPreset_MHBeTopper19x15W32,  // 32 channels moving head
+  lightPreset_MH19x15W24,          // 24 channels moving heads
+  lightPreset_count
+};
+
   #define NODE_METADATA_VIRTUALS()                          \
     const char* getName() const override { return name(); } \
     uint8_t getDim() const override { return dim(); }       \
@@ -284,9 +302,6 @@ class DriverNode : public Node {
   CRGB savedColorCorrection;
   bool initDone = false;
   #endif
-
- protected:
-  uint8_t lightPreset = 2;  // GRB
 
  public:
   void setup() override;
