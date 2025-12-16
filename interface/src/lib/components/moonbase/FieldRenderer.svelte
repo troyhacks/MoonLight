@@ -1,6 +1,6 @@
 <!--
    @title     MoonBase
-   @file      MultiInput.svelte
+   @file      FieldRenderer.svelte
    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
    @Authors   https://github.com/MoonModules/MoonLight/commits/main
    @Copyright © 2025 Github MoonLight Commit Authors
@@ -12,7 +12,7 @@
 
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import FileEdit from '$lib/components/moonbase/FileEdit.svelte';
+	import FileEditWidget from '$lib/components/moonbase/FileEditWidget.svelte';
 	import { initCap, getTimeAgo } from '$lib/stores/moonbase_utilities';
 
 	export let property: any;
@@ -35,7 +35,7 @@
 	}, 1000);
 
 	onDestroy(() => {
-		console.log('MultiInput clearing interval');
+		console.log('FieldRenderer clearing interval');
 		clearInterval(interval);
 	});
 
@@ -126,7 +126,7 @@
 			{/each}
 		</select>
 		{#if property.type == 'selectFile'}
-			<FileEdit path={value} showEditor={false} />
+			<FileEditWidget path={value} showEditor={false} />
 		{/if}
 	{:else if property.type == 'checkbox'}
 		<input

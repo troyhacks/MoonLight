@@ -1,3 +1,13 @@
+<!--
+   @title     MoonBase
+   @file      EditRowWidget.svelte
+   @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
+   @Authors   https://github.com/MoonModules/MoonLight/commits/main
+   @Copyright © 2025 Github MoonLight Commit Authors
+   @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+   @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
+-->
+
 <script lang="ts">
 	import { modals } from 'svelte-modals';
 	import { fly } from 'svelte/transition';
@@ -5,8 +15,8 @@
 	import { cubicOut } from 'svelte/easing';
 	import Cancel from '~icons/tabler/x';
 
-	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
-	import MultiRow from '$src/lib/components/moonbase/MultiRow.svelte';
+	import FieldRenderer from '$lib/components/moonbase/FieldRenderer.svelte';
+	import RowRenderer from '$src/lib/components/moonbase/RowRenderer.svelte';
 
 	interface Props {
 		property: any;
@@ -51,27 +61,27 @@
 			{#each property.n as propertyN}
 				{#if propertyN.type == 'array'}
 					<label for={propertyN.name}>{propertyN.name}</label>
-					<MultiRow
+					<RowRenderer
 						property={propertyN}
 						bind:data={dataEditable}
 						definition={localDefinition}
 						{onChange}
 						{changeOnInput}
-					></MultiRow>
+					></RowRenderer>
 				{:else if propertyN.type == 'controls'}
 					{#each dataEditable[propertyN.name] as control}
 						<!-- e.g. dE["controls"] -> {"name":"xFrequency","type":"slider","default":64,"p":1070417419,"value":64} -->
-						<MultiInput property={control} bind:value={control.value} {onChange} {changeOnInput}
-						></MultiInput>
+						<FieldRenderer property={control} bind:value={control.value} {onChange} {changeOnInput}
+						></FieldRenderer>
 					{/each}
 				{:else}
 					<div>
-						<MultiInput
+						<FieldRenderer
 							property={propertyN}
 							bind:value={dataEditable[propertyN.name]}
 							{onChange}
 							{changeOnInput}
-						></MultiInput>
+						></FieldRenderer>
 					</div>
 				{/if}
 			{/each}

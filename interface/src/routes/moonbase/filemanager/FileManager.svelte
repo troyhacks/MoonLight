@@ -30,9 +30,9 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { socket } from '$lib/stores/socket';
 	import { tick } from 'svelte';
-	import FileEdit from '$lib/components/moonbase/FileEdit.svelte';
+	import FileEditWidget from '$lib/components/moonbase/FileEditWidget.svelte';
 	import Help from '~icons/tabler/help';
-	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
+	import FieldRenderer from '$lib/components/moonbase/FieldRenderer.svelte';
 
 	let filesState: any = $state({});;
 	let folderList: FilesState[] = $state([]); //all files in a folder
@@ -271,7 +271,7 @@
 					transition:slide|local={{ duration: 300, easing: cubicOut }}
 				>
 					{#if showEditor}
-						<FileEdit
+						<FileEditWidget
 							newItem={newItem}
 							path = {path}
 							isFile = {editableFile.isFile}
@@ -364,11 +364,11 @@
 						</div>
 					</div>
 				</div>
-				<MultiInput property={{name:"showHidden", type:"checkbox"}} bind:value={filesState.showHidden}
+				<FieldRenderer property={{name:"showHidden", type:"checkbox"}} bind:value={filesState.showHidden}
 					onChange={() => {
 						postFilesState({"showHidden":filesState.showHidden});
 					}}>
-				</MultiInput>
+				</FieldRenderer>
 			{/await}
 		</div>
 	{/if}

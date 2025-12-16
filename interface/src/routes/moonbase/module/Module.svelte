@@ -7,9 +7,9 @@
 	import Router from '~icons/tabler/router';
 	import Help from '~icons/tabler/help';
 	// import Cancel from '~icons/tabler/x';
-	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
+	import FieldRenderer from '$lib/components/moonbase/FieldRenderer.svelte';
 	import { socket } from '$lib/stores/socket';
-	import MultiRow from '$src/lib/components/moonbase/MultiRow.svelte';
+	import RowRenderer from '$src/lib/components/moonbase/RowRenderer.svelte';
     import {initCap} from '$lib/stores/moonbase_utilities';
 
 	let definition: any = $state([]);
@@ -200,11 +200,11 @@
 					{#each definition as property}
 						{#if property.type != "rows"}
 							<div>
-								<MultiInput property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></MultiInput>
+								<FieldRenderer property={property} bind:value={data[property.name]} onChange={inputChanged} changeOnInput={!modeWS}></FieldRenderer>
 							</div>
 						{:else if property.type == "rows"}
 						    <!-- e.g. definition: [name:"nodes", n: [name: ,,, name:"on", name:"controls", n:[]]]] -->
-							<MultiRow property={property} bind:data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></MultiRow>
+							<RowRenderer property={property} bind:data={data} definition={definition} onChange={inputChanged} changeOnInput={!modeWS}></RowRenderer>
 						{/if}
 					{/each}
 				</div>

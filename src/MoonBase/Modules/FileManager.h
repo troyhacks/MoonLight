@@ -19,7 +19,7 @@
 // * handleEdit: when edit button pressed: navigate back and forward through folders, edit current file
 // * confirmDelete: when delete button pressed
 // * socket files / handleFileState (->folderListFromBreadCrumbs)
-// Using component FileEdit, see [Components](https://moonmodules.org/MoonLight/components/#fileedit)
+// Using component FileManager, FileEditWidget and EditRowWidget, see [Components](https://moonmodules.org/MoonLight/components/#FileEditWidget)
 
 #ifndef FileManager_h
 #define FileManager_h

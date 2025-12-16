@@ -161,20 +161,20 @@ This modal is based on [svelte-modals](https://svelte-modals.mattjennings.io/) w
 
 <img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/>
 
-### MultiInput
+### FieldRenderer
 
 Support for html input widgets including text, number, range, checkbox and pad (multiple buttons in 2D array layout)
 
-### Array
+### RowRenderer
 
-* Show an array of objects
-    * Summary and editor
+* Show multiple rows of objects
+    * Summary and zoom
 * Recursive
-    * An array can have an array e.g. multiple nodes with multiple controls per node
-* Uses MultiInput
+    * A row renderer can have a row renderer e.g. multiple nodes with multiple controls per node
+* Uses FieldRenderer
 * Used data and definition rest apis
 
-### FileEdit
+### FileEditWidget
 
 Arguments
 
