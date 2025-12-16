@@ -89,4 +89,4 @@ For each board the following presets are defined:
 ![SE-16p](../firmware/installer/images/esp32-s3-stephanelec-16p.jpg){: style="width:100px"}
 
 * Choose the esp32-s3-devkitc-1-n8r8v board in the [MoonLight Installer](../../gettingstarted/installer/) 
-* Set Switch1 the same as you set the jumper on the board: off / default: Ethernet. on: Infrared.
+* Set Switch1 the same as you set the jumper on the board: off / default: Infrared. on: Ethernet.

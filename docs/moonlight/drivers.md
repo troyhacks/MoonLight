@@ -93,12 +93,13 @@ Sends Lights in Art-Net compatible packages to an Art-Net controller specified b
 
 #### Controls
 
-* **Controller IP**: The last segment of the IP address within your local network, of the the hardware Art-Net controller.
+* **Controller IPs**: The last segment of the IP address within your local network, of the the hardware Art-Net controller, add more ip's if you sent to more then one controller, comma separated.
 * **Port**: The network port added to the IP address, 6454 is the default for Art-Net.
 * **FPS Limiter**: set the max frames per second Art-Net packages are send out (also all the other nodes will run at this speed).
     * Art-Net specs recommend about 44 FPS but higher framerates will work mostly (up to until ~130FPS tested)
 * **Nr of outputs**: Art-Net LED controllers can have more then 1 output (e.g. 12)
 * **Universes per output**: How many universes can each output handle. This determines the maximum number of lights an output can drive (nr of universe x nr of channels per universe / channels per light)
+* **Nr of Outputs per IP**: how much outputs does one Art-Net controller have. If all outputs are send, Art-Net will be sent to the next IP number.
 
 !!! tip "Set universes"
     Set the number of universes also on the controller!

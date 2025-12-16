@@ -101,7 +101,8 @@ class ParallelLEDDriver : public DriverNode {
           pins[i] = layerP.ledPins[assignedPin];
         else
           pins[i] = layerP.ledPins[i];
-        EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: %d -> %d #%d", i, nrOfPins, layerP.ledPins[i], pins[i], layerP.ledsPerPin[i]);
+        EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: assigned:%d %d->%d #%d", i, nrOfPins, assignedPin, layerP.ledPins[i], pins[i], layerP.ledsPerPin[i]);
+
         Char<12> tmp;
         tmp.format(" %d#%d", pins[i], layerP.ledsPerPin[i]);
         statusString += tmp;

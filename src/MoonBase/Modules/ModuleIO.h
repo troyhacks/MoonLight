@@ -289,14 +289,14 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(8, pin_Voltage);
       pinAssigner.assignPin(9, pin_Current);
 
-      if (_state.data["switch1"]) {
-        pinAssigner.assignPin(5, pin_Infrared);
-      } else {  // default
+      if (_state.data["switch1"]) {  // on: Ethernet
         pinAssigner.assignPin(5, pin_SPI_MISO);
         pinAssigner.assignPin(6, pin_SPI_MOSI);
         pinAssigner.assignPin(7, pin_SPI_SCK);
         pinAssigner.assignPin(15, pin_PHY_CS);
         pinAssigner.assignPin(18, pin_PHY_IRQ);
+      } else {  // off: default Infrared
+        pinAssigner.assignPin(5, pin_Infrared);
       }
 
     } else if (boardID == board_QuinLEDDigUnoV3) {
@@ -425,7 +425,7 @@ class ModuleIO : public Module {
     } else if (boardID == board_MHCP4NanoV1) {                                    // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
       object["maxPower"] = 100;                                                   // Assuming decent LED power!!
 
-      if (_state.data["switch1"]) {                         // on
+      if (_state.data["switch1"]) {                         // on: 8 LED Pins + RS485 + Dig Input
         uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27};  // 8 LED pins in this order
         for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
         pinAssigner.assignPin(3, pin_RS485_TX);
@@ -436,7 +436,7 @@ class ModuleIO : public Module {
         pinAssigner.assignPin(46, pin_Dig_Input);
         pinAssigner.assignPin(47, pin_Dig_Input);
         pinAssigner.assignPin(48, pin_Dig_Input);
-      } else {                                                                           // off - default
+      } else {                                                                           // off / default: 16 LED pins
         uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // 16 LED_PINS in this order
         for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
       }

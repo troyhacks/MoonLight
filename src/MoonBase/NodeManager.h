@@ -136,17 +136,17 @@ class NodeManager : public Module {
           }
 
           // migration 20251204
-          // update: not needed as we accept data updates, we only do not accept data definition updates!
-          // if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
-          //   EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
-          //   nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
-          //   EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
-          // }
-          // if (contains(updatedItem.value.as<const char*>(), "IR Driver")) {
-          //   EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
-          //   nodeState["name"] = getNameAndTags<IRDriver>();  // set to current combination of name and tags
-          //   EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
-          // }
+          // to consider: not needed as we accept data updates, we only do not accept data definition updates!
+          if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
+            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+            nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
+            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
+          }
+          if (contains(updatedItem.value.as<const char*>(), "IR Driver")) {
+            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+            nodeState["name"] = getNameAndTags<IRDriver>();  // set to current combination of name and tags
+            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
+          }
 
           // String xx;
           // serializeJson(nodeState["controls"], xx);

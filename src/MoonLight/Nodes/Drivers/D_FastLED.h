@@ -112,7 +112,7 @@ class FastLEDDriver : public Node {
           pins[i] = layerP.ledPins[assignedPin];
         else
           pins[i] = layerP.ledPins[i];
-        EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: %d -> %d #%d", i, nrOfPins, layerP.ledPins[i], pins[i], layerP.ledsPerPin[i]);
+        EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: assigned:%d %d->%d #%d", i, nrOfPins, assignedPin, layerP.ledPins[i], pins[i], layerP.ledsPerPin[i]);
         Char<12> tmp;
         tmp.format(" %d#%d", pins[i], layerP.ledsPerPin[i]);
         statusString += tmp;
@@ -551,12 +551,12 @@ class FastLEDDriver : public Node {
   #endif  // CONFIG_IDF_TARGET_ESP32S3
 
         default:
-          EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", layerP.ledPins[pinIndex]);
-        }  // switch ledPins[pinIndex]
+          EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", pins[pinIndex]);
+        }  // switch pins[pinIndex]
 
         startLed += layerP.ledsPerPin[pinIndex];
 
-      }  // sortedPins
+      }  // for pinIndex < nrOfPins
     }
 
     FastLED.setMaxPowerInMilliWatts(1000 * layerP.maxPower);  // 5v, 2000mA, to protect usb while developing
