@@ -159,22 +159,31 @@ This modal is based on [svelte-modals](https://svelte-modals.mattjennings.io/) w
 🌙
 ## MoonBase components
 
+Renderer: Takes JSON definitions and based on the type property shows a specific widget (e.g. input, checkbox, dropdown, ...)
+Widget: Complex, interactive components with editing capabilities
+
 <img width="30" src="https://github.com/user-attachments/assets/b0e8af99-ed76-422a-8bd1-bfbd9e0f4c44"/>
 
-### MultiInput
+### FieldRenderer
 
 Support for html input widgets including text, number, range, checkbox and pad (multiple buttons in 2D array layout)
 
-### Array
+### RowRenderer
 
-* Show an array of objects
-    * Summary and editor
+* Show multiple rows of objects
+    * Summary and zoom
 * Recursive
-    * An array can have an array e.g. multiple nodes with multiple controls per node
-* Uses MultiInput
+    * A row renderer can have a row renderer e.g. multiple nodes with multiple controls per node
+* Uses FieldRenderer
 * Used data and definition rest apis
 
-### FileEdit
+### EditRowWidget
+
+Shows all fields of a row (using FieldRenderer) in a popup
+
+### FileEditWidget
+
+Shows filename, file contents and uploadfile (from file system). Used in FileManager and FieldRenderer (select widgets containing files, which can directly be edited - for livescripts)
 
 Arguments
 

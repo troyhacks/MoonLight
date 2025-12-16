@@ -391,9 +391,9 @@ void DriverNode::loop() {
   CRGB correction;
   uint8_t white;
   ledsDriver.getColorCorrection(correction.red, correction.green, correction.blue, white);
-  if (correction.red != layer->layerP->lights.header.red || correction.green != layer->layerP->lights.header.green || correction.blue != layer->layerP->lights.header.blue) {
-    EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue, correction.red, correction.green, correction.blue);
-    ledsDriver.setColorCorrection(layer->layerP->lights.header.red, layer->layerP->lights.header.green, layer->layerP->lights.header.blue);
+  if (correction.red != header->red || correction.green != header->green || correction.blue != header->blue) {
+    EXT_LOGD(ML_TAG, "setColorCorrection r:%d, g:%d, b:%d (%d %d %d)", header->red, header->green, header->blue, correction.red, correction.green, correction.blue);
+    ledsDriver.setColorCorrection(header->red, header->green, header->blue);
   }
   #endif
 }
@@ -481,44 +481,44 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
       header->offsetWhite = 3;
       break;
     case lightPreset_MHBeeEyes150W15:
-      layer->layerP->lights.header.channelsPerLight = 15;  // set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
+      header->channelsPerLight = 15;  // set channels per light to 15 (RGB + Pan + Tilt + Zoom + Brightness)
       header->offsetRed = 0;
       header->offsetGreen = 1;
       header->offsetBlue = 2;
-      layer->layerP->lights.header.offsetRGB = 10;  // set offset for RGB lights in DMX map
-      layer->layerP->lights.header.offsetPan = 0;
-      layer->layerP->lights.header.offsetTilt = 1;
-      layer->layerP->lights.header.offsetZoom = 7;
-      layer->layerP->lights.header.offsetBrightness = 8;   // set offset for brightness
-      layer->layerP->lights.header.offsetGobo = 5;         // set offset for color wheel in DMX map
-      layer->layerP->lights.header.offsetBrightness2 = 3;  // set offset for color wheel brightness in DMX map    } //BGR
+      header->offsetRGB = 10;  // set offset for RGB lights in DMX map
+      header->offsetPan = 0;
+      header->offsetTilt = 1;
+      header->offsetZoom = 7;
+      header->offsetBrightness = 8;   // set offset for brightness
+      header->offsetGobo = 5;         // set offset for color wheel in DMX map
+      header->offsetBrightness2 = 3;  // set offset for color wheel brightness in DMX map    } //BGR
       break;
     case lightPreset_MHBeTopper19x15W32:
-      layer->layerP->lights.header.channelsPerLight = 32;
+      header->channelsPerLight = 32;
       header->offsetRed = 0;
       header->offsetGreen = 1;
       header->offsetBlue = 2;
-      layer->layerP->lights.header.offsetRGB = 9;
-      layer->layerP->lights.header.offsetRGB1 = 13;
-      layer->layerP->lights.header.offsetRGB2 = 17;
-      layer->layerP->lights.header.offsetRGB3 = 24;
-      layer->layerP->lights.header.offsetPan = 0;
-      layer->layerP->lights.header.offsetTilt = 2;
-      layer->layerP->lights.header.offsetZoom = 5;
-      layer->layerP->lights.header.offsetBrightness = 6;
+      header->offsetRGB = 9;
+      header->offsetRGB1 = 13;
+      header->offsetRGB2 = 17;
+      header->offsetRGB3 = 24;
+      header->offsetPan = 0;
+      header->offsetTilt = 2;
+      header->offsetZoom = 5;
+      header->offsetBrightness = 6;
       break;
     case lightPreset_MH19x15W24:
-      layer->layerP->lights.header.channelsPerLight = 24;
+      header->channelsPerLight = 24;
       header->offsetRed = 0;
       header->offsetGreen = 1;
       header->offsetBlue = 2;
-      layer->layerP->lights.header.offsetPan = 0;
-      layer->layerP->lights.header.offsetTilt = 1;
-      layer->layerP->lights.header.offsetBrightness = 3;
-      layer->layerP->lights.header.offsetRGB = 4;
-      layer->layerP->lights.header.offsetRGB1 = 8;
-      layer->layerP->lights.header.offsetRGB2 = 12;
-      layer->layerP->lights.header.offsetZoom = 17;
+      header->offsetPan = 0;
+      header->offsetTilt = 1;
+      header->offsetBrightness = 3;
+      header->offsetRGB = 4;
+      header->offsetRGB1 = 8;
+      header->offsetRGB2 = 12;
+      header->offsetZoom = 17;
       break;
     default:
       EXT_LOGW(ML_TAG, "Invalid lightPreset value: %d", header->lightPreset);
@@ -538,7 +538,7 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
   #if HP_ALL_DRIVERS
     #ifndef CONFIG_IDF_TARGET_ESP32P4
     if (initDone) {
-      // ledsDriver.setOffsets(layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue, layer->layerP->lights.header.offsetWhite);
+      // ledsDriver.setOffsets(header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
 
       // if (oldChannelsPerLight != header->channelsPerLight)
       //   restartNeeded = true; //in case
@@ -547,7 +547,7 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
 
   #else  // ESP32_LEDSDRIVER
     if (ledsDriver.initLedsDone) {
-      ledsDriver.setOffsets(layer->layerP->lights.header.offsetRed, layer->layerP->lights.header.offsetGreen, layer->layerP->lights.header.offsetBlue, layer->layerP->lights.header.offsetWhite);
+      ledsDriver.setOffsets(header->offsetRed, header->offsetGreen, header->offsetBlue, header->offsetWhite);
 
       if (oldChannelsPerLight != header->channelsPerLight) restartNeeded = true;  // in case
     }

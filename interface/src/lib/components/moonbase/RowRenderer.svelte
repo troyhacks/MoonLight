@@ -1,6 +1,6 @@
 <!--
    @title     MoonBase
-   @file      MultiInput.svelte
+   @file      RowRenderer.svelte
    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
    @Authors   https://github.com/MoonModules/MoonLight/commits/main
    @Copyright © 2025 Github MoonLight Commit Authors
@@ -22,10 +22,10 @@
 	import Delete from '~icons/tabler/trash';
 	import { initCap } from '$lib/stores/moonbase_utilities';
 
-	import EditObject from './EditObject.svelte';
+	import EditRowWidget from './EditRowWidget.svelte';
 	import { modals } from 'svelte-modals';
 	import Grip from '~icons/tabler/grip-vertical';
-	import MultiInput from './MultiInput.svelte';
+	import FieldRenderer from './FieldRenderer.svelte';
 	import { isNumber } from 'chart.js/helpers';
 
 	let { property, data = $bindable(), definition, onChange, changeOnInput } = $props();
@@ -82,7 +82,7 @@
 
 	function handleEdit(propertyName: string, itemToEdit: any) {
 		console.log('handleEdit', propertyName);
-		modals.open(EditObject as any, {
+		modals.open(EditRowWidget as any, {
 			property,
 			localDefinition,
 			title: initCap(propertyName),
@@ -178,14 +178,14 @@
 
 <!-- Search Filter -->
 {#if findItemInDefinition?.filter != null}
-	<MultiInput
+	<FieldRenderer
 		property={propertyFilter}
 		bind:value={data[property.name + '_filter']}
 		noPrompts={false}
 		onChange={(event) => {
 			onChange(event);
 		}}
-	></MultiInput>
+	></FieldRenderer>
 	{#if data[property.name + '_filter']}
 		<div class="text-sm text-base-content/60 mt-1 ml-1">
 			{filteredItems.length} of {data[property.name].length} items
@@ -214,14 +214,14 @@
 					return index < 3 || propertyN.show === true;
 				}) as propertyN}
 					{#if propertyN.type != 'array' && propertyN.type != 'controls' && propertyN.type != 'password'}
-						<MultiInput
+						<FieldRenderer
 							property={propertyN}
 							bind:value={itemWrapper.item[propertyN.name]}
 							noPrompts={true}
 							onChange={(event) => {
 								onChange(event);
 							}}
-						></MultiInput>
+						></FieldRenderer>
 					{/if}
 				{/each}
 				<!-- Show nr of controls -->

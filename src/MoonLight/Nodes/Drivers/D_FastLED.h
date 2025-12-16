@@ -530,7 +530,7 @@ class FastLEDDriver : public Node {
 
         default:
           EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", layerP.ledPins[pinIndex]);
-        }  // switch pinNr
+        }  // switch ledPins[pinIndex]
 
         startLed += layerP.ledsPerPin[pinIndex];
 

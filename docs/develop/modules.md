@@ -144,7 +144,7 @@ It might be arguable that readonly variables are not stored in state data.
 
 ### UI
 * [Module.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/moonbase/module/Module.svelte) will deal with the UI
-* [MultiInput.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/lib/components/moonbase/MultiInput.svelte) is used by Module.svelte to display the right UI widget based on what is defined in the definition json
+* [FieldRenderer.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/lib/components/moonbase/FieldRenderer.svelte) is used by Module.svelte to display the right UI widget based on what is defined in the definition json
 * Modifications done in [menu.svelte](https://github.com/MoonModules/MoonLight/blob/main/interface/src/routes/menu.svelte) do identify a module by href and not by title alone
 
 ### Example of json

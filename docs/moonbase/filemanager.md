@@ -4,5 +4,5 @@
 
 * Navigate through folders
 * create files and folders
-* edit and upload files (see FileEdit)
+* edit and upload files (see FileEditWidget)
 * Option to show hidden files (files starting with . e.g. .config)

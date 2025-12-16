@@ -75,7 +75,7 @@ For each board the following presets are defined:
 * On new ESP32-P4 Nano boards, the WiFi coprocessor needs to be updated first to a recent version, currently ESP-Hosted v2.0.17, see the link in the [MoonLight Installer](../../gettingstarted/installer/)
 * After install, select the **MHC P4 Nano Shield** board preset to have the pins assigned correctly.
     * Assuming 100W LED power; change if needed.
-    * Switch1: (set also the switches on the board)
+    * Switch1: (also set the switches on the board)
         * off (default): 16 LED pins. 
         * On: 8 LED pins, 4 RS-485 pins and 4 exposed pins 
     * Switch2: 

@@ -1,9 +1,9 @@
 <!--
    @title     MoonBase
-   @file      FileEdit.svelte
+   @file      FileEditWidget.svelte
    @repo      https://github.com/MoonModules/MoonLight, submit changes to this file as PRs
    @Authors   https://github.com/MoonModules/MoonLight/commits/main
-   @Doc       https://moonmodules.org/MoonLight/components/#fileedit
+   @Doc       https://moonmodules.org/MoonLight/components/#FileEditWidget
    @Copyright © 2025 Github MoonLight Commit Authors
    @license   GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
    @license   For non GPL-v3 usage, commercial licenses must be purchased. Contact us for more information.
@@ -20,7 +20,7 @@
 	import { notifications } from '$lib/components/toasts/notifications';
 	import Collapsible from '$lib/components/Collapsible.svelte';
 	import { onMount } from 'svelte';
-	import MultiInput from '$lib/components/moonbase/MultiInput.svelte';
+	import FieldRenderer from '$lib/components/moonbase/FieldRenderer.svelte';
 
 	let { path = "", showEditor = true, newItem = false, isFile = true } = $props();
 
@@ -179,11 +179,11 @@
 		<div class="divider my-0"></div>
 
 		<div>
-			<MultiInput property={{name:"Name", type:"text"}} bind:value={editableFile.name}
+			<FieldRenderer property={{name:"Name", type:"text"}} bind:value={editableFile.name}
 				onChange={() => {
 					changed = true;
 				}}>
-			</MultiInput>
+			</FieldRenderer>
 			<label class="label" for="name">
 				<span class="text-error {formErrors.name ? '' : 'hidden'}"
 					>Name must be between 3 and 32 characters long</span
@@ -192,20 +192,20 @@
 		</div>
 		{#if isFile}
 			<div>
-				<MultiInput property={{name:"Contents", type:"textarea"}} bind:value={editableFile.contents} 
+				<FieldRenderer property={{name:"Contents", type:"textarea"}} bind:value={editableFile.contents} 
 					onChange={(event) => {
 						editableFile.contents = event.target.value;
 						changed = true;
 					}}>
-				</MultiInput>
+				</FieldRenderer>
 			</div>
 			<div>
-				<MultiInput property={{name:"Upload", type:"file"}} bind:value={editableFile.contents} 
+				<FieldRenderer property={{name:"Upload", type:"file"}} bind:value={editableFile.contents} 
 					onChange={(event) => {
 						uploadFile(event);
 						changed = true;
 					}}>
-				</MultiInput>
+				</FieldRenderer>
 			</div>
 		{/if}
 		<div class="flex flex-wrap justify-end gap-2">
