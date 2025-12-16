@@ -76,7 +76,7 @@ class BouncingBallsEffect : public Node {
         }
 
         // uint32_t color = SEGCOLOR(0);
-        // if (layer->layerP->palette) {
+        // if (layerP.palette) {
         //   color = layer->color_wheel(i*(256/MAX(numBalls, 8)));
         // }
         // else if (hasCol2) {
@@ -85,7 +85,7 @@ class BouncingBallsEffect : public Node {
 
         uint8_t pos = roundf(balls[y][i].height * (layer->size.x - 1));
 
-        CRGB color = ColorFromPalette(layer->layerP->palette, i * (256 / max(numBalls, (uint8_t)8)));  // error: no matching function for call to 'max(uint8_t&, int)'
+        CRGB color = ColorFromPalette(layerP.palette, i * (256 / max(numBalls, (uint8_t)8)));  // error: no matching function for call to 'max(uint8_t&, int)'
 
         layer->setRGB(Coord3D(pos, y), color);
         // if (layer->size.x<32) layer->setRGB(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
@@ -159,14 +159,14 @@ class BlurzEffect : public Node {
     unsigned pixIntensity = min((unsigned)(2.0f * sharedData.bands[freqBand]), 255U);
 
     if (sharedData.volume > 1.0f) {
-      layer->setRGB(segLoc, ColorFromPalette(layer->layerP->palette, pixColor));
+      layer->setRGB(segLoc, ColorFromPalette(layerP.palette, pixColor));
       step = layer->getRGB(segLoc);  // remember last color
       aux1 = segLoc;                 // remember last position
 
       layer->blur2d(blur);
       aux0++;
       aux0 %= 16;                                                                 // make sure it doesn't cross 16
-      layer->addRGB(segLoc, ColorFromPalette(layer->layerP->palette, pixColor));  // repaint center pixel after blur
+      layer->addRGB(segLoc, ColorFromPalette(layerP.palette, pixColor));  // repaint center pixel after blur
     } else
       layer->blur2d(blur);  // silence - just blur it again
     call++;
@@ -219,9 +219,9 @@ class DistortionWavesEffect : public Node {
         uint8_t valueG = gdistort + w * (a2 - (((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1)) >> 7));
         uint8_t valueB = bdistort + w * (a3 - (((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2)) >> 7));
 
-        valueR = layer->layerP->gamma8(cos8(valueR));
-        valueG = layer->layerP->gamma8(cos8(valueG));
-        valueB = layer->layerP->gamma8(cos8(valueB));
+        valueR = layerP.gamma8(cos8(valueR));
+        valueG = layerP.gamma8(cos8(valueG));
+        valueB = layerP.gamma8(cos8(valueB));
 
         layer->setRGB(pos, CRGB(valueR, valueG, valueB));
       }
@@ -409,7 +409,7 @@ class GEQEffect : public Node {
         if (colorBars)  // color_vertical / color bars toggle
           colorIndex = ::map(pos.y, 0, layer->size.y, 0, 256);
 
-        ledColor = ColorFromPalette(layer->layerP->palette, (uint8_t)colorIndex);
+        ledColor = ColorFromPalette(layerP.palette, (uint8_t)colorIndex);
 
         layer->setRGB(Coord3D(pos.x, layer->size.y - 1 - pos.y), ledColor);
       }
@@ -451,7 +451,7 @@ class LissajousEffect : public Node {
       locn.y = cos8(phase / 2 + i * 2);
       locn.x = (layer->size.x < 2) ? 1 : (::map(2 * locn.x, 0, 511, 0, 2 * (layer->size.x - 1)) + 1) / 2;  // softhack007: "*2 +1" for proper rounding
       locn.y = (layer->size.y < 2) ? 1 : (::map(2 * locn.y, 0, 511, 0, 2 * (layer->size.y - 1)) + 1) / 2;  // "layer->size.y > 2" is needed to avoid div/0 in ::map()
-      layer->setRGB(locn, ColorFromPalette(layer->layerP->palette, millis() / 100 + i, 255));
+      layer->setRGB(locn, ColorFromPalette(layerP.palette, millis() / 100 + i, 255));
     }
   }
 };
@@ -474,7 +474,7 @@ class Noise2DEffect : public Node {
     for (int y = 0; y < layer->size.y; y++) {
       for (int x = 0; x < layer->size.x; x++) {
         uint8_t pixelHue8 = inoise8(x * scale, y * scale, millis() / (16 - speed));
-        layer->setRGB(Coord3D(x, y), ColorFromPalette(layer->layerP->palette, pixelHue8));
+        layer->setRGB(Coord3D(x, y), ColorFromPalette(layerP.palette, pixelHue8));
       }
     }
   }
@@ -508,7 +508,7 @@ class NoiseMeterEffect : public Node {
     for (int i = 0; i < maxLen; i++) {                                                                                             // The louder the sound, the wider the soundbar. By Andrew Tuline.
       uint8_t index = inoise8(i * sharedData.volume + aux0, aux1 + i * sharedData.volume);                                         // Get a value from the noise function. I'm using both x and y axis.
       for (int y = 0; y < layer->size.y; y++)                                                                                      // propagate to other dimensions
-        for (int z = 0; z < layer->size.z; z++) layer->setRGB(Coord3D(i, y, z), ColorFromPalette(layer->layerP->palette, index));  //, 255, PALETTE_SOLID_WRAP));
+        for (int z = 0; z < layer->size.z; z++) layer->setRGB(Coord3D(i, y, z), ColorFromPalette(layerP.palette, index));  //, 255, PALETTE_SOLID_WRAP));
     }
 
     aux0 += beatsin8(5, 0, 10);
@@ -593,7 +593,7 @@ class PopCornEffect : public Node {
         // uint32_t col = layer->color_wheel(popcorn[i].colIndex);
         // if (!layer->palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
         uint16_t ledIndex = popcorn[i].pos;
-        CRGB col = ColorFromPalette(layer->layerP->palette, popcorn[i].colIndex * (256 / maxNumPopcorn));
+        CRGB col = ColorFromPalette(layerP.palette, popcorn[i].colIndex * (256 / maxNumPopcorn));
         if (ledIndex < layer->size.x) {
           layer->setRGB(ledIndex, col);
           for (int y = 0; y < layer->size.y; y++)
@@ -640,7 +640,7 @@ class WaverlyEffect : public Node {
       uint16_t thisMax = min(map(thisVal, 0, 512, 0, layer->size.y), (long)layer->size.y);
 
       for (pos.y = 0; pos.y < thisMax; pos.y++) {
-        CRGB color = ColorFromPalette(layer->layerP->palette, ::map(pos.y, 0, thisMax, 250, 0));
+        CRGB color = ColorFromPalette(layerP.palette, ::map(pos.y, 0, thisMax, 250, 0));
         if (!noClouds) layer->addRGB(pos, color);
         layer->addRGB(Coord3D((layer->size.x - 1) - pos.x, (layer->size.y - 1) - pos.y), color);
       }
@@ -1841,7 +1841,7 @@ class WaverlyEffect : public Node {
 //       spotlights[i].type = random8(SPOT_TYPES_COUNT);
 //     }
 
-//     uint32_t color = SEGMENT. ColorFromPalette(layer->layerP->palette, spotlights[i].colorIdx);
+//     uint32_t color = SEGMENT. ColorFromPalette(layerP.palette, spotlights[i].colorIdx);
 //     int start = spotlights[i].position;
 
 //     if (spotlights[i].width <= 1) {

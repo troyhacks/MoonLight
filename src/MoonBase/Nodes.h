@@ -207,11 +207,11 @@ class Node {
   void requestMappings() {
     if (hasModifier() || hasOnLayout()) {
       // EXT_LOGD(ML_TAG, "hasOnLayout or Modifier -> requestMapVirtual");
-      layer->layerP->requestMapVirtual = true;
+      layerP.requestMapVirtual = true;
     }
     if (hasOnLayout()) {
       // EXT_LOGD(ML_TAG, "hasOnLayout -> requestMapPhysical");
-      layer->layerP->requestMapPhysical = true;
+      layerP.requestMapPhysical = true;
     }
   }
 
@@ -224,10 +224,10 @@ class Node {
   virtual void onLayout() {}  // the definition of the layout, called by mapLayout()
 
   // convenience functions to add a light
-  void addLight(Coord3D position) { layer->layerP->addLight(position); }
+  void addLight(Coord3D position) { layerP.addLight(position); }
 
   // convenience function for next pin
-  void nextPin(uint8_t ledPinDIO = UINT8_MAX) { layer->layerP->nextPin(ledPinDIO); }
+  void nextPin(uint8_t ledPinDIO = UINT8_MAX) { layerP.nextPin(ledPinDIO); }
 
   // modifier
   virtual void modifySize() {}

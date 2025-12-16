@@ -76,8 +76,8 @@ static void _addControl(uint8_t* var, char* name, char* type, uint8_t min = 0, u
   EXT_LOGV(ML_TAG, "%s %s %d (%d-%d)", name, type, var, min, max);
   gNode->addControl(*var, name, type, min, max);
 }
-static void _nextPin() { gNode->layer->layerP->nextPin(); }
-static void _addLight(uint8_t x, uint8_t y, uint8_t z) { gNode->layer->layerP->addLight({x, y, z}); }
+static void _nextPin() { layerP.nextPin(); }
+static void _addLight(uint8_t x, uint8_t y, uint8_t z) { layerP.addLight({x, y, z}); }
 
 static void _modifySize() { gNode->modifySize(); }
 static void _modifyPosition(Coord3D& position) { gNode->modifyPosition(position); }  // need &position parameter
@@ -176,14 +176,14 @@ void LiveScriptNode::setup() {
 
   // MoonLight Parallel LED Driver vars
   //   but keep enabled to avoid compile errors when used in non virtual context
-  //   addExternal( "uint8_t colorOrder", &layer->layerP->ledsDriver.colorOrder);
-  //   addExternal( "uint8_t clockPin", &layer->layerP->ledsDriver.clockPin);
-  //   addExternal( "uint8_t latchPin", &layer->layerP->ledsDriver.latchPin);
-  //   addExternal( "uint8_t clockFreq", &layer->layerP->ledsDriver.clockFreq);
-  //   addExternal( "uint8_t dmaBuffer", &layer->layerP->ledsDriver.dmaBuffer);
+  //   addExternal( "uint8_t colorOrder", &layerP.ledsDriver.colorOrder);
+  //   addExternal( "uint8_t clockPin", &layerP.ledsDriver.clockPin);
+  //   addExternal( "uint8_t latchPin", &layerP.ledsDriver.latchPin);
+  //   addExternal( "uint8_t clockFreq", &layerP.ledsDriver.clockFreq);
+  //   addExternal( "uint8_t dmaBuffer", &layerP.ledsDriver.dmaBuffer);
 
   addExternal("void fadeToBlackBy(uint8_t)", (void*)_fadeToBlackBy);
-  addExternal("CRGB* leds", (void*)(CRGB*)layer->layerP->lights.channels);
+  addExternal("CRGB* leds", (void*)(CRGB*)layerP.lights.channels);
   addExternal("void setRGB(uint16_t,CRGB)", (void*)_setRGB);
   addExternal("void setRGBPal(uint16_t,uint8_t,uint8_t)", (void*)_setRGBPal);
   addExternal("void setPan(uint16_t,uint8_t)", (void*)_setPan);
@@ -197,7 +197,7 @@ void LiveScriptNode::setup() {
   //       EXT_LOGV(ML_TAG, "elink %s %s %d", el.shortname.c_str(), el.name.c_str(), el.type);
   //   }
 
-  //   runningPrograms.setPrekill(layer->layerP->ledsDriver.preKill, layer->layerP->ledsDriver.postKill); //for clockless driver...
+  //   runningPrograms.setPrekill(layerP.ledsDriver.preKill, layerP.ledsDriver.postKill); //for clockless driver...
   runningPrograms.setFunctionToSync(sync);
 
   compileAndRun();
@@ -399,7 +399,7 @@ void DriverNode::loop() {
 }
 
 void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
-  LightsHeader* header = &layer->layerP->lights.header;
+  LightsHeader* header = &layerP.lights.header;
 
   EXT_LOGD(ML_TAG, "%s: %s ", control["name"].as<const char*>(), control["value"].as<String>().c_str());
 
@@ -561,10 +561,10 @@ void DriverNode::reOrderAndDimRGBW(uint8_t* packetRGBChannel, uint8_t* lightsRGB
   // use ledsDriver.__rbg_map[0]; for super fast brightness and gamma correction! see secondPixel in ESP32-LedDriver!
   // apply the LUT to the RGB channels !
 
-  packetRGBChannel[layer->layerP->lights.header.offsetRed] = ledsDriver.__red_map[lightsRGBChannel[0]];
-  packetRGBChannel[layer->layerP->lights.header.offsetGreen] = ledsDriver.__green_map[lightsRGBChannel[1]];
-  packetRGBChannel[layer->layerP->lights.header.offsetBlue] = ledsDriver.__blue_map[lightsRGBChannel[2]];
-  if (layer->layerP->lights.header.offsetWhite != UINT8_MAX) packetRGBChannel[layer->layerP->lights.header.offsetWhite] = ledsDriver.__white_map[lightsRGBChannel[3]];
+  packetRGBChannel[layerP.lights.header.offsetRed] = ledsDriver.__red_map[lightsRGBChannel[0]];
+  packetRGBChannel[layerP.lights.header.offsetGreen] = ledsDriver.__green_map[lightsRGBChannel[1]];
+  packetRGBChannel[layerP.lights.header.offsetBlue] = ledsDriver.__blue_map[lightsRGBChannel[2]];
+  if (layerP.lights.header.offsetWhite != UINT8_MAX) packetRGBChannel[layerP.lights.header.offsetWhite] = ledsDriver.__white_map[lightsRGBChannel[3]];
 }
 
 #endif  // FT_MOONLIGHT

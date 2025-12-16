@@ -19,7 +19,7 @@
 
 class NodeManager : public Module {
  public:
-  Char<20> defaultNodeName;
+  Char<32> defaultNodeName;
 
  protected:
   PsychicHttpServer* _server;
@@ -90,7 +90,6 @@ class NodeManager : public Module {
     {
       control = addControl(rows, "name", "selectFile");
       control["default"] = defaultNodeName.c_str();
-      // values = control["values"].to<JsonArray>();
       addNodes(control);
 
       control = addControl(rows, "on", "checkbox");
@@ -137,16 +136,17 @@ class NodeManager : public Module {
           }
 
           // migration 20251204
-          if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
-            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
-            nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
-            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
-          }
-          if (contains(updatedItem.value.as<const char*>(), "IR Driver")) {
-            EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
-            nodeState["name"] = getNameAndTags<IRDriver>();  // set to current combination of name and tags
-            EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
-          }
+          // update: not needed as we accept data updates, we only do not accept data definition updates!
+          // if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
+          //   EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+          //   nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
+          //   EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
+          // }
+          // if (contains(updatedItem.value.as<const char*>(), "IR Driver")) {
+          //   EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
+          //   nodeState["name"] = getNameAndTags<IRDriver>();  // set to current combination of name and tags
+          //   EXT_LOGD(ML_TAG, "... to [%s]", updatedItem.value.as<const char*>());
+          // }
 
           // String xx;
           // serializeJson(nodeState["controls"], xx);

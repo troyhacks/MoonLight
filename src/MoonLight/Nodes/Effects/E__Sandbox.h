@@ -52,7 +52,7 @@ class ExampleEffect : public Node {
           pos.x = beatsin8(bpm, 0, layer->size.x - 1);
           pos.y = beatsin8(intensity, 0, layer->size.y - 1);
           pos.z = beatsin8(intensity, 0, layer->size.z - 1);
-          layer->setRGB(pos, ColorFromPalette(layer->layerP->palette, beatsin8(12, 0, 255)));
+          layer->setRGB(pos, ColorFromPalette(layerP.palette, beatsin8(12, 0, 255)));
         }
       }
     }
@@ -94,13 +94,13 @@ class BlackholeEffect : public Node {
     for (size_t i = 0; i < 8; i++) {
       x = beatsin8(outerXfreq >> 3, 0, cols - 1, 0, ((i % 2) ? 128 : 0) + t * i);
       y = beatsin8(outerYfreq >> 3, 0, rows - 1, 0, ((i % 2) ? 192 : 64) + t * i);
-      layer->addRGB(Coord3D(x, y), ColorFromPalette(layer->layerP->palette, i * 32));
+      layer->addRGB(Coord3D(x, y), ColorFromPalette(layerP.palette, i * 32));
     }
     // inner stars
     for (size_t i = 0; i < 4; i++) {
       x = beatsin8(innerXfreq >> 3, cols / 4, cols - 1 - cols / 4, 0, ((i % 2) ? 128 : 0) + t * i);
       y = beatsin8(innerYfreq >> 3, rows / 4, rows - 1 - rows / 4, 0, ((i % 2) ? 192 : 64) + t * i);
-      layer->addRGB(Coord3D(x, y), ColorFromPalette(layer->layerP->palette, 255 - i * 64));
+      layer->addRGB(Coord3D(x, y), ColorFromPalette(layerP.palette, 255 - i * 64));
     }
     // central white dot
     layer->setRGB(Coord3D(cols / 2, rows / 2), CRGB::White);

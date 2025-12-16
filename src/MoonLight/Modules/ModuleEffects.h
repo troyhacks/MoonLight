@@ -60,7 +60,7 @@ class ModuleEffects : public NodeManager {
     EXT_LOGV(ML_TAG, "");
     JsonObject control;  // state.data has one or more properties
     control = addControl(controls, "layer", "select");
-    control["default"] = 1;
+    control["default"] = 0; // 1 is layer 0
     uint8_t i = 1; //start with 1
     for (VirtualLayer* layer : layerP.layers) {
       addControlValue(control, i);

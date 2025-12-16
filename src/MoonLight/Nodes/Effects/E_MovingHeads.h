@@ -25,10 +25,10 @@ class Troy1ColorEffect : public Node {
     for (int x = 0; x < layer->size.x; x++) {  // loop over lights defined in layout
       if (audioReactive) {
         layer->setRGB(x, CRGB(sharedData.bands[NUM_GEQ_CHANNELS - 1], sharedData.bands[7], sharedData.bands[0]));
-        layer->setBrightness(x, (sharedData.bands[0] > 200) ? 0 : layer->layerP->lights.header.brightness);
+        layer->setBrightness(x, (sharedData.bands[0] > 200) ? 0 : layerP.lights.header.brightness);
       } else {
         layer->setRGB(x, CHSV(beatsin8(10), 255, 255));
-        // layer->setBrightness(x, layer->layerP->lights.header.brightness); // done automatically
+        // layer->setBrightness(x, layerP.lights.header.brightness); // done automatically
       }
     }
   }
@@ -118,10 +118,10 @@ class Troy1MoveEffect : public Node {
         layer->setTilt(x, mytilt);
       } else {
         layer->setGobo(x, colorwheel);
-        layer->setBrightness2(x, colorwheelbrightness);                                                                   // layer->layerP->lights.header.brightness);
+        layer->setBrightness2(x, colorwheelbrightness);                                                                   // layerP.lights.header.brightness);
         layer->setPan(x, autoMove ? beatsin8(bpm, pan - range, pan + range, 0, (invert && x % 2 == 0) ? 128 : 0) : pan);  // if automove, pan the light over a range
         layer->setTilt(x, autoMove ? beatsin8(bpm, tilt - range, tilt + range, 0, (invert && x % 2 == 0) ? 128 : 0) : tilt);
-        // layer->setBrightness(x, layer->layerP->lights.header.brightness); // done automatically
+        // layer->setBrightness(x, layerP.lights.header.brightness); // done automatically
       }
     }
   }
@@ -160,7 +160,7 @@ class Troy2ColorEffect : public Node {
         }
       } else {
         layer->setRGB(x, CHSV(beatsin8(10), 255, 255));
-        // layer->setBrightness(x, layer->layerP->lights.header.brightness); // done automatically
+        // layer->setBrightness(x, layerP.lights.header.brightness); // done automatically
       }
     }
   }
@@ -239,7 +239,7 @@ class Troy2MoveEffect : public Node {
       } else {
         layer->setPan(x, autoMove ? beatsin8(bpm, pan - range, pan + range, 0, (invert && x % 2 == 0) ? 128 : 0) : pan);  // if automove, pan the light over a range
         layer->setTilt(x, autoMove ? beatsin8(bpm, tilt - range, tilt + range, 0, (invert && x % 2 == 0) ? 128 : 0) : tilt);
-        // layer->setBrightness(x, layer->layerP->lights.header.brightness); // done automatically
+        // layer->setBrightness(x, layerP.lights.header.brightness); // done automatically
       }
     }
     if (coolDownSet) cooldown = millis();
@@ -281,7 +281,7 @@ class FreqColorsEffect : public Node {
         }
       }
 
-      // layer->setBrightness({x,0,0}, layer->layerP->lights.header.brightness); // done automatically
+      // layer->setBrightness({x,0,0}, layerP.lights.header.brightness); // done automatically
     }
   }
 };
@@ -316,7 +316,7 @@ class WowiMoveEffect : public Node {
       layer->setPan({x, 0, 0}, autoMove ? beatsin8(bpm, pan - range, pan + range, 0, (invert && x % 2 == 0) ? 128 : 0) : pan);  // if automove, pan the light over a range
       layer->setTilt({x, 0, 0}, autoMove ? beatsin8(bpm, tilt - range, tilt + range, 0, (invert && x % 2 == 0) ? 128 : 0) : tilt);
       layer->setZoom({x, 0, 0}, zoom);
-      // layer->setBrightness({x,0,0}, layer->layerP->lights.header.brightness); // done automatically
+      // layer->setBrightness({x,0,0}, layerP.lights.header.brightness); // done automatically
     }
   }
 };
