@@ -475,8 +475,8 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(19, pin_SDIO_PIN_CMD);  // ESP-Hosted WiFi pins
       pinAssigner.assignPin(24, pin_Reserved);      // USB Pins
       pinAssigner.assignPin(25, pin_Reserved);      // USB Pins
-      uint8_t ethernetPins[6] = {28, 29, 30, 31, 34, 35};
-      for (int i = 0; i < sizeof(ethernetPins); i++) pinAssigner.assignPin(ethernetPins[i], pin_Ethernet);  // Ethernet Pins
+      uint8_t ethernetPins[] = {28, 29, 30, 31, 34, 35};
+      for (uint8_t gpio : ethernetPins) pinAssigner.assignPin(gpio, pin_Ethernet);
       pinAssigner.assignPin(37, pin_Serial_TX);
       pinAssigner.assignPin(38, pin_Serial_RX);
       // 24-25 is is USB, but so is 26-27 but they're exposed on the header and work OK for pin outout.
