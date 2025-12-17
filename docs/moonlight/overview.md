@@ -128,7 +128,7 @@ Effects, Modifiers, Layouts and drivers use emoji's to visualize their usage. Se
     * 🎨 Using palette
     * 🐙 WLED origin
     * 💫 MoonLight origin
-    * ⚡: FastLED origin
+    * ⚡️ FastLED origin
     * 🚨 Moving head color effect
     * 🗼 Moving head move effect
 * 💎 Modifier

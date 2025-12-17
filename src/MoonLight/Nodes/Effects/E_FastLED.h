@@ -15,7 +15,7 @@ class RainbowEffect : public Node {
  public:
   static const char* name() { return "Rainbow"; }
   static uint8_t dim() { return _1D; }
-  static const char* tags() { return "🔥⚡"; }
+  static const char* tags() { return "🔥⚡️"; }
 
   uint8_t deltaHue = 7;
   uint8_t speed = 8;  // default 8*32 = 256 / 256 = 1 = hue++
@@ -36,7 +36,7 @@ class RainbowWithGlitterEffect : public Node {
  public:
   static const char* name() { return "Rainbow with glitter"; }
   static uint8_t dim() { return _1D; }
-  static const char* tags() { return "🔥⚡"; }  // ⚡ means FastLED origin
+  static const char* tags() { return "🔥⚡️"; }  // ⚡️ means FastLED origin
 
   bool glitter = false;
   uint8_t chance = 80;
@@ -44,7 +44,7 @@ class RainbowWithGlitterEffect : public Node {
   void setup() override {
     // no palette control is created
     addControl(glitter, "glitter", "checkbox");
-    addControl(chance, "glitter", "checkbox");
+    addControl(chance, "chance", "slider");
   }
 
   void loop() override {

@@ -33,7 +33,7 @@ class SolidEffect : public Node {
 
   void loop() override {
     layer->fill_solid(CRGB(red * brightness / 255, green * brightness / 255, blue * brightness / 255));
-    if (layer->layerP->lights.header.offsetWhite != UINT8_MAX && white > 0)
+    if (layerP.lights.header.offsetWhite != UINT8_MAX && white > 0)
       for (int index = 0; index < layer->nrOfLights; index++) layer->setWhite(index, white * brightness / 255);
   }
 };
@@ -145,7 +145,7 @@ class RandomEffect : public Node {
   void setup() { addControl(fade, "fade", "slider"); }
   void loop() override {
     layer->fadeToBlackBy(fade);
-    layer->setRGB(random16(layer->nrOfLights), ColorFromPalette(layer->layerP->palette, random8()));
+    layer->setRGB(random16(layer->nrOfLights), ColorFromPalette(layerP.palette, random8()));
   }
 };
 
@@ -422,7 +422,7 @@ class StarFieldEffect : public Node {  // Inspired by Daniel Shiffman's Coding T
       Coord3D pos = Coord3D(sx, sy);
       if (!pos.isOutofBounds(layer->size)) {
         if (usePalette)
-          layer->setRGB(Coord3D(sx, sy), ColorFromPalette(layer->layerP->palette, stars[i].colorIndex, ::map(stars[i].z, 0, layer->size.x, 255, 150)));
+          layer->setRGB(Coord3D(sx, sy), ColorFromPalette(layerP.palette, stars[i].colorIndex, ::map(stars[i].z, 0, layer->size.x, 255, 150)));
         else {
           uint8_t color = ::map(stars[i].colorIndex, 0, 255, 120, 255);
           int brightness = ::map(stars[i].z, 0, layer->size.x, 7, 10);
@@ -485,7 +485,7 @@ class PraxisEffect : public Node {
         // uint8_t hue = huebase + (-(pos.x+pos.y)*macro_mutator*10) + ((pos.x+pos.x*pos.y*(macro_mutator*256))/(micro_mutator+1));
         uint8_t hue = huebase + ((pos.x + pos.y * macro_mutator * pos.x) / (micro_mutator + 1));
         // uint8_t hue = huebase + ((pos.x+pos.y)*(250-macro_mutator)/5) + ((pos.x+pos.y*macro_mutator*pos.x)/(micro_mutator+1)); Original
-        CRGB colour = ColorFromPalette(layer->layerP->palette, hue, 255);
+        CRGB colour = ColorFromPalette(layerP.palette, hue, 255);
         layer->setRGB(pos, colour);  // blend(layer->getRGB(pos), colour, 155);
       }
     }
@@ -650,7 +650,7 @@ class FreqSawsEffect : public Node {
           y = ::map(bandPhase[band] >> 8, 0, 255, 0, layer->size.y - 1);  // saw wave, running over the y-axis, speed is determined by bpm
         }
         // y-axis shows a saw wave which runs faster if the bandSpeed for the x-column is higher, if rings are used for the y-axis, it will show as turning wheels
-        layer->setRGB(Coord3D(x, (invert && x % 2 == 0) ? layer->size.y - 1 - y : y), ColorFromPalette(layer->layerP->palette, ::map(x, 0, layer->size.x - 1, 0, 255)));
+        layer->setRGB(Coord3D(x, (invert && x % 2 == 0) ? layer->size.y - 1 - y : y), ColorFromPalette(layerP.palette, ::map(x, 0, layer->size.x - 1, 0, 255)));
       }
     }
   }
@@ -1131,7 +1131,7 @@ class ParticlesEffect : public Node {
       else
         particles[index].vz = 0;
 
-      particles[index].color = ColorFromPalette(layer->layerP->palette, random8());
+      particles[index].color = ColorFromPalette(layerP.palette, random8());
       Coord3D initPos = particles[index].toCoord3DRounded();
       layer->setRGB(initPos, particles[index].color);
     }
@@ -1315,7 +1315,7 @@ class SpiralFireEffect : public Node {
               // Color: bottom hot (yellow/white), top cooler (red/orange)
               uint8_t colorIndex = 255 - (pos.y * 180 / layer->size.y) + sin8(spiralPhase) / 3;
 
-              CRGB color = ColorFromPalette(layer->layerP->palette, colorIndex, brightness);
+              CRGB color = ColorFromPalette(layerP.palette, colorIndex, brightness);
 
               // Add some intensity variation
               color.nscale8(intensity);

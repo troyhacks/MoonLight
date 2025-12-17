@@ -39,7 +39,7 @@
 
 **MoonLight bridges the gap between hobbyist lighting projects and professional lighting systems.** Get enterprise-grade performance and flexibility without the enterprise price tag.
 
-- ⚡ **High Performance** - 12K LEDs at 100 FPS with FastLED + parallel drivers
+- ⚡️ **High Performance** - 12K LEDs at 100 FPS with FastLED + parallel drivers
 - 🎨 **3D Effects Engine** - Stunning visuals for 1D strips, 2D panels, 3D cubes, and custom layouts
 - 🏗️ **Flexible Setups** - From simple strips to complex installations and DMX fixtures
 - 🌐 **Modern IoT** - ESP32-powered with responsive Svelte 5 interface
@@ -79,7 +79,7 @@ Start creating stunning effects immediately on both mobile and desktop.
 
 | Firmware | Interface |
 |----------|-----------|
-| 🔧 **ESP-IDF 5** - Modern ESP32 framework | ⚡ **Svelte 5** - Lightning-fast reactive UI |
+| 🔧 **ESP-IDF 5** - Modern ESP32 framework | ⚡️ **Svelte 5** - Lightning-fast reactive UI |
 | 💡 **FastLED 3.10** - Industry-standard LED library | 🎨 **DaisyUI 5** - Modern component library |
 | 📡 **PsychicHTTP 1.21** - High-performance web server | 🎯 **Tailwind 4** - Utility-first CSS |
 | 📊 **ArduinoJson 7** - Advanced JSON processing | 📱 **Mobile & Desktop** responsive |
