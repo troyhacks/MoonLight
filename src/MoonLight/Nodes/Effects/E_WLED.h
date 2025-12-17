@@ -333,8 +333,6 @@ class GEQEffect : public Node {
 
   ~GEQEffect() {
     freeMB(previousBarHeight);
-
-    Node::~Node();
   }
 
   void onSizeChanged(const Coord3D& prevSize) override {
@@ -763,13 +761,13 @@ class OctopusEffect : public Node {
   };
 
   uint8_t speed = 16;
-  Coord3D offset = {128, 128, 1};
+  Coord3D offset = {50, 50, 50};
   uint8_t legs = 4;
   bool radialWave = false;
 
   void setup() override {
     addControl(speed, "speed", "slider", 1, 32);
-    addControl(offset, "offset", "coord3D", 0, 255, false);
+    addControl(offset, "offset", "coord3D", 0, 100, false); // 0..100%
     addControl(legs, "legs", "slider", 1, 8);
 
     addControl(radialWave, "radialWave", "checkbox");
@@ -788,13 +786,11 @@ class OctopusEffect : public Node {
 
   ~OctopusEffect() {
     freeMB(rMap);
-
-    Node::~Node();
   }
 
   void setRMap() {
-    const uint8_t C_X = layer->size.x / 2 + (offset.x - 128) * layer->size.x / 255;
-    const uint8_t C_Y = layer->size.y / 2 + (offset.y - 128) * layer->size.y / 255;
+    const uint8_t C_X = layer->size.x / 2 + (offset.x - 50) * layer->size.x / 100;
+    const uint8_t C_Y = layer->size.y / 2 + (offset.y - 50) * layer->size.y / 100;
     Coord3D pos = {0, 0, 0};
     const uint8_t mapp = 180 / max(layer->size.x, layer->size.y);
     for (pos.x = 0; pos.x < layer->size.x; pos.x++) {

@@ -90,7 +90,6 @@ class ModuleEffects : public NodeManager {
     addControlValue(control, getNameAndTags<FreqSawsEffect>());
     addControlValue(control, getNameAndTags<MarioTestEffect>());
     addControlValue(control, getNameAndTags<PixelMapEffect>());
-    addControlValue(control, getNameAndTags<RainbowEffect>());
     addControlValue(control, getNameAndTags<RandomEffect>());
     addControlValue(control, getNameAndTags<RingRandomFlowEffect>());
     addControlValue(control, getNameAndTags<RipplesEffect>());
@@ -132,7 +131,7 @@ class ModuleEffects : public NodeManager {
     addControlValue(control, getNameAndTags<WaverlyEffect>());
 
     // FastLED effects
-    addControlValue(control, getNameAndTags<RainbowWithGlitterEffect>());
+    addControlValue(control, getNameAndTags<RainbowEffect>());
 
     // Moving head effects, alphabetically
     addControlValue(control, getNameAndTags<AmbientMoveEffect>());
@@ -270,8 +269,6 @@ class ModuleEffects : public NodeManager {
     // FastLED
     else if (equalAZaz09(name, RainbowEffect::name()))
       node = allocMBObject<RainbowEffect>();
-    else if (equalAZaz09(name, RainbowWithGlitterEffect::name()))
-      node = allocMBObject<RainbowWithGlitterEffect>();
 
     // Moving head effects, alphabetically
 

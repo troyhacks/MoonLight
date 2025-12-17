@@ -1574,11 +1574,7 @@ class RingRandomFlowEffect : public RingEffect {
 
   uint8_t* hue = nullptr;
 
-  ~RingRandomFlowEffect() {
-    freeMB(hue);
-
-    Node::~Node();
-  }
+  ~RingRandomFlowEffect() { freeMB(hue); }
 
   void onSizeChanged(const Coord3D& prevSize) override {
     freeMB(hue);
@@ -1636,8 +1632,8 @@ class AudioRingsEffect : public RingEffect {
       //        setRingFromFtt((i * 2), i);
     }
 
-    setRingFromFtt(2, 7);  // set outer ring to bass
-    setRingFromFtt(0, 8);  // set outer ring to bass
+    if (nrOfRings >= 2) setRingFromFtt(2, nrOfRings - 2);  // set outer rings to bass
+    if (nrOfRings >= 1) setRingFromFtt(0, nrOfRings - 1);  // set outer rings to bass
   }
   void setRingFromFtt(int index, int ring) {
     byte val = sharedData.bands[index];
