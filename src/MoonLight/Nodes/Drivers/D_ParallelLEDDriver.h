@@ -92,7 +92,7 @@ class ParallelLEDDriver : public DriverNode {
 
       EXT_LOGD(ML_TAG, "nrOfLedPins %d %d %d", nrOfPins, layerP.nrOfLedPins, layerP.nrOfAssignedPins);
 
-      Char<32> statusString = "#";
+      Char<32> statusString = "#";  // truncate if larger
       statusString += nrOfPins;
       statusString += ": ";
       for (int i = 0; i < nrOfPins; i++) {

@@ -47,22 +47,29 @@ class ArtNetOutDriver : public DriverNode {
     memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER));  // copy in the Art-Net header.
   };
 
+  uint8_t ipAddresses[16];  // max 16
+  uint8_t nrOfIPAddresses = 0;
+
   void onUpdate(const Char<20>& oldValue, const JsonObject& control) override {
+    DriverNode::onUpdate(oldValue, control);  // !!
+
     if (control["name"] == "controllerIPs") {
-      EXT_LOGD(MB_TAG, "IPs: %s %s", controllerIP3s.c_str(), control["value"].as<const char*>());
-      uint8_t index = 0;
-      memset(ipAddresses, UINT8_MAX, sizeof(ipAddresses));  // reset ip addresses
-      controllerIP3s.split(",", [this, &index](const char* token, uint8_t nr) {
-        EXT_LOGD(MB_TAG, "Found IP: %s (%d / %d)", token, nr, index);
-        ipAddresses[index] = atoi(token);
-        index++;
+      EXT_LOGD(MB_TAG, "IPs: %s", controllerIP3s.c_str());
+      nrOfIPAddresses = 0;
+      controllerIP3s.split(",", [this](const char* token, uint8_t nr) {
+        int ipSegment = atoi(token);
+        if (nrOfIPAddresses < std::size(ipAddresses) && ipSegment >= 0 && ipSegment <= 255) {
+          EXT_LOGD(MB_TAG, "Found IP: %s (%d / %d)", token, nr, nrOfIPAddresses);
+          ipAddresses[nrOfIPAddresses] = ipSegment;
+          nrOfIPAddresses++;
+        } else
+          EXT_LOGW(MB_TAG, "Too many IPs provided (%d) or invalid IP segment: %d ", nrOfIPAddresses, ipSegment);
       });
     }
   };
 
   // loop variables:
   IPAddress controllerIP;   // tbd: controllerIP also configurable from fixtures and Art-Net instead of pin output
-  uint8_t ipAddresses[16];  // max 16
   unsigned long lastMillis = millis();
   unsigned long wait;
   uint8_t packet_buffer[sizeof(ART_NET_HEADER) + 6 + ARTNET_CHANNELS_PER_PACKET];
@@ -99,15 +106,14 @@ class ArtNetOutDriver : public DriverNode {
 
     LightsHeader* header = &layerP.lights.header;
 
-    if (header->isPositions != 0) return;  // don't sent if positions are sent
+    if (header->isPositions != 0 || nrOfIPAddresses == 0) return;  // don't sent if positions are sent or no IP addresses found (to do broadcast if no addresses specified...!)
 
     // continue with Art-Net code
     uint8_t actualIPIndex = 0;
-    IPAddress activeIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
-    controllerIP = activeIP;
+    controllerIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
     controllerIP[3] = ipAddresses[actualIPIndex];
 
-    if (!controllerIP) return;
+    if (!controllerIP) return;  // if no connection
 
     // wait until the throttle FPS is reached
     // wait needed to avoid misalignment between packages sent and displayed - 🚧
@@ -130,8 +136,6 @@ class ArtNetOutDriver : public DriverNode {
 
     // send all the leds to artnet
     for (int indexP = 0; indexP < header->nrOfLights; indexP++) {
-      controllerIP[3] = ipAddresses[actualIPIndex];
-
       // fill a package
       memcpy(&packet_buffer[packetSize + 18], &layerP.lights.channels[indexP * header->channelsPerLight], header->channelsPerLight);  // set all the channels
 

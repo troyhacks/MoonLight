@@ -54,7 +54,7 @@ class FastLEDDriver : public Node {
     addControl(colorOrder, "colorOrder", "text", 0, 20, true);
     addControl(usesI2S, "usesI2S", "checkbox", 0, 20, true);
     addControl(usesRMT5, "usesRMT5", "checkbox", 0, 20, true);
-    addControl(status, "status", "text", 0, 32, true);  // read only
+    addControl(status, "status", "text", 0, 32, true);
   }
 
   uint16_t savedMaxPower = UINT16_MAX;
@@ -91,7 +91,7 @@ class FastLEDDriver : public Node {
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
     if (layerP.pass == 1 && !layerP.monitorPass) {
-      uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
+      uint8_t nrOfPins = MIN(MIN(layerP.nrOfLedPins, layerP.nrOfAssignedPins), 4);  // FastLED RMT supports max 4 pins!
 
       if (nrOfPins == 0) return;
 
@@ -103,7 +103,7 @@ class FastLEDDriver : public Node {
       EXT_LOGD(ML_TAG, "nrOfLedPins #:%d", nrOfPins);
       uint8_t pins[MAX_PINS] = {};
 
-      Char<32> statusString = "#";
+      Char<32> statusString = "#";  // truncate if larger
       statusString += nrOfPins;
       statusString += ": ";
       for (int i = 0; i < nrOfPins; i++) {
@@ -123,7 +123,7 @@ class FastLEDDriver : public Node {
       moduleNodes->requestUIUpdate = true;
 
       uint16_t startLed = 0;
-      for (uint8_t pinIndex = 0; pinIndex < nrOfPins && pinIndex < 4; pinIndex++) {  // FastLED RMT supports max 4 pins!
+      for (uint8_t pinIndex = 0; pinIndex < nrOfPins; pinIndex++) {
         EXT_LOGD(ML_TAG, "ledPin s:%d #:%d p:%d", pinIndex, layerP.ledsPerPin[pinIndex]);
 
         uint16_t nrOfLights = layerP.ledsPerPin[pinIndex];

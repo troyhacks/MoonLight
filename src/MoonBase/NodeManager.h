@@ -135,8 +135,7 @@ class NodeManager : public Module {
             nodeState.remove("controls");  // remove the controls from the nodeState
           }
 
-          // migration 20251204
-          // to consider: not needed as we accept data updates, we only do not accept data definition updates!
+          // Migration 20251204: Maybe this is not needed as we accept data updates from legacy driver names, migration only needed for changes in the data definitions
           if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
             EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
             nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags
