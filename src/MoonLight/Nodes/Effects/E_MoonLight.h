@@ -135,27 +135,6 @@ class LinesEffect : public Node {
   }
 };
 
-class RainbowEffect : public Node {
- public:
-  static const char* name() { return "Rainbow"; }
-  static uint8_t dim() { return _1D; }
-  static const char* tags() { return "🔥"; }
-
-  uint8_t deltaHue = 7;
-  uint8_t speed = 8;  // default 8*32 = 256 / 256 = 1 = hue++
-
-  void setup() {
-    addControl(speed, "speed", "slider", 0, 32);
-    addControl(deltaHue, "deltaHue", "slider", 0, 32);
-  }
-
-  uint16_t hue = 0;
-
-  void loop() override {
-    layer->fill_rainbow((hue += speed * 32) >> 8, deltaHue);  // hue back to uint8_t
-  }
-};
-
 class RandomEffect : public Node {
  public:
   static const char* name() { return "Random"; }
@@ -1349,4 +1328,324 @@ class SpiralFireEffect : public Node {
     }
   }
 };
+
+const uint32_t colors[] = {0x000000, 0x100000, 0x300000, 0x600000, 0x800000, 0xA00000, 0xC02000, 0xC04000, 0xC06000, 0xC08000, 0x807080};
+
+// https://github.com/toggledbits/MatrixFireFast/blob/master/MatrixFireFast/MatrixFireFast.ino
+class FireEffect : public Node {
+ public:
+  static const char* name() { return "Fire"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "💫"; }
+
+  uint8_t NCOLORS = std::size(colors);
+
+  void glow(int x, int y, int z, uint8_t flareDecay, bool usePalette) {
+    int b = z * 10 / flareDecay + 1;
+    for (int i = (y - b); i < (y + b); ++i) {
+      for (int j = (x - b); j < (x + b); ++j) {
+        if (i >= 0 && j >= 0 && i < layer->size.y && j < layer->size.x) {
+          int d = (flareDecay * isqrt((x - j) * (x - j) + (y - i) * (y - i)) + 5) / 10;
+          uint8_t n = 0;
+          if (z > d) n = z - d;
+          if (layer->getRGB(Coord3D(j, layer->size.y - 1 - i)) < usePalette ? ColorFromPalette(layerP.palette, n * 23) : colors[n]) {  // can only get brighter
+            layer->setRGB(Coord3D(j, layer->size.y - 1 - i), usePalette ? ColorFromPalette(layerP.palette, n * 23) : colors[n]);       // 23*11 -> within palette range
+          }
+        }
+      }
+    }
+  }
+
+  // utility function?
+  uint32_t isqrt(uint32_t n) {
+    if (n < 2) return n;
+    uint32_t smallCandidate = isqrt(n >> 2) << 1;
+    uint32_t largeCandidate = smallCandidate + 1;
+    return (largeCandidate * largeCandidate > n) ? smallCandidate : largeCandidate;
+  }
+
+  bool usePalette = false;
+  uint8_t flareRows = 2;
+  uint8_t maxFlare = 8;
+  uint8_t flareChance = 50;
+  uint8_t flareDecay = 14;
+
+  void setup() {
+    addControl(usePalette, "usePalette", "checkbox");
+    addControl(flareRows, "flareRows", "slider", 0, 5);       /* number of rows (from bottom) allowed to flare */
+    addControl(maxFlare, "maxFlare", "slider", 0, 18);        /* max number of simultaneous flares */
+    addControl(flareChance, "flareChance", "slider", 0, 100); /* chance (%) of a new flare (if there's room) */
+    addControl(flareDecay, "flareDecay", "slider", 0, 28);    /* decay rate of flare radiation; 14 is good */
+  }
+
+  uint8_t nflare;
+  uint32_t flare[18];
+
+  void loop() {
+    // Effect Variables
+
+    // First, move all existing heat points up the display and fade
+    for (int y = layer->size.y - 1; y > 0; --y) {
+      for (int x = 0; x < layer->size.x; ++x) {
+        CRGB n = CRGB::Black;
+        if (layer->getRGB(Coord3D(x, layer->size.y - y)) != CRGB::Black) {
+          n = layer->getRGB(Coord3D(x, layer->size.y - y));  // - 0; //-0 to force conversion to CRGB
+          if (n.red > 10)
+            n.red -= 10;
+          else
+            n.red = 0;
+          if (n.green > 10)
+            n.green -= 10;
+          else
+            n.green = 0;
+          if (n.blue > 10)
+            n.blue -= 10;
+          else
+            n.blue = 0;
+        }
+        layer->setRGB(Coord3D(x, layer->size.y - 1 - y), n);
+      }
+    }
+
+    // Heat the bottom row
+    for (int x = 0; x < layer->size.x; ++x) {
+      CRGB i = layer->getRGB(Coord3D(x, layer->size.y - 1));  // - 0; //-0 to force conversion to CRGB
+      if (i != CRGB::Black) {
+        layer->setRGB(Coord3D(x, layer->size.y - 1), usePalette ? ColorFromPalette(layerP.palette, random8()) : colors[random(NCOLORS - 6, NCOLORS - 2)]);
+      }
+    }
+
+    // flare
+    for (int i = 0; i < nflare; ++i) {
+      int x = flare[i] & 0xff;
+      int y = (flare[i] >> 8) & 0xff;
+      int z = (flare[i] >> 16) & 0xff;
+
+      glow(x, y, z, flareDecay, usePalette);
+
+      if (z > 1) {
+        flare[i] = (flare[i] & 0xffff) | ((z - 1) << 16);
+      } else {
+        // This flare is out
+        for (int j = i + 1; j < nflare; ++j) {
+          flare[j - 1] = flare[j];
+        }
+        --(nflare);
+      }
+    }
+
+    // newflare();
+    if (nflare < maxFlare && random(1, 101) <= flareChance) {
+      int x = random(0, layer->size.x);
+      int y = random(0, flareRows);
+      int z = NCOLORS - 1;
+      flare[(nflare)++] = (z << 16) | (y << 8) | (x & 0xff);
+
+      glow(x, y, z, flareDecay, usePalette);
+    }
+  }
+
+};  // Fire Effect
+
+class VUMeterEffect : public Node {
+ public:
+  static const char* name() { return "VU Meter"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "♫💫📺"; }
+
+  void drawNeedle(float angle, Coord3D topLeft, Coord3D size, CRGB color) {
+    int x0 = topLeft.x + size.x / 2;  // Center of the needle
+    int y0 = topLeft.y + size.y - 1;  // Bottom of the needle
+
+    layer->drawCircle(topLeft.x + size.x / 2, topLeft.y + size.y / 2, size.x / 2, ColorFromPalette(layerP.palette, 35, 128), false);
+
+    // Calculate needle end position
+    int x1 = x0 - round(size.y * 0.7 * cos((angle + 30) * PI / 180));
+    int y1 = y0 - round(size.y * 0.7 * sin((angle + 30) * PI / 180));
+
+    // Draw the needle
+    layer->drawLine(x0, y0, x1, y1, color, true);
+  }
+
+  uint8_t speed = 255;
+  uint8_t bands = NUM_GEQ_CHANNELS;
+
+  void setup() override {
+    layer->fill_solid(CRGB::Black);
+    addControl(speed, "speed", "slider");
+    addControl(bands, "bands", "slider", 1, NUM_GEQ_CHANNELS);
+  }
+
+  void loop() override {
+    layer->fadeToBlackBy(200);
+
+    uint8_t nHorizontal = 4;
+    uint8_t nVertical = 2;
+
+    uint8_t band = 0;
+    for (int h = 0; h < nHorizontal; h++) {
+      for (int v = 0; v < nVertical; v++) {
+        drawNeedle((float)sharedData.bands[2 * (band++)] / 2.0, {layer->size.x * h / nHorizontal, layer->size.y * v / nVertical, 0}, {layer->size.x / nHorizontal, layer->size.y / nVertical, 0}, ColorFromPalette(layerP.palette, 255 / (nHorizontal * nVertical) * band));
+      }  // sharedData.bands[band++] / 200
+    }
+    // ppf(" v:%f, f:%f", sharedData.volume, (float) sharedData.bands[5]);
+  }
+};  // VUMeter
+
+class PixelMapEffect : public Node {
+ public:
+  static const char* name() { return "PixelMap"; }
+  static uint8_t dim() { return _3D; }
+  static const char* tags() { return "💫"; }
+
+  Coord3D pos = {0, 0, 0};
+
+  void setup() override { addControl(pos, "pos", "coord3D", 0, MAX(MAX(layer->size.x, layer->size.x), layer->size.x) - 1); }
+
+  void loop() override {
+    layer->fill_solid(CRGB::Black);
+
+    layer->setRGB(pos, CHSV(millis() / 50 + random8(64), 255, 255));  // ColorFromPalette(layerP.palette,call, bri);
+  }
+};  // PixelMap
+
+class MarioTestEffect : public Node {
+ public:
+  static const char* name() { return "MarioTest"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "💫"; }
+
+  bool background = false;
+  Coord3D offset = {0, 0, 0};
+
+  void setup() override {
+    addControl(background, "background", "checkbox");
+    addControl(offset, "offset", "coord3D", 0, 255);
+  }
+
+  const uint8_t mario[16][16] = {{0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},  //
+                                 {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0},  //
+                                 {0, 0, 0, 0, 2, 2, 2, 3, 3, 4, 3, 0, 0, 0, 0, 0},  //
+                                 {0, 0, 0, 2, 3, 2, 3, 3, 3, 4, 3, 3, 3, 0, 0, 0},  //
+                                 {0, 0, 0, 2, 3, 2, 2, 3, 3, 3, 4, 3, 3, 3, 0, 0},  //
+                                 {0, 0, 0, 0, 2, 3, 3, 3, 3, 4, 4, 4, 4, 0, 0, 0},  //
+                                 {0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0},  //
+                                 {0, 0, 0, 0, 5, 5, 1, 5, 5, 1, 0, 0, 0, 0, 0, 0},  //
+                                 {0, 0, 0, 5, 5, 5, 1, 5, 5, 1, 5, 5, 5, 0, 0, 0},  //
+                                 {0, 0, 5, 5, 5, 5, 1, 5, 5, 1, 5, 5, 5, 5, 0, 0},  //
+                                 {0, 0, 3, 3, 5, 5, 1, 1, 1, 1, 5, 5, 3, 3, 0, 0},  //
+                                 {0, 0, 3, 3, 3, 1, 6, 1, 1, 6, 1, 3, 3, 3, 0, 0},  //
+                                 {0, 0, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 0, 0},  //
+                                 {0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0},  //
+                                 {0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0},  //
+                                 {0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0}};
+
+  const CRGB colors[7] = {CRGB::DimGrey, CRGB::Red, CRGB::Brown, CRGB::Tan, CRGB::Black, CRGB::Blue, CRGB::Yellow};
+
+  void loop() override {
+    if (background)
+      layer->fill_solid(CRGB::DimGrey);
+    else
+      layer->fill_solid(CRGB::Black);
+    // draw 16x16 mario
+    for (int x = 0; x < MIN(16, layer->size.x); x++)
+      for (int y = 0; y < MIN(16, layer->size.y); y++) {
+        layer->setRGB(Coord3D(x + offset.x, y + offset.y), colors[mario[y][x]]);
+      }
+  }
+};  // MarioTest
+
+// by netmindz
+
+class RingEffect : public Node {
+ protected:
+  void setRing(int ring, CRGB colour) {  // so britisch ;-)
+    layer->setRGB(ring, colour);
+  }
+};
+
+class RingRandomFlowEffect : public RingEffect {
+ public:
+  static const char* name() { return "RingRandomFlow"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "💫"; }
+
+  // void setup() override {} //so no palette control is created
+
+  uint8_t* hue = nullptr;
+
+  ~RingRandomFlowEffect() {
+    freeMB(hue);
+
+    Node::~Node();
+  }
+
+  void onSizeChanged(const Coord3D& prevSize) override {
+    freeMB(hue);
+    hue = allocMB<uint8_t>(layer->size.x);
+    if (!hue) {
+      EXT_LOGE(ML_TAG, "allocate hue failed");
+    }
+  }
+
+  void loop() override {
+    if (hue) {
+      hue[0] = random(0, 255);
+      for (int r = 0; r < layer->size.x; r++) {
+        setRing(r, CHSV(hue[r], 255, 255));
+      }
+      for (int r = (layer->size.x - 1); r >= 1; r--) {
+        hue[r] = hue[(r - 1)];  // set this ruing based on the inner
+      }
+      // FastLED.delay(SPEED);
+    }
+  }
+};
+
+// by netmindz
+class AudioRingsEffect : public RingEffect {
+ public:
+  static const char* name() { return "AudioRings"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "♫💫"; }
+
+  bool inWards = true;
+  uint8_t nrOfRings = 7;
+
+  void setup() override {
+    addControl(inWards, "inWards", "checkbox");
+    addControl(nrOfRings, "rings", "slider", 1, 50);
+  }
+
+  void loop() override {
+    for (int i = 0; i < nrOfRings; i++) {
+      uint8_t band = ::map(i, 0, nrOfRings - 1, 0, NUM_GEQ_CHANNELS - 1);
+
+      byte val;
+      if (inWards) {
+        val = sharedData.bands[band];
+      } else {
+        val = sharedData.bands[NUM_GEQ_CHANNELS - 1 - band];
+      }
+
+      // Visualize leds to the beat
+      CRGB color = ColorFromPalette(layerP.palette, val, val);
+      //      CRGB color = ColorFromPalette(currentPalette, val, 255, currentBlending);
+      //      color.nscale8_video(val);
+      setRing(i, color);
+      //        setRingFromFtt((i * 2), i);
+    }
+
+    setRingFromFtt(2, 7);  // set outer ring to bass
+    setRingFromFtt(0, 8);  // set outer ring to bass
+  }
+  void setRingFromFtt(int index, int ring) {
+    byte val = sharedData.bands[index];
+    // Visualize leds to the beat
+    CRGB color = ColorFromPalette(layerP.palette, val);
+    color.nscale8_video(val);
+    setRing(ring, color);
+  }
+};
+
 #endif

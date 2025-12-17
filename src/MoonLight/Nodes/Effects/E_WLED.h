@@ -165,8 +165,8 @@ class BlurzEffect : public Node {
 
       layer->blur2d(blur);
       aux0++;
-      aux0 %= 16;                                                                 // make sure it doesn't cross 16
-      layer->addRGB(segLoc, ColorFromPalette(layer->layerP->palette, pixColor));  // repaint center pixel after blur
+      aux0 %= 16;                                                         // make sure it doesn't cross 16
+      layer->addRGB(segLoc, ColorFromPalette(layerP.palette, pixColor));  // repaint center pixel after blur
     } else
       layer->blur2d(blur);  // silence - just blur it again
     call++;
@@ -505,10 +505,10 @@ class NoiseMeterEffect : public Node {
     // if (maxLen <0) maxLen = 0;
     // if (maxLen >layer->size.x) maxLen = layer->size.x;
 
-    for (int i = 0; i < maxLen; i++) {                                                                                             // The louder the sound, the wider the soundbar. By Andrew Tuline.
-      uint8_t index = inoise8(i * sharedData.volume + aux0, aux1 + i * sharedData.volume);                                         // Get a value from the noise function. I'm using both x and y axis.
-      for (int y = 0; y < layer->size.y; y++)                                                                                      // propagate to other dimensions
-        for (int z = 0; z < layer->size.z; z++) layer->setRGB(Coord3D(i, y, z), ColorFromPalette(layer->layerP->palette, index));  //, 255, PALETTE_SOLID_WRAP));
+    for (int i = 0; i < maxLen; i++) {                                                                                     // The louder the sound, the wider the soundbar. By Andrew Tuline.
+      uint8_t index = inoise8(i * sharedData.volume + aux0, aux1 + i * sharedData.volume);                                 // Get a value from the noise function. I'm using both x and y axis.
+      for (int y = 0; y < layer->size.y; y++)                                                                              // propagate to other dimensions
+        for (int z = 0; z < layer->size.z; z++) layer->setRGB(Coord3D(i, y, z), ColorFromPalette(layerP.palette, index));  //, 255, PALETTE_SOLID_WRAP));
     }
 
     aux0 += beatsin8(5, 0, 10);
@@ -649,1136 +649,780 @@ class WaverlyEffect : public Node {
   }
 };  // Waverly
 
-// // By: Stepko https://editor.soulmatelights.com/gallery/1012 , Modified by: Andrew Tuline
-// class BlackHoleEffect: public Node {
-//   static const char * name() {return "BlackHole";}
-//   static uint8_t dim() {return _2D;}
-//   static const char * tags() {return "🐙";}
-
-//   void setup() override {
-//     ui->initSlider(parentVar, "fade", leds.effectData.write<uint8_t>(16), 0, 32);
-//     ui->initSlider(parentVar, "outX", leds.effectData.write<uint8_t>(16), 0, 32);
-//     ui->initSlider(parentVar, "outY", leds.effectData.write<uint8_t>(16), 0, 32);
-//     ui->initSlider(parentVar, "inX", leds.effectData.write<uint8_t>(16), 0, 32);
-//     ui->initSlider(parentVar, "inY", leds.effectData.write<uint8_t>(16), 0, 32);
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t fade = leds.effectData.read<uint8_t>();
-//     uint8_t outX = leds.effectData.read<uint8_t>();
-//     uint8_t outY = leds.effectData.read<uint8_t>();
-//     uint8_t inX = leds.effectData.read<uint8_t>();
-//     uint8_t inY = leds.effectData.read<uint8_t>();
-
-//     uint16_t x, y;
-
-//     leds.fadeToBlackBy(16 + (fade)); // create fading trails
-//     unsigned long t = sys->now/128;                 // timebase
-//     // outer stars
-//     for (size_t i = 0; i < 8; i++) {
-//       x = beatsin8(outX,   0, leds.size.x - 1, 0, ((i % 2) ? 128 : 0) + t * i);
-//       y = beatsin8(outY, 0, leds.size.y - 1, 0, ((i % 2) ? 192 : 64) + t * i);
-//       leds.addPixelColor(x, y, CHSV(i*32, 255, 255));
-//     }
-//     // inner stars
-//     for (size_t i = 0; i < 4; i++) {
-//       x = beatsin8(inX, leds.size.x/4, leds.size.x - 1 - leds.size.x/4, 0, ((i % 2) ? 128 : 0) + t * i);
-//       y = beatsin8(inY, leds.size.y/4, leds.size.y - 1 - leds.size.y/4, 0, ((i % 2) ? 192 : 64) + t * i);
-//       leds.addPixelColor(x, y, CHSV(i*32, 255, 255));
-//     }
-//     // central white dot
-//     leds.setPixelColor(leds.size.x/2, leds.size.y/2, CHSV(0, 0, 255));
-
-//     // blur everything a bit
-//     leds.blur2d(16);
-
-//   }
-// }; // BlackHole
-
-// // dna originally by by ldirko at https://pastebin.com/pCkkkzcs. Updated by Preyy. WLED conversion by Andrew Tuline.
-// class DNAEffect: public Node {
-//   const char * name() override {return "DNA";}
-//   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "🐙💫";}
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(16), 0, 32);
-//     ui->initSlider(parentVar, "blur", leds.effectData.write<uint8_t>(128));
-//     ui->initSlider(parentVar, "phases", leds.effectData.write<uint8_t>(64));
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t speed = leds.effectData.read<uint8_t>();
-//     uint8_t blur = leds.effectData.read<uint8_t>();
-//     uint8_t phases = leds.effectData.read<uint8_t>();
-
-//     const int cols = leds.size.x;
-//     const int rows = leds.size.y;
-
-//     leds.fadeToBlackBy(64);
-
-//     // WLEDMM optimized to prevent holes at height > 32
-//     int lastY1 = -1;
-//     int lastY2 = -1;
-//     for (int i = 0; i < cols; i++) {
-//             //256 is a complete phase
-//       // half a phase is dna is 128
-//       uint8_t phase;// = cols * i / 8;
-//       //32: 4 * i
-//       //16: 8 * i
-//       phase = i * phases / cols;
-
-//       // phase = i * 2 / (cols+1) * phases;
-
-//       int posY1 = beatsin8(speed, 0, rows-1, 0, phase    );
-//       int posY2 = beatsin8(speed, 0, rows-1, 0, phase + 128);
-//       if ((i==0) || ((abs(lastY1 - posY1) < 2) && (abs(lastY2 - posY2) < 2))) {   // use original code when no holes
-//         leds.setPixelColor(i, posY1, ColorFromPalette(leds.palette, i*5+sys->now/17, beatsin8(5, 55, 255, 0, i*10)));
-//         leds.setPixelColor(i, posY2, ColorFromPalette(leds.palette, i*5+128+sys->now/17, beatsin8(5, 55, 255, 0, i*10+128)));
-//       } else {                                                                    // draw line to prevent holes
-//         leds.drawLine(i-1, lastY1, i, posY1, ColorFromPalette(leds.palette, i*5+sys->now/17, beatsin8(5, 55, 255, 0, i*10)));
-//         leds.drawLine(i-1, lastY2, i, posY2, ColorFromPalette(leds.palette, i*5+128+sys->now/17, beatsin8(5, 55, 255, 0, i*10+128)));
-//       }
-//       lastY1 = posY1;
-//       lastY2 = posY2;
-//     }
-//     leds.blur2d(blur);
-//   }
-// }; // DNA
-
-// //Octopus inspired by WLED, Stepko and Sutaburosu and blazoncek
-// //Idea from https://www.youtube.com/watch?v=HsA-6KIbgto&ab_channel=GreatScott%21 (https://editor.soulmatelights.com/gallery/671-octopus)
-// class OctopusEffect: public Node {
-//   const char * name() override {return "Octopus";}
-//   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "🐙";}
-
-//   struct Map_t {
-//     uint8_t angle;
-//     uint8_t radius;
-//   };
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar); //palette
-//     bool *setup = leds.effectData.write<bool>(true);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(16), 1, 32);
-//     ui->initSlider(parentVar, "offsetX", leds.effectData.write<uint8_t>(128), 0, 255, false, [setup] (EventArguments) { switch (eventType) {
-//       case onChange: {*setup = true; return true;}
-//       default: return false;
-//     }});
-//     ui->initSlider(parentVar, "offsetY", leds.effectData.write<uint8_t>(128), 0, 255, false, [setup] (EventArguments) { switch (eventType) {
-//       case onChange: {*setup = true; return true;}
-//       default: return false;
-//     }});
-//     ui->initSlider(parentVar, "legs", leds.effectData.write<uint8_t>(4), 1, 8);
-
-//     ui->initCheckBox(parentVar, "radialWave", leds.effectData.write<bool>(false));
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     bool   *setup = leds.effectData.readWrite<bool>();
-//     uint8_t speed = leds.effectData.read<uint8_t>();
-//     uint8_t offsetX = leds.effectData.read<uint8_t>();
-//     uint8_t offsetY = leds.effectData.read<uint8_t>();
-//     uint8_t legs = leds.effectData.read<uint8_t>();
-//     bool radialWave = leds.effectData.read<bool>();
-
-//     // Effect Variables
-//     Coord3D  *prevLedSize = leds.effectData.readWrite<Coord3D>();
-//     Map_t    *rMap = leds.effectData.readWrite<Map_t>(leds.size.x * leds.size.y); //array
-//     uint32_t *step = leds.effectData.readWrite<uint32_t>();
-
-//     if (leds.effectData.success()) { //octopus allocates quite a lot, so worth checking
-
-//       const uint8_t mapp = 180 / max(leds.size.x,leds.size.y);
-
-//       Coord3D pos = {0,0,0};
-
-//       if (*setup || *prevLedSize != leds.size) { // Setup map if leds.size or offset changes
-//         *setup = false;
-//         *prevLedSize = leds.size;
-//         const uint8_t C_X = leds.size.x / 2 + (offsetX - 128)*leds.size.x/255;
-//         const uint8_t C_Y = leds.size.y / 2 + (offsetY - 128)*leds.size.y/255;
-//         for (pos.x = 0; pos.x < leds.size.x; pos.x++) {
-//           for (pos.y = 0; pos.y < leds.size.y; pos.y++) {
-//             uint16_t indexV = leds.XYZUnprojected(pos);
-//             if (indexV < leds.size.x * leds.size.y) { //excluding UINT16_MAX from XY if out of bounds due to projection
-//               rMap[indexV].angle = 40.7436f * atan2f(pos.y - C_Y, pos.x - C_X); // avoid 128*atan2()/PI
-//               rMap[indexV].radius = hypotf(pos.x - C_X, pos.y - C_Y) * mapp; //thanks Sutaburosu
-//             }
-//           }
-//         }
-//       }
-
-//       *step = sys->now * speed / 25; //sys.now/25 = 40 per second. speed / 32: 1-4 range ? (1-8 ??)
-//       if (radialWave)
-//         *step = 3 * (*step) / 4; // 7/6 = 1.16 for RadialWave mode
-//       else
-//         *step = (*step) / 2; // 1/2 for Octopus mode
-
-//       for (pos.x = 0; pos.x < leds.size.x; pos.x++) {
-//         for (pos.y = 0; pos.y < leds.size.y; pos.y++) {
-//           uint16_t indexV = leds.XYZUnprojected(pos);
-//           if (indexV < leds.size.x * leds.size.y) { //excluding UINT16_MAX from XY if out of bounds due to projection
-//             byte angle = rMap[indexV].angle;
-//             byte radius = rMap[indexV].radius;
-//             uint16_t intensity;
-//             if (radialWave)
-//               intensity = sin8(*step + sin8(*step - radius) + angle * legs);                               // RadialWave
-//             else
-//               intensity = sin8(sin8((angle * 4 - radius) / 4 + (*step)/2) + radius - (*step) + angle * legs); //octopus
-//             intensity = intensity * intensity / 255; // add a bit of non-linearity for cleaner display
-//             leds[pos] = ColorFromPalette(leds.palette, (*step) / 2 - radius, intensity);
-//           }
-//         }
-//       }
-//     } //if (leds.effectData.success())
-//   }
-
-// }; // Octopus
-
-//   const uint32_t colors[] = {
-//     0x000000,
-//     0x100000,
-//     0x300000,
-//     0x600000,
-//     0x800000,
-//     0xA00000,
-//     0xC02000,
-//     0xC04000,
-//     0xC06000,
-//     0xC08000,
-//     0x807080
-//   };
-
-// //https://github.com/toggledbits/MatrixFireFast/blob/master/MatrixFireFast/MatrixFireFast.ino
-// class FireEffect: public Node {
-//   const char * name() {return "Fire";}
-//   uint8_t dim() {return _2D;}
-//   const char * tags() {return "💫";}
-
-//   const uint8_t NCOLORS = (sizeof(colors)/sizeof(colors[0]));
-
-//   void glow(int x, int y, int z, uint8_t flareDecay, bool usePalette) {
-//     int b = z * 10 / flareDecay + 1;
-//     for ( int i=(y-b); i<(y+b); ++i ) {
-//       for ( int j=(x-b); j<(x+b); ++j ) {
-//         if ( i >=0 && j >= 0 && i < leds.size.y && j < leds.size.x ) {
-//           int d = ( flareDecay * isqrt((x-j)*(x-j) + (y-i)*(y-i)) + 5 ) / 10;
-//           uint8_t n = 0;
-//           if ( z > d ) n = z - d;
-//           if ( leds[leds.XY(j, leds.size.y - 1 - i)] < usePalette?ColorFromPalette(leds.palette, n*23): colors[n]) { // can only get brighter
-//             leds[leds.XY(j, leds.size.y - 1 - i)] = usePalette?ColorFromPalette(leds.palette, n*23): colors[n]; //23*11 -> within palette range
-//           }
-//         }
-//       }
-//     }
-//   }
-
-//   //utility function?
-//   uint32_t isqrt(uint32_t n) {
-//     if ( n < 2 ) return n;
-//     uint32_t smallCandidate = isqrt(n >> 2) << 1;
-//     uint32_t largeCandidate = smallCandidate + 1;
-//     return (largeCandidate*largeCandidate > n) ? smallCandidate : largeCandidate;
-//   }
-
-//   void setup() {
-//     Effect::setup(leds, parentVar); //palette
-
-//     ui->initCheckBox(parentVar, "usePalette",    leds.effectData.write<bool>(false));
-//     ui->initSlider(parentVar, "flareRows", leds.effectData.write<uint8_t>(2), 0, 5);    /* number of rows (from bottom) allowed to flare */
-//     ui->initSlider(parentVar, "maxFlare", leds.effectData.write<uint8_t>(8), 0, 18);     /* max number of simultaneous flares */
-//     ui->initSlider(parentVar, "flareChance", leds.effectData.write<uint8_t>(50), 0, 100); /* chance (%) of a new flare (if there's room) */
-//     ui->initSlider(parentVar, "flareDecay", leds.effectData.write<uint8_t>(14), 0, 28);  /* decay rate of flare radiation; 14 is good */
-//   }
-
-//   void loop() {
-
-//     bool usePalette = leds.effectData.read<bool>();
-//     uint8_t flareRows = leds.effectData.read<uint8_t>();
-//     uint8_t maxFlare = leds.effectData.read<uint8_t>();
-//     uint8_t flareChance = leds.effectData.read<uint8_t>();
-//     uint8_t flareDecay = leds.effectData.read<uint8_t>();
-
-//     // Effect Variables
-//     uint8_t *nflare = leds.effectData.readWrite<uint8_t>();
-//     uint32_t *flare = leds.effectData.readWrite<uint32_t>(18);
-
-//     // First, move all existing heat points up the display and fade
-//     for (int y=leds.size.y-1; y>0; --y ) {
-//       for (int x=0; x<leds.size.x; ++x ) {
-//         CRGB n = CRGB::Black;
-//         if ( leds[leds.XY(x, leds.size.y - y)] != CRGB::Black) {
-//           n = leds[leds.XY(x, leds.size.y - y)] - 0; //-0 to force conversion to CRGB
-//           if (n.red > 10) n.red -= 10; else n.red = 0;
-//           if (n.green > 10) n.green -= 10; else n.green = 0;
-//           if (n.blue > 10) n.blue -= 10; else n.blue = 0;
-//         }
-//         leds[leds.XY(x, leds.size.y - 1 - y)] = n;
-//       }
-//     }
-
-//     // Heat the bottom row
-//     for (int x=0; x<leds.size.x; ++x ) {
-//       CRGB i = leds[leds.XY(x, leds.size.y - 1 - 0)] - 0; //-0 to force conversion to CRGB
-//       if ( i != CRGB::Black ) {
-//         leds[leds.XY(x, leds.size.y - 1 - 0)] = usePalette?ColorFromPalette(leds.palette, random8()): colors[random(NCOLORS-6, NCOLORS-2)];
-//       }
-//     }
-
-//     // flare
-//     for (int i=0; i<*nflare; ++i ) {
-//       int x = flare[i] & 0xff;
-//       int y = (flare[i] >> 8) & 0xff;
-//       int z = (flare[i] >> 16) & 0xff;
-
-//       glow( x, y, z, flareDecay, leds, usePalette);
-
-//       if ( z > 1 ) {
-//         flare[i] = (flare[i] & 0xffff) | ((z-1)<<16);
-//       } else {
-//         // This flare is out
-//         for ( int j=i+1; j<*nflare; ++j ) {
-//           flare[j-1] = flare[j];
-//         }
-//         --(*nflare);
-//       }
-//     }
-
-//     //newflare();
-//     if ( *nflare < maxFlare && random(1,101) <= flareChance ) {
-//       int x = random(0, leds.size.x);
-//       int y = random(0, flareRows);
-//       int z = NCOLORS - 1;
-//       flare[(*nflare)++] = (z<<16) | (y<<8) | (x&0xff);
-
-//       glow( x, y, z, flareDecay, leds, usePalette);
-//     }
-//   }
-
-// }; // Fire Effect
-
-// //Frizzles inspired by WLED, Stepko, Andrew Tuline, https://editor.soulmatelights.com/gallery/640-color-frizzles
-// class FrizzlesEffect: public Node {
-//   const char * name() override {return "Frizzles";}
-//   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "🐙";}
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar);
-//     ui->initSlider(parentVar, "BPM", leds.effectData.write<uint8_t>(60));
-//     ui->initSlider(parentVar, "intensity", leds.effectData.write<uint8_t>(128));
-//     ui->initSlider(parentVar, "blur", leds.effectData.write<uint8_t>(128));
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t bpm = leds.effectData.read<uint8_t>();
-//     uint8_t intensity = leds.effectData.read<uint8_t>();
-//     uint8_t blur = leds.effectData.read<uint8_t>();
-
-//     leds.fadeToBlackBy(16);
-
-//     for (int i = 8; i > 0; i--) {
-//       Coord3D pos = {0,0,0};
-//       pos.x = beatsin8(bpm/8 + i, 0, leds.size.x - 1);
-//       pos.y = beatsin8(intensity/8 - i, 0, leds.size.y - 1);
-//       CRGB color = ColorFromPalette(leds.palette, beatsin8(12, 0, 255));
-//       leds[pos] = color;
-//     }
-//     leds.blur2d(blur);
-//   }
-// }; // Frizzles
-
-// /*
-//  * Exploding fireworks effect
-//  * adapted from: http://www.anirama.com/1000leds/1d-fireworks/
-//  * adapted for 2D WLED by blazoncek (Blaz Kristan (AKA blazoncek))
-//  * simplified for StarLight by ewowi in Nov 24
-//  */
-// class FireworksEffect: public Node {
-//   const char * name() override {return "Fireworks";}
-//   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "🐙";}
-
-//   void setup() override {
-//     leds.fadeToBlackBy(16);
-//     Effect::setup(leds, parentVar);
-//     ui->initSlider(parentVar, "gravity", leds.effectData.write<uint8_t>(128));
-//     ui->initSlider(parentVar, "firingSide", leds.effectData.write<uint8_t>(128));
-//     ui->initSlider(parentVar, "numSparks", leds.effectData.write<uint8_t>(128));
-//     // PROGMEM = "Fireworks 1D@Gravity,Firing side;!,!;!;12;pal=11,ix=128";
-//   }
-
-//   void loop() override {
-
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t gravityC = leds.effectData.read<uint8_t>();
-//     uint8_t firingSide = leds.effectData.read<uint8_t>();
-//     uint8_t numSparks = leds.effectData.read<uint8_t>();
-
-//     float *dying_gravity = leds.effectData.readWrite<float>();
-//     uint16_t *aux0Flare = leds.effectData.readWrite<uint16_t>();
-//     Spark* sparks = leds.effectData.readWrite<Spark>(255);
-//     Spark* flare = sparks; //first spark is flare data
-
-//     const uint16_t cols = leds.size.x;
-//     const uint16_t rows = leds.size.y;
-
-//     //allocate segment data
-
-//     // if (dataSize != aux1) { //reset to flare if sparks were reallocated (it may be good idea to reset segment if bounds change)
-//     //   *dying_gravity = 0.0f;
-//     //   (*aux0Flare) = 0;
-//     //   aux1 = dataSize;
-//     // }
-
-//     leds.fadeToBlackBy(252); //fade_out(252);
-
-//     float gravity = -0.0004f - (gravityC/800000.0f); // m/s/s
-//     gravity *= rows;
-
-//     if ((*aux0Flare) < 2) { //FLARE
-//       if ((*aux0Flare) == 0) { //init flare
-//         flare->pos = 0;
-//         flare->posX = random16(2,cols-3);
-//         uint16_t peakHeight = 75 + random8(180); //0-255
-//         peakHeight = (peakHeight * (rows -1)) >> 8;
-//         flare->vel = sqrtf(-2.0f * gravity * peakHeight);
-//         flare->velX = (random8(9)-4)/32.f;
-//         flare->col = 255; //brightness
-//         (*aux0Flare) = 1;
-//       }
-
-//       // launch
-//       if (flare->vel > 12 * gravity) {
-//         // flare
-//         leds.setPixelColor(int(flare->posX), rows - uint16_t(flare->pos) - 1, CRGB(flare->col, flare->col, flare->col));
-//         flare->pos  += flare->vel;
-//         flare->posX += flare->velX;
-//         flare->pos  = constrain(flare->pos, 0, rows-1);
-//         flare->posX = constrain(flare->posX, 0, cols-1);
-//         flare->vel  += gravity;
-//         flare->col  -= 2;
-//       } else {
-//         (*aux0Flare) = 2;  // ready to explode
-//       }
-//     } else if ((*aux0Flare) < 4) {
-//       /*
-//       * Explode!
-//       *
-//       * Explosion happens where the flare ended.
-//       * Size is proportional to the height.
-//       */
-//       uint8_t nSparks = flare->pos + random8(4);
-//       // nSparks = std::max(nSparks, 4U);  // This is not a standard constrain; numSparks is not guaranteed to be at least 4
-//       nSparks = std::min(nSparks, numSparks);
-
-//       // initialize sparks
-//       if ((*aux0Flare) == 2) {
-//         for (int i = 1; i < nSparks; i++) {
-//           sparks[i].pos  = flare->pos;
-//           sparks[i].posX = flare->posX;
-//           sparks[i].vel  = (float(random16(20001)) / 10000.0f) - 0.9f; // from -0.9 to 1.1
-//           // sparks[i].vel *= rows<32 ? 0.5f : 1; // reduce velocity for smaller strips
-//           sparks[i].velX  = (float(random16(20001)) / 10000.0f) - 0.9f; // from -0.9 to 1.1
-//           // sparks[i].velX = (float(random16(10001)) / 10000.0f) - 0.5f; // from -0.5 to 0.5
-//           sparks[i].col  = 345;//abs(sparks[i].vel * 750.0); // set colors before scaling velocity to keep them bright
-//           //sparks[i].col = constrain(sparks[i].col, 0, 345);
-//           sparks[i].colIndex = random8();
-//           sparks[i].vel  *= flare->pos/rows; // proportional to height
-//           sparks[i].velX *= flare->posX/cols; // proportional to width
-//           sparks[i].vel  *= -gravity *50;
-//         }
-//         //sparks[1].col = 345; // this will be our known spark
-//         *dying_gravity = gravity/2;
-//         (*aux0Flare) = 3;
-//       }
-
-//       if (sparks[1].col > 4) {//&& sparks[1].pos > 0) { // as long as our known spark is lit, work with all the sparks
-//         for (int i = 1; i < nSparks; i++) {
-//           sparks[i].pos  += sparks[i].vel;
-//           sparks[i].posX += sparks[i].velX;
-//           sparks[i].vel  += *dying_gravity;
-//           sparks[i].velX += *dying_gravity;
-//           if (sparks[i].col > 3) sparks[i].col -= 4;
-
-//           if (sparks[i].pos > 0 && sparks[i].pos < rows) {
-//             if (!(sparks[i].posX >= 0 && sparks[i].posX < cols)) continue;
-//             uint16_t prog = sparks[i].col;
-//             CRGB spColor = ColorFromPalette(leds.palette, sparks[i].colIndex);
-//             CRGB c = CRGB::Black; //HeatColor(sparks[i].col);
-//             if (prog > 300) { //fade from white to spark color
-//               c = CRGB(blend(spColor, CRGB::White, (prog - 300)*5));
-//             } else if (prog > 45) { //fade from spark color to black
-//               c = CRGB(blend(CRGB::Black, spColor, prog - 45));
-//               uint8_t cooling = (300 - prog) >> 5;
-//               c.g = qsub8(c.g, cooling);
-//               c.b = qsub8(c.b, cooling * 2);
-//             }
-//             leds.setPixelColor(sparks[i].posX, rows - sparks[i].pos - 1, c);
-//           }
-//         }
-//         leds.blur2d(16);
-//         *dying_gravity *= .8f; // as sparks burn out they fall slower
-//       } else {
-//         (*aux0Flare) = 6 + random8(10); //wait for this many frames
-//       }
-//     } else {
-//       (*aux0Flare)--;
-//       if ((*aux0Flare) < 4) {
-//         (*aux0Flare) = 0; //back to flare
-//       }
-//     }
-//   }
-
-// }; //FireworksEffect
-
-// class FunkyPlankEffect: public Node {
-//   const char * name() override {return "Funky Plank";}
-//   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "♫🐙💫";}
-
-//   void setup() override {
-//     leds.fill_solid(CRGB::Black);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(255));
-//     ui->initSlider(parentVar, "bands", leds.effectData.write<uint8_t>(NUM_GEQ_CHANNELS), 1, NUM_GEQ_CHANNELS);
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t speed = leds.effectData.read<uint8_t>();
-//     uint8_t num_bands = leds.effectData.read<uint8_t>();
-
-//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
-//     uint8_t *aux0 = leds.effectData.readWrite<uint8_t>();
-
-//     uint8_t secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
-//     if ((speed > 254) || (*aux0 != secondHand)) {   // WLEDMM allow run run at full speed
-//       *aux0 = secondHand;
-
-//       //evenly distribute see also GEQ/By ewowi/From AXI
-//       float bandwidth = (float)leds.size.x / num_bands;
-//       float remaining = bandwidth;
-//       uint8_t band = 0;
-//       for (int posx=0; posx < leds.size.x; posx++) {
-//         if (remaining < 1) {band++; remaining += bandwidth;} //increase remaining but keep the current remaining
-//         remaining--; //consume remaining
-
-//         int hue = sharedData.bands[map(band, 0, num_bands-1, 0, NUM_GEQ_CHANNELS-1)];
-//         int v = ::map(hue, 0, 255, 10, 255);
-//         leds.setPixelColor(posx, 0, CHSV(hue, 255, v));
-//       }
-
-//       // drip down:
-//       for (int i = (leds.size.y - 1); i > 0; i--) {
-//         for (int j = (leds.size.x - 1); j >= 0; j--) {
-//           leds.setPixelColor(j, i, leds.getPixelColor(j, i-1));
-//         }
-//       }
-//     }
-//   }
-// }; //FunkyPlank
-
-// class VUMeterEffect: public Node {
-//   const char * name() override {return "VU Meter";}
-//   uint8_t dim() override {return _2D;}
-//   const char * tags() override {return "♫💫📺";}
-
-//   void drawNeedle(float angle, Coord3D topLeft, Coord3D size, CRGB color) {
-//       int x0 = topLeft.x + size.x / 2; // Center of the needle
-//       int y0 = topLeft.y + size.y - 1; // Bottom of the needle
-
-//       leds.drawCircle(topLeft.x + size.x / 2, topLeft.y + size.y / 2, size.x/2, ColorFromPalette(leds.palette, 35, 128), false);
-
-//       // Calculate needle end position
-//       int x1 = x0 - round(size.y * 0.7 * cos((angle + 30) * PI / 180));
-//       int y1 = y0 - round(size.y * 0.7 * sin((angle + 30) * PI / 180));
-
-//       // Draw the needle
-//       leds.drawLine(x0, y0, x1, y1, color, true);
-//   }
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar); //palette
-//     leds.fill_solid(CRGB::Black);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(255));
-//     ui->initSlider(parentVar, "bands", leds.effectData.write<uint8_t>(NUM_GEQ_CHANNELS), 1, NUM_GEQ_CHANNELS);
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t speed = leds.effectData.read<uint8_t>();
-//     uint8_t num_bands = leds.effectData.read<uint8_t>();
-//     leds.fadeToBlackBy(200);
-
-//     uint8_t nHorizontal = 4;
-//     uint8_t nVertical = 2;
-
-//     uint8_t band = 0;
-//     for (int h = 0; h < nHorizontal; h++) {
-//       for (int v = 0; v < nVertical; v++) {
-//         drawNeedle(leds, (float)sharedData.bands[2*(band++)] / 2.0, {leds.size.x * h / nHorizontal, leds.size.y * v / nVertical, 0}, {leds.size.x / nHorizontal, leds.size.y / nVertical, 0},
-//                 ColorFromPalette(leds.palette, 255 / (nHorizontal * nVertical) * band));
-//       } //sharedData.bands[band++] / 200
-//     }
-//     // ppf(" v:%f, f:%f", sharedData.volume, (float) sharedData.bands[5]);
-//   }
-// }; //VUMeter
-
-// class PixelMapEffect: public Node {
-//   const char * name() override {return "PixelMap 🧊";}
-//   uint8_t dim() override {return _3D;}
-//   const char * tags() override {return "💫";}
-
-//   void setup() override {
-//     ui->initSlider(parentVar, "x", leds.effectData.write<uint8_t>(0), 0, leds.size.x - 1);
-//     ui->initSlider(parentVar, "y", leds.effectData.write<uint8_t>(0), 0, leds.size.y - 1);
-//     ui->initSlider(parentVar, "z", leds.effectData.write<uint8_t>(0), 0, leds.size.z - 1);
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t x = leds.effectData.read<uint8_t>();
-//     uint8_t y = leds.effectData.read<uint8_t>();
-//     uint8_t z = leds.effectData.read<uint8_t>();
-
-//     leds.fill_solid(CRGB::Black);
-
-//     Coord3D pos = {x, y, z};
-//     leds[pos] = CHSV( sys->now/50 + random8(64), 255, 255);// ColorFromPalette(leds.palette,call, bri);
-//   }
-// }; // PixelMap
-
-// class MarioTestEffect: public Node {
-//   const char * name() override {return "MarioTest";}
-//   uint8_t       dim() override {return _2D;}
-//   const char * tags() override {return "💫";}
-
-//   void setup() override {
-//     ui->initCheckBox(parentVar, "background", leds.effectData.write<bool>(false));
-//     ui->initSlider(parentVar, "offsetX", leds.effectData.write<uint8_t>(leds.size.x/2 - 8), 0, leds.size.x - 16);
-//     ui->initSlider(parentVar, "offsetY", leds.effectData.write<uint8_t>(leds.size.y/2 - 8), 0, leds.size.y - 16);
-//   }
-
-//   void loop() override {
-//     bool background = leds.effectData.read<bool>();
-//     uint8_t offsetX = leds.effectData.read<uint8_t>();
-//     uint8_t offsetY = leds.effectData.read<uint8_t>();
-
-//     const uint8_t mario[16][16] = {
-//       {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
-//       {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0},
-//       {0, 0, 0, 0, 2, 2, 2, 3, 3, 4, 3, 0, 0, 0, 0, 0},
-//       {0, 0, 0, 2, 3, 2, 3, 3, 3, 4, 3, 3, 3, 0, 0, 0},
-//       {0, 0, 0, 2, 3, 2, 2, 3, 3, 3, 4, 3, 3, 3, 0, 0},
-//       {0, 0, 0, 0, 2, 3, 3, 3, 3, 4, 4, 4, 4, 0, 0, 0},
-//       {0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0},
-//       {0, 0, 0, 0, 5, 5, 1, 5, 5, 1, 0, 0, 0, 0, 0, 0},
-//       {0, 0, 0, 5, 5, 5, 1, 5, 5, 1, 5, 5, 5, 0, 0, 0},
-//       {0, 0, 5, 5, 5, 5, 1, 5, 5, 1, 5, 5, 5, 5, 0, 0},
-//       {0, 0, 3, 3, 5, 5, 1, 1, 1, 1, 5, 5, 3, 3, 0, 0},
-//       {0, 0, 3, 3, 3, 1, 6, 1, 1, 6, 1, 3, 3, 3, 0, 0},
-//       {0, 0, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 0, 0},
-//       {0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-//       {0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0},
-//       {0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0}
-//     };
-
-//     CRGB colors[7] = {CRGB::DimGrey, CRGB::Red, CRGB::Brown, CRGB::Tan, CRGB::Black, CRGB::Blue, CRGB::Yellow};
-
-//     if (background) leds.fill_solid(CRGB::DimGrey);
-//     else leds.fill_solid(CRGB::Black);
-//     //draw 16x16 mario
-//     for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) {
-//       leds[Coord3D(x + offsetX, y + offsetY)] = colors[mario[y][x]];
-//     }
-//   }
-// }; // MarioTest
-
-// class RainbowWithGlitterEffect: public Node {
-//   const char * name() override {return "Rainbow with glitter";}
-//   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "⚡";} //⚡ means FastLED origin
-
-//   void setup() override {
-//     //no palette control is created
-//     ui->initCheckBox(parentVar, "glitter", leds.effectData.write<bool>(false));
-//   }
-
-//   void loop() override {
-//     bool glitter = leds.effectData.read<bool>();
-
-//     // built-in FastLED rainbow, plus some random sparkly glitter
-//     // FastLED's built-in rainbow generator
-//     leds.fill_rainbow(sys->now/50, 7);
-
-//     if (glitter)
-//       addGlitter(leds, 80);
-//   }
-
-//   void addGlitter(fract8 chanceOfGlitter)
-//   {
-//     if( random8() < chanceOfGlitter) {
-//       leds[ random16(leds.size.x) ] += CRGB::White;
-//     }
-//   }
-// };
-
-// // Best of both worlds from Palette and Spot effects. By Aircoookie
-// class FlowEffect: public Node {
-//   const char * name() override {return "Flow";}
-//   uint8_t      dim()  override {return _1D;}
-//   const char * tags() override {return "🐙";} //🐙 means wled origin
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(128));
-//     ui->initSlider(parentVar, "zones", leds.effectData.write<uint8_t>(128));
-//   }
-
-//   void loop() override {
-//     // UI Variables
-//     uint8_t speed   = leds.effectData.read<uint8_t>();
-//     uint8_t zonesUI = leds.effectData.read<uint8_t>();
-
-//     uint16_t counter = 0;
-//     if (speed != 0) {
-//       counter = sys->now * ((speed >> 2) +1);
-//       counter = counter >> 8;
-//     }
-
-//     uint16_t maxZones = leds.size.x / 6; //only looks good if each zone has at least 6 LEDs
-//     uint16_t zones    = (zonesUI * maxZones) >> 8;
-//     if (zones & 0x01) zones++; //zones must be even
-//     if (zones < 2)    zones = 2;
-//     uint16_t zoneLen = leds.size.x / zones;
-//     uint16_t offset  = (leds.size.x - zones * zoneLen) >> 1;
-
-//     leds.fill_solid(ColorFromPalette(leds.palette, -counter));
-
-//     for (int z = 0; z < zones; z++) {
-//       uint16_t pos = offset + z * zoneLen;
-//       for (int i = 0; i < zoneLen; i++) {
-//         uint8_t  colorIndex = (i * 255 / zoneLen) - counter;
-//         uint16_t led = (z & 0x01) ? i : (zoneLen -1) -i;
-//         leds[pos + led] = ColorFromPalette(leds.palette, colorIndex);
-//       }
-//     }
-//   }
-// };
-
-// class RingEffect: public Node {
-//   protected:
-
-//   void setRing(int ring, CRGB colour) { //so britisch ;-)
-//     leds[ring] = colour;
-//   }
-
-// };
-
-// class RingRandomFlowEffect: public RingEffect {
-//   const char * name() override {return "RingRandomFlow";}
-//   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "💫";}
-
-//   void setup() override {} //so no palette control is created
-
-//   void loop() override {
-//     //binding of loop persistent values (pointers)
-//     uint8_t *hue = leds.effectData.readWrite<uint8_t>(leds.size.x); //array
-
-//     hue[0] = random(0, 255);
-//     for (int r = 0; r < leds.size.x; r++) {
-//       setRing(leds, r, CHSV(hue[r], 255, 255));
-//     }
-//     for (int r = (leds.size.x - 1); r >= 1; r--) {
-//       hue[r] = hue[(r - 1)]; // set this ruing based on the inner
-//     }
-//     // FastLED.delay(SPEED);
-//   }
-// };
-
-// void mode_fireworks(uint16_t *aux0, uint16_t *aux1, uint8_t speed, uint8_t intensity, bool useAudio = false) {
-//   // fade_out(0);
-//   leds.fadeToBlackBy(10);
-//   // if (call == 0) {
-//   //   *aux0 = UINT16_MAX;
-//   //   *aux1 = UINT16_MAX;
-//   // }
-//   bool valid1 = (*aux0 < leds.size.x);
-//   bool valid2 = (*aux1 < leds.size.x);
-//   CRGB sv1 = 0, sv2 = 0;
-//   if (valid1) sv1 = leds.getPixelColor(*aux0);
-//   if (valid2) sv2 = leds.getPixelColor(*aux1);
-
-//   // WLEDSR
-//   uint8_t blurAmount   = 255 - speed;
-//   uint8_t my_intensity = 129 - intensity;
-//   bool addPixels = true;                        // false -> inhibit new pixels in silence
-//   int soundColor = -1;                          // -1 = random color; 0..255 = use as palette index
-
-//   // if (useAudio) {
-//   //   if (FFT_MajorPeak < 100)    { blurAmount = 254;} // big blobs
-//   //   else {
-//   //     if (FFT_MajorPeak > 3200) { blurAmount = 1;}   // small blobs
-//   //     else {                                         // blur + color depends on major frequency
-//   //       float musicIndex = logf(FFT_MajorPeak);            // log scaling of peak freq
-//   //       blurAmount = mapff(musicIndex, 4.60, 8.08, 253, 1);// map to blur range (low freq = more blur)
-//   //       blurAmount = constrain(blurAmount, 1, 253);        // remove possible "overshot" results
-//   //       soundColor = mapff(musicIndex, 4.6, 8.08, 0, 255); // pick color from frequency
-//   //   } }
-//   //   if (sampleAgc <= 1.0) {      // silence -> no new pixels, just blur
-//   //     valid1 = valid2 = false;   // do not copy last pixels
-//   //     addPixels = false;
-//   //     blurAmount = 128;
-//   //   }
-//   //   my_intensity = 129 - (speed >> 1); // dirty hack: use "speed" slider value intensity (no idea how to _disable_ the first slider, but show the second one)
-//   //   if (samplePeak == 1) my_intensity -= my_intensity / 4;    // inclease intensity at peaks
-//   //   if (samplePeak > 1) my_intensity = my_intensity / 2;      // double intensity at main peaks
-//   // }
-//   // // WLEDSR end
-
-//   leds.blur1d(blurAmount);
-//   if (valid1) leds.setPixelColor(*aux0, sv1);
-//   if (valid2) leds.setPixelColor(*aux1, sv2);
-
-//   if (addPixels) {                                                                             // WLEDSR
-//     for(uint16_t i=0; i<max(1, leds.size.x/20); i++) {
-//       if(random8(my_intensity) == 0) {
-//         uint16_t index = random(leds.size.x);
-//         if (soundColor < 0)
-//           leds.setPixelColor(index, ColorFromPalette(leds.palette, random8()));
-//         else
-//           leds.setPixelColor(index, ColorFromPalette(leds.palette, soundColor + random8(24))); // WLEDSR
-//         *aux1 = *aux0;
-//         *aux0 = index;
-//       }
-//     }
-//   }
-//   // return FRAMETIME;
-// }
-
-// class RainEffect: public Node {
-//   const char * name() override {return "Rain";}
-//   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "🐙";}
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(128), 1, 255);
-//     ui->initSlider(parentVar, "intensity", leds.effectData.write<uint8_t>(64), 1, 128);
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t speed = leds.effectData.read<uint8_t>();
-//     uint8_t intensity = leds.effectData.read<uint8_t>();
-
-//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
-//     uint16_t *aux0 = leds.effectData.readWrite<uint16_t>();
-//     uint16_t *aux1 = leds.effectData.readWrite<uint16_t>();
-//     uint16_t *step = leds.effectData.readWrite<uint16_t>();
-
-//     // if(call == 0) {
-//       // leds.fill(BLACK);
-//     // }
-//     *step += 1000 / 40;// FRAMETIME;
-//     if (*step > (5U + (50U*(255U - speed))/leds.size.x)) { //SPEED_FORMULA_L) {
-//       *step = 1;
-//       // if (strip.isMatrix) {
-//       //   //uint32_t ctemp[leds.size.x];
-//       //   //for (int i = 0; i<leds.size.x; i++) ctemp[i] = leds.getPixelColor(i, leds.size.y-1);
-//       //   leds.move(6, 1, true);  // move all pixels down
-//       //   //for (int i = 0; i<leds.size.x; i++) leds.setPixelColor(i, 0, ctemp[i]); // wrap around
-//       //   *aux0 = (*aux0 % leds.size.x) + (*aux0 / leds.size.x + 1) * leds.size.x;
-//       //   *aux1 = (*aux1 % leds.size.x) + (*aux1 / leds.size.x + 1) * leds.size.x;
-//       // } else
-//       {
-//         //shift all leds left
-//         CRGB ctemp = leds.getPixelColor(0);
-//         for (int i = 0; i < leds.size.x - 1; i++) {
-//           leds.setPixelColor(i, leds.getPixelColor(i+1));
-//         }
-//         leds.setPixelColor(leds.size.x -1, ctemp); // wrap around
-//         *aux0++;  // increase spark index
-//         *aux1++;
-//       }
-//       if (*aux0 == 0) *aux0 = UINT16_MAX; // reset previous spark position
-//       if (*aux1 == 0) *aux0 = UINT16_MAX; // reset previous spark position
-//       if (*aux0 >= leds.size.x*leds.size.y) *aux0 = 0;     // ignore
-//       if (*aux1 >= leds.size.x*leds.size.y) *aux1 = 0;
-//     }
-//     mode_fireworks(leds, aux0, aux1, speed, intensity);
-//   }
-// }; // RainEffect
-
-// //each needs 19 bytes
-// //Spark type is used for popcorn, fireworks, and drip
-// struct Spark {
-//   float pos, posX;
-//   float vel, velX;
-//   uint16_t col;
-//   uint8_t colIndex;
-// };
-
-// #define maxNumDrops 6
-// class DripEffect: public Node {
-//   const char * name() override {return "Drip";}
-//   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "🐙💫";}
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar);
-//     ui->initSlider(parentVar, "gravity", leds.effectData.write<uint8_t>(128), 1, 255);
-//     ui->initSlider(parentVar, "drips", leds.effectData.write<uint8_t>(4), 1, 6);
-//     ui->initSlider(parentVar, "swell", leds.effectData.write<uint8_t>(4), 1, 6);
-//     ui->initCheckBox(parentVar, "invert", leds.effectData.write<bool>(false));
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t grav = leds.effectData.read<uint8_t>();
-//     uint8_t drips = leds.effectData.read<uint8_t>();
-//     uint8_t swell = leds.effectData.read<uint8_t>();
-//     bool invert = leds.effectData.read<bool>();
-
-//     //binding of loop persistent values (pointers)
-//     Spark* drops = leds.effectData.readWrite<Spark>(maxNumDrops);
-
-//     // leds.fadeToBlackBy(90);
-//     leds.fill_solid(CRGB::Black);
-
-//     float gravity = -0.0005f - (grav/25000.0f); //increased gravity (50000 to 25000)
-//     gravity *= max(1, leds.size.x-1);
-//     int sourcedrop = 12;
-
-//     for (int j=0;j<drips;j++) {
-//       if (drops[j].colIndex == 0) { //init
-//         drops[j].pos = leds.size.x-1;    // start at end
-//         drops[j].vel = 0;           // speed
-//         drops[j].col = sourcedrop;  // brightness
-//         drops[j].colIndex = 1;      // drop state (0 init, 1 forming, 2 falling, 5 bouncing)
-//         drops[j].velX = (uint32_t)ColorFromPalette(leds.palette, random8()); // random color
-//       }
-//       CRGB dropColor = drops[j].velX;
-
-//       leds.setPixelColor(invert?0:leds.size.x-1, blend(CRGB::Black, dropColor, sourcedrop));// water source
-//       if (drops[j].colIndex==1) {
-//         if (drops[j].col>255) drops[j].col=255;
-//         leds.setPixelColor(invert?leds.size.x-1-drops[j].pos:drops[j].pos, blend(CRGB::Black, dropColor, drops[j].col));
-
-//         drops[j].col += swell; // swelling
-
-//         if (random16() <= drops[j].col * swell * swell / 10) {               // random drop
-//           drops[j].colIndex=2;               //fall
-//           drops[j].col=255;
-//         }
-//       }
-//       if (drops[j].colIndex > 1) {           // falling
-//         if (drops[j].pos > 0) {              // fall until end of segment
-//           drops[j].pos += drops[j].vel;
-//           if (drops[j].pos < 0) drops[j].pos = 0;
-//           drops[j].vel += gravity;           // gravity is negative
-
-//           for (int i=1;i<7-drops[j].colIndex;i++) { // some minor math so we don't expand bouncing droplets
-//             uint16_t pos = constrain(uint16_t(drops[j].pos) +i, 0, leds.size.x-1); //this is BAD, returns a pos >= leds.size.x occasionally
-//             leds.setPixelColor(invert?leds.size.x-1-pos:pos, blend(CRGB::Black, dropColor, drops[j].col/i)); //spread pixel with fade while falling
-//           }
-
-//           if (drops[j].colIndex > 2) {       // during bounce, some water is on the floor
-//             leds.setPixelColor(invert?leds.size.x-1:0, blend(dropColor, CRGB::Black, drops[j].col));
-//           }
-//         } else {                             // we hit bottom
-//           if (drops[j].colIndex > 2) {       // already hit once, so back to forming
-//             drops[j].colIndex = 0;
-//             // drops[j].col = sourcedrop;
-
-//           } else {
-
-//             if (drops[j].colIndex==2) {      // init bounce
-//               drops[j].vel = -drops[j].vel/4;// reverse velocity with damping
-//               drops[j].pos += drops[j].vel;
-//             }
-//             drops[j].col = sourcedrop*2;
-//             drops[j].colIndex = 5;           // bouncing
-//           }
-//         }
-//       }
-//     }
-//   }
-// }; // DripEffect
-
-// class HeartBeatEffect: public Node {
-//   const char * name() override {return "HeartBeat";}
-//   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "🐙💫♥";}
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(15), 0, 31);
-//     ui->initSlider(parentVar, "intensity", leds.effectData.write<uint8_t>(128));
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t speed = leds.effectData.read<uint8_t>();
-//     uint8_t intensity = leds.effectData.read<uint8_t>();
-
-//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
-//     bool *isSecond = leds.effectData.readWrite<bool>();
-//     uint16_t *bri_lower = leds.effectData.readWrite<uint16_t>();
-//     unsigned long *step = leds.effectData.readWrite<unsigned long>();
-
-//     uint8_t bpm = 40 + (speed);
-//     uint32_t msPerBeat = (60000L / bpm);
-//     uint32_t secondBeat = (msPerBeat / 3);
-//     unsigned long beatTimer = sys->now - *step;
-
-//     *bri_lower = *bri_lower * 2042 / (2048 + intensity);
-
-//     if ((beatTimer > secondBeat) && !*isSecond) { // time for the second beat?
-//       *bri_lower = UINT16_MAX; //3/4 bri
-//       *isSecond = true;
-//     }
-
-//     if (beatTimer > msPerBeat) { // time to reset the beat timer?
-//       *bri_lower = UINT16_MAX; //full bri
-//       *isSecond = false;
-//       *step = sys->now;
-//     }
-
-//     for (int i = 0; i < leds.size.x; i++) {
-//       leds.setPixelColor(i, ColorFromPalette(leds.palette, ::map(i, 0, leds.size.x, 0, 255), 255 - (*bri_lower >> 8)));
-//     }
-//   }
-// }; // HeartBeatEffect
-
-// class AudioRingsEffect: public RingEffect {
-//   const char * name() override {return "AudioRings";}
-//   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "♫💫";}
-
-//   void setup() override {
-//     Effect::setup(leds, parentVar);
-//     ui->initCheckBox(parentVar, "inWards", leds.effectData.write<bool>(true));
-//     ui->initSlider(parentVar, "rings", leds.effectData.write<uint8_t>(7), 1, 50);
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     bool inWards = leds.effectData.read<bool>();
-//     uint8_t nrOfRings = leds.effectData.read<uint8_t>();
-
-//     for (int i = 0; i < nrOfRings; i++) {
-
-//       uint8_t band = ::map(i, 0, nrOfRings-1, 0, NUM_GEQ_CHANNELS-1);
-
-//       byte val;
-//       if (inWards) {
-//         val = sharedData.bands[band];
-//       }
-//       else {
-//         val = sharedData.bands[NUM_GEQ_CHANNELS-1 - band];
-//       }
-
-//       // Visualize leds to the beat
-//       CRGB color = ColorFromPalette(leds.palette, val, val);
-// //      CRGB color = ColorFromPalette(currentPalette, val, 255, currentBlending);
-// //      color.nscale8_video(val);
-//       setRing(leds, i, color);
-// //        setRingFromFtt((i * 2), i);
-//     }
-
-//     setRingFromFtt(leds, 2, 7); // set outer ring to bass
-//     setRingFromFtt(leds, 0, 8); // set outer ring to bass
-
-//   }
-//   void setRingFromFtt(int index, int ring) {
-//     byte val = sharedData.bands[index];
-//     // Visualize leds to the beat
-//     CRGB color = ColorFromPalette(leds.palette, val);
-//     color.nscale8_video(val);
-//     setRing(leds, ring, color);
-//   }
-// };
-
-// class DJLightEffect: public Node {
-//   const char * name() override {return "DJLight";}
-//   uint8_t dim() override {return _1D;}
-//   const char * tags() override {return "♫🐙";}
-
-//   void setup() override {
-//     leds.fill_solid(CRGB::Black);
-//     ui->initSlider(parentVar, "speed", leds.effectData.write<uint8_t>(255));
-//     ui->initCheckBox(parentVar, "candyFactory", leds.effectData.write<bool>(true));
-//     ui->initSlider(parentVar, "fade", leds.effectData.write<uint8_t>(4), 0, 10);
-//   }
-
-//   void loop() override {
-//     //Binding of controls. Keep before binding of vars and keep in same order as in setup()
-//     uint8_t speed = leds.effectData.read<uint8_t>();
-//     bool candyFactory = leds.effectData.read<bool>();
-//     uint8_t fade = leds.effectData.read<uint8_t>();
-
-//     //binding of loop persistent values (pointers) tbd: aux0,1,step etc can be renamed to meaningful names
-//     uint8_t *aux0 = leds.effectData.readWrite<uint8_t>();
-
-//     const int mid = leds.size.x / 2;
-
-//     uint8_t secondHand = (speed < 255) ? (micros()/(256-speed)/500 % 16) : 0;
-//     if((speed > 254) || (*aux0 != secondHand)) {   // WLEDMM allow run run at full speed
-//       *aux0 = secondHand;
-
-//       CRGB color = CRGB(0,0,0);
-//       // color = CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1]/2, sharedData.bands[5]/2, sharedData.bands[0]/2);   // formula from 0.13.x (10Khz): R = 3880-5120, G=240-340, B=60-100
-//       if (!candyFactory) {
-//         color = CRGB(sharedData.bands[12]/2, sharedData.bands[3]/2, sharedData.bands[1]/2);    // formula for 0.14.x  (22Khz): R = 3015-3704, G=216-301, B=86-129
-//       } else {
-//         // candy factory: an attempt to get more colors
-//         color = CRGB(sharedData.bands[11]/2 + sharedData.bands[12]/4 + sharedData.bands[14]/4, // red  : 2412-3704 + 4479-7106
-//                     sharedData.bands[4]/2 + sharedData.bands[3]/4,                     // green: 216-430
-//                     sharedData.bands[0]/4 + sharedData.bands[1]/4 + sharedData.bands[2]/4);   // blue:  46-216
-//         if ((color.getLuma() < 96) && (volumeSmth >= 1.5f)) {             // enhance "almost dark" pixels with yellow, based on not-yet-used channels
-//           unsigned yello_g = (sharedData.bands[5] + sharedData.bands[6] + sharedData.bands[7]) / 3;
-//           unsigned yello_r = (sharedData.bands[7] + sharedData.bands[8] + sharedData.bands[9] + sharedData.bands[10]) / 4;
-//           color.green += (uint8_t) yello_g / 2;
-//           color.red += (uint8_t) yello_r / 2;
-//         }
-//       }
-
-//       if (volumeSmth < 1.0f) color = CRGB(0,0,0); // silence = black
-
-//       // make colors less "pastel", by turning up color saturation in HSV space
-//       if (color.getLuma() > 32) {                                      // don't change "dark" pixels
-//         CHSV hsvColor = rgb2hsv_approximate(color);
-//         hsvColor.v = constrain(hsvColor.v, 48, 204);  // 48 < brightness < 204
-//         if (candyFactory)
-//           hsvColor.s = max(hsvColor.s, (uint8_t)204);                  // candy factory mode: strongly turn up color saturation (> 192)
-//         else
-//           hsvColor.s = max(hsvColor.s, (uint8_t)108);                  // normal mode: turn up color saturation to avoid pastels
-//         color = hsvColor;
-//       }
-//       //if (color.getLuma() > 12) color.maximizeBrightness();          // for testing
-
-//       //leds.setPixelColor(mid, color.fadeToBlackBy(map(sharedData.bands[4], 0, 255, 255, 4)));     // 0.13.x  fade -> 180hz-260hz
-//       uint8_t fadeVal = ::map(sharedData.bands[3], 0, 255, 255, 4);                                      // 0.14.x  fade -> 216hz-301hz
-//       if (candyFactory) fadeVal = constrain(fadeVal, 0, 176);  // "candy factory" mode - avoid complete fade-out
-//       leds.setPixelColor(mid, color.fadeToBlackBy(fadeVal));
-
-//       for (int i = leds.size.x - 1; i > mid; i--)   leds.setPixelColor(i, leds.getPixelColor(i-1)); // move to the left
-//       for (int i = 0; i < mid; i++)            leds.setPixelColor(i, leds.getPixelColor(i+1)); // move to the right
-
-//       leds.fadeToBlackBy(fade);
-
-//     }
-//   }
-// }; //DJLight
+class BlackholeEffect : public Node {
+ public:
+  static const char* name() { return "Blackhole"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🔥🎨⏳🐙"; }
+
+  uint8_t fadeRate = 128;    // speed
+  uint8_t outerYfreq = 128;  // intensity
+  uint8_t outerXfreq = 128;  // custom1
+  uint8_t innerXfreq = 128;  // custom2
+  uint8_t innerYfreq = 128;  // custom3
+  uint8_t blur = 16;         // check3
+
+  void setup() override {
+    addControl(fadeRate, "fadeRate", "slider");
+    addControl(outerYfreq, "outerYfreq", "slider");
+    addControl(outerXfreq, "outerXfreq", "slider");
+    addControl(innerXfreq, "innerXfreq", "slider");
+    addControl(innerYfreq, "innerYfreq", "slider");
+    addControl(blur, "blur", "slider");
+  }
+
+  void loop() override {
+    const int cols = layer->size.x;
+    const int rows = layer->size.y;
+    int x, y;
+
+    layer->fadeToBlackBy(16 + (fadeRate >> 3));  // create fading trails
+    unsigned long t = millis() / 128;            // timebase
+    // outer stars
+    for (size_t i = 0; i < 8; i++) {
+      x = beatsin8(outerXfreq >> 3, 0, cols - 1, 0, ((i % 2) ? 128 : 0) + t * i);
+      y = beatsin8(outerYfreq >> 3, 0, rows - 1, 0, ((i % 2) ? 192 : 64) + t * i);
+      layer->addRGB(Coord3D(x, y), ColorFromPalette(layerP.palette, i * 32));
+    }
+    // inner stars
+    for (size_t i = 0; i < 4; i++) {
+      x = beatsin8(innerXfreq >> 3, cols / 4, cols - 1 - cols / 4, 0, ((i % 2) ? 128 : 0) + t * i);
+      y = beatsin8(innerYfreq >> 3, rows / 4, rows - 1 - rows / 4, 0, ((i % 2) ? 192 : 64) + t * i);
+      layer->addRGB(Coord3D(x, y), ColorFromPalette(layerP.palette, 255 - i * 64));
+    }
+    // central white dot
+    layer->setRGB(Coord3D(cols / 2, rows / 2), CRGB::White);
+    // blur everything a bit
+    if (blur) layer->blur2d(blur);
+  }
+};
+
+// dna originally by by ldirko at https://pastebin.com/pCkkkzcs. Updated by Preyy. WLED conversion by Andrew Tuline.
+class DNAEffect : public Node {
+ public:
+  static const char* name() { return "DNA"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🐙💫"; }
+
+  uint8_t speed = 16;
+  uint8_t blur = 128;
+  uint8_t phases = 64;
+
+  void setup() override {
+    addControl(speed, "speed", "slider", 0, 32);
+    addControl(blur, "blur", "slider");
+    addControl(phases, "phases", "slider");
+  }
+
+  void loop() override {
+    const int cols = layer->size.x;
+    const int rows = layer->size.y;
+
+    layer->fadeToBlackBy(64);
+
+    // WLEDMM optimized to prevent holes at height > 32
+    int lastY1 = -1;
+    int lastY2 = -1;
+    for (int i = 0; i < cols; i++) {
+      // 256 is a complete phase
+      // half a phase is dna is 128
+      uint8_t phase;  // = cols * i / 8;
+      // 32: 4 * i
+      // 16: 8 * i
+      phase = i * phases / cols;
+
+      // phase = i * 2 / (cols+1) * phases;
+
+      int posY1 = beatsin8(speed, 0, rows - 1, 0, phase);
+      int posY2 = beatsin8(speed, 0, rows - 1, 0, phase + 128);
+      if ((i == 0) || ((abs(lastY1 - posY1) < 2) && (abs(lastY2 - posY2) < 2))) {  // use original code when no holes
+        layer->setRGB(Coord3D(i, posY1), ColorFromPalette(layerP.palette, i * 5 + millis() / 17, beatsin8(5, 55, 255, 0, i * 10)));
+        layer->setRGB(Coord3D(i, posY2), ColorFromPalette(layerP.palette, i * 5 + 128 + millis() / 17, beatsin8(5, 55, 255, 0, i * 10 + 128)));
+      } else {  // draw line to prevent holes
+        layer->drawLine(i - 1, lastY1, i, posY1, ColorFromPalette(layerP.palette, i * 5 + millis() / 17, beatsin8(5, 55, 255, 0, i * 10)));
+        layer->drawLine(i - 1, lastY2, i, posY2, ColorFromPalette(layerP.palette, i * 5 + 128 + millis() / 17, beatsin8(5, 55, 255, 0, i * 10 + 128)));
+      }
+      lastY1 = posY1;
+      lastY2 = posY2;
+    }
+    layer->blur2d(blur);
+  }
+};  // DNA
+
+// Octopus inspired by WLED, Stepko and Sutaburosu and blazoncek
+// Idea from https://www.youtube.com/watch?v=HsA-6KIbgto&ab_channel=GreatScott%21 (https://editor.soulmatelights.com/gallery/671-octopus)
+class OctopusEffect : public Node {
+ public:
+  static const char* name() { return "Octopus"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🐙"; }
+
+  struct Map_t {
+    uint8_t angle;
+    uint8_t radius;
+  };
+
+  uint8_t speed = 16;
+  Coord3D offset = {128, 128, 1};
+  uint8_t legs = 4;
+  bool radialWave = false;
+
+  void setup() override {
+    addControl(speed, "speed", "slider", 1, 32);
+    addControl(offset, "offset", "coord3D", 0, 255, false);
+    addControl(legs, "legs", "slider", 1, 8);
+
+    addControl(radialWave, "radialWave", "checkbox");
+  }
+
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) {
+    // add your custom onUpdate code here
+    if (control["name"] == "offset") {
+      if (rMap) setRMap();
+    }
+  }
+
+  Coord3D prevLedSize;
+  Map_t* rMap = nullptr;
+  uint32_t step;
+
+  ~OctopusEffect() {
+    freeMB(rMap);
+
+    Node::~Node();
+  }
+
+  void setRMap() {
+    const uint8_t C_X = layer->size.x / 2 + (offset.x - 128) * layer->size.x / 255;
+    const uint8_t C_Y = layer->size.y / 2 + (offset.y - 128) * layer->size.y / 255;
+    Coord3D pos = {0, 0, 0};
+    const uint8_t mapp = 180 / max(layer->size.x, layer->size.y);
+    for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
+      for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
+        uint16_t indexV = layer->XYZUnModified(pos);
+        if (indexV < layer->size.x * layer->size.y) {                        // excluding UINT16_MAX from XY if out of bounds due to projection
+          rMap[indexV].angle = 40.7436f * atan2f(pos.y - C_Y, pos.x - C_X);  // avoid 128*atan2()/PI
+          rMap[indexV].radius = hypotf(pos.x - C_X, pos.y - C_Y) * mapp;     // thanks Sutaburosu
+        }
+      }
+    }
+  }
+
+  void onSizeChanged(const Coord3D& prevSize) override {
+    // freeMB(rMap);
+    Map_t* newAlloc = reallocMB<Map_t>(rMap, layer->size.x * layer->size.y);
+    if (!newAlloc) {
+      EXT_LOGE(ML_TAG, "allocate rMap failed");
+    } else {
+      rMap = newAlloc;
+      setRMap();
+    }
+  }
+
+  void loop() override {
+    if (rMap) {  // check if rMap allocation successful
+
+      step = millis() * speed / 25;  // sys.now/25 = 40 per second. speed / 32: 1-4 range ? (1-8 ??)
+      if (radialWave)
+        step = 3 * step / 4;  // 7/6 = 1.16 for RadialWave mode
+      else
+        step = step / 2;  // 1/2 for Octopus mode
+
+      Coord3D pos = {0, 0, 0};
+      for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
+        for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
+          uint16_t indexV = layer->XYZUnModified(pos);
+          if (indexV < layer->size.x * layer->size.y) {  // excluding UINT16_MAX from XY if out of bounds due to projection
+            byte angle = rMap[indexV].angle;
+            byte radius = rMap[indexV].radius;
+            uint16_t intensity;
+            if (radialWave)
+              intensity = sin8(step + sin8(step - radius) + angle * legs);  // RadialWave
+            else
+              intensity = sin8(sin8((angle * 4 - radius) / 4 + step / 2) + radius - step + angle * legs);  // octopus
+            intensity = intensity * intensity / 255;                                                       // add a bit of non-linearity for cleaner display
+            layer->setRGB(pos, ColorFromPalette(layerP.palette, step / 2 - radius, intensity));
+          }
+        }
+      }
+    }  // if (layer->effectData.success())
+  }
+
+};  // Octopus
+
+
+// Frizzles inspired by WLED, Stepko, Andrew Tuline, https://editor.soulmatelights.com/gallery/640-color-frizzles
+class FrizzlesEffect : public Node {
+ public:
+  static const char* name() { return "Frizzles"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🐙"; }
+
+  uint8_t bpm = 60;
+  uint8_t intensity = 128;
+  uint8_t blur = 128;
+
+  void setup() override {
+    addControl(bpm, "BPM", "slider");
+    addControl(intensity, "intensity", "slider");
+    addControl(blur, "blur", "slider");
+  }
+
+  void loop() override {
+    layer->fadeToBlackBy(16);
+
+    for (int i = 8; i > 0; i--) {
+      Coord3D pos = {0, 0, 0};
+      pos.x = beatsin8(bpm / 8 + i, 0, layer->size.x - 1);
+      pos.y = beatsin8(intensity / 8 - i, 0, layer->size.y - 1);
+      CRGB color = ColorFromPalette(layerP.palette, beatsin8(12, 0, 255));
+      layer->setRGB(pos, color);
+    }
+    layer->blur2d(blur);
+  }
+};  // Frizzles
+
+/*
+ * Exploding fireworks effect
+ * adapted from: http://www.anirama.com/1000leds/1d-fireworks/
+ * adapted for 2D WLED by blazoncek (Blaz Kristan (AKA blazoncek))
+ * simplified for StarLight by ewowi in Nov 24
+ */
+class FireworksEffect : public Node {
+ public:
+  static const char* name() { return "Fireworks"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🐙"; }
+
+  uint8_t gravityC = 128;
+  uint8_t firingSide = 128;
+  uint8_t numSparks = 128;
+
+  void setup() override {
+    layer->fadeToBlackBy(16);
+    addControl(gravityC, "gravity", "slider");
+    addControl(firingSide, "firingSide", "slider");
+    addControl(numSparks, "numSparks", "slider");
+    // PROGMEM = "Fireworks 1D@Gravity,Firing side;!,!;!;12;pal=11,ix=128";
+  }
+
+  float dying_gravity;
+  uint16_t aux0Flare;
+  Spark sparks[255];
+  Spark* flare = sparks;  // first spark is flare data
+
+  void loop() override {
+    const uint16_t cols = layer->size.x;
+    const uint16_t rows = layer->size.y;
+
+    // allocate segment data
+
+    // if (dataSize != aux1) { //reset to flare if sparks were reallocated (it may be good idea to reset segment if bounds change)
+    //   dying_gravity = 0.0f;
+    //   (aux0Flare) = 0;
+    //   aux1 = dataSize;
+    // }
+
+    layer->fadeToBlackBy(252);  // fade_out(252);
+
+    float gravity = -0.0004f - (gravityC / 800000.0f);  // m/s/s
+    gravity *= rows;
+
+    if (aux0Flare < 2) {     // FLARE
+      if (aux0Flare == 0) {  // init flare
+        flare->pos = 0;
+        flare->posX = random16(2, cols - 3);
+        uint16_t peakHeight = 75 + random8(180);  // 0-255
+        peakHeight = (peakHeight * (rows - 1)) >> 8;
+        flare->vel = sqrtf(-2.0f * gravity * peakHeight);
+        flare->velX = (random8(9) - 4) / 32.f;
+        flare->col = 255;  // brightness
+        aux0Flare = 1;
+      }
+
+      // launch
+      if (flare->vel > 12 * gravity) {
+        // flare
+        layer->setRGB(Coord3D(int(flare->posX), rows - uint16_t(flare->pos) - 1), CRGB(flare->col, flare->col, flare->col));
+        flare->pos += flare->vel;
+        flare->posX += flare->velX;
+        flare->pos = constrain(flare->pos, 0, rows - 1);
+        flare->posX = constrain(flare->posX, 0, cols - 1);
+        flare->vel += gravity;
+        flare->col -= 2;
+      } else {
+        aux0Flare = 2;  // ready to explode
+      }
+    } else if (aux0Flare < 4) {
+      /*
+       * Explode!
+       *
+       * Explosion happens where the flare ended.
+       * Size is proportional to the height.
+       */
+      uint8_t nSparks = flare->pos + random8(4);
+      // nSparks = std::max(nSparks, 4U);  // This is not a standard constrain; numSparks is not guaranteed to be at least 4
+      nSparks = std::min(nSparks, numSparks);
+
+      // initialize sparks
+      if (aux0Flare == 2) {
+        for (int i = 1; i < nSparks; i++) {
+          sparks[i].pos = flare->pos;
+          sparks[i].posX = flare->posX;
+          sparks[i].vel = (float(random16(20001)) / 10000.0f) - 0.9f;  // from -0.9 to 1.1
+          // sparks[i].vel *= rows<32 ? 0.5f : 1; // reduce velocity for smaller strips
+          sparks[i].velX = (float(random16(20001)) / 10000.0f) - 0.9f;  // from -0.9 to 1.1
+          // sparks[i].velX = (float(random16(10001)) / 10000.0f) - 0.5f; // from -0.5 to 0.5
+          sparks[i].col = 345;  // abs(sparks[i].vel * 750.0); // set colors before scaling velocity to keep them bright
+          // sparks[i].col = constrain(sparks[i].col, 0, 345);
+          sparks[i].colIndex = random8();
+          sparks[i].vel *= flare->pos / rows;    // proportional to height
+          sparks[i].velX *= flare->posX / cols;  // proportional to width
+          sparks[i].vel *= -gravity * 50;
+        }
+        // sparks[1].col = 345; // this will be our known spark
+        dying_gravity = gravity / 2;
+        aux0Flare = 3;
+      }
+
+      if (sparks[1].col > 4) {  //&& sparks[1].pos > 0) { // as long as our known spark is lit, work with all the sparks
+        for (int i = 1; i < nSparks; i++) {
+          sparks[i].pos += sparks[i].vel;
+          sparks[i].posX += sparks[i].velX;
+          sparks[i].vel += dying_gravity;
+          sparks[i].velX += dying_gravity;
+          if (sparks[i].col > 3) sparks[i].col -= 4;
+
+          if (sparks[i].pos > 0 && sparks[i].pos < rows) {
+            if (!(sparks[i].posX >= 0 && sparks[i].posX < cols)) continue;
+            uint16_t prog = sparks[i].col;
+            CRGB spColor = ColorFromPalette(layerP.palette, sparks[i].colIndex);
+            CRGB c = CRGB::Black;  // HeatColor(sparks[i].col);
+            if (prog > 300) {      // fade from white to spark color
+              c = CRGB(blend(spColor, CRGB::White, (prog - 300) * 5));
+            } else if (prog > 45) {  // fade from spark color to black
+              c = CRGB(blend(CRGB::Black, spColor, prog - 45));
+              uint8_t cooling = (300 - prog) >> 5;
+              c.g = qsub8(c.g, cooling);
+              c.b = qsub8(c.b, cooling * 2);
+            }
+            layer->setRGB(Coord3D(sparks[i].posX, rows - sparks[i].pos - 1), c);
+          }
+        }
+        layer->blur2d(16);
+        dying_gravity *= .8f;  // as sparks burn out they fall slower
+      } else {
+        aux0Flare = 6 + random8(10);  // wait for this many frames
+      }
+    } else {
+      aux0Flare--;
+      if (aux0Flare < 4) {
+        aux0Flare = 0;  // back to flare
+      }
+    }
+  }
+
+};  // FireworksEffect
+
+class FunkyPlankEffect : public Node {
+ public:
+  static const char* name() { return "Funky Plank"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "♫🐙💫"; }
+
+  uint8_t speed = 255;
+  uint8_t bands = NUM_GEQ_CHANNELS;
+
+  void setup() override {
+    layer->fill_solid(CRGB::Black);
+    addControl(speed, "speed", "slider");
+    addControl(bands, "bands", "slider", 1, NUM_GEQ_CHANNELS);
+  }
+
+  uint8_t aux0;
+
+  void loop() override {
+    uint8_t secondHand = (speed < 255) ? (micros() / (256 - speed) / 500 % 16) : 0;
+    if ((speed > 254) || (aux0 != secondHand)) {  // WLEDMM allow run run at full speed
+      aux0 = secondHand;
+
+      // evenly distribute see also GEQ/By ewowi/From AXI
+      float bandwidth = (float)layer->size.x / bands;
+      float remaining = bandwidth;
+      uint8_t band = 0;
+      for (int posx = 0; posx < layer->size.x; posx++) {
+        if (remaining < 1) {
+          band++;
+          remaining += bandwidth;
+        }  // increase remaining but keep the current remaining
+        remaining--;  // consume remaining
+
+        int hue = sharedData.bands[map(band, 0, bands - 1, 0, NUM_GEQ_CHANNELS - 1)];
+        int v = ::map(hue, 0, 255, 10, 255);
+        layer->setRGB(Coord3D(posx, 0), CHSV(hue, 255, v));
+      }
+
+      // drip down:
+      for (int i = (layer->size.y - 1); i > 0; i--) {
+        for (int j = (layer->size.x - 1); j >= 0; j--) {
+          layer->setRGB(Coord3D(j, i), layer->getRGB(Coord3D(j, i - 1)));
+        }
+      }
+    }
+  }
+};  // FunkyPlank
+
+// Best of both worlds from Palette and Spot effects. By Aircoookie
+class FlowEffect : public Node {
+ public:
+  static const char* name() { return "Flow"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "🐙"; }  // 🐙 means wled origin
+
+  uint8_t speed = 128;
+  uint8_t zonesUI = 128;
+
+  void setup() override {
+    addControl(speed, "speed", "slider");
+    addControl(zonesUI, "zones", "slider");
+  }
+
+  void loop() override {
+    uint16_t counter = 0;
+    if (speed != 0) {
+      counter = millis() * ((speed >> 2) + 1);
+      counter = counter >> 8;
+    }
+
+    uint16_t maxZones = layer->size.x / 6;  // only looks good if each zone has at least 6 LEDs
+    uint16_t zones = (zonesUI * maxZones) >> 8;
+    if (zones & 0x01) zones++;  // zones must be even
+    if (zones < 2) zones = 2;
+    uint16_t zoneLen = layer->size.x / zones;
+    uint16_t offset = (layer->size.x - zones * zoneLen) >> 1;
+
+    layer->fill_solid(ColorFromPalette(layerP.palette, -counter));
+
+    for (int z = 0; z < zones; z++) {
+      uint16_t pos = offset + z * zoneLen;
+      for (int i = 0; i < zoneLen; i++) {
+        uint8_t colorIndex = (i * 255 / zoneLen) - counter;
+        uint16_t led = (z & 0x01) ? i : (zoneLen - 1) - i;
+        layer->setRGB(pos + led, ColorFromPalette(layerP.palette, colorIndex));
+      }
+    }
+  }
+};
+
+static void mode_fireworks(VirtualLayer* layer, uint16_t aux0, uint16_t aux1, uint8_t speed, uint8_t intensity, bool useAudio = false) {
+  // fade_out(0);
+  layer->fadeToBlackBy(10);
+  // if (call == 0) {
+  //   aux0 = UINT16_MAX;
+  //   aux1 = UINT16_MAX;
+  // }
+  bool valid1 = (aux0 < layer->size.x);
+  bool valid2 = (aux1 < layer->size.x);
+  CRGB sv1 = 0, sv2 = 0;
+  if (valid1) sv1 = layer->getRGB(aux0);
+  if (valid2) sv2 = layer->getRGB(aux1);
+
+  // WLEDSR
+  uint8_t blurAmount = 255 - speed;
+  uint8_t my_intensity = 129 - intensity;
+  bool addPixels = true;  // false -> inhibit new pixels in silence
+  int soundColor = -1;    // -1 = random color; 0..255 = use as palette index
+
+  // if (useAudio) {
+  //   if (FFT_MajorPeak < 100)    { blurAmount = 254;} // big blobs
+  //   else {
+  //     if (FFT_MajorPeak > 3200) { blurAmount = 1;}   // small blobs
+  //     else {                                         // blur + color depends on major frequency
+  //       float musicIndex = logf(FFT_MajorPeak);            // log scaling of peak freq
+  //       blurAmount = mapff(musicIndex, 4.60, 8.08, 253, 1);// map to blur range (low freq = more blur)
+  //       blurAmount = constrain(blurAmount, 1, 253);        // remove possible "overshot" results
+  //       soundColor = mapff(musicIndex, 4.6, 8.08, 0, 255); // pick color from frequency
+  //   } }
+  //   if (sampleAgc <= 1.0) {      // silence -> no new pixels, just blur
+  //     valid1 = valid2 = false;   // do not copy last pixels
+  //     addPixels = false;
+  //     blurAmount = 128;
+  //   }
+  //   my_intensity = 129 - (speed >> 1); // dirty hack: use "speed" slider value intensity (no idea how to _disable_ the first slider, but show the second one)
+  //   if (samplePeak == 1) my_intensity -= my_intensity / 4;    // inclease intensity at peaks
+  //   if (samplePeak > 1) my_intensity = my_intensity / 2;      // double intensity at main peaks
+  // }
+  // // WLEDSR end
+
+  layer->blur1d(blurAmount);
+  if (valid1) layer->setRGB(aux0, sv1);
+  if (valid2) layer->setRGB(aux1, sv2);
+
+  if (addPixels) {  // WLEDSR
+    for (uint16_t i = 0; i < max(1, layer->size.x / 20); i++) {
+      if (random8(my_intensity) == 0) {
+        uint16_t index = random(layer->size.x);
+        if (soundColor < 0)
+          layer->setRGB(index, ColorFromPalette(layerP.palette, random8()));
+        else
+          layer->setRGB(index, ColorFromPalette(layerP.palette, soundColor + random8(24)));  // WLEDSR
+        aux1 = aux0;
+        aux0 = index;
+      }
+    }
+  }
+  // return FRAMETIME;
+}
+
+class RainEffect : public Node {
+ public:
+  static const char* name() { return "Rain"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "🐙"; }
+
+  uint8_t speed = 128;
+  uint8_t intensity = 64;
+
+  void setup() override {
+    addControl(speed, "speed", "slider", 1, 255);
+    addControl(intensity, "intensity", "slider", 1, 128);
+  }
+
+  uint16_t aux0;
+  uint16_t aux1;
+  uint16_t step;
+
+  void loop() override {
+    // if(call == 0) {
+    // layer->fill(BLACK);
+    // }
+    step += 1000 / 40;                                           // FRAMETIME;
+    if (step > (5U + (50U * (255U - speed)) / layer->size.x)) {  // SPEED_FORMULA_L) {
+      step = 1;
+      // if (strip.isMatrix) {
+      //   //uint32_t ctemp[layer->size.x];
+      //   //for (int i = 0; i<layer->size.x; i++) ctemp[i] = layer->getRGB(i, layer->size.y-1);
+      //   layer->move(6, 1, true);  // move all pixels down
+      //   //for (int i = 0; i<layer->size.x; i++) layer->setRGB(Coord3D(i, 0), ctemp[i]); // wrap around
+      //   aux0 = (aux0 % layer->size.x) + (aux0 / layer->size.x + 1) * layer->size.x;
+      //   aux1 = (aux1 % layer->size.x) + (aux1 / layer->size.x + 1) * layer->size.x;
+      // } else
+      {
+        // shift all leds left
+        CRGB ctemp = layer->getRGB(0);
+        for (int i = 0; i < layer->size.x - 1; i++) {
+          layer->setRGB(i, layer->getRGB(i + 1));
+        }
+        layer->setRGB(layer->size.x - 1, ctemp);  // wrap around
+        aux0++;                                   // increase spark index
+        aux1++;
+      }
+      if (aux0 == 0) aux0 = UINT16_MAX;                     // reset previous spark position
+      if (aux1 == 0) aux0 = UINT16_MAX;                     // reset previous spark position
+      if (aux0 >= layer->size.x * layer->size.y) aux0 = 0;  // ignore
+      if (aux1 >= layer->size.x * layer->size.y) aux1 = 0;
+    }
+    mode_fireworks(layer, aux0, aux1, speed, intensity);
+  }
+};  // RainEffect
+
+  #define maxNumDrops 6
+class DripEffect : public Node {
+ public:
+  static const char* name() { return "Drip"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "🐙💫"; }
+
+  uint8_t gravityUI = 128;
+  uint8_t drips = 4;
+  uint8_t swell = 4;
+  bool invert = false;
+
+  void setup() override {
+    addControl(gravityUI, "gravity", "slider", 1, 255);
+    addControl(drips, "drips", "slider", 1, 6);
+    addControl(swell, "swell", "slider", 1, 6);
+    addControl(invert, "invert", "checkbox");
+  }
+
+  // binding of loop persistent values (pointers)
+  Spark drops[maxNumDrops];
+
+  void loop() override {
+    // layer->fadeToBlackBy(90);
+    layer->fill_solid(CRGB::Black);
+
+    float gravity = -0.0005f - (gravityUI / 25000.0f);  // increased gravity (50000 to 25000)
+    gravity *= max(1, layer->size.x - 1);
+    int sourcedrop = 12;
+
+    for (int j = 0; j < drips; j++) {
+      if (drops[j].colIndex == 0) {                                             // init
+        drops[j].pos = layer->size.x - 1;                                       // start at end
+        drops[j].vel = 0;                                                       // speed
+        drops[j].col = sourcedrop;                                              // brightness
+        drops[j].colIndex = 1;                                                  // drop state (0 init, 1 forming, 2 falling, 5 bouncing)
+        drops[j].velX = (uint32_t)ColorFromPalette(layerP.palette, random8());  // random color
+      }
+      CRGB dropColor = drops[j].velX;
+
+      layer->setRGB(invert ? 0 : layer->size.x - 1, blend(CRGB::Black, dropColor, sourcedrop));  // water source
+      if (drops[j].colIndex == 1) {
+        if (drops[j].col > 255) drops[j].col = 255;
+        layer->setRGB(invert ? layer->size.x - 1 - drops[j].pos : drops[j].pos, blend(CRGB::Black, dropColor, drops[j].col));
+
+        drops[j].col += swell;  // swelling
+
+        if (random16() <= drops[j].col * swell * swell / 10) {  // random drop
+          drops[j].colIndex = 2;                                // fall
+          drops[j].col = 255;
+        }
+      }
+      if (drops[j].colIndex > 1) {  // falling
+        if (drops[j].pos > 0) {     // fall until end of segment
+          drops[j].pos += drops[j].vel;
+          if (drops[j].pos < 0) drops[j].pos = 0;
+          drops[j].vel += gravity;  // gravity is negative
+
+          for (int i = 1; i < 7 - drops[j].colIndex; i++) {                                                          // some minor math so we don't expand bouncing droplets
+            uint16_t pos = constrain(uint16_t(drops[j].pos) + i, 0, layer->size.x - 1);                              // this is BAD, returns a pos >= layer->size.x occasionally
+            layer->setRGB(invert ? layer->size.x - 1 - pos : pos, blend(CRGB::Black, dropColor, drops[j].col / i));  // spread pixel with fade while falling
+          }
+
+          if (drops[j].colIndex > 2) {  // during bounce, some water is on the floor
+            layer->setRGB(invert ? layer->size.x - 1 : 0, blend(dropColor, CRGB::Black, drops[j].col));
+          }
+        } else {                        // we hit bottom
+          if (drops[j].colIndex > 2) {  // already hit once, so back to forming
+            drops[j].colIndex = 0;
+            // drops[j].col = sourcedrop;
+
+          } else {
+            if (drops[j].colIndex == 2) {        // init bounce
+              drops[j].vel = -drops[j].vel / 4;  // reverse velocity with damping
+              drops[j].pos += drops[j].vel;
+            }
+            drops[j].col = sourcedrop * 2;
+            drops[j].colIndex = 5;  // bouncing
+          }
+        }
+      }
+    }
+  }
+};  // DripEffect
+
+class HeartBeatEffect : public Node {
+ public:
+  static const char* name() { return "HeartBeat"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "🐙💫♥"; }
+
+  uint8_t speed = 15;
+  uint8_t intensity = 128;
+
+  void setup() override {
+    addControl(speed, "speed", "slider", 0, 31);
+    addControl(intensity, "intensity", "slider");
+  }
+
+  bool isSecond;
+  uint16_t bri_lower;
+  unsigned long step;
+
+  void loop() override {
+    uint8_t bpm = 40 + (speed);
+    uint32_t msPerBeat = (60000L / bpm);
+    uint32_t secondBeat = (msPerBeat / 3);
+    unsigned long beatTimer = millis() - step;
+
+    bri_lower = bri_lower * 2042 / (2048 + intensity);
+
+    if ((beatTimer > secondBeat) && !isSecond) {  // time for the second beat?
+      bri_lower = UINT16_MAX;                     // 3/4 bri
+      isSecond = true;
+    }
+
+    if (beatTimer > msPerBeat) {  // time to reset the beat timer?
+      bri_lower = UINT16_MAX;     // full bri
+      isSecond = false;
+      step = millis();
+    }
+
+    for (int i = 0; i < layer->size.x; i++) {
+      layer->setRGB(i, ColorFromPalette(layerP.palette, ::map(i, 0, layer->size.x, 0, 255), 255 - (bri_lower >> 8)));
+    }
+  }
+};  // HeartBeatEffect
+
+class DJLightEffect : public Node {
+ public:
+  static const char* name() { return "DJLight"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "♫🐙"; }
+
+  uint8_t speed = 255;
+  bool candyFactory = true;
+  uint8_t fade = 4;
+
+  void setup() override {
+    layer->fill_solid(CRGB::Black);
+    addControl(speed, "speed", "slider");
+    addControl(candyFactory, "candyFactory", "checkbox");
+    addControl(fade, "fade", "slider", 0, 10);
+  }
+
+  uint8_t aux0;
+
+  void loop() override {
+    const int mid = layer->size.x / 2;
+
+    uint8_t secondHand = (speed < 255) ? (micros() / (256 - speed) / 500 % 16) : 0;
+    if ((speed > 254) || (aux0 != secondHand)) {  // WLEDMM allow run run at full speed
+      aux0 = secondHand;
+
+      CRGB color = CRGB(0, 0, 0);
+      // color = CRGB(sharedData.bands[NUM_GEQ_CHANNELS-1]/2, sharedData.bands[5]/2, sharedData.bands[0]/2);   // formula from 0.13.x (10Khz): R = 3880-5120, G=240-340, B=60-100
+      if (!candyFactory) {
+        color = CRGB(sharedData.bands[12] / 2, sharedData.bands[3] / 2, sharedData.bands[1] / 2);  // formula for 0.14.x  (22Khz): R = 3015-3704, G=216-301, B=86-129
+      } else {
+        // candy factory: an attempt to get more colors
+        color = CRGB(sharedData.bands[11] / 2 + sharedData.bands[12] / 4 + sharedData.bands[14] / 4,  // red  : 2412-3704 + 4479-7106
+                     sharedData.bands[4] / 2 + sharedData.bands[3] / 4,                               // green: 216-430
+                     sharedData.bands[0] / 4 + sharedData.bands[1] / 4 + sharedData.bands[2] / 4);    // blue:  46-216
+        if ((color.getLuma() < 96) && (sharedData.volume >= 1.5f)) {                                  // enhance "almost dark" pixels with yellow, based on not-yet-used channels
+          unsigned yello_g = (sharedData.bands[5] + sharedData.bands[6] + sharedData.bands[7]) / 3;
+          unsigned yello_r = (sharedData.bands[7] + sharedData.bands[8] + sharedData.bands[9] + sharedData.bands[10]) / 4;
+          color.green += (uint8_t)yello_g / 2;
+          color.red += (uint8_t)yello_r / 2;
+        }
+      }
+
+      if (sharedData.volume < 1.0f) color = CRGB(0, 0, 0);  // silence = black
+
+      // make colors less "pastel", by turning up color saturation in HSV space
+      if (color.getLuma() > 32) {  // don't change "dark" pixels
+        CHSV hsvColor = rgb2hsv_approximate(color);
+        hsvColor.v = constrain(hsvColor.v, 48, 204);  // 48 < brightness < 204
+        if (candyFactory)
+          hsvColor.s = max(hsvColor.s, (uint8_t)204);  // candy factory mode: strongly turn up color saturation (> 192)
+        else
+          hsvColor.s = max(hsvColor.s, (uint8_t)108);  // normal mode: turn up color saturation to avoid pastels
+        color = hsvColor;
+      }
+      // if (color.getLuma() > 12) color.maximizeBrightness();          // for testing
+
+      // layer->setRGB(mid, color.fadeToBlackBy(map(sharedData.bands[4], 0, 255, 255, 4)));     // 0.13.x  fade -> 180hz-260hz
+      uint8_t fadeVal = ::map(sharedData.bands[3], 0, 255, 255, 4);  // 0.14.x  fade -> 216hz-301hz
+      if (candyFactory) fadeVal = constrain(fadeVal, 0, 176);        // "candy factory" mode - avoid complete fade-out
+      layer->setRGB(mid, color.fadeToBlackBy(fadeVal));
+
+      for (int i = layer->size.x - 1; i > mid; i--) layer->setRGB(i, layer->getRGB(i - 1));  // move to the left
+      for (int i = 0; i < mid; i++) layer->setRGB(i, layer->getRGB(i + 1));                  // move to the right
+
+      layer->fadeToBlackBy(fade);
+    }
+  }
+};  // DJLight
 
 // /*
 //  * Spotlights moving back and forth that cast dancing shadows.
