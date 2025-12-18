@@ -823,7 +823,7 @@ class TetrixEffect : public Node {
         // if the speed is set to 1 this should take 5s and at 255 it should take 0.25s
         // as this is dependant on layer->size.x it should be taken into account and the fact that effect runs every FRAMETIME s
         int speed = speedControl ? speedControl : random8(1, 255);
-        speed = map(speed, 1, 255, 5000, 250);                                                     // time taken for full (layer->size.x) drop
+        speed = map(speed, 1, 255, 40000, 250);                                                    // time in ms taken for full (layer->size.x) drop
         drops[y].speed = float(layer->size.x * FRAMETIME) / float(speed);                          // set speed
         drops[y].pos = layer->size.x;                                                              // start at end of segment (no need to subtract 1)
         if (!oneColor) drops[y].col = random8(0, 15) << 4;                                         // limit color choices so there is enough HUE gap
@@ -1583,74 +1583,95 @@ class DripEffect : public Node {
   uint8_t gravityControl = 128;
   uint8_t drips = 4;
   uint8_t swell = 4;
-  bool invert = false;
 
   void setup() override {
     addControl(gravityControl, "gravity", "slider", 1, 255);
     addControl(drips, "drips", "slider", 1, 6);
     addControl(swell, "swell", "slider", 1, 6);
-    addControl(invert, "invert", "checkbox");
   }
 
-  // binding of loop persistent values (pointers)
-  Spark drops[maxNumDrops];
+  Spark (*drops)[maxNumDrops] = nullptr;  //[maxColumns][maxNumBalls];
+  uint16_t dropsSize = 0;
+
+  ~DripEffect() override {
+    freeMB(drops);
+    freeMB(colors);
+  }
+
+  void onSizeChanged(const Coord3D& prevSize) override {
+    Spark(*newAlloc)[maxNumDrops] = reallocMB<Spark[maxNumDrops]>(drops, layer->size.y);
+
+    if (newAlloc) {
+      drops = newAlloc;
+      dropsSize = layer->size.x;
+    } else {
+      EXT_LOGE(ML_TAG, "(re)allocate drops failed");
+    }
+  }
+
+  enum DropState { init = 0, forming = 1, falling = 2, bouncing = 5 };
 
   void loop() override {
     // layer->fadeToBlackBy(90);
     layer->fill_solid(CRGB::Black);
 
-    float gravity = -0.0005f - (gravityControl / 25000.0f);  // increased gravity (50000 to 25000)
+    float gravity = -0.0005f - (gravityControl / 50000.0f);  // increased gravity (50000 to 25000)
     gravity *= max(1, layer->size.x - 1);
+    gravity /= 100;  // don't know why it is falling so fast so slowed it down...
     int sourcedrop = 12;
 
-    for (int j = 0; j < drips; j++) {
-      if (drops[j].colIndex == 0) {                                             // init
-        drops[j].pos = layer->size.x - 1;                                       // start at end
-        drops[j].vel = 0;                                                       // speed
-        drops[j].col = sourcedrop;                                              // brightness
-        drops[j].colIndex = 1;                                                  // drop state (0 init, 1 forming, 2 falling, 5 bouncing)
-        drops[j].velX = (uint32_t)ColorFromPalette(layerP.palette, random8());  // random color
-      }
-      CRGB dropColor = drops[j].velX;
-
-      layer->setRGB(invert ? 0 : layer->size.x - 1, blend(CRGB::Black, dropColor, sourcedrop));  // water source
-      if (drops[j].colIndex == 1) {
-        if (drops[j].col > 255) drops[j].col = 255;
-        layer->setRGB(invert ? layer->size.x - 1 - drops[j].pos : drops[j].pos, blend(CRGB::Black, dropColor, drops[j].col));
-
-        drops[j].col += swell;  // swelling
-
-        if (random16() <= drops[j].col * swell * swell / 10) {  // random drop
-          drops[j].colIndex = 2;                                // fall
-          drops[j].col = 255;
+    for (int y = 0; y < dropsSize; y++) {
+      for (int j = 0; j < drips; j++) {
+        if (drops[y][j].colIndex == init) {                      // init
+          drops[y][j].pos = layer->size.x - 1;                   // start at end
+          drops[y][j].vel = 0;                                   // speed
+          drops[y][j].col = sourcedrop;                          // brightness
+          drops[y][j].colIndex = forming;                        // drop state
+          CRGB c = ColorFromPalette(layerP.palette, random8());  // random color by MoonModules, hacked into velX of type float
+          memcpy(&drops[y][j].velX, &c, sizeof(CRGB));
         }
-      }
-      if (drops[j].colIndex > 1) {  // falling
-        if (drops[j].pos > 0) {     // fall until end of segment
-          drops[j].pos += drops[j].vel;
-          if (drops[j].pos < 0) drops[j].pos = 0;
-          drops[j].vel += gravity;  // gravity is negative
+        CRGB dropColor;
+        memcpy(&dropColor, &drops[y][j].velX, sizeof(CRGB));  // hacked back
 
-          for (int i = 1; i < 7 - drops[j].colIndex; i++) {                                                          // some minor math so we don't expand bouncing droplets
-            uint16_t pos = constrain(uint16_t(drops[j].pos) + i, 0, layer->size.x - 1);                              // this is BAD, returns a pos >= layer->size.x occasionally
-            layer->setRGB(invert ? layer->size.x - 1 - pos : pos, blend(CRGB::Black, dropColor, drops[j].col / i));  // spread pixel with fade while falling
+        layer->setRGB(Coord3D(layer->size.x - 1, y), blend(CRGB::Black, dropColor, sourcedrop));  // water source
+        if (drops[y][j].colIndex == forming) {
+          if (drops[y][j].col > 255) drops[y][j].col = 255;
+          layer->setRGB(Coord3D(drops[y][j].pos, y), blend(CRGB::Black, dropColor, drops[y][j].col));
+
+          drops[y][j].col += swell;  // swelling
+
+          if (random16() <= drops[y][j].col * swell * swell / 10) {  // random drop
+            drops[y][j].colIndex = falling;
+            drops[y][j].col = 255;
           }
+        }
+        if (drops[y][j].colIndex > forming) {  // falling
+          if (drops[y][j].pos > 0) {           // fall until end of segment
+            drops[y][j].pos += drops[y][j].vel;
+            if (drops[y][j].pos < 0) drops[y][j].pos = 0;
+            drops[y][j].vel += gravity;  // gravity is negative
 
-          if (drops[j].colIndex > 2) {  // during bounce, some water is on the floor
-            layer->setRGB(invert ? layer->size.x - 1 : 0, blend(dropColor, CRGB::Black, drops[j].col));
-          }
-        } else {                        // we hit bottom
-          if (drops[j].colIndex > 2) {  // already hit once, so back to forming
-            drops[j].colIndex = 0;
-            // drops[j].col = sourcedrop;
-
-          } else {
-            if (drops[j].colIndex == 2) {        // init bounce
-              drops[j].vel = -drops[j].vel / 4;  // reverse velocity with damping
-              drops[j].pos += drops[j].vel;
+            for (int i = 1; i < 7 - drops[y][j].colIndex; i++) {                                   // some minor math so we don't expand bouncing droplets
+              uint16_t pos = constrain(uint16_t(drops[y][j].pos) + i, 0, layer->size.x - 1);       // this is BAD, returns a pos >= layer->size.x occasionally
+              layer->setRGB(Coord3D(pos, y), blend(CRGB::Black, dropColor, drops[y][j].col / i));  // spread pixel with fade while falling
             }
-            drops[j].col = sourcedrop * 2;
-            drops[j].colIndex = 5;  // bouncing
+
+            if (drops[y][j].colIndex > falling) {  // during bounce, some water is on the floor
+              layer->setRGB(Coord3D(0, y), blend(dropColor, CRGB::Black, drops[y][j].col));
+            }
+          } else {                                 // we hit bottom
+            if (drops[y][j].colIndex > falling) {  // already hit once, so back to forming
+              drops[y][j].colIndex = init;
+              drops[y][j].col = sourcedrop;
+
+            } else {
+              if (drops[y][j].colIndex == falling) {     // init bounce
+                drops[y][j].vel = -drops[y][j].vel / 4;  // reverse velocity with damping
+                drops[y][j].pos += drops[y][j].vel;
+              }
+              drops[y][j].col = sourcedrop * 2;
+              drops[y][j].colIndex = bouncing;
+            }
           }
         }
       }

@@ -399,11 +399,17 @@ class TransposeModifier : public Node {
   bool transposeXY = true;
   bool transposeXZ = false;
   bool transposeYZ = false;
-
+  bool inverseX = false;
+  bool inverseY = false;
+  bool inverseZ = false;
+  
   void setup() override {
     addControl(transposeXY, "XY", "checkbox");
     addControl(transposeXZ, "XZ", "checkbox");
     addControl(transposeYZ, "YZ", "checkbox");
+    addControl(inverseX, "inverse X", "checkbox");
+    addControl(inverseY, "inverse Y", "checkbox");
+    addControl(inverseZ, "inverse Z", "checkbox");
   }
 
   Coord3D modifierSize;
@@ -446,6 +452,10 @@ class TransposeModifier : public Node {
       position.y = position.z;
       position.z = temp;
     }
+    
+    if (inverseX) position.x = layer->size.x - position.x - 1;
+    if (inverseY) position.y = layer->size.y - position.y - 1;
+    if (inverseZ) position.z = layer->size.z - position.z - 1;
   }
 };  // Transpose
 
