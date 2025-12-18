@@ -176,7 +176,7 @@ class VirtualLayer {
   void addRGB(const Coord3D& position, const CRGB& color) { setRGB(position, getRGB(position) + color); }
 
   void blendColor(const uint16_t indexV, const CRGB& color, uint8_t blendAmount) { setRGB(indexV, blend(color, getRGB(indexV), blendAmount)); }
-  void blendColor(Coord3D& position, const CRGB& color, const uint8_t blendAmount) { blendColor(XYZ(position), color, blendAmount); }
+  void blendColor(Coord3D position, const CRGB& color, const uint8_t blendAmount) { blendColor(XYZ(position), color, blendAmount); }
 
   uint8_t getWhite(const uint16_t indexV) { return getLight<uint8_t>(indexV, layerP->lights.header.offsetWhite); }
   uint8_t getWhite(Coord3D pos) { return getWhite(XYZ(pos)); }
