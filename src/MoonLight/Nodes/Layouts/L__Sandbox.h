@@ -16,7 +16,7 @@
 // add documentation in /docs/moonlight/layouts.md
 class ExampleLayout : public Node {
  public:
-  static const char* name() { return "Example Layout"; }
+  static const char* name() { return "Example"; }
   static uint8_t dim() { return _3D; }          // dimensions supported
   static const char* tags() { return "🚥⏳"; }  // use emojis see https://moonmoduÍles.org/MoonLight/moonlight/overview/#emoji-coding, 🚥 for layout
 

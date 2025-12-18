@@ -234,7 +234,7 @@
 	{:else if property.type == 'coord3D'}
 		<input
 			type="number"
-			style="width: {String(property.max || 255).length * 2}ch"
+			style="width: {String(property.max || 255).length + 5}ch"
 			class="input invalid:border-error invalid:border-2"
 			min="0"
 			max="65536"
@@ -243,7 +243,7 @@
 		/>
 		<input
 			type="number"
-			style="width: {String(property.max || 255).length * 2}ch"
+			style="width: {String(property.max || 255).length + 5}ch"
 			class="input invalid:border-error invalid:border-2"
 			min="0"
 			max="65536"
@@ -252,7 +252,7 @@
 		/>
 		<input
 			type="number"
-			style="width: {String(property.max || 255).length * 2}ch"
+			style="width: {String(property.max || 255).length + 5}ch"
 			class="input invalid:border-error invalid:border-2"
 			min="0"
 			max="65536"

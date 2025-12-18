@@ -60,8 +60,8 @@ class ModuleEffects : public NodeManager {
     EXT_LOGV(ML_TAG, "");
     JsonObject control;  // state.data has one or more properties
     control = addControl(controls, "layer", "select");
-    control["default"] = 1;
-    uint8_t i = 1; //start with 1
+    control["default"] = 0;  // the first entry has index 0 and refers to Layer 1 (layer counting starts with 1)
+    uint8_t i = 1;           // start with 1
     for (VirtualLayer* layer : layerP.layers) {
       addControlValue(control, i);
       i++;
@@ -78,7 +78,9 @@ class ModuleEffects : public NodeManager {
 
     // MoonLight effects, Solid first then alphabetically
     addControlValue(control, getNameAndTags<SolidEffect>());
+    addControlValue(control, getNameAndTags<AudioRingsEffect>());
     addControlValue(control, getNameAndTags<LinesEffect>());
+    addControlValue(control, getNameAndTags<FireEffect>());
     addControlValue(control, getNameAndTags<FixedRectangleEffect>());
     addControlValue(control, getNameAndTags<ParticlesEffect>());
     addControlValue(control, getNameAndTags<PraxisEffect>());
@@ -86,16 +88,19 @@ class ModuleEffects : public NodeManager {
     addControlValue(control, getNameAndTags<MoonManEffect>());
   #endif
     addControlValue(control, getNameAndTags<FreqSawsEffect>());
-    addControlValue(control, getNameAndTags<RainbowEffect>());
+    addControlValue(control, getNameAndTags<MarioTestEffect>());
+    addControlValue(control, getNameAndTags<PixelMapEffect>());
     addControlValue(control, getNameAndTags<RandomEffect>());
+    addControlValue(control, getNameAndTags<RingRandomFlowEffect>());
     addControlValue(control, getNameAndTags<RipplesEffect>());
     addControlValue(control, getNameAndTags<RubiksCubeEffect>());
     addControlValue(control, getNameAndTags<ScrollingTextEffect>());
     addControlValue(control, getNameAndTags<SinusEffect>());
     addControlValue(control, getNameAndTags<SphereMoveEffect>());
-    addControlValue(control, getNameAndTags<StarFieldEffect>());
-    addControlValue(control, getNameAndTags<WaveEffect>());
     addControlValue(control, getNameAndTags<SpiralFireEffect>());
+    addControlValue(control, getNameAndTags<StarFieldEffect>());
+    addControlValue(control, getNameAndTags<VUMeterEffect>());
+    addControlValue(control, getNameAndTags<WaveEffect>());
 
     // MoonModules effects, alphabetically
     addControlValue(control, getNameAndTags<GameOfLifeEffect>());
@@ -107,13 +112,28 @@ class ModuleEffects : public NodeManager {
     addControlValue(control, getNameAndTags<BouncingBallsEffect>());
     addControlValue(control, getNameAndTags<BlurzEffect>());
     addControlValue(control, getNameAndTags<DistortionWavesEffect>());
+    addControlValue(control, getNameAndTags<DJLightEffect>());
+    addControlValue(control, getNameAndTags<DNAEffect>());
+    addControlValue(control, getNameAndTags<DripEffect>());
     addControlValue(control, getNameAndTags<FreqMatrixEffect>());
+    addControlValue(control, getNameAndTags<FireworksEffect>());
+    addControlValue(control, getNameAndTags<FlowEffect>());
+    addControlValue(control, getNameAndTags<FrizzlesEffect>());
+    addControlValue(control, getNameAndTags<FunkyPlankEffect>());
     addControlValue(control, getNameAndTags<GEQEffect>());
+    addControlValue(control, getNameAndTags<HeartBeatEffect>());
     addControlValue(control, getNameAndTags<LissajousEffect>());
     addControlValue(control, getNameAndTags<Noise2DEffect>());
     addControlValue(control, getNameAndTags<NoiseMeterEffect>());
+    addControlValue(control, getNameAndTags<OctopusEffect>());
+    addControlValue(control, getNameAndTags<PacManEffect>());
     addControlValue(control, getNameAndTags<PopCornEffect>());
+    addControlValue(control, getNameAndTags<RainEffect>());
+    addControlValue(control, getNameAndTags<TetrixEffect>());
     addControlValue(control, getNameAndTags<WaverlyEffect>());
+
+    // FastLED effects
+    addControlValue(control, getNameAndTags<RainbowEffect>());
 
     // Moving head effects, alphabetically
     addControlValue(control, getNameAndTags<AmbientMoveEffect>());
@@ -151,20 +171,32 @@ class ModuleEffects : public NodeManager {
     // MoonLight effects, Solid first then alphabetically
     if (equalAZaz09(name, SolidEffect::name()))
       node = allocMBObject<SolidEffect>();
+    else if (equalAZaz09(name, AudioRingsEffect::name()))
+      node = allocMBObject<AudioRingsEffect>();
+    else if (equalAZaz09(name, FireEffect::name()))
+      node = allocMBObject<FireEffect>();
     else if (equalAZaz09(name, FixedRectangleEffect::name()))
       node = allocMBObject<FixedRectangleEffect>();
     else if (equalAZaz09(name, FreqSawsEffect::name()))
       node = allocMBObject<FreqSawsEffect>();
     else if (equalAZaz09(name, LinesEffect::name()))
       node = allocMBObject<LinesEffect>();
+    else if (equalAZaz09(name, MarioTestEffect::name()))
+      node = allocMBObject<MarioTestEffect>();
   #if USE_M5UNIFIED
     else if (equalAZaz09(name, MoonManEffect::name()))
       node = allocMBObject<MoonManEffect>();
   #endif
+    else if (equalAZaz09(name, ParticlesEffect::name()))
+      node = allocMBObject<ParticlesEffect>();
     else if (equalAZaz09(name, PraxisEffect::name()))
       node = allocMBObject<PraxisEffect>();
+    else if (equalAZaz09(name, PixelMapEffect::name()))
+      node = allocMBObject<PixelMapEffect>();
     else if (equalAZaz09(name, RandomEffect::name()))
       node = allocMBObject<RandomEffect>();
+    else if (equalAZaz09(name, RingRandomFlowEffect::name()))
+      node = allocMBObject<RingRandomFlowEffect>();
     else if (equalAZaz09(name, RipplesEffect::name()))
       node = allocMBObject<RipplesEffect>();
     else if (equalAZaz09(name, RubiksCubeEffect::name()))
@@ -181,6 +213,8 @@ class ModuleEffects : public NodeManager {
       node = allocMBObject<WaveEffect>();
     else if (equalAZaz09(name, SpiralFireEffect::name()))
       node = allocMBObject<SpiralFireEffect>();
+    else if (equalAZaz09(name, VUMeterEffect::name()))
+      node = allocMBObject<VUMeterEffect>();
 
     // MoonModules effects, alphabetically
     else if (equalAZaz09(name, GameOfLifeEffect::name()))
@@ -199,24 +233,48 @@ class ModuleEffects : public NodeManager {
       node = allocMBObject<BlurzEffect>();
     else if (equalAZaz09(name, DistortionWavesEffect::name()))
       node = allocMBObject<DistortionWavesEffect>();
+    else if (equalAZaz09(name, DJLightEffect::name()))
+      node = allocMBObject<DJLightEffect>();
+    else if (equalAZaz09(name, DNAEffect::name()))
+      node = allocMBObject<DNAEffect>();
+    else if (equalAZaz09(name, DripEffect::name()))
+      node = allocMBObject<DripEffect>();
+    else if (equalAZaz09(name, FireworksEffect::name()))
+      node = allocMBObject<FireworksEffect>();
+    else if (equalAZaz09(name, FlowEffect::name()))
+      node = allocMBObject<FlowEffect>();
     else if (equalAZaz09(name, FreqMatrixEffect::name()))
       node = allocMBObject<FreqMatrixEffect>();
+    else if (equalAZaz09(name, FrizzlesEffect::name()))
+      node = allocMBObject<FrizzlesEffect>();
+    else if (equalAZaz09(name, FunkyPlankEffect::name()))
+      node = allocMBObject<FunkyPlankEffect>();
     else if (equalAZaz09(name, GEQEffect::name()))
       node = allocMBObject<GEQEffect>();
+    else if (equalAZaz09(name, HeartBeatEffect::name()))
+      node = allocMBObject<HeartBeatEffect>();
     else if (equalAZaz09(name, LissajousEffect::name()))
       node = allocMBObject<LissajousEffect>();
     else if (equalAZaz09(name, Noise2DEffect::name()))
       node = allocMBObject<Noise2DEffect>();
     else if (equalAZaz09(name, NoiseMeterEffect::name()))
       node = allocMBObject<NoiseMeterEffect>();
-    else if (equalAZaz09(name, ParticlesEffect::name()))
-      node = allocMBObject<ParticlesEffect>();
+    else if (equalAZaz09(name, OctopusEffect::name()))
+      node = allocMBObject<OctopusEffect>();
+    else if (equalAZaz09(name, PacManEffect::name()))
+      node = allocMBObject<PacManEffect>();
     else if (equalAZaz09(name, PopCornEffect::name()))
       node = allocMBObject<PopCornEffect>();
-    else if (equalAZaz09(name, RainbowEffect::name()))
-      node = allocMBObject<RainbowEffect>();
+    else if (equalAZaz09(name, RainEffect::name()))
+      node = allocMBObject<RainEffect>();
+    else if (equalAZaz09(name, TetrixEffect::name()))
+      node = allocMBObject<TetrixEffect>();
     else if (equalAZaz09(name, WaverlyEffect::name()))
       node = allocMBObject<WaverlyEffect>();
+
+    // FastLED
+    else if (equalAZaz09(name, RainbowEffect::name()))
+      node = allocMBObject<RainbowEffect>();
 
     // Moving head effects, alphabetically
 
@@ -268,8 +326,8 @@ class ModuleEffects : public NodeManager {
       node->constructor(layerP.layers[0], controls);  // pass the layer to the node
       // node->moduleControl = _moduleLightsControl;     // to access global lights control functions if needed
       // node->moduleIO = _moduleIO;                     // to get pin allocations
-      node->moduleNodes = (Module*)this;              // to request UI update
-      node->setup();                                  // run the setup of the effect
+      node->moduleNodes = (Module*)this;  // to request UI update
+      node->setup();                      // run the setup of the effect
       node->onSizeChanged(Coord3D());
       // layers[0]->nodes.reserve(index+1);
       if (index >= layerP.layers[0]->nodes.size())
