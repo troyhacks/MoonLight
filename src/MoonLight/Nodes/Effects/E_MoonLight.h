@@ -1329,8 +1329,6 @@ class SpiralFireEffect : public Node {
   }
 };
 
-const uint32_t colors[] = {0x000000, 0x100000, 0x300000, 0x600000, 0x800000, 0xA00000, 0xC02000, 0xC04000, 0xC06000, 0xC08000, 0x807080};
-
 // https://github.com/toggledbits/MatrixFireFast/blob/master/MatrixFireFast/MatrixFireFast.ino
 class FireEffect : public Node {
  public:
@@ -1338,7 +1336,8 @@ class FireEffect : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "💫"; }
 
-  uint8_t NCOLORS = std::size(colors);
+  const uint32_t colors[11] = {0x000000, 0x100000, 0x300000, 0x600000, 0x800000, 0xA00000, 0xC02000, 0xC04000, 0xC06000, 0xC08000, 0x807080};
+  const uint8_t NCOLORS = std::size(colors);
 
   void glow(int x, int y, int z, uint8_t flareDecay, bool usePalette) {
     int b = z * 10 / flareDecay + 1;

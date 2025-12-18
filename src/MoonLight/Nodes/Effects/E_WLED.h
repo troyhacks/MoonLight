@@ -26,15 +26,18 @@ class BouncingBallsEffect : public Node {
   }
 
   Ball (*balls)[maxNumBalls] = nullptr;  //[maxColumns][maxNumBalls];
+  uint16_t ballsSize = 0;
 
   ~BouncingBallsEffect() override { freeMB(balls); }
 
   void onSizeChanged(const Coord3D& prevSize) override {
-    freeMB(balls);
-    balls = allocMB<Ball[maxNumBalls]>(layer->size.y);
+    Ball(*newAlloc)[maxNumBalls] = reallocMB<Ball[maxNumBalls]>(balls, layer->size.y);
 
-    if (!balls) {
-      EXT_LOGE(ML_TAG, "allocate balls failed");
+    if (newAlloc) {
+      balls = newAlloc;
+      ballsSize = layer->size.x;
+    } else {
+      EXT_LOGE(ML_TAG, "(re)allocate balls failed");
     }
   }
 
@@ -53,7 +56,7 @@ class BouncingBallsEffect : public Node {
     //    for (size_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
     //  }
 
-    for (int y = 0; y < layer->size.y; y++) {
+    for (int y = 0; y < MIN(layer->size.y, ballsSize); y++) {
       for (size_t i = 0; i < MIN(numBalls, maxNumBalls); i++) {
         float timeSinceLastBounce = (time - balls[y][i].lastBounceTime) / ((255 - grav) / 64 + 1);
         float timeSec = timeSinceLastBounce / 1000.0f;
@@ -328,15 +331,18 @@ class GEQEffect : public Node {
     step = millis();
   }
 
-  uint16_t* previousBarHeight = nullptr;  // array
+  uint16_t* previousBarHeight = nullptr;
+  uint8_t previousBarHeightSize = 0;
 
   ~GEQEffect() { freeMB(previousBarHeight); }
 
   void onSizeChanged(const Coord3D& prevSize) override {
-    freeMB(previousBarHeight);
-    previousBarHeight = allocMB<uint16_t>(layer->size.x);
-    if (!previousBarHeight) {
-      EXT_LOGE(ML_TAG, "allocate previousBarHeight failed");
+    uint16_t* newAlloc = reallocMB<uint16_t>(previousBarHeight, layer->size.x);
+    if (newAlloc) {
+      previousBarHeight = newAlloc;
+      previousBarHeightSize = layer->size.x;
+    } else {
+      EXT_LOGE(ML_TAG, "(re)allocate previousBarHeight failed");
     }
   }
 
@@ -409,7 +415,7 @@ class GEQEffect : public Node {
         layer->setRGB(Coord3D(pos.x, layer->size.y - 1 - pos.y), ledColor);
       }
 
-      if (previousBarHeight) {
+      if (previousBarHeight && pos.x < previousBarHeightSize) {
         if (barHeight > previousBarHeight[pos.x]) previousBarHeight[pos.x] = barHeight;                                  // drive the peak up
         if ((ripple > 0) && (previousBarHeight[pos.x] > 0) && (previousBarHeight[pos.x] < layer->size.y))                // WLEDMM avoid "overshooting" into other segments
           layer->setRGB(Coord3D(pos.x, layer->size.y - previousBarHeight[pos.x]), (CRGB)CHSV(millis() / 50, 255, 255));  // take millis()/50 color for the time being
@@ -535,12 +541,12 @@ typedef struct PacManChars {
 class PacManEffect : public Node {
  public:
   static const char* name() { return "PacMan"; }
-  static uint8_t dim() { return _1D; } // it is a 1D effect, todo: 2D
+  static uint8_t dim() { return _1D; }  // it is a 1D effect, todo: 2D
   static const char* tags() { return "🔥🐙"; }
 
   // static const char _data_FX_MODE_PACMAN[] PROGMEM = "PacMan@Speed,# of PowerDots,Blink distance,Blur,# of Ghosts,Dots,Smear,Compact;;!;1;m12=0,sx=192,ix=64,c1=64,c2=0,c3=12,o1=1,o2=0";
   uint8_t speed = 192;
-  uint8_t numPowerDotsUI = 64;
+  uint8_t numPowerDotsControl = 64;
   uint8_t blinkDistance = 64;
   uint8_t blur = 0;
   uint8_t numGhosts = 4;
@@ -550,7 +556,7 @@ class PacManEffect : public Node {
 
   void setup() override {
     addControl(speed, "speed", "slider");
-    addControl(numPowerDotsUI, "#powerdots", "slider");
+    addControl(numPowerDotsControl, "#powerdots", "slider");
     addControl(blinkDistance, "blinkDistance", "slider", 20, 255);
     addControl(blur, "blur", "slider");
     addControl(numGhosts, "#ghosts", "slider", 2, 8);
@@ -583,16 +589,16 @@ class PacManEffect : public Node {
   const uint32_t ghostColors[4] = {CRGB::Red, PURPLEISH, CRGB::Cyan, ORANGEISH};
 
   void initializePacMan() {
-    numPowerDots = MIN(layer->nrOfLights / 10U, numPowerDotsUI);  // cap the max so packed state fits in 8 bits: ML: keep the nr visible in the UI
+    numPowerDots = MIN(layer->nrOfLights / 10U, numPowerDotsControl);  // cap the max so packed state fits in 8 bits: ML: keep the nr visible in the UI
 
-    EXT_LOGD(ML_TAG, "#l:%d #pd:%d #g:%d #pd:%d", layer->nrOfLights, numPowerDotsUI, numGhosts, numPowerDots);
+    EXT_LOGD(ML_TAG, "#l:%d #pd:%d #g:%d #pd:%d", layer->nrOfLights, numPowerDotsControl, numGhosts, numPowerDots);
 
     pacmancharacters_t* newAlloc = reallocMB<pacmancharacters_t>(character, numGhosts + numPowerDots + 1);  // +1 is the PacMan character
     if (newAlloc) {
       character = newAlloc;
       nrOfCharacters = numGhosts + numPowerDots + 1;
     } else {
-      EXT_LOGE(ML_TAG, "allocate character failed");  // keep old (if existed)
+      EXT_LOGE(ML_TAG, "(re)allocate character failed");  // keep old (if existed)
     }
 
     if (nrOfCharacters > 0) {
@@ -769,7 +775,7 @@ class TetrixEffect : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🔥🐙🎨"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, 🔥 for effect, 🎨 if palette used (recommended)
 
-  uint8_t speed = 0;  // 1 beat per second
+  uint8_t speedControl = 0;  // 1 beat per second
   uint8_t width = 0;
   bool oneColor = false;
   // static const char _data_FX_MODE_TETRIX[] PROGMEM = "Tetrix@!,Width,,,,One color;!,!;!;1.5d;sx=0,ix=0,pal=11,m12=1";  // WLEDMM 1.5d
@@ -777,7 +783,7 @@ class TetrixEffect : public Node {
   void setup() override {
     // controls will show in the UI
     // for different type of controls see other Nodes
-    addControl(speed, "speed", "slider");
+    addControl(speedControl, "speed", "slider");
     addControl(width, "width", "slider");
     addControl(oneColor, "oneColor", "checkbox");
   }
@@ -791,7 +797,7 @@ class TetrixEffect : public Node {
       drops = newAlloc;
       nrOfDrops = layer->size.y;
     } else {
-      EXT_LOGE(ML_TAG, "allocate character failed");  // keep old (if existed)
+      EXT_LOGE(ML_TAG, "(re)allocate drops failed");  // keep old (if existed)
     }
     for (int i = 0; i < nrOfDrops; i++) {
       drops[i].stack = 0;               // reset brick stack size
@@ -801,14 +807,6 @@ class TetrixEffect : public Node {
   }
 
   ~TetrixEffect() override { freeMB(drops); };
-
-  void onUpdate(const Char<20>& oldValue, const JsonObject& control) {
-    // add your custom onUpdate code here
-    if (control["name"] == "bpm") {
-      if (control["value"] == 0) {
-      }
-    }
-  }
 
   void loop() override {
     if (!drops) return;
@@ -823,14 +821,14 @@ class TetrixEffect : public Node {
       if (drops[y].step == 0) {  // init brick
         // speed calculation: a single brick should reach bottom of strip in X seconds
         // if the speed is set to 1 this should take 5s and at 255 it should take 0.25s
-        // as this is dependant on layer->nrOfLights it should be taken into account and the fact that effect runs every FRAMETIME s
-        int speed = speed ? speed : random8(1, 255);
-        speed = map(speed, 1, 255, 5000, 250);                                                         // time taken for full (layer->nrOfLights) drop
-        drops[y].speed = float(layer->nrOfLights * FRAMETIME) / float(speed);                          // set speed
-        drops[y].pos = layer->nrOfLights;                                                              // start at end of segment (no need to subtract 1)
-        if (!oneColor) drops[y].col = random8(0, 15) << 4;                                             // limit color choices so there is enough HUE gap
-        drops[y].step = 1;                                                                             // drop state (0 init, 1 forming, 2 falling)
-        drops[y].brick = (width ? (width >> 5) + 1 : random8(1, 5)) * (1 + (layer->nrOfLights >> 6));  // size of brick
+        // as this is dependant on layer->size.x it should be taken into account and the fact that effect runs every FRAMETIME s
+        int speed = speedControl ? speedControl : random8(1, 255);
+        speed = map(speed, 1, 255, 5000, 250);                                                     // time taken for full (layer->size.x) drop
+        drops[y].speed = float(layer->size.x * FRAMETIME) / float(speed);                          // set speed
+        drops[y].pos = layer->size.x;                                                              // start at end of segment (no need to subtract 1)
+        if (!oneColor) drops[y].col = random8(0, 15) << 4;                                         // limit color choices so there is enough HUE gap
+        drops[y].step = 1;                                                                         // drop state (0 init, 1 forming, 2 falling)
+        drops[y].brick = (width ? (width >> 5) + 1 : random8(1, 5)) * (1 + (layer->size.x >> 6));  // size of brick
       }
 
       if (drops[y].step == 1) {  // forming
@@ -842,15 +840,15 @@ class TetrixEffect : public Node {
       if (drops[y].step == 2) {               // falling
         if (drops[y].pos > drops[y].stack) {  // fall until top of stack
           drops[y].pos -= drops[y].speed;     // may add gravity as: speed += gravity
-          if (int(drops[y].pos) < int(drops[y].stack)) drops[y].pos = drops[y].stack;
-          for (int i = int(drops[y].pos); i < layer->nrOfLights; i++) {
-            CRGB col = i < int(drops[y].pos) + drops[y].brick ? ColorFromPalette(layerP.palette, drops[y].col) : CRGB::Black;
+          if (drops[y].pos < drops[y].stack) drops[y].pos = drops[y].stack;
+          for (int i = drops[y].pos; i < layer->size.x; i++) {
+            CRGB col = i < drops[y].pos + drops[y].brick ? ColorFromPalette(layerP.palette, drops[y].col) : CRGB::Black;
             layer->setRGB(Coord3D(i, y), col);
           }
-        } else {                                                                     // we hit bottom
-          drops[y].step = 0;                                                         // proceed with next brick, go back to init
-          drops[y].stack += drops[y].brick;                                          // increase the stack size
-          if (drops[y].stack >= layer->nrOfLights) drops[y].step = millis() + 2000;  // fade out stack
+        } else {                                                                 // we hit bottom
+          drops[y].step = 0;                                                     // proceed with next brick, go back to init
+          drops[y].stack += drops[y].brick;                                      // increase the stack size
+          if (drops[y].stack >= layer->size.x) drops[y].step = millis() + 2000;  // fade out stack
         }
       }
 
@@ -858,7 +856,7 @@ class TetrixEffect : public Node {
         drops[y].brick = 0;     // reset brick size (no more growing)
         if (drops[y].step > millis()) {
           // allow fading of virtual strip
-          for (int i = 0; i < layer->nrOfLights; i++) layer->blendColor(Coord3D(i, y), CRGB::Black, 25);  // 10% blend
+          for (int i = 0; i < layer->size.x; i++) layer->blendColor(Coord3D(i, y), CRGB::Black, 25);  // 10% blend
         } else {
           drops[y].stack = 0;               // reset brick stack size
           drops[y].step = 0;                // proceed with next brick
@@ -1137,6 +1135,7 @@ class OctopusEffect : public Node {
 
   Coord3D prevLedSize;
   Map_t* rMap = nullptr;
+  uint16_t rMapSize = 0;
   uint32_t step;
 
   ~OctopusEffect() { freeMB(rMap); }
@@ -1158,13 +1157,13 @@ class OctopusEffect : public Node {
   }
 
   void onSizeChanged(const Coord3D& prevSize) override {
-    // freeMB(rMap);
     Map_t* newAlloc = reallocMB<Map_t>(rMap, layer->size.x * layer->size.y);
-    if (!newAlloc) {
-      EXT_LOGE(ML_TAG, "allocate rMap failed");
-    } else {
+    if (newAlloc) {
       rMap = newAlloc;
+      rMapSize = layer->size.x * layer->size.y;
       setRMap();
+    } else {
+      EXT_LOGE(ML_TAG, "(re)allocate rMap failed");
     }
   }
 
@@ -1181,7 +1180,7 @@ class OctopusEffect : public Node {
       for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
         for (pos.y = 0; pos.y < layer->size.y; pos.y++) {
           uint16_t indexV = layer->XYZUnModified(pos);
-          if (indexV < layer->size.x * layer->size.y) {  // excluding UINT16_MAX from XY if out of bounds due to projection
+          if (indexV < rMapSize) {  // excluding UINT16_MAX from XY if out of bounds due to projection
             byte angle = rMap[indexV].angle;
             byte radius = rMap[indexV].radius;
             uint16_t intensity;
@@ -1428,11 +1427,11 @@ class FlowEffect : public Node {
   static const char* tags() { return "🐙"; }  // 🐙 means wled origin
 
   uint8_t speed = 128;
-  uint8_t zonesUI = 128;
+  uint8_t zonesControl = 128;
 
   void setup() override {
     addControl(speed, "speed", "slider");
-    addControl(zonesUI, "zones", "slider");
+    addControl(zonesControl, "zones", "slider");
   }
 
   void loop() override {
@@ -1443,7 +1442,7 @@ class FlowEffect : public Node {
     }
 
     uint16_t maxZones = layer->size.x / 6;  // only looks good if each zone has at least 6 LEDs
-    uint16_t zones = (zonesUI * maxZones) >> 8;
+    uint16_t zones = (zonesControl * maxZones) >> 8;
     if (zones & 0x01) zones++;  // zones must be even
     if (zones < 2) zones = 2;
     uint16_t zoneLen = layer->size.x / zones;
@@ -1581,13 +1580,13 @@ class DripEffect : public Node {
   static uint8_t dim() { return _1D; }
   static const char* tags() { return "🐙💫"; }
 
-  uint8_t gravityUI = 128;
+  uint8_t gravityControl = 128;
   uint8_t drips = 4;
   uint8_t swell = 4;
   bool invert = false;
 
   void setup() override {
-    addControl(gravityUI, "gravity", "slider", 1, 255);
+    addControl(gravityControl, "gravity", "slider", 1, 255);
     addControl(drips, "drips", "slider", 1, 6);
     addControl(swell, "swell", "slider", 1, 6);
     addControl(invert, "invert", "checkbox");
@@ -1600,7 +1599,7 @@ class DripEffect : public Node {
     // layer->fadeToBlackBy(90);
     layer->fill_solid(CRGB::Black);
 
-    float gravity = -0.0005f - (gravityUI / 25000.0f);  // increased gravity (50000 to 25000)
+    float gravity = -0.0005f - (gravityControl / 25000.0f);  // increased gravity (50000 to 25000)
     gravity *= max(1, layer->size.x - 1);
     int sourcedrop = 12;
 
