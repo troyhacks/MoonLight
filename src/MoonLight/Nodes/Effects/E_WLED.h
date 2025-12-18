@@ -1241,13 +1241,13 @@ class FireworksEffect : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🐙"; }
 
-  uint8_t gravityC = 128;
+  uint8_t gravityControl = 128;
   uint8_t firingSide = 128;
   uint8_t numSparks = 128;
 
   void setup() override {
     layer->fadeToBlackBy(16);
-    addControl(gravityC, "gravity", "slider");
+    addControl(gravityControl, "gravity", "slider");
     addControl(firingSide, "firingSide", "slider");
     addControl(numSparks, "numSparks", "slider");
     // PROGMEM = "Fireworks 1D@Gravity,Firing side;!,!;!;12;pal=11,ix=128";
@@ -1272,7 +1272,7 @@ class FireworksEffect : public Node {
 
     layer->fadeToBlackBy(252);  // fade_out(252);
 
-    float gravity = -0.0004f - (gravityC / 800000.0f);  // m/s/s
+    float gravity = -0.0004f - (gravityControl / 800000.0f);  // m/s/s
     gravity *= rows;
 
     if (aux0Flare < 2) {     // FLARE
@@ -1583,7 +1583,7 @@ class DripEffect : public Node {
   uint8_t gravityControl = 128;
   uint8_t drips = 4;
   uint8_t swell = 4;
-  uint8_t bounce = 128;
+  uint8_t bounce = 64;
 
   void setup() override {
     addControl(gravityControl, "gravity", "slider", 1, 255);
@@ -1616,12 +1616,11 @@ class DripEffect : public Node {
   enum DropState { init = 0, forming = 1, falling = 2, bouncing = 5 };
 
   void loop() override {
-    // layer->fadeToBlackBy(90);
-    layer->fill_solid(CRGB::Black);
+    layer->fadeToBlackBy(90);
 
-    float gravity = -0.0005f - (gravityControl / 50000.0f);  // increased gravity (50000 to 25000)
+    float gravity = -(gravityControl / 800000.0f);
+
     gravity *= max(1, layer->size.x - 1);
-    gravity /= 100;  // don't know why it is falling so fast so slowed it down...
     int sourcedrop = 12;
 
     for (int y = 0; y < dropsSize; y++) {
@@ -1655,8 +1654,10 @@ class DripEffect : public Node {
             if (drops[y][j].pos < 0) drops[y][j].pos = 0;
             drops[y][j].vel += gravity;  // gravity is negative
 
+            layer->setRGB(Coord3D(drops[y][j].pos, y), dropColor);  // needed for bouncing
+
             for (int i = 1; i < 7 - drops[y][j].colIndex; i++) {                                   // some minor math so we don't expand bouncing droplets
-              uint16_t pos = constrain(uint16_t(drops[y][j].pos) + i, 0, layer->size.x - 1);       // this is BAD, returns a pos >= layer->size.x occasionally
+              uint16_t pos = constrain(drops[y][j].pos + i, 0, layer->size.x - 1);                 // this is BAD, returns a pos >= layer->size.x occasionally
               layer->setRGB(Coord3D(pos, y), blend(CRGB::Black, dropColor, drops[y][j].col / i));  // spread pixel with fade while falling
             }
 
@@ -1665,15 +1666,11 @@ class DripEffect : public Node {
             }
           } else {                                 // we hit bottom, pos <= 0
             if (drops[y][j].colIndex > falling) {  // bouncing, already hit once, so back to forming
-              if (drops[y][j].pos <= 0) {
-                drops[y][j].colIndex = init;
-              }
+              drops[y][j].colIndex = init;
             } else {
-              if (drops[y][j].colIndex == falling) {       // init bounce
-                drops[y][j].vel = -drops[y][j].vel ;/// 4.0;  // reverse velocity with damping
-                // drops[y][j].vel = -drops[y][j].vel / (bounce / 64.0);  // reverse velocity with damping
+              if (drops[y][j].colIndex == falling) {                // init bounce
+                drops[y][j].vel = -drops[y][j].vel * bounce / 255;  // reverse velocity with damping
                 drops[y][j].pos += drops[y][j].vel;
-                if (drops[y][j].pos <= 1) drops[y][j].pos = 1;
               }
               drops[y][j].col = sourcedrop * 2;
               drops[y][j].colIndex = bouncing;
