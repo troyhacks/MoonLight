@@ -1583,27 +1583,31 @@ class DripEffect : public Node {
   uint8_t gravityControl = 128;
   uint8_t drips = 4;
   uint8_t swell = 4;
+  uint8_t bounce = 128;
 
   void setup() override {
     addControl(gravityControl, "gravity", "slider", 1, 255);
     addControl(drips, "drips", "slider", 1, 6);
     addControl(swell, "swell", "slider", 1, 6);
+    addControl(bounce, "bounce", "slider");
   }
 
   Spark (*drops)[maxNumDrops] = nullptr;  //[maxColumns][maxNumBalls];
   uint16_t dropsSize = 0;
 
-  ~DripEffect() override {
-    freeMB(drops);
-    freeMB(colors);
-  }
+  ~DripEffect() override { freeMB(drops); }
 
   void onSizeChanged(const Coord3D& prevSize) override {
     Spark(*newAlloc)[maxNumDrops] = reallocMB<Spark[maxNumDrops]>(drops, layer->size.y);
 
     if (newAlloc) {
       drops = newAlloc;
-      dropsSize = layer->size.x;
+      dropsSize = layer->size.y;
+      for (int y = 0; y < layer->size.y; y++) {
+        for (int j = 0; j < maxNumDrops; j++) {
+          drops[y][j].colIndex = init;  // Set to init so loop() will initialize properly
+        }
+      }
     } else {
       EXT_LOGE(ML_TAG, "(re)allocate drops failed");
     }
@@ -1646,7 +1650,7 @@ class DripEffect : public Node {
           }
         }
         if (drops[y][j].colIndex > forming) {  // falling
-          if (drops[y][j].pos > 0) {           // fall until end of segment
+          if (drops[y][j].pos > 0) {           // fall until end of layer
             drops[y][j].pos += drops[y][j].vel;
             if (drops[y][j].pos < 0) drops[y][j].pos = 0;
             drops[y][j].vel += gravity;  // gravity is negative
@@ -1659,15 +1663,17 @@ class DripEffect : public Node {
             if (drops[y][j].colIndex > falling) {  // during bounce, some water is on the floor
               layer->setRGB(Coord3D(0, y), blend(dropColor, CRGB::Black, drops[y][j].col));
             }
-          } else {                                 // we hit bottom
-            if (drops[y][j].colIndex > falling) {  // already hit once, so back to forming
-              drops[y][j].colIndex = init;
-              drops[y][j].col = sourcedrop;
-
+          } else {                                 // we hit bottom, pos <= 0
+            if (drops[y][j].colIndex > falling) {  // bouncing, already hit once, so back to forming
+              if (drops[y][j].pos <= 0) {
+                drops[y][j].colIndex = init;
+              }
             } else {
-              if (drops[y][j].colIndex == falling) {     // init bounce
-                drops[y][j].vel = -drops[y][j].vel / 4;  // reverse velocity with damping
+              if (drops[y][j].colIndex == falling) {       // init bounce
+                drops[y][j].vel = -drops[y][j].vel ;/// 4.0;  // reverse velocity with damping
+                // drops[y][j].vel = -drops[y][j].vel / (bounce / 64.0);  // reverse velocity with damping
                 drops[y][j].pos += drops[y][j].vel;
+                if (drops[y][j].pos <= 1) drops[y][j].pos = 1;
               }
               drops[y][j].col = sourcedrop * 2;
               drops[y][j].colIndex = bouncing;
