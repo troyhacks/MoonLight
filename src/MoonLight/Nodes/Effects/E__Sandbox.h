@@ -16,7 +16,7 @@
 // add documentation in /docs/moonlight/effects.md
 class ExampleEffect : public Node {
  public:
-  static const char* name() { return "Example Effect"; }
+  static const char* name() { return "Example"; }
   static uint8_t dim() { return _3D; }            // Dimensions supported _3D prefered, _2D or _1D can be used for first phase
   static const char* tags() { return "🔥🎨⏳"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, 🔥 for effect, 🎨 if palette used (recommended)
 
@@ -62,3 +62,16 @@ class ExampleEffect : public Node {
 };
 
 #endif
+
+// WLED conversion changes:
+//
+// controls: static const char _data_FX_MODE_PACMAN[] PROGMEM = "PacMan@Speed,# of PowerDots,Blink distance,Blur,# of Ghosts,Dots,Smear,Compact;;!;1;m12=0,sx=192,ix=64,c1=64,c2=0,c3=12,o1=1,o2=0"; -> addControl()
+// control mapping: unsigned numGhosts = map(nrOfghosts, 0, 31, 2, 8); -> change the range in addControl instead of mapping
+// SEGLEN: layer->nrOfLights
+// RED: CRGB::Red etc.
+// SEGMENT.intensity: use addControl class variables
+// SEGENV.aux0: -> class variable (change/extend name to make it semantic)
+// SEGENV.call== 0 -> move to setup()
+// SEGMENT. -> Layer->
+// FRAMETIME -> 1000 / 40 (for the time being)
+// SEGCOLOR(1) -> CRGB::Black (for the time being)

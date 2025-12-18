@@ -126,8 +126,10 @@ class ModuleEffects : public NodeManager {
     addControlValue(control, getNameAndTags<Noise2DEffect>());
     addControlValue(control, getNameAndTags<NoiseMeterEffect>());
     addControlValue(control, getNameAndTags<OctopusEffect>());
+    addControlValue(control, getNameAndTags<PacManEffect>());
     addControlValue(control, getNameAndTags<PopCornEffect>());
     addControlValue(control, getNameAndTags<RainEffect>());
+    addControlValue(control, getNameAndTags<TetrixEffect>());
     addControlValue(control, getNameAndTags<WaverlyEffect>());
 
     // FastLED effects
@@ -259,10 +261,14 @@ class ModuleEffects : public NodeManager {
       node = allocMBObject<NoiseMeterEffect>();
     else if (equalAZaz09(name, OctopusEffect::name()))
       node = allocMBObject<OctopusEffect>();
+    else if (equalAZaz09(name, PacManEffect::name()))
+      node = allocMBObject<PacManEffect>();
     else if (equalAZaz09(name, PopCornEffect::name()))
       node = allocMBObject<PopCornEffect>();
     else if (equalAZaz09(name, RainEffect::name()))
       node = allocMBObject<RainEffect>();
+    else if (equalAZaz09(name, TetrixEffect::name()))
+      node = allocMBObject<TetrixEffect>();
     else if (equalAZaz09(name, WaverlyEffect::name()))
       node = allocMBObject<WaverlyEffect>();
 

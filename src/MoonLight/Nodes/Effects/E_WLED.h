@@ -25,7 +25,6 @@ class BouncingBallsEffect : public Node {
     addControl(numBalls, "numBalls", "slider", 1, maxNumBalls);
   }
 
-  // binding of loop persistent values (pointers)
   Ball (*balls)[maxNumBalls] = nullptr;  //[maxColumns][maxNumBalls];
 
   ~BouncingBallsEffect() override { freeMB(balls); }
@@ -331,9 +330,7 @@ class GEQEffect : public Node {
 
   uint16_t* previousBarHeight = nullptr;  // array
 
-  ~GEQEffect() {
-    freeMB(previousBarHeight);
-  }
+  ~GEQEffect() { freeMB(previousBarHeight); }
 
   void onSizeChanged(const Coord3D& prevSize) override {
     freeMB(previousBarHeight);
@@ -513,6 +510,364 @@ class NoiseMeterEffect : public Node {
     aux1 += beatsin8(4, 0, 10);
   }
 };  // NoiseMeter
+
+/*
+/  Pac-Man by Bob Loeffler with help from @dedehai and @blazoncek
+*   speed slider is for speed.
+*   intensity slider is for selecting the number of power dots.
+*   custom1 slider is for selecting the LED where the ghosts will start blinking blue.
+*   custom2 slider is for blurring the LEDs in the segment.
+*   custom3 slider is for selecting the # of ghosts (between 2 and 8).
+*   check1 is for displaying White Dots that PacMan eats.  Enabled will show white dots.  Disabled will not show any white dots (all leds will be black).
+*   check2 is for Smear mode (enabled will smear/persist the LED colors, disabled will not).
+*   check3 is for the Compact Dots mode of displaying white dots.  Enabled will show white dots in every LED.  Disabled will show black LEDs between the white dots.
+*   aux1 is the main counter for timing.
+*/
+typedef struct PacManChars {
+  signed pos;
+  signed topPos;  // LED position of farthest PacMan has moved
+  uint32_t color;
+  bool direction;  // true = moving away from first LED
+  bool blue;       // used for ghosts only
+  bool eaten;      // used for power dots only
+} pacmancharacters_t;
+
+class PacManEffect : public Node {
+ public:
+  static const char* name() { return "PacMan"; }
+  static uint8_t dim() { return _1D; } // it is a 1D effect, todo: 2D
+  static const char* tags() { return "🔥🐙"; }
+
+  // static const char _data_FX_MODE_PACMAN[] PROGMEM = "PacMan@Speed,# of PowerDots,Blink distance,Blur,# of Ghosts,Dots,Smear,Compact;;!;1;m12=0,sx=192,ix=64,c1=64,c2=0,c3=12,o1=1,o2=0";
+  uint8_t speed = 192;
+  uint8_t numPowerDotsUI = 64;
+  uint8_t blinkDistance = 64;
+  uint8_t blur = 0;
+  uint8_t numGhosts = 4;
+  bool dots = true;
+  bool smearMode = false;
+  bool compact = false;
+
+  void setup() override {
+    addControl(speed, "speed", "slider");
+    addControl(numPowerDotsUI, "#powerdots", "slider");
+    addControl(blinkDistance, "blinkDistance", "slider", 20, 255);
+    addControl(blur, "blur", "slider");
+    addControl(numGhosts, "#ghosts", "slider", 2, 8);
+    addControl(dots, "dots", "checkbox");
+    addControl(smearMode, "smear", "checkbox");
+    addControl(compact, "compact", "checkbox");
+  }
+
+  pacmancharacters_t* character = nullptr;
+  uint8_t nrOfCharacters = 0;
+
+  ~PacManEffect() { freeMB(character); }
+
+  void onSizeChanged(const Coord3D& prevSize) override { initializePacMan(); }
+
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) {
+    if (control["name"] == "#powerdots" || control["name"] == "#ghosts") {
+      initializePacMan();
+    }
+  }
+
+  uint8_t aux1TimingCounter;
+  uint8_t numPowerDots;
+
+  const unsigned ORANGEYELLOW = 0xFFCC00;
+  const unsigned PURPLEISH = 0xB000B0;
+  const unsigned ORANGEISH = 0xFF8800;
+  const unsigned WHITEISH = 0x999999;
+  const unsigned PACMAN = 0;  // PacMan is character[0]
+  const uint32_t ghostColors[4] = {CRGB::Red, PURPLEISH, CRGB::Cyan, ORANGEISH};
+
+  void initializePacMan() {
+    numPowerDots = MIN(layer->nrOfLights / 10U, numPowerDotsUI);  // cap the max so packed state fits in 8 bits: ML: keep the nr visible in the UI
+
+    EXT_LOGD(ML_TAG, "#l:%d #pd:%d #g:%d #pd:%d", layer->nrOfLights, numPowerDotsUI, numGhosts, numPowerDots);
+
+    pacmancharacters_t* newAlloc = reallocMB<pacmancharacters_t>(character, numGhosts + numPowerDots + 1);  // +1 is the PacMan character
+    if (newAlloc) {
+      character = newAlloc;
+      nrOfCharacters = numGhosts + numPowerDots + 1;
+    } else {
+      EXT_LOGE(ML_TAG, "allocate character failed");  // keep old (if existed)
+    }
+
+    if (nrOfCharacters > 0) {
+      character[PACMAN].color = CRGB::Yellow;
+      character[PACMAN].pos = 0;
+      character[PACMAN].topPos = 0;
+      character[PACMAN].direction = true;
+      character[PACMAN].blue = false;
+    }
+
+    // Initialize ghosts with alternating colors
+    for (int i = 1; i <= MIN(numGhosts, nrOfCharacters); i++) {
+      character[i].color = ghostColors[(i - 1) % 4];
+      character[i].pos = -2 * (i + 1);
+      character[i].direction = true;
+      character[i].blue = false;
+    }
+
+    // Initialize power dots
+    for (int i = 0; i < numPowerDots; i++) {
+      if (i + numGhosts + 1 < nrOfCharacters) {
+        character[i + numGhosts + 1].color = ORANGEYELLOW;
+        character[i + numGhosts + 1].eaten = false;
+      }
+    }
+    if (numGhosts + 1 < nrOfCharacters) {
+      character[numGhosts + 1].pos = layer->nrOfLights - 1;  // Last power dot at end
+    }
+  }
+
+  unsigned long step = 0;
+
+  void loop() override {
+    if (layer->nrOfLights > 16 + (2 * numGhosts) && character) {
+      // Calculate when blue ghosts start blinking.
+      // On first call (or after settings change), `topPos` is not known yet, so fall back to the full segment length in that case.
+      int maxBlinkPos = character[PACMAN].topPos;  //(SEGENV.call == 0) ? (int)layer->nrOfLights - 1 :
+      if (maxBlinkPos < 20) maxBlinkPos = 20;
+      int startBlinkingGhostsLED = (layer->nrOfLights < 64) ? (int)layer->nrOfLights / 3 : map(blinkDistance, 20, 255, 20, maxBlinkPos);
+
+      if (millis() > step) {
+        step = millis();
+        aux1TimingCounter++;
+      }
+
+      // Clear background if not in smear mode
+      if (!smearMode) layer->fadeToBlackBy(255);
+
+      // Draw white dots in front of PacMan if option selected
+      if (dots) {
+        int step = compact ? 1 : 2;  // Compact or spaced dots
+        for (int i = layer->nrOfLights - 1; i > character[PACMAN].topPos; i -= step) {
+          layer->setRGB(i, WHITEISH);
+        }
+      }
+
+      // Update power dot positions dynamically
+      uint32_t everyXLeds = (((uint32_t)layer->nrOfLights - 10U) << 8) / numPowerDots;  // Fixed-point spacing for power dots: use 32-bit math to avoid overflow on long segments.
+      for (int i = 1; i < numPowerDots; i++) {
+        character[i + numGhosts + 1].pos = 10 + ((i * everyXLeds) >> 8);
+      }
+
+      // Blink power dots every 10 ticks
+      if (aux1TimingCounter % 10 == 0) {
+        uint32_t dotColor = (character[numGhosts + 1].color == ORANGEYELLOW) ? CRGB::Black : ORANGEYELLOW;
+        for (int i = 0; i < numPowerDots; i++) {
+          character[i + numGhosts + 1].color = dotColor;
+        }
+      }
+
+      // Blink blue ghosts when nearing start
+      if (aux1TimingCounter % 15 == 0 && character[1].blue && character[PACMAN].pos <= startBlinkingGhostsLED) {
+        uint32_t ghostColor = (character[1].color == CRGB::Blue) ? WHITEISH : CRGB::Blue;
+        for (int i = 1; i <= numGhosts; i++) {
+          character[i].color = ghostColor;
+        }
+      }
+
+      // Draw uneaten power dots
+      for (int i = 0; i < numPowerDots; i++) {
+        if (!character[i + numGhosts + 1].eaten && (unsigned)character[i + numGhosts + 1].pos < layer->nrOfLights) {
+          layer->setRGB(character[i + numGhosts + 1].pos, character[i + numGhosts + 1].color);
+        }
+      }
+
+      // Check if PacMan ate a power dot
+      for (int j = 0; j < numPowerDots; j++) {
+        auto& dot = character[j + numGhosts + 1];
+        if (character[PACMAN].pos == dot.pos && !dot.eaten) {
+          // Reverse all characters - PacMan now chases ghosts
+          for (int i = 0; i <= numGhosts; i++) {
+            character[i].direction = false;
+          }
+          // Turn ghosts blue
+          for (int i = 1; i <= numGhosts; i++) {
+            character[i].color = CRGB::Blue;
+            character[i].blue = true;
+          }
+          dot.eaten = true;
+          break;  // only one power dot per frame
+        }
+      }
+
+      // Reset when PacMan reaches start with blue ghosts
+      if (character[1].blue && character[PACMAN].pos <= 0) {
+        // Reverse direction back
+        for (int i = 0; i <= numGhosts; i++) {
+          character[i].direction = true;
+        }
+        // Reset ghost colors
+        for (int i = 1; i <= numGhosts; i++) {
+          character[i].color = ghostColors[(i - 1) % 4];
+          character[i].blue = false;
+        }
+        // Reset power dots if last one was eaten
+        if (character[numGhosts + 1].eaten) {
+          for (int i = 0; i < numPowerDots; i++) {
+            character[i + numGhosts + 1].eaten = false;
+          }
+          character[PACMAN].topPos = 0;  // set the top position of PacMan to LED 0 (beginning of the segment)
+        }
+      }
+
+      // Update and draw characters based on speed setting
+      bool updatePositions = (aux1TimingCounter % map(speed, 0, 255, 15, 1) == 0);
+
+      // update positions of characters if it's time to do so
+      if (updatePositions) {
+        character[PACMAN].pos += character[PACMAN].direction ? 1 : -1;
+        for (int i = 1; i <= numGhosts; i++) {
+          character[i].pos += character[i].direction ? 1 : -1;
+        }
+      }
+
+      // Draw PacMan
+      if ((unsigned)character[PACMAN].pos < layer->nrOfLights) {
+        layer->setRGB(character[PACMAN].pos, character[PACMAN].color);
+      }
+
+      // Draw ghosts
+      for (int i = 1; i <= numGhosts; i++) {
+        if ((unsigned)character[i].pos < layer->nrOfLights) {
+          layer->setRGB(character[i].pos, character[i].color);
+        }
+      }
+
+      // Track farthest position of PacMan
+      if (character[PACMAN].topPos < character[PACMAN].pos) {
+        character[PACMAN].topPos = character[PACMAN].pos;
+      }
+
+      layer->blur2d(blur >> 1);
+    }
+  }
+};
+
+/*
+ * Tetris or Stacking (falling bricks) Effect
+ * by Blaz Kristan (AKA blazoncek) (https://github.com/blazoncek, https://blaz.at/home)
+ */
+// 20 bytes
+typedef struct Tetris {
+  float pos;
+  float speed;
+  uint8_t col;     // color index
+  uint16_t brick;  // brick size in pixels
+  uint16_t stack;  // stack size in pixels
+  uint32_t step;   // 2D-fication of SEGENV.step (state)
+} tetris;
+
+class TetrixEffect : public Node {
+ public:
+  static const char* name() { return "Tetrix"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🔥🐙🎨"; }  // use emojis see https://moonmodules.org/MoonLight/moonlight/overview/#emoji-coding, 🔥 for effect, 🎨 if palette used (recommended)
+
+  uint8_t speed = 0;  // 1 beat per second
+  uint8_t width = 0;
+  bool oneColor = false;
+  // static const char _data_FX_MODE_TETRIX[] PROGMEM = "Tetrix@!,Width,,,,One color;!,!;!;1.5d;sx=0,ix=0,pal=11,m12=1";  // WLEDMM 1.5d
+
+  void setup() override {
+    // controls will show in the UI
+    // for different type of controls see other Nodes
+    addControl(speed, "speed", "slider");
+    addControl(width, "width", "slider");
+    addControl(oneColor, "oneColor", "checkbox");
+  }
+
+  Tetris* drops = nullptr;
+  uint16_t nrOfDrops = 0;
+
+  void onSizeChanged(const Coord3D& prevSize) override {
+    Tetris* newAlloc = reallocMB<Tetris>(drops, layer->size.y);
+    if (newAlloc) {
+      drops = newAlloc;
+      nrOfDrops = layer->size.y;
+    } else {
+      EXT_LOGE(ML_TAG, "allocate character failed");  // keep old (if existed)
+    }
+    for (int i = 0; i < nrOfDrops; i++) {
+      drops[i].stack = 0;               // reset brick stack size
+      drops[i].step = millis() + 2000;  // start by fading out strip
+      if (oneColor) drops[i].col = 0;   // use only one color from palette
+    }
+  }
+
+  ~TetrixEffect() override { freeMB(drops); };
+
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) {
+    // add your custom onUpdate code here
+    if (control["name"] == "bpm") {
+      if (control["value"] == 0) {
+      }
+    }
+  }
+
+  void loop() override {
+    if (!drops) return;
+
+    uint16_t strips = layer->size.y;  // allow running on virtual strips (columns in 2D segment)
+
+    // if (SEGENV.call == 0) layer->fill(SEGCOLOR(1));  // will fill entire segment (1D or 2D), then use drops[y].step = 0 below
+
+    const uint8_t FRAMETIME = 1000 / 40;
+
+    for (int y = 0; y < layer->size.y; y++) {
+      if (drops[y].step == 0) {  // init brick
+        // speed calculation: a single brick should reach bottom of strip in X seconds
+        // if the speed is set to 1 this should take 5s and at 255 it should take 0.25s
+        // as this is dependant on layer->nrOfLights it should be taken into account and the fact that effect runs every FRAMETIME s
+        int speed = speed ? speed : random8(1, 255);
+        speed = map(speed, 1, 255, 5000, 250);                                                         // time taken for full (layer->nrOfLights) drop
+        drops[y].speed = float(layer->nrOfLights * FRAMETIME) / float(speed);                          // set speed
+        drops[y].pos = layer->nrOfLights;                                                              // start at end of segment (no need to subtract 1)
+        if (!oneColor) drops[y].col = random8(0, 15) << 4;                                             // limit color choices so there is enough HUE gap
+        drops[y].step = 1;                                                                             // drop state (0 init, 1 forming, 2 falling)
+        drops[y].brick = (width ? (width >> 5) + 1 : random8(1, 5)) * (1 + (layer->nrOfLights >> 6));  // size of brick
+      }
+
+      if (drops[y].step == 1) {  // forming
+        if (random8() >> 6) {    // random drop
+          drops[y].step = 2;     // fall
+        }
+      }
+
+      if (drops[y].step == 2) {               // falling
+        if (drops[y].pos > drops[y].stack) {  // fall until top of stack
+          drops[y].pos -= drops[y].speed;     // may add gravity as: speed += gravity
+          if (int(drops[y].pos) < int(drops[y].stack)) drops[y].pos = drops[y].stack;
+          for (int i = int(drops[y].pos); i < layer->nrOfLights; i++) {
+            CRGB col = i < int(drops[y].pos) + drops[y].brick ? ColorFromPalette(layerP.palette, drops[y].col) : CRGB::Black;
+            layer->setRGB(Coord3D(i, y), col);
+          }
+        } else {                                                                     // we hit bottom
+          drops[y].step = 0;                                                         // proceed with next brick, go back to init
+          drops[y].stack += drops[y].brick;                                          // increase the stack size
+          if (drops[y].stack >= layer->nrOfLights) drops[y].step = millis() + 2000;  // fade out stack
+        }
+      }
+
+      if (drops[y].step > 2) {  // fade strip
+        drops[y].brick = 0;     // reset brick size (no more growing)
+        if (drops[y].step > millis()) {
+          // allow fading of virtual strip
+          for (int i = 0; i < layer->nrOfLights; i++) layer->blendColor(Coord3D(i, y), CRGB::Black, 25);  // 10% blend
+        } else {
+          drops[y].stack = 0;               // reset brick stack size
+          drops[y].step = 0;                // proceed with next brick
+          if (oneColor) drops[y].col += 8;  // gradually increase palette index
+        }
+      }
+    }
+  }
+};
 
 // each needs 19 bytes
 // Spark type is used for popcorn, fireworks, and drip
@@ -767,7 +1122,7 @@ class OctopusEffect : public Node {
 
   void setup() override {
     addControl(speed, "speed", "slider", 1, 32);
-    addControl(offset, "offset", "coord3D", 0, 100, false); // 0..100%
+    addControl(offset, "offset", "coord3D", 0, 100, false);  // 0..100%
     addControl(legs, "legs", "slider", 1, 8);
 
     addControl(radialWave, "radialWave", "checkbox");
@@ -784,9 +1139,7 @@ class OctopusEffect : public Node {
   Map_t* rMap = nullptr;
   uint32_t step;
 
-  ~OctopusEffect() {
-    freeMB(rMap);
-  }
+  ~OctopusEffect() { freeMB(rMap); }
 
   void setRMap() {
     const uint8_t C_X = layer->size.x / 2 + (offset.x - 50) * layer->size.x / 100;
@@ -845,7 +1198,6 @@ class OctopusEffect : public Node {
   }
 
 };  // Octopus
-
 
 // Frizzles inspired by WLED, Stepko, Andrew Tuline, https://editor.soulmatelights.com/gallery/640-color-frizzles
 class FrizzlesEffect : public Node {
@@ -1190,7 +1542,7 @@ class RainEffect : public Node {
 
   void loop() override {
     // if(call == 0) {
-    // layer->fill(BLACK);
+    // layer->fill(CRGB::Black);
     // }
     step += 1000 / 40;                                           // FRAMETIME;
     if (step > (5U + (50U * (255U - speed)) / layer->size.x)) {  // SPEED_FORMULA_L) {
@@ -1429,8 +1781,8 @@ class DJLightEffect : public Node {
 //  */
 // uint16_t mode_dancing_shadows(void)
 // {
-//   if (SEGLEN == 1) return mode_static();
-//   uint8_t numSpotlights = ::map(SEGMENT.intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
+//   if (layer->nrOfLights == 1) return mode_static();
+//   uint8_t numSpotlights = ::map(intensity, 0, 255, 2, SPOT_MAX_COUNT);  // 49 on 32 segment ESP32, 17 on 16 segment ESP8266
 //   bool initialize = aux0 != numSpotlights;
 //   aux0 = numSpotlights;
 
@@ -1439,9 +1791,9 @@ class DJLightEffect : public Node {
 //   Spotlight* spotlights = reinterpret_cast<Spotlight*>(SEGENV.data);
 //   if (call == 0) SEGENV.setUpLeds();   // WLEDMM use lossless getRGB()
 
-//   SEGMENT.fill(BLACK);
+//   layer->fill(CRGB::Black);
 
-//   unsigned long time = strip.now;
+//   unsigned long time = millis();
 //   bool respawn = false;
 
 //   for (size_t i = 0; i < numSpotlights; i++) {
@@ -1455,7 +1807,7 @@ class DJLightEffect : public Node {
 //         spotlights[i].lastUpdateTime = time;
 //       }
 
-//       respawn = (spotlights[i].speed > 0.0 && spotlights[i].position > (SEGLEN + 2))
+//       respawn = (spotlights[i].speed > 0.0 && spotlights[i].position > (layer->nrOfLights + 2))
 //              || (spotlights[i].speed < 0.0 && spotlights[i].position < -(spotlights[i].width + 2));
 //     }
 
@@ -1466,11 +1818,11 @@ class DJLightEffect : public Node {
 //       spotlights[i].speed = 1.0f/random8(4, 50);
 
 //       if (initialize) {
-//         spotlights[i].position = random16(SEGLEN);
+//         spotlights[i].position = random16(layer->nrOfLights);
 //         spotlights[i].speed *= random8(2) > 0 ? 1.0 : -1.0;
 //       } else {
 //         if (random8(2)) {
-//           spotlights[i].position = SEGLEN + spotlights[i].width;
+//           spotlights[i].position = layer->nrOfLights + spotlights[i].width;
 //           spotlights[i].speed *= -1.0f;
 //         }else {
 //           spotlights[i].position = -spotlights[i].width;
@@ -1481,59 +1833,59 @@ class DJLightEffect : public Node {
 //       spotlights[i].type = random8(SPOT_TYPES_COUNT);
 //     }
 
-//     uint32_t color = SEGMENT. ColorFromPalette(layer->layerP->palette, spotlights[i].colorIdx);
+//     uint32_t color = layer-> ColorFromPalette(layer->layerP->palette, spotlights[i].colorIdx);
 //     int start = spotlights[i].position;
 
 //     if (spotlights[i].width <= 1) {
-//       if (start >= 0 && start < SEGLEN) {
-//         SEGMENT.blendColor(start, color, 128);
+//       if (start >= 0 && start < layer->nrOfLights) {
+//         layer->blendColor(start, color, 128);
 //       }
 //     } else {
 //       switch (spotlights[i].type) {
 //         case SPOT_TYPE_SOLID:
 //           for (size_t j = 0; j < spotlights[i].width; j++) {
-//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
-//               SEGMENT.blendColor(start + j, color, 128);
+//             if ((start + j) >= 0 && (start + j) < layer->nrOfLights) {
+//               layer->blendColor(start + j, color, 128);
 //             }
 //           }
 //         break;
 
 //         case SPOT_TYPE_GRADIENT:
 //           for (size_t j = 0; j < spotlights[i].width; j++) {
-//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
-//               SEGMENT.blendColor(start + j, color, cubicwave8(map(j, 0, spotlights[i].width - 1, 0, 255)));
+//             if ((start + j) >= 0 && (start + j) < layer->nrOfLights) {
+//               layer->blendColor(start + j, color, cubicwave8(map(j, 0, spotlights[i].width - 1, 0, 255)));
 //             }
 //           }
 //         break;
 
 //         case SPOT_TYPE_2X_GRADIENT:
 //           for (size_t j = 0; j < spotlights[i].width; j++) {
-//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
-//               SEGMENT.blendColor(start + j, color, cubicwave8(2 * ::map(j, 0, spotlights[i].width - 1, 0, 255)));
+//             if ((start + j) >= 0 && (start + j) < layer->nrOfLights) {
+//               layer->blendColor(start + j, color, cubicwave8(2 * ::map(j, 0, spotlights[i].width - 1, 0, 255)));
 //             }
 //           }
 //         break;
 
 //         case SPOT_TYPE_2X_DOT:
 //           for (size_t j = 0; j < spotlights[i].width; j += 2) {
-//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
-//               SEGMENT.blendColor(start + j, color, 128);
+//             if ((start + j) >= 0 && (start + j) < layer->nrOfLights) {
+//               layer->blendColor(start + j, color, 128);
 //             }
 //           }
 //         break;
 
 //         case SPOT_TYPE_3X_DOT:
 //           for (size_t j = 0; j < spotlights[i].width; j += 3) {
-//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
-//               SEGMENT.blendColor(start + j, color, 128);
+//             if ((start + j) >= 0 && (start + j) < layer->nrOfLights) {
+//               layer->blendColor(start + j, color, 128);
 //             }
 //           }
 //         break;
 
 //         case SPOT_TYPE_4X_DOT:
 //           for (size_t j = 0; j < spotlights[i].width; j += 4) {
-//             if ((start + j) >= 0 && (start + j) < SEGLEN) {
-//               SEGMENT.blendColor(start + j, color, 128);
+//             if ((start + j) >= 0 && (start + j) < layer->nrOfLights) {
+//               layer->blendColor(start + j, color, 128);
 //             }
 //           }
 //         break;
@@ -1568,7 +1920,7 @@ class DJLightEffect : public Node {
 //   // Overall twinkle density.
 //   // 0 (NONE lit) to 8 (ALL lit at once).
 //   // Default is 5.
-//   uint8_t twinkleDensity = (SEGMENT.intensity >> 5) +1;
+//   uint8_t twinkleDensity = (intensity >> 5) +1;
 
 //   uint8_t bright = 0;
 //   if (((slowcycle8 & 0x0E)/2) < twinkleDensity) {
@@ -1640,14 +1992,14 @@ class DJLightEffect : public Node {
 
 //   uint8_t backgroundBrightness = bg.getAverageLight();
 
-//   for (int i = 0; i < SEGLEN; i++) {
+//   for (int i = 0; i < layer->nrOfLights; i++) {
 
 //     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
 //     uint16_t myclockoffset16= PRNG16; // use that number as clock offset
 //     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
 //     // use that number as clock speed adjustment factor (in 8ths, from 8/8ths to 23/8ths)
 //     uint8_t myspeedmultiplierQ5_3 =  ((((PRNG16 & 0xFF)>>4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
-//     uint32_t myclock30 = (uint32_t)((strip.now * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
+//     uint32_t myclock30 = (uint32_t)((millis() * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
 //     uint8_t  myunique8 = PRNG16 >> 8; // get 'salt' value for this pixel
 
 //     // We now have the adjusted 'clock' for this pixel, now we call
