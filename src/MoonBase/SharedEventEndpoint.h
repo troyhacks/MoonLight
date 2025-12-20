@@ -46,9 +46,6 @@ class SharedEventEndpoint {
 
  private:
   void syncState(Module* module, const String& originId, bool sync = false) {
-    // ADDED: Check if there are connected clients before creating JSON
-    if (!_socket->getConnectedClients()) return;
-
     JsonDocument doc;
 
     // CHANGED: Use JsonObject overload, not buffer

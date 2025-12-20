@@ -568,9 +568,9 @@ class FreqSawsEffect : public Node {
   static const char* tags() { return "🔥♫🎨🪚"; }
 
   uint8_t fade = 4;
-  uint8_t increaser = 255;
-  uint8_t decreaser = 255;
-  uint8_t bpmMax = 115;
+  uint8_t increaser = 211;
+  uint8_t decreaser = 18;
+  uint8_t bpmMax = 198;
   bool invert = false;
   bool keepOn = false;
   uint8_t method = 2;

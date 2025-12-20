@@ -37,7 +37,7 @@ class ModuleDevices : public Module {
 
     control = addControl(controls, "devices", "rows");
     control["filter"] = "";
-    control["crud"] = "rd";  // delete old devices
+    control["crud"] = "r";
     rows = control["n"].to<JsonArray>();
     {
       addControl(rows, "name", "mdnsName", 0, 32, true);
@@ -57,10 +57,10 @@ class ModuleDevices : public Module {
   }
 
   void loop10s() {
-    if (!_socket->getConnectedClients()) return;
     if (!WiFi.localIP() && !ETH.localIP()) return;
 
     if (!deviceUDPConnected) {
+      _state.data["devices"].to<JsonArray>();
       deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
       EXT_LOGD(ML_TAG, "deviceUDPConnected %d i:%d p:%d", deviceUDPConnected, deviceUDP.remoteIP()[3], deviceUDPPort);
     }
@@ -74,40 +74,46 @@ class ModuleDevices : public Module {
     // EXT_LOGD(ML_TAG, "updateDevices ...%d %s", ip[3], name);
     if (_state.data["devices"].isNull()) _state.data["devices"].to<JsonArray>();
 
+    JsonDocument doc;
+    doc.set(_state.data);  // copy
+    JsonArray devices = doc["devices"];
+
     JsonObject device = JsonObject();
 
-    for (JsonObject dev : _state.data["devices"].as<JsonArray>()) {
+    for (JsonObject dev : devices) {
       if (dev["ip"] == ip.toString()) {
         device = dev;
-        // EXT_LOGD(ML_TAG, "updated ...%d %s", ip[3], name);
+        EXT_LOGD(ML_TAG, "updated ...%d %s", ip[3], name);
       }
     }
     if (device.isNull()) {
-      device = _state.data["devices"].as<JsonArray>().add<JsonObject>();
+      device = devices.add<JsonObject>();
       EXT_LOGD(ML_TAG, "added ...%d %s", ip[3], name);
       device["ip"] = ip.toString();
     }
 
     device["name"] = name;           // name can change
-    device["time"] = time(nullptr);  // time will change
+    device["time"] = time(nullptr);  // time will change, triggering update
 
-    if (!_socket->getConnectedClients()) return;
+    if (!_socket->getConnectedClients()) return;  // no need to update if no clients
     if (!WiFi.localIP() && !ETH.localIP()) return;
 
     // sort in vector
-    std::vector<JsonObject> v;
-    for (JsonObject obj : _state.data["devices"].as<JsonArray>()) v.push_back(obj);
-    std::sort(v.begin(), v.end(), [](JsonObject a, JsonObject b) { return a["name"] < b["name"]; });
+    std::vector<JsonObject> devicesVector;
+    for (JsonObject device : devices) {
+      if (time(nullptr) - device["time"].as<time_t>() < 3600) devicesVector.push_back(device);  // max 1 hour
+    }
+    std::sort(devicesVector.begin(), devicesVector.end(), [](JsonObject a, JsonObject b) { return a["name"] < b["name"]; });
 
-    // send only the readonly values ...
+    // create sorted devices
+    JsonDocument doc2;
+    doc2["devices"].to<JsonArray>();
+    for (JsonObject device : devicesVector) {
+      doc2["devices"].add(device);
+    }
 
-    // add sorted to devices
-    JsonDocument devices;
-    devices["devices"].to<JsonArray>();
-    for (auto& obj : v) devices["devices"].add(obj);
-
-    JsonObject object = devices.as<JsonObject>();
-    update(object, ModuleState::update, _moduleName + "server");
+    JsonObject controls = doc2.as<JsonObject>();
+    update(controls, ModuleState::update, _moduleName + "server");
   }
 
   void readUDP() {
@@ -115,7 +121,8 @@ class ModuleDevices : public Module {
     if (packetSize > 0) {
       char buffer[packetSize];
       deviceUDP.read(buffer, packetSize);
-      // EXT_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer+6, packetSize);
+      // deviceUDP.clear();
+      EXT_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer + 6, packetSize);
 
       updateDevices(buffer + 6, deviceUDP.remoteIP());
     }

@@ -35,7 +35,7 @@
 	}, 1000);
 
 	onDestroy(() => {
-		console.log('FieldRenderer clearing interval');
+		// console.log('FieldRenderer clearing interval');
 		clearInterval(interval);
 	});
 
