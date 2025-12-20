@@ -73,7 +73,7 @@ Want to add a Driver to MoonLight, see [develop](../../develop/overview/). See a
 Receives Art-Net data from the network.
 
 * DDP: If unchecked, processes data in Art-Net format, if checked, process data in DDP format
-* Port: The port listening to for Art-Net, When using DDP change 4048 is the default port for DDP.
+* Port: The port listening for Art-Net. When using DDP, change to 4048 (the default port for DDP).
 * Universe Min-Max: Filters Universes (Art-Net only).
 * View: 
     * Select physical layer to directly store the received channels into the physical layer

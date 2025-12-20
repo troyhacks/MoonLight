@@ -811,7 +811,7 @@ class AntEffect : public Node {
 
   uint8_t antSpeed = 192;
   uint8_t nrOfAnts = MAX_ANTS / 2;
-  uint8_t antSizeControl = 32 / 255;
+  uint8_t antSizeControl = 8;
   uint8_t blur = 0;
   bool gatherFood = true;
   bool passByControl = true;
@@ -824,34 +824,15 @@ class AntEffect : public Node {
     addControl(blur, "blur", "slider");
     addControl(gatherFood, "gatherFood", "checkbox");
     addControl(passByControl, "passBy", "checkbox");
+
+    initAnts();
   }
 
-  Ant* ants = nullptr;
-  // uint16_t nrOfAnts = 0;
-
-  void onSizeChanged(const Coord3D& prevSize) override {
-    Ant* newAlloc = reallocMB<Ant>(ants, MAX_ANTS);
-    if (newAlloc) {
-      ants = newAlloc;
-      // nrOfAnts = MAX_ANTS;
-    } else {
-      EXT_LOGE(ML_TAG, "(re)allocate ants failed");  // keep old (if existed)
-    }
-  }
-
-  ~AntEffect() override { freeMB(ants); };
-
-  void onUpdate(const Char<20>& oldValue, const JsonObject& control) {
-    // add your custom onUpdate code here
-    if (control["name"] == "bpm") {
-      if (control["value"] == 0) {
-      }
-    }
-  }
+  Ant ants[MAX_ANTS];
 
   // Helper function to calculate ant color
   CRGB getAntColor(int antIndex, int numAnts, bool usePalette) {
-    // if (usePalette) 
+    // if (usePalette)
     return ColorFromPalette(layerP.palette, antIndex * 255 / numAnts);
     // Alternate between two colors for default palette
     // return (antIndex % 3 == 1) ? SEGCOLOR(0) : SEGCOLOR(2);
@@ -868,23 +849,22 @@ class AntEffect : public Node {
     }
   }
 
-    // Initialize ants on first call
+  // Initialize ants on first call
   void initAnts() {
-          int confusedAntIndex = random(0, numAnts);  // the first random ant to go backwards
+    int confusedAntIndex = random(0, numAnts);  // the first random ant to go backwards
 
-      for (int i = 0; i < MAX_ANTS; i++) {
-        ants[i].lastBumpUpdate = millis();
+    for (int i = 0; i < MAX_ANTS; i++) {
+      ants[i].lastBumpUpdate = millis();
 
-        // Random velocity
-        float velocity = VELOCITY_MIN + (VELOCITY_MAX - VELOCITY_MIN) * random16(1000, 5000) / 5000.0f;
-        // One random ant moves in opposite direction
-        ants[i].velocity = (i == confusedAntIndex) ? -velocity : velocity;
-        // Random starting position (0.0 to 1.0)
-        ants[i].position = random16(0, 10000) / 10000.0f;
-        // Ants don't have food yet
-        ants[i].hasFood = false;
-      }
-
+      // Random velocity
+      float velocity = VELOCITY_MIN + (VELOCITY_MAX - VELOCITY_MIN) * random16(1000, 5000) / 5000.0f;
+      // One random ant moves in opposite direction
+      ants[i].velocity = (i == confusedAntIndex) ? -velocity : velocity;
+      // Random starting position (0.0 to 1.0)
+      ants[i].position = random16(0, 10000) / 10000.0f;
+      // Ants don't have food yet
+      ants[i].hasFood = false;
+    }
   }
 
   unsigned numAnts;
@@ -958,7 +938,7 @@ class AntEffect : public Node {
       unsigned pixelPosition = roundf(newPosition * (layer->nrOfLights - 1));
 
       // Determine ant color
-      CRGB antColor = getAntColor(i, numAnts, true); //always use palette for now 
+      CRGB antColor = getAntColor(i, numAnts, true);  // always use palette for now
 
       // Render ant pixels
       for (int pixelOffset = 0; pixelOffset < antSize; pixelOffset++) {

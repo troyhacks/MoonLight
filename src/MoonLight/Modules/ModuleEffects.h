@@ -250,7 +250,7 @@ class ModuleEffects : public NodeManager {
     if (!node) node = checkAndAlloc<RippleYZModifier>(name);
 
   #if FT_LIVESCRIPT
-    else if (!node) {
+    if (!node) {
       LiveScriptNode* liveScriptNode = allocMBObject<LiveScriptNode>();
       liveScriptNode->animation = name;  // set the (file)name of the script
       node = liveScriptNode;
