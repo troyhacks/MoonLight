@@ -69,7 +69,7 @@ class ArtNetOutDriver : public DriverNode {
   };
 
   // loop variables:
-  IPAddress controllerIP;   // tbd: controllerIP also configurable from fixtures and Art-Net instead of pin output
+  IPAddress controllerIP;  // tbd: controllerIP also configurable from fixtures and Art-Net instead of pin output
   unsigned long lastMillis = millis();
   unsigned long wait;
   uint8_t packet_buffer[sizeof(ART_NET_HEADER) + 6 + ARTNET_CHANNELS_PER_PACKET];
@@ -165,8 +165,8 @@ class ArtNetOutDriver : public DriverNode {
           while (universe % universesPerOutput != 0) universe++;  // advance to next port
           processedOutputs++;
           if (processedOutputs >= nrOfOutputs) {
-            if (actualIPIndex < std::size(ipAddresses) - 1 && ipAddresses[actualIPIndex + 1] != UINT8_MAX) actualIPIndex++;  // advance to the next IP, if exists
-            processedOutputs = 0;                                                                                            // processedOutputs per IP
+            if (actualIPIndex + 1 < nrOfIPAddresses) actualIPIndex++;  // advance to the next IP, if exists
+            processedOutputs = 0;                                      // processedOutputs per IP
             universe = 0;
             controllerIP[3] = ipAddresses[actualIPIndex];  // assign the new IP address
           }

@@ -12,7 +12,7 @@ For each board the following presets are defined:
 
 * Modded: set when any pin differs from the selected board preset. Press off to return to the preset defaults.
 * Max Power in Watts: adjust the brightness to approach this max power, depending on the number of LEDs used. Default 10: 5V * 2A = 10W (so it runs fine on USB). Used by LED drivers, see [Drivers](../../moonlight/drivers/)
-* Switch1 and 2: If the board contains a jumper or pins have different functions, a custom switch can be set. Eg. select between Infrared and Ethernet. See boards below for details
+* Switch1 and 2: If the board contains a jumper or pins have different functions, a custom switch can be set. Eg. select between Infrared and Ethernet. If a switch is turned on or off, the board the modded status will not change. See boards below for details
 * Pins: Assign functionality to gpio pins. Other modules and nodes use the pin assignments made here.
     * GPIO = gpio_num;
     * Usage: See below

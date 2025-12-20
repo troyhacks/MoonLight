@@ -11,18 +11,13 @@
 
 #if FT_MOONLIGHT
 
-  #include <WiFiUdp.h>
-
 class ArtNetInDriver : public Node {
  public:
   static const char* name() { return "Art-Net In"; }
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️"; }
 
-  // Protocol Configuration
-  // uint16_t ARTNET_PORT = 6454;
-  // uint16_t DDP_PORT = 4048;
-  WiFiUDP artnetUdp;
+  NetworkUDP artnetUdp;
   uint8_t packetBuffer[1500];
 
   bool ddp = false;

@@ -24,7 +24,7 @@ struct UDPMessage {
 
 class ModuleDevices : public Module {
  public:
-  WiFiUDP deviceUDP;
+  NetworkUDP deviceUDP;
   uint16_t deviceUDPPort = 65506;
   bool deviceUDPConnected = false;
 
