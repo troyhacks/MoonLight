@@ -61,11 +61,14 @@ class ModuleEffects : public NodeManager {
     JsonObject control;  // state.data has one or more properties
     control = addControl(controls, "layer", "select");
     control["default"] = 0;  // the first entry has index 0 and refers to Layer 1 (layer counting starts with 1)
-    uint8_t i = 1;           // start with 1
+    uint8_t i = 1;           // start with one
     for (VirtualLayer* layer : layerP.layers) {
-      addControlValue(control, i);
+      Char<32> layerName;
+      layerName.format("Layer %d", i);
+      addControlValue(control, layerName.c_str());
       i++;
     }
+
     addControl(controls, "start", "coord3D", 0, UINT16_MAX, true);
     addControl(controls, "end", "coord3D", 0, UINT16_MAX, true);
     addControl(controls, "brightness", "slider", 0, UINT8_MAX, true);

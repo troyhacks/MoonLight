@@ -60,7 +60,6 @@ class ModuleDevices : public Module {
     if (!WiFi.localIP() && !ETH.localIP()) return;
 
     if (!deviceUDPConnected) {
-      _state.data["devices"].to<JsonArray>();
       deviceUDPConnected = deviceUDP.begin(deviceUDPPort);
       EXT_LOGD(ML_TAG, "deviceUDPConnected %d i:%d p:%d", deviceUDPConnected, deviceUDP.remoteIP()[3], deviceUDPPort);
     }
@@ -83,7 +82,7 @@ class ModuleDevices : public Module {
     for (JsonObject dev : devices) {
       if (dev["ip"] == ip.toString()) {
         device = dev;
-        EXT_LOGD(ML_TAG, "updated ...%d %s", ip[3], name);
+        // EXT_LOGD(ML_TAG, "updated ...%d %s", ip[3], name);
       }
     }
     if (device.isNull()) {
@@ -100,8 +99,8 @@ class ModuleDevices : public Module {
 
     // sort in vector
     std::vector<JsonObject> devicesVector;
-    for (JsonObject device : devices) {
-      if (time(nullptr) - device["time"].as<time_t>() < 3600) devicesVector.push_back(device);  // max 1 hour
+    for (JsonObject dev : devices) {
+      if (time(nullptr) - dev["time"].as<time_t>() < 86400) devicesVector.push_back(dev);  // max 1 day
     }
     std::sort(devicesVector.begin(), devicesVector.end(), [](JsonObject a, JsonObject b) { return a["name"] < b["name"]; });
 
@@ -118,11 +117,10 @@ class ModuleDevices : public Module {
 
   void readUDP() {
     size_t packetSize = deviceUDP.parsePacket();
-    if (packetSize > 0) {
+    if (packetSize >= sizeof(UDPMessage)) { // WLED has 44, MM has 38 ATM
       char buffer[packetSize];
       deviceUDP.read(buffer, packetSize);
-      // deviceUDP.clear();
-      EXT_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer + 6, packetSize);
+      // EXT_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer + 6, packetSize);
 
       updateDevices(buffer + 6, deviceUDP.remoteIP());
     }

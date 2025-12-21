@@ -47,8 +47,7 @@ function createTelemetry() {
 					rssi: { rssi: 0, ssid: data.ssid, disconnected: true, safeMode: data.safeMode, restartNeeded: data.restartNeeded, saveNeeded: data.saveNeeded, hostName: data.hostName } // 🌙  variables added
 				}));
 			}
-			if (data.hostName != '')
-				localStorage.setItem('telemetry.rssi.hostName', data.hostName);
+			localStorage.setItem('telemetry.rssi.hostName', data.hostName != "" ? data.hostName : 'MoonLight');
 		},
 		setBattery: (data: Battery) => {
 			update((telemetry_data) => ({

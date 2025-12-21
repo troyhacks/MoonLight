@@ -21,7 +21,7 @@ class ArtNetInDriver : public Node {
   uint8_t packetBuffer[1500];
 
   bool ddp = false;
-  uint8_t view = 1;  // virtual layer 1 by default
+  uint8_t view = 1;  // Physical is 0, virtual layer 0 (shown as 1) is 1 by default
   uint16_t port = 6454;
   uint16_t universeMin = 0;
   uint16_t universeMax = 32767;
