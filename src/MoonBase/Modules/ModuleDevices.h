@@ -117,7 +117,7 @@ class ModuleDevices : public Module {
 
   void readUDP() {
     size_t packetSize = deviceUDP.parsePacket();
-    if (packetSize >= sizeof(UDPMessage)) { // WLED has 44, MM has 38 ATM
+    if (packetSize >= sizeof(UDPMessage)) {  // WLED has 44, MM has 38 ATM
       char buffer[packetSize];
       deviceUDP.read(buffer, packetSize);
       // EXT_LOGD(ML_TAG, "UDP packet read from %d: %s (%d)", deviceUDP.remoteIP()[3], buffer + 6, packetSize);

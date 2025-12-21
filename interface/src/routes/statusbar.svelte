@@ -95,7 +95,7 @@
 			><Hamburger class="h-6 w-auto" /></label
 		>
 		<img src={logo} alt="Logo" class="h-12 w-12 lg:hidden" /> <!-- 🌙 -->
-		<span class="px-2 text-xl font-bold lg:text-2xl">{localStorage.getItem('telemetry.rssi.hostName')}</span> <!-- 🌙 -->
+		<span class="px-2 text-xl font-bold lg:text-2xl">{localStorage.getItem('telemetry.rssi.hostName') || 'MoonLight'}</span> <!-- 🌙 -->
 	</div>
 	<div class="indicator flex-none">
 		<UpdateIndicator />

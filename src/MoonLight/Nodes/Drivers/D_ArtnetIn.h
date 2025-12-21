@@ -123,7 +123,7 @@ class ArtNetInDriver : public Node {
 
           uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
-          int startPixel = (universe-universeMin) * (512 / layerP.lights.header.channelsPerLight);
+          int startPixel = (universe - universeMin) * (512 / layerP.lights.header.channelsPerLight);
           int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
           for (int i = 0; i < numPixels; i++) {
