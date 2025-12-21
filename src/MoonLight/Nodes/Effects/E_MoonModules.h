@@ -23,7 +23,7 @@ class GameOfLifeEffect : public Node {
   void placePentomino(uint8_t* futureCells, bool colorByAge) {
     uint8_t pattern[5][2] = {{1, 0}, {0, 1}, {1, 1}, {2, 1}, {2, 2}};  // R-pentomino
     if (!random8(5)) pattern[0][1] = 3;                                // 1/5 chance to use glider
-    CRGB color = ColorFromPalette(layer->layerP->palette, random8());
+    CRGB color = ColorFromPalette(layerP.palette, random8());
     for (int attempts = 0; attempts < 100; attempts++) {
       int x = random8(1, layer->size.x - 3);
       int y = random8(1, layer->size.y - 5);
@@ -140,7 +140,7 @@ class GameOfLifeEffect : public Node {
 
   void startNewGameOfLife() {
     // EXT_LOGD(ML_TAG, "startNewGameOfLife");
-    prevPalette = ColorFromPalette(layer->layerP->palette, 0);
+    prevPalette = ColorFromPalette(layerP.palette, 0);
     generation = 1;
     disablePause ? step = millis() : step = millis() + 1500;
 
@@ -158,7 +158,7 @@ class GameOfLifeEffect : public Node {
             int index = layer->XYZUnModified(Coord3D(x, y, z));
             setBitValue(cells, index, true);
             cellColors[index] = random8(1, 255);
-            layer->setRGB(Coord3D(x, y, z), colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, cellColors[index]));
+            layer->setRGB(Coord3D(x, y, z), colorByAge ? CRGB::Green : ColorFromPalette(layerP.palette, cellColors[index]));
             // layer->setRGB(Coord3D(x,y,z), bgColor); // Color set in redraw loop
           }
         }
@@ -208,7 +208,7 @@ class GameOfLifeEffect : public Node {
     }
 
     CRGB bgColor = CRGB(bgC.x, bgC.y, bgC.z);
-    CRGB color = ColorFromPalette(layer->layerP->palette, random8());  // Used if all parents died
+    CRGB color = ColorFromPalette(layerP.palette, random8());  // Used if all parents died
 
     int fadedBackground = 0;
     if (blur > 220 && !colorByAge) {  // Keep faded background if blur > 220
@@ -230,11 +230,11 @@ class GameOfLifeEffect : public Node {
             // Redraw alive if palette changed, spawn initial colors randomly, age alive cells while paused
             if (alive && recolor) {
               cellColors[cIndex] = random8(1, 255);
-              layer->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, cellColors[cIndex]));
+              layer->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layerP.palette, cellColors[cIndex]));
             } else if (alive && colorByAge && !generation)
               layer->blendColor(cLoc, CRGB::Red, 248);  // Age alive cells while paused
             else if (alive && cellColors[cIndex] != 0)
-              layer->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, cellColors[cIndex]));
+              layer->setRGB(cLoc, colorByAge ? CRGB::Green : ColorFromPalette(layerP.palette, cellColors[cIndex]));
             // Redraw dead if palette changed, blur paused game, fade on newgame
             // if      (!alive && (paletteChanged || disablePause)) layer->setRGB(cLoc, bgColor);   // Remove blended dead cells
             else if (!alive && blurDead)
@@ -297,7 +297,7 @@ class GameOfLifeEffect : public Node {
             uint8_t colorIndex = nColors[random8(colorCount)];
             if (random8(100) < mutation) colorIndex = random8();
             cellColors[cIndex] = colorIndex;
-            layer->setRGB(cPos, colorByAge ? CRGB::Green : ColorFromPalette(layer->layerP->palette, colorIndex));
+            layer->setRGB(cPos, colorByAge ? CRGB::Green : ColorFromPalette(layerP.palette, colorIndex));
           } else {
             // Blending, fade dead cells further causing blurring effect to moving cells
             if (!cellValue) {
@@ -310,7 +310,7 @@ class GameOfLifeEffect : public Node {
               if (colorByAge)
                 layer->blendColor(cPos, CRGB::Red, 248);
               else
-                layer->setRGB(cPos, ColorFromPalette(layer->layerP->palette, cellColors[cIndex]));
+                layer->setRGB(cPos, ColorFromPalette(layerP.palette, cellColors[cIndex]));
             }
           }
         }
@@ -403,7 +403,7 @@ class GEQ3DEffect : public Node {
 
     for (int i = 0; i <= split; i++) {  // paint right vertical faces and top - LEFT to RIGHT
       uint16_t colorIndex = ::map(cols / NUM_BANDS * i, 0, cols, 0, 256);
-      CRGB ledColor = ColorFromPalette(layer->layerP->palette, colorIndex);
+      CRGB ledColor = ColorFromPalette(layerP.palette, colorIndex);
       int linex = i * (cols / NUM_BANDS);
 
       if (heights[i] > 1) {
@@ -427,7 +427,7 @@ class GEQ3DEffect : public Node {
 
     for (int i = (NUM_BANDS - 1); i > split; i--) {  // paint left vertical faces and top - RIGHT to LEFT
       uint16_t colorIndex = ::map(cols / NUM_BANDS * i, 0, cols - 1, 0, 255);
-      CRGB ledColor = ColorFromPalette(layer->layerP->palette, colorIndex);
+      CRGB ledColor = ColorFromPalette(layerP.palette, colorIndex);
       int linex = i * (cols / NUM_BANDS);
       int pPos = max(0, linex + (cols / NUM_BANDS) - 1);
 
@@ -451,7 +451,7 @@ class GEQ3DEffect : public Node {
 
     for (int i = 0; i < NUM_BANDS; i++) {
       uint16_t colorIndex = ::map(cols / NUM_BANDS * i, 0, cols - 1, 0, 255);
-      CRGB ledColor = ColorFromPalette(layer->layerP->palette, colorIndex);
+      CRGB ledColor = ColorFromPalette(layerP.palette, colorIndex);
       int linex = i * (cols / NUM_BANDS);
       int pPos = linex + (cols / NUM_BANDS) - 1;
       int pPos1 = linex + (cols / NUM_BANDS);
@@ -553,9 +553,9 @@ class PaintBrushEffect : public Node {
       if (length > max(1, (int)minLength)) {
         CRGB color;
         if (color_chaos)
-          color = ColorFromPalette(layer->layerP->palette, i * 255 / numLines + ((aux0Hue) & 0xFF), 255);
+          color = ColorFromPalette(layerP.palette, i * 255 / numLines + ((aux0Hue) & 0xFF), 255);
         else
-          color = ColorFromPalette(layer->layerP->palette, ::map(i, 0, numLines, 0, 255), 255);
+          color = ColorFromPalette(layerP.palette, ::map(i, 0, numLines, 0, 255), 255);
         if (depth > 1)
           layer->drawLine3D(x1, y1, z1, x2, y2, z2, color, soft, length);  // no soft implemented in 3D yet
         else

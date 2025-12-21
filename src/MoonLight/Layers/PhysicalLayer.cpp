@@ -41,7 +41,7 @@ void PhysicalLayer::setup() {
   if (psramFound())
     lights.maxChannels = MIN(ESP.getPsramSize() / 2, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
   else
-    lights.maxChannels = 8192 * 3;  // esp32-d0: max 1024->2048->4096->8192 Leds ATM
+    lights.maxChannels = 4096 * 3;  // esp32-d0: max 1024->2048->4096 Leds ATM
 
   lights.channels = allocMB<uint8_t>(lights.maxChannels);
 

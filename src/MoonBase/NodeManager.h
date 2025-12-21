@@ -19,7 +19,7 @@
 
 class NodeManager : public Module {
  public:
-  Char<20> defaultNodeName;
+  Char<32> defaultNodeName;
 
  protected:
   PsychicHttpServer* _server;
@@ -79,6 +79,15 @@ class NodeManager : public Module {
 
   virtual Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const { return nullptr; }
 
+  template <typename T>
+  Node* checkAndAlloc(const char* name) const {
+    if (equalAZaz09(name, T::name())) {
+      EXT_LOGD(ML_TAG, "Allocate %s", name);
+      return allocMBObject<T>();
+    } else
+      return nullptr;
+  }
+
   // define the data model
   void setupDefinition(const JsonArray& controls) override {
     EXT_LOGV(ML_TAG, "");
@@ -90,7 +99,6 @@ class NodeManager : public Module {
     {
       control = addControl(rows, "name", "selectFile");
       control["default"] = defaultNodeName.c_str();
-      // values = control["values"].to<JsonArray>();
       addNodes(control);
 
       control = addControl(rows, "on", "checkbox");
@@ -136,7 +144,7 @@ class NodeManager : public Module {
             nodeState.remove("controls");  // remove the controls from the nodeState
           }
 
-          // migration 20251204
+          // Migration 20251204: this is optional as we accept data updates from legacy driver names (migration is mandatory for changes in the data definitions)
           if (contains(updatedItem.value.as<const char*>(), "Physical Driver")) {
             EXT_LOGD(ML_TAG, "update [%s] to ...", updatedItem.value.as<const char*>());
             nodeState["name"] = getNameAndTags<ParallelLEDDriver>();  // set to current combination of name and tags

@@ -78,7 +78,7 @@ class BouncingBallsEffect : public Node {
         }
 
         // uint32_t color = SEGCOLOR(0);
-        // if (layer->layerP->palette) {
+        // if (layerP.palette) {
         //   color = layer->color_wheel(i*(256/MAX(numBalls, 8)));
         // }
         // else if (hasCol2) {
@@ -87,7 +87,7 @@ class BouncingBallsEffect : public Node {
 
         uint8_t pos = roundf(balls[y][i].height * (layer->size.x - 1));
 
-        CRGB color = ColorFromPalette(layer->layerP->palette, i * (256 / max(numBalls, (uint8_t)8)));  // error: no matching function for call to 'max(uint8_t&, int)'
+        CRGB color = ColorFromPalette(layerP.palette, i * (256 / max(numBalls, (uint8_t)8)));  // error: no matching function for call to 'max(uint8_t&, int)'
 
         layer->setRGB(Coord3D(pos, y), color);
         // if (layer->size.x<32) layer->setRGB(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
@@ -158,10 +158,10 @@ class BlurzEffect : public Node {
 
     if (layer->size.x * layer->size.y * layer->size.z < 2) segLoc = 0;                                                       // WLEDMM just to be sure
     unsigned pixColor = (2 * sharedData.bands[freqBand] * 240) / max(1, layer->size.x * layer->size.y * layer->size.z - 1);  // WLEDMM avoid uint8 overflow, and preserve pixel parameters for redraw
-    unsigned pixIntensity = min((unsigned)(2.0f * sharedData.bands[freqBand]), 255U);
+    unsigned pixIntensity = MIN((unsigned)(2.0f * sharedData.bands[freqBand]), 255U);
 
     if (sharedData.volume > 1.0f) {
-      layer->setRGB(segLoc, ColorFromPalette(layer->layerP->palette, pixColor));
+      layer->setRGB(segLoc, ColorFromPalette(layerP.palette, pixColor));
       step = layer->getRGB(segLoc);  // remember last color
       aux1 = segLoc;                 // remember last position
 
@@ -221,9 +221,9 @@ class DistortionWavesEffect : public Node {
         uint8_t valueG = gdistort + w * (a2 - (((xoffs - cx1) * (xoffs - cx1) + (yoffs - cy1) * (yoffs - cy1)) >> 7));
         uint8_t valueB = bdistort + w * (a3 - (((xoffs - cx2) * (xoffs - cx2) + (yoffs - cy2) * (yoffs - cy2)) >> 7));
 
-        valueR = layer->layerP->gamma8(cos8(valueR));
-        valueG = layer->layerP->gamma8(cos8(valueG));
-        valueB = layer->layerP->gamma8(cos8(valueB));
+        valueR = layerP.gamma8(cos8(valueR));
+        valueG = layerP.gamma8(cos8(valueG));
+        valueB = layerP.gamma8(cos8(valueB));
 
         layer->setRGB(pos, CRGB(valueR, valueG, valueB));
       }
@@ -410,7 +410,7 @@ class GEQEffect : public Node {
         if (colorBars)  // color_vertical / color bars toggle
           colorIndex = ::map(pos.y, 0, layer->size.y, 0, 256);
 
-        ledColor = ColorFromPalette(layer->layerP->palette, (uint8_t)colorIndex);
+        ledColor = ColorFromPalette(layerP.palette, (uint8_t)colorIndex);
 
         layer->setRGB(Coord3D(pos.x, layer->size.y - 1 - pos.y), ledColor);
       }
@@ -452,7 +452,7 @@ class LissajousEffect : public Node {
       locn.y = cos8(phase / 2 + i * 2);
       locn.x = (layer->size.x < 2) ? 1 : (::map(2 * locn.x, 0, 511, 0, 2 * (layer->size.x - 1)) + 1) / 2;  // softhack007: "*2 +1" for proper rounding
       locn.y = (layer->size.y < 2) ? 1 : (::map(2 * locn.y, 0, 511, 0, 2 * (layer->size.y - 1)) + 1) / 2;  // "layer->size.y > 2" is needed to avoid div/0 in ::map()
-      layer->setRGB(locn, ColorFromPalette(layer->layerP->palette, millis() / 100 + i, 255));
+      layer->setRGB(locn, ColorFromPalette(layerP.palette, millis() / 100 + i, 255));
     }
   }
 };
@@ -475,7 +475,7 @@ class Noise2DEffect : public Node {
     for (int y = 0; y < layer->size.y; y++) {
       for (int x = 0; x < layer->size.x; x++) {
         uint8_t pixelHue8 = inoise8(x * scale, y * scale, millis() / (16 - speed));
-        layer->setRGB(Coord3D(x, y), ColorFromPalette(layer->layerP->palette, pixelHue8));
+        layer->setRGB(Coord3D(x, y), ColorFromPalette(layerP.palette, pixelHue8));
       }
     }
   }
@@ -756,6 +756,207 @@ class PacManEffect : public Node {
 };
 
 /*
+/  Ants (created by making modifications to the Rolling Balls code) - Bob Loeffler 2025
+*   First slider is for the ants' speed.
+*   Second slider is for the # of ants.
+*   Third slider is for the Ants' size.
+*   Fourth slider (custom2) is for blurring the LEDs in the segment.
+*   Checkbox1 is for Gathering food (enabled if you want the ants to gather food, disabled if they are just walking).
+*     We will switch directions when they get to the beginning or end of the segment when gathering food.
+*     When gathering food, the Pass By option will automatically be enabled so they can drop off their food easier (and look for more food).
+*   Checkbox2 is for Overlay mode (enabled is Overlay, disabled is no overlay)
+*   Checkbox3 is for whether the ants will bump into each other (disabled) or just pass by each other (enabled)
+*/
+// Ant structure representing each ant's state
+struct Ant {
+  unsigned long lastBumpUpdate;  // the last time the ant bumped into another ant
+  bool hasFood;
+  float velocity;
+  float position;  // (0.0 to 1.0 range)
+};
+
+constexpr unsigned MAX_ANTS = 32;
+constexpr float MIN_COLLISION_TIME_MS = 2.0f;
+constexpr float VELOCITY_MIN = 2.0f;
+constexpr float VELOCITY_MAX = 10.0f;
+
+// Helper function to get food pixel color based on ant and background colors
+static uint32_t getFoodColor(CRGB antColor, CRGB backgroundColor) {
+  if (antColor == CRGB::White) return (backgroundColor == CRGB::Yellow) ? CRGB::Gray : CRGB::Yellow;
+  return (backgroundColor == CRGB::White) ? CRGB::Yellow : CRGB::White;
+}
+
+// Helper function to handle ant boundary wrapping or bouncing
+static void handleBoundary(Ant& ant, float& position, bool gatherFood, bool atStart, unsigned long currentTime) {
+  if (gatherFood) {
+    // Bounce mode: reverse direction and update food status
+    position = atStart ? 0.0f : 1.0f;
+    ant.velocity = -ant.velocity;
+    ant.lastBumpUpdate = currentTime;
+    ant.position = position;
+    ant.hasFood = atStart;  // Has food when leaving start, drops it at end
+  } else {
+    // Wrap mode: teleport to opposite end
+    position = atStart ? 1.0f : 0.0f;
+    ant.lastBumpUpdate = currentTime;
+    ant.position = position;
+  }
+}
+
+class AntEffect : public Node {
+ public:
+  static const char* name() { return "Ants"; }
+  static uint8_t dim() { return _1D; }
+  static const char* tags() { return "🔥🎨"; }
+
+  uint8_t antSpeed = 192;
+  uint8_t nrOfAnts = MAX_ANTS / 2;
+  uint8_t antSizeControl = 8;
+  uint8_t blur = 0;
+  bool gatherFood = true;
+  bool passByControl = true;
+  // static const char _data_FX_MODE_ANTS[] PROGMEM = "Ants@Ant speed,# of ants,Ant size,Blur,,Gathering food,Overlay,Pass by;!,!,!;!;1;sx=192,ix=255,c1=32,c2=0,o1=1,o3=1";
+
+  void setup() override {
+    addControl(antSpeed, "antSpeed", "slider");
+    addControl(nrOfAnts, "nrOfAnts", "slider", 1, MAX_ANTS);
+    addControl(antSizeControl, "antSize", "slider", 1, 20);
+    addControl(blur, "blur", "slider");
+    addControl(gatherFood, "gatherFood", "checkbox");
+    addControl(passByControl, "passBy", "checkbox");
+
+    initAnts();
+  }
+
+  Ant ants[MAX_ANTS];
+
+  // Helper function to calculate ant color
+  CRGB getAntColor(int antIndex, int numAnts, bool usePalette) {
+    // if (usePalette)
+    return ColorFromPalette(layerP.palette, antIndex * 255 / numAnts);
+    // Alternate between two colors for default palette
+    // return (antIndex % 3 == 1) ? SEGCOLOR(0) : SEGCOLOR(2);
+  }
+
+  // Helper function to render a single ant pixel with food handling
+  void renderAntPixel(int pixelIndex, int pixelOffset, int antSize, const Ant& ant, CRGB antColor, CRGB backgroundColor, bool gatherFood) {
+    bool isMovingBackward = (ant.velocity < 0);
+    bool isFoodPixel = gatherFood && ant.hasFood && ((isMovingBackward && pixelOffset == 0) || (!isMovingBackward && pixelOffset == antSize - 1));
+    if (isFoodPixel) {
+      layer->setRGB(pixelIndex, getFoodColor(antColor, backgroundColor));
+    } else {
+      layer->setRGB(pixelIndex, antColor);
+    }
+  }
+
+  // Initialize ants on first call
+  void initAnts() {
+    int confusedAntIndex = random(0, numAnts);  // the first random ant to go backwards
+
+    for (int i = 0; i < MAX_ANTS; i++) {
+      ants[i].lastBumpUpdate = millis();
+
+      // Random velocity
+      float velocity = VELOCITY_MIN + (VELOCITY_MAX - VELOCITY_MIN) * random16(1000, 5000) / 5000.0f;
+      // One random ant moves in opposite direction
+      ants[i].velocity = (i == confusedAntIndex) ? -velocity : velocity;
+      // Random starting position (0.0 to 1.0)
+      ants[i].position = random16(0, 10000) / 10000.0f;
+      // Ants don't have food yet
+      ants[i].hasFood = false;
+    }
+  }
+
+  unsigned numAnts;
+
+  void loop() override {
+    // Extract configuration from segment settings
+    numAnts = MIN(1 + (layer->nrOfLights * nrOfAnts >> 12), MAX_ANTS);
+    bool passBy = passByControl || gatherFood;  // global no‑collision when gathering food is enabled
+    unsigned antSize = antSizeControl + (gatherFood ? 1 : 0);
+
+    // Calculate time conversion factor based on speed slider
+    float timeConversionFactor = float(scale8(8, 255 - antSpeed) + 1) * 20000.0f;
+
+    layer->fadeToBlackBy(255);
+
+    // Update and render each ant
+    for (int i = 0; i < numAnts; i++) {
+      float timeSinceLastUpdate = float(millis() - ants[i].lastBumpUpdate) / timeConversionFactor;
+      float newPosition = ants[i].position + ants[i].velocity * timeSinceLastUpdate;
+
+      // Reset ants that wandered too far off-track (e.g., after intensity change)
+      if (newPosition < -0.5f || newPosition > 1.5f) {
+        newPosition = ants[i].position = random16(0, 10000) / 10000.0f;
+        ants[i].lastBumpUpdate = millis();
+      }
+
+      // Handle boundary conditions (bounce or wrap)
+      if (newPosition <= 0.0f && ants[i].velocity < 0.0f) {
+        handleBoundary(ants[i], newPosition, gatherFood, true, millis());
+      } else if (newPosition >= 1.0f && ants[i].velocity > 0.0f) {
+        handleBoundary(ants[i], newPosition, gatherFood, false, millis());
+      }
+
+      // Handle collisions between ants (if not passing by)
+      if (!passBy) {
+        for (int j = i + 1; j < numAnts; j++) {
+          if (fabsf(ants[j].velocity - ants[i].velocity) < 0.001f) continue;  // Moving in same direction at same speed; avoids tiny denominators
+
+          // Calculate collision time using physics
+          float timeOffset = float(ants[j].lastBumpUpdate - ants[i].lastBumpUpdate);
+          float collisionTime = (timeConversionFactor * (ants[i].position - ants[j].position) + ants[i].velocity * timeOffset) / (ants[j].velocity - ants[i].velocity);
+
+          // Check if collision occurred in valid time window
+          float timeSinceJ = float(millis() - ants[j].lastBumpUpdate);
+          if (collisionTime > MIN_COLLISION_TIME_MS && collisionTime < timeSinceJ) {
+            // Update positions to collision point
+            float adjustedTime = (collisionTime + float(ants[j].lastBumpUpdate - ants[i].lastBumpUpdate)) / timeConversionFactor;
+            ants[i].position += ants[i].velocity * adjustedTime;
+            ants[j].position = ants[i].position;
+
+            // Update collision time
+            unsigned long collisionMoment = static_cast<unsigned long>(collisionTime + 0.5f) + ants[j].lastBumpUpdate;
+            ants[i].lastBumpUpdate = collisionMoment;
+            ants[j].lastBumpUpdate = collisionMoment;
+
+            // Reverse the ant with greater speed magnitude
+            if (fabsf(ants[i].velocity) > fabsf(ants[j].velocity)) {
+              ants[i].velocity = -ants[i].velocity;
+            } else {
+              ants[j].velocity = -ants[j].velocity;
+            }
+
+            // Recalculate position after collision
+            newPosition = ants[i].position + ants[i].velocity * (millis() - ants[i].lastBumpUpdate) / timeConversionFactor;
+          }
+        }
+      }
+
+      // Clamp position to valid range
+      newPosition = constrain(newPosition, 0.0f, 1.0f);
+      unsigned pixelPosition = roundf(newPosition * (layer->nrOfLights - 1));
+
+      // Determine ant color
+      CRGB antColor = getAntColor(i, numAnts, true);  // always use palette for now
+
+      // Render ant pixels
+      for (int pixelOffset = 0; pixelOffset < antSize; pixelOffset++) {
+        unsigned currentPixel = pixelPosition + pixelOffset;
+        if (currentPixel >= layer->nrOfLights) break;
+        renderAntPixel(currentPixel, pixelOffset, antSize, ants[i], antColor, CRGB::Black, gatherFood);
+      }
+
+      // Update ant state
+      ants[i].lastBumpUpdate = millis();
+      ants[i].position = newPosition;
+    }
+
+    layer->blur1d(blur >> 1);
+  }
+};
+
+/*
  * Tetris or Stacking (falling bricks) Effect
  * by Blaz Kristan (AKA blazoncek) (https://github.com/blazoncek, https://blaz.at/home)
  */
@@ -944,7 +1145,7 @@ class PopCornEffect : public Node {
         // uint32_t col = layer->color_wheel(popcorn[i].colIndex);
         // if (!layer->palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
         uint16_t ledIndex = popcorn[i].pos;
-        CRGB col = ColorFromPalette(layer->layerP->palette, popcorn[i].colIndex * (256 / maxNumPopcorn));
+        CRGB col = ColorFromPalette(layerP.palette, popcorn[i].colIndex * (256 / maxNumPopcorn));
         if (ledIndex < layer->size.x) {
           layer->setRGB(ledIndex, col);
           for (int y = 0; y < layer->size.y; y++)
@@ -988,10 +1189,10 @@ class WaverlyEffect : public Node {
     Coord3D pos = {0, 0, 0};  // initialize z otherwise wrong results
     for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
       uint16_t thisVal = sharedData.volume * amplification * inoise8(pos.x * 45, t, t) / 4096;  // WLEDMM back to SR code
-      uint16_t thisMax = min(map(thisVal, 0, 512, 0, layer->size.y), (long)layer->size.y);
+      uint16_t thisMax = MIN(map(thisVal, 0, 512, 0, layer->size.y), (long)layer->size.y);
 
       for (pos.y = 0; pos.y < thisMax; pos.y++) {
-        CRGB color = ColorFromPalette(layer->layerP->palette, ::map(pos.y, 0, thisMax, 250, 0));
+        CRGB color = ColorFromPalette(layerP.palette, ::map(pos.y, 0, thisMax, 250, 0));
         if (!noClouds) layer->addRGB(pos, color);
         layer->addRGB(Coord3D((layer->size.x - 1) - pos.x, (layer->size.y - 1) - pos.y), color);
       }
@@ -1309,7 +1510,7 @@ class FireworksEffect : public Node {
        */
       uint8_t nSparks = flare->pos + random8(4);
       // nSparks = std::max(nSparks, 4U);  // This is not a standard constrain; numSparks is not guaranteed to be at least 4
-      nSparks = std::min(nSparks, numSparks);
+      nSparks = MIN(nSparks, numSparks);
 
       // initialize sparks
       if (aux0Flare == 2) {

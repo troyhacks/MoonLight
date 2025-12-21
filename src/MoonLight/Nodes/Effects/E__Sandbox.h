@@ -52,7 +52,7 @@ class ExampleEffect : public Node {
           pos.x = beatsin8(bpm, 0, layer->size.x - 1);
           pos.y = beatsin8(intensity, 0, layer->size.y - 1);
           pos.z = beatsin8(intensity, 0, layer->size.z - 1);
-          layer->setRGB(pos, ColorFromPalette(layer->layerP->palette, beatsin8(12, 0, 255)));
+          layer->setRGB(pos, ColorFromPalette(layerP.palette, beatsin8(12, 0, 255)));
         }
       }
     }

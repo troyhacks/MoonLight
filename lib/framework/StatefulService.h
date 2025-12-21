@@ -199,8 +199,11 @@ protected:
     {
         // 🌙 adding semaphore wait too long logging
         if (xSemaphoreTakeRecursive(_accessMutex, pdMS_TO_TICKS(100))==pdFALSE) {
-            ESP_LOGW("🐼", "_accessMutex wait too long");
-            xSemaphoreTakeRecursive(_accessMutex, portMAX_DELAY);
+            ESP_LOGI("🐼", "_accessMutex wait 100ms");
+            if (xSemaphoreTakeRecursive(_accessMutex, pdMS_TO_TICKS(400))==pdFALSE) {
+                ESP_LOGW("🐼", "_accessMutex waited 500ms and continues 🤷‍♂️");
+                // xSemaphoreTakeRecursive(_accessMutex, portMAX_DELAY);
+            }
         }
     }
 

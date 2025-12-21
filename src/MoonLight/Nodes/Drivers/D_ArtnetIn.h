@@ -11,22 +11,17 @@
 
 #if FT_MOONLIGHT
 
-  #include <WiFiUdp.h>
-
 class ArtNetInDriver : public Node {
  public:
   static const char* name() { return "Art-Net In"; }
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️"; }
 
-  // Protocol Configuration
-  // uint16_t ARTNET_PORT = 6454;
-  // uint16_t DDP_PORT = 4048;
-  WiFiUDP artnetUdp;
+  NetworkUDP artnetUdp;
   uint8_t packetBuffer[1500];
 
   bool ddp = false;
-  uint8_t view = 1;  // virtual layer 1 by default
+  uint8_t view = 1;  // Physical is 0, virtual layer 0 (shown as 1) is 1 by default
   uint16_t port = 6454;
   uint16_t universeMin = 0;
   uint16_t universeMax = 32767;
@@ -128,7 +123,7 @@ class ArtNetInDriver : public Node {
 
           uint8_t* dmxData = packetBuffer + sizeof(ArtNetHeader);
 
-          int startPixel = (universe-universeMin) * (512 / layerP.lights.header.channelsPerLight);
+          int startPixel = (universe - universeMin) * (512 / layerP.lights.header.channelsPerLight);
           int numPixels = min((uint16_t)(dataLength / layerP.lights.header.channelsPerLight), (uint16_t)(layerP.lights.header.nrOfLights - startPixel));
 
           for (int i = 0; i < numPixels; i++) {

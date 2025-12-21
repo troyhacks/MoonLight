@@ -73,7 +73,7 @@ Want to add a Driver to MoonLight, see [develop](../../develop/overview/). See a
 Receives Art-Net data from the network.
 
 * DDP: If unchecked, processes data in Art-Net format, if checked, process data in DDP format
-* Port: The port listening to for Art-Net
+* Port: The port listening for Art-Net. When using DDP, change to 4048 (the default port for DDP).
 * Universe Min-Max: Filters Universes (Art-Net only).
 * View: 
     * Select physical layer to directly store the received channels into the physical layer
@@ -93,17 +93,18 @@ Sends Lights in Art-Net compatible packages to an Art-Net controller specified b
 
 #### Controls
 
-* **Controller IP**: The last segment of the IP address within your local network, of the the hardware Art-Net controller.
+* **Controller IPs**: The last segment of the IP address within your local network, of the hardware Art-Net controller. Add more IPs if you send to more than one controller, comma separated.
 * **Port**: The network port added to the IP address, 6454 is the default for Art-Net.
 * **FPS Limiter**: set the max frames per second Art-Net packages are send out (also all the other nodes will run at this speed).
     * Art-Net specs recommend about 44 FPS but higher framerates will work mostly (up to until ~130FPS tested)
-* **Nr of outputs**: Art-Net LED controllers can have more then 1 output (e.g. 12)
+* **Nr of outputs**: Art-Net LED controllers can have more than 1 output (e.g. 12)
 * **Universes per output**: How many universes can each output handle. This determines the maximum number of lights an output can drive (nr of universe x nr of channels per universe / channels per light)
+* **Nr of Outputs per IP**: How many outputs does one Art-Net controller have. If all outputs are sent, Art-Net will be sent to the next IP number.
 
 !!! tip "Set universes"
     Set the number of universes also on the controller!
 
-* **Channels per ouput**: each output can drive a maximum number of channels, determined by the universes per output
+* **Channels per output**: each output can drive a maximum number of channels, determined by the universes per output
 
 !!! warning "DMX start with 1"
     Dmx channels count from 1 to 512. At the moment we start counting from 0..511.
@@ -119,7 +120,7 @@ The following devices have been tested and are recommended:
 * Driving DMX fixtures: Used to drive the Light Presets for DMX lights / moving heads (see below)
 * **Nr of outputs**: max 2 outputs
 * **Universes per output**: 1 universe
-* **Channels per ouput**:  512 channels
+* **Channels per output**:  512 channels
 
 [Club Lights 12 Pro Artnet Controller - CL12P](https://s.click.aliexpress.com/e/_Ex9uaOk)
 
@@ -129,7 +130,7 @@ The following devices have been tested and are recommended:
 
 * **Nr of outputs**: Max 12 outputs
 * **Universes per output**: Max 8 universes
-* **Channels per ouput**: max 8 * 512. 
+* **Channels per output**: max 8 * 512. 
 
 Each color in a LED is one channel: For RGB max 170 LEDs is 510 channels per universe, for RGBW max 128 LEDs per universe is 512 channels per universe => max 1360 RGB LEDs and 1024 RGBW LEDs per output. 
 

@@ -105,47 +105,30 @@ class ModuleDrivers : public NodeManager {
     Node* node = nullptr;
 
     // Layouts, most used first
-    if (equalAZaz09(name, PanelLayout::name()))
-      node = allocMBObject<PanelLayout>();
-    else if (equalAZaz09(name, PanelsLayout::name()))
-      node = allocMBObject<PanelsLayout>();
-    else if (equalAZaz09(name, CubeLayout::name()))
-      node = allocMBObject<CubeLayout>();
-    else if (equalAZaz09(name, RingsLayout::name()))
-      node = allocMBObject<RingsLayout>();
-    else if (equalAZaz09(name, WheelLayout::name()))
-      node = allocMBObject<WheelLayout>();
-    else if (equalAZaz09(name, SpiralLayout::name()))
-      node = allocMBObject<SpiralLayout>();
-    else if (equalAZaz09(name, HumanSizedCubeLayout::name()))
-      node = allocMBObject<HumanSizedCubeLayout>();
-    else if (equalAZaz09(name, SingleLineLayout::name()))
-      node = allocMBObject<SingleLineLayout>();
-    else if (equalAZaz09(name, SingleRowLayout::name()))
-      node = allocMBObject<SingleRowLayout>();
+    if (!node) node = checkAndAlloc<PanelLayout>(name);
+    if (!node) node = checkAndAlloc<PanelsLayout>(name);
+    if (!node) node = checkAndAlloc<CubeLayout>(name);
+    if (!node) node = checkAndAlloc<RingsLayout>(name);
+    if (!node) node = checkAndAlloc<WheelLayout>(name);
+    if (!node) node = checkAndAlloc<SpiralLayout>(name);
+    if (!node) node = checkAndAlloc<HumanSizedCubeLayout>(name);
+    if (!node) node = checkAndAlloc<SingleLineLayout>(name);
+    if (!node) node = checkAndAlloc<SingleRowLayout>(name);
 
     // Drivers most used first
-    else if (equalAZaz09(name, ParallelLEDDriver::name()))
-      node = allocMBObject<ParallelLEDDriver>();
-    else if (equalAZaz09(name, FastLEDDriver::name()))
-      node = allocMBObject<FastLEDDriver>();
-    else if (equalAZaz09(name, ArtNetInDriver::name()))
-      node = allocMBObject<ArtNetInDriver>();
-    else if (equalAZaz09(name, ArtNetOutDriver::name()))
-      node = allocMBObject<ArtNetOutDriver>();
-    else if (equalAZaz09(name, AudioSyncDriver::name()))
-      node = allocMBObject<AudioSyncDriver>();
-    else if (equalAZaz09(name, IRDriver::name()))
-      node = allocMBObject<IRDriver>();
-    else if (equalAZaz09(name, HUB75Driver::name()))
-      node = allocMBObject<HUB75Driver>();
+    if (!node) node = checkAndAlloc<ParallelLEDDriver>(name);
+    if (!node) node = checkAndAlloc<FastLEDDriver>(name);
+    if (!node) node = checkAndAlloc<ArtNetInDriver>(name);
+    if (!node) node = checkAndAlloc<ArtNetOutDriver>(name);
+    if (!node) node = checkAndAlloc<AudioSyncDriver>(name);
+    if (!node) node = checkAndAlloc<IRDriver>(name);
+    if (!node) node = checkAndAlloc<HUB75Driver>(name);
 
     // custom
-    else if (equalAZaz09(name, SE16Layout::name()))
-      node = allocMBObject<SE16Layout>();
+    if (!node) node = checkAndAlloc<SE16Layout>(name);
 
   #if FT_LIVESCRIPT
-    else {
+    if (!node) {
       LiveScriptNode* liveScriptNode = allocMBObject<LiveScriptNode>();
       liveScriptNode->animation = name;  // set the (file)name of the script
       node = liveScriptNode;

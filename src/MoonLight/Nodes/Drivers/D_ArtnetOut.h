@@ -27,24 +27,45 @@ class ArtNetOutDriver : public DriverNode {
   static uint8_t dim() { return _NoD; }
   static const char* tags() { return "☸️"; }
 
-  uint8_t controllerIP3 = 11;
+  Char<32> controllerIP3s = "11";
   uint16_t port = 6454;               // Art-Net default port
   uint8_t FPSLimiter = 50;            // default 50 FPS
-  // uint8_t nrOfOutputs = 1;            // max 12 on Art-Net LED Controller
   uint8_t universesPerOutput = 1;     // 7 on on Art-Net LED Controller { 0,7,14,21,28,35,42,49 }
   uint16_t channelsPerOutput = 1024;  // 3096 (1024x3) on Art-Net LED Controller {1024,1024,1024,1024,1024,1024,1024,1024};
+  uint8_t nrOfOutputs = 1;            // max 12 on Art-Net LED Controller
 
   void setup() override {
     DriverNode::setup();
 
-    addControl(controllerIP3, "controllerIP", "number", 0, 255);
+    addControl(controllerIP3s, "controllerIPs", "text", 0, 32);
     addControl(port, "port", "number", 0, 65538);
     addControl(FPSLimiter, "Limiter", "number", 0, 255, false, "FPS");
-    // addControl(nrOfOutputs, "#Outputs", "number", 0, 255);
     addControl(universesPerOutput, "universesPerOutput", "number", 0, 255);
     addControl(channelsPerOutput, "channelsPerOutput", "number", 0, 65538);
+    addControl(nrOfOutputs, "#Outputs per IP", "number", 0, 255);
 
     memcpy(packet_buffer, ART_NET_HEADER, sizeof(ART_NET_HEADER));  // copy in the Art-Net header.
+  };
+
+  uint8_t ipAddresses[16];  // max 16
+  uint8_t nrOfIPAddresses = 0;
+
+  void onUpdate(const Char<20>& oldValue, const JsonObject& control) override {
+    DriverNode::onUpdate(oldValue, control);  // !!
+
+    if (control["name"] == "controllerIPs") {
+      EXT_LOGD(MB_TAG, "IPs: %s", controllerIP3s.c_str());
+      nrOfIPAddresses = 0;
+      controllerIP3s.split(",", [this](const char* token, uint8_t nr) {
+        int ipSegment = atoi(token);
+        if (nrOfIPAddresses < std::size(ipAddresses) && ipSegment >= 0 && ipSegment <= 255) {
+          EXT_LOGD(MB_TAG, "Found IP: %s (%d / %d)", token, nr, nrOfIPAddresses);
+          ipAddresses[nrOfIPAddresses] = ipSegment;
+          nrOfIPAddresses++;
+        } else
+          EXT_LOGW(MB_TAG, "Too many IPs provided (%d) or invalid IP segment: %d ", nrOfIPAddresses, ipSegment);
+      });
+    }
   };
 
   // loop variables:
@@ -78,18 +99,21 @@ class ArtNetOutDriver : public DriverNode {
     return true;
   }
 
+  uint8_t processedOutputs = 0;
+
   void loop() override {
     DriverNode::loop();
 
-    LightsHeader* header = &layer->layerP->lights.header;
+    LightsHeader* header = &layerP.lights.header;
+
+    if (header->isPositions != 0 || nrOfIPAddresses == 0) return;  // don't sent if positions are sent or no IP addresses found (to do broadcast if no addresses specified...!)
 
     // continue with Art-Net code
-    IPAddress activeIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
-    controllerIP = activeIP;
-    controllerIP[3] = controllerIP3;
-    if (!controllerIP) return;
+    uint8_t actualIPIndex = 0;
+    controllerIP = WiFi.isConnected() ? WiFi.localIP() : ETH.localIP();
+    controllerIP[3] = ipAddresses[actualIPIndex];
 
-    if (header->isPositions != 0) return;  // don't update if positions are sent
+    if (!controllerIP) return;  // if no connection
 
     // wait until the throttle FPS is reached
     // wait needed to avoid misalignment between packages sent and displayed - 🚧
@@ -113,14 +137,14 @@ class ArtNetOutDriver : public DriverNode {
     // send all the leds to artnet
     for (int indexP = 0; indexP < header->nrOfLights; indexP++) {
       // fill a package
-      memcpy(&packet_buffer[packetSize + 18], &layer->layerP->lights.channels[indexP * header->channelsPerLight], header->channelsPerLight);  // set all the channels
+      memcpy(&packet_buffer[packetSize + 18], &layerP.lights.channels[indexP * header->channelsPerLight], header->channelsPerLight);  // set all the channels
 
       // correct the RGB channels for color order and brightness
-      reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB]);
+      reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB], &layerP.lights.channels[indexP * header->channelsPerLight + header->offsetRGB]);
 
-      if (header->offsetRGB1 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB1], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB1]);
-      if (header->offsetRGB2 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB2], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB2]);
-      if (header->offsetRGB3 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB3], &layer->layerP->lights.channels[indexP * header->channelsPerLight + header->offsetRGB3]);
+      if (header->offsetRGB1 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB1], &layerP.lights.channels[indexP * header->channelsPerLight + header->offsetRGB1]);
+      if (header->offsetRGB2 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB2], &layerP.lights.channels[indexP * header->channelsPerLight + header->offsetRGB2]);
+      if (header->offsetRGB3 != UINT8_MAX) reOrderAndDimRGBW(&packet_buffer[packetSize + 18 + header->offsetRGB3], &layerP.lights.channels[indexP * header->channelsPerLight + header->offsetRGB3]);
 
       if (header->lightPreset == 9 && indexP < 72)  // RGBWYP this config assumes a mix of 4 channels and 6 channels per light !!!!
         packetSize += 4;
@@ -139,6 +163,13 @@ class ArtNetOutDriver : public DriverNode {
           channels_remaining = channelsPerOutput;             // reset for a new output
 
           while (universe % universesPerOutput != 0) universe++;  // advance to next port
+          processedOutputs++;
+          if (processedOutputs >= nrOfOutputs) {
+            if (actualIPIndex + 1 < nrOfIPAddresses) actualIPIndex++;  // advance to the next IP, if exists
+            processedOutputs = 0;                                      // processedOutputs per IP
+            universe = 0;
+            controllerIP[3] = ipAddresses[actualIPIndex];  // assign the new IP address
+          }
         }
       }
     }

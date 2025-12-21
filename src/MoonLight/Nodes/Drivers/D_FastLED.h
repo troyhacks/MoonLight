@@ -46,6 +46,7 @@ class FastLEDDriver : public Node {
   #else
   bool usesRMT5 = false;
   #endif
+  Char<32> status = "ok";
 
   void setup() override {
     addControl(version, "version", "text", 0, 20, true);
@@ -53,6 +54,7 @@ class FastLEDDriver : public Node {
     addControl(colorOrder, "colorOrder", "text", 0, 20, true);
     addControl(usesI2S, "usesI2S", "checkbox", 0, 20, true);
     addControl(usesRMT5, "usesRMT5", "checkbox", 0, 20, true);
+    addControl(status, "status", "text", 0, 32, true);
   }
 
   uint16_t savedMaxPower = UINT16_MAX;
@@ -88,27 +90,47 @@ class FastLEDDriver : public Node {
 
   bool hasOnLayout() const override { return true; }
   void onLayout() override {
-    if (layerP.pass == 1 && !layerP.monitorPass) { 
-      // if (safeModeMB) {
-      //     EXT_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
-      //     return;
-      // }
-
-      uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
+    if (layerP.pass == 1 && !layerP.monitorPass) {
+      uint8_t nrOfPins = MIN(MIN(layerP.nrOfLedPins, layerP.nrOfAssignedPins), 4);  // FastLED RMT supports max 4 pins!
 
       if (nrOfPins == 0) return;
 
+      if (safeModeMB) {
+        EXT_LOGW(ML_TAG, "Safe mode enabled, not adding FastLED driver");
+        return;
+      }
+
       EXT_LOGD(ML_TAG, "nrOfLedPins #:%d", nrOfPins);
+      uint8_t pins[MAX_PINS] = {};
+
+      Char<32> statusString = "#";  // truncate if larger
+      statusString += nrOfPins;
+      statusString += ": ";
+      for (int i = 0; i < nrOfPins; i++) {
+        uint8_t assignedPin = layerP.ledPinsAssigned[i];
+        if (assignedPin < layerP.nrOfLedPins)
+          pins[i] = layerP.ledPins[assignedPin];
+        else
+          pins[i] = layerP.ledPins[i];
+        EXT_LOGD(ML_TAG, "onLayout pin#%d of %d: assigned:%d %d->%d #%d", i, nrOfPins, assignedPin, layerP.ledPins[i], pins[i], layerP.ledsPerPin[i]);
+        Char<12> tmp;
+        tmp.format(" %d#%d", pins[i], layerP.ledsPerPin[i]);
+        statusString += tmp;
+      }
+      EXT_LOGD(ML_TAG, "status: %s", statusString.c_str());
+
+      updateControl("status", statusString.c_str());
+      moduleNodes->requestUIUpdate = true;
 
       uint16_t startLed = 0;
-      for (uint8_t pinIndex = 0; pinIndex < nrOfPins && pinIndex < 4; pinIndex++) {  // FastLED RMT supports max 4 pins!
+      for (uint8_t pinIndex = 0; pinIndex < nrOfPins; pinIndex++) {
         EXT_LOGD(ML_TAG, "ledPin s:%d #:%d p:%d", pinIndex, layerP.ledsPerPin[pinIndex]);
 
         uint16_t nrOfLights = layerP.ledsPerPin[pinIndex];
 
         CRGB* leds = (CRGB*)layerP.lights.channels;
 
-        switch (layerP.ledPins[pinIndex]) {
+        switch (pins[pinIndex]) {
   #if CONFIG_IDF_TARGET_ESP32
         case 0:
           FastLED.addLeds<ML_CHIPSET, 0 COLOR_ORDER_ARG>(leds, startLed, nrOfLights).setCorrection(TypicalLEDStrip) RGBW_CALL;
@@ -529,12 +551,12 @@ class FastLEDDriver : public Node {
   #endif  // CONFIG_IDF_TARGET_ESP32S3
 
         default:
-          EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", layerP.ledPins[pinIndex]);
-        }  // switch ledPins[pinIndex]
+          EXT_LOGW(ML_TAG, "FastLEDPin assignment: pin not supported %d", pins[pinIndex]);
+        }  // switch pins[pinIndex]
 
         startLed += layerP.ledsPerPin[pinIndex];
 
-      }  // sortedPins
+      }  // for pinIndex < nrOfPins
     }
 
     FastLED.setMaxPowerInMilliWatts(1000 * layerP.maxPower);  // 5v, 2000mA, to protect usb while developing

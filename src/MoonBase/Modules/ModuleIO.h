@@ -289,14 +289,14 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(8, pin_Voltage);
       pinAssigner.assignPin(9, pin_Current);
 
-      if (_state.data["switch1"]) {
-        pinAssigner.assignPin(5, pin_Infrared);
-      } else {  // default
+      if (_state.data["switch1"]) {  // on: Ethernet
         pinAssigner.assignPin(5, pin_SPI_MISO);
         pinAssigner.assignPin(6, pin_SPI_MOSI);
         pinAssigner.assignPin(7, pin_SPI_SCK);
         pinAssigner.assignPin(15, pin_PHY_CS);
         pinAssigner.assignPin(18, pin_PHY_IRQ);
+      } else {  // off: default Infrared
+        pinAssigner.assignPin(5, pin_Infrared);
       }
 
     } else if (boardID == board_QuinLEDDigUnoV3) {
@@ -425,7 +425,7 @@ class ModuleIO : public Module {
     } else if (boardID == board_MHCP4NanoV1) {                                    // https://shop.myhome-control.de/ABC-WLED-ESP32-P4-Shield/HW10027
       object["maxPower"] = 100;                                                   // Assuming decent LED power!!
 
-      if (_state.data["switch1"]) {                         // on
+      if (_state.data["switch1"]) {                         // on: 8 LED Pins + RS485 + Dig Input
         uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27};  // 8 LED pins in this order
         for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
         pinAssigner.assignPin(3, pin_RS485_TX);
@@ -436,7 +436,7 @@ class ModuleIO : public Module {
         pinAssigner.assignPin(46, pin_Dig_Input);
         pinAssigner.assignPin(47, pin_Dig_Input);
         pinAssigner.assignPin(48, pin_Dig_Input);
-      } else {                                                                           // off - default
+      } else {                                                                           // off / default: 16 LED pins
         uint8_t ledPins[] = {21, 20, 25, 5, 7, 23, 8, 27, 3, 22, 24, 4, 46, 47, 2, 48};  // 16 LED_PINS in this order
         for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
       }
@@ -521,6 +521,8 @@ class ModuleIO : public Module {
   uint8_t newBoardID = UINT8_MAX;
 
   void onUpdate(const UpdatedItem& updatedItem) override {
+    JsonDocument doc;
+    JsonObject object = doc.to<JsonObject>();
     if (updatedItem.name == "boardPreset" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
       // if booting and modded is false or ! booting
       if ((updatedItem.oldValue == "" && _state.data["modded"] == false) || updatedItem.oldValue != "") {  // only update unmodded
@@ -528,22 +530,21 @@ class ModuleIO : public Module {
         newBoardID = updatedItem.value;  // run in sveltekit task
       }
     } else if (updatedItem.name == "modded" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+      // set pins to default if modded is turned off
       if (updatedItem.value == false) {
         EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
         newBoardID = _state.data["boardPreset"];  // run in sveltekit task
       }
     } else if ((updatedItem.name == "switch1" || updatedItem.name == "switch2") && !_state.updateOriginId.contains("server")) {
       // rebuild with new switch setting
-      _state.data["modded"] = false;
-      newBoardID = _state.data["boardPreset"];                                              // run in sveltekit task
-    } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
-      // EXT_LOGD(MB_TAG, "%s[%d]%s[%d].%s = %s -> %s", updatedItem.parent[0].c_str(), updatedItem.index[0], updatedItem.parent[1].c_str(), updatedItem.index[1], updatedItem.name.c_str(), updatedItem.oldValue.c_str(), updatedItem.value.as<String>().c_str());
-      // set pins to default if modded is turned off
-      JsonDocument doc;
-      JsonObject object = doc.to<JsonObject>();
+      newBoardID = _state.data["boardPreset"];  // run in sveltekit task
+    } else if (updatedItem.name == "maxPower" && !_state.updateOriginId.contains("server")) {
       object["modded"] = true;
-      update(object, ModuleState::update, _moduleName + "server");
+    } else if (updatedItem.name == "usage" && !_state.updateOriginId.contains("server")) {  // not done by this module: done by UI
+      object["modded"] = true;
     }
+
+    if (object.size()) update(object, ModuleState::update, _moduleName + "server");  // if changes made then update
   }
 
   // Function to convert drive capability to string
