@@ -156,7 +156,7 @@
 </script>
 
 <svelte:head>
-	<title>{localStorage.getItem('telemetry.rssi.hostName') || 'MoonLight'}</title>
+	<title>{$telemetry.rssi.hostName || 'MoonLight'}</title>
 </svelte:head>
 
 {#if page.data.features.security && $user.bearer_token === ''}

@@ -48,12 +48,11 @@ class ModuleDevices : public Module {
   }
 
   void loop1s() {
-    if (!_socket->getConnectedClients()) return;
     if (!WiFi.localIP() && !ETH.localIP()) return;
 
     if (!deviceUDPConnected) return;
 
-    readUDP();
+    readUDP();  // and updateDevices
   }
 
   void loop10s() {
@@ -66,16 +65,20 @@ class ModuleDevices : public Module {
 
     if (!deviceUDPConnected) return;
 
-    writeUDP();
+    writeUDP();  // and updateDevices with own device
   }
 
   void updateDevices(const char* name, IPAddress ip) {
     // EXT_LOGD(ML_TAG, "updateDevices ...%d %s", ip[3], name);
     if (_state.data["devices"].isNull()) _state.data["devices"].to<JsonArray>();
 
+    JsonArray devices;
     JsonDocument doc;
-    doc.set(_state.data);  // copy
-    JsonArray devices = doc["devices"];
+    if (_socket->getConnectedClients()) {
+      doc.set(_state.data);  // copy
+      devices = doc["devices"];
+    } else
+      devices = _state.data["devices"];
 
     JsonObject device = JsonObject();
 
@@ -95,7 +98,6 @@ class ModuleDevices : public Module {
     device["time"] = time(nullptr);  // time will change, triggering update
 
     if (!_socket->getConnectedClients()) return;  // no need to update if no clients
-    if (!WiFi.localIP() && !ETH.localIP()) return;
 
     // sort in vector
     std::vector<JsonObject> devicesVector;
