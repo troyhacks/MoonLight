@@ -107,7 +107,7 @@
 		{#if property.type == 'ip'}
 			<a href="http://{value}" target="_blank">{value}</a>
 		{:else if property.type == 'mdnsName'}
-			<a href="http://{value}.local/moonbase/module?group=moonlight&module=lightscontrol" target="_blank">{value}</a>
+			<a href="http://{value}.local/moonbase/module?group=moonlight&module=lightscontrol">{value}</a>
 		{:else if property.type == 'time'}
 			<span>{getTimeAgo(value, currentTime)}</span>
 		{:else if property.type == 'coord3D' && value != null}

@@ -32,7 +32,8 @@ enum IO_PinUsageEnum {
   pin_I2C_SCL,
   pin_ButtonPush,
   pin_ButtonToggle,
-  pin_Button_LightsOn,
+  pin_Button_Push_LightsOn,
+  pin_Button_Toggle_LightsOn,
   pin_Relay,
   pin_Relay_LightsOn,
   pin_Voltage,
@@ -43,7 +44,6 @@ enum IO_PinUsageEnum {
   pin_OnBoardKey,
   pin_Battery,
   pin_Temperature,
-  pin_Exposed,
   pin_SDIO_PIN_CMD,
   pin_SDIO_PIN_CLK,
   pin_SDIO_PIN_D0,
@@ -61,6 +61,7 @@ enum IO_PinUsageEnum {
   pin_RS485_TX,
   pin_RS485_RX,
   pin_Dig_Input,  // Digital Input pin type. May contains some protection circuit
+  pin_Exposed,
   pin_Reserved,
   pin_count
 };
@@ -146,7 +147,7 @@ class ModuleIO : public Module {
       control = addControl(rows, "usage", "select");
       control["default"] = 0;
       addControlValue(control, "Unused");  // 0
-      addControlValue(control, "LED");
+      addControlValue(control, "LED 🚦");
       addControlValue(control, "LED CW");
       addControlValue(control, "LED WW");
       addControlValue(control, "LED R");
@@ -158,20 +159,20 @@ class ModuleIO : public Module {
       addControlValue(control, "I2S MCLK");
       addControlValue(control, "I2C SDA");
       addControlValue(control, "I2C SCL");
-      addControlValue(control, "Button Push");
-      addControlValue(control, "Button Toggle");
-      addControlValue(control, "Button LightOn");
+      addControlValue(control, "Button 🛎️");
+      addControlValue(control, "Button 𓐟");
+      addControlValue(control, "Button LightOn 🛎️");
+      addControlValue(control, "Button LightOn 𓐟");
       addControlValue(control, "Relay");
-      addControlValue(control, "Relay LightOn");
-      addControlValue(control, "Voltage");
-      addControlValue(control, "Current");
-      addControlValue(control, "Infrared");
+      addControlValue(control, "Relay LightOn 🔀");
+      addControlValue(control, "Voltage️️️ ⚡️");
+      addControlValue(control, "Current ⚡️");
+      addControlValue(control, "Infrared ♨️");
       addControlValue(control, "DMX in");
       addControlValue(control, "Onboard LED");
       addControlValue(control, "Onboard Key");
       addControlValue(control, "Battery");
       addControlValue(control, "Temperature");
-      addControlValue(control, "Exposed");
       addControlValue(control, "SDIO CMD");
       addControlValue(control, "SDIO CLK");
       addControlValue(control, "SDIO D0");
@@ -181,14 +182,15 @@ class ModuleIO : public Module {
       addControlValue(control, "Serial TX");
       addControlValue(control, "Serial RX");
       addControlValue(control, "Ethernet");
-      addControlValue(control, "SPI SCK");
-      addControlValue(control, "SPI MISO");
-      addControlValue(control, "SPI MOSI");
-      addControlValue(control, "PHY CS");
-      addControlValue(control, "PHY IRQ");
+      addControlValue(control, "SPI SCK 🔗");
+      addControlValue(control, "SPI MISO 🔗");
+      addControlValue(control, "SPI MOSI 🔗");
+      addControlValue(control, "PHY CS 🔗");
+      addControlValue(control, "PHY IRQ 🔗");
       addControlValue(control, "RS-485 TX");
       addControlValue(control, "RS-485 RX");
       addControlValue(control, "Digital Input");
+      addControlValue(control, "Exposed");
       addControlValue(control, "Reserved");
 
       control = addControl(rows, "index", "number", 1, 32);  // max 32 of one type, e.g 32 led pins
@@ -285,7 +287,7 @@ class ModuleIO : public Module {
       for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
       pinAssigner.assignPin(0, pin_ButtonPush);
       pinAssigner.assignPin(45, pin_ButtonPush);
-      pinAssigner.assignPin(46, pin_Button_LightsOn);
+      pinAssigner.assignPin(46, pin_Button_Push_LightsOn);
       pinAssigner.assignPin(8, pin_Voltage);
       pinAssigner.assignPin(9, pin_Current);
 
@@ -338,7 +340,7 @@ class ModuleIO : public Module {
     } else if (boardID == board_QuinLEDDig2Go) {
       // dig2go
       object["maxPower"] = 10;  // USB powered: 2A / 10W
-      pinAssigner.assignPin(0, pin_Button_LightsOn);
+      pinAssigner.assignPin(0, pin_Button_Push_LightsOn);
       pinAssigner.assignPin(5, pin_Infrared);
       pinAssigner.assignPin(16, pin_LED);
       pinAssigner.assignPin(12, pin_Relay_LightsOn);
@@ -376,7 +378,7 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(16, pin_LED);
       // pinAssigner.assignPin(17, pin_LED); // e.g. apa102...
 
-      // pinAssigner.assignPin(??, pin_Button_LightsOn); // which pin ?
+      // pinAssigner.assignPin(??, pin_Button_Push_LightsOn); // which pin ?
       pinAssigner.assignPin(19, pin_Relay_LightsOn);  // optional
 
       // e.g. for mic
@@ -397,7 +399,7 @@ class ModuleIO : public Module {
       else  // default
         pinAssigner.assignPin(3, pin_LED);
 
-      pinAssigner.assignPin(17, pin_Button_LightsOn);
+      pinAssigner.assignPin(17, pin_Button_Push_LightsOn);
       pinAssigner.assignPin(19, pin_Relay_LightsOn);
       pinAssigner.assignPin(18, pin_Infrared);
 

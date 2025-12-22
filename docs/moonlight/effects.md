@@ -12,7 +12,7 @@ The Effects module defines Effects and Modifiers. They run in a 'layer'.
 
 !!! info "One layer"
 
-    Until v0.6.0 there is only one layer, projected on the whole display. Multiple layers is planned after v0.6.0
+    Currently there is only one layer, projected on the whole display. Multiple layers is planned later
 
 !!! info "3D"
 
@@ -21,7 +21,7 @@ The Effects module defines Effects and Modifiers. They run in a 'layer'.
 ## Controls
 
 * Layer: Choose the layer (currently only one layer supported)
-    * Start, End and Brightness: read only for now, when multiple layers are implemented (>v0.6.0), these can be set per layer
+    * Start, End and Brightness: read only for now, when multiple layers are implemented, these can be set per layer
 * Nodes: a list of Effects and Modifiers for a specific layer
     * Nodes can be added (+), deleted (🗑️) or edited (✎) or reordered (drag and drop). The node to edit will be shown below the list, press save (💾) if you want to preserve the change when the device is restarted or you want to save as a preset (see Light Control)
     * Reorder: Nodes can be reordered, defining the order of execution

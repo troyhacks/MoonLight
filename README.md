@@ -26,11 +26,19 @@
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">
-    <img width="600" src="https://img.youtube.com/vi/l6lTDG6EdEA/maxresdefault.jpg" alt="Watch MoonLight Demo">
+    <img width="380" src="https://img.youtube.com/vi/l6lTDG6EdEA/maxresdefault.jpg">
+  </a><br>
+</p>
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=TtHu7hYC1oU">▶️ Watch the release 0.6.0 video</a>
+</p>
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=TtHu7hYC1oU">
+    <img width="380" src="https://i9.ytimg.com/vi/TtHu7hYC1oU/mqdefault.jpg?v=69494f29&sqp=CJSupcoG&rs=AOn4CLBXfMICdn7xvZqUkCwNRvkHytOhGw">
   </a>
 </p>
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=Z70zDhpqY8o">▶️ Watch the release 0.6.0 video</a>
+  <a href="https://www.youtube.com/watch?v=TtHu7hYC1oU">▶️ Watch the release 0.7.0 video</a>
 </p>
 
 ---
@@ -39,7 +47,7 @@
 
 **MoonLight bridges the gap between hobbyist lighting projects and professional lighting systems.** Get enterprise-grade performance and flexibility without the enterprise price tag.
 
-- ⚡️ **High Performance** - 12K LEDs at 100 FPS with FastLED + parallel drivers
+- ⚡️️ **High Performance** - 12K LEDs at 100 FPS with FastLED + parallel drivers
 - 🎨 **3D Effects Engine** - Stunning visuals for 1D strips, 2D panels, 3D cubes, and custom layouts
 - 🏗️ **Flexible Setups** - From simple strips to complex installations and DMX fixtures
 - 🌐 **Modern IoT** - ESP32-powered with responsive Svelte 5 interface
@@ -125,8 +133,9 @@ Start creating stunning effects immediately on both mobile and desktop.
 
 ### Version 0.6.0 - November 2025
 **The user-friendly baseline release**
-
 **From 0.6.0 Forward:** Community-driven development focused on ease of use, more effects, and expanded hardware support.
+### Version 0.7.0 - December 2025
+**The Art-Net, board presets and ESP32-P4 release**
 
 See [v0.7.0 Kanban board](https://github.com/users/MoonModules/projects/4) or log an [Issue](https://github.com/MoonModules/MoonLight/issues/new/choose) to report issues or request enhancements.
 

@@ -8,7 +8,7 @@ For a step-by-step instruction, go to <a href="https://moonmodules.org/MoonLight
 
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 
-MoonLight v0.6.0, 7 November 2025
+MoonLight v0.7.0, 22 December 2025
 
 | Name | Image* | Flash | Shop & Board presets |
 |------|--------|-------|----------------------|
