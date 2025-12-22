@@ -86,7 +86,7 @@ class ModuleLightsControl : public Module {
             EXT_LOGD(ML_TAG, "pinRelayLightsOn found %d", pinRelayLightsOn);
           } else
             EXT_LOGE(MB_TAG, "gpio %d not valid", pinRelayLightsOn);
-        } else if (usage == pin_Button_LightsOn) {
+        } else if (usage == pin_Button_Push_LightsOn) {
           if (GPIO_IS_VALID_GPIO(gpio)) {
             pinButtonLightsOn = gpio;
             pinMode(pinButtonLightsOn, INPUT_PULLUP);

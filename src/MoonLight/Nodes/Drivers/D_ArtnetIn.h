@@ -21,7 +21,7 @@ class ArtNetInDriver : public Node {
   uint8_t packetBuffer[1500];
 
   bool ddp = false;
-  uint8_t view = 1;  // Physical is 0, virtual layer 0 (shown as 1) is 1 by default
+  uint8_t layer = 1;  // Physical is 0, virtual layer 0 (shown as 1) is 1 by default
   uint16_t port = 6454;
   uint16_t universeMin = 0;
   uint16_t universeMax = 32767;
@@ -31,7 +31,7 @@ class ArtNetInDriver : public Node {
     addControl(port, "port", "number", 0, 65538);
     addControl(universeMin, "universeMin", "number", 0, 32767);
     addControl(universeMax, "universeMax", "number", 0, 32767);
-    addControl(view, "view", "select");
+    addControl(layer, "layer", "select");
     addControlValue("Physical layer");
     uint8_t i = 1;  // start with one
     for (VirtualLayer* layer : layerP.layers) {
@@ -129,10 +129,10 @@ class ArtNetInDriver : public Node {
           for (int i = 0; i < numPixels; i++) {
             int ledIndex = startPixel + i;
             if (ledIndex < layerP.lights.header.nrOfLights) {
-              if (view == 0) {
+              if (layer == 0) {  // Physical layer
                 memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &dmxData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
-              } else {
-                layerP.layers[view - 1]->setLight(ledIndex, &dmxData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
+              } else {  // Virtual layer
+                layerP.layers[layer - 1]->setLight(ledIndex, &dmxData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
               }
             }
           }
@@ -159,10 +159,10 @@ class ArtNetInDriver : public Node {
       for (int i = 0; i < numPixels; i++) {
         int ledIndex = startPixel + i;
         if (ledIndex < layerP.lights.header.nrOfLights) {
-          if (view == 0) {
+          if (layer == 0) {  // Physical layer
             memcpy(&layerP.lights.channels[ledIndex * layerP.lights.header.channelsPerLight], &pixelData[i * layerP.lights.header.channelsPerLight], layerP.lights.header.channelsPerLight);
-          } else {
-            layerP.layers[view - 1]->setLight(ledIndex, &pixelData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
+          } else {  // Virtual layer
+            layerP.layers[layer - 1]->setLight(ledIndex, &pixelData[i * layerP.lights.header.channelsPerLight], 0, layerP.lights.header.channelsPerLight);
           }
         }
       }

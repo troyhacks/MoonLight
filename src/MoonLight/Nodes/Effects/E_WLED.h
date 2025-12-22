@@ -35,7 +35,7 @@ class BouncingBallsEffect : public Node {
 
     if (newAlloc) {
       balls = newAlloc;
-      ballsSize = layer->size.x;
+      ballsSize = layer->size.y;
     } else {
       EXT_LOGE(ML_TAG, "(re)allocate balls failed");
     }

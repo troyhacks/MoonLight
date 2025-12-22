@@ -27,15 +27,15 @@ For each board the following presets are defined:
 ## Pin usage
 
   * Supported
-    * LEDs: Used by LED drivers to setup LED outputs, see [Drivers](../../moonlight/drivers/)
-    * Voltage and Current: Sets energy monitoring, see [System status](../../system/status) and [System Metrics](../../system/metrics)
-    * Infrared: Used by IR driver, see [Drivers](../../moonlight/drivers/)
-    * Button LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
-    * Relay LightsOn: sets on/off in [Light Control](../../moonlight/lightscontrol/)
-    * SPI_SCK, SPI_MISO, SPI_MOSI, PHY_CS, PHY_IRQ: S3 Ethernet, Used by the Ethernet module, see [Ethernet](../../network/ethernet/)
+    * LEDs 🚦: Used by LED drivers to setup LED outputs, see [Drivers](../../moonlight/drivers/)
+    * Voltage and Current ⚡️: Sets energy monitoring, see [System status](../../system/status) and [System Metrics](../../system/metrics)
+    * Infrared ♨️: Used by IR driver, see [Drivers](../../moonlight/drivers/)
+    * Button LightsOn 🛎️/𓐟: sets on/off in [Light Control](../../moonlight/lightscontrol/), Push (🛎️) and Toggle (𓐟)
+    * Relay LightsOn 🔀: sets on/off in [Light Control](../../moonlight/lightscontrol/)
+    * SPI_SCK, SPI_MISO, SPI_MOSI, PHY_CS, PHY_IRQ 🔗: S3 Ethernet, Used by the Ethernet module, see [Ethernet](../../network/ethernet/)
   * Planned soon
     * Battery
-    * DMX (in)
+    * DMX
   * Planned later
     * I2S for microphone and line in
     * I2C
