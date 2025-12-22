@@ -26,7 +26,8 @@ class ModuleLightsControl : public Module {
   FileManager* _fileManager;
   ModuleIO* _moduleIO;
   uint8_t pinRelayLightsOn = UINT8_MAX;
-  uint8_t pinButtonLightsOn = UINT8_MAX;
+  uint8_t pinPushButtonLightsOn = UINT8_MAX;
+  uint8_t pinToggleButtonLightsOn = UINT8_MAX;
 
   ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
     EXT_LOGV(ML_TAG, "constructor");
@@ -72,7 +73,8 @@ class ModuleLightsControl : public Module {
   void readPins() {
     moduleIO.read([&](ModuleState& state) {
       pinRelayLightsOn = UINT8_MAX;
-      pinButtonLightsOn = UINT8_MAX;
+      pinPushButtonLightsOn = UINT8_MAX;
+      pinToggleButtonLightsOn = UINT8_MAX;
       for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
         uint8_t usage = pinObject["usage"];
         uint8_t gpio = pinObject["GPIO"];
@@ -88,11 +90,18 @@ class ModuleLightsControl : public Module {
             EXT_LOGE(MB_TAG, "gpio %d not valid", pinRelayLightsOn);
         } else if (usage == pin_Button_Push_LightsOn) {
           if (GPIO_IS_VALID_GPIO(gpio)) {
-            pinButtonLightsOn = gpio;
-            pinMode(pinButtonLightsOn, INPUT_PULLUP);
-            EXT_LOGD(ML_TAG, "pinButtonLightsOn found %d", pinButtonLightsOn);
+            pinPushButtonLightsOn = gpio;
+            pinMode(pinPushButtonLightsOn, INPUT_PULLUP);
+            EXT_LOGD(ML_TAG, "pinPushButtonLightsOn found %d", pinPushButtonLightsOn);
           } else
-            EXT_LOGE(MB_TAG, "gpio %d not valid", pinButtonLightsOn);
+            EXT_LOGE(MB_TAG, "gpio %d not valid", pinPushButtonLightsOn);
+        } else if (usage == pin_Button_Toggle_LightsOn) {
+          if (GPIO_IS_VALID_GPIO(gpio)) {
+            pinToggleButtonLightsOn = gpio;
+            pinMode(pinToggleButtonLightsOn, INPUT_PULLUP);
+            EXT_LOGD(ML_TAG, "pinToggleButtonLightsOn found %d", pinToggleButtonLightsOn);
+          } else
+            EXT_LOGE(MB_TAG, "gpio %d not valid", pinToggleButtonLightsOn);
         }
       }
       // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
@@ -263,7 +272,7 @@ class ModuleLightsControl : public Module {
   }
 
   unsigned long lastPresetTime = 0;
-  // see pinButtonLightsOn
+  // see pinPushButtonLightsOn
   unsigned long lastDebounceTime = 0;
   static constexpr unsigned long debounceDelay = 50;  // 50ms debounce
   int lastState = HIGH;
@@ -315,9 +324,9 @@ class ModuleLightsControl : public Module {
       }
     }
 
-    if (pinButtonLightsOn != UINT8_MAX) {
-      int state = digitalRead(pinButtonLightsOn);
-      if (state != lastState && (millis() - lastDebounceTime) > debounceDelay) {
+    if (pinPushButtonLightsOn != UINT8_MAX) {
+      int state = digitalRead(pinPushButtonLightsOn);
+      if ((state != lastState) && ((((millis() - lastDebounceTime) > debounceDelay) || (millis() < lastDebounceTime)))) {        
         lastDebounceTime = millis();
         // Trigger only on button press (HIGH to LOW transition for INPUT_PULLUP)
         if (state == LOW) {
@@ -326,6 +335,18 @@ class ModuleLightsControl : public Module {
           newState["lightsOn"] = !_state.data["lightsOn"];
           update(newState, ModuleState::update, _moduleName + "server");
         }
+        lastState = state;
+      }
+    }
+
+    if (pinToggleButtonLightsOn != UINT8_MAX) {
+      int state = digitalRead(pinToggleButtonLightsOn);
+      if ((state != lastState) && ((((millis() - lastDebounceTime) > debounceDelay) || (millis() < lastDebounceTime)))) {        
+        lastDebounceTime = millis();
+        JsonDocument doc;
+        JsonObject newState = doc.to<JsonObject>();
+        newState["lightsOn"] = !_state.data["lightsOn"];
+        update(newState, ModuleState::update, _moduleName + "server");
         lastState = state;
       }
     }
