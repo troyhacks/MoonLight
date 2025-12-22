@@ -9,7 +9,7 @@
     {
       "chipFamily": "ESP32",
       "name": "esp32-d0-16mb",
-      "image": "./images/esp32-d0.jpg",
+      "image": "./images/esp32-d0-16mb.jpg",
       "parts": [
         { "path": "./MoonLight_esp32-d0-16mb_0-7-0_webflash.bin", "offset": 0 }
       ]
