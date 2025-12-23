@@ -114,8 +114,7 @@ ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit
 ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
 
-volatile xSemaphoreHandle effectSemaphore = xSemaphoreCreateBinary();
-volatile xSemaphoreHandle driverSemaphore = xSemaphoreCreateBinary();
+volatile xSemaphoreHandle lowLevelSemaphore = xSemaphoreCreateBinary();
 
 TaskHandle_t effectTaskHandle = NULL;
 TaskHandle_t driverTaskHandle = NULL;
@@ -128,7 +127,7 @@ void effectTask(void* pvParameters) {
   for (;;) {
     esp32sveltekit.lps++;  // 🌙 todo: not moonlight specific?
 
-    if (xSemaphoreTake(effectSemaphore, pdMS_TO_TICKS(100)) == pdFALSE) {
+    if (xSemaphoreTake(lowLevelSemaphore, pdMS_TO_TICKS(100)) == pdFALSE) {
       // EXT_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
     }
 
@@ -140,7 +139,7 @@ void effectTask(void* pvParameters) {
       layerP.loop20ms();
     }
 
-    xSemaphoreGive(driverSemaphore);
+    xSemaphoreGive(lowLevelSemaphore);
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
@@ -152,11 +151,11 @@ void driverTask(void* pvParameters) {
   // layerP.setup() done in effectTask
 
   for (;;) {
-    xSemaphoreTake(driverSemaphore, pdMS_TO_TICKS(100));
+    xSemaphoreTake(lowLevelSemaphore, pdMS_TO_TICKS(100));
 
     layerP.loopDrivers();
 
-    xSemaphoreGive(effectSemaphore);
+    xSemaphoreGive(lowLevelSemaphore);
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
@@ -324,8 +323,6 @@ void setup() {
       },
       false);
     #endif
-
-  xSemaphoreGive(effectSemaphore);  // Allow effectTask to run first
 
   // 🌙
   xTaskCreateUniversal(effectTask,                          // task function
