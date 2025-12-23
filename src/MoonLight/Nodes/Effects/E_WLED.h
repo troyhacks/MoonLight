@@ -1638,12 +1638,12 @@ class FlowEffect : public Node {
       counter = counter >> 8;
     }
 
-    uint16_t maxZones = layer->size.x / 6;  // only looks good if each zone has at least 6 LEDs
+    uint16_t maxZones = layer->size.y / 6;  // only looks good if each zone has at least 6 LEDs
     uint16_t zones = (zonesControl * maxZones) >> 8;
     if (zones & 0x01) zones++;  // zones must be even
     if (zones < 2) zones = 2;
-    uint16_t zoneLen = layer->size.x / zones;
-    uint16_t offset = (layer->size.x - zones * zoneLen) >> 1;
+    uint16_t zoneLen = layer->size.y / zones;
+    uint16_t offset = (layer->size.y - zones * zoneLen) >> 1;
 
     layer->fill_solid(ColorFromPalette(layerP.palette, -counter));
 
@@ -1652,7 +1652,7 @@ class FlowEffect : public Node {
       for (int i = 0; i < zoneLen; i++) {
         uint8_t colorIndex = (i * 255 / zoneLen) - counter;
         uint16_t led = (z & 0x01) ? i : (zoneLen - 1) - i;
-        layer->setRGB(pos + led, ColorFromPalette(layerP.palette, colorIndex));
+        layer->setRGB(Coord3D(0, pos + led), ColorFromPalette(layerP.palette, colorIndex));
       }
     }
   }
@@ -1668,8 +1668,8 @@ static void mode_fireworks(VirtualLayer* layer, uint16_t x, uint16_t aux0, uint1
   bool valid1 = (aux0 < layer->size.y);
   bool valid2 = (aux1 < layer->size.y);
   CRGB sv1 = 0, sv2 = 0;
-  if (valid1) sv1 = layer->getRGB(Coord3D(0, layer->size.y - 1 - aux0));
-  if (valid2) sv2 = layer->getRGB(Coord3D(0, layer->size.y - 1 - aux1));
+  if (valid1) sv1 = layer->getRGB(Coord3D(x, layer->size.y - 1 - aux0));
+  if (valid2) sv2 = layer->getRGB(Coord3D(x, layer->size.y - 1 - aux1));
 
   // WLEDSR
   uint8_t blurAmount = 255 - speed;
@@ -1793,7 +1793,7 @@ class RainEffect : public Node {
 class DripEffect : public Node {
  public:
   static const char* name() { return "Drip"; }
-  static uint8_t dim() { return _1D; }
+  static uint8_t dim() { return _2D; }
   static const char* tags() { return "🐙💫"; }
 
   uint8_t gravityControl = 128;
@@ -1935,8 +1935,8 @@ class HeartBeatEffect : public Node {
       step = millis();
     }
 
-    for (int i = 0; i < layer->size.x; i++) {
-      layer->setRGB(i, ColorFromPalette(layerP.palette, ::map(i, 0, layer->size.x, 0, 255), 255 - (bri_lower >> 8)));
+    for (int i = 0; i < layer->size.y; i++) {
+      layer->setRGB(Coord3D(0, i), ColorFromPalette(layerP.palette, ::map(i, 0, layer->size.y, 0, 255), 255 - (bri_lower >> 8)));
     }
   }
 };  // HeartBeatEffect
