@@ -129,17 +129,19 @@ void effectTask(void* pvParameters) {
 
     if (xSemaphoreTake(lowLevelSemaphore, pdMS_TO_TICKS(100)) == pdFALSE) {
       // EXT_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
+      //EXT_LOGW(ML_TAG, "effect: semaphore wait too long");
     }
+    else {
+      layerP.loop();  // run all the effects of all virtual layers (currently only one layer)
 
-    layerP.loop();  // run all the effects of all virtual layers (currently only one layer)
+      static unsigned long last20ms = 0;
+      if (millis() - last20ms >= 20) {
+        last20ms = millis();
+        layerP.loop20ms();
+      }
 
-    static unsigned long last20ms = 0;
-    if (millis() - last20ms >= 20) {
-      last20ms = millis();
-      layerP.loop20ms();
+      xSemaphoreGive(lowLevelSemaphore);
     }
-
-    xSemaphoreGive(lowLevelSemaphore);
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
@@ -151,12 +153,14 @@ void driverTask(void* pvParameters) {
   // layerP.setup() done in effectTask
 
   for (;;) {
-    xSemaphoreTake(lowLevelSemaphore, pdMS_TO_TICKS(100));
+    if (xSemaphoreTake(lowLevelSemaphore, pdMS_TO_TICKS(100))  == pdFALSE) {
+      //EXT_LOGW(ML_TAG, "driver: semaphore wait too long");
+    }
+    else {
+      layerP.loopDrivers();
 
-    layerP.loopDrivers();
-
-    xSemaphoreGive(lowLevelSemaphore);
-
+      xSemaphoreGive(lowLevelSemaphore);
+    }
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
 }
@@ -323,6 +327,8 @@ void setup() {
       },
       false);
     #endif
+
+  xSemaphoreGive(lowLevelSemaphore);
 
   // 🌙
   xTaskCreateUniversal(effectTask,                          // task function
