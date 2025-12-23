@@ -1010,13 +1010,11 @@ class TetrixEffect : public Node {
   void loop() override {
     if (!drops) return;
 
-    uint16_t strips = layer->size.x;  // allow running on virtual strips (columns in 2D segment)
-
     // if (SEGENV.call == 0) layer->fill(SEGCOLOR(1));  // will fill entire segment (1D or 2D), then use drops[x].step = 0 below
 
     const uint8_t FRAMETIME = 1000 / 40;
 
-    for (int x = 0; x < layer->size.x; x++) {
+    for (int x = 0; x < nrOfDrops; x++) {
       if (drops[x].step == 0) {  // init brick
         // speed calculation: a single brick should reach bottom of strip in X seconds
         // if the speed is set to 1 this should take 5s and at 255 it should take 0.25s
@@ -1773,9 +1771,9 @@ class RainEffect : public Node {
         // } else
         {
           // shift all leds down
-          CRGB ctemp = layer->getRGB(Coord3D(0, 0));
+          CRGB ctemp = layer->getRGB(Coord3D(x, 0));
           for (int i = 0; i < layer->size.y - 1; i++) {
-            layer->setRGB(Coord3D(x, layer->size.y - 1 - i), layer->getRGB(Coord3D(0, layer->size.y - 1 - (i + 1))));
+            layer->setRGB(Coord3D(x, layer->size.y - 1 - i), layer->getRGB(Coord3D(x, layer->size.y - 1 - (i + 1))));
           }
           layer->setRGB(Coord3D(x, 0), ctemp);  // wrap around
           drops[x].pos++;                       // increase spark index
@@ -1874,9 +1872,9 @@ class DripEffect : public Node {
 
             layer->setRGB(Coord3D(x, layer->size.y - 1 - drops[x][j].pos), dropColor);  // needed for bouncing
 
-            for (int i = 1; i < 7 - drops[x][j].colIndex; i++) {                                   // some minor math so we don't expand bouncing droplets
-              uint16_t pos = constrain(drops[x][j].pos + i, layer->size.y - 1, 0);                 // this is BAD, returns a pos >= layer->size.x occasionally
-              layer->setRGB(Coord3D(x, pos), blend(CRGB::Black, dropColor, drops[x][j].col / i));  // spread pixel with fade while falling
+            for (int i = 1; i < 7 - drops[x][j].colIndex; i++) {                                                       // some minor math so we don't expand bouncing droplets
+              uint16_t pos = constrain(drops[x][j].pos + i, 0, layer->size.y - 1);                                     // this is BAD, returns a pos >= layer->size.y occasionally
+              layer->setRGB(Coord3D(x, layer->size.y - 1 - pos), blend(CRGB::Black, dropColor, drops[x][j].col / i));  // spread pixel with fade while falling
             }
 
             if (drops[x][j].colIndex > falling) {  // during bounce, some water is on the floor
