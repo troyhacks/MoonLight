@@ -38,15 +38,26 @@ PhysicalLayer::PhysicalLayer() {
 void PhysicalLayer::setup() {
   // allocate lights.channels
 
-  if (psramFound())
-    lights.maxChannels = MIN(ESP.getPsramSize() / 2, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
-  else
+  if (psramFound()) {
+    lights.maxChannels = MIN(ESP.getPsramSize() / 4, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
+    lights.useDoubleBuffer = true;                                // Enable double buffering
+  } else {
     lights.maxChannels = 4096 * 3;  // esp32-d0: max 1024->2048->4096 Leds ATM
+    lights.useDoubleBuffer = false;  // Single buffer mode
+  }
 
   lights.channels = allocMB<uint8_t>(lights.maxChannels);
 
   if (lights.channels) {
     EXT_LOGD(ML_TAG, "allocated %d bytes in %s", lights.maxChannels, isInPSRAM(lights.channels) ? "PSRAM" : "RAM");
+    // Allocate back buffer only if PSRAM available
+    if (lights.useDoubleBuffer) {
+      lights.channelsBack = allocMB<uint8_t>(lights.maxChannels);
+      if (!lights.channelsBack) {
+        EXT_LOGW(ML_TAG, "Failed to allocate back buffer, disabling double buffering");
+        lights.useDoubleBuffer = false;
+      }
+    }
   } else {
     EXT_LOGE(ML_TAG, "failed to allocated %d bytes of RAM or PSRAM", lights.maxChannels);
     lights.maxChannels = 0;

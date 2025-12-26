@@ -326,7 +326,7 @@ class ModuleLightsControl : public Module {
 
     if (pinPushButtonLightsOn != UINT8_MAX) {
       int state = digitalRead(pinPushButtonLightsOn);
-      if ((state != lastState) && ((((millis() - lastDebounceTime) > debounceDelay) || (millis() < lastDebounceTime)))) {        
+      if ((state != lastState) && ((((millis() - lastDebounceTime) > debounceDelay) || (millis() < lastDebounceTime)))) {
         lastDebounceTime = millis();
         // Trigger only on button press (HIGH to LOW transition for INPUT_PULLUP)
         if (state == LOW) {
@@ -341,7 +341,7 @@ class ModuleLightsControl : public Module {
 
     if (pinToggleButtonLightsOn != UINT8_MAX) {
       int state = digitalRead(pinToggleButtonLightsOn);
-      if ((state != lastState) && ((((millis() - lastDebounceTime) > debounceDelay) || (millis() < lastDebounceTime)))) {        
+      if ((state != lastState) && ((((millis() - lastDebounceTime) > debounceDelay) || (millis() < lastDebounceTime)))) {
         lastDebounceTime = millis();
         JsonDocument doc;
         JsonObject newState = doc.to<JsonObject>();
@@ -364,9 +364,17 @@ class ModuleLightsControl : public Module {
       });
     } else if (layerP.lights.header.isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
       EVERY_N_MILLIS(layerP.lights.header.nrOfLights / 12) {
+        
         read([&](ModuleState& _state) {
-          if (_socket->getConnectedClients() && _state.data["monitorOn"]) _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfChannels, layerP.lights.maxChannels));
+          if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
+            extern SemaphoreHandle_t swapMutex;
+            
+            xSemaphoreTake(swapMutex, portMAX_DELAY);
+            _socket->emitEvent("monitor", (char*)layerP.lights.channels, MIN(layerP.lights.header.nrOfChannels, layerP.lights.maxChannels));
+            xSemaphoreGive(swapMutex);
+          }
         });
+
       }
     }
   #endif

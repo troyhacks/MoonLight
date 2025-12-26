@@ -114,7 +114,8 @@ ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit
 ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
 
-volatile xSemaphoreHandle lowLevelSemaphore = xSemaphoreCreateBinary();
+SemaphoreHandle_t swapMutex = NULL;
+volatile bool newFrameReady = false;
 
 TaskHandle_t effectTaskHandle = NULL;
 TaskHandle_t driverTaskHandle = NULL;
@@ -123,24 +124,38 @@ void effectTask(void* pvParameters) {
   // 🌙
 
   layerP.setup();  // setup virtual layers (no node setup here as done in addNode)
+  static unsigned long last20ms = 0;
 
   for (;;) {
-    esp32sveltekit.lps++;  // 🌙 todo: not moonlight specific?
+    if (layerP.lights.useDoubleBuffer) {
+      // effectTask always writes to channelsBack, reads previous channelsBack
+      layerP.lights.channels = layerP.lights.channelsBack;
+      layerP.loop();  // getRGB and setRGB both use channelsBack
 
-    if (xSemaphoreTake(lowLevelSemaphore, pdMS_TO_TICKS(100)) == pdFALSE) {
-      // EXT_LOGW(ML_TAG, "effectSemaphore wait too long"); //happens if no driver!, but let effects continue (for monitor) at 10 fps
-      //EXT_LOGW(ML_TAG, "effect: semaphore wait too long");
-    }
-    else {
-      layerP.loop();  // run all the effects of all virtual layers (currently only one layer)
-
-      static unsigned long last20ms = 0;
       if (millis() - last20ms >= 20) {
         last20ms = millis();
         layerP.loop20ms();
       }
 
-      xSemaphoreGive(lowLevelSemaphore);
+      // Atomic swap channels
+      xSemaphoreTake(swapMutex, portMAX_DELAY);
+      uint8_t* temp = layerP.lights.channelsBack;
+      layerP.lights.channelsBack = layerP.lights.channels;
+      layerP.lights.channels = temp;
+      newFrameReady = true;
+      xSemaphoreGive(swapMutex);
+
+    } else {
+      // Single buffer mode
+      xSemaphoreTake(swapMutex, portMAX_DELAY);
+      layerP.loop();
+
+      if (millis() - last20ms >= 20) {
+        last20ms = millis();
+        layerP.loop20ms();
+      }
+
+      xSemaphoreGive(swapMutex);
     }
 
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
@@ -153,15 +168,25 @@ void driverTask(void* pvParameters) {
   // layerP.setup() done in effectTask
 
   for (;;) {
-    if (xSemaphoreTake(lowLevelSemaphore, pdMS_TO_TICKS(100))  == pdFALSE) {
-      //EXT_LOGW(ML_TAG, "driver: semaphore wait too long");
-    }
-    else {
-      layerP.loopDrivers();
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
+    esp32sveltekit.lps++;
 
-      xSemaphoreGive(lowLevelSemaphore);
+    if (layerP.lights.useDoubleBuffer) {
+      if (newFrameReady) {
+        newFrameReady = false;
+        // Double buffer: release lock, then send
+        xSemaphoreGive(swapMutex);
+        layerP.loopDrivers();  // ✅ No lock needed
+      } else {
+        xSemaphoreGive(swapMutex);
+      }
+    } else {
+      // Single buffer: keep lock while sending
+      layerP.loopDrivers();  // ✅ Protected by lock
+      xSemaphoreGive(swapMutex);
     }
-    vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
+
+    vTaskDelay(1);
   }
 }
   #endif
@@ -222,39 +247,39 @@ void setup() {
     safeModeMB = true;
   }
 
-//   // check sizes ...
-//   sizeof(esp32sveltekit);                // 4152
-//   sizeof(WiFiSettingsService);           // 456
-//   sizeof(SystemStatus);                  // 16
-//   sizeof(UploadFirmwareService);         // 32
-//   sizeof(HttpEndpoint<ModuleState>);     // 152
-//   sizeof(EventEndpoint<ModuleState>);    // 112
-//   sizeof(SharedEventEndpoint);           // 8
-//   sizeof(WebSocketServer<ModuleState>);  // 488
-//   sizeof(SharedWebSocketServer);         // 352
-//   sizeof(FSPersistence<ModuleState>);    // 128
-//   sizeof(PsychicHttpServer*);            // 8
-//   sizeof(HttpEndpoint<APSettings>);      // 152
-//   sizeof(SharedHttpEndpoint);            // 16
-//   sizeof(FSPersistence<APSettings>);     // 128
-//   sizeof(APSettingsService);             // 600;
-//   sizeof(PsychicWebSocketHandler);       // 336
-//   sizeof(fileManager);                   // 864
-//   sizeof(Module);                        // 1144 -> 472
-//   sizeof(moduleDevices);                 // 1320
-//   sizeof(moduleIO);                      // 1144
-// #if FT_ENABLED(FT_MOONLIGHT)
-//   sizeof(moduleEffects);        // 1208
-//   sizeof(moduleDrivers);        // 1216
-//   sizeof(moduleLightsControl);  // 1176
-//   #if FT_ENABLED(FT_LIVESCRIPT)
-//   sizeof(moduleLiveScripts);  // 1176
-//   #endif
-//   sizeof(moduleChannels);        // 1144
-//   sizeof(moduleMoonLightInfo);   // 1144
-//   sizeof(layerP.lights);         // 56
-//   sizeof(layerP.lights.header);  // 40
-// #endif
+  //   // check sizes ...
+  //   sizeof(esp32sveltekit);                // 4152
+  //   sizeof(WiFiSettingsService);           // 456
+  //   sizeof(SystemStatus);                  // 16
+  //   sizeof(UploadFirmwareService);         // 32
+  //   sizeof(HttpEndpoint<ModuleState>);     // 152
+  //   sizeof(EventEndpoint<ModuleState>);    // 112
+  //   sizeof(SharedEventEndpoint);           // 8
+  //   sizeof(WebSocketServer<ModuleState>);  // 488
+  //   sizeof(SharedWebSocketServer);         // 352
+  //   sizeof(FSPersistence<ModuleState>);    // 128
+  //   sizeof(PsychicHttpServer*);            // 8
+  //   sizeof(HttpEndpoint<APSettings>);      // 152
+  //   sizeof(SharedHttpEndpoint);            // 16
+  //   sizeof(FSPersistence<APSettings>);     // 128
+  //   sizeof(APSettingsService);             // 600;
+  //   sizeof(PsychicWebSocketHandler);       // 336
+  //   sizeof(fileManager);                   // 864
+  //   sizeof(Module);                        // 1144 -> 472
+  //   sizeof(moduleDevices);                 // 1320
+  //   sizeof(moduleIO);                      // 1144
+  // #if FT_ENABLED(FT_MOONLIGHT)
+  //   sizeof(moduleEffects);        // 1208
+  //   sizeof(moduleDrivers);        // 1216
+  //   sizeof(moduleLightsControl);  // 1176
+  //   #if FT_ENABLED(FT_LIVESCRIPT)
+  //   sizeof(moduleLiveScripts);  // 1176
+  //   #endif
+  //   sizeof(moduleChannels);        // 1144
+  //   sizeof(moduleMoonLightInfo);   // 1144
+  //   sizeof(layerP.lights);         // 56
+  //   sizeof(layerP.lights.header);  // 40
+  // #endif
 
   // start ESP32-SvelteKit
   esp32sveltekit.begin();
@@ -328,16 +353,16 @@ void setup() {
       false);
     #endif
 
-  xSemaphoreGive(lowLevelSemaphore);
+  swapMutex = xSemaphoreCreateMutex();
 
   // 🌙
   xTaskCreateUniversal(effectTask,                          // task function
                        "AppEffectTask",                     // name
                        psramFound() ? 4 * 1024 : 3 * 1024,  // d0-tuning... stack size (without livescripts we can do with 12...). updated from 4 to 6 to support preset loop
                        NULL,                                // parameter
-                       3,                                   // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
+                       10,                                  // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                        &effectTaskHandle,                   // task handle
-                       1                                    // core (0 or 1)
+                       0                                    // core (0 or 1)
   );
 
   xTaskCreateUniversal(driverTask,                          // task function

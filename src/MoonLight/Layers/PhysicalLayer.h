@@ -88,8 +88,10 @@ struct LightsHeader {
 
 struct Lights {
   LightsHeader header;
-  uint8_t* channels = nullptr;  // //pka leds, created in constructor
+  uint8_t* channels = nullptr;      // pka leds, created in constructor
+  uint8_t* channelsBack = nullptr;  // Back buffer (being written by effects)
   size_t maxChannels = 0;
+  bool useDoubleBuffer = false;  // Only when PSRAM available
 
   // std::vector<size_t> universes; //tells at which byte the universe starts
 };
