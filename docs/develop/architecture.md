@@ -161,19 +161,22 @@ Synchronization Flow
 
 void effectTask(void* param) {
   while (true) {
-    if (useDoubleBuffer) {
-      // Step 1: Copy front → back (NO LOCK)
-      memcpy(channelsBack, channels, nrOfChannels);
-      
-      // Step 2: Compute effects on back buffer (NO LOCK, 5-15ms)
-      uint8_t* temp = channels;
-      channels = channelsBack;
-      computeEffects();  // Reads and writes channelsBack
-      
-      // Step 3: BRIEF LOCK - Swap pointers (10µs)
+    if (layerP.lights.useDoubleBuffer) {
+      layerP.lights.channels = layerP.lights.channelsBack;
+      layerP.loop();  // getRGB and setRGB both use channelsBack
+
+      // Atomic swap channels
       xSemaphoreTake(swapMutex, portMAX_DELAY);
-      channelsBack = channels;
-      channels = temp;
+      uint8_t* temp = layerP.lights.channelsBack;
+      layerP.lights.channelsBack = layerP.lights.channels;
+      layerP.lights.channels = temp;
+      newFrameReady = true;
+      xSemaphoreGive(swapMutex);
+
+    } else {
+      xSemaphoreTake(swapMutex, portMAX_DELAY);
+      layerP.loop();
+
       xSemaphoreGive(swapMutex);
     }
     vTaskDelay(1);
@@ -182,14 +185,20 @@ void effectTask(void* param) {
 
 void driverTask(void* param) {
   while (true) {
-    if (useDoubleBuffer) {
-      // Step 4: BRIEF LOCK - Capture pointer (10µs)
-      xSemaphoreTake(swapMutex, portMAX_DELAY);
-      uint8_t* currentFrame = channels;
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
+    esp32sveltekit.lps++;
+
+    if (layerP.lights.useDoubleBuffer) {
+      if (newFrameReady) {
+        newFrameReady = false;
+        xSemaphoreGive(swapMutex);
+        layerP.loopDrivers();  // ✅ No lock needed
+      } else {
+        xSemaphoreGive(swapMutex);
+      }
+    } else {
+      layerP.loopDrivers();  // ✅ Protected by lock
       xSemaphoreGive(swapMutex);
-      
-      // Step 5: Send to LEDs (NO LOCK, 1-5ms)
-      sendViaDMA(currentFrame);
     }
     vTaskDelay(1);
   }
@@ -387,7 +396,7 @@ xTaskCreateUniversal(effectTask,
                      "AppEffectTask",
                      psramFound() ? 4 * 1024 : 3 * 1024,
                      NULL,
-                     3,  // Priority
+                     10,  // Priority
                      &effectTaskHandle,
                      0   // Core 0 (PRO_CPU)
 );

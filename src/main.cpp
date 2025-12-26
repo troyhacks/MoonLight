@@ -126,7 +126,7 @@ void effectTask(void* pvParameters) {
   layerP.setup();  // setup virtual layers (no node setup here as done in addNode)
   static unsigned long last20ms = 0;
 
-  for (;;) {
+  while (true) {
     if (layerP.lights.useDoubleBuffer) {
       // effectTask always writes to channelsBack, reads previous channelsBack
       layerP.lights.channels = layerP.lights.channelsBack;
@@ -167,7 +167,7 @@ void driverTask(void* pvParameters) {
 
   // layerP.setup() done in effectTask
 
-  for (;;) {
+  while (true) {
     xSemaphoreTake(swapMutex, portMAX_DELAY);
     esp32sveltekit.lps++;
 

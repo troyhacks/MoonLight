@@ -367,6 +367,8 @@ class ModuleLightsControl : public Module {
         
         read([&](ModuleState& _state) {
           if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
+
+            //protect emit by swapMutex, see main.cpp
             extern SemaphoreHandle_t swapMutex;
             
             xSemaphoreTake(swapMutex, portMAX_DELAY);
