@@ -40,6 +40,7 @@ nav:
     - develop/nodes.md
     - develop/modules.md
     - develop/layers.md
+    - develop/architecture.md
     - develop/sveltekit.md
     - develop/documentation.md
   - "ESP32 SvelteKit":
