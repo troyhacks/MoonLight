@@ -129,7 +129,6 @@ void effectTask(void* pvParameters) {
   while (true) {
     if (layerP.lights.useDoubleBuffer) {
       // effectTask always writes to channelsBack, reads previous channelsBack
-      layerP.lights.channelsE = layerP.lights.channelsD;
       layerP.loop();  // getRGB and setRGB both use channelsBack
 
       if (millis() - last20ms >= 20) {

@@ -10,11 +10,11 @@ MoonLight uses a multi-core, multi-task architecture on ESP32 to achieve smooth 
 |------|------|----------|------------|-----------|---------|
 | **WiFi/BT** | 0 (PRO_CPU) | 23 | System | Event-driven | System networking stack |
 | **lwIP TCP/IP** | 0 (PRO_CPU) | 18 | System | Event-driven | TCP/IP protocol processing |
-| **Effect Task** | 0 (PRO_CPU) | 3 | 3-4KB | ~60 fps | Calculate LED colors and effects |
+| **Effect Task** | 0 (PRO_CPU) | 10 | 3-4KB | ~60 fps | Calculate LED colors and effects |
 | **ESP32SvelteKit** | 1 (APP_CPU) | 2 | System | 10ms | HTTP/WebSocket UI framework |
 | **Driver Task** | 1 (APP_CPU) | 3 | 3-4KB | ~60 fps | Output data to LEDs via DMA/I2S/LCD/PARLIO |
 
-Effect Task (Core 0, Priority 3)
+Effect Task (Core 0, Priority 10)
 
 - **Function**: Pure computation - calculates pixel colors based on effect algorithms
 - **Operations**: Reads/writes to `channels` array, performs mathematical calculations
@@ -162,7 +162,6 @@ Synchronization Flow
 void effectTask(void* param) {
   while (true) {
     if (layerP.lights.useDoubleBuffer) {
-      layerP.lights.channelsE = layerP.lights.channelsD;
 
       layerP.loop();  // getRGB and setRGB both use channelsBack
 
@@ -177,7 +176,6 @@ void effectTask(void* param) {
     } else {
       xSemaphoreTake(swapMutex, portMAX_DELAY);
       layerP.loop();
-
       xSemaphoreGive(swapMutex);
     }
     vTaskDelay(1);
