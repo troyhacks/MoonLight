@@ -162,14 +162,15 @@ Synchronization Flow
 void effectTask(void* param) {
   while (true) {
     if (layerP.lights.useDoubleBuffer) {
-      layerP.lights.channels = layerP.lights.channelsBack;
+      layerP.lights.channelsE = layerP.lights.channelsD;
+
       layerP.loop();  // getRGB and setRGB both use channelsBack
 
       // Atomic swap channels
       xSemaphoreTake(swapMutex, portMAX_DELAY);
-      uint8_t* temp = layerP.lights.channelsBack;
-      layerP.lights.channelsBack = layerP.lights.channels;
-      layerP.lights.channels = temp;
+      uint8_t* temp = layerP.lights.channelsD;
+      layerP.lights.channelsD = layerP.lights.channelsE;
+      layerP.lights.channelsE = temp;
       newFrameReady = true;
       xSemaphoreGive(swapMutex);
 
@@ -366,11 +367,11 @@ Double buffering is **automatically enabled** when PSRAM is detected:
 // In PhysicalLayer::setup()
 if (psramFound()) {
   lights.useDoubleBuffer = true;
-  lights.channels = allocMB<uint8_t>(maxChannels);
-  lights.channelsBack = allocMB<uint8_t>(maxChannels);
+  lights.channelsE = allocMB<uint8_t>(maxChannels);
+  lights.channelsD = allocMB<uint8_t>(maxChannels);
 } else {
   lights.useDoubleBuffer = false;
-  lights.channels = allocMB<uint8_t>(maxChannels);
+  lights.channelsE = allocMB<uint8_t>(maxChannels);
 }
 ```
 

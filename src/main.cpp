@@ -129,7 +129,7 @@ void effectTask(void* pvParameters) {
   while (true) {
     if (layerP.lights.useDoubleBuffer) {
       // effectTask always writes to channelsBack, reads previous channelsBack
-      layerP.lights.channels = layerP.lights.channelsBack;
+      layerP.lights.channelsE = layerP.lights.channelsD;
       layerP.loop();  // getRGB and setRGB both use channelsBack
 
       if (millis() - last20ms >= 20) {
@@ -139,9 +139,9 @@ void effectTask(void* pvParameters) {
 
       // Atomic swap channels
       xSemaphoreTake(swapMutex, portMAX_DELAY);
-      uint8_t* temp = layerP.lights.channelsBack;
-      layerP.lights.channelsBack = layerP.lights.channels;
-      layerP.lights.channels = temp;
+      uint8_t* temp = layerP.lights.channelsD;
+      layerP.lights.channelsD = layerP.lights.channelsE;
+      layerP.lights.channelsE = temp;
       newFrameReady = true;
       xSemaphoreGive(swapMutex);
 
