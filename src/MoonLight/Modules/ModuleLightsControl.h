@@ -372,7 +372,7 @@ class ModuleLightsControl : public Module {
             extern SemaphoreHandle_t swapMutex;
             
             xSemaphoreTake(swapMutex, portMAX_DELAY);
-            _socket->emitEvent("monitor", (char*)layerP.lights.channelsD, MIN(layerP.lights.header.nrOfChannels, layerP.lights.maxChannels));
+            _socket->emitEvent("monitor", (char*)layerP.lights.channelsE, MIN(layerP.lights.header.nrOfChannels, layerP.lights.maxChannels));
             xSemaphoreGive(swapMutex);
           }
         });
