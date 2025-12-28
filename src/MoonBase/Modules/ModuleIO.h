@@ -60,6 +60,7 @@ enum IO_PinUsageEnum {
   pin_PHY_IRQ,
   pin_RS485_TX,
   pin_RS485_RX,
+  pin_RS485_DE,
   pin_Dig_Input,  // Digital Input pin type. May contains some protection circuit
   pin_Exposed,
   pin_Reserved,
@@ -77,6 +78,7 @@ enum IO_BoardsEnum {
   board_SergUniShieldV5,
   board_SergMiniShield,
   board_SE16V1,
+  board_SE16V2,
   board_MHCV43,       // by Wladi
   board_MHCP4NanoV1,  // by Wladi V1.0
   board_YvesV48,
@@ -116,6 +118,7 @@ class ModuleIO : public Module {
     addControlValue(control, "Serg Universal Shield");
     addControlValue(control, "Serg Mini Shield");
     addControlValue(control, "Mathieu SE16 v1");
+    addControlValue(control, "Lightcrafter 16");
     addControlValue(control, "MyHome-Control V43 controller");
     addControlValue(control, "MyHome-Control P4 Nano Shield V1.0");
     addControlValue(control, "Yves V48 🚧");
@@ -189,6 +192,7 @@ class ModuleIO : public Module {
       addControlValue(control, "PHY IRQ 🔗");
       addControlValue(control, "RS-485 TX");
       addControlValue(control, "RS-485 RX");
+      addControlValue(control, "RS-485 DE");
       addControlValue(control, "Digital Input");
       addControlValue(control, "Exposed");
       addControlValue(control, "Reserved");
@@ -301,6 +305,23 @@ class ModuleIO : public Module {
         pinAssigner.assignPin(5, pin_Infrared);
       }
 
+    } else if (boardID == board_SE16V2) {
+      object["maxPower"] = 500;
+      uint8_t ledPins[] = {47, 21, 14, 9, 8, 16, 15, 7, 1, 2, 42, 41, 40, 39, 38, 48};  // LED_PINS
+      for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
+      pinAssigner.assignPin(3, pin_OnBoardLed);   // WIZ580_nRST, needs to be high to access RS485_DE, VBUS_DET, WIZ580_nINT. Also drives an LED.
+      pinAssigner.assignPin(17, pin_Serial_TX);
+      pinAssigner.assignPin(18, pin_Serial_RX);
+      pinAssigner.assignPin(46, pin_RS485_DE);
+      pinAssigner.assignPin(0, pin_Dig_Input);    // Native USB port vbus detection
+      pinAssigner.assignPin(5, pin_Voltage);      // Input voltage
+      pinAssigner.assignPin(6, pin_Current);      // Input current
+      pinAssigner.assignPin(13, pin_SPI_MISO);    // WIZ850IO MISO
+      pinAssigner.assignPin(11, pin_SPI_MOSI);    // WIZ850IO MOSI
+      pinAssigner.assignPin(12, pin_SPI_SCK);     // WIZ850IO CLK
+      pinAssigner.assignPin(10, pin_PHY_CS);      // WIZ850IO nCS
+      pinAssigner.assignPin(45, pin_PHY_IRQ);     // WIZ850IO nINT
+      pinAssigner.assignPin(4, pin_Infrared);
     } else if (boardID == board_QuinLEDDigUnoV3) {
       // Dig-Uno-V3
       // esp32-d0 (4MB)
