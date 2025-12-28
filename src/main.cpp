@@ -131,13 +131,11 @@ void effectTask(void* pvParameters) {
     // Check state under lock
     xSemaphoreTake(swapMutex, portMAX_DELAY);
     uint8_t isPositions = layerP.lights.header.isPositions;
+    bool canProduce = !newFrameReady;
     xSemaphoreGive(swapMutex);
 
     if (isPositions == 0) {  // driver task can change this
       if (layerP.lights.useDoubleBuffer) {
-        xSemaphoreTake(swapMutex, portMAX_DELAY);
-        bool canProduce = !newFrameReady;
-        xSemaphoreGive(swapMutex);
 
         if (canProduce) {
           // Copy previous frame (channelsD) to working buffer (channelsE)

@@ -45,18 +45,16 @@ sequenceDiagram
     participant EffectTask
     participant DriverTask
     participant LEDs
-    participant FileSystem
 
     Note over EffectTask,DriverTask: Both tasks synchronized via mutex
 
     User->>WebUI: Adjust effect parameter
     WebUI->>SvelteKit: WebSocket message
     SvelteKit->>SvelteKit: Update in-memory state
-    SvelteKit->>SvelteKit: Queue deferred write
     
     Note over EffectTask: Core 0 (PRO_CPU)
     EffectTask->>EffectTask: Take mutex (10µs)
-    EffectTask->>EffectTask: memcpy front→back buffer
+    EffectTask->>EffectTask: memcpy channelsD → channelsE
     EffectTask->>EffectTask: Release mutex
     EffectTask->>EffectTask: Compute effects (5-15ms)
     EffectTask->>EffectTask: Take mutex (10µs)
@@ -69,11 +67,6 @@ sequenceDiagram
     DriverTask->>DriverTask: Release mutex
     DriverTask->>DriverTask: Send via DMA (1-5ms)
     DriverTask->>LEDs: Pixel data
-
-    User->>WebUI: Click "Save Config"
-    WebUI->>SvelteKit: POST /rest/saveConfig
-    SvelteKit->>FileSystem: Execute all deferred writes
-    FileSystem-->>SvelteKit: Write complete (10-50ms)
 ```
 
 ## Core Assignments
@@ -139,19 +132,19 @@ Buffer Architecture (PSRAM Only)
 ```mermaid
 graph LR
     subgraph MemoryBuffers["Memory Buffers"]
-        Front[Front Buffer<br/>channels*]
-        Back[Back Buffer<br/>channelsBack*]
+        Effects[Effects Buffer<br/>channelsE*]
+        Drivers[Drivers Buffer<br/>channelsD*]
     end
     
-    EffectTask[Effect Task<br/>Core 0] -.->|1. memcpy| Back
-    EffectTask -.->|2. Compute effects| Back
-    EffectTask -.->|3. Swap pointers<br/>MUTEX 10µs| Front
+    EffectTask[Effect Task<br/>Core 0] -.->|1. memcpy| Drivers
+    EffectTask -.->|2. Compute effects| Drivers
+    EffectTask -.->|3. Swap pointers<br/>MUTEX 10µs| Effects
     
-    DriverTask[Driver Task<br/>Core 1] -->|4. Read pixels| Front
+    DriverTask[Driver Task<br/>Core 1] -->|4. Read pixels| Effects
     DriverTask -->|5. Send via DMA| LEDs[LEDs]
     
-    style Front fill:#898f89
-    style Back fill:#898c8f
+    style Effects fill:#898f89
+    style Drivers fill:#898c8f
 ```
 
 Synchronization Flow
@@ -161,14 +154,50 @@ Synchronization Flow
 
 void effectTask(void* param) {
   while (true) {
-    // tbd ...
-    vTaskDelay(1);
+    uint8_t isPositions = layerP.lights.header.isPositions;
+    bool canProduce = !newFrameReady;
+
+    if (isPositions == 0) {  // driver task can change this
+      if (layerP.lights.useDoubleBuffer) {
+
+        if (canProduce) {
+          // Copy previous frame (channelsD) to working buffer (channelsE)
+          memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);
+
+          layerP.loop();
+
+          // Atomic swap channels
+          uint8_t* temp = layerP.lights.channelsD;
+          layerP.lights.channelsD = layerP.lights.channelsE;
+          layerP.lights.channelsE = temp;
+          newFrameReady = true;
+        }
+
+      } else {
+        // Single buffer mode
+        layerP.loop();
+      }
+      vTaskDelay(1);
   }
 }
 
 void driverTask(void* param) {
   while (true) {
-    // tbd ...
+     if (isPositions == 0) {
+      if (layerP.lights.useDoubleBuffer) {
+        if (newFrameReady) {
+          newFrameReady = false;
+          // Double buffer: release lock, then send
+ 
+          esp32sveltekit.lps++;
+          layerP.loopDrivers();  // ✅ No lock needed
+        }
+      } else {
+        // Single buffer: keep lock while sending
+        esp32sveltekit.lps++;
+        layerP.loopDrivers();  // ✅ Protected by lock
+      }
+    }
     vTaskDelay(1);
   }
 }
@@ -186,79 +215,6 @@ Performance Impact
 | 20,000 | 60 KB | 200 µs | 1.2% |
 
 **Conclusion**: Double buffering overhead is negligible (<1% for typical setups).
-
-## State Persistence & Deferred Writes
-
-Why Deferred Writes?
-
-Flash write operations (LittleFS) **block all CPU cores** for 10-50ms, causing:
-
-- ❌ Dropped frames (2-6 frames at 60fps)
-- ❌ Visible LED stutter
-- ❌ Poor user experience during settings changes
-
-Solution: Deferred Write Queue
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI
-    participant Module
-    participant WriteQueue
-    participant FileSystem
-
-    User->>UI: Move slider
-    UI->>Module: Update state (in-memory)
-    Module->>WriteQueue: Queue write operation
-    Note over WriteQueue: Changes accumulate<br/>in memory
-
-    User->>UI: Move slider again
-    UI->>Module: Update state (in-memory)
-    Note over WriteQueue: Previous write replaced<br/>No flash access yet
-
-    User->>UI: Click "Save Config"
-    UI->>WriteQueue: Execute all queued writes
-    WriteQueue->>FileSystem: Write all changes (10-50ms)
-    Note over FileSystem: Single flash write<br/>for all changes
-    FileSystem-->>UI: Complete
-```
-
-Implementation
-
-**When UI updates state:**
-```cpp
-// File: SharedFSPersistence.h
-void writeToFS(const String& moduleName) {
-  if (delayedWriting) {
-    // Add to global queue (no flash write yet)
-    sharedDelayedWrites.push_back([this, module](char writeOrCancel) {
-      if (writeOrCancel == 'W') {
-        this->writeToFSNow(moduleName);  // Actual flash write
-      }
-    });
-  }
-}
-```
-
-**When user clicks "Save Config":**
-```cpp
-// File: FileManager.cpp
-_server->on("/rest/saveConfig", HTTP_POST, [](PsychicRequest* request) {
-  // Execute all queued writes in a single batch
-  FSPersistence<int>::writeToFSDelayed('W');
-  return ESP_OK;
-});
-```
-
-Benefits
-
-| Aspect | Without Deferred Writes | With Deferred Writes |
-|--------|-------------------------|----------------------|
-| **Flash writes per slider move** | 1 (10-50ms) | 0 |
-| **LED stutter during UI use** | Constant | None |
-| **Flash writes per session** | 100+ | 1 |
-| **User experience** | Laggy, stuttering | Smooth |
-| **Flash wear** | High | Minimal |
 
 ## Performance Budget at 60fps
 
@@ -315,15 +271,13 @@ Overhead Analysis
 | SvelteKit | 0.5-2ms (on Core 1) | 2-3ms (on Core 1) | 5ms |
 | Double buffer memcpy | 0.1ms (0.6%) | 0.1ms (0.6%) | 0.1ms |
 | Mutex locks | 0.02ms (0.1%) | 0.02ms (0.1%) | 0.02ms |
-| Flash writes | **0ms** (deferred) | **0ms** (deferred) | 10-50ms (on save) |
 | **Total** | **1-3ms (6-18%)** | **4-8ms (24-48%)** | **Flash: user-triggered** |
 
 **Result**: 
 
 - ✅ 60fps sustained during normal operation
 - ✅ 52-60fps during heavy WiFi/UI activity
-- ✅ No stutter during UI interaction (deferred writes)
-- ✅ Only brief stutter when user explicitly saves config (acceptable)
+- ✅ No stutter during UI interaction
 
 ## Configuration
 
@@ -389,6 +343,5 @@ This architecture achieves optimal performance through:
 2. **Priority Hierarchy**: Driver > SvelteKit ensures LED timing is never compromised
 3. **Minimal Locking**: 10µs mutex locks enable 99% parallel execution
 4. **Double Buffering**: Eliminates tearing with <1% overhead
-5. **Deferred Writes**: Eliminates UI stutter by batching flash operations
 
 **Result**: Smooth 60fps LED effects with responsive UI and stable networking. 🚀
