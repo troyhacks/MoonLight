@@ -128,7 +128,12 @@ void effectTask(void* pvParameters) {
   static unsigned long last20ms = 0;
 
   while (true) {
-    if (layerP.lights.header.isPositions == 0) {  // driver task can change this
+    // Check state under lock
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
+    uint8_t isPositions = layerP.lights.header.isPositions;
+    xSemaphoreGive(swapMutex);
+
+    if (isPositions == 0) {  // driver task can change this
       if (layerP.lights.useDoubleBuffer) {
         xSemaphoreTake(swapMutex, portMAX_DELAY);
         bool canProduce = !newFrameReady;
@@ -138,21 +143,21 @@ void effectTask(void* pvParameters) {
           // Copy previous frame (channelsD) to working buffer (channelsE)
           memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);
 
-          xSemaphoreTake(monitorMutex, portMAX_DELAY);  // don't change channelsE while the monitor display data is sent
           layerP.loop();
 
           if (millis() - last20ms >= 20) {
             last20ms = millis();
             layerP.loop20ms();
           }
-          xSemaphoreGive(monitorMutex);
 
           // Atomic swap channels
           xSemaphoreTake(swapMutex, portMAX_DELAY);
+          xSemaphoreTake(monitorMutex, portMAX_DELAY);
           uint8_t* temp = layerP.lights.channelsD;
           layerP.lights.channelsD = layerP.lights.channelsE;
           layerP.lights.channelsE = temp;
           newFrameReady = true;
+          xSemaphoreGive(monitorMutex);
           xSemaphoreGive(swapMutex);
         }
 
@@ -180,12 +185,16 @@ void driverTask(void* pvParameters) {
   // layerP.setup() done in effectTask
 
   while (true) {
+    // Check and transition state under lock
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
     if (layerP.lights.header.isPositions == 3) {
       EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
-      layerP.lights.header.isPositions = 0;  // now driver can show again
+      layerP.lights.header.isPositions = 0;
     }
+    uint8_t isPositions = layerP.lights.header.isPositions;
+    xSemaphoreGive(swapMutex);
 
-    if (layerP.lights.header.isPositions == 0) {
+    if (isPositions == 0) {
       xSemaphoreTake(swapMutex, portMAX_DELAY);
       if (layerP.lights.useDoubleBuffer) {
         if (newFrameReady) {

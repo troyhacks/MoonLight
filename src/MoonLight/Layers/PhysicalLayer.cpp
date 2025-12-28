@@ -111,7 +111,7 @@ void PhysicalLayer::loopDrivers() {
     if (prevSize != lights.header.size) node->onSizeChanged(prevSize);
     if (node->on) node->loop();
   }
-  
+
   prevSize = lights.header.size;
 }
 
@@ -131,9 +131,14 @@ void PhysicalLayer::onLayoutPre() {
   if (pass == 1) {
     lights.header.nrOfLights = 0;  // for pass1 and pass2 as in pass2 virtual layer needs it
     lights.header.size = {0, 0, 0};
+    extern SemaphoreHandle_t swapMutex;
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
     EXT_LOGD(ML_TAG, "positions in progress (%d -> 1)", lights.header.isPositions);
     lights.header.isPositions = 1;  // in progress...
-    delay(100);                     // wait to stop effects
+    xSemaphoreGive(swapMutex);
+
+    delay(100);  // wait to stop effects
+
     // set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
     memset(lights.channelsE, 0, lights.maxChannels);  // set all the channels to 0, positions in channelsE
     // dealloc pins
@@ -206,8 +211,11 @@ void PhysicalLayer::onLayoutPost() {
     lights.header.nrOfChannels = lights.header.nrOfLights * lights.header.channelsPerLight * ((lights.header.lightPreset == lightPreset_RGB2040) ? 2 : 1);  // RGB2040 has empty channels
     EXT_LOGD(ML_TAG, "pass %d mp:%d #:%d / %d s:%d,%d,%d", pass, monitorPass, lights.header.nrOfLights, lights.header.nrOfChannels, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     // send the positions to the UI _socket_emit
+    extern SemaphoreHandle_t swapMutex;
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
     EXT_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights ? 2 : 3);
     lights.header.isPositions = lights.header.nrOfLights ? 2 : 3;  // filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
+    xSemaphoreGive(swapMutex);
 
     // initLightsToBlend();
 
