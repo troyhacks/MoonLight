@@ -106,7 +106,7 @@ class ArtNetOutDriver : public DriverNode {
 
     LightsHeader* header = &layerP.lights.header;
 
-    if (header->isPositions != 0 || nrOfIPAddresses == 0) return;  // don't sent if positions are sent or no IP addresses found (to do broadcast if no addresses specified...!)
+    if (nrOfIPAddresses == 0) return;  // don't sent if no IP addresses found (to do broadcast if no addresses specified...!)
 
     // continue with Art-Net code
     uint8_t actualIPIndex = 0;

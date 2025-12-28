@@ -161,44 +161,14 @@ Synchronization Flow
 
 void effectTask(void* param) {
   while (true) {
-    if (layerP.lights.useDoubleBuffer) {
-
-      layerP.loop();  // getRGB and setRGB both use channelsBack
-
-      // Atomic swap channels
-      xSemaphoreTake(swapMutex, portMAX_DELAY);
-      uint8_t* temp = layerP.lights.channelsD;
-      layerP.lights.channelsD = layerP.lights.channelsE;
-      layerP.lights.channelsE = temp;
-      newFrameReady = true;
-      xSemaphoreGive(swapMutex);
-
-    } else {
-      xSemaphoreTake(swapMutex, portMAX_DELAY);
-      layerP.loop();
-      xSemaphoreGive(swapMutex);
-    }
+    // tbd ...
     vTaskDelay(1);
   }
 }
 
 void driverTask(void* param) {
   while (true) {
-    xSemaphoreTake(swapMutex, portMAX_DELAY);
-    esp32sveltekit.lps++;
-
-    if (layerP.lights.useDoubleBuffer) {
-      if (newFrameReady) {
-        newFrameReady = false;
-        xSemaphoreGive(swapMutex);
-        layerP.loopDrivers();  // ✅ No lock needed
-      } else {
-        xSemaphoreGive(swapMutex);
-      }
-    } else {
-      layerP.loopDrivers();  // ✅ Protected by lock
-      xSemaphoreGive(swapMutex);
-    }
+    // tbd ...
     vTaskDelay(1);
   }
 }

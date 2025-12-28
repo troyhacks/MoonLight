@@ -51,26 +51,22 @@ class ParallelLEDDriver : public DriverNode {
   #if HP_ALL_DRIVERS
     if (!initDone) return;
 
-    if (layerP.lights.header.isPositions == 0) {
-      DriverNode::loop();  // This populates the LUT tables!
+    DriverNode::loop();  // This populates the LUT tables!
 
     #ifndef CONFIG_IDF_TARGET_ESP32P4
-      if (ledsDriver.total_leds > 0) ledsDriver.showPixels(WAIT);
+    if (ledsDriver.total_leds > 0) ledsDriver.showPixels(WAIT);
     #else
-      uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
-      // LUTs are accessed directly within show_parlio via extern ledsDriver
-      // No brightness parameter needed
-      show_parlio(pins, layerP.lights.header.nrOfLights, layerP.lights.channelsD, layerP.lights.header.channelsPerLight == 4, nrOfPins, layerP.ledsPerPin[0], layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue);
+    uint8_t nrOfPins = min(layerP.nrOfLedPins, layerP.nrOfAssignedPins);
+    // LUTs are accessed directly within show_parlio via extern ledsDriver
+    // No brightness parameter needed
+    show_parlio(pins, layerP.lights.header.nrOfLights, layerP.lights.channelsD, layerP.lights.header.channelsPerLight == 4, nrOfPins, layerP.ledsPerPin[0], layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue);
     #endif
-    }
   #else  // ESP32_LEDSDRIVER
     if (!ledsDriver.initLedsDone) return;
 
-    if (layerP.lights.header.isPositions == 0) {
-      DriverNode::loop();
+    DriverNode::loop();
 
-      ledsDriver.show();
-    }
+    ledsDriver.show();
   #endif
   }
 

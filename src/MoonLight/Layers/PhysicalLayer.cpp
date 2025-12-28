@@ -42,7 +42,7 @@ void PhysicalLayer::setup() {
     lights.maxChannels = MIN(ESP.getPsramSize() / 4, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
     lights.useDoubleBuffer = true;                                // Enable double buffering
   } else {
-    lights.maxChannels = 4096 * 3;  // esp32-d0: max 1024->2048->4096 Leds ATM
+    lights.maxChannels = 4096 * 3;   // esp32-d0: max 1024->2048->4096 Leds ATM
     lights.useDoubleBuffer = false;  // Single buffer mode
   }
 
@@ -71,12 +71,9 @@ void PhysicalLayer::setup() {
 }
 
 void PhysicalLayer::loop() {
-  if (lights.header.isPositions == 0 || lights.header.isPositions == 3) {  // otherwise lights is used for positions etc.
-
-    // runs the loop of all effects / nodes in the layer
-    for (VirtualLayer* layer : layers) {
-      if (layer) layer->loop();  // if (layer) needed when deleting rows ...
-    }
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop();  // if (layer) needed when deleting rows ...
   }
 }
 
@@ -108,19 +105,14 @@ void PhysicalLayer::loopDrivers() {
     requestMapVirtual = false;
   }
 
-  if (lights.header.isPositions == 3) {
-    EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
-    lights.header.isPositions = 0;  // now driver can show again
-  }
+  if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
 
-  if (lights.header.isPositions == 0) {  // otherwise lights is used for positions etc.
-    if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
-    for (Node* node : nodes) {
-      if (prevSize != lights.header.size) node->onSizeChanged(prevSize);
-      if (node->on) node->loop();
-    }
-    prevSize = lights.header.size;
+  for (Node* node : nodes) {
+    if (prevSize != lights.header.size) node->onSizeChanged(prevSize);
+    if (node->on) node->loop();
   }
+  
+  prevSize = lights.header.size;
 }
 
 void PhysicalLayer::mapLayout() {
