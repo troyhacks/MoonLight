@@ -309,7 +309,7 @@ class ModuleIO : public Module {
       object["maxPower"] = 500;
       uint8_t ledPins[] = {47, 21, 14, 9, 8, 16, 15, 7, 1, 2, 42, 41, 40, 39, 38, 48};  // LED_PINS
       for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
-      pinAssigner.assignPin(3, pin_OnBoardLed);   // WIZ580_nRST, needs to be high to access RS485_DE, VBUS_DET, WIZ580_nINT. Also drives an LED.
+      pinAssigner.assignPin(3, pin_OnBoardLed);   // WIZ850_nRST, needs to be high to access RS485_DE, VBUS_DET, WIZ580_nINT. Also drives an LED.
       pinAssigner.assignPin(17, pin_Serial_TX);
       pinAssigner.assignPin(18, pin_Serial_RX);
       pinAssigner.assignPin(46, pin_RS485_DE);
