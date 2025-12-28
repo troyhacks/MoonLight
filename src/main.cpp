@@ -138,21 +138,21 @@ void effectTask(void* pvParameters) {
           // Copy previous frame (channelsD) to working buffer (channelsE)
           memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);
 
+          xSemaphoreTake(monitorMutex, portMAX_DELAY);  // don't change channelsE while the monitor display data is sent
           layerP.loop();
 
           if (millis() - last20ms >= 20) {
             last20ms = millis();
             layerP.loop20ms();
           }
+          xSemaphoreGive(monitorMutex);
 
           // Atomic swap channels
           xSemaphoreTake(swapMutex, portMAX_DELAY);
-          xSemaphoreTake(monitorMutex, portMAX_DELAY);
           uint8_t* temp = layerP.lights.channelsD;
           layerP.lights.channelsD = layerP.lights.channelsE;
           layerP.lights.channelsE = temp;
           newFrameReady = true;
-          xSemaphoreGive(monitorMutex);
           xSemaphoreGive(swapMutex);
         }
 
@@ -190,16 +190,17 @@ void driverTask(void* pvParameters) {
       if (layerP.lights.useDoubleBuffer) {
         if (newFrameReady) {
           newFrameReady = false;
-          esp32sveltekit.lps++;
           // Double buffer: release lock, then send
           xSemaphoreGive(swapMutex);
 
+          esp32sveltekit.lps++;
           layerP.loopDrivers();  // ✅ No lock needed
         } else {
           xSemaphoreGive(swapMutex);
         }
       } else {
         // Single buffer: keep lock while sending
+        esp32sveltekit.lps++;
         layerP.loopDrivers();  // ✅ Protected by lock
         xSemaphoreGive(swapMutex);
       }
