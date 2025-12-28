@@ -78,7 +78,7 @@ graph TB
     subgraph Core0["Core 0 (PRO_CPU)"]
         WiFi[WiFi/BT<br/>Priority 23]
         lwIP[lwIP TCP/IP<br/>Priority 18]
-        Effect[Effect Task<br/>Priority 3<br/>Computation Only]
+        Effect[Effect Task<br/>Priority 10<br/>Computation Only]
     end
     
     subgraph Core1["Core 1 (APP_CPU)"]
@@ -136,11 +136,11 @@ graph LR
         Drivers[Drivers Buffer<br/>channelsD*]
     end
     
-    EffectTask[Effect Task<br/>Core 0] -.->|1. memcpy| Drivers
-    EffectTask -.->|2. Compute effects| Drivers
-    EffectTask -.->|3. Swap pointers<br/>MUTEX 10µs| Effects
+    EffectTask[Effect Task<br/>Core 0] -.->|1. memcpy| Effects
+    EffectTask -.->|2. Compute effects| Effects
+    EffectTask -.->|3. Swap pointers<br/>MUTEX 10µs| Drivers
     
-    DriverTask[Driver Task<br/>Core 1] -->|4. Read pixels| Effects
+    DriverTask[Driver Task<br/>Core 1] -->|4. Read pixels| Drivers
     DriverTask -->|5. Send via DMA| LEDs[LEDs]
     
     style Effects fill:#898f89
