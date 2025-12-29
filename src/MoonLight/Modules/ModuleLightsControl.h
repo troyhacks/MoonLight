@@ -352,7 +352,6 @@ class ModuleLightsControl : public Module {
     }
 
   #if FT_ENABLED(FT_MONITOR)
-    extern SemaphoreHandle_t monitorMutex;  // defined in main
     extern SemaphoreHandle_t swapMutex;
 
     // Check and transition under lock
@@ -374,15 +373,12 @@ class ModuleLightsControl : public Module {
       });
     } else if (isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
       static unsigned long monitorMillis = 0;
-      if (millis() - monitorMillis >= layerP.lights.header.nrOfLights / 12) {
+      if (millis() - monitorMillis >= MAX(20, layerP.lights.header.nrOfLights / 300)) { // 12K lights -> 40ms
         monitorMillis = millis();
 
         read([&](ModuleState& _state) {
           if (_socket->getConnectedClients() && _state.data["monitorOn"]) {
-            // protect emit by monitorMutex, see main.cpp
-            xSemaphoreTake(monitorMutex, portMAX_DELAY);
             _socket->emitEvent("monitor", (char*)layerP.lights.channelsD, MIN(layerP.lights.header.nrOfChannels, layerP.lights.maxChannels));  // use channelsD as it won't be overwritten by effects during loop
-            xSemaphoreGive(monitorMutex);
           }
         });
       }

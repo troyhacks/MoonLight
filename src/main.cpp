@@ -115,7 +115,6 @@ ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
 
 SemaphoreHandle_t swapMutex = xSemaphoreCreateMutex();
-SemaphoreHandle_t monitorMutex = xSemaphoreCreateMutex();
 volatile bool newFrameReady = false;
 
 TaskHandle_t effectTaskHandle = NULL;
@@ -130,38 +129,30 @@ void effectTask(void* pvParameters) {
   while (true) {
     // Check state under lock
     xSemaphoreTake(swapMutex, portMAX_DELAY);
-    uint8_t isPositions = layerP.lights.header.isPositions;
-    bool canProduce = !newFrameReady;
-    xSemaphoreGive(swapMutex);
 
-    if (isPositions == 0) {  // driver task can change this
-      if (canProduce) {
-        if (layerP.lights.useDoubleBuffer) {
-          memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);  // Copy previous frame (channelsD) to working buffer (channelsE)
-        }
-
-        layerP.loop();
-
-        if (millis() - last20ms >= 20) {
-          last20ms = millis();
-          layerP.loop20ms();
-        }
-
-        xSemaphoreTake(monitorMutex, portMAX_DELAY);
-
-        xSemaphoreTake(swapMutex, portMAX_DELAY);
-        if (layerP.lights.useDoubleBuffer) {  // Atomic swap channels
-          uint8_t* temp = layerP.lights.channelsD;
-          layerP.lights.channelsD = layerP.lights.channelsE;
-          layerP.lights.channelsE = temp;
-        }
-        newFrameReady = true;
+    if (layerP.lights.header.isPositions == 0 && !newFrameReady) {  // within mutex as driver task can change this
+      if (layerP.lights.useDoubleBuffer) {
         xSemaphoreGive(swapMutex);
-        
-        xSemaphoreGive(monitorMutex);
+        memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);  // Copy previous frame (channelsD) to working buffer (channelsE)
       }
+
+      layerP.loop();
+
+      if (millis() - last20ms >= 20) {
+        last20ms = millis();
+        layerP.loop20ms();
+      }
+
+      if (layerP.lights.useDoubleBuffer) {  // Atomic swap channels
+        xSemaphoreTake(swapMutex, portMAX_DELAY);
+        uint8_t* temp = layerP.lights.channelsD;
+        layerP.lights.channelsD = layerP.lights.channelsE;
+        layerP.lights.channelsE = temp;
+      }
+      newFrameReady = true;
     }
 
+    xSemaphoreGive(swapMutex);
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
 }
@@ -173,13 +164,13 @@ void driverTask(void* pvParameters) {
 
   while (true) {
     // Check and transition state under lock
+    bool mutexGiven = false;
     xSemaphoreTake(swapMutex, portMAX_DELAY);
+
     if (layerP.lights.header.isPositions == 3) {
       EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
       layerP.lights.header.isPositions = 0;
     }
-
-    bool mutexGiven = false;
 
     if (layerP.lights.header.isPositions == 0) {
       if (newFrameReady) {
@@ -190,12 +181,11 @@ void driverTask(void* pvParameters) {
         }
 
         esp32sveltekit.lps++;
-        layerP.loopDrivers();  // ✅ No lock needed
+        layerP.loopDrivers();
       }
     }
 
-    if (!mutexGiven) xSemaphoreGive(swapMutex);
-
+    if (!mutexGiven) xSemaphoreGive(swapMutex);  // not double buffer or if conditions not met
     vTaskDelay(1);
   }
 }

@@ -154,50 +154,48 @@ Synchronization Flow
 
 void effectTask(void* param) {
   while (true) {
-    uint8_t isPositions = layerP.lights.header.isPositions;
-    bool canProduce = !newFrameReady;
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
 
-    if (isPositions == 0) {  // driver task can change this
+    if (layerP.lights.header.isPositions == 0 && !newFrameReady) {  // within mutex as driver task can change this
       if (layerP.lights.useDoubleBuffer) {
-
-        if (canProduce) {
-          // Copy previous frame (channelsD) to working buffer (channelsE)
-          memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);
-
-          layerP.loop();
-
-          // Atomic swap channels
-          uint8_t* temp = layerP.lights.channelsD;
-          layerP.lights.channelsD = layerP.lights.channelsE;
-          layerP.lights.channelsE = temp;
-          newFrameReady = true;
-        }
-
-      } else {
-        // Single buffer mode
-        layerP.loop();
+        xSemaphoreGive(swapMutex);
+        memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);  // Copy previous frame (channelsD) to working buffer (channelsE)
       }
-      vTaskDelay(1);
+
+      layerP.loop();
+
+      if (layerP.lights.useDoubleBuffer) {  // Atomic swap channels
+        xSemaphoreTake(swapMutex, portMAX_DELAY);
+        uint8_t* temp = layerP.lights.channelsD;
+        layerP.lights.channelsD = layerP.lights.channelsE;
+        layerP.lights.channelsE = temp;
+      }
+      newFrameReady = true;
+    }
+
+    xSemaphoreGive(swapMutex);
+    vTaskDelay(1);
   }
 }
 
 void driverTask(void* param) {
   while (true) {
-     if (isPositions == 0) {
-      if (layerP.lights.useDoubleBuffer) {
-        if (newFrameReady) {
-          newFrameReady = false;
-          // Double buffer: release lock, then send
- 
-          esp32sveltekit.lps++;
-          layerP.loopDrivers();  // ✅ No lock needed
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
+
+    if (layerP.lights.header.isPositions == 0) {
+      if (newFrameReady) {
+        newFrameReady = false;
+        if (layerP.lights.useDoubleBuffer) {
+          xSemaphoreGive(swapMutex);  // Double buffer: release lock, then send
+          mutexGiven = true;
         }
-      } else {
-        // Single buffer: keep lock while sending
+
         esp32sveltekit.lps++;
-        layerP.loopDrivers();  // ✅ Protected by lock
+        layerP.loopDrivers();
       }
     }
+
+    if (!mutexGiven) xSemaphoreGive(swapMutex);  // not double buffer or if conditions not met
     vTaskDelay(1);
   }
 }

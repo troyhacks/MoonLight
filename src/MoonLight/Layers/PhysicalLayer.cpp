@@ -42,7 +42,7 @@ void PhysicalLayer::setup() {
 
   if (psramFound()) {
     lights.maxChannels = MIN(ESP.getPsramSize() / 4, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
-    lights.useDoubleBuffer = true;                                // Enable double buffering
+    lights.useDoubleBuffer = false;                                // Enable double buffering
   } else {
     lights.maxChannels = 4096 * 3;   // esp32-d0: max 1024->2048->4096 Leds ATM
     lights.useDoubleBuffer = false;  // Single buffer mode
@@ -73,21 +73,7 @@ void PhysicalLayer::setup() {
 }
 
 void PhysicalLayer::loop() {
-  // runs the loop of all effects / nodes in the layer
-  for (VirtualLayer* layer : layers) {
-    if (layer) layer->loop();  // if (layer) needed when deleting rows ...
-  }
-}
-
-void PhysicalLayer::loop20ms() {
-  // runs the loop of all effects / nodes in the layer
-  for (VirtualLayer* layer : layers) {
-    if (layer) layer->loop20ms();  // if (layer) needed when deleting rows ...
-  }
-}
-
-void PhysicalLayer::loopDrivers() {
-  // run mapping in the driver task
+  // run mapping in the effects task
 
   if (requestMapPhysical) {
     EXT_LOGD(ML_TAG, "mapLayout physical requested");
@@ -107,6 +93,20 @@ void PhysicalLayer::loopDrivers() {
     requestMapVirtual = false;
   }
 
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop();  // if (layer) needed when deleting rows ...
+  }
+}
+
+void PhysicalLayer::loop20ms() {
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop20ms();  // if (layer) needed when deleting rows ...
+  }
+}
+
+void PhysicalLayer::loopDrivers() {
   if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
 
   for (Node* node : nodes) {
@@ -133,10 +133,10 @@ void PhysicalLayer::onLayoutPre() {
   if (pass == 1) {
     lights.header.nrOfLights = 0;  // for pass1 and pass2 as in pass2 virtual layer needs it
     lights.header.size = {0, 0, 0};
-    xSemaphoreTake(swapMutex, portMAX_DELAY);
+    if (layerP.lights.useDoubleBuffer) xSemaphoreTake(swapMutex, portMAX_DELAY);
     EXT_LOGD(ML_TAG, "positions in progress (%d -> 1)", lights.header.isPositions);
     lights.header.isPositions = 1;  // in progress...
-    xSemaphoreGive(swapMutex);
+    if (layerP.lights.useDoubleBuffer) xSemaphoreGive(swapMutex);
 
     delay(100);  // wait to stop effects
 
@@ -212,10 +212,10 @@ void PhysicalLayer::onLayoutPost() {
     lights.header.nrOfChannels = lights.header.nrOfLights * lights.header.channelsPerLight * ((lights.header.lightPreset == lightPreset_RGB2040) ? 2 : 1);  // RGB2040 has empty channels
     EXT_LOGD(ML_TAG, "pass %d mp:%d #:%d / %d s:%d,%d,%d", pass, monitorPass, lights.header.nrOfLights, lights.header.nrOfChannels, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     // send the positions to the UI _socket_emit
-    xSemaphoreTake(swapMutex, portMAX_DELAY);
+    if (layerP.lights.useDoubleBuffer) xSemaphoreTake(swapMutex, portMAX_DELAY);
     EXT_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights ? 2 : 3);
     lights.header.isPositions = lights.header.nrOfLights ? 2 : 3;  // filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
-    xSemaphoreGive(swapMutex);
+    if (layerP.lights.useDoubleBuffer) xSemaphoreGive(swapMutex);
 
     // initLightsToBlend();
 
