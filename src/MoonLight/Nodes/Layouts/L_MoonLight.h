@@ -323,6 +323,109 @@ class SingleRowLayout : public Node {
   }
 };
 
+class RingLayout : public Node {
+ public:
+  static const char* name() { return "Ring"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🚥"; }
+
+  Coord3D topLeft;
+  uint8_t nrOfLEDs = 24;
+  uint16_t angleFirst = 0;  // top
+
+  void setup() override {
+    addControl(topLeft, "topLeft", "coord3D", 0, 255);
+    addControl(nrOfLEDs, "nrOfLEDs", "slider", 1, 255);
+    addControl(angleFirst, "angleFirst", "slider", 0, 359);
+  }
+
+  bool hasOnLayout() const override { return true; }
+
+  void onLayout() override {
+    // Calculate ring dimensions based on 1cm spacing between LEDs
+    const float radius = nrOfLEDs / (2.0 * PI);  // or nrOfLEDs / 6.28318
+    const float width = 2.2 * radius;
+    const float height = 2.2 * radius;
+
+    const float centerX = width / 2.0;
+    const float centerY = height / 2.0;
+
+    for (int i = 0; i < nrOfLEDs; i++) {
+      float x = centerX;
+      float y = centerY;
+
+      if (nrOfLEDs != 1) {
+        float angle = PI + (TWO_PI * i) / nrOfLEDs + TWO_PI * angleFirst / 359;
+
+        // EXT_LOGD(ML_TAG, "%d = %d - %d (%d)", angle, (255 * i) / (nrOfLEDs - 1), map(angleFirst, 0, 359, 0, 255), angleFirst);
+
+        x = centerX - sin(angle) * radius;
+        y = centerY + cos(angle) * radius;
+      }
+
+      addLight({(uint8_t)x + topLeft.x, (uint8_t)y + topLeft.y, topLeft.z});
+    }
+
+    nextPin();  // all lights to one pin
+  }
+};
+
+class Rings16Layout : public Node {
+ public:
+  static const char* name() { return "16 Rings"; }
+  static uint8_t dim() { return _2D; }
+  static const char* tags() { return "🚥"; }
+
+  // uint8_t nrOfLEDs = 24;
+  // uint16_t angleFirst = 0;  // top
+
+  void setup() override {
+    // addControl(nrOfLEDs, "nrOfLEDs", "slider", 1, 255);
+    // addControl(angleFirst, "angleFirst", "slider", 0, 359);
+  }
+
+  bool hasOnLayout() const override { return true; }
+
+  void onLayout() override {
+    RingLayout ringLayout;
+
+    uint8_t rows[] = {0, 5, 12, 18, 23, 29, 35, 41, 48};
+    uint8_t cols[] = {5, 17, 30, 36, 42, 54, 65};
+    ringLayout.topLeft = {cols[5], rows[3], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[6], rows[4], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[5], rows[1], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[5], rows[5], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[4], rows[2], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[5], rows[7], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[3], rows[0], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[4], rows[6], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[2], rows[2], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[3], rows[8], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[1], rows[1], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[2], rows[6], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[1], rows[3], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[1], rows[7], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[0], rows[4], 0};
+    ringLayout.onLayout();
+    ringLayout.topLeft = {cols[1], rows[5], 0};
+    ringLayout.onLayout();
+  }
+};
+
 class RingsLayout : public Node {
  public:
   static const char* name() { return "Rings"; }

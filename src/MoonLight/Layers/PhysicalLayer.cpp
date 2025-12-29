@@ -73,7 +73,21 @@ void PhysicalLayer::setup() {
 }
 
 void PhysicalLayer::loop() {
-  // run mapping in the effects task
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop();  // if (layer) needed when deleting rows ...
+  }
+}
+
+void PhysicalLayer::loop20ms() {
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop20ms();  // if (layer) needed when deleting rows ...
+  }
+}
+
+void PhysicalLayer::loopDrivers() {
+  // run mapping in the drivers task
 
   if (requestMapPhysical) {
     EXT_LOGD(ML_TAG, "mapLayout physical requested");
@@ -93,20 +107,6 @@ void PhysicalLayer::loop() {
     requestMapVirtual = false;
   }
 
-  // runs the loop of all effects / nodes in the layer
-  for (VirtualLayer* layer : layers) {
-    if (layer) layer->loop();  // if (layer) needed when deleting rows ...
-  }
-}
-
-void PhysicalLayer::loop20ms() {
-  // runs the loop of all effects / nodes in the layer
-  for (VirtualLayer* layer : layers) {
-    if (layer) layer->loop20ms();  // if (layer) needed when deleting rows ...
-  }
-}
-
-void PhysicalLayer::loopDrivers() {
   if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
 
   for (Node* node : nodes) {

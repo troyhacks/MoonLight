@@ -108,12 +108,14 @@ class LinesEffect : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🔥"; }
 
-  uint8_t bpm = 120;
+  uint8_t bpm = 30;
 
   void setup() override { addControl(bpm, "bpm", "slider"); }
 
+  int frameNr;
+
   void loop() override {
-    int frameNr = 0;
+    frameNr = 0;
 
     layer->fadeToBlackBy(255);
 
@@ -128,7 +130,7 @@ class LinesEffect : public Node {
     pos = {0, 0, 0};
     pos.y = ::map(beat16(bpm), 0, UINT16_MAX, 0, layer->size.y);  // instead of call%height
     for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
-      int colorNr = (frameNr / layer->size.x) % 3;
+      int colorNr = 1;//(frameNr / layer->size.x) % 3;
       layer->setRGB(pos, colorNr == 0 ? CRGB::Red : colorNr == 1 ? CRGB::Green : CRGB::Blue);
     }
     (frameNr)++;
