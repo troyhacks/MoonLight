@@ -180,6 +180,7 @@ void effectTask(void* param) {
 
 void driverTask(void* param) {
   while (true) {
+    bool mutexGiven = false;
     xSemaphoreTake(swapMutex, portMAX_DELAY);
 
     if (layerP.lights.header.isPositions == 0) {

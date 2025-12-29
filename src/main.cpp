@@ -161,12 +161,11 @@ void driverTask(void* pvParameters) {
   // 🌙
 
   // layerP.setup() done in effectTask
-
+  
   while (true) {
-    // Check and transition state under lock
     bool mutexGiven = false;
+    // Check and transition state under lock
     xSemaphoreTake(swapMutex, portMAX_DELAY);
-
     if (layerP.lights.header.isPositions == 3) {
       EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
       layerP.lights.header.isPositions = 0;
