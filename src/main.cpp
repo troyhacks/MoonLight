@@ -114,7 +114,7 @@ ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit
 ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
 
-SemaphoreHandle_t swapMutex = NULL;
+SemaphoreHandle_t swapMutex = xSemaphoreCreateMutex();
 volatile bool newFrameReady = false;
 
 TaskHandle_t effectTaskHandle = NULL;
@@ -126,28 +126,16 @@ void effectTask(void* pvParameters) {
   layerP.setup();  // setup virtual layers (no node setup here as done in addNode)
   static unsigned long last20ms = 0;
 
-  for (;;) {
-    if (layerP.lights.useDoubleBuffer) {
-      // effectTask always writes to channelsBack, reads previous channelsBack
-      layerP.lights.channels = layerP.lights.channelsBack;
-      layerP.loop();  // getRGB and setRGB both use channelsBack
+  while (true) {
+    // Check state under lock
+    xSemaphoreTake(swapMutex, portMAX_DELAY);
 
-      if (millis() - last20ms >= 20) {
-        last20ms = millis();
-        layerP.loop20ms();
+    if (layerP.lights.header.isPositions == 0 && !newFrameReady) {  // within mutex as driver task can change this
+      if (layerP.lights.useDoubleBuffer) {
+        xSemaphoreGive(swapMutex);
+        memcpy(layerP.lights.channelsE, layerP.lights.channelsD, layerP.lights.header.nrOfChannels);  // Copy previous frame (channelsD) to working buffer (channelsE)
       }
 
-      // Atomic swap channels
-      xSemaphoreTake(swapMutex, portMAX_DELAY);
-      uint8_t* temp = layerP.lights.channelsBack;
-      layerP.lights.channelsBack = layerP.lights.channels;
-      layerP.lights.channels = temp;
-      newFrameReady = true;
-      xSemaphoreGive(swapMutex);
-
-    } else {
-      // Single buffer mode
-      xSemaphoreTake(swapMutex, portMAX_DELAY);
       layerP.loop();
 
       if (millis() - last20ms >= 20) {
@@ -155,9 +143,16 @@ void effectTask(void* pvParameters) {
         layerP.loop20ms();
       }
 
-      xSemaphoreGive(swapMutex);
+      if (layerP.lights.useDoubleBuffer) {  // Atomic swap channels
+        xSemaphoreTake(swapMutex, portMAX_DELAY);
+        uint8_t* temp = layerP.lights.channelsD;
+        layerP.lights.channelsD = layerP.lights.channelsE;
+        layerP.lights.channelsE = temp;
+      }
+      newFrameReady = true;
     }
 
+    xSemaphoreGive(swapMutex);
     vTaskDelay(1);  // yield to other tasks, 1 tick (~1ms)
   }
 }
@@ -166,26 +161,30 @@ void driverTask(void* pvParameters) {
   // 🌙
 
   // layerP.setup() done in effectTask
-
-  for (;;) {
+  
+  while (true) {
+    bool mutexGiven = false;
+    // Check and transition state under lock
     xSemaphoreTake(swapMutex, portMAX_DELAY);
-    esp32sveltekit.lps++;
-
-    if (layerP.lights.useDoubleBuffer) {
-      if (newFrameReady) {
-        newFrameReady = false;
-        // Double buffer: release lock, then send
-        xSemaphoreGive(swapMutex);
-        layerP.loopDrivers();  // ✅ No lock needed
-      } else {
-        xSemaphoreGive(swapMutex);
-      }
-    } else {
-      // Single buffer: keep lock while sending
-      layerP.loopDrivers();  // ✅ Protected by lock
-      xSemaphoreGive(swapMutex);
+    if (layerP.lights.header.isPositions == 3) {
+      EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
+      layerP.lights.header.isPositions = 0;
     }
 
+    if (layerP.lights.header.isPositions == 0) {
+      if (newFrameReady) {
+        newFrameReady = false;
+        if (layerP.lights.useDoubleBuffer) {
+          xSemaphoreGive(swapMutex);  // Double buffer: release lock, then send
+          mutexGiven = true;
+        }
+
+        esp32sveltekit.lps++;
+        layerP.loopDrivers();
+      }
+    }
+
+    if (!mutexGiven) xSemaphoreGive(swapMutex);  // not double buffer or if conditions not met
     vTaskDelay(1);
   }
 }
@@ -353,8 +352,6 @@ void setup() {
       false);
     #endif
 
-  swapMutex = xSemaphoreCreateMutex();
-
   // 🌙
   xTaskCreateUniversal(effectTask,                          // task function
                        "AppEffectTask",                     // name
@@ -362,7 +359,7 @@ void setup() {
                        NULL,                                // parameter
                        10,                                  // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                        &effectTaskHandle,                   // task handle
-                       0                                    // core (0 or 1)
+                       0                                    // core
   );
 
   xTaskCreateUniversal(driverTask,                          // task function
@@ -371,7 +368,7 @@ void setup() {
                        NULL,                                // parameter
                        3,                                   // priority (between 5 and 10: ASYNC_WORKER_TASK_PRIORITY and Restart/Sleep), don't set it higher then 10...
                        &driverTaskHandle,                   // task handle
-                       1                                    // core (0 or 1)
+                       1                                    // core
   );
   #endif
 

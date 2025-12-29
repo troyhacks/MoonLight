@@ -19,6 +19,8 @@
   #include "MoonBase/Utilities.h"
   #include "VirtualLayer.h"
 
+extern SemaphoreHandle_t swapMutex;
+
 PhysicalLayer layerP;  // global declaration of the physical layer
 
 PhysicalLayer::PhysicalLayer() {
@@ -33,30 +35,32 @@ PhysicalLayer::PhysicalLayer() {
 
 // heap-optimization: request heap optimization review
 // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
-// goal is to have lights.channels as large as possible, preferable 12288 at least for boards without PSRAM
+// goal is to have lights.channelsE/D as large as possible, preferable 12288 at least for boards without PSRAM
 
 void PhysicalLayer::setup() {
-  // allocate lights.channels
+  // allocate lights.channelsE/D
 
   if (psramFound()) {
     lights.maxChannels = MIN(ESP.getPsramSize() / 4, 61440 * 3);  // fill halve with channels, max 120 pins * 512 LEDs, still addressable with uint16_t
     lights.useDoubleBuffer = true;                                // Enable double buffering
   } else {
-    lights.maxChannels = 4096 * 3;  // esp32-d0: max 1024->2048->4096 Leds ATM
+    lights.maxChannels = 4096 * 3;   // esp32-d0: max 1024->2048->4096 Leds ATM
     lights.useDoubleBuffer = false;  // Single buffer mode
   }
 
-  lights.channels = allocMB<uint8_t>(lights.maxChannels);
+  lights.channelsE = allocMB<uint8_t>(lights.maxChannels);
 
-  if (lights.channels) {
-    EXT_LOGD(ML_TAG, "allocated %d bytes in %s", lights.maxChannels, isInPSRAM(lights.channels) ? "PSRAM" : "RAM");
+  if (lights.channelsE) {
+    EXT_LOGD(ML_TAG, "allocated %d bytes in %s", lights.maxChannels, isInPSRAM(lights.channelsE) ? "PSRAM" : "RAM");
     // Allocate back buffer only if PSRAM available
     if (lights.useDoubleBuffer) {
-      lights.channelsBack = allocMB<uint8_t>(lights.maxChannels);
-      if (!lights.channelsBack) {
+      lights.channelsD = allocMB<uint8_t>(lights.maxChannels);
+      if (!lights.channelsD) {
         EXT_LOGW(ML_TAG, "Failed to allocate back buffer, disabling double buffering");
         lights.useDoubleBuffer = false;
       }
+    } else {
+      lights.channelsD = lights.channelsE;  // share the same array
     }
   } else {
     EXT_LOGE(ML_TAG, "failed to allocated %d bytes of RAM or PSRAM", lights.maxChannels);
@@ -69,24 +73,7 @@ void PhysicalLayer::setup() {
 }
 
 void PhysicalLayer::loop() {
-  if (lights.header.isPositions == 0 || lights.header.isPositions == 3) {  // otherwise lights is used for positions etc.
-
-    // runs the loop of all effects / nodes in the layer
-    for (VirtualLayer* layer : layers) {
-      if (layer) layer->loop();  // if (layer) needed when deleting rows ...
-    }
-  }
-}
-
-void PhysicalLayer::loop20ms() {
-  // runs the loop of all effects / nodes in the layer
-  for (VirtualLayer* layer : layers) {
-    if (layer) layer->loop20ms();  // if (layer) needed when deleting rows ...
-  }
-}
-
-void PhysicalLayer::loopDrivers() {
-  // run mapping in the driver task
+  // run mapping in the effects task
 
   if (requestMapPhysical) {
     EXT_LOGD(ML_TAG, "mapLayout physical requested");
@@ -106,19 +93,28 @@ void PhysicalLayer::loopDrivers() {
     requestMapVirtual = false;
   }
 
-  if (lights.header.isPositions == 3) {
-    EXT_LOGD(ML_TAG, "positions done (3 -> 0)");
-    lights.header.isPositions = 0;  // now driver can show again
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop();  // if (layer) needed when deleting rows ...
+  }
+}
+
+void PhysicalLayer::loop20ms() {
+  // runs the loop of all effects / nodes in the layer
+  for (VirtualLayer* layer : layers) {
+    if (layer) layer->loop20ms();  // if (layer) needed when deleting rows ...
+  }
+}
+
+void PhysicalLayer::loopDrivers() {
+  if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
+
+  for (Node* node : nodes) {
+    if (prevSize != lights.header.size) node->onSizeChanged(prevSize);
+    if (node->on) node->loop();
   }
 
-  if (lights.header.isPositions == 0) {  // otherwise lights is used for positions etc.
-    if (prevSize != lights.header.size) EXT_LOGD(ML_TAG, "onSizeChanged P %d,%d,%d -> %d,%d,%d", prevSize.x, prevSize.y, prevSize.z, lights.header.size.x, lights.header.size.y, lights.header.size.z);
-    for (Node* node : nodes) {
-      if (prevSize != lights.header.size) node->onSizeChanged(prevSize);
-      if (node->on) node->loop();
-    }
-    prevSize = lights.header.size;
-  }
+  prevSize = lights.header.size;
 }
 
 void PhysicalLayer::mapLayout() {
@@ -137,11 +133,15 @@ void PhysicalLayer::onLayoutPre() {
   if (pass == 1) {
     lights.header.nrOfLights = 0;  // for pass1 and pass2 as in pass2 virtual layer needs it
     lights.header.size = {0, 0, 0};
+    if (layerP.lights.useDoubleBuffer) xSemaphoreTake(swapMutex, portMAX_DELAY);
     EXT_LOGD(ML_TAG, "positions in progress (%d -> 1)", lights.header.isPositions);
     lights.header.isPositions = 1;  // in progress...
-    delay(100);                     // wait to stop effects
+    if (layerP.lights.useDoubleBuffer) xSemaphoreGive(swapMutex);
+
+    delay(100);  // wait to stop effects
+
     // set all channels to 0 (e.g for multichannel to not activate unused channels, e.g. fancy modes on MHs)
-    memset(lights.channels, 0, lights.maxChannels);  // set all the channels to 0
+    memset(lights.channelsE, 0, lights.maxChannels);  // set all the channels to 0, positions in channelsE
     // dealloc pins
     if (!monitorPass) {
       memset(ledsPerPin, 0xFF, sizeof(ledsPerPin));  // UINT16_MAX is 2 * 0xFF
@@ -171,7 +171,7 @@ void PhysicalLayer::addLight(Coord3D position) {
   if (pass == 1) {
     // EXT_LOGD(ML_TAG, "%d,%d,%d", position.x, position.y, position.z);
     if (lights.header.nrOfLights < lights.maxChannels / 3) {
-      packCoord3DInto3Bytes(&lights.channels[lights.header.nrOfLights * 3], position);
+      packCoord3DInto3Bytes(&lights.channelsE[lights.header.nrOfLights * 3], position);  // positions in channelsE
     }
 
     lights.header.size = lights.header.size.maximum(position);
@@ -212,8 +212,10 @@ void PhysicalLayer::onLayoutPost() {
     lights.header.nrOfChannels = lights.header.nrOfLights * lights.header.channelsPerLight * ((lights.header.lightPreset == lightPreset_RGB2040) ? 2 : 1);  // RGB2040 has empty channels
     EXT_LOGD(ML_TAG, "pass %d mp:%d #:%d / %d s:%d,%d,%d", pass, monitorPass, lights.header.nrOfLights, lights.header.nrOfChannels, lights.header.size.x, lights.header.size.y, lights.header.size.z);
     // send the positions to the UI _socket_emit
+    if (layerP.lights.useDoubleBuffer) xSemaphoreTake(swapMutex, portMAX_DELAY);
     EXT_LOGD(ML_TAG, "positions stored (%d -> %d)", lights.header.isPositions, lights.header.nrOfLights ? 2 : 3);
     lights.header.isPositions = lights.header.nrOfLights ? 2 : 3;  // filled with positions, set back to 3 in ModuleEffects, or direct to 3 if no lights (effects will move it to 0)
+    if (layerP.lights.useDoubleBuffer) xSemaphoreGive(swapMutex);
 
     // initLightsToBlend();
 

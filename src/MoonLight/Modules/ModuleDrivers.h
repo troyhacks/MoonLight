@@ -159,9 +159,6 @@ class ModuleDrivers : public NodeManager {
   bool initPins = false;
 
   void loop() override {
-    // if (layerP.lights.header.isPositions == 0) //otherwise lights is used for positions etc.
-    //     layerP.loop(); //run all the effects of all virtual layers (currently only one)
-
     NodeManager::loop();
 
     if (!initPins) {
