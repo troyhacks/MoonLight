@@ -32,7 +32,7 @@ class RainbowEffect : public Node {
   void loop() override {
     layer->fill_rainbow((hue += speed * 32) >> 8, deltaHue);  // hue back to uint8_t
     if (chanceOfGlitter && random8() < chanceOfGlitter) {
-      layer->setRGB(random16(layer->size.x), CRGB::White);
+      layer->setRGB(random16(layer->nrOfLights), CRGB::White);
     }
   }
 };
