@@ -405,7 +405,7 @@ Various settings support placeholder substitution, indicated by comments in [fac
 
 | Placeholder  | Substituted value                                                            |
 | ------------ | ---------------------------------------------------------------------------- |
-| #{platform}  | The microcontroller platform, e.g. "esp32" or "esp32c3"                      |
+| #{platform}  | ml- (was The microcontroller platform) 🌙                                    |
 | #{unique_id} | A unique identifier derived from the MAC address, e.g. "~~0b0a859d~~6816" 🌙 |
 | #{random}    | A random number encoded as a hex string, e.g. "55722f94"                     |
 
@@ -413,9 +413,9 @@ You may use SettingValue::format in your own code if you require the use of thes
 
 ```cpp
   static StateUpdateResult update(JsonObject& root, LightMqttSettings& settings) {
-    settings.mqttPath = root["mqtt_path"] | SettingValue::format("homeassistant/light/#{unique_id}");
-    settings.name = root["name"] | SettingValue::format("light-#{unique_id}");
-    settings.uniqueId = root["unique_id"] | SettingValue::format("light-#{unique_id}");
+    settings.mqttPath = root["mqtt_path"] | SettingValue::format("homeassistant/#{platform}/#{unique_id}");
+    settings.name = root["name"] | SettingValue::format("#{platform}-#{unique_id}");
+    settings.uniqueId = root["unique_id"] | SettingValue::format("#{platform}-#{unique_id}");
     return StateUpdateResult::CHANGED;
   }
 ```

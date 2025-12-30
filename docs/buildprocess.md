@@ -101,7 +101,7 @@ Various settings support placeholder substitution, indicated by comments in [fac
 
 | Placeholder  | Substituted value                                                            |
 | ------------ | ---------------------------------------------------------------------------- |
-| #{platform}  | The microcontroller platform, e.g. "esp32" or "esp32c3"                      |
+| #{platform}  | ml- (was The microcontroller platform) 🌙                                    |
 | #{unique_id} | A unique identifier derived from the MAC address, e.g. "~~0b0a859d~~6816" 🌙 |
 | #{random}    | A random number encoded as a hex string, e.g. "55722f94"                     |
 

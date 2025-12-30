@@ -48,7 +48,7 @@
 #endif
 
 #ifndef FACTORY_MQTT_STATUS_TOPIC
-#define FACTORY_MQTT_STATUS_TOPIC "#{platform}/#{unique_id}/status"
+#define FACTORY_MQTT_STATUS_TOPIC "light/#{unique_id}/status"
 #endif
 
 #ifndef FACTORY_MQTT_KEEP_ALIVE

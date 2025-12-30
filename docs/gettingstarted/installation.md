@@ -92,7 +92,7 @@ Keep this page visible until installation complete.
 
 !!! tip "Hostname"
 
-    The hostname will be used to access your device. E.g. if the hostname is ML-home you can access it using [http://ml-home.local](http://ml-home.local)
+    The hostname will be used to access your device. E.g. if the hostname is ml-home you can access it using [http://ml-home.local](http://ml-home.local)
 
 !!! tip "Track analytics"
 

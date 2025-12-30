@@ -118,15 +118,15 @@ void WiFiSettingsService::reconfigureWiFiConnection()
         //logging: 
         // [0;32mI (5079) 🐼: Reconfiguring WiFi connection to: STRENGTH
         // I (5079) 🐼: Reconfiguring WiFi TxPower to: 34
-        // [0;32mI (5079) 🐼: Hostname: ML-you35
+        // [0;32mI (5079) 🐼: Hostname: ml-you35
         // ...
         // [0;32mI (16438) 🐼: 20 networks found.
         // [0;32mI (16439) 🐼: Connecting to strongest network: ewtr, BSSID: 92:5a:9e:0e:cc:e4 
-        // D (16440) 🐼: Connecting to SSID: ewtr, Channel: 11, BSSID: 92:5a:9e:0e:cc:e4, Hostname: ML-you35
+        // D (16440) 🐼: Connecting to SSID: ewtr, Channel: 11, BSSID: 92:5a:9e:0e:cc:e4, Hostname: ml-you35
         // [0;32mI (16451) 🐼: WiFi setTxPower to: 34
         // [0;32mI (16612) 🐼: WiFi Connected.
         // ...
-        // [0;32mI (18124) 🐼: WiFi Got IP. localIP=http://192.168.1.105, hostName=http://ML-you35.local
+        // [0;32mI (18124) 🐼: WiFi Got IP. localIP=http://192.168.1.105, hostName=http://ml-you35.local
 
     #else
         //by @troyhacks, needed to make P4 networking work (AP and STA)
@@ -144,13 +144,13 @@ void WiFiSettingsService::reconfigureWiFiConnection()
         // E (7253) system_api: 0 mac type is incorrect (not found)
         // mI (7254) 🐼: Reconfiguring WiFi connection to: STRENGTH
         // [0;32mI (7254) 🐼: Reconfiguring WiFi TxPower to: 0
-        // 32mI (7259) 🐼: Hostname: ML-P4
+        // 32mI (7259) 🐼: Hostname: ml-P4
         // ...
         // [0;32mI (19737) 🐼: WiFi Connected.
         // [0;32mI (20761) 🐼: WiFi Got IP. localIP=http://192.168.1.188, hostName=http://esp32p4-E1E3E7.local
 
         // findings: 
-        // mac type is incorrect ??? No 20 networks found. ???, wrong hostname displayed (but the hostname ML-P4.local works!)
+        // mac type is incorrect ??? No 20 networks found. ???, wrong hostname displayed (but the hostname ml-P4.local works!)
         // deleting the Saved network: it still connects (still stored on the C5 chip???)
         // erase flash: Wifi still connects!!
 

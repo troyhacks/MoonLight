@@ -20,7 +20,35 @@
   #include "MoonBase/Modules/FileManager.h"
   #include "MoonBase/Utilities.h"  //for isInPSRAM
 
+// Convert ModuleLightsControl state -> Home Assistant JSON
+void readMQTT(ModuleState& state, JsonObject& root) {
+  root["state"] = state.data["lightsOn"].as<bool>() ? "ON" : "OFF";
+  root["brightness"] = state.data["brightness"].as<uint8_t>();
+  String js;
+  serializeJson(root, js);
+  EXT_LOGI(ML_TAG, "Read HA %s", js.c_str());
+}
+
+// Convert Home Assistant JSON -> ModuleLightsControl state updates
+StateUpdateResult updateMQTT(JsonObject& root, ModuleState& state, const String& originId) {
+  String js;
+  serializeJson(root, js);
+  EXT_LOGI(ML_TAG, "Update HA %s", js.c_str());
+  JsonDocument doc;
+  JsonObject newState = doc.to<JsonObject>();
+
+  if (!root["state"].isNull()) newState["lightsOn"] = (root["state"] == "ON");
+  if (!root["brightness"].isNull()) newState["brightness"] = root["brightness"].as<uint8_t>();
+
+  return ModuleState::update(newState, state, originId);
+}
+
 class ModuleLightsControl : public Module {
+ private:
+  MqttEndpoint<ModuleState> _mqttEndpoint;
+  PsychicMqttClient* _mqttClient;
+  MqttSettingsService* _mqttSettingsService;
+
  public:
   PsychicHttpServer* _server;
   FileManager* _fileManager;
@@ -29,7 +57,11 @@ class ModuleLightsControl : public Module {
   uint8_t pinPushButtonLightsOn = UINT8_MAX;
   uint8_t pinToggleButtonLightsOn = UINT8_MAX;
 
-  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
+  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO)
+      : Module("lightscontrol", server, sveltekit),  //
+        _mqttEndpoint(readMQTT, updateMQTT, this, sveltekit->getMqttClient()),
+        _mqttClient(sveltekit->getMqttClient()),
+        _mqttSettingsService(sveltekit->getMqttSettingsService()) {
     EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
@@ -68,6 +100,46 @@ class ModuleLightsControl : public Module {
     });
     moduleIO.addUpdateHandler([this](const String& originId) { readPins(); }, false);
     readPins();  // initially
+
+    // configure MQTT callback
+    _mqttClient->onConnect(std::bind(&ModuleLightsControl::registerConfig, this));
+  }
+
+  void registerConfig() {
+    if (!_mqttClient->connected()) {
+      return;
+    }
+    String configTopic;
+    String subTopic;
+    String pubTopic;
+
+    String settingsMqttPath = SettingValue::format("homeassistant/light/#{unique_id}");
+    String settingsName = SettingValue::format("light-#{unique_id}");
+    String settingsUniqueId = SettingValue::format("light-#{unique_id}");
+    String settingsStateTopic = SettingValue::format(FACTORY_MQTT_STATUS_TOPIC);
+
+    JsonDocument doc;
+    configTopic = settingsMqttPath + "/config";
+    subTopic = settingsMqttPath + "/set";
+    pubTopic = settingsMqttPath + "/state";
+    doc["~"] = settingsMqttPath;
+    doc["name"] = settingsName;
+    doc["unique_id"] = settingsUniqueId;
+
+    doc["cmd_t"] = "~/set";
+    doc["stat_t"] = "~/state";
+    doc["schema"] = "json";
+    doc["brightness"] = true;
+
+    _mqttSettingsService->setStatusTopic(settingsStateTopic);
+
+    String payload;
+    serializeJson(doc, payload);
+    _mqttClient->publish(configTopic.c_str(), 0, false, payload.c_str());
+
+    _mqttEndpoint.configureTopics(pubTopic, subTopic);
+
+    EXT_LOGI(ML_TAG, "Published HA discovery to %s", configTopic.c_str());
   }
 
   void readPins() {
@@ -373,7 +445,7 @@ class ModuleLightsControl : public Module {
       });
     } else if (isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
       static unsigned long monitorMillis = 0;
-      if (millis() - monitorMillis >= MAX(20, layerP.lights.header.nrOfLights / 300)) { // 12K lights -> 40ms
+      if (millis() - monitorMillis >= MAX(20, layerP.lights.header.nrOfLights / 300)) {  // 12K lights -> 40ms
         monitorMillis = millis();
 
         read([&](ModuleState& _state) {
