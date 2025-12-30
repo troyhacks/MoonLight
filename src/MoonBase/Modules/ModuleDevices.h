@@ -40,7 +40,7 @@ class ModuleDevices : public Module {
     control["crud"] = "r";
     rows = control["n"].to<JsonArray>();
     {
-      addControl(rows, "name", "mdnsName", 0, 32, true);
+      addControl(rows, "name", "mDNSName", 0, 32, true);
       addControl(rows, "ip", "ip", 0, 32, true);
       addControl(rows, "time", "time", 0, 32, true);
       addControl(rows, "mac", "text", 0, 32, true);

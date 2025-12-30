@@ -102,18 +102,23 @@ class ModuleLightsControl : public Module {
     readPins();  // initially
 
     // configure MQTT callback
-    _mqttClient->onConnect(std::bind(&ModuleLightsControl::registerConfig, this));
+    if (_mqttClient) _mqttClient->onConnect(std::bind(&ModuleLightsControl::registerConfig, this));
   }
 
   void registerConfig() {
     if (!_mqttClient->connected()) {
+      EXT_LOGE(ML_TAG, "MQTT client not connected");
+      return;
+    }
+    if (!_mqttSettingsService) {
+      EXT_LOGE(ML_TAG, "MQTT settings service unavailable");
       return;
     }
     String configTopic;
     String subTopic;
     String pubTopic;
 
-    String settingsMqttPath = SettingValue::format("homeassistant/light/#{platform}-#{unique_id}"); // currently configured as a homeassistent light type
+    String settingsMqttPath = SettingValue::format("homeassistant/light/#{platform}-#{unique_id}");  // currently configured as a homeassistent light type
     String settingsName = SettingValue::format("#{platform}-#{unique_id}");
     String settingsUniqueId = SettingValue::format("#{platform}-#{unique_id}");
     String settingsStateTopic = SettingValue::format(FACTORY_MQTT_STATUS_TOPIC);
@@ -131,11 +136,26 @@ class ModuleLightsControl : public Module {
     doc["schema"] = "json";
     doc["brightness"] = true;
 
+    // Add availability topic for online/offline status
+    doc["availability_topic"] = settingsStateTopic;
+    doc["payload_available"] = "online";
+    doc["payload_not_available"] = "offline";
+
+    // Add device info for grouping in HA
+    JsonObject device = doc["device"].to<JsonObject>();
+    device["identifiers"].to<JsonArray>().add(settingsUniqueId);
+    device["name"] = settingsName;
+    device["manufacturer"] = "MoonModules";
+    device["model"] = "MoonLight";
+
     _mqttSettingsService->setStatusTopic(settingsStateTopic);
 
     String payload;
     serializeJson(doc, payload);
-    _mqttClient->publish(configTopic.c_str(), 0, false, payload.c_str());
+    if (!_mqttClient->publish(configTopic.c_str(), 1, false, payload.c_str())) {  // QoS 1
+      EXT_LOGE(ML_TAG, "Failed to publish HA discovery config");
+      return;
+    }
 
     _mqttEndpoint.configureTopics(pubTopic, subTopic);
 
