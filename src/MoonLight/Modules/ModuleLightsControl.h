@@ -45,9 +45,10 @@ StateUpdateResult updateMQTT(JsonObject& root, ModuleState& state, const String&
 
 class ModuleLightsControl : public Module {
  private:
-  MqttEndpoint<ModuleState> _mqttEndpoint;
+  MqttEndpoint<ModuleState>* _mqttEndpoint = nullptr;  // pointer, dynamically allocated
   PsychicMqttClient* _mqttClient;
   MqttSettingsService* _mqttSettingsService;
+  update_handler_id_t _mqttSettingsUpdateHandlerId = 0;  // track handler ID
 
  public:
   PsychicHttpServer* _server;
@@ -59,7 +60,6 @@ class ModuleLightsControl : public Module {
 
   ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO)
       : Module("lightscontrol", server, sveltekit),  //
-        _mqttEndpoint(readMQTT, updateMQTT, this, sveltekit->getMqttClient()),
         _mqttClient(sveltekit->getMqttClient()),
         _mqttSettingsService(sveltekit->getMqttSettingsService()) {
     EXT_LOGV(ML_TAG, "constructor");
@@ -101,26 +101,72 @@ class ModuleLightsControl : public Module {
     moduleIO.addUpdateHandler([this](const String& originId) { readPins(); }, false);
     readPins();  // initially
 
-    // configure MQTT callback
-    if (_mqttClient) _mqttClient->onConnect(std::bind(&ModuleLightsControl::registerConfig, this));
+    // Register handler to react to MQTT settings changes (including enable/disable)
+    if (_mqttSettingsService) {
+      _mqttSettingsUpdateHandlerId = _mqttSettingsService->addUpdateHandler([this](const String& originId) { onMqttSettingsChanged(); },
+                                                                            false  // don't allow removal by others
+      );
+      onMqttSettingsChanged();  // Initialize MQTT if enabled at boot
+    }
+  }
+
+  void onMqttSettingsChanged() {
+    if (!_mqttSettingsService) return;
+
+    bool shouldBeEnabled = _mqttSettingsService->isEnabled() && _mqttClient;
+    bool isCurrentlyEnabled = (_mqttEndpoint != nullptr);
+
+    // Handle enable/disable transitions
+    if (shouldBeEnabled && !isCurrentlyEnabled) {
+      // Transition: disabled → enabled
+      EXT_LOGD(ML_TAG, "Enabling MQTT for Home Assistant");
+      initializeMqtt();
+    } else if (!shouldBeEnabled && isCurrentlyEnabled) {
+      // Transition: enabled → disabled
+      EXT_LOGD(ML_TAG, "Disabling MQTT for Home Assistant");
+      cleanupMqtt();
+    }
+    // If both true or both false, no transition needed (already in correct state)
+  }
+
+  void initializeMqtt() {
+    if (_mqttEndpoint) return;  // already initialized
+
+    _mqttEndpoint = new MqttEndpoint<ModuleState>(readMQTT, updateMQTT, this, _mqttClient);
+    _mqttClient->onConnect(std::bind(&ModuleLightsControl::registerConfig, this));
+
+    // If already connected, register config immediately
+    if (_mqttClient->connected()) {
+      registerConfig();
+    }
+  }
+
+  void cleanupMqtt() {
+    if (_mqttEndpoint) {
+      delete _mqttEndpoint;
+      _mqttEndpoint = nullptr;
+    }
+    // Note: We can't easily remove the onConnect callback, but registerConfig checks enabled state
   }
 
   void registerConfig() {
-    if (!_mqttClient->connected()) {
+    // Defense in depth: check enabled state even though we only create endpoint when enabled
+    if (!_mqttSettingsService || !_mqttSettingsService->isEnabled()) {
+      EXT_LOGD(ML_TAG, "MQTT not enabled, skipping HA config");
+      return;
+    }
+    if (!_mqttClient || !_mqttClient->connected()) {
       EXT_LOGE(ML_TAG, "MQTT client not connected");
       return;
     }
-    if (!_mqttSettingsService) {
-      EXT_LOGE(ML_TAG, "MQTT settings service unavailable");
-      return;
-    }
+
     String configTopic;
     String subTopic;
     String pubTopic;
 
-    String settingsMqttPath = "homeassistant/light/" + String(_mqttSettingsService->getClientId());  // currently configured as a homeassistent light type
-    String settingsName = _mqttSettingsService->getClientId();
-    String settingsUniqueId = _mqttSettingsService->getClientId();
+    String settingsUniqueId = _mqttSettingsService->getClientId() ? _mqttSettingsService->getClientId() : SettingValue::format("#{platform}-#{unique_id}");
+    String settingsMqttPath = "homeassistant/light/" + esp32sveltekit.getWiFiSettingsService()->getHostname();  // currently configured as a homeassistent light type
+    String settingsName = esp32sveltekit.getWiFiSettingsService()->getHostname();
     String settingsStateTopic = SettingValue::format(FACTORY_MQTT_STATUS_TOPIC);
 
     JsonDocument doc;
@@ -128,7 +174,7 @@ class ModuleLightsControl : public Module {
     subTopic = settingsMqttPath + "/set";
     pubTopic = settingsMqttPath + "/state";
     doc["~"] = settingsMqttPath;
-    doc["name"] = settingsName;
+    doc["name"] = "🌙💡";  // so HA displays Entity name → function of that device as light, instead of showing device name twice
     doc["unique_id"] = settingsUniqueId;
 
     doc["cmd_t"] = "~/set";
@@ -157,7 +203,7 @@ class ModuleLightsControl : public Module {
       return;
     }
 
-    _mqttEndpoint.configureTopics(pubTopic, subTopic);
+    _mqttEndpoint->configureTopics(pubTopic, subTopic);
 
     EXT_LOGI(ML_TAG, "Published HA discovery to %s", configTopic.c_str());
   }
