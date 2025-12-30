@@ -118,9 +118,9 @@ class ModuleLightsControl : public Module {
     String subTopic;
     String pubTopic;
 
-    String settingsMqttPath = SettingValue::format("homeassistant/light/#{platform}-#{unique_id}");  // currently configured as a homeassistent light type
-    String settingsName = SettingValue::format("#{platform}-#{unique_id}");
-    String settingsUniqueId = SettingValue::format("#{platform}-#{unique_id}");
+    String settingsMqttPath = "homeassistant/light/" + String(_mqttSettingsService->getClientId());  // currently configured as a homeassistent light type
+    String settingsName = _mqttSettingsService->getClientId();
+    String settingsUniqueId = _mqttSettingsService->getClientId();
     String settingsStateTopic = SettingValue::format(FACTORY_MQTT_STATUS_TOPIC);
 
     JsonDocument doc;
