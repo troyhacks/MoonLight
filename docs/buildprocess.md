@@ -99,11 +99,11 @@ Changing factory time zone setting is a common requirement. This requires a litt
 
 Various settings support placeholder substitution, indicated by comments in [factory_settings.ini](https://github.com/theelims/ESP32-sveltekit/blob/main/factory_settings.ini). This can be particularly useful where settings need to be unique, such as the Access Point SSID or MQTT client id. The following placeholders are supported:
 
-| Placeholder  | Substituted value                                                            |
-| ------------ | ---------------------------------------------------------------------------- |
-| #{platform}  | ml- (was The microcontroller platform) 🌙                                    |
-| #{unique_id} | A unique identifier derived from the MAC address, e.g. "~~0b0a859d~~6816" 🌙 |
-| #{random}    | A random number encoded as a hex string, e.g. "55722f94"                     |
+| Placeholder  | Substituted value                                                             |
+| ------------ | ----------------------------------------------------------------------------- |
+| #{platform}  | The platform identifier "ml-" (MoonLight), used in hostnames and MQTT topics🌙|
+| #{unique_id} | A unique identifier derived from the MAC address, e.g. "~~0b0a859d~~6816" 🌙  |
+| #{random}    | A random number encoded as a hex string, e.g. "55722f94"                      |
 
 ## Other Build Flags
 

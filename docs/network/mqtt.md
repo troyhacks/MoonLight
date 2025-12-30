@@ -7,15 +7,17 @@
 In Home Assistant
 
 * create non admin user in home assistant e.g mqttuser
-* install the Mosquitto MQTT Broker via Settings / Devices & Services, it will auto discover the MoonLight devices
+* install the Mosquitto MQTT Broker via Settings / Devices & Services, it will auto-discover the MoonLight devices
+* Optionally enable TLS (Transport Layer Security) for secure connections in MQTT / Configure
  
 In MoonLight / Network / MQTT:
 
 * Enable MQTT
-* URI: mqtt://homeassistant.local:1883
+* URI: mqtt://homeassistant.local:1883 (non secure)
     * replace homeassistant.local by it appropriate mdns name or IP address
+    * secure HA: use mqtts://homeassistant.local:8883
     * to test outsde HA e.g. use mqtts://broker.hivemq.com:8883\
 * Username / password: mqttuser credentials
-* client id: ml-xxxx. to do: use hostname
+* client id: ml-xxxx.
 * Apply Settings
 

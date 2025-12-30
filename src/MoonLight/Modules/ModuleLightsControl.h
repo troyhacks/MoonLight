@@ -26,14 +26,14 @@ void readMQTT(ModuleState& state, JsonObject& root) {
   root["brightness"] = state.data["brightness"].as<uint8_t>();
   String js;
   serializeJson(root, js);
-  EXT_LOGI(ML_TAG, "Read HA %s", js.c_str());
+  EXT_LOGD(ML_TAG, "Read HA %s", js.c_str());
 }
 
 // Convert Home Assistant JSON -> ModuleLightsControl state updates
 StateUpdateResult updateMQTT(JsonObject& root, ModuleState& state, const String& originId) {
   String js;
   serializeJson(root, js);
-  EXT_LOGI(ML_TAG, "Update HA %s", js.c_str());
+  EXT_LOGD(ML_TAG, "Update HA %s", js.c_str());
   JsonDocument doc;
   JsonObject newState = doc.to<JsonObject>();
 
@@ -113,9 +113,9 @@ class ModuleLightsControl : public Module {
     String subTopic;
     String pubTopic;
 
-    String settingsMqttPath = SettingValue::format("homeassistant/light/#{unique_id}");
-    String settingsName = SettingValue::format("light-#{unique_id}");
-    String settingsUniqueId = SettingValue::format("light-#{unique_id}");
+    String settingsMqttPath = SettingValue::format("homeassistant/light/#{platform}-#{unique_id}"); // currently configured as a homeassistent light type
+    String settingsName = SettingValue::format("#{platform}-#{unique_id}");
+    String settingsUniqueId = SettingValue::format("#{platform}-#{unique_id}");
     String settingsStateTopic = SettingValue::format(FACTORY_MQTT_STATUS_TOPIC);
 
     JsonDocument doc;
