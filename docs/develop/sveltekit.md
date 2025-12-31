@@ -72,7 +72,6 @@ This is a checklist, More info on most of the items can be found in the ESP32-Sv
     * add {custom}-logo.png (used in mkdocs.yml)
     * replace favicon.png
 * factory_settings.ini
-    * FACTORY_AP_SSID=\"{custom}-#{unique_id}\"
     * FACTORY_AP_PASSWORD=\"\" (recommendation)
     * FACTORY_NTP_TIME_ZONE_LABEL=\"Europe/Berlin\"
 * package.json
@@ -97,7 +96,6 @@ This is a checklist, More info on most of the items can be found in the ESP32-Sv
 * interface/static/favicon.png
     * replace favicon.png
 * lib/framework/APSettingsService.h
-    * FACTORY_AP_SSID "{custom}-#{unique_id}"
     * FACTORY_AP_PASSWORD ""
 * mkdocs.yml
     * site_name: {custom}

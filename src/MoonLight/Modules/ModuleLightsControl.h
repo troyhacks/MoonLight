@@ -20,7 +20,36 @@
   #include "MoonBase/Modules/FileManager.h"
   #include "MoonBase/Utilities.h"  //for isInPSRAM
 
+// Convert ModuleLightsControl state -> Home Assistant JSON
+void readMQTT(ModuleState& state, JsonObject& root) {
+  root["state"] = state.data["lightsOn"].as<bool>() ? "ON" : "OFF";
+  root["brightness"] = state.data["brightness"].as<uint8_t>();
+  String js;
+  serializeJson(root, js);
+  EXT_LOGD(ML_TAG, "Read HA %s", js.c_str());
+}
+
+// Convert Home Assistant JSON -> ModuleLightsControl state updates
+StateUpdateResult updateMQTT(JsonObject& root, ModuleState& state, const String& originId) {
+  String js;
+  serializeJson(root, js);
+  EXT_LOGD(ML_TAG, "Update HA %s", js.c_str());
+  JsonDocument doc;
+  JsonObject newState = doc.to<JsonObject>();
+
+  if (!root["state"].isNull()) newState["lightsOn"] = (root["state"] == "ON");
+  if (!root["brightness"].isNull()) newState["brightness"] = root["brightness"].as<uint8_t>();
+
+  return ModuleState::update(newState, state, originId);
+}
+
 class ModuleLightsControl : public Module {
+ private:
+  MqttEndpoint<ModuleState>* _mqttEndpoint = nullptr;  // pointer, dynamically allocated
+  PsychicMqttClient* _mqttClient;
+  MqttSettingsService* _mqttSettingsService;
+  update_handler_id_t _mqttSettingsUpdateHandlerId = 0;  // track handler ID
+
  public:
   PsychicHttpServer* _server;
   FileManager* _fileManager;
@@ -29,7 +58,10 @@ class ModuleLightsControl : public Module {
   uint8_t pinPushButtonLightsOn = UINT8_MAX;
   uint8_t pinToggleButtonLightsOn = UINT8_MAX;
 
-  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO) : Module("lightscontrol", server, sveltekit) {
+  ModuleLightsControl(PsychicHttpServer* server, ESP32SvelteKit* sveltekit, FileManager* fileManager, ModuleIO* moduleIO)
+      : Module("lightscontrol", server, sveltekit),  //
+        _mqttClient(sveltekit->getMqttClient()),
+        _mqttSettingsService(sveltekit->getMqttSettingsService()) {
     EXT_LOGV(ML_TAG, "constructor");
     _server = server;
     _fileManager = fileManager;
@@ -68,6 +100,112 @@ class ModuleLightsControl : public Module {
     });
     moduleIO.addUpdateHandler([this](const String& originId) { readPins(); }, false);
     readPins();  // initially
+
+    // Register handler to react to MQTT settings changes (including enable/disable)
+    if (_mqttSettingsService) {
+      _mqttSettingsUpdateHandlerId = _mqttSettingsService->addUpdateHandler([this](const String& originId) { onMqttSettingsChanged(); },
+                                                                            false  // don't allow removal by others
+      );
+      onMqttSettingsChanged();  // Initialize MQTT if enabled at boot
+    }
+  }
+
+  void onMqttSettingsChanged() {
+    if (!_mqttSettingsService) return;
+
+    bool shouldBeEnabled = _mqttSettingsService->isEnabled() && _mqttClient;
+    bool isCurrentlyEnabled = (_mqttEndpoint != nullptr);
+
+    // Handle enable/disable transitions
+    if (shouldBeEnabled && !isCurrentlyEnabled) {
+      // Transition: disabled → enabled
+      EXT_LOGD(ML_TAG, "Enabling MQTT for Home Assistant");
+      initializeMqtt();
+    } else if (!shouldBeEnabled && isCurrentlyEnabled) {
+      // Transition: enabled → disabled
+      EXT_LOGD(ML_TAG, "Disabling MQTT for Home Assistant");
+      cleanupMqtt();
+    }
+    // If both true or both false, no transition needed (already in correct state)
+  }
+
+  void initializeMqtt() {
+    if (_mqttEndpoint) return;  // already initialized
+
+    _mqttEndpoint = new MqttEndpoint<ModuleState>(readMQTT, updateMQTT, this, _mqttClient);
+    _mqttClient->onConnect(std::bind(&ModuleLightsControl::registerConfig, this));
+
+    // If already connected, register config immediately
+    if (_mqttClient->connected()) {
+      registerConfig();
+    }
+  }
+
+  void cleanupMqtt() {
+    if (_mqttEndpoint) {
+      delete _mqttEndpoint;
+      _mqttEndpoint = nullptr;
+    }
+    // Note: We can't easily remove the onConnect callback, but registerConfig checks enabled state
+  }
+
+  void registerConfig() {
+    // Defense in depth: check enabled state even though we only create endpoint when enabled
+    if (!_mqttSettingsService || !_mqttSettingsService->isEnabled()) {
+      EXT_LOGD(ML_TAG, "MQTT not enabled, skipping HA config");
+      return;
+    }
+    if (!_mqttClient || !_mqttClient->connected()) {
+      EXT_LOGE(ML_TAG, "MQTT client not connected");
+      return;
+    }
+
+    String configTopic;
+    String subTopic;
+    String pubTopic;
+
+    String settingsUniqueId = _mqttSettingsService->getClientId() ? _mqttSettingsService->getClientId() : SettingValue::format("#{platform}-#{unique_id}");
+    String settingsMqttPath = "homeassistant/light/" + esp32sveltekit.getWiFiSettingsService()->getHostname();  // currently configured as a homeassistent light type
+    String settingsName = esp32sveltekit.getWiFiSettingsService()->getHostname();
+    String settingsStateTopic = SettingValue::format(FACTORY_MQTT_STATUS_TOPIC);
+
+    JsonDocument doc;
+    configTopic = settingsMqttPath + "/config";
+    subTopic = settingsMqttPath + "/set";
+    pubTopic = settingsMqttPath + "/state";
+    doc["~"] = settingsMqttPath;
+    doc["name"] = "🌙💡";  // so HA displays Entity name → function of that device as light, instead of showing device name twice
+    doc["unique_id"] = settingsUniqueId;
+
+    doc["cmd_t"] = "~/set";
+    doc["stat_t"] = "~/state";
+    doc["schema"] = "json";
+    doc["brightness"] = true;
+
+    // Add availability topic for online/offline status
+    doc["availability_topic"] = settingsStateTopic;
+    doc["payload_available"] = "online";
+    doc["payload_not_available"] = "offline";
+
+    // Add device info for grouping in HA
+    JsonObject device = doc["device"].to<JsonObject>();
+    device["identifiers"].to<JsonArray>().add(settingsUniqueId);
+    device["name"] = settingsName;
+    device["manufacturer"] = "MoonModules";
+    device["model"] = "MoonLight";
+
+    _mqttSettingsService->setStatusTopic(settingsStateTopic);
+
+    String payload;
+    serializeJson(doc, payload);
+    if (!_mqttClient->publish(configTopic.c_str(), 1, false, payload.c_str())) {  // QoS 1
+      EXT_LOGE(ML_TAG, "Failed to publish HA discovery config");
+      return;
+    }
+
+    _mqttEndpoint->configureTopics(pubTopic, subTopic);
+
+    EXT_LOGI(ML_TAG, "Published HA discovery to %s", configTopic.c_str());
   }
 
   void readPins() {
@@ -373,7 +511,7 @@ class ModuleLightsControl : public Module {
       });
     } else if (isPositions == 0 && layerP.lights.header.nrOfLights) {  // send to UI
       static unsigned long monitorMillis = 0;
-      if (millis() - monitorMillis >= MAX(20, layerP.lights.header.nrOfLights / 300)) { // 12K lights -> 40ms
+      if (millis() - monitorMillis >= MAX(20, layerP.lights.header.nrOfLights / 300)) {  // 12K lights -> 40ms
         monitorMillis = millis();
 
         read([&](ModuleState& _state) {

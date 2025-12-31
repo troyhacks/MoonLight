@@ -226,7 +226,7 @@ protected:
     {
         if (_subTopic.length() > 0)
         {
-            _mqttClient->subscribe(_subTopic.c_str(), 2);
+            _mqttClient->subscribe(_subTopic.c_str(), 2); // 🌙 Home Assistant / Mosquitto does not benefit from QoS 2, 1 might be better, add as UI variable?
         }
     }
 };
