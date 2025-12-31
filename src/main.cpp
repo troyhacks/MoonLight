@@ -115,6 +115,7 @@ ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
 
 adc_attenuation_t voltage_readout_current_adc_attenuation = ADC_11db;
+adc_attenuation_t current_readout_current_adc_attenuation = ADC_11db;
 SemaphoreHandle_t swapMutex = xSemaphoreCreateMutex();
 volatile bool newFrameReady = false;
 
@@ -228,6 +229,28 @@ SharedHttpEndpoint* sharedHttpEndpoint = nullptr;
 SharedWebSocketServer* sharedWebSocketServer = nullptr;
 SharedEventEndpoint* sharedEventEndpoint = nullptr;
 // SharedFSPersistence* sharedFsPersistence = nullptr;
+
+ adc_attenuation_t adc_get_adjusted_gain(adc_attenuation_t current_gain, uint32_t adc_mv_readout)
+ {
+  if (current_gain == ADC_11db && adc_mv_readout < 1700) {
+    return ADC_6db;
+  } else if (current_gain == ADC_6db) {
+    if (adc_mv_readout > 1720) {
+      return ADC_11db;
+    } else if (adc_mv_readout < 1200) {
+      return ADC_2_5db;
+    }
+  } else if (current_gain == ADC_2_5db) {
+    if (adc_mv_readout > 1220) {
+      return ADC_6db;
+    } else if (adc_mv_readout < 900) {
+      return ADC_0db;
+    }
+  } else if (current_gain == ADC_0db && adc_mv_readout > 920) {
+    return ADC_2_5db;
+  }
+  return current_gain;
+ }
 
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
@@ -393,41 +416,20 @@ void setup() {
       }
       if (pinVoltage != UINT8_MAX) {
         analogSetAttenuation(voltage_readout_current_adc_attenuation);
-        float adc_mv_input = analogReadMilliVolts(pinVoltage);
-        float volts =  adc_mv_input * 11.43 / (1.43 * 1000);  // 1k43/10k resistor divider
-        batteryService->updateVoltage(volts);
-
-        /* Logic to change attenuation to get more precise measurement */
-        if (voltage_readout_current_adc_attenuation == ADC_11db && adc_mv_input < 1700) {
-          voltage_readout_current_adc_attenuation = ADC_6db;
-          EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
-        } else if (voltage_readout_current_adc_attenuation == ADC_6db) {
-          if (adc_mv_input > 1720) {
-            voltage_readout_current_adc_attenuation = ADC_11db;
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
-          } else if (adc_mv_input < 1200) {
-            voltage_readout_current_adc_attenuation = ADC_2_5db;
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
-          }
-        } else if (voltage_readout_current_adc_attenuation == ADC_2_5db) {
-          if (adc_mv_input > 1220) {
-            voltage_readout_current_adc_attenuation = ADC_6db;
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
-          } else if (adc_mv_input < 900) {
-            voltage_readout_current_adc_attenuation = ADC_0db;
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
-          }
-        } else if (voltage_readout_current_adc_attenuation == ADC_0db && adc_mv_input > 920) {
-          voltage_readout_current_adc_attenuation = ADC_2_5db;
-          EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
-        }
+        uint32_t adc_mv_vinput = analogReadMilliVolts(pinVoltage);
         analogSetAttenuation(ADC_11db);
+        float volts =  ((float)adc_mv_vinput) * 11.43 / (1.43 * 1000);  // 1k43/10k resistor divider
+        batteryService->updateVoltage(volts);
+        voltage_readout_current_adc_attenuation = adc_get_adjusted_gain(voltage_readout_current_adc_attenuation, adc_mv_vinput);
       }
       if (pinCurrent != UINT8_MAX) {
-        float mA = analogReadMilliVolts(pinCurrent);
-        if (mA > 330)  // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
+        analogSetAttenuation(current_readout_current_adc_attenuation);
+        uint32_t adc_mv_cinput = analogReadMilliVolts(pinCurrent);
+        analogSetAttenuation(ADC_11db);
+        current_readout_current_adc_attenuation = adc_get_adjusted_gain(current_readout_current_adc_attenuation, adc_mv_cinput);
+        if (adc_mv_cinput > 330)  // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
         {
-          batteryService->updateCurrent(((mA - 330) * 37.75) / 1000);  // 40mV / A with a 10k/5k1 resistor divider, so a 37.75mA/mV
+          batteryService->updateCurrent((((float)(adc_mv_cinput) - 330) * 37.75) / 1000);  // 40mV / A with a 10k/5k1 resistor divider, so a 37.75mA/mV
         } else {
           batteryService->updateCurrent(0);
         }
