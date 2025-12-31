@@ -18,7 +18,7 @@
 	import { page } from '$app/state';
 	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import SearchIcon from '~icons/tabler/search';
+	import SettingsIcon from '~icons/tabler/settings';
 	import Delete from '~icons/tabler/trash';
 	import { initCap } from '$lib/stores/moonbase_utilities';
 
@@ -246,7 +246,7 @@
 								handleEdit(property.name, itemWrapper.item);
 							}}
 						>
-							<SearchIcon class="h-6 w-6" /></button
+							<SettingsIcon class="h-6 w-6" /></button
 						>
 						{#if findItemInDefinition?.crud == null || findItemInDefinition?.crud?.includes('d')}
 							<button

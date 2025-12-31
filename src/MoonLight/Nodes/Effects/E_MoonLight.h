@@ -108,12 +108,14 @@ class LinesEffect : public Node {
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🔥"; }
 
-  uint8_t bpm = 120;
+  uint8_t bpm = 30;
 
   void setup() override { addControl(bpm, "bpm", "slider"); }
 
+  int frameNr;
+
   void loop() override {
-    int frameNr = 0;
+    frameNr = 0;
 
     layer->fadeToBlackBy(255);
 
@@ -128,7 +130,7 @@ class LinesEffect : public Node {
     pos = {0, 0, 0};
     pos.y = ::map(beat16(bpm), 0, UINT16_MAX, 0, layer->size.y);  // instead of call%height
     for (pos.x = 0; pos.x < layer->size.x; pos.x++) {
-      int colorNr = (frameNr / layer->size.x) % 3;
+      int colorNr = 1;//(frameNr / layer->size.x) % 3;
       layer->setRGB(pos, colorNr == 0 ? CRGB::Red : colorNr == 1 ? CRGB::Green : CRGB::Blue);
     }
     (frameNr)++;
@@ -1558,8 +1560,8 @@ class MarioTestEffect : public Node {
 
 class RingEffect : public Node {
  protected:
-  void setRing(int ring, CRGB colour) {  // so britisch ;-)
-    layer->setRGB(ring, colour);
+  void setRing(int ring, CRGB colour) {       // so britisch ;-)
+    layer->setRGB(Coord3D(0, ring), colour);  // 1D effect on y-axis (default)
   }
 };
 
@@ -1577,7 +1579,7 @@ class RingRandomFlowEffect : public RingEffect {
 
   void onSizeChanged(const Coord3D& prevSize) override {
     freeMB(hue);
-    hue = allocMB<uint8_t>(layer->size.x);
+    hue = allocMB<uint8_t>(layer->size.y);
     if (!hue) {
       EXT_LOGE(ML_TAG, "allocate hue failed");
     }
@@ -1586,10 +1588,10 @@ class RingRandomFlowEffect : public RingEffect {
   void loop() override {
     if (hue) {
       hue[0] = random(0, 255);
-      for (int r = 0; r < layer->size.x; r++) {
+      for (int r = 0; r < layer->size.y; r++) {
         setRing(r, CHSV(hue[r], 255, 255));
       }
-      for (int r = (layer->size.x - 1); r >= 1; r--) {
+      for (int r = (layer->size.y - 1); r >= 1; r--) {
         hue[r] = hue[(r - 1)];  // set this ruing based on the inner
       }
       // FastLED.delay(SPEED);
@@ -1605,14 +1607,14 @@ class AudioRingsEffect : public RingEffect {
   static const char* tags() { return "♫💫"; }
 
   bool inWards = true;
-  uint8_t nrOfRings = 7;
 
   void setup() override {
     addControl(inWards, "inWards", "checkbox");
-    addControl(nrOfRings, "rings", "slider", 1, 50);
+    // addControl(nrOfRings, "rings", "slider", 1, 50);
   }
 
   void loop() override {
+    uint8_t nrOfRings = MAX(layer->size.y, 2);  // height of the layer, minimal 2
     for (int i = 0; i < nrOfRings; i++) {
       uint8_t band = ::map(i, 0, nrOfRings - 1, 0, NUM_GEQ_CHANNELS - 1);
 

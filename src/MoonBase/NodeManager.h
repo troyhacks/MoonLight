@@ -220,7 +220,8 @@ class NodeManager : public Module {
           }
 
           oldNode->requestMappings();
-
+          
+          delay(100);  // to allow the node to finish its last loop
           EXT_LOGD(ML_TAG, "remove oldNode: %d p:%p", nodes->size(), oldNode);
           // delete node; //causing assert failed: multi_heap_free multi_heap_poisoning.c:259 (head != NULL) ATM
           // EXT_LOGD(MB_TAG, "destructing object (inPR:%d)", isInPSRAM(node));

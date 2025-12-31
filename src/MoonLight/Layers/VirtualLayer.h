@@ -63,7 +63,7 @@ class VirtualLayer {
   // heap-optimization: request heap optimization review
   // on boards without PSRAM, heap is only 60 KB (30KB max alloc) available, need to find out how to increase the heap
   // for virtual mapping mappingTable and mappingTableIndexes is used
-  // mappingTable is per default same size as the number of LEDs/lights (stored in lights.channels), see Physical layer, goal is also here to support 12288 LEDs on non PSRAM boards at least for non PSRAM board
+  // mappingTable is per default same size as the number of LEDs/lights (stored in lights.channelsE/D), see Physical layer, goal is also here to support 12288 LEDs on non PSRAM boards at least for non PSRAM board
   // mappingTableIndexes is used of the mapping of effects to lights.channel is not 1:1 but 1:M
 
   // they will be reused to avoid fragmentation
@@ -212,19 +212,19 @@ class VirtualLayer {
   // checks if a virtual light is mapped to a physical light (use with XY() or XYZ() to get the indexV)
   bool isMapped(int indexV) const { return indexV < mappingTableSize && (mappingTable[indexV].mapType == m_oneLight || mappingTable[indexV].mapType == m_moreLights); }
 
-  void blur1d(fract8 blur_amount) {
+  void blur1d(fract8 blur_amount, uint16_t x = 0) {
     // todo: check updated in wled-MM
     const uint8_t keep = 255 - blur_amount;
     const uint8_t seep = blur_amount >> 1;
     CRGB carryover = CRGB::Black;
-    for (uint16_t i = 0; i < size.x; ++i) {
-      CRGB cur = getRGB(i);
+    for (uint16_t i = 0; i < size.y; ++i) {
+      CRGB cur = getRGB(Coord3D(x, i));
       CRGB part = cur;
       part.nscale8(seep);
       cur.nscale8(keep);
       cur += carryover;
-      if (i) addRGB(i - 1, part);
-      setRGB(i, cur);
+      if (i) addRGB(Coord3D(x, i - 1), part);
+      setRGB(Coord3D(x, i), cur);
       carryover = part;
     }
   }
