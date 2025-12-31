@@ -114,7 +114,7 @@ ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit
 ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
 
-adc_attenuation_t current_adc_attenuation = ADC_11db;
+adc_attenuation_t voltage_readout_current_adc_attenuation = ADC_11db;
 SemaphoreHandle_t swapMutex = xSemaphoreCreateMutex();
 volatile bool newFrameReady = false;
 
@@ -392,40 +392,36 @@ void setup() {
         batteryService->updateSOC(perc * 100);
       }
       if (pinVoltage != UINT8_MAX) {
+        analogSetAttenuation(voltage_readout_current_adc_attenuation);
         float adc_mv_input = analogReadMilliVolts(pinVoltage);
         float volts =  adc_mv_input * 11.43 / (1.43 * 1000);  // 1k43/10k resistor divider
         batteryService->updateVoltage(volts);
 
         /* Logic to change attenuation to get more precise measurement */
-        if (current_adc_attenuation == ADC_11db && adc_mv_input < 1700) {
-          current_adc_attenuation = ADC_6db;
-          analogSetAttenuation(current_adc_attenuation);
-          EXT_LOGD(ML_TAG, "ADC attenuation set to %d", current_adc_attenuation);
-        } else if (current_adc_attenuation == ADC_6db) {
+        if (voltage_readout_current_adc_attenuation == ADC_11db && adc_mv_input < 1700) {
+          voltage_readout_current_adc_attenuation = ADC_6db;
+          EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
+        } else if (voltage_readout_current_adc_attenuation == ADC_6db) {
           if (adc_mv_input > 1720) {
-            current_adc_attenuation = ADC_11db;
-            analogSetAttenuation(current_adc_attenuation);
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", current_adc_attenuation);
+            voltage_readout_current_adc_attenuation = ADC_11db;
+            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
           } else if (adc_mv_input < 1200) {
-            current_adc_attenuation = ADC_2_5db;
-            analogSetAttenuation(current_adc_attenuation);
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", current_adc_attenuation);
+            voltage_readout_current_adc_attenuation = ADC_2_5db;
+            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
           }
-        } else if (current_adc_attenuation == ADC_2_5db) {
+        } else if (voltage_readout_current_adc_attenuation == ADC_2_5db) {
           if (adc_mv_input > 1220) {
-            current_adc_attenuation = ADC_6db;
-            analogSetAttenuation(current_adc_attenuation);
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", current_adc_attenuation);
+            voltage_readout_current_adc_attenuation = ADC_6db;
+            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
           } else if (adc_mv_input < 900) {
-            current_adc_attenuation = ADC_0db;
-            analogSetAttenuation(current_adc_attenuation);
-            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", current_adc_attenuation);
+            voltage_readout_current_adc_attenuation = ADC_0db;
+            EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
           }
-        } else if (current_adc_attenuation == ADC_0db && adc_mv_input > 920) {
-          current_adc_attenuation = ADC_2_5db;
-          analogSetAttenuation(current_adc_attenuation);
-          EXT_LOGD(ML_TAG, "ADC attenuation set to %d", current_adc_attenuation);
+        } else if (voltage_readout_current_adc_attenuation == ADC_0db && adc_mv_input > 920) {
+          voltage_readout_current_adc_attenuation = ADC_2_5db;
+          EXT_LOGD(ML_TAG, "ADC attenuation set to %d", voltage_readout_current_adc_attenuation);
         }
+        analogSetAttenuation(ADC_11db);
       }
       if (pinCurrent != UINT8_MAX) {
         float mA = analogReadMilliVolts(pinCurrent);
