@@ -429,9 +429,9 @@ void setup() {
       }
       if (pinCurrent != UINT8_MAX) {
         float mA = analogReadMilliVolts(pinCurrent);
-        if (mA > 250)  // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
+        if (mA > 330)  // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
         {
-          batteryService->updateCurrent(((mA - 250) * 50.0) / 1000);  // 40mV / A with a /2 resistor divider, so a 50mA/mV
+          batteryService->updateCurrent(((mA - 330) * 37.75) / 1000);  // 40mV / A with a 10k/5k1 resistor divider, so a 37.75mA/mV
         } else {
           batteryService->updateCurrent(0);
         }
