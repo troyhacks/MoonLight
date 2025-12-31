@@ -98,7 +98,7 @@ class VirtualLayer {
   uint16_t XYZUnModified(const Coord3D& position) const { return position.x + position.y * size.x + position.z * size.x * size.y; }
 
   void setRGB(const uint16_t indexV, CRGB color) {
-    if (layerP->lights.header.offsetWhite != UINT8_MAX) {  // W set
+    if (layerP->lights.header.offsetWhite != UINT8_MAX && layerP->lights.header.channelsPerLight == 4) {  // W set
       // using the simple algorithm of taking the minimum of RGB as white channel, this is good enough and fastest algorithm - we need speed 🔥
       uint8_t rgbw[4];
       rgbw[3] = MIN(MIN(color.r, color.g), color.b);
@@ -112,8 +112,10 @@ class VirtualLayer {
   void setRGB(Coord3D pos, CRGB color) { setRGB(XYZ(pos), color); }
 
   void setWhite(const uint16_t indexV, const uint8_t value) {
-    if (layerP->lights.header.offsetWhite == 0 && layerP->lights.header.channelsPerLight == 4) setLight(indexV, &value, 3, sizeof(value));
-    else if (layerP->lights.header.offsetWhite != UINT8_MAX) setLight(indexV, &value, layerP->lights.header.offsetWhite, sizeof(value));
+    if (layerP->lights.header.offsetWhite != UINT8_MAX) {
+      if (layerP->lights.header.channelsPerLight == 4) setLight(indexV, &value, 3, sizeof(value)); // for rgbw lights
+      else setLight(indexV, &value, layerP->lights.header.offsetWhite, sizeof(value)); // for moving heads
+    }
   }
   void setWhite(Coord3D pos, const uint8_t value) { setWhite(XYZ(pos), value); }
 
