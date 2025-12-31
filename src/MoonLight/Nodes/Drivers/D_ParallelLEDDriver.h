@@ -117,8 +117,8 @@ class ParallelLEDDriver : public DriverNode {
 
         uint8_t savedBrightness = ledsDriver._brightness;  //(initLed sets it to 255 and thats not what we want)
 
-        EXT_LOGD(ML_TAG, "init Parallel LED Driver %d %d %d %d", layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue);
-        ledsDriver.initled(layerP.lights.channelsD, pins, layerP.ledsPerPin, nrOfPins, layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue);
+        EXT_LOGD(ML_TAG, "init Parallel LED Driver %d %d %d %d %d", layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue, layerP.lights.header.offsetWhite);
+        ledsDriver.initled(layerP.lights.channelsD, pins, layerP.ledsPerPin, nrOfPins, layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue, layerP.lights.header.offsetWhite);
 
         ledsDriver.setBrightness(savedBrightness);  //(initLed sets it to 255 and thats not what we want)
 
@@ -130,8 +130,8 @@ class ParallelLEDDriver : public DriverNode {
       } else {
         // don't call initled again as that will crash because if channelsPerLight (nb_components) change, the dma buffers are not big enough
 
-        EXT_LOGD(ML_TAG, "update Parallel LED Driver %d %d %d %d", layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue);
-        ledsDriver.updateDriver(pins, layerP.ledsPerPin, nrOfPins, dmaBuffer, layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue);
+        EXT_LOGD(ML_TAG, "update Parallel LED Driver %d %d %d %d %d", layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue, layerP.lights.header.offsetWhite);
+        ledsDriver.updateDriver(pins, layerP.ledsPerPin, nrOfPins, dmaBuffer, layerP.lights.header.channelsPerLight, layerP.lights.header.offsetRed, layerP.lights.header.offsetGreen, layerP.lights.header.offsetBlue, layerP.lights.header.offsetWhite);
       }
 
     #else  // P4: Parlio Troy Driver
