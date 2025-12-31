@@ -230,8 +230,8 @@ SharedWebSocketServer* sharedWebSocketServer = nullptr;
 SharedEventEndpoint* sharedEventEndpoint = nullptr;
 // SharedFSPersistence* sharedFsPersistence = nullptr;
 
- adc_attenuation_t adc_get_adjusted_gain(adc_attenuation_t current_gain, uint32_t adc_mv_readout)
- {
+adc_attenuation_t adc_get_adjusted_gain(adc_attenuation_t current_gain, uint32_t adc_mv_readout)
+{
   if (current_gain == ADC_11db && adc_mv_readout < 1700) {
     return ADC_6db;
   } else if (current_gain == ADC_6db) {
@@ -250,7 +250,7 @@ SharedEventEndpoint* sharedEventEndpoint = nullptr;
     return ADC_2_5db;
   }
   return current_gain;
- }
+}
 
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
@@ -427,7 +427,7 @@ void setup() {
         uint32_t adc_mv_cinput = analogReadMilliVolts(pinCurrent);
         analogSetAttenuation(ADC_11db);
         current_readout_current_adc_attenuation = adc_get_adjusted_gain(current_readout_current_adc_attenuation, adc_mv_cinput);
-        if (adc_mv_cinput > 330)  // datasheet unidirectional quiescent current of 0.5V. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
+        if (adc_mv_cinput > 330)  // datasheet quiescent output voltage of 0.5V, which is ~330mV after the 10k/5k1 voltage divider. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
         {
           batteryService->updateCurrent((((float)(adc_mv_cinput) - 330) * 37.75) / 1000);  // 40mV / A with a 10k/5k1 resistor divider, so a 37.75mA/mV
         } else {
