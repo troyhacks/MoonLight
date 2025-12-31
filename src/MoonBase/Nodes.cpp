@@ -353,6 +353,7 @@ void DriverNode::setup() {
   addControlValue("BGR");
   addControlValue("RGBW");                      // e.g. 4 channel par/dmx light
   addControlValue("GRBW");                      // rgbw LED eg. sk6812
+  addControlValue("WRGB");                      // rgbw ws2814 LEDs
   addControlValue("Curtain GRB6");              // some LED curtains
   addControlValue("Curtain RGB2040");           // curtain RGB2040
   addControlValue("Lightbar RGBWYP");           // 6 channel par/dmx light with UV etc
@@ -457,6 +458,13 @@ void DriverNode::onUpdate(const Char<20>& oldValue, const JsonObject& control) {
       header->offsetGreen = 0;
       header->offsetBlue = 2;
       header->offsetWhite = 3;
+      break;
+    case lightPreset_WRGB:
+      header->channelsPerLight = 4;
+      header->offsetRed = 1;
+      header->offsetGreen = 2;
+      header->offsetBlue = 3;
+      header->offsetWhite = 0;
       break;
     case lightPreset_GRB6:
       header->channelsPerLight = 6;

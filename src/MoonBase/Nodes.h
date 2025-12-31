@@ -27,6 +27,7 @@ enum LightPresetsEnum {
   lightPreset_BGR,
   lightPreset_RGBW,                // e.g. 4 channel par/dmx light
   lightPreset_GRBW,                // rgbw LED eg. sk6812
+  lightPreset_WRGB,                // rgbw ws2814 LEDs
   lightPreset_GRB6,                // some LED curtains
   lightPreset_RGB2040,             // curtain 2040
   lightPreset_RGBWYP,              // 6 channel par/dmx light with UV etc
