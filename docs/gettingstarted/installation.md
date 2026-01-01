@@ -168,11 +168,11 @@ Keep this page visible until installation complete.
 
 ## Update firmware using ESPConnect
 
-ESPConnect is a browser-based control center for ESP32- and ESP8266-class boards. It runs entirely inside a modern Chromium browser so you can inspect hardware details, manage SPIFFS files, back up flash, and deploy firmware without installing desktop software. It is based on [Jason2866](https://github.com/Jason2866)'s [WebSerial ESPTool](https://github.com/Jason2866/WebSerial_ESPTool/tree/development).
+ESPConnect is a browser-based control center for ESP32- and ESP8266-class boards. It runs entirely inside a modern Chromium browser so you can inspect hardware details, manage SPIFFS files, back up flash, and deploy firmware without installing desktop software.
 
-[ESPConnect on GitHub](https://github.com/thelastoutpostworkshop/ESPConnect)
+Launch [ESPConnect](https://thelastoutpostworkshop.github.io/microcontroller_devkit/espconnect/)
 
-[ESPConnect](https://thelastoutpostworkshop.github.io/microcontroller_devkit/espconnect/)
+<img width="400" src="https://github.com/user-attachments/assets/3b702b3e-62cc-4330-83f6-d473067df449" />
 
 * Click Connect and choose your device when the browser asks for permission.
 * Select Flash Tools, go to Flash Firmware
@@ -180,3 +180,6 @@ ESPConnect is a browser-based control center for ESP32- and ESP8266-class boards
     * Files ending with _webflash.bin (e.g. MoonLight_esp32-d0_0-6-1_webflash.bin) also formats the partition: choose Flash offset 0x0 or recommended offsets Bootloader. webflash files can be found [here](https://github.com/MoonModules/MoonLight/tree/main/firmware/installer) and are used by the [MoonLight Installer](https://moonmodules.org/MoonLight/gettingstarted/installer/) as well.
     * Files ending with .bin, without _webflash (e.g. MoonLight_esp32-d0_0-6-1.bin). Choose recommended offsets App0. Only use if you previously had MoonLight installed on the device, so the partitions has already been set. These files can be found in [published releases](https://github.com/MoonModules/MoonLight/releases).
     * Nightly builds if shared on [discord](https://discord.gg/MTn9mVUG5n).
+ 
+[ESPConnect on GitHub](https://github.com/thelastoutpostworkshop/ESPConnect)
+ESPConnect is based on [Jason2866](https://github.com/Jason2866)'s [WebSerial ESPTool](https://github.com/Jason2866/WebSerial_ESPTool/tree/development).
