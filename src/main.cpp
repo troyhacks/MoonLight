@@ -114,8 +114,6 @@ ModuleLiveScripts moduleLiveScripts = ModuleLiveScripts(&server, &esp32sveltekit
 ModuleChannels moduleChannels = ModuleChannels(&server, &esp32sveltekit);
 ModuleMoonLightInfo moduleMoonLightInfo = ModuleMoonLightInfo(&server, &esp32sveltekit);
 
-adc_attenuation_t voltage_readout_current_adc_attenuation = ADC_11db;
-adc_attenuation_t current_readout_current_adc_attenuation = ADC_11db;
 SemaphoreHandle_t swapMutex = xSemaphoreCreateMutex();
 volatile bool newFrameReady = false;
 
@@ -214,10 +212,6 @@ static int custom_vprintf(const char* fmt, va_list args) {
   #include <M5Unified.h>
 #endif
 
-uint8_t pinVoltage = -1;
-uint8_t pinCurrent = -1;
-uint8_t pinBattery = -1;
-
 std::vector<Module*> modules;
 #include "MoonBase/SharedEventEndpoint.h"
 #include "MoonBase/SharedHttpEndpoint.h"
@@ -229,28 +223,6 @@ SharedHttpEndpoint* sharedHttpEndpoint = nullptr;
 SharedWebSocketServer* sharedWebSocketServer = nullptr;
 SharedEventEndpoint* sharedEventEndpoint = nullptr;
 // SharedFSPersistence* sharedFsPersistence = nullptr;
-
-adc_attenuation_t adc_get_adjusted_gain(adc_attenuation_t current_gain, uint32_t adc_mv_readout)
-{
-  if (current_gain == ADC_11db && adc_mv_readout < 1700) {
-    return ADC_6db;
-  } else if (current_gain == ADC_6db) {
-    if (adc_mv_readout > 1720) {
-      return ADC_11db;
-    } else if (adc_mv_readout < 1200) {
-      return ADC_2_5db;
-    }
-  } else if (current_gain == ADC_2_5db) {
-    if (adc_mv_readout > 1220) {
-      return ADC_6db;
-    } else if (adc_mv_readout < 900) {
-      return ADC_0db;
-    }
-  } else if (current_gain == ADC_0db && adc_mv_readout > 920) {
-    return ADC_2_5db;
-  }
-  return current_gain;
-}
 
 void setup() {
 #ifdef USE_ESP_IDF_LOG  // 🌙
@@ -352,44 +324,6 @@ void setup() {
   fileManager.begin();
   for (Module* module : modules) module->begin();
 
-    #if FT_BATTERY
-  moduleIO.addUpdateHandler(
-      [&](const String& originId) {
-        moduleIO.read([&](ModuleState& state) {
-          // readPins
-          for (JsonObject pinObject : state.data["pins"].as<JsonArray>()) {
-            uint8_t usage = pinObject["usage"];
-            if (usage == pin_Voltage) {
-              pinVoltage = pinObject["GPIO"];
-              EXT_LOGD(ML_TAG, "pinVoltage found %d", pinVoltage);
-            } else if (usage == pin_Current) {
-              pinCurrent = pinObject["GPIO"];
-              EXT_LOGD(ML_TAG, "pinCurrent found %d", pinCurrent);
-            } else if (usage == pin_Battery) {
-              pinBattery = pinObject["GPIO"];
-              EXT_LOGD(ML_TAG, "pinBattery found %d", pinBattery);
-            } else if (usage == pin_High) {
-              uint8_t pinHigh = pinObject["GPIO"];
-              if (GPIO_IS_VALID_OUTPUT_GPIO(pinHigh)) {
-                gpio_set_direction((gpio_num_t)pinHigh, GPIO_MODE_OUTPUT);
-                gpio_set_level((gpio_num_t)pinHigh, 1);
-              }
-              EXT_LOGD(ML_TAG, "Setting pin %d to high", pinHigh);
-            } else if (usage == pin_Low) {
-              uint8_t pinLow = pinObject["GPIO"];
-              if (GPIO_IS_VALID_OUTPUT_GPIO(pinLow)) {
-                gpio_set_direction((gpio_num_t)pinLow, GPIO_MODE_OUTPUT);
-                gpio_set_level((gpio_num_t)pinLow, 0);
-              }
-              EXT_LOGD(ML_TAG, "Setting pin %d to low", pinLow);
-            }
-          }
-          // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);
-        });
-      },
-      false);
-    #endif
-
   // 🌙
   xTaskCreateUniversal(effectTask,                          // task function
                        "AppEffectTask",                     // name
@@ -419,37 +353,7 @@ void setup() {
     if (millis() - lastSecond >= 1000) {
       lastSecond = millis();
 
-      // 🌙
-  #if FT_BATTERY
-      BatteryService* batteryService = esp32sveltekit.getBatteryService();
-      if (pinBattery != UINT8_MAX) {
-        float mVB = analogReadMilliVolts(pinBattery) * 2.0;
-        float perc = (mVB - BATTERY_MV * 0.65) / (BATTERY_MV * 0.35);  // 65% of full battery is 0%, showing 0-100%
-        // ESP_LOGD("", "bat mVB %f p:%f", mVB, perc);
-        batteryService->updateSOC(perc * 100);
-      }
-      if (pinVoltage != UINT8_MAX) {
-        analogSetAttenuation(voltage_readout_current_adc_attenuation);
-        uint32_t adc_mv_vinput = analogReadMilliVolts(pinVoltage);
-        analogSetAttenuation(ADC_11db);
-        float volts =  ((float)adc_mv_vinput) * 11.43 / (1.43 * 1000);  // 1k43/10k resistor divider
-        batteryService->updateVoltage(volts);
-        voltage_readout_current_adc_attenuation = adc_get_adjusted_gain(voltage_readout_current_adc_attenuation, adc_mv_vinput);
-      }
-      if (pinCurrent != UINT8_MAX) {
-        analogSetAttenuation(current_readout_current_adc_attenuation);
-        uint32_t adc_mv_cinput = analogReadMilliVolts(pinCurrent);
-        analogSetAttenuation(ADC_11db);
-        current_readout_current_adc_attenuation = adc_get_adjusted_gain(current_readout_current_adc_attenuation, adc_mv_cinput);
-        if (adc_mv_cinput > 330)  // datasheet quiescent output voltage of 0.5V, which is ~330mV after the 10k/5k1 voltage divider. Ideally, this value should be measured at boot when nothing is displayed on the LEDs
-        {
-          batteryService->updateCurrent((((float)(adc_mv_cinput) - 330) * 37.75) / 1000);  // 40mV / A with a 10k/5k1 resistor divider, so a 37.75mA/mV
-        } else {
-          batteryService->updateCurrent(0);
-        }
-      }
-  #endif
-
+      moduleIO.loop1s();
       moduleDevices.loop1s();
       moduleTasks.loop1s();
 
