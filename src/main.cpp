@@ -368,6 +368,20 @@ void setup() {
             } else if (usage == pin_Battery) {
               pinBattery = pinObject["GPIO"];
               EXT_LOGD(ML_TAG, "pinBattery found %d", pinBattery);
+            } else if (usage == pin_High) {
+              uint8_t pinHigh = pinObject["GPIO"];
+              if (GPIO_IS_VALID_OUTPUT_GPIO(pinHigh)) {
+                gpio_set_direction((gpio_num_t)pinHigh, GPIO_MODE_OUTPUT);
+                gpio_set_level((gpio_num_t)pinHigh, 1);
+              }
+              EXT_LOGD(ML_TAG, "Setting pin %d to high", pinHigh);
+            } else if (usage == pin_Low) {
+              uint8_t pinLow = pinObject["GPIO"];
+              if (GPIO_IS_VALID_OUTPUT_GPIO(pinLow)) {
+                gpio_set_direction((gpio_num_t)pinLow, GPIO_MODE_OUTPUT);
+                gpio_set_level((gpio_num_t)pinLow, 0);
+              }
+              EXT_LOGD(ML_TAG, "Setting pin %d to low", pinLow);
             }
           }
           // for (int i = 0; i < sizeof(pins); i++) EXT_LOGD(ML_TAG, "pin %d = %d", i, pins[i]);

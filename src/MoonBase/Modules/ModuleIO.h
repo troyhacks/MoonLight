@@ -36,6 +36,8 @@ enum IO_PinUsageEnum {
   pin_Button_Toggle_LightsOn,
   pin_Relay,
   pin_Relay_LightsOn,
+  pin_High,
+  pin_Low,
   pin_Voltage,
   pin_Current,
   pin_Infrared,
@@ -168,6 +170,8 @@ class ModuleIO : public Module {
       addControlValue(control, "Button LightOn 𓐟");
       addControlValue(control, "Relay");
       addControlValue(control, "Relay LightOn 🔀");
+      addControlValue(control, "High");
+      addControlValue(control, "Low");
       addControlValue(control, "Voltage️️️ ⚡️");
       addControlValue(control, "Current ⚡️");
       addControlValue(control, "Infrared ♨️");
@@ -309,7 +313,9 @@ class ModuleIO : public Module {
       object["maxPower"] = 500;
       uint8_t ledPins[] = {47, 21, 14, 9, 8, 16, 15, 7, 1, 2, 42, 41, 40, 39, 38, 48};  // LED_PINS
       for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);
-      pinAssigner.assignPin(3, pin_OnBoardLed);   // WIZ850_nRST, needs to be high to access RS485_DE, VBUS_DET, WIZ580_nINT. Also drives an LED.
+      pinAssigner.assignPin(3, pin_High);         // WIZ850_nRST, needs to be high to access RS485_DE, VBUS_DET, WIZ580_nINT. Also drives an LED.      
+      gpio_set_direction((gpio_num_t)3, GPIO_MODE_OUTPUT);    // LEAVE here: guarantees the pin is set to high at platform boot so the ethernet module can initialize correctly
+      gpio_set_level((gpio_num_t)3, 1);                       // LEAVE here: guarantees the pin is set to high at platform boot so the ethernet module can initialize correctly
       pinAssigner.assignPin(17, pin_Serial_TX);
       pinAssigner.assignPin(18, pin_Serial_RX);
       pinAssigner.assignPin(46, pin_RS485_DE);
