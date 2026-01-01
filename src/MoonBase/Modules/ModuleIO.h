@@ -15,6 +15,7 @@
 #if FT_MOONBASE == 1
 
   #include "MoonBase/Module.h"
+  #include "driver/uart.h"
 
 enum IO_PinUsageEnum {
   pin_Unused,  // 0
@@ -316,8 +317,8 @@ class ModuleIO : public Module {
       pinAssigner.assignPin(3, pin_High);                   // WIZ850_nRST, needs to be high to access RS485_DE, VBUS_DET, WIZ580_nINT. Also drives an LED.
       gpio_set_direction((gpio_num_t)3, GPIO_MODE_OUTPUT);  // LEAVE here: guarantees the pin is set to high at platform boot so the ethernet module can initialize correctly
       gpio_set_level((gpio_num_t)3, 1);                     // LEAVE here: guarantees the pin is set to high at platform boot so the ethernet module can initialize correctly
-      pinAssigner.assignPin(17, pin_Serial_TX);
-      pinAssigner.assignPin(18, pin_Serial_RX);
+      pinAssigner.assignPin(17, pin_RS485_TX);
+      pinAssigner.assignPin(18, pin_RS485_RX);
       pinAssigner.assignPin(46, pin_RS485_DE);
       pinAssigner.assignPin(0, pin_Dig_Input);  // Native USB port vbus detection
       pinAssigner.assignPin(5, pin_Voltage);    // Input voltage
@@ -602,6 +603,10 @@ class ModuleIO : public Module {
     }
   }
 
+  uint8_t pinRS485TX = UINT8_MAX;
+  uint8_t pinRS485RX = UINT8_MAX;
+  uint8_t pinRS485DE = UINT8_MAX;
+
   void readPins() {
   #if FT_ENABLED(FT_ETHERNET)
     EXT_LOGD(MB_TAG, "Try to configure ethernet");
@@ -664,7 +669,15 @@ class ModuleIO : public Module {
       } else if (usage == pin_Battery) {
         pinBattery = pinObject["GPIO"];
         EXT_LOGD(ML_TAG, "pinBattery found %d", pinBattery);
-      } else if (usage == pin_High) {
+      } 
+    }
+  #endif
+
+    // GPIOs & RS485
+    bool rs485_ios_updated = false;
+    for (JsonObject pinObject : _state.data["pins"].as<JsonArray>()) {
+      uint8_t usage = pinObject["usage"];
+      if (usage == pin_High) {
         uint8_t pinHigh = pinObject["GPIO"];
         if (GPIO_IS_VALID_OUTPUT_GPIO(pinHigh)) {
           gpio_set_direction((gpio_num_t)pinHigh, GPIO_MODE_OUTPUT);
@@ -678,9 +691,59 @@ class ModuleIO : public Module {
           gpio_set_level((gpio_num_t)pinLow, 0);
         }
         EXT_LOGD(ML_TAG, "Setting pin %d to low", pinLow);
-      }
+      } else if (usage == pin_RS485_DE) {
+        rs485_ios_updated = true;
+        pinRS485DE = pinObject["GPIO"];
+      } else if (usage == pin_RS485_RX) {
+        rs485_ios_updated = true;
+        pinRS485RX = pinObject["GPIO"];
+      } else if (usage == pin_RS485_TX) {
+        rs485_ios_updated = true;
+        pinRS485TX = pinObject["GPIO"];
+      } 
     }
-  #endif
+
+    // Check if all RS485 pins are specified
+    if (rs485_ios_updated && (pinRS485TX != UINT8_MAX) && (pinRS485RX != UINT8_MAX) && (pinRS485DE != UINT8_MAX)) {
+      EXT_LOGD(ML_TAG, "RS485 init with pins %d %d %d", pinRS485TX, pinRS485RX, pinRS485DE);
+
+      // test code to be replaced with functional code. use UART1 as UART0 is (AFAIK) always for debug serial
+      uart_config_t uart_config = {
+          .baud_rate = 9600,
+          .data_bits = UART_DATA_8_BITS,
+          .parity    = UART_PARITY_DISABLE,
+          .stop_bits = UART_STOP_BITS_1,
+          .flow_ctrl = UART_HW_FLOWCTRL_DISABLE, // Flow control handled by RS485 driver
+          .source_clk = UART_SCLK_DEFAULT,
+      };
+      ESP_ERROR_CHECK(uart_driver_install(UART_NUM_1, 128 * 2, 0, 0, NULL, 0));
+      ESP_ERROR_CHECK(uart_param_config(UART_NUM_1, &uart_config));
+      ESP_ERROR_CHECK(uart_set_pin(UART_NUM_1, pinRS485TX, pinRS485RX, pinRS485DE, UART_PIN_NO_CHANGE));
+      ESP_ERROR_CHECK(uart_set_mode(UART_NUM_1, UART_MODE_RS485_HALF_DUPLEX));
+
+      #ifdef DEMOCODE_FOR_SHT30_SENSOR
+      // Modbus RTU Request: [Addr][Func][RegHi][RegLo][CountHi][CountLo][CRC_L][CRC_H]
+      // To read Reg 0 & 1 from Slave 0x01: 01 03 00 00 00 02 C4 0B
+      const uint8_t request[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x02, 0xC4, 0x0B};
+      uint8_t response[128];
+      // Send request
+      uart_write_bytes(UART_NUM_1, (const char*)request, sizeof(request));
+      ESP_LOGI(ML_TAG, "Request sent");
+
+      // Wait for response (timeout 1 second)
+      int len = uart_read_bytes(UART_NUM_1, response, 128, pdMS_TO_TICKS(100));
+      
+      if (len > 0) {
+          ESP_LOGI(ML_TAG, "Answer recceived: %d %d %d %d %d %d %d %d %d", response[0], response[1], response[2], response[3], response[4], response[5], response[6], response[7], response[8]);
+          uint16_t humidity = ((uint16_t)response[4])*256 + response[3];
+          uint16_t temperature = ((uint16_t)response[6])*256 + response[5];
+          ESP_LOGI(ML_TAG, "hum %d temp %d", humidity, temperature);
+          // Process registers here (response[3] to response[6] contain the data)
+      } else {
+          ESP_LOGW(ML_TAG, "No response from sensor");
+      }  
+      #endif   
+    }
   }
 
   #if FT_BATTERY
