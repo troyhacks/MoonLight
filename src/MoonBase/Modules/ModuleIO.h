@@ -735,9 +735,9 @@ class ModuleIO : public Module {
       
       if (len > 0) {
           ESP_LOGI(ML_TAG, "Answer recceived: %d %d %d %d %d %d %d %d %d", response[0], response[1], response[2], response[3], response[4], response[5], response[6], response[7], response[8]);
-          uint16_t humidity = ((uint16_t)response[4])*256 + response[3];
-          uint16_t temperature = ((uint16_t)response[6])*256 + response[5];
-          ESP_LOGI(ML_TAG, "hum %d temp %d", humidity, temperature);
+          float humidity = ((float)response[3])*256 + (float)response[4];
+          float temperature = ((float)response[5])*256 +(float)response[6];
+          ESP_LOGI(ML_TAG, "humidity: %f temperature: %f", humidity/10, temperature/10);
           // Process registers here (response[3] to response[6] contain the data)
       } else {
           ESP_LOGW(ML_TAG, "No response from sensor");
