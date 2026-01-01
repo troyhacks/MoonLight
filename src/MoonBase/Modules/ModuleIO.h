@@ -716,6 +716,7 @@ class ModuleIO : public Module {
           .flow_ctrl = UART_HW_FLOWCTRL_DISABLE, // Flow control handled by RS485 driver
           .source_clk = UART_SCLK_DEFAULT,
       };
+      uart_driver_delete(UART_NUM_1);
       ESP_ERROR_CHECK(uart_driver_install(UART_NUM_1, 128 * 2, 0, 0, NULL, 0));
       ESP_ERROR_CHECK(uart_param_config(UART_NUM_1, &uart_config));
       ESP_ERROR_CHECK(uart_set_pin(UART_NUM_1, pinRS485TX, pinRS485RX, pinRS485DE, UART_PIN_NO_CHANGE));
@@ -728,19 +729,21 @@ class ModuleIO : public Module {
       uint8_t response[128];
       // Send request
       uart_write_bytes(UART_NUM_1, (const char*)request, sizeof(request));
-      ESP_LOGI(ML_TAG, "Request sent");
+      EXT_LOGD(ML_TAG, "Request sent");
 
       // Wait for response (timeout 1 second)
       int len = uart_read_bytes(UART_NUM_1, response, 128, pdMS_TO_TICKS(100));
       
-      if (len > 0) {
-          ESP_LOGI(ML_TAG, "Answer recceived: %d %d %d %d %d %d %d %d %d", response[0], response[1], response[2], response[3], response[4], response[5], response[6], response[7], response[8]);
+      if (len > 8) {
+          EXT_LOGD(ML_TAG, "Answer recceived: %d %d %d %d %d %d %d %d %d", response[0], response[1], response[2], response[3], response[4], response[5], response[6], response[7], response[8]);
           float humidity = ((float)response[3])*256 + (float)response[4];
           float temperature = ((float)response[5])*256 +(float)response[6];
-          ESP_LOGI(ML_TAG, "humidity: %f temperature: %f", humidity/10, temperature/10);
+          EXT_LOGD(ML_TAG, "humidity: %f temperature: %f", humidity/10, temperature/10);
           // Process registers here (response[3] to response[6] contain the data)
+      } else if (len > 0) {
+          EXT_LOGD(ML_TAG, "Invalid answer length");
       } else {
-          ESP_LOGW(ML_TAG, "No response from sensor");
+          EXT_LOGD(ML_TAG, "No response from sensor");
       }  
       #endif   
     }
