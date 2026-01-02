@@ -26,6 +26,7 @@ Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonL
 | Single Line | ![Single line](https://github.com/user-attachments/assets/4ba5a3ac-9312-4bac-876d-cfa3dce41215) | <img width="320" alt="Single line" src="https://github.com/user-attachments/assets/70455279-646c-467d-b8e5-492b1aeae0fa" /> | |
 | Single Row | ![Single row](https://github.com/user-attachments/assets/a88cea0f-9227-4da4-9a43-b944fd8bef97) | <img width="320" alt="Single row" src="https://github.com/user-attachments/assets/9f9918b9-e1ee-43a8-a02d-7f1ee182888b" /> | |
 | SE16 | ![SE16](https://github.com/user-attachments/assets/45c7bec7-2386-4c42-8f24-5a57b87f0df9) | <img width="320" alt="SE16" src="https://github.com/user-attachments/assets/0efe941a-acf5-4a2c-a7d6-bdfa91574d1a" /> | Layout(s) including pins for Stephan Electronics 16-Pin ESP32-S3 board<br>see below |
+| LightCrafter16 | ![LightCrafter16](https://github.com/user-attachments/assets/45c7bec7-2386-4c42-8f24-5a57b87f0df9) | <img width="320" alt="LightCrafter16" src="https://github.com/user-attachments/assets/0efe941a-acf5-4a2c-a7d6-bdfa91574d1a" /> | Layout(s) for Stephan Electronics LightCrafter16 ESP32-S3 board<br>see below |
 
 !!! warning "Choosing pins"
 
@@ -36,11 +37,19 @@ Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonL
 
 ### SE16
 
-16 channel LED strip driver by Stephane Electronics
+16 channel LED strip driver by Stephan Electronics
 
-<img width="320" alt="SE16" src="/firmware/installer/images/esp32-s3-stephanelec-16p.jpg"/>
+![SE-16p](../firmware/installer/images/esp32-s3-stephanelec-16p.jpg)
 
 * Leds Per Pin: the number of LEDs connected to each pin
 * Pins Are Columns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)
 * Mirrored Pins: If set it is assumed that LEDs are connected with increasing positions on 8 pins on one side of the board and decreasing positions on the 8 pins of the other side of the board. The resulting size will have a width of 8 and the height (or width) will be 2 * ledsPerPin. If not set, the width will be 16 and the height (or width) = ledsPerPin
-* Pins: 47,48,21,38,14,39,13,40,12,41,11,42,10,2,3,1
+
+### LightCrafter16
+
+16 channel LED strip driver by Stephan Electronics
+
+![SE-16p](../firmware/installer/images/esp32-s3-lightcrafter16.jpg)
+
+* Leds Per Pin: the number of LEDs connected to each pin
+* Pins Are Columns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)

@@ -99,9 +99,12 @@ class ModuleDrivers : public NodeManager {
     addControlValue(control, getNameAndTags<IRDriver>());
     addControlValue(control, getNameAndTags<HUB75Driver>());
 
-    // custom
-    addControlValue(control, getNameAndTags<SE16Layout>());
-    addControlValue(control, getNameAndTags<SE16V2Layout>());
+    // board preset specific
+    _moduleIO->read([&](ModuleState& state) {
+      uint8_t boardPreset = state.data["boardPreset"];
+      if (boardPreset == board_SE16V1) addControlValue(control, getNameAndTags<SE16Layout>());
+      if (boardPreset == board_LightCrafter16) addControlValue(control, getNameAndTags<LightCrafter16Layout>());
+    });
   }
 
   Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {
@@ -129,9 +132,12 @@ class ModuleDrivers : public NodeManager {
     if (!node) node = checkAndAlloc<IRDriver>(name);
     if (!node) node = checkAndAlloc<HUB75Driver>(name);
 
-    // custom
-    if (!node) node = checkAndAlloc<SE16Layout>(name);
-    if (!node) node = checkAndAlloc<SE16V2Layout>(name);
+    // board preset specific
+    _moduleIO->read([&](ModuleState& state) {
+      uint8_t boardPreset = state.data["boardPreset"];
+      if (!node && boardPreset == board_SE16V1) node = checkAndAlloc<SE16Layout>(name);
+      if (!node && boardPreset == board_LightCrafter16) node = checkAndAlloc<LightCrafter16Layout>(name);
+    });
 
   #if FT_LIVESCRIPT
     if (!node) {

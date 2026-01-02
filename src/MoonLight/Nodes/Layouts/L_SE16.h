@@ -80,19 +80,17 @@ class SE16Layout : public Node {
   }
 };
 
-// SE16V2 board
-class SE16V2Layout : public Node {
+// LightCrafter16 board
+class LightCrafter16Layout : public Node {
  public:
   static const char* name() { return "LightCrafter16"; }
   static uint8_t dim() { return _2D; }
   static const char* tags() { return "🚥"; }
 
-  bool mirroredPins = false;
   bool pinsAreColumns = false;
   uint16_t ledsPerPin = 10;
 
   void setup() override {
-    //addControl(mirroredPins, "mirroredPins", "checkbox");
     addControl(pinsAreColumns, "pinsAreColumns", "checkbox");
     addControl(ledsPerPin, "ledsPerPin", "number", 1, 2047);
   }

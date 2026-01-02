@@ -81,7 +81,7 @@ enum IO_BoardsEnum {
   board_SergUniShieldV5,
   board_SergMiniShield,
   board_SE16V1,
-  board_SE16V2,
+  board_LightCrafter16,
   board_MHCV43,       // by Wladi
   board_MHCP4NanoV1,  // by Wladi V1.0
   board_YvesV48,
@@ -310,7 +310,7 @@ class ModuleIO : public Module {
         pinAssigner.assignPin(5, pin_Infrared);
       }
 
-    } else if (boardID == board_SE16V2) {
+    } else if (boardID == board_LightCrafter16) {
       object["maxPower"] = 500;
       uint8_t ledPins[] = {47, 21, 14, 9, 8, 16, 15, 7, 1, 2, 42, 41, 40, 39, 38, 48};  // LED_PINS
       for (uint8_t gpio : ledPins) pinAssigner.assignPin(gpio, pin_LED);

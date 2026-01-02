@@ -33,9 +33,10 @@ For each board the following presets are defined:
     * Button LightsOn 🛎️/𓐟: sets on/off in [Light Control](../../moonlight/lightscontrol/), Push (🛎️) and Toggle (𓐟)
     * Relay LightsOn 🔀: sets on/off in [Light Control](../../moonlight/lightscontrol/)
     * SPI_SCK, SPI_MISO, SPI_MOSI, PHY_CS, PHY_IRQ 🔗: S3 Ethernet, Used by the Ethernet module, see [Ethernet](../../network/ethernet/)
+	* High / Low: to indefinitely set high or low a GPIO pin
+	* RS-485 DE/TX/RX: when all set, for upcoming DMX and RS485 communications
   * Planned soon
     * Battery
-    * DMX
   * Planned later
     * I2S for microphone and line in
     * I2C
@@ -86,7 +87,16 @@ For each board the following presets are defined:
 
 ### SE16 v1
 
-![SE-16p](../firmware/installer/images/esp32-s3-stephanelec-16p.jpg){: style="width:100px"}
+![SE-16p](../firmware/installer/images/esp32-s3-stephanelec-16p.jpg)
 
 * Choose the esp32-s3-devkitc-1-n8r8v board in the [MoonLight Installer](../../gettingstarted/installer/) 
 * Set Switch1 the same as you set the jumper on the board: off / default: Infrared. on: Ethernet.
+* Only 5 boards were ever produced. If you are one of the lucky few, feel free to reach out to limpkin on [Discord](https://discord.gg/TC8NSUSCdV)
+
+
+### LightCrafter16
+
+![SE-16p](../firmware/installer/images/esp32-s3-lightcrafter16.jpg)
+
+* Choose the esp32-s3-devkitc-1-n8r8v board in the [MoonLight Installer](../../gettingstarted/installer/) 
+* Documentation to be soon published on [limpkin's website](https://www.limpkin.fr)
