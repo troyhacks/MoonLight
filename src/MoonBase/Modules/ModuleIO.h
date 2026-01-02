@@ -736,7 +736,7 @@ class ModuleIO : public Module {
       int len = uart_read_bytes(UART_NUM_1, response, 128, pdMS_TO_TICKS(100));
       
       if (len > 8) {
-          EXT_LOGD(ML_TAG, "Answer recceived: %d %d %d %d %d %d %d %d %d", response[0], response[1], response[2], response[3], response[4], response[5], response[6], response[7], response[8]);
+          EXT_LOGD(ML_TAG, "Answer received: %d %d %d %d %d %d %d %d %d", response[0], response[1], response[2], response[3], response[4], response[5], response[6], response[7], response[8]);
           float humidity = ((float)response[3])*256 + (float)response[4];
           float temperature = ((float)response[5])*256 +(float)response[6];
           EXT_LOGD(ML_TAG, "humidity: %f temperature: %f", humidity/10, temperature/10);
