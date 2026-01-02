@@ -47,7 +47,7 @@ Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonL
 
 ### LightCrafter16
 
-16 channel LED strip driver by Stephan Electronics
+16-channel LED strip driver by Stephan Electronics
 
 ![SE-16p](../firmware/installer/images/esp32-s3-lightcrafter16.jpg)
 
