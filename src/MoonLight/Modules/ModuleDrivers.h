@@ -101,6 +101,7 @@ class ModuleDrivers : public NodeManager {
 
     // custom
     addControlValue(control, getNameAndTags<SE16Layout>());
+    addControlValue(control, getNameAndTags<SE16V2Layout>());
   }
 
   Node* addNode(const uint8_t index, const char* name, const JsonArray& controls) const override {
@@ -130,6 +131,7 @@ class ModuleDrivers : public NodeManager {
 
     // custom
     if (!node) node = checkAndAlloc<SE16Layout>(name);
+    if (!node) node = checkAndAlloc<SE16V2Layout>(name);
 
   #if FT_LIVESCRIPT
     if (!node) {

@@ -603,11 +603,12 @@ class ModuleIO : public Module {
     }
   }
 
+
+  void readPins() {
   uint8_t pinRS485TX = UINT8_MAX;
   uint8_t pinRS485RX = UINT8_MAX;
   uint8_t pinRS485DE = UINT8_MAX;
-
-  void readPins() {
+  
   #if FT_ENABLED(FT_ETHERNET)
     EXT_LOGD(MB_TAG, "Try to configure ethernet");
     EthernetSettingsService* ess = _sveltekit->getEthernetSettingsService();
