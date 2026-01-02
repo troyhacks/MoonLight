@@ -53,3 +53,5 @@ Want to add a a Layout to MoonLight, see [develop](https://moonmodules.org/MoonL
 
 * Leds Per Pin: the number of LEDs connected to each pin
 * Pins Are Columns: are the LEDs on a pin a row of the effect (width is 1 (or 2) x ledsPerPin). If not set the LEDs are a column (height is 1 (or 2) x ledsPerPin)
+
+X0Y0 position is on the top left when the board is positioned in such a way that the Ethernet connector is on the top left.
